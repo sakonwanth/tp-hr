@@ -140,10 +140,10 @@ include 'templates/header.php';
             สลิปเงินเดือน <?php echo thaiMonth(date('n', strtotime($slip['payroll_month']))); ?> <?php echo date('Y', strtotime($slip['payroll_month'])) + 543; ?>
         </h1>
         <div class="flex gap-2">
-            <button onclick="window.print()" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">
+            <a href="payslip.php?action=download&slip_id=<?php echo $slip['id']; ?>" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">
                 <i class="fas fa-print mr-2"></i>พิมพ์
-            </button>
-            <a href="payslip.php?action=download&slip_id=<?php echo $slip['id']; ?>" class="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
+            </a>
+            <a href="payslip.php?action=download&slip_id=<?php echo $slip['id']; ?>" target="_blank" class="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
                 <i class="fas fa-download mr-2"></i>ดาวน์โหลด PDF
             </a>
         </div>
