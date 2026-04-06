@@ -13,6 +13,7 @@ $current_page = $current_page ?? '';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?php echo csrfToken(); ?>">
     <title><?php echo htmlspecialchars($page_title ?? 'TP-HR'); ?> - TP-HR</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
