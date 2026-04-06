@@ -1,20 +1,40 @@
 <?php
 /**
  * Payslip Print Template
- * Template สลิปเงินเดือนสำหรับพิมพ์ - ใช้ format เดียวกับ CRM
+ * Template สลิปเงินเดือนสำหรับพิมพ์ - ใช้ format เดียวกับ CRM payroll_print.php
  * 
  * Required variables:
  * - $slip: array from payroll_slips with user info
  * - $ytd: array YTD summary (optional)
+ * - $pdo: database connection
  */
 
 if (!isset($slip) || !$slip) {
     die('ไม่พบข้อมูลสลิปเงินเดือน');
 }
 
-// Company info
-$company_name = 'บริษัท ทีพี โฮม จำกัด';
-$company_name_en = 'TP Home Company Limited';
+// Get company settings from database (same as CRM)
+$company_name = 'บริษัท ทีพี-แอสเสท ดีเวลลอปเม้นท์ จำกัด';
+$company_name_en = 'TP-ASSET DEVELOPMENT CO., LTD.';
+
+// Try to get from settings table
+try {
+    if (isset($pdo)) {
+        // Try settings table
+        $stmtSetting = $pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = 'company_name' LIMIT 1");
+        $stmtSetting->execute();
+        $row = $stmtSetting->fetch();
+        if ($row && !empty($row['setting_value'])) {
+            $company_name = $row['setting_value'];
+        }
+    }
+} catch (Exception $e) {
+    // Use default
+}
+
+// Logo from CRM (use absolute URL to CRM assets)
+$logo_brand_src = 'https://crm.tp-asset.com/asset/logo/tp-brand.png';
+$watermark_src = 'https://crm.tp-asset.com/asset/logo/TP-ASSET%20DEVELOPMENT-logo-08.png';
 
 // Thai months
 $thai_months = ['', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 
@@ -23,12 +43,13 @@ $thai_months = ['', 'มกราคม', 'กุมภาพันธ์', 'ม
 $pm = strtotime($slip['payroll_month']);
 $month_label_th = $thai_months[(int)date('n', $pm)] . ' ' . ((int)date('Y', $pm) + 543);
 $month_label_en = date('F Y', $pm);
+$period_label = date('m/Y', $pm);
 $ytd_year = (int)date('Y', $pm);
 
 $full_name = trim(($slip['first_name_th'] ?? '') . ' ' . ($slip['last_name_th'] ?? ''));
 $emp_code = $slip['employee_code'] ?? '';
 
-// Bilingual labels
+// Bilingual labels (same as CRM)
 $bilingual_labels = [
     'ค่าตำแหน่ง' => 'ค่าตำแหน่ง / Position Allowance',
     'ค่าเดินทาง' => 'ค่าเดินทาง / Travel Allowance',
@@ -109,10 +130,12 @@ header('Content-Type: text/html; charset=utf-8');
             pointer-events: none;
             z-index: 10;
         }
-        .watermark svg {
+        .watermark img {
             width: 50%;
             height: auto;
+            object-fit: contain;
             opacity: 0.04;
+            filter: grayscale(100%) brightness(1.2);
         }
 
         .doc-header {
@@ -127,10 +150,10 @@ header('Content-Type: text/html; charset=utf-8');
         .doc-header-logo {
             flex-shrink: 0;
         }
-        .doc-header-logo .logo-text {
-            font-size: 20px;
-            font-weight: 700;
-            color: #1a365d;
+        .doc-header-logo img {
+            height: 44px;
+            width: auto;
+            display: block;
         }
         .doc-header-right {
             text-align: right;
@@ -148,6 +171,12 @@ header('Content-Type: text/html; charset=utf-8');
             margin-top: 4px;
             font-weight: 500;
         }
+        .doc-header-right .doc-period {
+            font-size: 12px;
+            color: #475569;
+            margin-top: 2px;
+            font-weight: 600;
+        }
 
         .doc-title {
             font-size: 18px;
@@ -157,18 +186,14 @@ header('Content-Type: text/html; charset=utf-8');
             margin-bottom: 24px;
             letter-spacing: 0.01em;
         }
+        .doc-title span {
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
+        }
 
         .section {
             margin-bottom: 20px;
-        }
-        .section-title {
-            font-size: 11px;
-            font-weight: 700;
-            color: #fff;
-            background: #1a365d;
-            padding: 8px 14px;
-            letter-spacing: 0.05em;
-            margin-bottom: 0;
         }
         .info-table {
             width: 100%;
@@ -253,7 +278,7 @@ header('Content-Type: text/html; charset=utf-8');
             line-height: 1.5;
         }
 
-        .no-print { margin-bottom: 16px; display: flex; gap: 12px; align-items: center; }
+        .no-print { margin-bottom: 16px; }
         .btn-print {
             padding: 10px 20px;
             background: #1a365d;
@@ -265,66 +290,47 @@ header('Content-Type: text/html; charset=utf-8');
             font-weight: 600;
             cursor: pointer;
             text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            display: inline-block;
         }
         .btn-print:hover { background: #2d4a7c; }
-        .btn-secondary {
-            padding: 10px 20px;
-            background: #e2e8f0;
-            color: #1a365d;
-            border: none;
-            border-radius: 8px;
-            font-family: inherit;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .btn-secondary:hover { background: #cbd5e1; }
+        .link-back { margin-left: 12px; color: #1a365d; font-weight: 500; text-decoration: none; }
+        .link-back:hover { text-decoration: underline; }
 
         @media print {
             body { padding: 0; min-height: auto; overflow: visible; }
             .page { padding: 18px 22px 24px; }
             .no-print { display: none !important; }
-            .watermark svg { opacity: 0.035; width: 48%; }
+            .watermark img { opacity: 0.035; width: 48%; }
         }
     </style>
 </head>
 <body>
     <div class="page">
         <div class="no-print">
-            <button type="button" class="btn-print" onclick="window.print();">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                พิมพ์ / บันทึกเป็น PDF
-            </button>
-            <a href="payslip.php?slip_id=<?php echo (int)$slip['id']; ?>" class="btn-secondary">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-                กลับหน้าสลิป
-            </a>
+            <button type="button" class="btn-print" onclick="window.print();">พิมพ์ / บันทึกเป็น PDF</button>
+            <a href="payslip.php?slip_id=<?php echo (int)$slip['id']; ?>" class="link-back">← กลับรายการสลิป</a>
         </div>
 
-        <div class="slip-body">
-            <!-- Watermark -->
-            <div class="watermark">
-                <svg viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
-                    <text x="100" y="35" text-anchor="middle" font-family="Sarabun, sans-serif" font-size="24" font-weight="700" fill="#1a365d">TP HOME</text>
-                </svg>
+        <header class="doc-header">
+            <div class="doc-header-logo">
+                <img src="<?php echo htmlspecialchars($logo_brand_src); ?>" alt="<?php echo htmlspecialchars($company_name); ?>" onerror="this.style.display='none'">
             </div>
+            <div class="doc-header-right">
+                <div class="company-name"><?php echo htmlspecialchars($company_name); ?></div>
+                <div class="doc-type">Payroll Statement / ใบสำคัญจ่ายเงินเดือน</div>
+                <div class="doc-period">Period <?php echo $period_label; ?></div>
+            </div>
+        </header>
 
-            <header class="doc-header">
-                <div class="doc-header-logo">
-                    <div class="logo-text">TP HOME</div>
-                </div>
-                <div class="doc-header-right">
-                    <div class="company-name"><?php echo htmlspecialchars($company_name); ?></div>
-                    <div class="doc-type">ใบแสดงรายได้ / Payslip<br><?php echo $month_label_th; ?> (<?php echo $month_label_en; ?>)</div>
-                </div>
-            </header>
+        <h1 class="doc-title">
+            สลิปเงินเดือน ประจำเดือน <?php echo $month_label_th; ?><br>
+            <span>Payroll Slip — <?php echo $month_label_en; ?></span>
+        </h1>
+
+        <div class="slip-body">
+            <div class="watermark" aria-hidden="true">
+                <img src="<?php echo htmlspecialchars($watermark_src); ?>" alt="">
+            </div>
 
             <section class="section">
                 <table class="info-table">
@@ -335,10 +341,6 @@ header('Content-Type: text/html; charset=utf-8');
                     <tr>
                         <th>ชื่อ-นามสกุล / Name</th>
                         <td><?php echo htmlspecialchars($full_name); ?></td>
-                    </tr>
-                    <tr>
-                        <th>แผนก / Department</th>
-                        <td><?php echo htmlspecialchars(trim($slip['department'] ?? '') !== '' ? $slip['department'] : '-'); ?></td>
                     </tr>
                     <tr>
                         <th>ตำแหน่ง / Position</th>
@@ -480,8 +482,7 @@ header('Content-Type: text/html; charset=utf-8');
         </div>
 
         <footer class="footer">
-            เอกสารนี้ออกโดยระบบอัตโนมัติ ไม่ต้องลงลายมือชื่อ<br>
-            This document is automatically generated. No signature required.
+            เอกสารนี้จัดทำและออกโดยบริษัท ซึ่งบุคคลผู้มีรายชื่อปรากฏอยู่ในเอกสารนี้สามารถใช้ยืนยันข้อมูลต่าง ๆ ตามที่ปรากฏในเอกสารนี้ได้อย่างสมบูรณ์
         </footer>
     </div>
 </body>
