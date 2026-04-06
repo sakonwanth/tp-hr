@@ -207,12 +207,6 @@ function createRequest($pdo, $user) {
         $fullPurpose = $purposeDetail;
     }
     
-    // Calculate fee
-    $fee = $template['fee_amount'] * $copies;
-    if ($isUrgent) {
-        $fee += ($template['urgent_fee'] ?? 0);
-    }
-    
     // Generate request number
     $requestNumber = generateRunningNumber($pdo, 'DOC_REQUEST', 'DR');
     
@@ -221,12 +215,12 @@ function createRequest($pdo, $user) {
         $stmt = $pdo->prepare("
             INSERT INTO hr_document_requests (
                 request_number, user_id, template_id, language, copies,
-                purpose, notes, is_urgent, fee_amount, status, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', NOW())
+                purpose, purpose_detail, remarks, status, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', NOW())
         ");
         $stmt->execute([
             $requestNumber, $user['id'], $templateId, $language, $copies,
-            $fullPurpose, $notes, $isUrgent ? 1 : 0, $fee
+            $fullPurpose, $purposeDetail, $notes
         ]);
         $requestId = $pdo->lastInsertId();
         

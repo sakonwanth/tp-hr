@@ -104,7 +104,7 @@ function getEntitlements($pdo, $user) {
     }
     
     $stmt = $pdo->prepare("
-        SELECT lt.id, lt.name, lt.code, lt.color_code,
+        SELECT lt.id, lt.name, lt.code, lt.color as color_code,
                COALESCE(le.entitled_days, lt.default_days_per_year) as entitled_days,
                COALESCE(le.carried_over_days, 0) as carried_over,
                COALESCE(le.used_days, 0) as used_days,
@@ -145,11 +145,11 @@ function getHistory($pdo, $user) {
     $offset = ($page - 1) * $limit;
     
     $sql = "
-        SELECT lr.*, lt.name as leave_type_name, lt.color_code,
+        SELECT lr.*, lt.name as leave_type_name, lt.color as color_code,
                CONCAT(approver.first_name_th, ' ', approver.last_name_th) as approved_by_name
         FROM hr_leave_requests lr
         JOIN hr_leave_types lt ON lr.leave_type_id = lt.id
-        LEFT JOIN users approver ON lr.approved_by = approver.id
+        LEFT JOIN users approver ON lr.final_approved_by = approver.id
         WHERE lr.user_id = ? AND YEAR(lr.start_date) = ?
     ";
     $params = [$user['id'], $year];
@@ -210,13 +210,13 @@ function getDetail($pdo, $user) {
     $isHR = isHR() || hasRole('manager');
     
     $stmt = $pdo->prepare("
-        SELECT lr.*, lt.name as leave_type_name, lt.color_code,
+        SELECT lr.*, lt.name as leave_type_name, lt.color as color_code,
                CONCAT(approver.first_name_th, ' ', approver.last_name_th) as approved_by_name,
                CONCAT(u.first_name_th, ' ', u.last_name_th) as user_name, u.email as user_email
         FROM hr_leave_requests lr
         JOIN hr_leave_types lt ON lr.leave_type_id = lt.id
         JOIN users u ON lr.user_id = u.id
-        LEFT JOIN users approver ON lr.approved_by = approver.id
+        LEFT JOIN users approver ON lr.final_approved_by = approver.id
         WHERE lr.id = ? AND (lr.user_id = ? OR ? = 1)
     ");
     
@@ -247,7 +247,7 @@ function getPending($pdo, $user) {
     }
     
     $stmt = $pdo->prepare("
-        SELECT lr.*, lt.name as leave_type_name, lt.color_code,
+        SELECT lr.*, lt.name as leave_type_name, lt.color as color_code,
                CONCAT(u.first_name_th, ' ', u.last_name_th) as user_name, u.employee_code,
                u.department as department_name
         FROM hr_leave_requests lr
@@ -277,7 +277,7 @@ function getCalendar($pdo, $user) {
     
     $stmt = $pdo->prepare("
         SELECT lr.id, lr.start_date, lr.end_date, lr.total_days, lr.status,
-               lt.name as leave_type_name, lt.color_code,
+               lt.name as leave_type_name, lt.color as color_code,
                CONCAT(u.first_name_th, ' ', u.last_name_th) as user_name
         FROM hr_leave_requests lr
         JOIN hr_leave_types lt ON lr.leave_type_id = lt.id
@@ -291,9 +291,9 @@ function getCalendar($pdo, $user) {
     
     // Get holidays
     $stmtHolidays = $pdo->prepare("
-        SELECT date, name, is_national_holiday
+        SELECT date, name, (type = 'PUBLIC') as is_national_holiday
         FROM hr_holidays
-        WHERE date BETWEEN ? AND ?
+        WHERE date BETWEEN ? AND ? AND is_active = 1
     ");
     $stmtHolidays->execute([$startDate, $endDate]);
     $holidays = $stmtHolidays->fetchAll();

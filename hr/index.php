@@ -45,7 +45,7 @@ $pendingDocs = $stmtDoc->fetchColumn();
 
 // Recent leaves to approve
 $stmtRecentLeaves = $pdo->prepare("
-    SELECT lr.*, lt.name as leave_type_name, lt.color_code,
+    SELECT lr.*, lt.name as leave_type_name, lt.color as color_code,
            u.first_name_th, u.last_name_th, u.employee_code, u.department
     FROM hr_leave_requests lr
     JOIN hr_leave_types lt ON lr.leave_type_id = lt.id
@@ -73,7 +73,7 @@ $recentDocs = $stmtRecentDocs->fetchAll();
 
 // Employees on leave today
 $stmtOnLeave = $pdo->prepare("
-    SELECT lr.*, lt.name as leave_type_name, lt.color_code,
+    SELECT lr.*, lt.name as leave_type_name, lt.color as color_code,
            u.first_name_th, u.last_name_th, u.department
     FROM hr_leave_requests lr
     JOIN hr_leave_types lt ON lr.leave_type_id = lt.id

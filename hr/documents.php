@@ -76,7 +76,7 @@ $stmtStats = $pdo->query("
     SELECT 
         SUM(CASE WHEN status = 'PENDING' THEN 1 ELSE 0 END) as pending,
         SUM(CASE WHEN status = 'PROCESSING' THEN 1 ELSE 0 END) as processing,
-        SUM(CASE WHEN status = 'COMPLETED' THEN 1 ELSE 0 END) as completed,
+        SUM(CASE WHEN status = 'READY' THEN 1 ELSE 0 END) as completed,
         COUNT(*) as total
     FROM hr_document_requests
     WHERE DATE_FORMAT(created_at, '%Y-%m') = '" . ($month ?: date('Y-m')) . "'
@@ -107,8 +107,8 @@ include dirname(__DIR__) . '/templates/header.php';
         <p class="text-white/50 text-sm">กำลังจัดทำ</p>
         <p class="text-2xl font-bold text-blue-400"><?php echo $stats['processing'] ?? 0; ?></p>
     </a>
-    <a href="?status=COMPLETED&month=<?php echo $month; ?>"
-       class="glass-card rounded-xl p-4 <?php echo $status === 'COMPLETED' ? 'ring-2 ring-green-400' : ''; ?>">
+    <a href="?status=READY&month=<?php echo $month; ?>"
+       class="glass-card rounded-xl p-4 <?php echo $status === 'READY' ? 'ring-2 ring-green-400' : ''; ?>">
         <p class="text-white/50 text-sm">จัดทำแล้ว</p>
         <p class="text-2xl font-bold text-green-400"><?php echo $stats['completed'] ?? 0; ?></p>
     </a>

@@ -73,9 +73,6 @@ include 'templates/header.php';
                             data-processing="<?php echo $tpl['processing_days']; ?>"
                             data-desc="<?php echo htmlspecialchars($tpl['description'] ?? ''); ?>">
                         <?php echo htmlspecialchars($tpl['name']); ?>
-                        <?php if ($tpl['fee_amount'] > 0): ?>
-                        (ค่าธรรมเนียม <?php echo number_format($tpl['fee_amount'], 0); ?> บาท)
-                        <?php endif; ?>
                     </option>
                     <?php endforeach; ?>
                 </select>

@@ -35,14 +35,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
             case 'add_holiday':
                 $stmt = $pdo->prepare("
-                    INSERT INTO hr_holidays (name, holiday_date, is_recurring, description) 
-                    VALUES (?, ?, ?, ?)
+                    INSERT INTO hr_holidays (name, date, type, description, created_by) 
+                    VALUES (?, ?, ?, ?, ?)
                 ");
                 $stmt->execute([
                     $_POST['name'],
                     $_POST['holiday_date'],
-                    isset($_POST['is_recurring']) ? 1 : 0,
-                    $_POST['description'] ?? null
+                    isset($_POST['is_recurring']) ? 'PUBLIC' : 'COMPANY',
+                    $_POST['description'] ?? null,
+                    $user['id']
                 ]);
                 Auth::log('add_holiday', 'hr_holidays', $pdo->lastInsertId());
                 $success = 'เพิ่มวันหยุดเรียบร้อยแล้ว';
@@ -103,7 +104,7 @@ while ($row = $stmt->fetch()) {
     $settings[$row['key']] = $row['value'];
 }
 
-$holidays = $pdo->query("SELECT * FROM hr_holidays ORDER BY holiday_date")->fetchAll();
+$holidays = $pdo->query("SELECT * FROM hr_holidays ORDER BY date")->fetchAll();
 $leaveTypes = $pdo->query("SELECT * FROM hr_leave_types ORDER BY sort_order")->fetchAll();
 $workShifts = $pdo->query("SELECT * FROM hr_work_shifts ORDER BY id")->fetchAll();
 
@@ -263,10 +264,10 @@ require_once __DIR__ . '/../templates/header.php';
                 <tbody>
                     <?php foreach ($holidays as $holiday): ?>
                     <tr>
-                        <td><?php echo formatDateThai($holiday['holiday_date']); ?></td>
+                        <td><?php echo formatDateThai($holiday['date']); ?></td>
                         <td><?php echo htmlspecialchars($holiday['name']); ?></td>
                         <td>
-                            <?php if ($holiday['is_recurring']): ?>
+                            <?php if ($holiday['type'] === 'PUBLIC'): ?>
                             <span class="badge badge-info">ประจำปี</span>
                             <?php else: ?>
                             <span class="badge badge-warning">พิเศษ</span>

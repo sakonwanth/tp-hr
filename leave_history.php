@@ -26,11 +26,11 @@ $leaveTypes = $stmtTypes->fetchAll();
 
 // Build query
 $sql = "
-    SELECT lr.*, lt.name as leave_type_name, lt.color_code,
-           approver.fullname as approved_by_name
+    SELECT lr.*, lt.name as leave_type_name, lt.color as color_code,
+           CONCAT(approver.first_name_th, ' ', approver.last_name_th) as approved_by_name
     FROM hr_leave_requests lr
     JOIN hr_leave_types lt ON lr.leave_type_id = lt.id
-    LEFT JOIN users approver ON lr.approved_by = approver.id
+    LEFT JOIN users approver ON lr.final_approved_by = approver.id
     WHERE lr.user_id = ? AND YEAR(lr.start_date) = ?
 ";
 $params = [$user['id'], $year];
@@ -46,7 +46,7 @@ if ($status) {
 }
 
 // Count total
-$countSql = str_replace("lr.*, lt.name as leave_type_name, lt.color_code,\n           approver.fullname as approved_by_name", "COUNT(*)", $sql);
+$countSql = str_replace("lr.*, lt.name as leave_type_name, lt.color as color_code,\n           CONCAT(approver.first_name_th, ' ', approver.last_name_th) as approved_by_name", "COUNT(*)", $sql);
 $stmtCount = $pdo->prepare($countSql);
 $stmtCount->execute($params);
 $totalRecords = $stmtCount->fetchColumn();
@@ -60,7 +60,7 @@ $requests = $stmt->fetchAll();
 
 // Get summary for this year
 $stmtSummary = $pdo->prepare("
-    SELECT lt.name, lt.color_code,
+    SELECT lt.name, lt.color as color_code,
            SUM(CASE WHEN lr.status = 'APPROVED' THEN lr.total_days ELSE 0 END) as approved_days,
            SUM(CASE WHEN lr.status = 'PENDING' THEN lr.total_days ELSE 0 END) as pending_days,
            COUNT(CASE WHEN lr.status = 'APPROVED' THEN 1 END) as approved_count,
@@ -68,7 +68,7 @@ $stmtSummary = $pdo->prepare("
     FROM hr_leave_requests lr
     JOIN hr_leave_types lt ON lr.leave_type_id = lt.id
     WHERE lr.user_id = ? AND YEAR(lr.start_date) = ?
-    GROUP BY lt.id, lt.name, lt.color_code
+    GROUP BY lt.id, lt.name, lt.color
     ORDER BY lt.sort_order
 ");
 $stmtSummary->execute([$user['id'], $year]);
