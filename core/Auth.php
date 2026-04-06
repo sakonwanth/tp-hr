@@ -167,7 +167,7 @@ class Auth {
     /**
      * Log action
      */
-    public static function log(string $action, string $table = null, int $recordId = null, array $oldValues = null, array $newValues = null): void {
+    public static function log(string $action, ?string $table = null, ?int $recordId = null, ?array $oldValues = null, ?array $newValues = null): void {
         try {
             $pdo = getDB();
             $stmt = $pdo->prepare("

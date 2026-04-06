@@ -28,7 +28,7 @@ function generateRunningNumber(string $prefix, string $table, string $column = '
 /**
  * Upload file
  */
-function uploadFile(array $file, string $destination, array $allowedTypes = null): array {
+function uploadFile(array $file, string $destination, ?array $allowedTypes = null): array {
     if ($file['error'] !== UPLOAD_ERR_OK) {
         $errors = [
             UPLOAD_ERR_INI_SIZE => 'ไฟล์มีขนาดใหญ่เกินไป',
