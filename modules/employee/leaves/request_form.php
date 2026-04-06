@@ -34,7 +34,7 @@ $leave_types_form = $stmt->fetchAll();
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <div class="lg:col-span-2">
-        <form id="leave-form" class="glass-card rounded-xl p-6" method="POST" action="/tp-hr/api/leave.php" enctype="multipart/form-data">
+        <form id="leave-form" class="glass-card rounded-xl p-6" method="POST" action="/api/leave.php" enctype="multipart/form-data">
             <input type="hidden" name="action" value="create">
             <?php echo csrfField(); ?>
             
@@ -315,7 +315,7 @@ document.getElementById('leave-form').addEventListener('submit', async function(
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>กำลังส่งคำขอ...';
     
     try {
-        const response = await fetch('/tp-hr/api/leave.php', {
+        const response = await fetch('/api/leave.php', {
             method: 'POST',
             body: formData
         });

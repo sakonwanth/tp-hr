@@ -11,7 +11,7 @@ Auth::requireLogin();
 $user = Auth::user();
 
 if (!isHR()) {
-    redirect('/tp-hr/', 302);
+    redirect('/', 302);
 }
 
 $pdo = Database::getInstance()->getConnection();
@@ -87,7 +87,7 @@ include dirname(__DIR__) . '/templates/header.php';
 
 <div class="mb-6">
     <nav class="text-sm text-white/60 mb-1">
-        <a href="/tp-hr/hr/" class="hover:text-white">HR</a>
+        <a href="/hr/" class="hover:text-white">HR</a>
         <span class="mx-2">/</span>
         <span class="text-white">จัดการเวลาทำงาน</span>
     </nav>
@@ -364,7 +364,7 @@ document.getElementById('edit-form').addEventListener('submit', async function(e
     formData.append('note', document.getElementById('edit-note').value);
     formData.append('_token', '<?php echo csrfToken(); ?>');
     
-    const response = await fetch('/tp-hr/api/attendance.php', { method: 'POST', body: formData });
+    const response = await fetch('/api/attendance.php', { method: 'POST', body: formData });
     const result = await response.json();
     
     if (result.success) {

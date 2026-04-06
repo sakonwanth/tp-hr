@@ -59,7 +59,7 @@ include 'templates/header.php';
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <div class="lg:col-span-2">
-        <form id="certificate-form" class="glass-card rounded-xl p-6" method="POST" action="/tp-hr/api/certificate.php">
+        <form id="certificate-form" class="glass-card rounded-xl p-6" method="POST" action="/api/certificate.php">
             <input type="hidden" name="action" value="create">
             <?php echo csrfField(); ?>
             
@@ -232,7 +232,7 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>กำลังส่งคำขอ...';
     
     try {
-        const response = await fetch('/tp-hr/api/certificate.php', {
+        const response = await fetch('/api/certificate.php', {
             method: 'POST',
             body: formData
         });
@@ -388,7 +388,7 @@ async function cancelRequest(id) {
         formData.append('request_id', id);
         formData.append('_token', '<?php echo csrfToken(); ?>');
         
-        const response = await fetch('/tp-hr/api/certificate.php', {
+        const response = await fetch('/api/certificate.php', {
             method: 'POST',
             body: formData
         });

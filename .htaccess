@@ -44,5 +44,5 @@ RewriteRule ^([^/]+)/?$ $1.php [L]
 </IfModule>
 
 # Error Documents
-ErrorDocument 404 /tp-hr/errors/404.php
-ErrorDocument 500 /tp-hr/errors/500.php
+# ErrorDocument 404 /errors/404.php
+# ErrorDocument 500 /errors/500.php

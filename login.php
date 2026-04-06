@@ -7,7 +7,7 @@ require_once __DIR__ . '/bootstrap.php';
 
 // Already logged in
 if (Auth::check()) {
-    redirect('/tp-hr/');
+    redirect('/');
 }
 
 $error = '';
@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = Auth::login($username, $password);
         
         if ($result['success']) {
-            $redirect = $_GET['redirect'] ?? '/tp-hr/';
+            $redirect = $_GET['redirect'] ?? '/';
             redirect($redirect);
         } else {
             $error = $result['message'];

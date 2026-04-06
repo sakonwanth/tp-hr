@@ -651,7 +651,7 @@ document.getElementById('edit-form').addEventListener('submit', async function(e
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>กำลังบันทึก...';
     
     try {
-        const response = await fetch('/tp-hr/api/profile.php', {
+        const response = await fetch('/api/profile.php', {
             method: 'POST',
             body: formData
         });
@@ -702,7 +702,7 @@ async function deleteRecord(action, id) {
         formData.append('id', id);
         formData.append('_token', '<?php echo csrfToken(); ?>');
         
-        const response = await fetch('/tp-hr/api/profile.php', {
+        const response = await fetch('/api/profile.php', {
             method: 'POST',
             body: formData
         });

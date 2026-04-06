@@ -489,7 +489,7 @@ async function confirmCheckin() {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>กำลังบันทึก...';
     
     try {
-        const response = await fetch('/tp-hr/api/attendance.php', {
+        const response = await fetch('/api/attendance.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

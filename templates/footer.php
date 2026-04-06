@@ -27,38 +27,38 @@
         
         <!-- Mobile Navigation -->
         <nav class="space-y-2">
-            <a href="/tp-hr/" class="nav-link">
+            <a href="/" class="nav-link">
                 <i class="fas fa-home w-5"></i>
                 <span>หน้าแรก</span>
             </a>
             
-            <a href="/tp-hr/checkin.php" class="nav-link">
+            <a href="/checkin.php" class="nav-link">
                 <i class="fas fa-fingerprint w-5"></i>
                 <span>ลงเวลาเข้า-ออก</span>
             </a>
             
-            <a href="/tp-hr/leave.php" class="nav-link">
+            <a href="/leave.php" class="nav-link">
                 <i class="fas fa-calendar-alt w-5"></i>
                 <span>การลา</span>
             </a>
             
-            <a href="/tp-hr/payslip.php" class="nav-link">
+            <a href="/payslip.php" class="nav-link">
                 <i class="fas fa-file-invoice-dollar w-5"></i>
                 <span>สลิปเงินเดือน</span>
             </a>
             
-            <a href="/tp-hr/document.php" class="nav-link">
+            <a href="/document.php" class="nav-link">
                 <i class="fas fa-file-certificate w-5"></i>
                 <span>ขอใบรับรอง</span>
             </a>
             
-            <a href="/tp-hr/profile.php" class="nav-link">
+            <a href="/profile.php" class="nav-link">
                 <i class="fas fa-user w-5"></i>
                 <span>ข้อมูลส่วนตัว</span>
             </a>
             
             <div class="pt-4 mt-4 border-t border-white/10">
-                <a href="/tp-hr/logout.php" class="nav-link text-red-400">
+                <a href="/logout.php" class="nav-link text-red-400">
                     <i class="fas fa-sign-out-alt w-5"></i>
                     <span>ออกจากระบบ</span>
                 </a>

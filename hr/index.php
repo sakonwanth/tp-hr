@@ -12,7 +12,7 @@ $user = Auth::user();
 
 // Check HR permission
 if (!isHR()) {
-    redirect('/tp-hr/', 302);
+    redirect('/', 302);
 }
 
 $pdo = Database::getInstance()->getConnection();
@@ -366,7 +366,7 @@ async function approveLeave(id) {
         formData.append('request_id', id);
         formData.append('_token', '<?php echo csrfToken(); ?>');
         
-        const response = await fetch('/tp-hr/api/leave.php', {
+        const response = await fetch('/api/leave.php', {
             method: 'POST',
             body: formData
         });
@@ -408,7 +408,7 @@ document.getElementById('reject-form').addEventListener('submit', async function
         formData.append('reason', reason);
         formData.append('_token', '<?php echo csrfToken(); ?>');
         
-        const response = await fetch('/tp-hr/api/leave.php', {
+        const response = await fetch('/api/leave.php', {
             method: 'POST',
             body: formData
         });

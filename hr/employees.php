@@ -11,7 +11,7 @@ Auth::requireLogin();
 $user = Auth::user();
 
 if (!isHR()) {
-    redirect('/tp-hr/', 302);
+    redirect('/', 302);
 }
 
 $pdo = Database::getInstance()->getConnection();
@@ -86,7 +86,7 @@ include dirname(__DIR__) . '/templates/header.php';
 
 <div class="mb-6">
     <nav class="text-sm text-white/60 mb-1">
-        <a href="/tp-hr/hr/" class="hover:text-white">HR</a>
+        <a href="/hr/" class="hover:text-white">HR</a>
         <span class="mx-2">/</span>
         <span class="text-white">จัดการพนักงาน</span>
     </nav>
@@ -296,7 +296,7 @@ async function viewLeaveBalance(userId) {
     document.getElementById('leave-content').innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-white/30"></i></div>';
     
     try {
-        const response = await fetch(`/tp-hr/api/leave.php?action=entitlements&user_id=${userId}&year=<?php echo date('Y'); ?>`);
+        const response = await fetch(`/api/leave.php?action=entitlements&user_id=${userId}&year=<?php echo date('Y'); ?>`);
         const result = await response.json();
         
         if (result.success && result.entitlements) {

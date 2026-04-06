@@ -83,7 +83,7 @@ $current_page = $current_page ?? '';
 <aside class="sidebar fixed left-0 top-0 w-[260px] h-screen overflow-y-auto hidden lg:block z-50">
     <div class="p-6">
         <!-- Logo -->
-        <a href="/tp-hr/" class="flex items-center gap-3 mb-8">
+        <a href="/" class="flex items-center gap-3 mb-8">
             <div class="w-10 h-10 rounded-lg bg-violet-600 flex items-center justify-center">
                 <i class="fas fa-users text-white"></i>
             </div>
@@ -95,32 +95,32 @@ $current_page = $current_page ?? '';
         
         <!-- Navigation -->
         <nav class="space-y-2">
-            <a href="/tp-hr/" class="nav-link <?php echo $current_page === 'dashboard' ? 'active' : ''; ?>">
+            <a href="/" class="nav-link <?php echo $current_page === 'dashboard' ? 'active' : ''; ?>">
                 <i class="fas fa-home w-5"></i>
                 <span>หน้าแรก</span>
             </a>
             
-            <a href="/tp-hr/checkin.php" class="nav-link <?php echo $current_page === 'checkin' ? 'active' : ''; ?>">
+            <a href="/checkin.php" class="nav-link <?php echo $current_page === 'checkin' ? 'active' : ''; ?>">
                 <i class="fas fa-fingerprint w-5"></i>
                 <span>ลงเวลาเข้า-ออก</span>
             </a>
             
-            <a href="/tp-hr/leave.php" class="nav-link <?php echo $current_page === 'leave' ? 'active' : ''; ?>">
+            <a href="/leave.php" class="nav-link <?php echo $current_page === 'leave' ? 'active' : ''; ?>">
                 <i class="fas fa-calendar-alt w-5"></i>
                 <span>การลา</span>
             </a>
             
-            <a href="/tp-hr/payslip.php" class="nav-link <?php echo $current_page === 'payslip' ? 'active' : ''; ?>">
+            <a href="/payslip.php" class="nav-link <?php echo $current_page === 'payslip' ? 'active' : ''; ?>">
                 <i class="fas fa-file-invoice-dollar w-5"></i>
                 <span>สลิปเงินเดือน</span>
             </a>
             
-            <a href="/tp-hr/document.php" class="nav-link <?php echo $current_page === 'document' ? 'active' : ''; ?>">
+            <a href="/document.php" class="nav-link <?php echo $current_page === 'document' ? 'active' : ''; ?>">
                 <i class="fas fa-file-certificate w-5"></i>
                 <span>ขอใบรับรอง</span>
             </a>
             
-            <a href="/tp-hr/profile.php" class="nav-link <?php echo $current_page === 'profile' ? 'active' : ''; ?>">
+            <a href="/profile.php" class="nav-link <?php echo $current_page === 'profile' ? 'active' : ''; ?>">
                 <i class="fas fa-user w-5"></i>
                 <span>ข้อมูลส่วนตัว</span>
             </a>
@@ -129,32 +129,32 @@ $current_page = $current_page ?? '';
             <div class="pt-4 mt-4 border-t border-white/10">
                 <p class="text-xs text-white/40 uppercase tracking-wider mb-2 px-4">HR Admin</p>
                 
-                <a href="/tp-hr/admin/employees.php" class="nav-link <?php echo $current_page === 'admin-employees' ? 'active' : ''; ?>">
+                <a href="/admin/employees.php" class="nav-link <?php echo $current_page === 'admin-employees' ? 'active' : ''; ?>">
                     <i class="fas fa-users-cog w-5"></i>
                     <span>จัดการพนักงาน</span>
                 </a>
                 
-                <a href="/tp-hr/admin/attendance.php" class="nav-link <?php echo $current_page === 'admin-attendance' ? 'active' : ''; ?>">
+                <a href="/admin/attendance.php" class="nav-link <?php echo $current_page === 'admin-attendance' ? 'active' : ''; ?>">
                     <i class="fas fa-user-clock w-5"></i>
                     <span>จัดการลงเวลา</span>
                 </a>
                 
-                <a href="/tp-hr/admin/leaves.php" class="nav-link <?php echo $current_page === 'admin-leaves' ? 'active' : ''; ?>">
+                <a href="/admin/leaves.php" class="nav-link <?php echo $current_page === 'admin-leaves' ? 'active' : ''; ?>">
                     <i class="fas fa-calendar-check w-5"></i>
                     <span>อนุมัติการลา</span>
                 </a>
                 
-                <a href="/tp-hr/admin/documents.php" class="nav-link <?php echo $current_page === 'admin-documents' ? 'active' : ''; ?>">
+                <a href="/admin/documents.php" class="nav-link <?php echo $current_page === 'admin-documents' ? 'active' : ''; ?>">
                     <i class="fas fa-file-alt w-5"></i>
                     <span>จัดการเอกสาร</span>
                 </a>
                 
-                <a href="/tp-hr/admin/reports.php" class="nav-link <?php echo $current_page === 'admin-reports' ? 'active' : ''; ?>">
+                <a href="/admin/reports.php" class="nav-link <?php echo $current_page === 'admin-reports' ? 'active' : ''; ?>">
                     <i class="fas fa-chart-bar w-5"></i>
                     <span>รายงาน</span>
                 </a>
                 
-                <a href="/tp-hr/admin/settings.php" class="nav-link <?php echo $current_page === 'admin-settings' ? 'active' : ''; ?>">
+                <a href="/admin/settings.php" class="nav-link <?php echo $current_page === 'admin-settings' ? 'active' : ''; ?>">
                     <i class="fas fa-cog w-5"></i>
                     <span>ตั้งค่าระบบ</span>
                 </a>
@@ -180,14 +180,14 @@ $current_page = $current_page ?? '';
         <i class="fas fa-bars text-xl"></i>
     </button>
     
-    <a href="/tp-hr/" class="flex items-center gap-2">
+    <a href="/" class="flex items-center gap-2">
         <div class="w-8 h-8 rounded-lg bg-violet-600 flex items-center justify-center">
             <i class="fas fa-users text-white text-sm"></i>
         </div>
         <span class="font-bold text-white">TP-HR</span>
     </a>
     
-    <a href="/tp-hr/profile.php" class="text-white">
+    <a href="/profile.php" class="text-white">
         <i class="fas fa-user-circle text-xl"></i>
     </a>
 </header>
@@ -207,12 +207,12 @@ $current_page = $current_page ?? '';
         </div>
         
         <div class="flex items-center gap-4">
-            <a href="/tp-hr/notifications.php" class="text-white/60 hover:text-white relative">
+            <a href="/notifications.php" class="text-white/60 hover:text-white relative">
                 <i class="fas fa-bell"></i>
                 <!-- <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span> -->
             </a>
             
-            <a href="/tp-hr/logout.php" class="text-white/60 hover:text-white">
+            <a href="/logout.php" class="text-white/60 hover:text-white">
                 <i class="fas fa-sign-out-alt"></i>
             </a>
         </div>

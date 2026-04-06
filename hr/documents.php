@@ -11,7 +11,7 @@ Auth::requireLogin();
 $user = Auth::user();
 
 if (!isHR()) {
-    redirect('/tp-hr/', 302);
+    redirect('/', 302);
 }
 
 $pdo = Database::getInstance()->getConnection();
@@ -88,7 +88,7 @@ include dirname(__DIR__) . '/templates/header.php';
 
 <div class="mb-6">
     <nav class="text-sm text-white/60 mb-1">
-        <a href="/tp-hr/hr/" class="hover:text-white">HR</a>
+        <a href="/hr/" class="hover:text-white">HR</a>
         <span class="mx-2">/</span>
         <span class="text-white">จัดการคำขอเอกสาร</span>
     </nav>
@@ -330,7 +330,7 @@ async function updateDocStatus(id, status) {
     formData.append('status', status);
     formData.append('_token', '<?php echo csrfToken(); ?>');
     
-    const response = await fetch('/tp-hr/api/certificate.php', { method: 'POST', body: formData });
+    const response = await fetch('/api/certificate.php', { method: 'POST', body: formData });
     const result = await response.json();
     
     if (result.success) {
@@ -359,7 +359,7 @@ document.getElementById('complete-form').addEventListener('submit', async functi
     formData.append('action', 'complete');
     formData.append('_token', '<?php echo csrfToken(); ?>');
     
-    const response = await fetch('/tp-hr/api/certificate.php', { method: 'POST', body: formData });
+    const response = await fetch('/api/certificate.php', { method: 'POST', body: formData });
     const result = await response.json();
     
     if (result.success) {
@@ -389,7 +389,7 @@ document.getElementById('reject-form').addEventListener('submit', async function
     formData.append('reason', document.getElementById('reject-reason').value);
     formData.append('_token', '<?php echo csrfToken(); ?>');
     
-    const response = await fetch('/tp-hr/api/certificate.php', { method: 'POST', body: formData });
+    const response = await fetch('/api/certificate.php', { method: 'POST', body: formData });
     const result = await response.json();
     
     if (result.success) {

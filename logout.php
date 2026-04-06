@@ -6,4 +6,4 @@
 require_once __DIR__ . '/bootstrap.php';
 
 Auth::logout();
-redirect('/tp-hr/login.php');
+redirect('/login.php');

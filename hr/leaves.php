@@ -11,7 +11,7 @@ Auth::requireLogin();
 $user = Auth::user();
 
 if (!isHR()) {
-    redirect('/tp-hr/', 302);
+    redirect('/', 302);
 }
 
 $pdo = Database::getInstance()->getConnection();
@@ -98,7 +98,7 @@ include dirname(__DIR__) . '/templates/header.php';
 
 <div class="mb-6">
     <nav class="text-sm text-white/60 mb-1">
-        <a href="/tp-hr/hr/" class="hover:text-white">HR</a>
+        <a href="/hr/" class="hover:text-white">HR</a>
         <span class="mx-2">/</span>
         <span class="text-white">จัดการการลา</span>
     </nav>
@@ -336,7 +336,7 @@ async function approveLeave(id) {
     formData.append('request_id', id);
     formData.append('_token', '<?php echo csrfToken(); ?>');
     
-    const response = await fetch('/tp-hr/api/leave.php', { method: 'POST', body: formData });
+    const response = await fetch('/api/leave.php', { method: 'POST', body: formData });
     const result = await response.json();
     
     if (result.success) {
@@ -366,7 +366,7 @@ document.getElementById('reject-form').addEventListener('submit', async function
     formData.append('reason', document.getElementById('reject-reason').value);
     formData.append('_token', '<?php echo csrfToken(); ?>');
     
-    const response = await fetch('/tp-hr/api/leave.php', { method: 'POST', body: formData });
+    const response = await fetch('/api/leave.php', { method: 'POST', body: formData });
     const result = await response.json();
     
     if (result.success) {
@@ -381,7 +381,7 @@ async function viewDetail(id) {
     document.getElementById('detail-modal').classList.remove('hidden');
     document.getElementById('detail-content').innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-white/30"></i></div>';
     
-    const response = await fetch(`/tp-hr/api/leave.php?action=detail&id=${id}`);
+    const response = await fetch(`/api/leave.php?action=detail&id=${id}`);
     const result = await response.json();
     
     if (result.success) {

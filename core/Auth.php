@@ -116,7 +116,7 @@ class Auth {
             }
             
             $redirectUrl = urlencode($_SERVER['REQUEST_URI'] ?? '');
-            redirect('/tp-hr/login.php?redirect=' . $redirectUrl);
+            redirect('/login.php?redirect=' . $redirectUrl);
         }
     }
     
@@ -133,7 +133,7 @@ class Auth {
                 echo json_encode(['error' => 'Access denied']);
                 exit;
             }
-            redirect('/tp-hr/index.php?error=' . urlencode('คุณไม่มีสิทธิ์เข้าถึงส่วนนี้'));
+            redirect('/index.php?error=' . urlencode('คุณไม่มีสิทธิ์เข้าถึงส่วนนี้'));
         }
     }
     

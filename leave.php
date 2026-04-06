@@ -335,7 +335,7 @@ async function cancelRequest(id) {
     if (!confirm('ต้องการยกเลิกคำขอลานี้หรือไม่?')) return;
     
     try {
-        const response = await fetch('/tp-hr/api/leave.php', {
+        const response = await fetch('/api/leave.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'cancel', id: id })

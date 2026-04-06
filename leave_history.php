@@ -345,7 +345,7 @@ async function viewDetail(id) {
     content.innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-white/30"></i></div>';
     
     try {
-        const response = await fetch(`/tp-hr/api/leave.php?action=detail&id=${id}`);
+        const response = await fetch(`/api/leave.php?action=detail&id=${id}`);
         const result = await response.json();
         
         if (result.success) {
@@ -438,7 +438,7 @@ async function cancelRequest(id) {
         formData.append('request_id', id);
         formData.append('csrf_token', '<?php echo csrfToken(); ?>');
         
-        const response = await fetch('/tp-hr/api/leave.php', {
+        const response = await fetch('/api/leave.php', {
             method: 'POST',
             body: formData
         });
