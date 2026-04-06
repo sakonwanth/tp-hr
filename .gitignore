@@ -1,0 +1,36 @@
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+/vendor/
+/node_modules/
+
+# Storage
+/storage/uploads/*
+/storage/documents/*
+/storage/temp/*
+!/storage/.gitkeep
+!/storage/uploads/.gitkeep
+!/storage/documents/.gitkeep
+!/storage/temp/.gitkeep
+
+# Logs
+*.log
+/logs/*
+!/logs/.gitkeep
+
+# IDE
+.idea/
+.vscode/
+*.sublime-*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+*.bak
+*.tmp
+*.swp

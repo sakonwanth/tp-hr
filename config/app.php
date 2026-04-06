@@ -1,0 +1,95 @@
+<?php
+/**
+ * TP-HR Application Configuration
+ */
+
+// Application
+define('APP_NAME', 'TP-HR');
+define('APP_VERSION', '1.0.0');
+define('APP_ENV', $_ENV['APP_ENV'] ?? 'development');
+define('APP_DEBUG', filter_var($_ENV['APP_DEBUG'] ?? true, FILTER_VALIDATE_BOOLEAN));
+define('APP_URL', $_ENV['APP_URL'] ?? 'http://localhost/tp-hr');
+
+// Session
+define('SESSION_LIFETIME', 7200); // 2 hours
+
+// File Upload
+define('MAX_UPLOAD_SIZE', 10 * 1024 * 1024); // 10MB
+define('ALLOWED_FILE_TYPES', ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx', 'xls', 'xlsx']);
+define('ALLOWED_IMAGE_TYPES', ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+
+// Pagination
+define('DEFAULT_PER_PAGE', 25);
+
+// Date/Time
+define('DATE_FORMAT', 'Y-m-d');
+define('TIME_FORMAT', 'H:i:s');
+define('DATETIME_FORMAT', 'Y-m-d H:i:s');
+define('THAI_DATE_FORMAT', 'd/m/Y');
+
+// HR Roles
+define('HR_ROLES', ['HR', 'Admin', 'Chairman', 'CEO']);
+define('MANAGER_ROLES', ['Manager', 'Director', 'HR', 'Admin', 'Chairman', 'CEO']);
+
+// Attendance
+define('ATTENDANCE_STATUS', [
+    'PENDING' => 'รอดำเนินการ',
+    'PRESENT' => 'มาทำงาน',
+    'LATE' => 'มาสาย',
+    'ABSENT' => 'ขาดงาน',
+    'LEAVE' => 'ลา',
+    'HOLIDAY' => 'วันหยุด',
+    'HALF_DAY' => 'ครึ่งวัน',
+    'WFH' => 'ทำงานที่บ้าน'
+]);
+
+// Leave Status
+define('LEAVE_STATUS', [
+    'DRAFT' => 'แบบร่าง',
+    'PENDING' => 'รออนุมัติ',
+    'APPROVED' => 'อนุมัติ',
+    'REJECTED' => 'ไม่อนุมัติ',
+    'CANCELLED' => 'ยกเลิก'
+]);
+
+// Document Request Status
+define('DOCUMENT_STATUS', [
+    'PENDING' => 'รอดำเนินการ',
+    'PROCESSING' => 'กำลังดำเนินการ',
+    'READY' => 'พร้อมรับ',
+    'DELIVERED' => 'รับแล้ว',
+    'CANCELLED' => 'ยกเลิก',
+    'REJECTED' => 'ไม่อนุมัติ'
+]);
+
+// Position Levels
+define('POSITION_LEVELS', [
+    1 => 'Staff',
+    2 => 'Senior',
+    3 => 'Lead',
+    4 => 'Manager',
+    5 => 'Director',
+    6 => 'Executive'
+]);
+
+// Thai Titles
+define('TITLES', [
+    'นาย' => 'นาย',
+    'นาง' => 'นาง',
+    'นางสาว' => 'นางสาว',
+    'Mr.' => 'Mr.',
+    'Mrs.' => 'Mrs.',
+    'Ms.' => 'Ms.'
+]);
+
+// Departments (for legacy, use hr_departments table instead)
+define('DEPARTMENTS', [
+    'ขาย' => 'ขาย',
+    'สินเชื่อ' => 'สินเชื่อ',
+    'รีโนเวท' => 'รีโนเวท',
+    'บัญชี' => 'บัญชี',
+    'กฎหมาย' => 'กฎหมาย',
+    'IT' => 'IT',
+    'HR' => 'HR',
+    'อื่นๆ' => 'อื่นๆ'
+]);
