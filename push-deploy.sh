@@ -22,7 +22,7 @@ REPO="sakonwanth/tp-hr"
 gh repo edit $REPO --visibility public --accept-visibility-change-consequences 2>/dev/null
 
 # Deploy to server
-ssh $SERVER "cd $REMOTE_DIR && curl -sL https://github.com/$REPO/archive/refs/heads/main.tar.gz | tar -xzf - --strip-components=1 && chown -R tpasset:psacln . && echo '[$(date)] Deployed: $MESSAGE' >> storage/logs/deploy.log"
+ssh $SERVER "cd $REMOTE_DIR && curl -sL https://codeload.github.com/$REPO/tar.gz/main | tar -xzf - --strip-components=1 && chown -R tpasset:psacln . && echo '[$(date)] Deployed: $MESSAGE' >> storage/logs/deploy.log"
 
 # Make repo private again  
 gh repo edit $REPO --visibility private --accept-visibility-change-consequences 2>/dev/null
