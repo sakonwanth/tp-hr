@@ -1,7 +1,6 @@
 <?php
 /**
- * TP-HR - Human Resource Management System
- * หน้าแรก - Dashboard
+ * TP-HR Dashboard - Modern Design
  */
 
 require_once __DIR__ . '/bootstrap.php';
@@ -12,6 +11,7 @@ $user = Auth::user();
 $isHR = isHR();
 
 $page_title = 'หน้าแรก';
+$current_page = 'dashboard';
 
 // Get employee stats for HR
 if ($isHR) {
@@ -82,244 +82,335 @@ $announcements = $stmt->fetchAll();
 require_once __DIR__ . '/templates/header.php';
 ?>
 
-<main class="content-area p-6">
-    <!-- Page Header -->
-    <div class="mb-6">
-        <h1 class="text-2xl font-bold text-white">
-            สวัสดี<?php echo $user['title'] ?? ''; ?><?php echo $user['first_name_th'] ?? $user['username']; ?>
-        </h1>
-        <p class="text-white/60 mt-1">
-            <?php echo formatDateThai(date('Y-m-d')); ?> | 
-            <?php echo $user['position'] ?? $user['department'] ?? 'พนักงาน'; ?>
-        </p>
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-white mb-2">
+                สวัสดี, <?php echo htmlspecialchars($user['first_name_th'] ?? $user['username']); ?>
+            </h1>
+            <p class="text-slate-400 flex items-center gap-2">
+                <i class="fas fa-calendar-day"></i>
+                <?php echo formatDateThai(date('Y-m-d')); ?>
+                <span class="text-slate-600">|</span>
+                <i class="fas fa-briefcase"></i>
+                <?php echo htmlspecialchars($user['position'] ?? $user['role_name'] ?? 'พนักงาน'); ?>
+            </p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="/checkin.php" class="btn-primary">
+                <i class="fas fa-fingerprint mr-2"></i>
+                ลงเวลา
+            </a>
+        </div>
     </div>
-    
-    <?php if ($isHR): ?>
-    <!-- HR Dashboard Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div class="glass-card p-4 rounded-xl">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                    <i class="fas fa-users text-blue-400 text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-white/60 text-sm">พนักงานทั้งหมด</p>
-                    <p class="text-2xl font-bold text-white"><?php echo number_format($stats['total_employees']); ?></p>
-                </div>
+</div>
+
+<?php if ($isHR): ?>
+<!-- HR Stats Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="stat-card group">
+        <div class="flex items-center gap-4">
+            <div class="stat-icon bg-gradient-to-br from-blue-500/20 to-blue-600/20 group-hover:from-blue-500/30 group-hover:to-blue-600/30 transition-colors">
+                <i class="fas fa-users text-blue-400 text-xl"></i>
             </div>
-        </div>
-        
-        <div class="glass-card p-4 rounded-xl">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-lg bg-green-500/20 flex items-center justify-center">
-                    <i class="fas fa-user-check text-green-400 text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-white/60 text-sm">ลงเวลาวันนี้</p>
-                    <p class="text-2xl font-bold text-white"><?php echo number_format($stats['today_attendance']); ?></p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="glass-card p-4 rounded-xl">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-lg bg-yellow-500/20 flex items-center justify-center">
-                    <i class="fas fa-calendar-times text-yellow-400 text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-white/60 text-sm">คำขอลารออนุมัติ</p>
-                    <p class="text-2xl font-bold text-white"><?php echo number_format($stats['pending_leaves']); ?></p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="glass-card p-4 rounded-xl">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                    <i class="fas fa-file-alt text-purple-400 text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-white/60 text-sm">คำขอเอกสาร</p>
-                    <p class="text-2xl font-bold text-white"><?php echo number_format($stats['pending_documents']); ?></p>
-                </div>
+            <div>
+                <p class="text-slate-400 text-sm">พนักงานทั้งหมด</p>
+                <p class="text-2xl font-bold text-white"><?php echo number_format($stats['total_employees']); ?></p>
             </div>
         </div>
     </div>
-    <?php endif; ?>
     
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Left Column -->
-        <div class="lg:col-span-2 space-y-6">
-            
-            <!-- Quick Actions -->
-            <div class="glass-card rounded-xl p-6">
-                <h2 class="text-lg font-semibold text-white mb-4">
-                    <i class="fas fa-bolt text-yellow-400 mr-2"></i>
-                    ทางลัดด่วน
-                </h2>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <a href="checkin.php" class="flex flex-col items-center p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
-                        <div class="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center mb-2">
-                            <i class="fas fa-fingerprint text-green-400 text-xl"></i>
-                        </div>
-                        <span class="text-white text-sm text-center">ลงเวลา</span>
-                    </a>
-                    
-                    <a href="leave.php?action=request" class="flex flex-col items-center p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
-                        <div class="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center mb-2">
-                            <i class="fas fa-calendar-plus text-blue-400 text-xl"></i>
-                        </div>
-                        <span class="text-white text-sm text-center">ขอลา</span>
-                    </a>
-                    
-                    <a href="payslip.php" class="flex flex-col items-center p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
-                        <div class="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center mb-2">
-                            <i class="fas fa-file-invoice-dollar text-emerald-400 text-xl"></i>
-                        </div>
-                        <span class="text-white text-sm text-center">สลิปเงินเดือน</span>
-                    </a>
-                    
-                    <a href="document.php?action=request" class="flex flex-col items-center p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
-                        <div class="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center mb-2">
-                            <i class="fas fa-file-certificate text-purple-400 text-xl"></i>
-                        </div>
-                        <span class="text-white text-sm text-center">ขอใบรับรอง</span>
-                    </a>
-                </div>
+    <div class="stat-card group">
+        <div class="flex items-center gap-4">
+            <div class="stat-icon bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 group-hover:from-emerald-500/30 group-hover:to-emerald-600/30 transition-colors">
+                <i class="fas fa-user-check text-emerald-400 text-xl"></i>
             </div>
-            
-            <!-- Today's Attendance -->
-            <div class="glass-card rounded-xl p-6">
-                <h2 class="text-lg font-semibold text-white mb-4">
-                    <i class="fas fa-clock text-blue-400 mr-2"></i>
-                    การลงเวลาวันนี้
-                </h2>
+            <div>
+                <p class="text-slate-400 text-sm">ลงเวลาวันนี้</p>
+                <p class="text-2xl font-bold text-white"><?php echo number_format($stats['today_attendance']); ?></p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="stat-card group">
+        <div class="flex items-center gap-4">
+            <div class="stat-icon bg-gradient-to-br from-amber-500/20 to-amber-600/20 group-hover:from-amber-500/30 group-hover:to-amber-600/30 transition-colors">
+                <i class="fas fa-calendar-times text-amber-400 text-xl"></i>
+            </div>
+            <div>
+                <p class="text-slate-400 text-sm">คำขอลารออนุมัติ</p>
+                <p class="text-2xl font-bold text-white"><?php echo number_format($stats['pending_leaves']); ?></p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="stat-card group">
+        <div class="flex items-center gap-4">
+            <div class="stat-icon bg-gradient-to-br from-purple-500/20 to-purple-600/20 group-hover:from-purple-500/30 group-hover:to-purple-600/30 transition-colors">
+                <i class="fas fa-file-alt text-purple-400 text-xl"></i>
+            </div>
+            <div>
+                <p class="text-slate-400 text-sm">คำขอเอกสาร</p>
+                <p class="text-2xl font-bold text-white"><?php echo number_format($stats['pending_documents']); ?></p>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Left Column -->
+    <div class="lg:col-span-2 space-y-6">
+        
+        <!-- Quick Actions -->
+        <div class="glass-card rounded-2xl p-6">
+            <h2 class="section-title">
+                <i class="fas fa-bolt text-amber-400"></i>
+                ทางลัดด่วน
+            </h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="/checkin.php" class="quick-action group">
+                    <div class="quick-action-icon bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 group-hover:from-emerald-500/40 group-hover:to-emerald-600/40">
+                        <i class="fas fa-fingerprint text-emerald-400"></i>
+                    </div>
+                    <span class="text-white font-medium">ลงเวลา</span>
+                </a>
                 
-                <?php if ($myData['today_attendance']): ?>
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-4">
-                            <div class="text-center">
-                                <p class="text-white/60 text-xs">เข้างาน</p>
-                                <p class="text-xl font-bold text-green-400">
-                                    <?php echo $myData['today_attendance']['check_in_time'] 
-                                        ? date('H:i', strtotime($myData['today_attendance']['check_in_time'])) 
-                                        : '-'; ?>
-                                </p>
-                            </div>
-                            <i class="fas fa-arrow-right text-white/30"></i>
-                            <div class="text-center">
-                                <p class="text-white/60 text-xs">ออกงาน</p>
-                                <p class="text-xl font-bold <?php echo $myData['today_attendance']['check_out_time'] ? 'text-blue-400' : 'text-white/30'; ?>">
-                                    <?php echo $myData['today_attendance']['check_out_time'] 
-                                        ? date('H:i', strtotime($myData['today_attendance']['check_out_time'])) 
-                                        : '-'; ?>
-                                </p>
+                <a href="/leave.php?action=request" class="quick-action group">
+                    <div class="quick-action-icon bg-gradient-to-br from-blue-500/20 to-blue-600/20 group-hover:from-blue-500/40 group-hover:to-blue-600/40">
+                        <i class="fas fa-calendar-plus text-blue-400"></i>
+                    </div>
+                    <span class="text-white font-medium">ขอลา</span>
+                </a>
+                
+                <a href="/payslip.php" class="quick-action group">
+                    <div class="quick-action-icon bg-gradient-to-br from-teal-500/20 to-teal-600/20 group-hover:from-teal-500/40 group-hover:to-teal-600/40">
+                        <i class="fas fa-file-invoice-dollar text-teal-400"></i>
+                    </div>
+                    <span class="text-white font-medium">สลิปเงินเดือน</span>
+                </a>
+                
+                <a href="/certificate.php" class="quick-action group">
+                    <div class="quick-action-icon bg-gradient-to-br from-purple-500/20 to-purple-600/20 group-hover:from-purple-500/40 group-hover:to-purple-600/40">
+                        <i class="fas fa-file-certificate text-purple-400"></i>
+                    </div>
+                    <span class="text-white font-medium">ขอใบรับรอง</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Today's Attendance -->
+        <div class="glass-card rounded-2xl p-6">
+            <h2 class="section-title">
+                <i class="fas fa-clock text-blue-400"></i>
+                การลงเวลาวันนี้
+            </h2>
+            
+            <?php if ($myData['today_attendance']): ?>
+                <div class="flex items-center justify-between bg-slate-800/50 rounded-xl p-4">
+                    <div class="flex items-center gap-8">
+                        <div class="text-center px-4">
+                            <p class="text-slate-400 text-xs mb-1">เข้างาน</p>
+                            <p class="text-2xl font-bold text-emerald-400">
+                                <?php echo $myData['today_attendance']['check_in_time'] 
+                                    ? date('H:i', strtotime($myData['today_attendance']['check_in_time'])) 
+                                    : '-'; ?>
+                            </p>
+                        </div>
+                        <div class="flex items-center text-slate-600">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                        <div class="text-center px-4">
+                            <p class="text-slate-400 text-xs mb-1">ออกงาน</p>
+                            <p class="text-2xl font-bold <?php echo $myData['today_attendance']['check_out_time'] ? 'text-blue-400' : 'text-slate-600'; ?>">
+                                <?php echo $myData['today_attendance']['check_out_time'] 
+                                    ? date('H:i', strtotime($myData['today_attendance']['check_out_time'])) 
+                                    : '-'; ?>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <?php if (!$myData['today_attendance']['check_out_time']): ?>
+                    <a href="/checkin.php?action=out" class="btn-primary">
+                        <i class="fas fa-sign-out-alt mr-2"></i>
+                        ลงเวลาออก
+                    </a>
+                    <?php else: ?>
+                    <span class="badge badge-success">
+                        <i class="fas fa-check mr-1"></i>
+                        เสร็จสิ้น
+                    </span>
+                    <?php endif; ?>
+                </div>
+            <?php else: ?>
+                <div class="text-center py-12 bg-slate-800/30 rounded-xl border border-dashed border-slate-700">
+                    <i class="fas fa-clock text-slate-600 text-5xl mb-4"></i>
+                    <p class="text-slate-400 mb-4">คุณยังไม่ได้ลงเวลาเข้างานวันนี้</p>
+                    <a href="/checkin.php" class="btn-primary">
+                        <i class="fas fa-fingerprint mr-2"></i>
+                        ลงเวลาเข้างาน
+                    </a>
+                </div>
+            <?php endif; ?>
+        </div>
+        
+        <!-- Leave Balance -->
+        <div class="glass-card rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="section-title mb-0">
+                    <i class="fas fa-umbrella-beach text-orange-400"></i>
+                    วันลาคงเหลือ
+                </h2>
+                <a href="/leave.php" class="text-sm text-primary-400 hover:text-primary-300 font-medium">
+                    ดูทั้งหมด <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+            
+            <?php if ($myData['leave_balance']): ?>
+                <div class="space-y-4">
+                    <?php foreach ($myData['leave_balance'] as $leave): ?>
+                    <?php 
+                        $percentage = $leave['entitled_days'] > 0 
+                            ? ($leave['remaining'] / $leave['entitled_days']) * 100 
+                            : 0;
+                        $barColor = $percentage > 50 ? 'bg-emerald-500' : ($percentage > 20 ? 'bg-amber-500' : 'bg-red-500');
+                    ?>
+                    <div class="bg-slate-800/50 rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-white font-medium"><?php echo htmlspecialchars($leave['name']); ?></span>
+                            <div class="flex items-center gap-1">
+                                <span class="text-white font-bold"><?php echo number_format($leave['remaining'], 1); ?></span>
+                                <span class="text-slate-500">/ <?php echo number_format($leave['entitled_days'], 1); ?> วัน</span>
                             </div>
                         </div>
-                        
-                        <?php if (!$myData['today_attendance']['check_out_time']): ?>
-                        <a href="checkin.php?action=out" class="btn-primary">
-                            <i class="fas fa-sign-out-alt mr-1"></i> ลงเวลาออก
-                        </a>
+                        <div class="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
+                            <div class="h-full <?php echo $barColor; ?> rounded-full transition-all" style="width: <?php echo min(100, max(0, $percentage)); ?>%"></div>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <div class="text-center py-8">
+                    <i class="fas fa-calendar-times text-slate-600 text-3xl mb-3"></i>
+                    <p class="text-slate-400">ยังไม่มีข้อมูลสิทธิ์วันลา</p>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+    
+    <!-- Right Column -->
+    <div class="space-y-6">
+        
+        <!-- Pending Requests -->
+        <?php if ($myData['pending_leaves']): ?>
+        <div class="glass-card rounded-2xl p-6">
+            <h2 class="section-title">
+                <i class="fas fa-hourglass-half text-amber-400"></i>
+                คำขอที่รออนุมัติ
+            </h2>
+            <div class="space-y-3">
+                <?php foreach ($myData['pending_leaves'] as $leave): ?>
+                <div class="bg-slate-800/50 rounded-xl p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-white font-medium"><?php echo htmlspecialchars($leave['leave_type_name']); ?></span>
+                        <span class="badge badge-warning">รออนุมัติ</span>
+                    </div>
+                    <p class="text-slate-400 text-sm">
+                        <i class="fas fa-calendar mr-1"></i>
+                        <?php echo formatDateThai($leave['start_date']); ?>
+                        <?php if ($leave['start_date'] !== $leave['end_date']): ?>
+                        - <?php echo formatDateThai($leave['end_date']); ?>
                         <?php endif; ?>
-                    </div>
-                <?php else: ?>
-                    <div class="text-center py-6">
-                        <i class="fas fa-clock text-white/20 text-4xl mb-3"></i>
-                        <p class="text-white/60 mb-4">คุณยังไม่ได้ลงเวลาเข้างานวันนี้</p>
-                        <a href="checkin.php" class="btn-primary">
-                            <i class="fas fa-fingerprint mr-1"></i> ลงเวลาเข้างาน
-                        </a>
-                    </div>
-                <?php endif; ?>
-            </div>
-            
-            <!-- Leave Balance -->
-            <div class="glass-card rounded-xl p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-semibold text-white">
-                        <i class="fas fa-umbrella-beach text-orange-400 mr-2"></i>
-                        วันลาคงเหลือ
-                    </h2>
-                    <a href="leave.php" class="text-sm text-violet-400 hover:text-violet-300">
-                        ดูทั้งหมด <i class="fas fa-arrow-right ml-1"></i>
-                    </a>
+                    </p>
                 </div>
-                
-                <?php if ($myData['leave_balance']): ?>
-                    <div class="space-y-3">
-                        <?php foreach ($myData['leave_balance'] as $leave): ?>
-                        <div class="flex items-center justify-between">
-                            <span class="text-white/80"><?php echo htmlspecialchars($leave['name']); ?></span>
-                            <div class="flex items-center gap-2">
-                                <span class="text-white font-medium"><?php echo number_format($leave['remaining'], 1); ?></span>
-                                <span class="text-white/50">/ <?php echo number_format($leave['entitled_days'], 1); ?> วัน</span>
-                            </div>
-                        </div>
-                        <?php endforeach; ?>
-                    </div>
-                <?php else: ?>
-                    <p class="text-white/60 text-center py-4">ยังไม่มีข้อมูลสิทธิ์วันลา</p>
-                <?php endif; ?>
+                <?php endforeach; ?>
             </div>
         </div>
+        <?php endif; ?>
         
-        <!-- Right Column -->
-        <div class="space-y-6">
-            <!-- Pending Requests -->
-            <?php if ($myData['pending_leaves']): ?>
-            <div class="glass-card rounded-xl p-6">
-                <h2 class="text-lg font-semibold text-white mb-4">
-                    <i class="fas fa-hourglass-half text-yellow-400 mr-2"></i>
-                    คำขอที่รอดำเนินการ
-                </h2>
+        <!-- Announcements -->
+        <div class="glass-card rounded-2xl p-6">
+            <h2 class="section-title">
+                <i class="fas fa-bullhorn text-red-400"></i>
+                ประกาศ
+            </h2>
+            
+            <?php if ($announcements): ?>
                 <div class="space-y-3">
-                    <?php foreach ($myData['pending_leaves'] as $leave): ?>
-                    <div class="p-3 rounded-lg bg-white/5">
-                        <div class="flex items-center justify-between">
-                            <span class="text-white"><?php echo htmlspecialchars($leave['leave_type_name']); ?></span>
-                            <span class="px-2 py-1 text-xs rounded bg-yellow-500/20 text-yellow-400">รออนุมัติ</span>
-                        </div>
-                        <p class="text-white/60 text-sm mt-1">
-                            <?php echo formatDateThai($leave['start_date']); ?> - <?php echo formatDateThai($leave['end_date']); ?>
+                    <?php foreach ($announcements as $ann): ?>
+                    <div class="bg-slate-800/50 rounded-xl p-4 hover:bg-slate-800/80 transition-colors cursor-pointer">
+                        <?php if ($ann['is_pinned']): ?>
+                        <span class="inline-flex items-center text-xs text-red-400 mb-2">
+                            <i class="fas fa-thumbtack mr-1"></i>
+                            ปักหมุด
+                        </span>
+                        <?php endif; ?>
+                        <h3 class="text-white font-medium mb-1 line-clamp-1"><?php echo htmlspecialchars($ann['title']); ?></h3>
+                        <p class="text-slate-400 text-sm line-clamp-2"><?php echo htmlspecialchars(strip_tags($ann['content'])); ?></p>
+                        <p class="text-slate-500 text-xs mt-2">
+                            <i class="fas fa-clock mr-1"></i>
+                            <?php echo formatDateThai($ann['publish_date'] ?? $ann['created_at']); ?>
                         </p>
                     </div>
                     <?php endforeach; ?>
                 </div>
-            </div>
+            <?php else: ?>
+                <div class="text-center py-8">
+                    <i class="fas fa-bullhorn text-slate-600 text-3xl mb-3"></i>
+                    <p class="text-slate-400">ไม่มีประกาศใหม่</p>
+                </div>
             <?php endif; ?>
-            
-            <!-- Announcements -->
-            <div class="glass-card rounded-xl p-6">
-                <h2 class="text-lg font-semibold text-white mb-4">
-                    <i class="fas fa-bullhorn text-red-400 mr-2"></i>
-                    ประกาศ
-                </h2>
-                
-                <?php if ($announcements): ?>
-                    <div class="space-y-3">
-                        <?php foreach ($announcements as $ann): ?>
-                        <div class="p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer">
-                            <div class="flex items-start gap-2">
-                                <?php if ($ann['is_pinned']): ?>
-                                <i class="fas fa-thumbtack text-red-400 mt-1"></i>
-                                <?php endif; ?>
-                                <div>
-                                    <h3 class="text-white font-medium"><?php echo htmlspecialchars($ann['title']); ?></h3>
-                                    <p class="text-white/60 text-sm mt-1">
-                                        <?php echo formatDateThai($ann['publish_date'] ?? $ann['created_at']); ?>
-                                    </p>
-                                </div>
-                            </div>
+        </div>
+        
+        <!-- Quick Links for HR -->
+        <?php if ($isHR): ?>
+        <div class="glass-card rounded-2xl p-6">
+            <h2 class="section-title">
+                <i class="fas fa-tasks text-primary-400"></i>
+                งานรออนุมัติ
+            </h2>
+            <div class="space-y-2">
+                <?php if ($stats['pending_leaves'] > 0): ?>
+                <a href="/hr/leaves.php?status=pending" class="flex items-center justify-between p-3 rounded-xl bg-slate-800/50 hover:bg-primary-500/10 transition-colors group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                            <i class="fas fa-calendar-times text-amber-400 text-sm"></i>
                         </div>
-                        <?php endforeach; ?>
+                        <span class="text-white">คำขอลา</span>
                     </div>
-                <?php else: ?>
-                    <p class="text-white/60 text-center py-4">ไม่มีประกาศใหม่</p>
+                    <div class="flex items-center gap-2">
+                        <span class="text-amber-400 font-bold"><?php echo $stats['pending_leaves']; ?></span>
+                        <i class="fas fa-chevron-right text-slate-600 group-hover:text-primary-400 transition-colors"></i>
+                    </div>
+                </a>
+                <?php endif; ?>
+                
+                <?php if ($stats['pending_documents'] > 0): ?>
+                <a href="/hr/documents.php?status=pending" class="flex items-center justify-between p-3 rounded-xl bg-slate-800/50 hover:bg-primary-500/10 transition-colors group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                            <i class="fas fa-file-alt text-purple-400 text-sm"></i>
+                        </div>
+                        <span class="text-white">คำขอเอกสาร</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-purple-400 font-bold"><?php echo $stats['pending_documents']; ?></span>
+                        <i class="fas fa-chevron-right text-slate-600 group-hover:text-primary-400 transition-colors"></i>
+                    </div>
+                </a>
+                <?php endif; ?>
+                
+                <?php if ($stats['pending_leaves'] == 0 && $stats['pending_documents'] == 0): ?>
+                <div class="text-center py-4">
+                    <i class="fas fa-check-circle text-emerald-400 text-xl mb-2"></i>
+                    <p class="text-slate-400 text-sm">ไม่มีงานรออนุมัติ</p>
+                </div>
                 <?php endif; ?>
             </div>
         </div>
+        <?php endif; ?>
     </div>
-</main>
+</div>
 
 <?php require_once __DIR__ . '/templates/footer.php'; ?>

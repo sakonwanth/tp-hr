@@ -1,6 +1,6 @@
 <?php
 /**
- * TP-HR Header Template
+ * TP-HR Header Template - Modern Design
  */
 $current_user = Auth::user();
 $isHR = isHR();
@@ -17,203 +17,536 @@ $current_page = $current_page ?? '';
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Google Fonts - Sarabun -->
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
         * {
-            font-family: 'Sarabun', sans-serif;
+            font-family: 'IBM Plex Sans Thai', sans-serif;
         }
         
         body {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            background: #0f172a;
             min-height: 100vh;
         }
         
-        .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
         .sidebar {
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(20px);
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.98) 100%);
+            border-right: 1px solid rgba(148, 163, 184, 0.1);
         }
         
-        .nav-link {
-            @apply flex items-center gap-3 px-4 py-3 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all;
+        .glass-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
         }
         
-        .nav-link.active {
-            @apply text-white bg-violet-600/50;
+        .glass-card:hover {
+            border-color: rgba(139, 92, 246, 0.3);
+            box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.15);
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: rgba(148, 163, 184, 1);
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin-bottom: 4px;
+        }
+        
+        .nav-item:hover {
+            background: rgba(139, 92, 246, 0.1);
+            color: #fff;
+        }
+        
+        .nav-item.active {
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+        }
+        
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .quick-action {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 16px;
+            border-radius: 16px;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .quick-action:hover {
+            background: rgba(139, 92, 246, 0.15);
+            border-color: rgba(139, 92, 246, 0.3);
+            transform: translateY(-4px);
+        }
+        
+        .quick-action-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            font-size: 1.5rem;
         }
         
         .btn-primary {
-            @apply inline-flex items-center justify-center px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+            color: #fff;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
         }
         
         .btn-secondary {
-            @apply inline-flex items-center justify-center px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            background: rgba(148, 163, 184, 0.1);
+            color: #fff;
+            border-radius: 10px;
+            font-weight: 500;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            transition: all 0.2s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(148, 163, 184, 0.2);
         }
         
         .input-field {
-            @apply w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-violet-500;
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 10px;
+            color: #fff;
+            transition: all 0.2s ease;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+        }
+        
+        .input-field::placeholder {
+            color: rgba(148, 163, 184, 0.5);
         }
         
         .content-area {
-            margin-left: 260px;
+            margin-left: 280px;
             min-height: 100vh;
         }
         
         @media (max-width: 1024px) {
             .content-area {
                 margin-left: 0;
+                padding-top: 64px;
             }
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 16px;
+        }
+        
+        .section-title i {
+            font-size: 1rem;
+        }
+        
+        /* Badge Styles */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .badge-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+        }
+        
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+        }
+        
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+        
+        .badge-info {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.3);
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.5);
+        }
+        
+        /* Table Styles */
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .data-table th {
+            background: rgba(30, 41, 59, 0.5);
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: rgba(148, 163, 184, 1);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .data-table th:first-child {
+            border-radius: 12px 0 0 0;
+        }
+        
+        .data-table th:last-child {
+            border-radius: 0 12px 0 0;
+        }
+        
+        .data-table td {
+            padding: 16px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            color: #fff;
+        }
+        
+        .data-table tbody tr:hover {
+            background: rgba(139, 92, 246, 0.05);
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fade-in {
+            animation: fadeInUp 0.3s ease forwards;
         }
     </style>
 </head>
-<body class="text-white">
+<body class="text-slate-300">
 
 <!-- Sidebar -->
-<aside class="sidebar fixed left-0 top-0 w-[260px] h-screen overflow-y-auto hidden lg:block z-50">
+<aside class="sidebar fixed left-0 top-0 w-[280px] h-screen overflow-y-auto hidden lg:block z-50">
     <div class="p-6">
         <!-- Logo -->
-        <a href="/" class="flex items-center gap-3 mb-8">
-            <div class="w-10 h-10 rounded-lg bg-violet-600 flex items-center justify-center">
-                <i class="fas fa-users text-white"></i>
+        <a href="/" class="flex items-center gap-4 mb-8 group">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-lg shadow-primary-500/30 group-hover:scale-105 transition-transform">
+                <i class="fas fa-users text-white text-lg"></i>
             </div>
             <div>
                 <h1 class="text-xl font-bold text-white">TP-HR</h1>
-                <p class="text-xs text-white/60">Human Resources</p>
+                <p class="text-xs text-slate-500">Human Resources</p>
             </div>
         </a>
         
-        <!-- Navigation -->
-        <nav class="space-y-2">
-            <a href="/" class="nav-link <?php echo $current_page === 'dashboard' ? 'active' : ''; ?>">
-                <i class="fas fa-home w-5"></i>
+        <!-- User Info -->
+        <div class="mb-6 p-4 rounded-2xl bg-slate-800/50 border border-slate-700/50">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold">
+                    <?php echo mb_substr($current_user['first_name_th'] ?? $current_user['username'], 0, 1); ?>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-white font-medium truncate"><?php echo htmlspecialchars($current_user['first_name_th'] ?? $current_user['username']); ?></p>
+                    <p class="text-xs text-slate-500 truncate"><?php echo htmlspecialchars($current_user['position'] ?? $current_user['role_name'] ?? 'พนักงาน'); ?></p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Navigation -->
+        <nav class="space-y-1">
+            <a href="/" class="nav-item <?php echo $current_page === 'dashboard' ? 'active' : ''; ?>">
+                <i class="fas fa-home"></i>
                 <span>หน้าแรก</span>
             </a>
             
-            <a href="/checkin.php" class="nav-link <?php echo $current_page === 'checkin' ? 'active' : ''; ?>">
-                <i class="fas fa-fingerprint w-5"></i>
+            <a href="/checkin.php" class="nav-item <?php echo $current_page === 'checkin' ? 'active' : ''; ?>">
+                <i class="fas fa-fingerprint"></i>
                 <span>ลงเวลาเข้า-ออก</span>
             </a>
             
-            <a href="/leave.php" class="nav-link <?php echo $current_page === 'leave' ? 'active' : ''; ?>">
-                <i class="fas fa-calendar-alt w-5"></i>
+            <a href="/leave.php" class="nav-item <?php echo $current_page === 'leave' ? 'active' : ''; ?>">
+                <i class="fas fa-calendar-alt"></i>
                 <span>การลา</span>
             </a>
             
-            <a href="/payslip.php" class="nav-link <?php echo $current_page === 'payslip' ? 'active' : ''; ?>">
-                <i class="fas fa-file-invoice-dollar w-5"></i>
+            <a href="/payslip.php" class="nav-item <?php echo $current_page === 'payslip' ? 'active' : ''; ?>">
+                <i class="fas fa-file-invoice-dollar"></i>
                 <span>สลิปเงินเดือน</span>
             </a>
             
-            <a href="/document.php" class="nav-link <?php echo $current_page === 'document' ? 'active' : ''; ?>">
-                <i class="fas fa-file-certificate w-5"></i>
+            <a href="/certificate.php" class="nav-item <?php echo $current_page === 'certificate' ? 'active' : ''; ?>">
+                <i class="fas fa-file-certificate"></i>
                 <span>ขอใบรับรอง</span>
             </a>
             
-            <a href="/profile.php" class="nav-link <?php echo $current_page === 'profile' ? 'active' : ''; ?>">
-                <i class="fas fa-user w-5"></i>
+            <a href="/profile.php" class="nav-item <?php echo $current_page === 'profile' ? 'active' : ''; ?>">
+                <i class="fas fa-user"></i>
                 <span>ข้อมูลส่วนตัว</span>
             </a>
+        </nav>
+        
+        <?php if ($isHR): ?>
+        <!-- HR Admin Section -->
+        <div class="mt-6 pt-6 border-t border-slate-700/50">
+            <p class="text-xs text-slate-500 uppercase tracking-wider mb-3 px-2 font-semibold">HR Admin</p>
             
-            <?php if ($isHR): ?>
-            <div class="pt-4 mt-4 border-t border-white/10">
-                <p class="text-xs text-white/40 uppercase tracking-wider mb-2 px-4">HR Admin</p>
-                
-                <a href="/admin/employees.php" class="nav-link <?php echo $current_page === 'admin-employees' ? 'active' : ''; ?>">
-                    <i class="fas fa-users-cog w-5"></i>
+            <nav class="space-y-1">
+                <a href="/hr/employees.php" class="nav-item <?php echo $current_page === 'hr-employees' ? 'active' : ''; ?>">
+                    <i class="fas fa-users-cog"></i>
                     <span>จัดการพนักงาน</span>
                 </a>
                 
-                <a href="/admin/attendance.php" class="nav-link <?php echo $current_page === 'admin-attendance' ? 'active' : ''; ?>">
-                    <i class="fas fa-user-clock w-5"></i>
+                <a href="/hr/attendance.php" class="nav-item <?php echo $current_page === 'hr-attendance' ? 'active' : ''; ?>">
+                    <i class="fas fa-user-clock"></i>
                     <span>จัดการลงเวลา</span>
                 </a>
                 
-                <a href="/admin/leaves.php" class="nav-link <?php echo $current_page === 'admin-leaves' ? 'active' : ''; ?>">
-                    <i class="fas fa-calendar-check w-5"></i>
+                <a href="/hr/leaves.php" class="nav-item <?php echo $current_page === 'hr-leaves' ? 'active' : ''; ?>">
+                    <i class="fas fa-calendar-check"></i>
                     <span>อนุมัติการลา</span>
                 </a>
                 
-                <a href="/admin/documents.php" class="nav-link <?php echo $current_page === 'admin-documents' ? 'active' : ''; ?>">
-                    <i class="fas fa-file-alt w-5"></i>
+                <a href="/hr/documents.php" class="nav-item <?php echo $current_page === 'hr-documents' ? 'active' : ''; ?>">
+                    <i class="fas fa-file-alt"></i>
                     <span>จัดการเอกสาร</span>
                 </a>
                 
-                <a href="/admin/reports.php" class="nav-link <?php echo $current_page === 'admin-reports' ? 'active' : ''; ?>">
-                    <i class="fas fa-chart-bar w-5"></i>
+                <a href="/hr/reports.php" class="nav-item <?php echo $current_page === 'hr-reports' ? 'active' : ''; ?>">
+                    <i class="fas fa-chart-bar"></i>
                     <span>รายงาน</span>
                 </a>
                 
-                <a href="/admin/settings.php" class="nav-link <?php echo $current_page === 'admin-settings' ? 'active' : ''; ?>">
-                    <i class="fas fa-cog w-5"></i>
+                <a href="/hr/settings.php" class="nav-item <?php echo $current_page === 'hr-settings' ? 'active' : ''; ?>">
+                    <i class="fas fa-cog"></i>
                     <span>ตั้งค่าระบบ</span>
                 </a>
-            </div>
-            <?php endif; ?>
-        </nav>
-        
-        <!-- TP-CRM Link -->
-        <?php if (TP_CRM_AVAILABLE): ?>
-        <div class="mt-6 pt-4 border-t border-white/10">
-            <a href="/tp-crm/" class="nav-link">
-                <i class="fas fa-exchange-alt w-5"></i>
-                <span>ไป TP-CRM</span>
-            </a>
+            </nav>
         </div>
         <?php endif; ?>
+        
+        <!-- Logout -->
+        <div class="mt-6 pt-6 border-t border-slate-700/50">
+            <a href="/logout.php" class="nav-item text-red-400 hover:bg-red-500/10 hover:text-red-300">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>ออกจากระบบ</span>
+            </a>
+        </div>
     </div>
 </aside>
 
-<!-- Top Bar (Mobile) -->
-<header class="lg:hidden fixed top-0 left-0 right-0 h-16 bg-black/30 backdrop-blur-lg z-40 flex items-center justify-between px-4">
-    <button id="mobileMenuBtn" class="text-white">
-        <i class="fas fa-bars text-xl"></i>
+<!-- Mobile Header -->
+<header class="lg:hidden fixed top-0 left-0 right-0 h-16 bg-slate-900/95 backdrop-blur-lg border-b border-slate-800 z-40 flex items-center justify-between px-4">
+    <button id="mobileMenuBtn" class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-white">
+        <i class="fas fa-bars"></i>
     </button>
     
     <a href="/" class="flex items-center gap-2">
-        <div class="w-8 h-8 rounded-lg bg-violet-600 flex items-center justify-center">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center">
             <i class="fas fa-users text-white text-sm"></i>
         </div>
         <span class="font-bold text-white">TP-HR</span>
     </a>
     
-    <a href="/profile.php" class="text-white">
-        <i class="fas fa-user-circle text-xl"></i>
+    <a href="/profile.php" class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-white">
+        <i class="fas fa-user"></i>
     </a>
 </header>
 
-<!-- User Info Bar -->
-<div class="content-area">
-    <div class="bg-black/20 backdrop-blur-sm py-3 px-6 flex items-center justify-between">
-        <div class="hidden lg:flex items-center gap-4 text-sm">
-            <span class="text-white/60">
-                <i class="fas fa-user-circle mr-1"></i>
-                <?php echo htmlspecialchars(getUserFullName($current_user)); ?>
-            </span>
-            <span class="text-white/40">|</span>
-            <span class="text-white/60">
-                <?php echo htmlspecialchars($current_user['position'] ?? $current_user['department'] ?? '-'); ?>
-            </span>
-        </div>
-        
-        <div class="flex items-center gap-4">
-            <a href="/notifications.php" class="text-white/60 hover:text-white relative">
-                <i class="fas fa-bell"></i>
-                <!-- <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span> -->
-            </a>
+<!-- Mobile Sidebar -->
+<div id="mobileSidebar" class="lg:hidden fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeMobileMenu()"></div>
+    <aside class="sidebar absolute left-0 top-0 w-[280px] h-full overflow-y-auto transform transition-transform">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-6">
+                <a href="/" class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center">
+                        <i class="fas fa-users text-white"></i>
+                    </div>
+                    <span class="text-lg font-bold text-white">TP-HR</span>
+                </a>
+                <button onclick="closeMobileMenu()" class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
             
-            <a href="/logout.php" class="text-white/60 hover:text-white">
-                <i class="fas fa-sign-out-alt"></i>
-            </a>
+            <nav class="space-y-1">
+                <a href="/" class="nav-item <?php echo $current_page === 'dashboard' ? 'active' : ''; ?>">
+                    <i class="fas fa-home"></i>
+                    <span>หน้าแรก</span>
+                </a>
+                <a href="/checkin.php" class="nav-item <?php echo $current_page === 'checkin' ? 'active' : ''; ?>">
+                    <i class="fas fa-fingerprint"></i>
+                    <span>ลงเวลาเข้า-ออก</span>
+                </a>
+                <a href="/leave.php" class="nav-item <?php echo $current_page === 'leave' ? 'active' : ''; ?>">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>การลา</span>
+                </a>
+                <a href="/payslip.php" class="nav-item <?php echo $current_page === 'payslip' ? 'active' : ''; ?>">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span>สลิปเงินเดือน</span>
+                </a>
+                <a href="/certificate.php" class="nav-item <?php echo $current_page === 'certificate' ? 'active' : ''; ?>">
+                    <i class="fas fa-file-certificate"></i>
+                    <span>ขอใบรับรอง</span>
+                </a>
+                <a href="/profile.php" class="nav-item <?php echo $current_page === 'profile' ? 'active' : ''; ?>">
+                    <i class="fas fa-user"></i>
+                    <span>ข้อมูลส่วนตัว</span>
+                </a>
+                
+                <?php if ($isHR): ?>
+                <div class="mt-4 pt-4 border-t border-slate-700/50">
+                    <p class="text-xs text-slate-500 uppercase tracking-wider mb-2 font-semibold">HR Admin</p>
+                    <a href="/hr/employees.php" class="nav-item">
+                        <i class="fas fa-users-cog"></i>
+                        <span>จัดการพนักงาน</span>
+                    </a>
+                    <a href="/hr/leaves.php" class="nav-item">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>อนุมัติการลา</span>
+                    </a>
+                </div>
+                <?php endif; ?>
+                
+                <div class="mt-4 pt-4 border-t border-slate-700/50">
+                    <a href="/logout.php" class="nav-item text-red-400">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>ออกจากระบบ</span>
+                    </a>
+                </div>
+            </nav>
         </div>
-    </div>
+    </aside>
+</div>
+
+<script>
+function openMobileMenu() {
+    document.getElementById('mobileSidebar').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeMobileMenu() {
+    document.getElementById('mobileSidebar').classList.add('hidden');
+    document.body.style.overflow = '';
+}
+
+document.getElementById('mobileMenuBtn')?.addEventListener('click', openMobileMenu);
+</script>
+
+<!-- Main Content -->
+<div class="content-area p-6">
