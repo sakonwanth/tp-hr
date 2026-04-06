@@ -23,9 +23,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'update_settings':
                 foreach ($_POST['settings'] as $key => $value) {
                     $stmt = $pdo->prepare("
-                        INSERT INTO hr_settings (setting_key, setting_value, updated_by) 
+                        INSERT INTO hr_settings (`key`, `value`, updated_by) 
                         VALUES (?, ?, ?)
-                        ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value), updated_by = VALUES(updated_by), updated_at = NOW()
+                        ON DUPLICATE KEY UPDATE `value` = VALUES(`value`), updated_by = VALUES(updated_by), updated_at = NOW()
                     ");
                     $stmt->execute([$key, $value, $user['id']]);
                 }
@@ -98,9 +98,9 @@ $tab = $_GET['tab'] ?? 'general';
 
 // Fetch data based on tab
 $settings = [];
-$stmt = $pdo->query("SELECT setting_key, setting_value FROM hr_settings");
+$stmt = $pdo->query("SELECT `key`, `value` FROM hr_settings");
 while ($row = $stmt->fetch()) {
-    $settings[$row['setting_key']] = $row['setting_value'];
+    $settings[$row['key']] = $row['value'];
 }
 
 $holidays = $pdo->query("SELECT * FROM hr_holidays ORDER BY holiday_date")->fetchAll();

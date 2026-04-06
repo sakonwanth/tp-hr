@@ -21,7 +21,7 @@ $templates = $stmtTemplates->fetchAll();
 // Get my requests
 $stmt = $pdo->prepare("
     SELECT dr.*, dt.name as template_name, dt.description as template_desc,
-           id.file_path, id.issued_date, id.issued_by,
+           id.document_path as file_path, id.document_date as issued_date, id.issued_by,
            issuer.first_name_th as issuer_first, issuer.last_name_th as issuer_last
     FROM hr_document_requests dr
     JOIN hr_document_templates dt ON dr.template_id = dt.id

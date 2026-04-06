@@ -19,13 +19,13 @@ $viewSlipId = (int)($_GET['slip_id'] ?? 0);
 
 // Get user's payroll slips - connect to tp-crm payroll_slips table
 $stmt = $pdo->prepare("
-    SELECT ps.*, pr.payroll_month, pr.status as run_status, pr.paid_date,
+    SELECT ps.*, pr.payroll_month, pr.status as run_status,
            pr.approved_by, u.first_name_th as approver_first, u.last_name_th as approver_last
     FROM payroll_slips ps
     JOIN payroll_runs pr ON ps.payroll_run_id = pr.id
     LEFT JOIN users u ON pr.approved_by = u.id
     WHERE ps.user_id = ? AND YEAR(pr.payroll_month) = ?
-    AND pr.status IN ('pending', 'approved', 'paid')
+    AND pr.status IN ('draft', 'calculated', 'approved', 'paid')
     ORDER BY pr.payroll_month DESC
 ");
 $stmt->execute([$user['id'], $year]);
@@ -50,7 +50,7 @@ if (!in_array($year, $availableYears)) {
 $slip = null;
 if ($viewSlipId > 0) {
     $stmt = $pdo->prepare("
-        SELECT ps.*, pr.payroll_month, pr.status as run_status, pr.paid_date,
+        SELECT ps.*, pr.payroll_month, pr.status as run_status,
                pr.approved_by, u.first_name_th as approver_first, u.last_name_th as approver_last,
                emp.first_name_th, emp.last_name_th, emp.employee_code, emp.department, emp.position
         FROM payroll_slips ps
@@ -122,8 +122,8 @@ include 'templates/header.php';
             <p class="text-white print:text-black font-medium">
                 ประจำเดือน <?php echo thaiMonth(date('n', strtotime($slip['payroll_month']))); ?> <?php echo date('Y', strtotime($slip['payroll_month'])) + 543; ?>
             </p>
-            <?php if ($slip['paid_date']): ?>
-            <p class="text-white/50 print:text-gray-500 text-sm">วันที่จ่าย: <?php echo formatDateThai($slip['paid_date']); ?></p>
+            <?php if ($slip['run_status'] === 'paid'): ?>
+            <p class="text-white/50 print:text-gray-500 text-sm">สถานะ: จ่ายแล้ว</p>
             <?php endif; ?>
         </div>
     </div>

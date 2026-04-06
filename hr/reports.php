@@ -40,7 +40,7 @@ switch ($report) {
         $sql = "
             SELECT 
                 u.id,
-                u.employee_id,
+                u.employee_code,
                 CONCAT(u.first_name_th, ' ', u.last_name_th) as full_name,
                 u.department,
                 u.position,
@@ -68,7 +68,7 @@ switch ($report) {
         $sql = "
             SELECT 
                 u.id,
-                u.employee_id,
+                u.employee_code,
                 CONCAT(u.first_name_th, ' ', u.last_name_th) as full_name,
                 u.department,
                 u.position,
@@ -249,7 +249,7 @@ require_once __DIR__ . '/../templates/header.php';
             <tbody>
                 <?php foreach ($reportData as $row): ?>
                 <tr>
-                    <td class="text-slate-400"><?php echo htmlspecialchars($row['employee_id'] ?? '-'); ?></td>
+                    <td class="text-slate-400"><?php echo htmlspecialchars($row['employee_code'] ?? '-'); ?></td>
                     <td>
                         <p class="text-white font-medium"><?php echo htmlspecialchars($row['full_name']); ?></p>
                         <p class="text-slate-500 text-xs"><?php echo htmlspecialchars($row['position'] ?? '-'); ?></p>

@@ -14,11 +14,9 @@ $pdo = Database::getInstance()->getConnection();
 
 // Get full user data
 $stmt = $pdo->prepare("
-    SELECT u.*, r.name as role_name, d.name as department_name, p.name as position_name
+    SELECT u.*, r.name as role_name, u.department as department_name, u.position as position_name
     FROM users u
     LEFT JOIN roles r ON u.role_id = r.id
-    LEFT JOIN hr_departments d ON u.department_id = d.id
-    LEFT JOIN hr_positions p ON u.position_id = p.id
     WHERE u.id = ?
 ");
 $stmt->execute([$user['id']]);
@@ -106,7 +104,7 @@ include 'templates/header.php';
             </div>
             <div class="flex items-center gap-3 text-white/70">
                 <i class="fas fa-calendar w-5 text-center"></i>
-                <span>เริ่มงาน <?php echo $profile['start_date'] ? formatDateThai($profile['start_date']) : '-'; ?></span>
+                <span>เริ่มงาน <?php echo $profile['hire_date'] ? formatDateThai($profile['hire_date']) : '-'; ?></span>
             </div>
         </div>
         
@@ -177,7 +175,7 @@ include 'templates/header.php';
                 </div>
                 <div>
                     <p class="text-white/50 text-sm">วันที่เริ่มงาน</p>
-                    <p class="text-white"><?php echo $profile['start_date'] ? formatDateThai($profile['start_date']) : '-'; ?></p>
+                    <p class="text-white"><?php echo $profile['hire_date'] ? formatDateThai($profile['hire_date']) : '-'; ?></p>
                 </div>
                 <div>
                     <p class="text-white/50 text-sm">ประเภทพนักงาน</p>

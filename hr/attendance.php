@@ -32,8 +32,8 @@ $departments = $stmtDepts->fetchAll(PDO::FETCH_COLUMN);
 $sql = "
     SELECT u.id, u.first_name_th, u.last_name_th, u.employee_code, u.department,
            a.check_in_time, a.check_out_time, a.status, a.late_minutes, 
-           a.early_leave_minutes, a.overtime_minutes, a.work_hours, a.id as attendance_id,
-           a.check_in_photo, a.location_in_lat, a.location_in_lng
+           a.early_leave_minutes, a.ot_minutes, a.work_minutes, a.id as attendance_id,
+           a.check_in_photo, a.check_in_latitude, a.check_in_longitude
     FROM users u
     LEFT JOIN hr_attendances a ON u.id = a.user_id AND a.attendance_date = ?
     WHERE u.is_active = 1
@@ -54,7 +54,7 @@ if ($status === 'PRESENT') {
 }
 
 // Count
-$countSql = "SELECT COUNT(*) FROM (" . str_replace("u.id, u.first_name_th, u.last_name_th, u.employee_code, u.department,\n           a.check_in_time, a.check_out_time, a.status, a.late_minutes, \n           a.early_leave_minutes, a.overtime_minutes, a.work_hours, a.id as attendance_id,\n           a.check_in_photo, a.location_in_lat, a.location_in_lng", "1", $sql) . ") t";
+$countSql = "SELECT COUNT(*) FROM (" . str_replace("u.id, u.first_name_th, u.last_name_th, u.employee_code, u.department,\n           a.check_in_time, a.check_out_time, a.status, a.late_minutes, \n           a.early_leave_minutes, a.ot_minutes, a.work_minutes, a.id as attendance_id,\n           a.check_in_photo, a.check_in_latitude, a.check_in_longitude", "1", $sql) . ") t";
 $stmtCount = $pdo->prepare($countSql);
 $stmtCount->execute($params);
 $totalRecords = $stmtCount->fetchColumn();
@@ -221,10 +221,10 @@ include dirname(__DIR__) . '/templates/header.php';
                         <?php endif; ?>
                     </td>
                     <td class="px-4 py-3 text-center">
-                        <?php if ($rec['work_hours']): ?>
-                        <span class="text-white"><?php echo number_format($rec['work_hours'], 1); ?> ชม.</span>
-                        <?php if ($rec['overtime_minutes'] > 0): ?>
-                        <span class="text-green-400 text-xs ml-1">(+<?php echo floor($rec['overtime_minutes']/60); ?>h)</span>
+                        <?php if ($rec['work_minutes']): ?>
+                        <span class="text-white"><?php echo number_format($rec['work_minutes']/60, 1); ?> ชม.</span>
+                        <?php if ($rec['ot_minutes'] > 0): ?>
+                        <span class="text-green-400 text-xs ml-1">(+<?php echo floor($rec['ot_minutes']/60); ?>h)</span>
                         <?php endif; ?>
                         <?php else: ?>
                         <span class="text-white/40">-</span>
@@ -248,8 +248,8 @@ include dirname(__DIR__) . '/templates/header.php';
                         ?>
                     </td>
                     <td class="px-4 py-3 text-center">
-                        <?php if ($hasAttendance && $rec['location_in_lat']): ?>
-                        <button onclick="viewLocation(<?php echo $rec['location_in_lat']; ?>, <?php echo $rec['location_in_lng']; ?>)" 
+                        <?php if ($hasAttendance && $rec['check_in_latitude']): ?>
+                        <button onclick="viewLocation(<?php echo $rec['check_in_latitude']; ?>, <?php echo $rec['check_in_longitude']; ?>)" 
                                 class="px-2 py-1 bg-white/10 hover:bg-white/20 text-white text-xs rounded transition-colors mr-1" title="ดูตำแหน่ง">
                             <i class="fas fa-map-marker-alt"></i>
                         </button>

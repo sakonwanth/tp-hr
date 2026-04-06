@@ -35,13 +35,13 @@ $departments = $stmtDepts->fetchAll(PDO::FETCH_COLUMN);
 
 // Build query
 $sql = "
-    SELECT lr.*, lt.name as leave_type_name, lt.color_code,
+    SELECT lr.*, lt.name as leave_type_name, lt.color as color_code,
            u.first_name_th, u.last_name_th, u.employee_code, u.department,
            approver.first_name_th as approver_first, approver.last_name_th as approver_last
     FROM hr_leave_requests lr
     JOIN hr_leave_types lt ON lr.leave_type_id = lt.id
     JOIN users u ON lr.user_id = u.id
-    LEFT JOIN users approver ON lr.approved_by = approver.id
+    LEFT JOIN users approver ON lr.final_approved_by = approver.id
     WHERE 1=1
 ";
 $params = [];
