@@ -12,6 +12,47 @@ $user = Auth::user();
 
 $pdo = Database::getInstance()->getConnection();
 
+// Handle download/print action - use CRM-style print template
+$action = $_GET['action'] ?? '';
+$downloadSlipId = (int)($_GET['slip_id'] ?? 0);
+
+if ($action === 'download' && $downloadSlipId > 0) {
+    // Get slip data for print template
+    $stmt = $pdo->prepare("
+        SELECT ps.*, pr.payroll_month, pr.status as run_status,
+               emp.first_name_th, emp.last_name_th, emp.employee_code, emp.department, emp.position
+        FROM payroll_slips ps
+        JOIN payroll_runs pr ON ps.payroll_run_id = pr.id
+        JOIN users emp ON ps.user_id = emp.id
+        WHERE ps.id = ? AND ps.user_id = ?
+    ");
+    $stmt->execute([$downloadSlipId, $user['id']]);
+    $slip = $stmt->fetch();
+    
+    if ($slip) {
+        // Get YTD for print template
+        $ytd_year = (int)date('Y', strtotime($slip['payroll_month']));
+        $stmt_ytd = $pdo->prepare("
+            SELECT 
+                COALESCE(SUM(s.total_income), 0) as ytd_income,
+                COALESCE(SUM(s.tax_withheld), 0) as ytd_tax,
+                COALESCE(SUM(s.social_security), 0) as ytd_ss,
+                COALESCE(SUM(s.provident_fund), 0) as ytd_pf,
+                COALESCE(SUM(s.total_deductions), 0) as ytd_deductions,
+                COALESCE(SUM(s.net_salary), 0) as ytd_net
+            FROM payroll_slips s
+            JOIN payroll_runs r ON s.payroll_run_id = r.id
+            WHERE s.user_id = ? AND YEAR(r.payroll_month) = ? AND r.payroll_month <= ?
+        ");
+        $stmt_ytd->execute([$slip['user_id'], $ytd_year, $slip['payroll_month']]);
+        $ytd = $stmt_ytd->fetch(PDO::FETCH_ASSOC);
+        
+        // Include print template and exit
+        include __DIR__ . '/modules/employee/payslip/print_template.php';
+        exit;
+    }
+}
+
 // Get current year and month filter
 $year = (int)($_GET['year'] ?? date('Y'));
 $viewMonth = $_GET['month'] ?? '';
