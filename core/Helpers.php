@@ -236,7 +236,7 @@ function apiError(string $message, int $status = 400): void {
 /**
  * API Success response
  */
-function apiSuccess(array $data = [], string $message = null): void {
+function apiSuccess(array $data = [], ?string $message = null): void {
     $response = ['success' => true];
     if ($message) $response['message'] = $message;
     $response = array_merge($response, $data);
