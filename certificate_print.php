@@ -248,12 +248,16 @@ body {
     max-width: 210mm;
     width: 210mm;
     min-height: 297mm;
+    max-height: 297mm;
     margin: 0 auto 20px;
     background: #fff;
-    padding: 22px 28px 28px;
+    padding: 16mm 14mm 12mm;
     position: relative;
     box-shadow: 0 4px 24px rgba(15,23,42,.12);
     page-break-after: always;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 .page:last-child { page-break-after: auto; margin-bottom: 0; }
 
@@ -306,12 +310,12 @@ body {
     align-items: flex-start;
     justify-content: space-between;
     gap: 20px;
-    padding-bottom: 18px;
+    padding-bottom: 10px;
     border-bottom: 2px solid #1a365d;
-    margin-bottom: 22px;
+    margin-bottom: 12px;
 }
 .doc-header-logo { flex-shrink: 0; }
-.doc-header-logo img { height: 72px; width: auto; display: block; }
+.doc-header-logo img { height: 58px; width: auto; display: block; }
 .doc-header-right { text-align: right; max-width: 62%; }
 .doc-header-right .company-name {
     font-size: 15px;
@@ -346,8 +350,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    margin: 4px 0 18px;
-    font-size: 13px;
+    margin: 2px 0 8px;
+    font-size: 12.5px;
     color: #334155;
 }
 .doc-ref .no { font-weight: 600; color: #1a365d; }
@@ -356,24 +360,24 @@ body {
 /* ---------- Title ---------- */
 .doc-title {
     text-align: center;
-    font-size: 20px;
+    font-size: 19px;
     font-weight: 700;
     color: #1a365d;
-    margin: 6px 0 20px;
-    line-height: 1.4;
+    margin: 2px 0 10px;
+    line-height: 1.3;
 }
 .doc-title .sub {
     display: block;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     color: #475569;
-    margin-top: 2px;
+    margin-top: 1px;
     letter-spacing: 0.04em;
 }
 
 /* ---------- Body ---------- */
-.body { font-size: 14px; line-height: 1.8; color: #1a1a1a; }
-.body p { margin: 0 0 10px; text-indent: 2.5em; text-align: justify; }
+.body { font-size: 13.5px; line-height: 1.65; color: #1a1a1a; flex: 1; }
+.body p { margin: 0 0 6px; text-indent: 2.5em; text-align: justify; }
 .body p.no-indent { text-indent: 0; }
 
 /* ---------- Info table (bordered — same as payslip) ---------- */
@@ -381,13 +385,14 @@ body {
     width: 100%;
     border-collapse: collapse;
     border: 1px solid #e2e8f0;
-    margin: 10px 0 14px;
+    margin: 6px 0 8px;
 }
 .info-table th, .info-table td {
-    padding: 9px 12px;
-    font-size: 13px;
+    padding: 5px 10px;
+    font-size: 12.5px;
     border: 1px solid #e2e8f0;
     vertical-align: middle;
+    line-height: 1.45;
 }
 .info-table th {
     width: 32%;
@@ -413,20 +418,20 @@ body {
 
 /* ---------- Salary Emphasis ---------- */
 .salary-box {
-    margin-top: 10px;
-    padding: 12px 16px;
+    margin: 6px 0 4px;
+    padding: 8px 14px;
     border: 2px solid #1a365d;
     background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
-.salary-box .label { font-size: 14px; color: #1a365d; font-weight: 600; }
+.salary-box .label { font-size: 13px; color: #1a365d; font-weight: 600; }
 .salary-box .value {
-    font-size: 18px; font-weight: 700; color: #0f172a;
+    font-size: 16px; font-weight: 700; color: #0f172a;
     font-variant-numeric: tabular-nums;
 }
-.salary-box .value span { font-size: 12px; font-weight: 500; color: #64748b; }
+.salary-box .value span { font-size: 11.5px; font-weight: 500; color: #64748b; }
 
 /* ---------- Remark banner ---------- */
 .remark {
@@ -441,10 +446,10 @@ body {
 
 /* ---------- Signatures: TWO signers side-by-side ---------- */
 .signatures {
-    margin-top: 30px;
+    margin-top: 14px;
     display: flex;
     justify-content: space-around;
-    gap: 24px;
+    gap: 20px;
 }
 .sig-block {
     flex: 1;
@@ -452,9 +457,9 @@ body {
     max-width: 48%;
 }
 .sig-block .sig-prefix {
-    font-size: 13px;
+    font-size: 12.5px;
     color: #475569;
-    margin-bottom: 60px;
+    margin-bottom: 42px;
 }
 .sig-block .sig-line {
     border-top: 1px dotted #475569;
@@ -480,54 +485,55 @@ body {
 .seal-area {
     position: relative;
     text-align: center;
-    margin-top: 22px;
+    margin-top: 8px;
 }
 .seal-area .seal-circle {
     display: inline-block;
-    width: 80px; height: 80px;
+    width: 62px; height: 62px;
     border: 1.5px dashed #94a3b8;
     border-radius: 50%;
-    line-height: 76px;
-    font-size: 10px;
+    line-height: 1.1;
+    font-size: 9px;
     color: #94a3b8;
     font-weight: 500;
+    padding-top: 22px;
 }
 .seal-area .seal-note {
-    font-size: 11px;
+    font-size: 10.5px;
     color: #94a3b8;
-    margin-top: 4px;
+    margin-top: 3px;
     font-style: italic;
 }
 
 /* ---------- Footer: verification + QR ---------- */
 .verify-footer {
-    margin-top: 24px;
-    padding: 10px 14px;
+    margin-top: auto;
+    padding: 8px 12px;
     border-top: 2px solid #1a365d;
     border-bottom: 1px solid #e2e8f0;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    gap: 12px;
     background: #f8fafc;
 }
-.verify-footer .vf-left { flex: 1; font-size: 10.5px; color: #475569; line-height: 1.5; }
-.verify-footer .vf-left h4 { font-size: 11.5px; font-weight: 700; color: #1a365d; margin-bottom: 4px; }
+.verify-footer .vf-left { flex: 1; font-size: 10px; color: #475569; line-height: 1.45; }
+.verify-footer .vf-left h4 { font-size: 11px; font-weight: 700; color: #1a365d; margin-bottom: 2px; }
 .verify-footer .vf-left .mono { font-family: 'Courier New', monospace; color: #1a365d; font-weight: 600; letter-spacing: 0.05em; }
 .verify-footer .qr-box {
     flex-shrink: 0; text-align: center;
-    padding: 4px; background: #fff; border: 1px solid #cbd5e1;
+    padding: 3px; background: #fff; border: 1px solid #cbd5e1;
 }
-.verify-footer .qr-box img { display: block; width: 70px; height: 70px; }
-.verify-footer .qr-box .cap { font-size: 9px; color: #64748b; margin-top: 2px; }
+.verify-footer .qr-box img { display: block; width: 58px; height: 58px; }
+.verify-footer .qr-box .cap { font-size: 8.5px; color: #64748b; margin-top: 1px; }
 
 .footer-note {
-    margin-top: 8px;
-    padding-top: 8px;
+    margin-top: 4px;
+    padding-top: 4px;
     text-align: center;
-    font-size: 10px;
+    font-size: 9.5px;
     color: #94a3b8;
-    line-height: 1.5;
+    line-height: 1.45;
 }
 
 /* ---------- Tax form (50 ทวิ) ---------- */
@@ -561,13 +567,16 @@ body {
     body { background: #fff; padding: 0; }
     .toolbar { display: none !important; }
     .page {
-        width: 210mm; min-height: 297mm; margin: 0;
-        box-shadow: none; padding: 18px 24px 24px;
+        width: 210mm; height: 297mm; min-height: 297mm; max-height: 297mm;
+        margin: 0;
+        box-shadow: none;
+        padding: 12mm 12mm 8mm;
         page-break-after: always;
+        overflow: hidden;
     }
     .page:last-child { page-break-after: auto; }
     .watermark img { opacity: 0.035; width: 48%; }
-    @page { size: A4; margin: 0; }
+    @page { size: A4 portrait; margin: 0; }
 }
 </style>
 </head>
@@ -830,9 +839,6 @@ body {
             <?php echo $isEn?'This document is valid only when sealed with the official company stamp':
                              'เอกสารฉบับนี้มีผลสมบูรณ์ต่อเมื่อมีการประทับตราบริษัทเท่านั้น'; ?>
         </div>
-        <div style="font-size:11px; color:#64748b; margin-top:8px; font-style:italic;">
-            <?php echo $isEn?'Issued on ':'ออก ณ วันที่ '; ?><?php echo $isEn?fmtEnDate($docDate):fmtThaiDate($docDate); ?>
-        </div>
     </div>
 
     <!-- ------ Verification footer (with real working QR) ------ -->
@@ -856,8 +862,8 @@ body {
 
     <div class="footer-note">
         <?php echo $isEn
-            ? 'This document is issued and controlled electronically by the HR system of ' . htmlspecialchars($company['name_en'] ?: $company['name_th'])
-            : 'เอกสารฉบับนี้จัดทำและออกโดยระบบบริหารทรัพยากรบุคคลของ ' . htmlspecialchars($company['name_th']) . ' ผู้ได้รับเอกสารสามารถสแกน QR Code เพื่อยืนยันความถูกต้องได้ตลอดเวลา'; ?>
+            ? 'Issued electronically by the HR system of ' . htmlspecialchars($company['name_en'] ?: $company['name_th'])
+            : 'ออกโดยระบบบริหารทรัพยากรบุคคล ' . htmlspecialchars($company['name_th']) . ' · สแกน QR Code เพื่อยืนยันความถูกต้อง'; ?>
     </div>
 </div>
 <?php endforeach; ?>
