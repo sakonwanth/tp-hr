@@ -351,6 +351,13 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
                         <?php echo $statusText[$req['status']] ?? $req['status']; ?>
                     </span>
                     
+                    <?php if (in_array($req['status'], ['PROCESSING','READY','DELIVERED','COMPLETED'], true)): ?>
+                    <a href="/certificate_print.php?id=<?php echo $req['id']; ?>&preview=1" target="_blank"
+                       class="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors text-sm">
+                        <i class="fas fa-print mr-2"></i>ดู / พิมพ์
+                    </a>
+                    <?php endif; ?>
+
                     <?php if ($req['status'] === 'COMPLETED' && $req['file_path']): ?>
                     <a href="<?php echo htmlspecialchars($req['file_path']); ?>" target="_blank"
                        class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm">

@@ -21,7 +21,7 @@ $status = $_GET['status'] ?? 'PENDING';
 $type = (int)($_GET['type'] ?? 0);
 $month = $_GET['month'] ?? date('Y-m');
 $page = max(1, (int)($_GET['page'] ?? 1));
-$limit = 20;
+$limit = DEFAULT_PER_PAGE;
 $offset = ($page - 1) * $limit;
 
 // Get document templates
@@ -213,6 +213,10 @@ include dirname(__DIR__) . '/templates/header.php';
                         </span>
                     </td>
                     <td class="px-4 py-3 text-center">
+                        <a href="/certificate_print.php?id=<?php echo $req['id']; ?>&preview=1" target="_blank"
+                           class="px-2 py-1 bg-violet-600 hover:bg-violet-700 text-white text-xs rounded transition-colors mr-1" title="ดู / พิมพ์เอกสาร">
+                            <i class="fas fa-print"></i>
+                        </a>
                         <?php if ($req['status'] === 'PENDING'): ?>
                         <button onclick="updateDocStatus(<?php echo $req['id']; ?>, 'PROCESSING')" 
                                 class="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded transition-colors mr-1" title="เริ่มจัดทำ">
