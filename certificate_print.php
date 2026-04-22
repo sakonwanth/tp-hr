@@ -393,11 +393,11 @@ body {
     margin: 6px 0 8px;
 }
 .info-table th, .info-table td {
-    padding: 5px 10px;
-    font-size: 12.5px;
+    padding: 4px 10px;
+    font-size: 12px;
     border: 1px solid #e2e8f0;
     vertical-align: middle;
-    line-height: 1.45;
+    line-height: 1.4;
 }
 .info-table th {
     width: 32%;
@@ -505,30 +505,30 @@ body {
 
 /* ---------- Footer: verification + QR ---------- */
 .verify-footer {
-    padding: 10px 14px;
+    padding: 7px 12px;
     border: 1px solid #cbd5e1;
     border-top: 2px solid #1a365d;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 14px;
+    gap: 12px;
     background: #f8fafc;
 }
-.verify-footer .vf-left { flex: 1; font-size: 11px; color: #475569; line-height: 1.55; }
+.verify-footer .vf-left { flex: 1; font-size: 10px; color: #475569; line-height: 1.45; }
 .verify-footer .vf-left h4 {
-    font-size: 12px; font-weight: 700; color: #1a365d;
-    margin-bottom: 4px; padding-bottom: 3px;
+    font-size: 10.5px; font-weight: 700; color: #1a365d;
+    margin-bottom: 3px; padding-bottom: 2px;
     border-bottom: 1px solid #e2e8f0;
 }
-.verify-footer .vf-left .mono { font-family: 'Courier New', monospace; color: #1a365d; font-weight: 700; letter-spacing: 0.05em; }
-.verify-footer .vf-left .vf-row { margin: 1px 0; }
+.verify-footer .vf-left .mono { font-family: 'Courier New', monospace; color: #1a365d; font-weight: 700; letter-spacing: 0.04em; }
+.verify-footer .vf-left .vf-row { margin: 0; }
 .verify-footer .qr-box {
     flex-shrink: 0; text-align: center;
-    padding: 5px; background: #fff; border: 1px solid #1a365d;
+    padding: 4px; background: #fff; border: 1px solid #1a365d;
     box-shadow: 0 1px 2px rgba(15,23,42,.06);
 }
-.verify-footer .qr-box img { display: block; width: 82px; height: 82px; }
-.verify-footer .qr-box .cap { font-size: 9px; color: #1a365d; margin-top: 3px; font-weight: 600; letter-spacing: 0.04em; }
+.verify-footer .qr-box img { display: block; width: 62px; height: 62px; }
+.verify-footer .qr-box .cap { font-size: 8.5px; color: #1a365d; margin-top: 2px; font-weight: 600; letter-spacing: 0.04em; }
 
 .footer-note {
     margin-top: 4px;
@@ -540,29 +540,30 @@ body {
 }
 
 /* ---------- Tax form (50 ทวิ) ---------- */
-.tax-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0 14px; }
-.tax-parties .party { border: 1px solid #e2e8f0; background: #f8fafc; padding: 10px 14px; font-size: 12px; line-height: 1.55; }
-.tax-parties .party h5 { font-size: 11px; font-weight: 700; color: #1a365d; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px solid #1a365d; }
+.tax-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 6px 0 8px; }
+.tax-parties .party { border: 1px solid #e2e8f0; background: #f8fafc; padding: 7px 10px; font-size: 11px; line-height: 1.45; }
+.tax-parties .party h5 { font-size: 10.5px; font-weight: 700; color: #1a365d; margin-bottom: 4px; padding-bottom: 3px; border-bottom: 1px solid #1a365d; }
 .tax-parties .party b { color: #0f172a; font-weight: 600; }
 .tax-table {
-    width: 100%; border-collapse: collapse; font-size: 12.5px;
-    margin: 10px 0;
+    width: 100%; border-collapse: collapse; font-size: 11.5px;
+    margin: 6px 0;
 }
 .tax-table th {
     background: #1a365d; color: #fff;
-    padding: 9px 10px; border: 1px solid #1a365d;
-    font-size: 12px; font-weight: 600;
+    padding: 6px 8px; border: 1px solid #1a365d;
+    font-size: 11px; font-weight: 600;
 }
 .tax-table td {
-    padding: 9px 10px; border: 1px solid #e2e8f0;
+    padding: 5px 8px; border: 1px solid #e2e8f0;
     color: #1e293b;
+    line-height: 1.4;
 }
 .tax-table td.num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
 .tax-table tr.total td { background: #f1f5f9; font-weight: 700; color: #0f172a; }
 .tax-note {
-    margin-top: 10px; padding: 9px 12px;
+    margin-top: 6px; padding: 6px 10px;
     background: #fef9e7; border-left: 3px solid #c8a951;
-    font-size: 11px; color: #78350f; line-height: 1.55;
+    font-size: 10px; color: #78350f; line-height: 1.5;
 }
 
 /* ---------- Print ---------- */
@@ -824,9 +825,7 @@ body {
         </table>
 
         <div class="tax-note">
-            <strong>หมายเหตุ:</strong> เอกสารฉบับนี้เป็นหนังสือรับรองการหักภาษี ณ ที่จ่าย ตามมาตรา 50 ทวิ แห่งประมวลรัษฎากร
-            ออกโดยระบบบริหารทรัพยากรบุคคลของบริษัทฯ ข้อมูลเงินได้ประเมินจากฐานเงินเดือนในระบบ
-            หากต้องการเอกสารฉบับทางการของกรมสรรพากร (กระดาษแบบ พ.ง.ด. 1ก) กรุณาติดต่อฝ่ายบัญชี
+            <strong>หมายเหตุ:</strong> เอกสารฉบับนี้ไม่ใช่แบบทางการของกรมสรรพากร (พ.ง.ด. 1ก) ออกโดยระบบ HR ของบริษัทฯ จากฐานเงินเดือน — หากต้องการแบบทางการ กรุณาติดต่อฝ่ายบัญชี
         </div>
 
     <?php else: ?>
