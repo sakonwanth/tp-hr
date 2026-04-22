@@ -26,6 +26,8 @@ if (!$reqId) { http_response_code(400); exit('ไม่พบคำขอเอ�
 // ------------------------------------------------------------------
 $stmt = $pdo->prepare("
     SELECT dr.*, dt.code AS tpl_code, dt.name AS tpl_name, dt.name_en AS tpl_name_en,
+           dt.footer_text AS tpl_footer_text, dt.layout_config AS tpl_layout,
+           dt.signatory_name AS tpl_sig_name, dt.signatory_position AS tpl_sig_position,
            u.id AS uid, u.employee_code, u.first_name_th, u.last_name_th,
            u.first_name_en, u.last_name_en, u.email, u.phone,
            u.id_card AS national_id, u.position, u.department, u.salary, u.hire_date, u.title,
@@ -54,7 +56,7 @@ if ($isOwner && !$isHR && !in_array($req['status'], ['PROCESSING','READY','DELIV
 $crm = [];
 try {
     $rs = $pdo->query("SELECT setting_key, setting_value FROM system_settings
-        WHERE setting_key IN ('company_name','company_name_en','company_address','company_phone','company_email','company_tax_id','company_website','company_logo')");
+        WHERE setting_key IN ('company_name','company_name_en','company_address','company_phone','company_email','company_tax_id','company_website','company_logo','company_seal','doc_header_subtitle_th','doc_header_subtitle_en','doc_footer_note_th','doc_show_esignature')");
     foreach ($rs as $row) { $crm[$row['setting_key']] = trim((string)$row['setting_value']); }
 } catch (Exception $e) { /* ignore */ }
 
@@ -68,9 +70,26 @@ $company = [
     'tax_id'  => $crm['company_tax_id']  ?? '',
 ];
 
+// Template layout_config (per-template overrides)
+$tplLayout = [];
+if (!empty($req['tpl_layout'])) { $tplLayout = json_decode((string)$req['tpl_layout'], true) ?: []; }
+$LC = [
+    'header_show_logo'    => $tplLayout['header']['show_logo']            ?? 1,
+    'header_show_addr'    => $tplLayout['header']['show_company_address'] ?? 1,
+    'header_sub_th'       => $tplLayout['header']['subtitle_th']          ?? ($crm['doc_header_subtitle_th'] ?? ''),
+    'header_sub_en'       => $tplLayout['header']['subtitle_en']          ?? ($crm['doc_header_subtitle_en'] ?? ''),
+    'signer_1_uid'        => (int)($tplLayout['signatures']['signer_1_user_id'] ?? 0),
+    'signer_2_uid'        => (int)($tplLayout['signatures']['signer_2_user_id'] ?? 0),
+    'show_two_signers'    => $tplLayout['signatures']['show_two_signers']  ?? 1,
+    'show_esignature'     => ($tplLayout['signatures']['show_esignature'] ?? 0) || !empty($crm['doc_show_esignature']),
+    'footer_show_qr'      => $tplLayout['footer']['show_qr_verify']       ?? 1,
+    'footer_show_seal'    => $tplLayout['footer']['show_seal_area']       ?? 1,
+    'footer_extra_note'   => $tplLayout['footer']['extra_note_th']        ?? ($crm['doc_footer_note_th'] ?? ''),
+];
+
 // Signers — real executives from users table (ประธานบริษัท + ประธานเจ้าหน้าที่บริหาร)
 $sigStmt = $pdo->query("
-    SELECT title, first_name_th, last_name_th, first_name_en, last_name_en, position
+    SELECT id, title, first_name_th, last_name_th, first_name_en, last_name_en, position, signature_image
     FROM users
     WHERE is_active = 1 AND (position LIKE 'ประธาน%' OR position LIKE '%กรรมการผู้จัดการ%' OR position LIKE '%CEO%')
     ORDER BY
@@ -83,8 +102,17 @@ $sigStmt = $pdo->query("
     LIMIT 2
 ");
 $signers = $sigStmt->fetchAll(PDO::FETCH_ASSOC);
-$signer1 = $signers[0] ?? ['title'=>'','first_name_th'=>'','last_name_th'=>'','first_name_en'=>'','last_name_en'=>'','position'=>'ประธานบริษัท'];
-$signer2 = $signers[1] ?? ['title'=>'','first_name_th'=>'','last_name_th'=>'','first_name_en'=>'','last_name_en'=>'','position'=>'ประธานเจ้าหน้าที่บริหาร'];
+
+// Override signers via template layout_config if configured
+$findSigner = function(int $uid) use ($pdo) {
+    if ($uid <= 0) return null;
+    $s = $pdo->prepare("SELECT id, title, first_name_th, last_name_th, first_name_en, last_name_en, position, signature_image FROM users WHERE id=? LIMIT 1");
+    $s->execute([$uid]);
+    return $s->fetch(PDO::FETCH_ASSOC) ?: null;
+};
+$defaultBlank = ['id'=>0,'title'=>'','first_name_th'=>'','last_name_th'=>'','first_name_en'=>'','last_name_en'=>'','position'=>'','signature_image'=>null];
+$signer1 = $findSigner($LC['signer_1_uid']) ?? ($signers[0] ?? array_merge($defaultBlank, ['position'=>'ประธานบริษัท']));
+$signer2 = $findSigner($LC['signer_2_uid']) ?? ($signers[1] ?? array_merge($defaultBlank, ['position'=>'ประธานเจ้าหน้าที่บริหาร']));
 $posEnMap = [
     'ประธานบริษัท' => 'President',
     'ประธานเจ้าหน้าที่บริหาร' => 'Chief Executive Officer',
@@ -211,8 +239,9 @@ $page_title = 'หนังสือรับรอง - ' . $V['fullName_th'];
 $verifyUrl = 'https://hr.tp-asset.com/verify_document.php?code=' . urlencode($verifyCode ?: $docNumber);
 $qrImg     = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=0&ecc=M&data=' . urlencode($verifyUrl);
 
-// Brand assets (same exact URLs as CRM payslip)
-$LOGO_BRAND = 'https://crm.tp-asset.com/asset/logo/LOGO%20TP-ASSET%20-%206.png';
+// Brand assets (prefer DB setting, fallback to CRM payslip URL)
+$LOGO_BRAND = !empty($crm['company_logo']) ? $crm['company_logo'] : 'https://crm.tp-asset.com/asset/logo/LOGO%20TP-ASSET%20-%206.png';
+$COMPANY_SEAL = $crm['company_seal'] ?? '';
 $WATERMARK  = 'https://crm.tp-asset.com/asset/logo/LOGO%20TP-ASSET%20-%205.png';
 
 function signerName(array $s, bool $isEn): string {
@@ -464,7 +493,17 @@ body {
 .sig-block .sig-prefix {
     font-size: 12.5px;
     color: #475569;
-    margin-bottom: 36px;
+    margin-bottom: 6px;
+}
+.sig-block .sig-image {
+    height: 40px;
+    margin: 0 auto 4px;
+    display: block;
+    object-fit: contain;
+}
+.sig-block .sig-image-placeholder {
+    height: 40px;
+    margin-bottom: 4px;
 }
 .sig-block .sig-line {
     border-top: 1px dotted #475569;
@@ -615,14 +654,20 @@ body {
 
     <!-- Header: logo left, company right -->
     <header class="doc-header">
+        <?php if (!empty($LC['header_show_logo'])): ?>
         <div class="doc-header-logo">
             <img src="<?php echo $LOGO_BRAND; ?>" alt="<?php echo htmlspecialchars($company['name_th']); ?>"
                  onerror="this.style.display='none'">
         </div>
+        <?php endif; ?>
         <div class="doc-header-right">
             <div class="company-name"><?php echo htmlspecialchars($company['name_th']); ?></div>
             <?php if ($company['name_en']): ?>
                 <div class="company-name-en"><?php echo htmlspecialchars(strtoupper($company['name_en'])); ?></div>
+            <?php endif; ?>
+            <?php $subT = $isEn ? $LC['header_sub_en'] : $LC['header_sub_th']; ?>
+            <?php if (!empty($subT)): ?>
+                <div class="company-addr" style="font-weight:600;color:#1a365d;"><?php echo htmlspecialchars($subT); ?></div>
             <?php endif; ?>
             <?php
                 // Split Thai address at ตำบล / แขวง for cleaner 2-line display
@@ -631,7 +676,7 @@ body {
                 $addrLine1 = trim($parts[0] ?? $addrFull);
                 $addrLine2 = isset($parts[1]) ? trim($parts[1]) : '';
             ?>
-            <?php if ($addrLine1): ?>
+            <?php if (!empty($LC['header_show_addr']) && $addrLine1): ?>
                 <div class="company-addr">
                     <?php echo htmlspecialchars($addrLine1); ?>
                     <?php if ($addrLine2): ?><br><?php echo htmlspecialchars($addrLine2); ?><?php endif; ?>
@@ -836,6 +881,11 @@ body {
     <div class="signatures">
         <div class="sig-block">
             <div class="sig-prefix"><?php echo $isEn?'Authorized by,':'ลงชื่อ'; ?></div>
+            <?php if ($LC['show_esignature'] && !empty($signer1['signature_image'])): ?>
+                <img class="sig-image" src="<?php echo htmlspecialchars($signer1['signature_image']); ?>" alt="signature">
+            <?php else: ?>
+                <div class="sig-image-placeholder"></div>
+            <?php endif; ?>
             <div class="sig-line"></div>
             <div class="sig-name">( <?php echo htmlspecialchars(signerName($signer1, $isEn)); ?> )</div>
             <div class="sig-position"><?php echo htmlspecialchars($signer1['position']); ?></div>
@@ -843,8 +893,14 @@ body {
                 <div class="sig-position-en"><?php echo htmlspecialchars($signer1['position_en']); ?></div>
             <?php endif; ?>
         </div>
+        <?php if (!empty($LC['show_two_signers'])): ?>
         <div class="sig-block">
             <div class="sig-prefix"><?php echo $isEn?'Authorized by,':'ลงชื่อ'; ?></div>
+            <?php if ($LC['show_esignature'] && !empty($signer2['signature_image'])): ?>
+                <img class="sig-image" src="<?php echo htmlspecialchars($signer2['signature_image']); ?>" alt="signature">
+            <?php else: ?>
+                <div class="sig-image-placeholder"></div>
+            <?php endif; ?>
             <div class="sig-line"></div>
             <div class="sig-name">( <?php echo htmlspecialchars(signerName($signer2, $isEn)); ?> )</div>
             <div class="sig-position"><?php echo htmlspecialchars($signer2['position']); ?></div>
@@ -852,20 +908,33 @@ body {
                 <div class="sig-position-en"><?php echo htmlspecialchars($signer2['position_en']); ?></div>
             <?php endif; ?>
         </div>
+        <?php endif; ?>
     </div>
 
     <!-- Empty space reserved for physical seal stamp -->
     <div class="flex-grow" aria-hidden="true"></div>
 
+    <?php if (!empty($LC['footer_show_seal'])): ?>
     <div class="seal-area">
+        <?php if (!empty($COMPANY_SEAL)): ?>
+            <img src="<?php echo htmlspecialchars($COMPANY_SEAL); ?>" alt="company seal" style="max-height:70px;margin-bottom:4px;">
+        <?php endif; ?>
         <div class="seal-note">
             <?php echo $isEn
                 ? 'This document is valid <b>only when affixed with the official company seal</b>.'
                 : '<b>เอกสารฉบับนี้มีผลสมบูรณ์ต่อเมื่อมีการประทับตราบริษัทเท่านั้น</b>'; ?>
         </div>
+        <?php if (!empty($LC['footer_extra_note'])): ?>
+            <div class="seal-note" style="margin-top:4px;font-size:10px;"><?php echo nl2br(htmlspecialchars($LC['footer_extra_note'])); ?></div>
+        <?php endif; ?>
+        <?php if (!empty($req['tpl_footer_text'])): ?>
+            <div class="seal-note" style="margin-top:4px;font-size:10px;"><?php echo nl2br(htmlspecialchars($req['tpl_footer_text'])); ?></div>
+        <?php endif; ?>
     </div>
+    <?php endif; ?>
 
     <!-- ------ Verification footer (with real working QR) ------ -->
+    <?php if (!empty($LC['footer_show_qr'])): ?>
     <div class="verify-footer">
         <div class="vf-left">
             <h4><?php echo $isEn?'Document Verification':'การตรวจสอบความถูกต้องของเอกสาร'; ?></h4>
@@ -878,6 +947,7 @@ body {
             <div class="cap"><?php echo $isEn?'SCAN TO VERIFY':'สแกนเพื่อตรวจสอบ'; ?></div>
         </div>
     </div>
+    <?php endif; ?>
 
     <div class="footer-note">
         <?php echo $isEn
