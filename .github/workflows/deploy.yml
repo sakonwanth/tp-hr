@@ -1,0 +1,122 @@
+# Deploy tp-hr — ตั้ง Secrets: SSH_HOST, SSH_USER, SSH_KEY, SSH_PATH (docroot ของ hr.tp-asset.com), SSH_PORT (optional)
+name: Deploy to hr.tp-asset.com
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+env:
+  PHP_VERSION: '8.2'
+
+jobs:
+  validate:
+    name: Validate PHP
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: pdo, pdo_mysql, mbstring, json, curl
+      - name: PHP syntax check
+        run: |
+          find . -name "*.php" -not -path "./vendor/*" -print0 | xargs -0 -n1 php -l
+          echo "OK"
+
+  deploy:
+    name: Deploy (SSH)
+    runs-on: ubuntu-latest
+    needs: [validate]
+    if: success()
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          TP_COMMON_KEY_DATA: ${{ secrets.TP_COMMON_DEPLOY_KEY }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          command_timeout: 5m
+          envs: TP_COMMON_KEY_DATA
+          script: |
+            set -e
+            DEPLOY_PATH="${{ secrets.SSH_PATH }}"
+            echo "========================================"
+            echo "TP-HR Deployment — hr.tp-asset.com"
+            echo "$(date '+%Y-%m-%d %H:%M:%S')"
+            echo "========================================"
+
+            PHP_BIN=$(which php 2>/dev/null || find /opt/plesk/php -name "php" -type f 2>/dev/null | sort -rV | head -1 || echo "")
+            if [ -z "$PHP_BIN" ]; then
+              PHP_BIN=$(ls /usr/bin/php* 2>/dev/null | sort -rV | head -1 || echo "php")
+            fi
+            export COMPOSER_ALLOW_SUPERUSER=1
+            COMPOSER_BIN=$(which composer 2>/dev/null || echo "")
+            if [ -z "$COMPOSER_BIN" ] && [ -n "$PHP_BIN" ]; then
+              for p in /usr/local/bin/composer /usr/bin/composer "$HOME/.composer/vendor/bin/composer"; do
+                if [ -f "$p" ]; then COMPOSER_BIN="$PHP_BIN $p"; break; fi
+              done
+            fi
+
+            PARENT_DIR="$(dirname "$DEPLOY_PATH")"
+            COMMON_PATH="$PARENT_DIR/common.tp-asset.com"
+
+            if [ -n "$TP_COMMON_KEY_DATA" ] && [ -d "$COMMON_PATH/.git" ]; then
+              echo "📦 Updating tp-common (deploy key)..."
+              TP_COMMON_KEY="/tmp/.tp-common-deploy-key-$$"
+              printf '%s\n' "$TP_COMMON_KEY_DATA" > "$TP_COMMON_KEY"
+              chmod 600 "$TP_COMMON_KEY"
+              export GIT_SSH_COMMAND="ssh -i $TP_COMMON_KEY -o StrictHostKeyChecking=no"
+              cd "$COMMON_PATH"
+              git fetch origin main 2>&1 || true
+              git reset --hard origin/main 2>&1 || true
+              rm -f "$TP_COMMON_KEY"
+              unset GIT_SSH_COMMAND
+            elif [ -d "$COMMON_PATH/.git" ]; then
+              echo "📦 Updating tp-common (server default remote)..."
+              cd "$COMMON_PATH"
+              git pull origin main 2>&1 || echo "   tp-common pull skipped"
+            fi
+
+            cd "$DEPLOY_PATH" || { echo "Failed to cd to $DEPLOY_PATH"; exit 1; }
+            echo "📁 $(pwd)"
+            echo "Current: $(git log -1 --format='%h %s' 2>/dev/null || echo 'n/a')"
+
+            cp -f .env /tmp/.env-hr-bak 2>/dev/null || true
+            git fetch origin
+            BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")
+            git reset --hard "origin/$BRANCH"
+            cp -f /tmp/.env-hr-bak .env 2>/dev/null || true
+
+            if [ -n "$COMPOSER_BIN" ] && [ -f composer.json ]; then
+              $COMPOSER_BIN install --no-interaction --no-dev 2>&1 || echo "composer install skipped"
+            fi
+
+            chown -R tpasset:psacln . 2>/dev/null || true
+            find . -type d -exec chmod 755 {} \; 2>/dev/null || true
+            find . -type f -exec chmod 644 {} \; 2>/dev/null || true
+            chmod 600 .env 2>/dev/null || true
+
+            echo "New: $(git log -1 --format='%h %s')"
+            echo "========================================"
+
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: success()
+    steps:
+      - uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            cd ${{ secrets.SSH_PATH }}
+            git log -1 --format="%h %s (%cr)"
