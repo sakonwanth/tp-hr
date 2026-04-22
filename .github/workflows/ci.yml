@@ -20,7 +20,7 @@ jobs:
 
       - name: PHP syntax check
         run: |
-          find . -name "*.php" -not -path "./vendor/*" -exec php -l {} \; 2>&1 | grep -i "error" && exit 1 || true
+          find . -name "*.php" -not -path "./vendor/*" -print0 | xargs -0 -n1 php -l
           echo "Syntax check passed"
 
       - name: Security scan
