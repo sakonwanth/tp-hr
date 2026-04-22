@@ -263,23 +263,32 @@ function sanitize(string $input): string {
  * API Response helper
  */
 function apiResponse(array $data, int $status = 200): void {
+    if (defined('TP_COMMON_AVAILABLE') && TP_COMMON_AVAILABLE
+        && class_exists('TpCommon\Http\ApiResponse')) {
+        \TpCommon\Http\ApiResponse::send($data, $status);
+    }
     http_response_code($status);
     header('Content-Type: application/json');
     echo json_encode($data, JSON_UNESCAPED_UNICODE);
     exit;
 }
 
-/**
- * API Error response
- */
 function apiError(string $message, int $status = 400): void {
+    if (defined('TP_COMMON_AVAILABLE') && TP_COMMON_AVAILABLE
+        && class_exists('TpCommon\Http\ApiResponse')) {
+        \TpCommon\Http\ApiResponse::error($message, $status);
+    }
     apiResponse(['success' => false, 'error' => $message], $status);
 }
 
-/**
- * API Success response
- */
 function apiSuccess(array $data = [], ?string $message = null): void {
+    if (defined('TP_COMMON_AVAILABLE') && TP_COMMON_AVAILABLE
+        && class_exists('TpCommon\Http\ApiResponse')) {
+        $body = ['success' => true];
+        if ($message) $body['message'] = $message;
+        $body = array_merge($body, $data);
+        \TpCommon\Http\ApiResponse::send($body, 200);
+    }
     $response = ['success' => true];
     if ($message) $response['message'] = $message;
     $response = array_merge($response, $data);
