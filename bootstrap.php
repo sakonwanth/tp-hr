@@ -7,11 +7,20 @@
 // Base path
 define('BASE_PATH', __DIR__);
 
-// Composer autoload — loads TpCommon namespace
-require_once BASE_PATH . '/vendor/autoload.php';
+// Detect TpCommon availability (local dev has vendor/ from composer install)
+$_autoload = BASE_PATH . '/vendor/autoload.php';
+define('TP_COMMON_AVAILABLE', file_exists($_autoload));
 
-// Shared error handler (registered early; APP_DEBUG resolved lazily)
-\TpCommon\ErrorHandler::register('tp-hr', BASE_PATH . '/logs');
+if (TP_COMMON_AVAILABLE) {
+    require_once $_autoload;
+    \TpCommon\ErrorHandler::register('tp-hr', BASE_PATH . '/logs');
+} else {
+    error_reporting(E_ALL);
+    ini_set('display_errors', '0');
+    ini_set('log_errors', '1');
+    ini_set('error_log', BASE_PATH . '/logs/php_errors.log');
+}
+unset($_autoload);
 
 define('STORAGE_PATH', BASE_PATH . '/storage');
 define('UPLOAD_PATH', STORAGE_PATH . '/uploads');
@@ -21,19 +30,58 @@ define('DOCUMENT_PATH', STORAGE_PATH . '/documents');
 define('SYSTEM_USER_IDS', [1, 12]);
 define('SYSTEM_USER_IDS_SQL', implode(',', SYSTEM_USER_IDS));
 
-// Load environment variables via TpCommon\Env
-\TpCommon\Env\Env::load(BASE_PATH . '/.env');
+// Load environment variables
+if (TP_COMMON_AVAILABLE) {
+    \TpCommon\Env\Env::load(BASE_PATH . '/.env');
+} else {
+    $envFile = BASE_PATH . '/.env';
+    if (file_exists($envFile)) {
+        $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($lines as $line) {
+            if (strpos(trim($line), '#') === 0) continue;
+            if (strpos($line, '=') !== false) {
+                list($key, $value) = explode('=', $line, 2);
+                $key = trim($key);
+                $value = trim($value, " \t\n\r\0\x0B\"'");
+                $_ENV[$key] = $value;
+                putenv("$key=$value");
+            }
+        }
+    }
+}
 
 // Config (defines constants: APP_NAME, APP_DEBUG, DB_HOST, HR_ROLES, etc.)
 require_once BASE_PATH . '/config/app.php';
 require_once BASE_PATH . '/config/database.php';
 
-// Session via TpCommon\Auth\Session (replaces inline session_start block)
-\TpCommon\Auth\Session::start([
-    'name'         => 'TPHRSESSID',
-    'lifetime'     => defined('SESSION_LIFETIME') ? (int)SESSION_LIFETIME : 7200,
-    'idle_timeout' => defined('SESSION_LIFETIME') ? (int)SESSION_LIFETIME : 7200,
-]);
+// Session
+if (TP_COMMON_AVAILABLE) {
+    \TpCommon\Auth\Session::start([
+        'name'         => 'TPHRSESSID',
+        'lifetime'     => defined('SESSION_LIFETIME') ? (int)SESSION_LIFETIME : 7200,
+        'idle_timeout' => defined('SESSION_LIFETIME') ? (int)SESSION_LIFETIME : 7200,
+    ]);
+} else {
+    if (session_status() === PHP_SESSION_NONE) {
+        $lifetime = defined('SESSION_LIFETIME') ? (int)SESSION_LIFETIME : 7200;
+        ini_set('session.gc_maxlifetime', (string)$lifetime);
+        session_name('TPHRSESSID');
+        session_set_cookie_params([
+            'lifetime' => 0,
+            'path' => '/',
+            'secure' => !empty($_SERVER['HTTPS']),
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+        session_start();
+        $now = time();
+        if (!empty($_SESSION['_last_activity']) && ($now - (int)$_SESSION['_last_activity']) > $lifetime) {
+            $_SESSION = [];
+            session_regenerate_id(true);
+        }
+        $_SESSION['_last_activity'] = $now;
+    }
+}
 
 // Timezone
 date_default_timezone_set('Asia/Bangkok');
@@ -65,12 +113,9 @@ if (!empty($_SESSION['user']['id']) && strpos($_SERVER['REQUEST_URI'] ?? '', '/a
 }
 
 // =====================================================================
-// Helper functions (keep legacy signatures — delegate to TpCommon)
+// Helper functions (keep legacy signatures — delegate to TpCommon when available)
 // =====================================================================
 
-/**
- * Database connection helper
- */
 function getDB(): PDO {
     return Database::getInstance()->getConnection();
 }
@@ -110,9 +155,6 @@ function getEffectiveSalary(array $user): float {
     return $salary ?? ($probSalary ?? 0.0);
 }
 
-/**
- * Flash message helper — delegates to TpCommon\Auth\Session::flash()
- */
 function flash(string $key, ?string $message = null) {
     if ($message !== null) {
         $_SESSION['flash'][$key] = $message;
@@ -128,22 +170,38 @@ function redirect(string $url, int $status = 302): void {
     exit;
 }
 
-// --- CSRF — delegate to TpCommon\Auth\Csrf ---
+// --- CSRF ---
 
 function csrfToken(): string {
-    return \TpCommon\Auth\Csrf::token();
+    if (TP_COMMON_AVAILABLE) {
+        return \TpCommon\Auth\Csrf::token();
+    }
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
 }
 
 function csrfField(): string {
-    return \TpCommon\Auth\Csrf::field('_token');
+    if (TP_COMMON_AVAILABLE) {
+        return \TpCommon\Auth\Csrf::field('_token');
+    }
+    return '<input type="hidden" name="_token" value="' . csrfToken() . '">';
 }
 
 function verifyCsrf(): bool {
-    return \TpCommon\Auth\Csrf::verify();
+    if (TP_COMMON_AVAILABLE) {
+        return \TpCommon\Auth\Csrf::verify();
+    }
+    return isset($_POST['_token']) && hash_equals($_SESSION['csrf_token'] ?? '', $_POST['_token']);
 }
 
 function verifyCsrfToken(?string $token = null): bool {
-    return \TpCommon\Auth\Csrf::verify($token);
+    if (TP_COMMON_AVAILABLE) {
+        return \TpCommon\Auth\Csrf::verify($token);
+    }
+    $submittedToken = $token ?? ($_POST['_token'] ?? '');
+    return hash_equals($_SESSION['csrf_token'] ?? '', $submittedToken);
 }
 
 // --- Role helpers ---
@@ -152,22 +210,41 @@ function hasRole(string|array $roles): bool {
     return Auth::hasRole($roles);
 }
 
-// --- Date/Money helpers — delegate to TpCommon\Helpers\Date ---
+// --- Date/Money helpers ---
 
 function formatDateThai(string $date, bool $showTime = false): string {
-    return \TpCommon\Helpers\Date::thai($date, $showTime);
+    if (TP_COMMON_AVAILABLE) {
+        return \TpCommon\Helpers\Date::thai($date, $showTime);
+    }
+    if (empty($date)) return '-';
+    $months = [1=>'ม.ค.',2=>'ก.พ.',3=>'มี.ค.',4=>'เม.ย.',5=>'พ.ค.',6=>'มิ.ย.',7=>'ก.ค.',8=>'ส.ค.',9=>'ก.ย.',10=>'ต.ค.',11=>'พ.ย.',12=>'ธ.ค.'];
+    $ts = strtotime($date);
+    $result = date('j', $ts) . ' ' . $months[(int)date('n', $ts)] . ' ' . (date('Y', $ts) + 543);
+    if ($showTime) $result .= ' ' . date('H:i', $ts);
+    return $result;
 }
 
 function formatMoney(float $amount): string {
-    return \TpCommon\Helpers\Date::money($amount);
+    if (TP_COMMON_AVAILABLE) {
+        return \TpCommon\Helpers\Date::money($amount);
+    }
+    return number_format($amount, 2) . ' บาท';
 }
 
 function thaiMonth(int $month): string {
-    return \TpCommon\Helpers\Date::thaiMonth($month);
+    if (TP_COMMON_AVAILABLE) {
+        return \TpCommon\Helpers\Date::thaiMonth($month);
+    }
+    $months = [1=>'มกราคม',2=>'กุมภาพันธ์',3=>'มีนาคม',4=>'เมษายน',5=>'พฤษภาคม',6=>'มิถุนายน',7=>'กรกฎาคม',8=>'สิงหาคม',9=>'กันยายน',10=>'ตุลาคม',11=>'พฤศจิกายน',12=>'ธันวาคม'];
+    return $months[$month] ?? '';
 }
 
 function thaiMonthShort(int $month): string {
-    return \TpCommon\Helpers\Date::thaiMonthShort($month);
+    if (TP_COMMON_AVAILABLE) {
+        return \TpCommon\Helpers\Date::thaiMonthShort($month);
+    }
+    $months = [1=>'ม.ค.',2=>'ก.พ.',3=>'มี.ค.',4=>'เม.ย.',5=>'พ.ค.',6=>'มิ.ย.',7=>'ก.ค.',8=>'ส.ค.',9=>'ก.ย.',10=>'ต.ค.',11=>'พ.ย.',12=>'ธ.ค.'];
+    return $months[$month] ?? '';
 }
 
 function getUserFullName(array $user): string {
@@ -177,9 +254,6 @@ function getUserFullName(array $user): string {
     return trim("$title$firstName $lastName");
 }
 
-/**
- * Calculate working days between dates.
- */
 function calculateWorkingDays(string $startDate, string $endDate, ?int $userId = null): float {
     $pdo = getDB();
 

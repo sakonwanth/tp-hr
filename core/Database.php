@@ -1,22 +1,34 @@
 <?php
 /**
- * Database Connection — shim extending TpCommon\Database\Connection
+ * Database Connection (Singleton)
  *
- * Keeps legacy API (getInstance, getConnection, beginTransaction, etc.)
- * while delegating to the shared library.
- *
- * @see TpCommon\Database\Connection
+ * When TpCommon is available, delegates to TpCommon\Database\Connection.
+ * Otherwise, falls back to standalone PDO singleton.
  */
-
-use TpCommon\Database\Connection;
-
 class Database
 {
     private static ?self $instance = null;
+    private PDO $connection;
 
     private function __construct()
     {
-        Connection::configureFromConstants();
+        if (defined('TP_COMMON_AVAILABLE') && TP_COMMON_AVAILABLE) {
+            \TpCommon\Database\Connection::configureFromConstants();
+            $this->connection = \TpCommon\Database\Connection::getConnection();
+        } else {
+            $dsn = sprintf(
+                "mysql:host=%s;port=%s;dbname=%s;charset=%s",
+                DB_HOST, DB_PORT, DB_NAME, DB_CHARSET
+            );
+            try {
+                $this->connection = new PDO($dsn, DB_USER, DB_PASS, DB_OPTIONS);
+            } catch (PDOException $e) {
+                if (defined('APP_DEBUG') && APP_DEBUG) {
+                    throw new RuntimeException("Database connection failed: " . $e->getMessage());
+                }
+                throw new RuntimeException("Database connection failed");
+            }
+        }
     }
 
     public static function getInstance(): self
@@ -29,27 +41,27 @@ class Database
 
     public function getConnection(): PDO
     {
-        return Connection::getConnection();
+        return $this->connection;
     }
 
     public function beginTransaction(): bool
     {
-        return Connection::getInstance()->beginTransaction();
+        return $this->connection->beginTransaction();
     }
 
     public function commit(): bool
     {
-        return Connection::getInstance()->commit();
+        return $this->connection->commit();
     }
 
     public function rollback(): bool
     {
-        return Connection::getInstance()->rollback();
+        return $this->connection->rollBack();
     }
 
     public function lastInsertId(): string
     {
-        return Connection::getInstance()->lastInsertId();
+        return $this->connection->lastInsertId();
     }
 
     private function __clone() {}
