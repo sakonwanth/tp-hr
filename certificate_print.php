@@ -209,7 +209,7 @@ $V = [
 $page_title = 'หนังสือรับรอง - ' . $V['fullName_th'];
 
 $verifyUrl = 'https://hr.tp-asset.com/verify_document.php?code=' . urlencode($verifyCode ?: $docNumber);
-$qrImg     = 'https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=0&ecc=M&data=' . urlencode($verifyUrl);
+$qrImg     = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=0&ecc=M&data=' . urlencode($verifyUrl);
 
 // Brand assets (same exact URLs as CRM payslip)
 $LOGO_BRAND = 'https://crm.tp-asset.com/asset/logo/LOGO%20TP-ASSET%20-%206.png';
@@ -304,24 +304,24 @@ body {
 }
 .page > *:not(.watermark) { position: relative; z-index: 1; }
 
-/* ---------- Header (logo left, company right) — identical to payslip ---------- */
+/* ---------- Header (logo left, company right) ---------- */
 .doc-header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
-    gap: 20px;
-    padding-bottom: 10px;
+    gap: 24px;
+    padding-bottom: 12px;
     border-bottom: 2px solid #1a365d;
     margin-bottom: 12px;
 }
 .doc-header-logo { flex-shrink: 0; }
-.doc-header-logo img { height: 58px; width: auto; display: block; }
-.doc-header-right { text-align: right; max-width: 62%; }
+.doc-header-logo img { height: 90px; width: auto; display: block; }
+.doc-header-right { text-align: right; max-width: 68%; }
 .doc-header-right .company-name {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
     color: #1a365d;
-    line-height: 1.35;
+    line-height: 1.3;
     letter-spacing: 0.02em;
 }
 .doc-header-right .company-name-en {
@@ -329,18 +329,19 @@ body {
     font-weight: 600;
     color: #334155;
     margin-top: 2px;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
 }
 .doc-header-right .company-addr {
-    font-size: 11px;
+    font-size: 11.5px;
     color: #475569;
-    margin-top: 4px;
-    line-height: 1.45;
+    margin-top: 5px;
+    line-height: 1.5;
 }
 .doc-header-right .company-tax {
-    font-size: 11px;
+    font-size: 11.5px;
     color: #475569;
-    margin-top: 3px;
+    margin-top: 2px;
     font-weight: 500;
 }
 .doc-header-right .company-tax b { color: #1a365d; font-weight: 600; font-variant-numeric: tabular-nums; }
@@ -481,51 +482,50 @@ body {
     font-style: italic;
 }
 
-/* Company seal (center between signatures) */
+/* Company seal area (text-only, no circle) */
 .seal-area {
     position: relative;
     text-align: center;
-    margin-top: 8px;
-}
-.seal-area .seal-circle {
-    display: inline-block;
-    width: 62px; height: 62px;
-    border: 1.5px dashed #94a3b8;
-    border-radius: 50%;
-    line-height: 1.1;
-    font-size: 9px;
-    color: #94a3b8;
-    font-weight: 500;
-    padding-top: 22px;
+    margin: 18px 0 10px;
+    padding: 8px 12px;
+    border-top: 1px dashed #cbd5e1;
+    border-bottom: 1px dashed #cbd5e1;
 }
 .seal-area .seal-note {
-    font-size: 10.5px;
-    color: #94a3b8;
-    margin-top: 3px;
-    font-style: italic;
+    font-size: 11.5px;
+    color: #64748b;
+    font-weight: 500;
+    letter-spacing: 0.02em;
 }
+.seal-area .seal-note b { color: #1a365d; font-weight: 700; }
 
 /* ---------- Footer: verification + QR ---------- */
 .verify-footer {
     margin-top: auto;
-    padding: 8px 12px;
+    padding: 10px 14px;
+    border: 1px solid #cbd5e1;
     border-top: 2px solid #1a365d;
-    border-bottom: 1px solid #e2e8f0;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: 14px;
     background: #f8fafc;
 }
-.verify-footer .vf-left { flex: 1; font-size: 10px; color: #475569; line-height: 1.45; }
-.verify-footer .vf-left h4 { font-size: 11px; font-weight: 700; color: #1a365d; margin-bottom: 2px; }
-.verify-footer .vf-left .mono { font-family: 'Courier New', monospace; color: #1a365d; font-weight: 600; letter-spacing: 0.05em; }
+.verify-footer .vf-left { flex: 1; font-size: 11px; color: #475569; line-height: 1.55; }
+.verify-footer .vf-left h4 {
+    font-size: 12px; font-weight: 700; color: #1a365d;
+    margin-bottom: 4px; padding-bottom: 3px;
+    border-bottom: 1px solid #e2e8f0;
+}
+.verify-footer .vf-left .mono { font-family: 'Courier New', monospace; color: #1a365d; font-weight: 700; letter-spacing: 0.05em; }
+.verify-footer .vf-left .vf-row { margin: 1px 0; }
 .verify-footer .qr-box {
     flex-shrink: 0; text-align: center;
-    padding: 3px; background: #fff; border: 1px solid #cbd5e1;
+    padding: 5px; background: #fff; border: 1px solid #1a365d;
+    box-shadow: 0 1px 2px rgba(15,23,42,.06);
 }
-.verify-footer .qr-box img { display: block; width: 58px; height: 58px; }
-.verify-footer .qr-box .cap { font-size: 8.5px; color: #64748b; margin-top: 1px; }
+.verify-footer .qr-box img { display: block; width: 82px; height: 82px; }
+.verify-footer .qr-box .cap { font-size: 9px; color: #1a365d; margin-top: 3px; font-weight: 600; letter-spacing: 0.04em; }
 
 .footer-note {
     margin-top: 4px;
@@ -618,12 +618,29 @@ body {
         <div class="doc-header-right">
             <div class="company-name"><?php echo htmlspecialchars($company['name_th']); ?></div>
             <?php if ($company['name_en']): ?>
-                <div class="company-name-en"><?php echo htmlspecialchars($company['name_en']); ?></div>
+                <div class="company-name-en"><?php echo htmlspecialchars(strtoupper($company['name_en'])); ?></div>
             <?php endif; ?>
-            <div class="company-addr"><?php echo htmlspecialchars($company['address']); ?></div>
+            <?php
+                // Split Thai address at ตำบล / แขวง for cleaner 2-line display
+                $addrFull = trim((string)$company['address']);
+                $parts = preg_split('/(?=ตำบล|แขวง)/u', $addrFull, 2);
+                $addrLine1 = trim($parts[0] ?? $addrFull);
+                $addrLine2 = isset($parts[1]) ? trim($parts[1]) : '';
+            ?>
+            <?php if ($addrLine1): ?>
+                <div class="company-addr">
+                    <?php echo htmlspecialchars($addrLine1); ?>
+                    <?php if ($addrLine2): ?><br><?php echo htmlspecialchars($addrLine2); ?><?php endif; ?>
+                </div>
+            <?php endif; ?>
             <div class="company-tax">
-                <?php if ($company['phone']): ?><?php echo $isEn?'Tel':'โทร'; ?>: <?php echo htmlspecialchars($company['phone']); ?> &nbsp;|&nbsp; <?php endif; ?>
-                <?php if ($company['email']): ?><?php echo $isEn?'Email':'อีเมล'; ?>: <?php echo htmlspecialchars($company['email']); ?><?php endif; ?>
+                <?php
+                    $contactParts = [];
+                    if ($company['phone']) $contactParts[] = ($isEn?'Tel':'โทร').': '.htmlspecialchars($company['phone']);
+                    if ($company['email']) $contactParts[] = ($isEn?'Email':'อีเมล').': '.htmlspecialchars($company['email']);
+                    if ($company['website']) $contactParts[] = htmlspecialchars($company['website']);
+                    echo implode(' &nbsp;|&nbsp; ', $contactParts);
+                ?>
             </div>
             <?php if ($company['tax_id']): ?>
             <div class="company-tax"><?php echo $isEn?'Tax ID':'เลขประจำตัวผู้เสียภาษี'; ?>: <b><?php echo htmlspecialchars($company['tax_id']); ?></b></div>
@@ -643,20 +660,21 @@ body {
             <span class="sub">CERTIFICATE OF EMPLOYMENT</span>
         </h1>
         <div class="body">
-            <p><?php echo htmlspecialchars($company['name_th']); ?>
-                <?php echo $company['name_en']?'('.htmlspecialchars($company['name_en']).')':''; ?>
-                ขอรับรองว่าบุคคลซึ่งมีรายนามและข้อมูลปรากฏด้านล่างนี้ เป็นพนักงานของบริษัทฯ จริง</p>
+            <p>ตามที่ <?php echo htmlspecialchars($V['fullName_th']); ?>
+                ได้ขอให้บริษัท <?php echo htmlspecialchars($company['name_th']); ?>
+                <?php echo $company['name_en'] ? '(' . htmlspecialchars(strtoupper($company['name_en'])) . ')' : ''; ?>
+                ออกหนังสือรับรองการทำงานให้ไว้เป็นหลักฐานนั้น บริษัทฯ ขอรับรองว่าบุคคลดังกล่าว เป็นพนักงานของบริษัทฯ โดยมีรายละเอียดตามที่ปรากฏในตารางด้านล่างนี้จริงทุกประการ</p>
             <table class="info-table">
                 <tr><th>ชื่อ-นามสกุล</th><td><?php echo htmlspecialchars($V['fullName_th']); ?></td></tr>
-                <tr><th>เลขประจำตัวประชาชน</th><td class="mono"><?php echo htmlspecialchars($V['nationalId']); ?></td></tr>
+                <tr><th>เลขประจำตัวประชาชน</th><td><?php echo htmlspecialchars($V['nationalId']); ?></td></tr>
                 <tr><th>รหัสพนักงาน</th><td><?php echo htmlspecialchars($V['empCode']); ?></td></tr>
                 <tr><th>ตำแหน่ง / Position</th><td><?php echo htmlspecialchars($V['position']); ?></td></tr>
                 <tr><th>แผนก / Department</th><td><?php echo htmlspecialchars($V['department']); ?></td></tr>
                 <tr><th>วันที่เริ่มปฏิบัติงาน</th><td><?php echo htmlspecialchars($hireStr); ?></td></tr>
                 <tr><th>อายุการทำงาน</th><td><?php echo htmlspecialchars($tenure); ?> <span style="font-weight:500; color:#64748b;">(นับถึงวันที่ออกหนังสือ)</span></td></tr>
             </table>
-            <p>บุคคลดังกล่าวยังคงปฏิบัติงานเป็นพนักงานของบริษัทฯ ในปัจจุบัน บริษัทฯ จึงออกหนังสือรับรองฉบับนี้เพื่อ<?php echo htmlspecialchars($V['purpose']); ?></p>
-            <p>ขอรับรองว่าข้อความข้างต้นเป็นความจริงทุกประการ</p>
+            <p>โดยปัจจุบันบุคคลดังกล่าวยังคงปฏิบัติหน้าที่เป็นพนักงานของบริษัทฯ อยู่ บริษัทฯ จึงออกหนังสือรับรองฉบับนี้ให้ไว้เพื่อ<?php echo htmlspecialchars($V['purpose']); ?> ทั้งนี้ ขอรับรองว่าข้อความที่ปรากฏข้างต้นเป็นความจริงทุกประการ</p>
+            <p>จึงเรียนมาเพื่อโปรดพิจารณาและใช้เป็นหลักฐานอ้างอิงต่อไป</p>
         </div>
 
     <?php elseif ($baseCode === 'CERT_WORK' && $isEn): ?>
@@ -666,7 +684,7 @@ body {
         </h1>
         <div class="body">
             <p class="no-indent"><strong>TO WHOM IT MAY CONCERN,</strong></p>
-            <p>This is to certify that the individual whose details appear below is currently an employee of <strong><?php echo htmlspecialchars($company['name_en'] ?: $company['name_th']); ?></strong>:</p>
+            <p>This letter is issued at the request of the individual named below to certify that he/she is a current employee of <strong><?php echo htmlspecialchars(strtoupper($company['name_en'] ?: $company['name_th'])); ?></strong> with the particulars as set forth in the table hereunder:</p>
             <table class="info-table">
                 <tr><th>Full Name</th><td><?php echo htmlspecialchars($V['fullName_en']); ?></td></tr>
                 <tr><th>Employee ID</th><td><?php echo htmlspecialchars($V['empCode']); ?></td></tr>
@@ -675,8 +693,8 @@ body {
                 <tr><th>Date of Employment</th><td><?php echo htmlspecialchars($hireStr); ?></td></tr>
                 <tr><th>Length of Service</th><td><?php echo htmlspecialchars($tenure); ?> <span style="font-weight:500;color:#64748b;">(as of the issue date)</span></td></tr>
             </table>
-            <p>The above-mentioned person is currently in active employment with the Company. This certificate is issued <?php echo htmlspecialchars($V['purposeEn']); ?>.</p>
-            <p>This certifies that the information stated herein is true and correct.</p>
+            <p>The above-named person remains in active employment with the Company as of the date of issue. This Certificate is issued <?php echo htmlspecialchars($V['purposeEn']); ?>, and the Company hereby certifies that all information stated above is true and correct in every respect.</p>
+            <p>Should any further verification be required, please contact the Human Resources Department or scan the QR code provided at the bottom of this document.</p>
         </div>
 
     <?php elseif (($baseCode === 'CERT_SALARY' || $code === 'CERT_SALARY_BANK') && !$isEn): ?>
@@ -685,7 +703,10 @@ body {
             <span class="sub">CERTIFICATE OF SALARY<?php echo $code==='CERT_SALARY_BANK'?' (FOR BANK)':''; ?></span>
         </h1>
         <div class="body">
-            <p><?php echo htmlspecialchars($company['name_th']); ?> ขอรับรองว่าบุคคลซึ่งมีรายนามและข้อมูลปรากฏด้านล่างนี้ เป็นพนักงานของบริษัทฯ และได้รับเงินเดือนตามอัตราที่ระบุจริง</p>
+            <p>ตามที่ <?php echo htmlspecialchars($V['fullName_th']); ?>
+                ได้ขอให้บริษัท <?php echo htmlspecialchars($company['name_th']); ?>
+                <?php echo $company['name_en'] ? '(' . htmlspecialchars(strtoupper($company['name_en'])) . ')' : ''; ?>
+                ออกหนังสือรับรองเงินเดือนให้ไว้เป็นหลักฐานนั้น บริษัทฯ ขอรับรองว่าบุคคลดังกล่าวเป็นพนักงานของบริษัทฯ และได้รับเงินเดือนตามอัตราที่ระบุไว้ในเอกสารฉบับนี้จริง โดยมีรายละเอียดดังนี้</p>
             <table class="info-table">
                 <tr><th>ชื่อ-นามสกุล</th><td><?php echo htmlspecialchars($V['fullName_th']); ?></td></tr>
                 <tr><th>เลขประจำตัวประชาชน</th><td><?php echo htmlspecialchars($V['nationalId']); ?></td></tr>
@@ -693,7 +714,7 @@ body {
                 <tr><th>ตำแหน่ง / Position</th><td><?php echo htmlspecialchars($V['position']); ?></td></tr>
                 <tr><th>แผนก / Department</th><td><?php echo htmlspecialchars($V['department']); ?></td></tr>
                 <tr><th>วันที่เริ่มปฏิบัติงาน</th><td><?php echo htmlspecialchars($hireStr); ?></td></tr>
-                <tr><th>ประเภทการจ้าง</th><td>พนักงานประจำ</td></tr>
+                <tr><th>ประเภทการจ้าง</th><td>พนักงานประจำ (รายเดือน)</td></tr>
             </table>
             <div class="salary-box">
                 <span class="label">อัตราเงินเดือน / Monthly Salary</span>
@@ -701,12 +722,10 @@ body {
             </div>
             <?php if ($code==='CERT_SALARY_BANK' && $req['recipient']): ?>
             <div class="remark"><strong>เรียน:</strong> <?php echo htmlspecialchars($req['recipient']); ?> &nbsp;|&nbsp;
-                หนังสือฉบับนี้ออกให้เพื่อ<?php echo htmlspecialchars($V['purpose']); ?> โดยเฉพาะ
+                หนังสือฉบับนี้ออกให้เพื่อ<?php echo htmlspecialchars($V['purpose']); ?>โดยเฉพาะ
             </div>
-            <?php else: ?>
-            <p style="margin-top:12px;">บริษัทฯ ขอออกหนังสือรับรองฉบับนี้เพื่อ<?php echo htmlspecialchars($V['purpose']); ?></p>
             <?php endif; ?>
-            <p>ขอรับรองว่าข้อความข้างต้นเป็นความจริงทุกประการ</p>
+            <p>บริษัทฯ จึงออกหนังสือรับรองเงินเดือนฉบับนี้ให้ไว้เพื่อ<?php echo htmlspecialchars($V['purpose']); ?> ทั้งนี้ ขอรับรองว่าข้อความที่ปรากฏข้างต้นเป็นความจริงทุกประการ</p>
         </div>
 
     <?php elseif ($baseCode === 'CERT_SALARY' && $isEn): ?>
@@ -716,21 +735,20 @@ body {
         </h1>
         <div class="body">
             <p class="no-indent"><strong>TO WHOM IT MAY CONCERN,</strong></p>
-            <p>This is to certify that the following individual is currently employed by <strong><?php echo htmlspecialchars($company['name_en'] ?: $company['name_th']); ?></strong> and receives the monthly salary specified below:</p>
+            <p>This letter is issued at the request of the individual named below to certify that he/she is a current employee of <strong><?php echo htmlspecialchars(strtoupper($company['name_en'] ?: $company['name_th'])); ?></strong> and is in receipt of the monthly salary as specified herein. The particulars are as follows:</p>
             <table class="info-table">
                 <tr><th>Full Name</th><td><?php echo htmlspecialchars($V['fullName_en']); ?></td></tr>
                 <tr><th>Employee ID</th><td><?php echo htmlspecialchars($V['empCode']); ?></td></tr>
                 <tr><th>Position</th><td><?php echo htmlspecialchars($V['position']); ?></td></tr>
                 <tr><th>Department</th><td><?php echo htmlspecialchars($V['department']); ?></td></tr>
                 <tr><th>Date of Employment</th><td><?php echo htmlspecialchars($hireStr); ?></td></tr>
-                <tr><th>Employment Type</th><td>Permanent / Full-time</td></tr>
+                <tr><th>Employment Type</th><td>Permanent / Full-time (Monthly-paid)</td></tr>
             </table>
             <div class="salary-box">
                 <span class="label">Monthly Salary</span>
                 <span class="value">THB <?php echo number_format($V['salary'], 2); ?></span>
             </div>
-            <p style="margin-top:12px;">This certificate is issued <?php echo htmlspecialchars($V['purposeEn']); ?>.</p>
-            <p>This certifies that the information stated herein is true and correct.</p>
+            <p>This Certificate is hereby issued <?php echo htmlspecialchars($V['purposeEn']); ?>. The Company certifies that all information stated above is true and correct in every respect.</p>
         </div>
 
     <?php elseif ($code === 'TAX_50TAWI'): ?>
@@ -750,7 +768,7 @@ body {
             <div class="party">
                 <h5>ผู้มีหน้าที่หักภาษี ณ ที่จ่าย (Payer)</h5>
                 <b><?php echo htmlspecialchars($company['name_th']); ?></b><br>
-                <span style="color:#64748b;"><?php echo htmlspecialchars($company['name_en']); ?></span><br>
+                <span style="color:#64748b;"><?php echo htmlspecialchars(strtoupper($company['name_en'] ?? '')); ?></span><br>
                 <?php echo htmlspecialchars($company['address']); ?><br>
                 เลขประจำตัวผู้เสียภาษี: <b><?php echo htmlspecialchars($company['tax_id']); ?></b>
             </div>
@@ -834,10 +852,10 @@ body {
         </div>
     </div>
     <div class="seal-area">
-        <div class="seal-circle"><?php echo $isEn?'(Company<br>Seal)':'(ตราประทับ<br>บริษัท)'; ?></div>
         <div class="seal-note">
-            <?php echo $isEn?'This document is valid only when sealed with the official company stamp':
-                             'เอกสารฉบับนี้มีผลสมบูรณ์ต่อเมื่อมีการประทับตราบริษัทเท่านั้น'; ?>
+            <?php echo $isEn
+                ? 'This document is valid <b>only when affixed with the official company seal</b>.'
+                : '<b>เอกสารฉบับนี้มีผลสมบูรณ์ต่อเมื่อมีการประทับตราบริษัทเท่านั้น</b>'; ?>
         </div>
     </div>
 
@@ -845,25 +863,20 @@ body {
     <div class="verify-footer">
         <div class="vf-left">
             <h4><?php echo $isEn?'Document Verification':'การตรวจสอบความถูกต้องของเอกสาร'; ?></h4>
-            <?php echo $isEn?'Doc No.':'เลขที่เอกสาร'; ?>: <span class="mono"><?php echo htmlspecialchars($docNumber); ?></span>
-            &nbsp;|&nbsp;
-            <?php echo $isEn?'Verification Code':'รหัสยืนยัน'; ?>: <span class="mono"><?php echo htmlspecialchars($verifyCode ?: '-'); ?></span>
-            <br>
-            <?php echo $isEn?'Verify online at':'ตรวจสอบออนไลน์ที่'; ?>:
-            <span class="mono">hr.tp-asset.com/verify_document.php</span>
-            &nbsp;·&nbsp;
-            <?php echo $isEn?'Page':'หน้า'; ?> <?php echo $pageNo; ?>/<?php echo $pageTotal; ?>
+            <div class="vf-row"><?php echo $isEn?'Document No.':'เลขที่เอกสาร'; ?>: <span class="mono"><?php echo htmlspecialchars($docNumber); ?></span></div>
+            <div class="vf-row"><?php echo $isEn?'Verification Code':'รหัสยืนยัน'; ?>: <span class="mono"><?php echo htmlspecialchars($verifyCode ?: '-'); ?></span></div>
+            <div class="vf-row"><?php echo $isEn?'Verify at':'ตรวจสอบออนไลน์ที่'; ?>: <span class="mono">hr.tp-asset.com/verify_document.php</span></div>
         </div>
         <div class="qr-box">
             <img src="<?php echo htmlspecialchars($qrImg); ?>" alt="QR Verify">
-            <div class="cap"><?php echo $isEn?'Scan to verify':'สแกนเพื่อตรวจสอบ'; ?></div>
+            <div class="cap"><?php echo $isEn?'SCAN TO VERIFY':'สแกนเพื่อตรวจสอบ'; ?></div>
         </div>
     </div>
 
     <div class="footer-note">
         <?php echo $isEn
-            ? 'Issued electronically by the HR system of ' . htmlspecialchars($company['name_en'] ?: $company['name_th'])
-            : 'ออกโดยระบบบริหารทรัพยากรบุคคล ' . htmlspecialchars($company['name_th']) . ' · สแกน QR Code เพื่อยืนยันความถูกต้อง'; ?>
+            ? 'Issued electronically by the HR system of ' . htmlspecialchars(strtoupper($company['name_en'] ?: $company['name_th'])) . ' &nbsp;·&nbsp; Page ' . $pageNo . '/' . $pageTotal
+            : 'ออกโดยระบบบริหารทรัพยากรบุคคล ' . htmlspecialchars($company['name_th']) . ' &nbsp;·&nbsp; หน้า ' . $pageNo . '/' . $pageTotal; ?>
     </div>
 </div>
 <?php endforeach; ?>
