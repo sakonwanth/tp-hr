@@ -377,9 +377,13 @@ body {
 }
 
 /* ---------- Body ---------- */
-.body { font-size: 13.5px; line-height: 1.65; color: #1a1a1a; flex: 1; }
-.body p { margin: 0 0 6px; text-indent: 2.5em; text-align: justify; }
+.body { font-size: 13.5px; line-height: 1.65; color: #1a1a1a; }
+.body p { margin: 0 0 6px; text-indent: 2.5em; text-align: left; word-spacing: 0; }
 .body p.no-indent { text-indent: 0; }
+.body .nowrap { white-space: nowrap; }
+
+/* Flexible vertical spacer that pushes seal+footer to bottom */
+.flex-grow { flex: 1 1 auto; min-height: 28px; }
 
 /* ---------- Info table (bordered — same as payslip) ---------- */
 .info-table {
@@ -447,7 +451,7 @@ body {
 
 /* ---------- Signatures: TWO signers side-by-side ---------- */
 .signatures {
-    margin-top: 14px;
+    margin-top: 18px;
     display: flex;
     justify-content: space-around;
     gap: 20px;
@@ -460,7 +464,7 @@ body {
 .sig-block .sig-prefix {
     font-size: 12.5px;
     color: #475569;
-    margin-bottom: 42px;
+    margin-bottom: 36px;
 }
 .sig-block .sig-line {
     border-top: 1px dotted #475569;
@@ -486,8 +490,8 @@ body {
 .seal-area {
     position: relative;
     text-align: center;
-    margin: 18px 0 10px;
-    padding: 8px 12px;
+    margin: 6px 0 8px;
+    padding: 6px 12px;
     border-top: 1px dashed #cbd5e1;
     border-bottom: 1px dashed #cbd5e1;
 }
@@ -501,7 +505,6 @@ body {
 
 /* ---------- Footer: verification + QR ---------- */
 .verify-footer {
-    margin-top: auto;
     padding: 10px 14px;
     border: 1px solid #cbd5e1;
     border-top: 2px solid #1a365d;
@@ -661,8 +664,8 @@ body {
         </h1>
         <div class="body">
             <p>ตามที่ <?php echo htmlspecialchars($V['fullName_th']); ?>
-                ได้ขอให้บริษัท <?php echo htmlspecialchars($company['name_th']); ?>
-                <?php echo $company['name_en'] ? '(' . htmlspecialchars(strtoupper($company['name_en'])) . ')' : ''; ?>
+                ได้ขอให้ <?php echo htmlspecialchars($company['name_th']); ?>
+                <?php echo $company['name_en'] ? '<span class="nowrap">(' . htmlspecialchars(strtoupper($company['name_en'])) . ')</span>' : ''; ?>
                 ออกหนังสือรับรองการทำงานให้ไว้เป็นหลักฐานนั้น บริษัทฯ ขอรับรองว่าบุคคลดังกล่าว เป็นพนักงานของบริษัทฯ โดยมีรายละเอียดตามที่ปรากฏในตารางด้านล่างนี้จริงทุกประการ</p>
             <table class="info-table">
                 <tr><th>ชื่อ-นามสกุล</th><td><?php echo htmlspecialchars($V['fullName_th']); ?></td></tr>
@@ -704,8 +707,8 @@ body {
         </h1>
         <div class="body">
             <p>ตามที่ <?php echo htmlspecialchars($V['fullName_th']); ?>
-                ได้ขอให้บริษัท <?php echo htmlspecialchars($company['name_th']); ?>
-                <?php echo $company['name_en'] ? '(' . htmlspecialchars(strtoupper($company['name_en'])) . ')' : ''; ?>
+                ได้ขอให้ <?php echo htmlspecialchars($company['name_th']); ?>
+                <?php echo $company['name_en'] ? '<span class="nowrap">(' . htmlspecialchars(strtoupper($company['name_en'])) . ')</span>' : ''; ?>
                 ออกหนังสือรับรองเงินเดือนให้ไว้เป็นหลักฐานนั้น บริษัทฯ ขอรับรองว่าบุคคลดังกล่าวเป็นพนักงานของบริษัทฯ และได้รับเงินเดือนตามอัตราที่ระบุไว้ในเอกสารฉบับนี้จริง โดยมีรายละเอียดดังนี้</p>
             <table class="info-table">
                 <tr><th>ชื่อ-นามสกุล</th><td><?php echo htmlspecialchars($V['fullName_th']); ?></td></tr>
@@ -851,6 +854,10 @@ body {
             <?php endif; ?>
         </div>
     </div>
+
+    <!-- Empty space reserved for physical seal stamp -->
+    <div class="flex-grow" aria-hidden="true"></div>
+
     <div class="seal-area">
         <div class="seal-note">
             <?php echo $isEn
