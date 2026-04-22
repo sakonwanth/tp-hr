@@ -48,7 +48,14 @@ try {
             break;
         case 'payroll-runs':
         case 'payslips':
-            require __DIR__ . '/payroll.php';
+            if ($method === 'GET') {
+                require __DIR__ . '/payroll.php';
+            } else {
+                require __DIR__ . '/payroll_write.php';
+            }
+            break;
+        case 'salary-setup':
+            require __DIR__ . '/payroll_write.php';
             break;
         default:
             if (in_array($resource, $metaResources, true)) {
