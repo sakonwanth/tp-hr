@@ -13,6 +13,12 @@ define('APP_URL', $_ENV['APP_URL'] ?? 'http://localhost/tp-hr');
 // Session
 define('SESSION_LIFETIME', 7200); // 2 hours
 
+// Security
+define('MIN_PASSWORD_LENGTH', 8);
+
+// External services
+define('CRM_BASE_URL', $_ENV['CRM_BASE_URL'] ?? 'https://crm.tp-asset.com');
+
 // File Upload
 define('MAX_UPLOAD_SIZE', 10 * 1024 * 1024); // 10MB
 define('ALLOWED_FILE_TYPES', ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx', 'xls', 'xlsx']);
@@ -29,7 +35,11 @@ define('THAI_DATE_FORMAT', 'd/m/Y');
 
 // HR Roles
 define('HR_ROLES', ['HR', 'Admin', 'Chairman', 'CEO']);
+define('CEO_ROLES', ['Admin', 'Chairman', 'CEO']);
 define('MANAGER_ROLES', ['Manager', 'Director', 'HR', 'Admin', 'Chairman', 'CEO']);
+
+// Thai day names (indexed 0=Sunday .. 6=Saturday)
+define('THAI_DAY_NAMES', ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์']);
 
 // Attendance
 define('ATTENDANCE_STATUS', [

@@ -4,7 +4,10 @@
  */
 $current_user = Auth::user();
 $isHR = isHR();
+$isCEO = isCEOOrAbove();
 $current_page = $current_page ?? '';
+$appIconPath = '/assets/icons/tphr-app-icon.svg';
+$appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
 ?>
 <!DOCTYPE html>
 <html lang="th">
@@ -13,32 +16,13 @@ $current_page = $current_page ?? '';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?php echo csrfToken(); ?>">
     <title><?php echo htmlspecialchars($page_title ?? 'TP-HR'); ?> - TP-HR</title>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="icon" type="image/svg+xml" href="<?php echo htmlspecialchars($appIconPath); ?>">
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="<?php echo htmlspecialchars($appTouchIconPath); ?>">
     
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: '#f5f3ff',
-                            100: '#ede9fe',
-                            200: '#ddd6fe',
-                            300: '#c4b5fd',
-                            400: '#a78bfa',
-                            500: '#8b5cf6',
-                            600: '#7c3aed',
-                            700: '#6d28d9',
-                            800: '#5b21b6',
-                            900: '#4c1d95',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Tailwind CSS (compiled) -->
+    <link rel="stylesheet" href="/assets/css/app.css">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -393,6 +377,11 @@ $current_page = $current_page ?? '';
                 <span>ขอใบรับรอง</span>
             </a>
             
+            <a href="/dayoff_schedule.php" class="nav-item <?php echo $current_page === 'dayoff' ? 'active' : ''; ?>">
+                <i class="fas fa-calendar-week"></i>
+                <span>วันหยุดประจำสัปดาห์</span>
+            </a>
+            
             <a href="/profile.php" class="nav-item <?php echo $current_page === 'profile' ? 'active' : ''; ?>">
                 <i class="fas fa-user"></i>
                 <span>ข้อมูลส่วนตัว</span>
@@ -420,11 +409,24 @@ $current_page = $current_page ?? '';
                     <span>อนุมัติการลา</span>
                 </a>
                 
+                <?php if ($isCEO): ?>
+                <a href="/hr/dayoff_approvals.php" class="nav-item <?php echo $current_page === 'hr-dayoff' ? 'active' : ''; ?>">
+                    <i class="fas fa-calendar-day"></i>
+                    <span>อนุมัติเปลี่ยนวันหยุด</span>
+                </a>
+                <?php endif; ?>
+                
                 <a href="/hr/documents.php" class="nav-item <?php echo $current_page === 'hr-documents' ? 'active' : ''; ?>">
                     <i class="fas fa-file-alt"></i>
                     <span>จัดการเอกสาร</span>
                 </a>
+
+                <a href="/hr/document_templates.php" class="nav-item <?php echo $current_page === 'hr-document-templates' ? 'active' : ''; ?>">
+                    <i class="fas fa-file-signature"></i>
+                    <span>ตั้งค่าเอกสารรับรอง</span>
+                </a>
                 
+                <?php if ($isCEO): ?>
                 <a href="/hr/reports.php" class="nav-item <?php echo $current_page === 'hr-reports' ? 'active' : ''; ?>">
                     <i class="fas fa-chart-bar"></i>
                     <span>รายงาน</span>
@@ -434,6 +436,7 @@ $current_page = $current_page ?? '';
                     <i class="fas fa-cog"></i>
                     <span>ตั้งค่าระบบ</span>
                 </a>
+                <?php endif; ?>
             </nav>
         </div>
         <?php endif; ?>

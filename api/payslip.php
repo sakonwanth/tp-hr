@@ -95,6 +95,8 @@ function generatePayslipHTML($slip, $monthName, $year) {
         $otherDeduction = json_decode($slip['deduction_other_json'], true) ?: [];
     }
     
+    $companyName = getSetting('company_name', 'บริษัท ทีพี-แอสเสท ดีเวลลอปเม้นท์ จำกัด');
+    
     $html = '<!DOCTYPE html>
 <html lang="th">
 <head>
@@ -130,7 +132,7 @@ function generatePayslipHTML($slip, $monthName, $year) {
 <body>
     <div class="container">
         <div class="header">
-            <h1>บริษัท ทีพี โฮม จำกัด</h1>
+            <h1>' . htmlspecialchars($companyName) . '</h1>
             <h2>ใบแสดงรายได้ประจำเดือน ' . $monthName . ' ' . $year . '</h2>
         </div>
         

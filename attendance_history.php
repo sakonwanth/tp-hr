@@ -54,6 +54,74 @@ $stmt = $pdo->prepare("
 $stmt->execute([$user['id'], $month]);
 $summary = $stmt->fetch();
 
+// Get holidays for this month
+$stmtHolidays = $pdo->prepare("
+    SELECT date, name, type 
+    FROM hr_holidays 
+    WHERE DATE_FORMAT(date, '%Y-%m') = ? AND is_active = 1
+    ORDER BY date
+");
+$stmtHolidays->execute([$month]);
+$holidays = [];
+foreach ($stmtHolidays->fetchAll() as $h) {
+    $holidays[$h['date']] = $h;
+}
+
+// Build full calendar for the month (all days up to today or end of month)
+$monthStart = $month . '-01';
+$monthEnd = date('Y-m-t', strtotime($monthStart));
+$today = date('Y-m-d');
+$lastDay = ($monthEnd <= $today) ? $monthEnd : $today;
+
+// Index attendance records by date
+$attendanceByDate = [];
+foreach ($attendances as $att) {
+    $attendanceByDate[$att['attendance_date']] = $att;
+}
+
+// Get employee's day-off schedule (default)
+$stmtSched = $pdo->prepare("SELECT day_off FROM hr_employee_schedules WHERE user_id = ?");
+$stmtSched->execute([$user['id']]);
+$schedule = $stmtSched->fetch();
+$defaultDayOff = $schedule ? (int)$schedule['day_off'] : 0;
+
+// Get approved day-off swaps for this month
+$stmtSwaps = $pdo->prepare("
+    SELECT week_start, week_end, requested_day_off 
+    FROM hr_dayoff_requests 
+    WHERE user_id = ? AND status = 'APPROVED' 
+    AND week_start <= ? AND week_end >= ?
+");
+$stmtSwaps->execute([$user['id'], $lastDay, $monthStart]);
+$dayoffSwaps = $stmtSwaps->fetchAll();
+
+// Generate all days
+$allDays = [];
+$currentDay = $monthStart;
+while ($currentDay <= $lastDay) {
+    $dow = (int)date('w', strtotime($currentDay));
+    // Check if this date falls in an approved swap week
+    $effectiveDayOff = $defaultDayOff;
+    foreach ($dayoffSwaps as $swap) {
+        if ($currentDay >= $swap['week_start'] && $currentDay <= $swap['week_end']) {
+            $effectiveDayOff = (int)$swap['requested_day_off'];
+            break;
+        }
+    }
+    $isDayOff = ($dow === $effectiveDayOff);
+    $holiday = $holidays[$currentDay] ?? null;
+    $att = $attendanceByDate[$currentDay] ?? null;
+    
+    $allDays[] = [
+        'date' => $currentDay,
+        'dow' => $dow,
+        'is_day_off' => $isDayOff,
+        'holiday' => $holiday,
+        'attendance' => $att,
+    ];
+    $currentDay = date('Y-m-d', strtotime('+1 day', strtotime($currentDay)));
+}
+
 // Generate month options (last 12 months)
 $month_options = [];
 for ($i = 0; $i < 12; $i++) {
@@ -106,6 +174,7 @@ require_once __DIR__ . '/templates/header.php';
                     <option value="LATE" <?php echo $status_filter === 'LATE' ? 'selected' : ''; ?>>มาสาย</option>
                     <option value="ABSENT" <?php echo $status_filter === 'ABSENT' ? 'selected' : ''; ?>>ขาดงาน</option>
                     <option value="LEAVE" <?php echo $status_filter === 'LEAVE' ? 'selected' : ''; ?>>ลา</option>
+                    <option value="HOLIDAY" <?php echo $status_filter === 'HOLIDAY' ? 'selected' : ''; ?>>วันหยุด</option>
                 </select>
             </div>
         </form>
@@ -158,23 +227,47 @@ require_once __DIR__ . '/templates/header.php';
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if ($attendances): ?>
-                        <?php foreach ($attendances as $att): ?>
-                        <tr class="border-b border-white/5 hover:bg-white/5">
+                    <?php if ($allDays): ?>
+                        <?php foreach ($allDays as $day): 
+                            $att = $day['attendance'];
+                            $isDayOff = $day['is_day_off'];
+                            $holiday = $day['holiday'];
+                            $dayNames = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+                            
+                            // Determine row style
+                            $rowClass = 'border-b border-white/5 hover:bg-white/5';
+                            if ($holiday) {
+                                $rowClass = 'border-b border-white/5 bg-orange-500/5';
+                            } elseif ($isDayOff) {
+                                $rowClass = 'border-b border-white/5 bg-blue-500/5';
+                            }
+                        ?>
+                        <tr class="<?php echo $rowClass; ?>">
                             <td class="px-4 py-3">
-                                <div class="text-white"><?php echo formatDateThai($att['attendance_date']); ?></div>
-                                <div class="text-white/50 text-xs">
-                                    <?php 
-                                    $dayNames = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
-                                    echo $dayNames[date('w', strtotime($att['attendance_date']))];
-                                    ?>
+                                <div class="flex items-center gap-2">
+                                    <div>
+                                        <div class="text-white <?php echo ($isDayOff || $holiday) ? 'opacity-70' : ''; ?>">
+                                            <?php echo formatDateThai($day['date']); ?>
+                                        </div>
+                                        <div class="text-xs <?php echo $isDayOff ? 'text-blue-400' : ($holiday ? 'text-orange-400' : 'text-white/50'); ?>">
+                                            <?php echo $dayNames[$day['dow']]; ?>
+                                            <?php if ($holiday): ?>
+                                                <span class="ml-1 text-orange-400">
+                                                    <i class="fas fa-star text-[10px]"></i>
+                                                    <?php echo htmlspecialchars($holiday['name']); ?>
+                                                </span>
+                                            <?php elseif ($isDayOff): ?>
+                                                <span class="ml-1 text-blue-400/70">วันหยุด</span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
                                 </div>
                             </td>
                             <td class="px-4 py-3 text-center text-white/70 text-sm">
-                                <?php echo $att['shift_name'] ?? '-'; ?>
+                                <?php echo $att ? ($att['shift_name'] ?? '-') : '-'; ?>
                             </td>
                             <td class="px-4 py-3 text-center">
-                                <?php if ($att['check_in_time']): ?>
+                                <?php if ($att && $att['check_in_time']): ?>
                                     <span class="text-green-400 font-medium">
                                         <?php echo date('H:i', strtotime($att['check_in_time'])); ?>
                                     </span>
@@ -186,7 +279,7 @@ require_once __DIR__ . '/templates/header.php';
                                 <?php endif; ?>
                             </td>
                             <td class="px-4 py-3 text-center">
-                                <?php if ($att['check_out_time']): ?>
+                                <?php if ($att && $att['check_out_time']): ?>
                                     <span class="text-blue-400 font-medium">
                                         <?php echo date('H:i', strtotime($att['check_out_time'])); ?>
                                     </span>
@@ -196,7 +289,7 @@ require_once __DIR__ . '/templates/header.php';
                             </td>
                             <td class="px-4 py-3 text-center text-white">
                                 <?php 
-                                if ($att['work_minutes']) {
+                                if ($att && $att['work_minutes']) {
                                     echo floor($att['work_minutes'] / 60) . ':' . str_pad($att['work_minutes'] % 60, 2, '0', STR_PAD_LEFT);
                                 } else {
                                     echo '-';
@@ -204,7 +297,7 @@ require_once __DIR__ . '/templates/header.php';
                                 ?>
                             </td>
                             <td class="px-4 py-3 text-center">
-                                <?php if ($att['ot_minutes'] > 0): ?>
+                                <?php if ($att && $att['ot_minutes'] > 0): ?>
                                     <span class="text-emerald-400">
                                         <?php echo floor($att['ot_minutes'] / 60); ?>:<?php echo str_pad($att['ot_minutes'] % 60, 2, '0', STR_PAD_LEFT); ?>
                                     </span>
@@ -213,19 +306,35 @@ require_once __DIR__ . '/templates/header.php';
                                 <?php endif; ?>
                             </td>
                             <td class="px-4 py-3 text-center">
+                                <?php if ($holiday): ?>
+                                <span class="px-2 py-1 text-xs rounded bg-orange-500/20 text-orange-400">
+                                    <?php echo match($holiday['type']) {
+                                        'PUBLIC' => 'วันหยุดราชการ',
+                                        'COMPANY' => 'วันหยุดบริษัท',
+                                        'SPECIAL' => 'วันหยุดพิเศษ',
+                                        'SUBSTITUTE' => 'วันหยุดชดเชย',
+                                        default => 'วันหยุด'
+                                    }; ?>
+                                </span>
+                                <?php elseif ($isDayOff): ?>
+                                <span class="px-2 py-1 text-xs rounded bg-blue-500/20 text-blue-400">วันหยุด</span>
+                                <?php elseif ($att): ?>
                                 <span class="px-2 py-1 text-xs rounded <?php 
                                     echo match($att['status']) {
                                         'PRESENT' => 'bg-green-500/20 text-green-400',
                                         'LATE' => 'bg-yellow-500/20 text-yellow-400',
                                         'ABSENT' => 'bg-red-500/20 text-red-400',
                                         'LEAVE' => 'bg-blue-500/20 text-blue-400',
-                                        'HOLIDAY' => 'bg-gray-500/20 text-gray-400',
+                                        'HOLIDAY' => 'bg-orange-500/20 text-orange-400',
                                         'WFH' => 'bg-purple-500/20 text-purple-400',
                                         default => 'bg-gray-500/20 text-gray-400'
                                     };
                                 ?>">
                                     <?php echo ATTENDANCE_STATUS[$att['status']] ?? $att['status']; ?>
                                 </span>
+                                <?php else: ?>
+                                <span class="px-2 py-1 text-xs rounded bg-red-500/20 text-red-400">ขาดงาน</span>
+                                <?php endif; ?>
                             </td>
                         </tr>
                         <?php endforeach; ?>

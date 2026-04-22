@@ -41,6 +41,10 @@ if ($method === 'POST') {
             handleAdjust($pdo, $user, $input);
             break;
             
+        case 'delete':
+            handleDelete($pdo, $user, $input);
+            break;
+            
         default:
             apiError('Invalid action');
     }
@@ -58,6 +62,10 @@ if ($method === 'POST') {
             
         case 'monthly':
             getMonthlyReport($pdo, $user);
+            break;
+            
+        case 'adjustment_history':
+            getAdjustmentHistory($pdo, $user);
             break;
             
         default:
@@ -93,14 +101,21 @@ function handleCheckIn(PDO $pdo, array $user, array $input): void {
     $status = 'PRESENT';
     
     if ($shift) {
+        $defaults = getShiftDefaults($shift);
         $shiftStart = strtotime(date('Y-m-d') . ' ' . $shift['start_time']);
-        $gracePeriod = ($shift['grace_period_minutes'] ?? 15) * 60;
+        $gracePeriod = $defaults['grace_period_minutes'] * 60;
         $now = time();
         
         if ($now > ($shiftStart + $gracePeriod)) {
             $lateMinutes = floor(($now - $shiftStart) / 60);
             $status = 'LATE';
         }
+    }
+
+    // WFH employees: force status to WFH, no lateness tracking
+    if (($user['work_mode'] ?? 'OFFICE') === 'WFH') {
+        $status = 'WFH';
+        $lateMinutes = 0;
     }
     
     // Validate location (optional)
@@ -208,7 +223,8 @@ function handleCheckOut(PDO $pdo, array $user, array $input): void {
     $workMinutes = floor(($checkOutTime - $checkInTime) / 60);
     
     // Subtract break time
-    $breakMinutes = $shift['break_minutes'] ?? 60;
+    $defaults = getShiftDefaults($shift ?: null);
+    $breakMinutes = $defaults['break_minutes'];
     $workMinutes -= $breakMinutes;
     if ($workMinutes < 0) $workMinutes = 0;
     
@@ -216,7 +232,7 @@ function handleCheckOut(PDO $pdo, array $user, array $input): void {
     $otMinutes = 0;
     if ($shift) {
         $shiftEnd = strtotime(date('Y-m-d') . ' ' . $shift['end_time']);
-        $expectedWorkMinutes = ($shift['work_hours_per_day'] ?? 8) * 60;
+        $expectedWorkMinutes = $defaults['work_hours_per_day'] * 60;
         
         if ($workMinutes > $expectedWorkMinutes) {
             $otMinutes = $workMinutes - $expectedWorkMinutes;
@@ -349,7 +365,7 @@ function getTodayAttendance(PDO $pdo, array $user): void {
  */
 function getAttendanceHistory(PDO $pdo, array $user): void {
     $page = (int)($_GET['page'] ?? 1);
-    $limit = (int)($_GET['limit'] ?? 30);
+    $limit = (int)($_GET['limit'] ?? DEFAULT_PER_PAGE);
     $offset = ($page - 1) * $limit;
     
     $month = $_GET['month'] ?? date('Y-m');
@@ -424,12 +440,22 @@ function handleAdjust(PDO $pdo, array $user, array $input): void {
     $userId = (int)($input['user_id'] ?? 0);
     $date = $input['attendance_date'] ?? '';
     $attendanceId = $input['attendance_id'] ?? '';
-    $checkInTime = $input['check_in_time'] ?? '';
-    $checkOutTime = $input['check_out_time'] ?? '';
+    $checkInTime = trim((string)($input['check_in_time'] ?? ''));
+    $checkOutTime = trim((string)($input['check_out_time'] ?? ''));
     $note = trim($input['note'] ?? '');
     
     if (!$userId || !$date) {
         apiError('ข้อมูลไม่ครบถ้วน');
+    }
+    
+    // Require reason for any adjustment (audit compliance)
+    if ($note === '') {
+        apiError('กรุณาระบุเหตุผลการแก้ไขเวลา');
+    }
+    
+    // Must have at least one time to adjust — empty-both = delete, use /delete action instead
+    if ($checkInTime === '' && $checkOutTime === '') {
+        apiError('กรุณาระบุเวลาเข้าหรือเวลาออกอย่างน้อยหนึ่งช่อง (หากต้องการลบข้อมูล ให้ใช้ปุ่ม "ลบข้อมูลการลงเวลา")');
     }
     
     // Validate date
@@ -446,55 +472,61 @@ function handleAdjust(PDO $pdo, array $user, array $input): void {
     $stmt = $pdo->query("SELECT * FROM hr_work_shifts WHERE is_default = 1 AND is_active = 1 LIMIT 1");
     $shift = $stmt->fetch();
     
-    // Prepare times
-    $checkInFull = $checkInTime ? "$date $checkInTime:00" : null;
-    $checkOutFull = $checkOutTime ? "$date $checkOutTime:00" : null;
+    // Effective values: new value (if provided) else keep existing
+    $checkInFull  = $checkInTime  !== '' ? "$date $checkInTime:00"  : ($existing['check_in_time']  ?? null);
+    $checkOutFull = $checkOutTime !== '' ? "$date $checkOutTime:00" : ($existing['check_out_time'] ?? null);
+    $checkInChanged  = ($checkInTime  !== '');
+    $checkOutChanged = ($checkOutTime !== '');
     
-    // Calculate work hours and late minutes
+    // Calculate work / late / status
     $workMinutes = 0;
     $lateMinutes = 0;
-    $status = 'PRESENT';
+    $status = $existing['status'] ?? 'PRESENT';
+    $defaults = getShiftDefaults($shift ?: null);
     
     if ($checkInFull && $shift) {
         $shiftStart = strtotime("$date " . $shift['start_time']);
-        $gracePeriod = ($shift['grace_period_minutes'] ?? 15) * 60;
+        $gracePeriod = $defaults['grace_period_minutes'] * 60;
         $checkInTs = strtotime($checkInFull);
-        
         if ($checkInTs > ($shiftStart + $gracePeriod)) {
-            $lateMinutes = floor(($checkInTs - $shiftStart) / 60);
+            $lateMinutes = (int)floor(($checkInTs - $shiftStart) / 60);
             $status = 'LATE';
+        } else {
+            $status = 'PRESENT';
         }
     }
     
     if ($checkInFull && $checkOutFull) {
-        $workMinutes = floor((strtotime($checkOutFull) - strtotime($checkInFull)) / 60);
-        $workMinutes -= ($shift['break_minutes'] ?? 60);
+        $workMinutes = (int)floor((strtotime($checkOutFull) - strtotime($checkInFull)) / 60);
+        $workMinutes -= $defaults['break_minutes'];
         if ($workMinutes < 0) $workMinutes = 0;
     }
     
     try {
         if ($existing) {
-            // Update existing
+            // Absolute update — supports explicit NULL clears
             $stmt = $pdo->prepare("
                 UPDATE hr_attendances SET
-                    check_in_time = COALESCE(?, check_in_time),
-                    check_out_time = COALESCE(?, check_out_time),
-                    check_in_type = CASE WHEN ? IS NOT NULL THEN 'MANUAL' ELSE check_in_type END,
-                    check_out_type = CASE WHEN ? IS NOT NULL THEN 'MANUAL' ELSE check_out_type END,
-                    work_minutes = CASE WHEN ? > 0 THEN ? ELSE work_minutes END,
-                    late_minutes = CASE WHEN ? IS NOT NULL THEN ? ELSE late_minutes END,
+                    check_in_time = ?,
+                    check_out_time = ?,
+                    check_in_type = CASE WHEN ? = 1 THEN 'MANUAL' ELSE check_in_type END,
+                    check_out_type = CASE WHEN ? = 1 THEN 'MANUAL' ELSE check_out_type END,
+                    work_minutes = ?,
+                    late_minutes = ?,
                     status = ?,
-                    notes = ?,
+                    adjustment_reason = ?,
                     adjusted_by = ?,
                     adjusted_at = NOW(),
                     updated_at = NOW()
                 WHERE id = ?
             ");
             $stmt->execute([
-                $checkInFull, $checkOutFull,
-                $checkInFull, $checkOutFull,
-                $workMinutes, $workMinutes,
-                $checkInFull, $lateMinutes,
+                $checkInFull,
+                $checkOutFull,
+                $checkInChanged ? 1 : 0,
+                $checkOutChanged ? 1 : 0,
+                $workMinutes,
+                $lateMinutes,
                 $status,
                 $note,
                 $user['id'],
@@ -507,7 +539,7 @@ function handleAdjust(PDO $pdo, array $user, array $input): void {
                     user_id, attendance_date, shift_id,
                     check_in_time, check_in_type,
                     check_out_time, check_out_type,
-                    work_minutes, late_minutes, status, notes,
+                    work_minutes, late_minutes, status, adjustment_reason,
                     adjusted_by, adjusted_at
                 ) VALUES (?, ?, ?, ?, 'MANUAL', ?, 'MANUAL', ?, ?, ?, ?, ?, NOW())
             ");
@@ -518,17 +550,234 @@ function handleAdjust(PDO $pdo, array $user, array $input): void {
                 $user['id']
             ]);
         }
-        
-        // Log action
-        Auth::log('ATTENDANCE_ADJUST', 'hr_attendances', $existing['id'] ?? $pdo->lastInsertId(), [
-            'target_user_id' => $userId,
-            'date' => $date,
-            'note' => $note
-        ]);
-        
+        // Detailed audit log: capture before/after values
+        $recordId = (int)($existing['id'] ?? $pdo->lastInsertId());
+        $oldValues = $existing ? [
+            'target_user_id'    => $userId,
+            'attendance_date'   => $date,
+            'check_in_time'     => $existing['check_in_time'] ?? null,
+            'check_out_time'    => $existing['check_out_time'] ?? null,
+            'check_in_type'     => $existing['check_in_type'] ?? null,
+            'check_out_type'    => $existing['check_out_type'] ?? null,
+            'work_minutes'      => (int)($existing['work_minutes'] ?? 0),
+            'late_minutes'      => (int)($existing['late_minutes'] ?? 0),
+            'status'            => $existing['status'] ?? null,
+            'adjustment_reason' => $existing['adjustment_reason'] ?? null,
+        ] : [
+            'target_user_id'    => $userId,
+            'attendance_date'   => $date,
+            '_note'             => 'no previous record',
+        ];
+        $newValues = [
+            'target_user_id'    => $userId,
+            'attendance_date'   => $date,
+            'check_in_time'     => $checkInFull,
+            'check_out_time'    => $checkOutFull,
+            'check_in_type'     => $checkInFull ? 'MANUAL' : ($existing['check_in_type'] ?? null),
+            'check_out_type'    => $checkOutFull ? 'MANUAL' : ($existing['check_out_type'] ?? null),
+            'work_minutes'      => (int)$workMinutes,
+            'late_minutes'      => (int)$lateMinutes,
+            'status'            => $status,
+            'adjustment_reason' => $note,
+            'adjusted_by'       => (int)$user['id'],
+        ];
+        Auth::log('ATTENDANCE_ADJUST', 'hr_attendances', $recordId, $oldValues, $newValues);
         apiSuccess([], 'บันทึกข้อมูลสำเร็จ');
-        
     } catch (Exception $e) {
+        error_log('handleAdjust exception: ' . $e->getMessage());
         apiError('เกิดข้อผิดพลาด: ' . $e->getMessage());
     }
 }
+
+/**
+ * Get adjustment history for a specific attendance (HR/Manager only)
+ * GET params: user_id, date  (identify the attendance row)
+ */
+function getAdjustmentHistory(PDO $pdo, array $user): void {
+    if (!isHR() && !hasRole(MANAGER_ROLES)) {
+        apiError('ไม่มีสิทธิ์ดำเนินการ', 403);
+    }
+
+    $userId = (int)($_GET['user_id'] ?? 0);
+    $date   = $_GET['date'] ?? '';
+
+    if (!$userId || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+        apiError('ข้อมูลไม่ครบถ้วน');
+    }
+
+    // Find attendance record id (if still exists)
+    $stmt = $pdo->prepare("SELECT id FROM hr_attendances WHERE user_id = ? AND attendance_date = ?");
+    $stmt->execute([$userId, $date]);
+    $row = $stmt->fetch();
+    $recordId = $row ? (int)$row['id'] : 0;
+
+    // Query audit logs for both ADJUST and DELETE actions on this user+date.
+    // Search by JSON payload (reliable even after row deletion/recreation), union with record_id
+    // if the current row still exists, to catch very old entries with minimal payload.
+    $userLike = '%"target_user_id":' . $userId . '%';
+    $dateLike = '%"attendance_date":"' . $date . '"%';
+
+    if ($recordId) {
+        $stmt = $pdo->prepare("
+            SELECT al.*, u.first_name_th, u.last_name_th, u.employee_code
+            FROM hr_audit_logs al
+            LEFT JOIN users u ON u.id = al.user_id
+            WHERE al.table_name = 'hr_attendances'
+              AND al.action IN ('ATTENDANCE_ADJUST','ATTENDANCE_DELETE')
+              AND (
+                    al.record_id = ?
+                 OR (al.new_values LIKE ? AND al.new_values LIKE ?)
+                 OR (al.old_values LIKE ? AND al.old_values LIKE ?)
+              )
+            ORDER BY al.created_at DESC
+            LIMIT 100
+        ");
+        $stmt->execute([$recordId, $userLike, $dateLike, $userLike, $dateLike]);
+    } else {
+        $stmt = $pdo->prepare("
+            SELECT al.*, u.first_name_th, u.last_name_th, u.employee_code
+            FROM hr_audit_logs al
+            LEFT JOIN users u ON u.id = al.user_id
+            WHERE al.table_name = 'hr_attendances'
+              AND al.action IN ('ATTENDANCE_ADJUST','ATTENDANCE_DELETE')
+              AND (
+                    (al.new_values LIKE ? AND al.new_values LIKE ?)
+                 OR (al.old_values LIKE ? AND al.old_values LIKE ?)
+              )
+            ORDER BY al.created_at DESC
+            LIMIT 100
+        ");
+        $stmt->execute([$userLike, $dateLike, $userLike, $dateLike]);
+    }
+
+    $logs = [];
+    while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $logs[] = [
+            'id'          => (int)$r['id'],
+            'action'      => $r['action'],
+            'created_at'  => $r['created_at'],
+            'by_user_id'  => (int)$r['user_id'],
+            'by_name'     => trim(($r['first_name_th'] ?? '') . ' ' . ($r['last_name_th'] ?? '')),
+            'by_code'     => $r['employee_code'] ?? '',
+            'ip_address'  => $r['ip_address'] ?? '',
+            'old_values'  => $r['old_values'] ? json_decode($r['old_values'], true) : null,
+            'new_values'  => $r['new_values'] ? json_decode($r['new_values'], true) : null,
+        ];
+    }
+
+    apiSuccess(['logs' => $logs, 'count' => count($logs)]);
+}
+
+/**
+ * Handle attendance record deletion (HR only).
+ * Removes the whole hr_attendances row for (user, date), including photos, location, and minutes.
+ * Status will naturally fall back to holiday/leave/day-off/absent on display.
+ */
+function handleDelete(PDO $pdo, array $user, array $input): void {
+    if (!isHR()) {
+        apiError('ไม่มีสิทธิ์ดำเนินการ', 403);
+    }
+    if (!verifyCsrfToken($input['_token'] ?? '')) {
+        apiError('Invalid token', 403);
+    }
+
+    $userId = (int)($input['user_id'] ?? 0);
+    $date   = $input['attendance_date'] ?? '';
+    $note   = trim($input['note'] ?? '');
+
+    if (!$userId || !$date) {
+        apiError('ข้อมูลไม่ครบถ้วน');
+    }
+    if ($note === '') {
+        apiError('กรุณาระบุเหตุผลการลบข้อมูล');
+    }
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+        apiError('รูปแบบวันที่ไม่ถูกต้อง');
+    }
+
+    $stmt = $pdo->prepare("SELECT * FROM hr_attendances WHERE user_id = ? AND attendance_date = ?");
+    $stmt->execute([$userId, $date]);
+    $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$existing) {
+        apiError('ไม่พบข้อมูลการลงเวลาของวันนี้');
+    }
+
+    try {
+        $oldValues = [
+            'target_user_id'      => $userId,
+            'attendance_date'     => $date,
+            'check_in_time'       => $existing['check_in_time'] ?? null,
+            'check_out_time'      => $existing['check_out_time'] ?? null,
+            'check_in_type'       => $existing['check_in_type'] ?? null,
+            'check_out_type'      => $existing['check_out_type'] ?? null,
+            'check_in_photo'      => $existing['check_in_photo'] ?? null,
+            'check_out_photo'     => $existing['check_out_photo'] ?? null,
+            'check_in_latitude'   => $existing['check_in_latitude'] ?? null,
+            'check_in_longitude'  => $existing['check_in_longitude'] ?? null,
+            'check_out_latitude'  => $existing['check_out_latitude'] ?? null,
+            'check_out_longitude' => $existing['check_out_longitude'] ?? null,
+            'work_minutes'        => (int)($existing['work_minutes'] ?? 0),
+            'late_minutes'        => (int)($existing['late_minutes'] ?? 0),
+            'early_leave_minutes' => (int)($existing['early_leave_minutes'] ?? 0),
+            'status'              => $existing['status'] ?? null,
+            'adjustment_reason'   => $existing['adjustment_reason'] ?? null,
+        ];
+
+        $attId = (int)$existing['id'];
+        $pdo->beginTransaction();
+
+        // Clean up dependent rows (FK constraints)
+        $childCounts = ['outside_requests' => 0, 'adjustments' => 0];
+
+        $cnt = $pdo->prepare("SELECT COUNT(*) FROM hr_attendance_outside_requests WHERE attendance_id = ?");
+        $cnt->execute([$attId]);
+        $childCounts['outside_requests'] = (int)$cnt->fetchColumn();
+        if ($childCounts['outside_requests'] > 0) {
+            $pdo->prepare("DELETE FROM hr_attendance_outside_requests WHERE attendance_id = ?")->execute([$attId]);
+        }
+
+        $cnt = $pdo->prepare("SELECT COUNT(*) FROM hr_attendance_adjustments WHERE attendance_id = ?");
+        $cnt->execute([$attId]);
+        $childCounts['adjustments'] = (int)$cnt->fetchColumn();
+        if ($childCounts['adjustments'] > 0) {
+            $pdo->prepare("DELETE FROM hr_attendance_adjustments WHERE attendance_id = ?")->execute([$attId]);
+        }
+
+        // Delete the main record
+        $del = $pdo->prepare("DELETE FROM hr_attendances WHERE id = ?");
+        $del->execute([$attId]);
+
+        $pdo->commit();
+
+        // Best-effort: remove photo files on disk
+        $photoFiles = array_filter([
+            $existing['check_in_photo']  ?? null,
+            $existing['check_out_photo'] ?? null,
+        ]);
+        foreach ($photoFiles as $rel) {
+            // Only delete if under storage/
+            $rel = ltrim((string)$rel, '/');
+            if ($rel && strpos($rel, 'storage/') === 0) {
+                $full = __DIR__ . '/../' . $rel;
+                if (is_file($full)) @unlink($full);
+            }
+        }
+
+        Auth::log('ATTENDANCE_DELETE', 'hr_attendances', $attId, $oldValues, [
+            'target_user_id'    => $userId,
+            'attendance_date'   => $date,
+            'action'            => 'DELETED',
+            'adjustment_reason' => $note,
+            'adjusted_by'       => (int)$user['id'],
+            'child_rows_deleted'=> $childCounts,
+        ]);
+
+        apiSuccess([], 'ลบข้อมูลการลงเวลาสำเร็จ');
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        error_log('handleDelete exception: ' . $e->getMessage());
+        apiError('เกิดข้อผิดพลาด: ' . $e->getMessage());
+    }
+}
+

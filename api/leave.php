@@ -141,7 +141,7 @@ function getHistory($pdo, $user) {
     $type = $_GET['type'] ?? '';
     $status = $_GET['status'] ?? '';
     $page = (int)($_GET['page'] ?? 1);
-    $limit = (int)($_GET['limit'] ?? 20);
+    $limit = (int)($_GET['limit'] ?? DEFAULT_PER_PAGE);
     $offset = ($page - 1) * $limit;
     
     $sql = "
@@ -240,7 +240,7 @@ function getDetail($pdo, $user) {
  */
 function getPending($pdo, $user) {
     // Check permission
-    if (!hasRole('hr_admin') && !hasRole('hr_manager') && !hasRole('manager')) {
+    if (!isHR() && !hasRole(MANAGER_ROLES)) {
         http_response_code(403);
         echo json_encode(['success' => false, 'error' => 'ไม่มีสิทธิ์เข้าถึง']);
         return;
@@ -428,7 +428,7 @@ function createLeaveRequest($pdo, $user) {
     if (isset($_FILES['document']) && $_FILES['document']['error'] === UPLOAD_ERR_OK) {
         $uploadResult = uploadFile($_FILES['document'], 'leave_documents', [
             'types' => ['pdf', 'jpg', 'jpeg', 'png'],
-            'max_size' => 5 * 1024 * 1024 // 5MB
+            'max_size' => MAX_UPLOAD_SIZE
         ]);
         
         if ($uploadResult['success']) {
@@ -547,7 +547,7 @@ function cancelLeaveRequest($pdo, $user) {
  */
 function approveLeaveRequest($pdo, $user) {
     // Check permission
-    if (!hasRole('hr_admin') && !hasRole('hr_manager') && !hasRole('manager')) {
+    if (!isHR() && !hasRole(MANAGER_ROLES)) {
         http_response_code(403);
         echo json_encode(['success' => false, 'error' => 'ไม่มีสิทธิ์ดำเนินการ']);
         return;
@@ -615,7 +615,7 @@ function approveLeaveRequest($pdo, $user) {
  */
 function rejectLeaveRequest($pdo, $user) {
     // Check permission
-    if (!hasRole('hr_admin') && !hasRole('hr_manager') && !hasRole('manager')) {
+    if (!isHR() && !hasRole(MANAGER_ROLES)) {
         http_response_code(403);
         echo json_encode(['success' => false, 'error' => 'ไม่มีสิทธิ์ดำเนินการ']);
         return;

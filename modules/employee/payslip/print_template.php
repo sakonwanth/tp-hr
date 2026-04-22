@@ -13,40 +13,40 @@ if (!isset($slip) || !$slip) {
     die('ไม่พบข้อมูลสลิปเงินเดือน');
 }
 
-// Get company settings from database (same as CRM)
+// Get company info from CRM's system_settings table (same source as CRM payroll)
 $company_name = 'บริษัท ทีพี-แอสเสท ดีเวลลอปเม้นท์ จำกัด';
 $company_name_en = 'TP-ASSET DEVELOPMENT CO., LTD.';
+$company_tax_id = '0135569010741';
 
-// Try to get from settings table
 try {
-    if (isset($pdo)) {
-        // Try settings table
-        $stmtSetting = $pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = 'company_name' LIMIT 1");
-        $stmtSetting->execute();
-        $row = $stmtSetting->fetch();
-        if ($row && !empty($row['setting_value'])) {
-            $company_name = $row['setting_value'];
+    $stmt = $pdo->prepare("SELECT setting_key, setting_value FROM system_settings WHERE setting_key IN ('company_name','company_name_en','company_tax_id')");
+    $stmt->execute();
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $v = trim((string)($row['setting_value'] ?? ''));
+        if ($v === '') continue;
+        switch ($row['setting_key']) {
+            case 'company_name':    $company_name = $v; break;
+            case 'company_name_en': $company_name_en = $v; break;
+            case 'company_tax_id':  $company_tax_id = $v; break;
         }
     }
 } catch (Exception $e) {
-    // Use default
+    // fall back to defaults
 }
 
-// Logo from CRM (use absolute URL to CRM assets)
-$logo_brand_src = 'https://crm.tp-asset.com/asset/logo/tp-brand.png';
-$watermark_src = 'https://crm.tp-asset.com/asset/logo/TP-ASSET%20DEVELOPMENT-logo-08.png';
-
-// Thai months
-$thai_months = ['', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 
-                'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+// Logo & watermark — use EXACT same files as CRM payroll_print.php
+// Header: LOGO TP-ASSET - 6.png (horizontal brand)
+// Watermark: LOGO TP-ASSET - 5.png (square brand mark)
+$logo_brand_src = 'https://crm.tp-asset.com/asset/logo/LOGO%20TP-ASSET%20-%206.png';
+$watermark_src  = 'https://crm.tp-asset.com/asset/logo/LOGO%20TP-ASSET%20-%205.png';
 
 $pm = strtotime($slip['payroll_month']);
-$month_label_th = $thai_months[(int)date('n', $pm)] . ' ' . ((int)date('Y', $pm) + 543);
+$month_label_th = thaiMonth((int)date('n', $pm)) . ' ' . ((int)date('Y', $pm) + 543);
 $month_label_en = date('F Y', $pm);
 $period_label = date('m/Y', $pm);
 $ytd_year = (int)date('Y', $pm);
 
-$full_name = trim(($slip['first_name_th'] ?? '') . ' ' . ($slip['last_name_th'] ?? ''));
+$full_name = trim(($slip['emp_title'] ?? '') . ($slip['first_name_th'] ?? '') . ' ' . ($slip['last_name_th'] ?? ''));
 $emp_code = $slip['employee_code'] ?? '';
 
 // Bilingual labels (same as CRM)
@@ -151,7 +151,7 @@ header('Content-Type: text/html; charset=utf-8');
             flex-shrink: 0;
         }
         .doc-header-logo img {
-            height: 44px;
+            height: 72px;
             width: auto;
             display: block;
         }
@@ -318,7 +318,10 @@ header('Content-Type: text/html; charset=utf-8');
             <div class="doc-header-right">
                 <div class="company-name"><?php echo htmlspecialchars($company_name); ?></div>
                 <div class="doc-type">Payroll Statement / ใบสำคัญจ่ายเงินเดือน</div>
-                <div class="doc-period">Period <?php echo $period_label; ?></div>
+                <?php if (!empty($company_tax_id)): ?>
+                <div class="tax-id" style="font-size:11px;color:#475569;margin-top:3px;font-weight:500;">เลขทะเบียนนิติบุคคล / Tax ID: <span style="font-weight:600;color:#1a365d;font-variant-numeric:tabular-nums;"><?php echo htmlspecialchars($company_tax_id); ?></span></div>
+                <?php endif; ?>
+                <div class="doc-period" style="font-size:12px;color:#475569;margin-top:3px;font-weight:600;">Period <?php echo $period_label; ?></div>
             </div>
         </header>
 
@@ -416,6 +419,12 @@ header('Content-Type: text/html; charset=utf-8');
                         <tr>
                             <td>ประกันสังคม / Social Security</td>
                             <td class="amt"><?php echo number_format($slip['social_security'], 2); ?></td>
+                        </tr>
+                        <?php endif; ?>
+                        <?php if ((float)($slip['group_insurance'] ?? 0) != 0): ?>
+                        <tr>
+                            <td>ประกันกลุ่ม / Group Insurance</td>
+                            <td class="amt"><?php echo number_format($slip['group_insurance'], 2); ?></td>
                         </tr>
                         <?php endif; ?>
                         <?php

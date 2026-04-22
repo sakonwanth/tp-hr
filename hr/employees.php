@@ -14,6 +14,31 @@ if (!isHR()) {
     redirect('/', 302);
 }
 
+// Check for CEO-level actions (add, edit, delete)
+$action = $_GET['action'] ?? '';
+
+// Redirect add/edit to employee_form.php
+if ($action === 'add') {
+    if (!canManageUsers()) {
+        flash('error', 'คุณไม่มีสิทธิ์ในการเพิ่มพนักงาน ต้องเป็นระดับ CEO ขึ้นไป');
+        redirect('/hr/employees.php', 302);
+    }
+    redirect('/hr/employee_form.php?action=add', 302);
+}
+
+if ($action === 'edit') {
+    $id = (int)($_GET['id'] ?? 0);
+    if ($id > 0) {
+        redirect("/hr/employee_form.php?action=edit&id={$id}", 302);
+    }
+    redirect('/hr/employees.php', 302);
+}
+
+if ($action === 'delete' && !canManageUsers()) {
+    flash('error', 'คุณไม่มีสิทธิ์ในการลบพนักงาน ต้องเป็นระดับ CEO ขึ้นไป');
+    redirect('/hr/employees.php', 302);
+}
+
 $pdo = Database::getInstance()->getConnection();
 
 // Filters
@@ -21,7 +46,7 @@ $search = $_GET['search'] ?? '';
 $department = $_GET['department'] ?? '';
 $status = $_GET['status'] ?? '';
 $page = max(1, (int)($_GET['page'] ?? 1));
-$limit = 20;
+$limit = DEFAULT_PER_PAGE;
 $offset = ($page - 1) * $limit;
 
 // Get departments
@@ -31,10 +56,10 @@ $departments = $stmtDepts->fetchAll(PDO::FETCH_COLUMN);
 // Build query
 $sql = "
     SELECT u.*, 
-           (SELECT COUNT(*) FROM hr_attendances a WHERE a.user_id = u.id AND a.attendance_date = CURDATE()) as checked_in_today,
+           (SELECT COUNT(*) FROM hr_attendances a WHERE a.user_id = u.id AND a.attendance_date = CURDATE() AND a.check_in_time IS NOT NULL) as checked_in_today,
            (SELECT SUM(total_days) FROM hr_leave_requests lr WHERE lr.user_id = u.id AND lr.status = 'APPROVED' AND YEAR(lr.start_date) = YEAR(CURDATE())) as total_leave_days
     FROM users u
-    WHERE u.id > 0
+    WHERE u.id > 0 AND u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")
 ";
 $params = [];
 
@@ -59,13 +84,13 @@ if ($status === 'ACTIVE') {
 }
 
 // Count
-$countSql = "SELECT COUNT(*) FROM (" . str_replace("u.*, \n           (SELECT COUNT(*) FROM hr_attendances a WHERE a.user_id = u.id AND a.attendance_date = CURDATE()) as checked_in_today,\n           (SELECT SUM(total_days) FROM hr_leave_requests lr WHERE lr.user_id = u.id AND lr.status = 'APPROVED' AND YEAR(lr.start_date) = YEAR(CURDATE())) as total_leave_days", "1", $sql) . ") t";
+$countSql = "SELECT COUNT(*) FROM (" . str_replace("u.*, \n           (SELECT COUNT(*) FROM hr_attendances a WHERE a.user_id = u.id AND a.attendance_date = CURDATE() AND a.check_in_time IS NOT NULL) as checked_in_today,\n           (SELECT SUM(total_days) FROM hr_leave_requests lr WHERE lr.user_id = u.id AND lr.status = 'APPROVED' AND YEAR(lr.start_date) = YEAR(CURDATE())) as total_leave_days", "1", $sql) . ") t";
 $stmtCount = $pdo->prepare($countSql);
 $stmtCount->execute($params);
 $totalRecords = $stmtCount->fetchColumn();
 $totalPages = ceil($totalRecords / $limit);
 
-$sql .= " ORDER BY u.is_active DESC, u.first_name_th ASC LIMIT $limit OFFSET $offset";
+$sql .= " ORDER BY u.is_active DESC, u.employee_code ASC LIMIT $limit OFFSET $offset";
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
@@ -78,6 +103,7 @@ $stmtStats = $pdo->query("
         SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) as active,
         SUM(CASE WHEN is_active = 0 THEN 1 ELSE 0 END) as inactive
     FROM users
+    WHERE id NOT IN (" . SYSTEM_USER_IDS_SQL . ")
 ");
 $stats = $stmtStats->fetch();
 
@@ -92,9 +118,11 @@ include dirname(__DIR__) . '/templates/header.php';
     </nav>
     <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold text-white">จัดการพนักงาน</h1>
+        <?php if (canManageUsers()): ?>
         <a href="employees.php?action=add" class="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
             <i class="fas fa-plus mr-2"></i>เพิ่มพนักงาน
         </a>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -186,7 +214,12 @@ include dirname(__DIR__) . '/templates/header.php';
                             </div>
                             <?php endif; ?>
                             <div>
-                                <p class="text-white font-medium"><?php echo htmlspecialchars(($emp['first_name_th'] ?? '') . ' ' . ($emp['last_name_th'] ?? '')); ?></p>
+                                <p class="text-white font-medium">
+                                    <?php echo htmlspecialchars(($emp['first_name_th'] ?? '') . ' ' . ($emp['last_name_th'] ?? '')); ?>
+                                    <?php if (($emp['work_mode'] ?? 'OFFICE') === 'WFH'): ?>
+                                    <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] bg-blue-500/20 text-blue-300" title="Work From Home"><i class="fas fa-home mr-1"></i>WFH</span>
+                                    <?php endif; ?>
+                                </p>
                                 <p class="text-white/50 text-xs"><?php echo htmlspecialchars($emp['employee_code'] ?? 'ไม่มีรหัส'); ?></p>
                             </div>
                         </div>
@@ -208,6 +241,8 @@ include dirname(__DIR__) . '/templates/header.php';
                     <td class="px-4 py-3 text-center">
                         <?php if ($emp['checked_in_today']): ?>
                         <span class="px-3 py-1 rounded-full text-xs bg-green-500/20 text-green-400">เข้างาน</span>
+                        <?php elseif (($emp['work_mode'] ?? 'OFFICE') === 'WFH'): ?>
+                        <span class="px-3 py-1 rounded-full text-xs bg-blue-500/20 text-blue-300">WFH</span>
                         <?php else: ?>
                         <span class="px-3 py-1 rounded-full text-xs bg-gray-500/20 text-gray-400">-</span>
                         <?php endif; ?>
@@ -220,14 +255,29 @@ include dirname(__DIR__) . '/templates/header.php';
                         <?php endif; ?>
                     </td>
                     <td class="px-4 py-3 text-center">
-                        <a href="employees.php?action=view&id=<?php echo $emp['id']; ?>" 
+                        <a href="employee_view.php?id=<?php echo $emp['id']; ?>" 
                            class="px-2 py-1 bg-white/10 hover:bg-white/20 text-white text-xs rounded transition-colors mr-1" title="ดูข้อมูล">
                             <i class="fas fa-eye"></i>
                         </a>
+                        <a href="/hr/employee_attendance.php?id=<?php echo $emp['id']; ?>" 
+                           class="px-2 py-1 bg-violet-500/20 hover:bg-violet-500/30 text-violet-400 text-xs rounded transition-colors mr-1" title="ดูลงเวลา">
+                            <i class="fas fa-clock"></i>
+                        </a>
+                        <?php if (canManageUsers()): ?>
                         <a href="employees.php?action=edit&id=<?php echo $emp['id']; ?>" 
                            class="px-2 py-1 bg-white/10 hover:bg-white/20 text-white text-xs rounded transition-colors mr-1" title="แก้ไข">
                             <i class="fas fa-edit"></i>
                         </a>
+                        <button onclick="confirmDelete(<?php echo $emp['id']; ?>, '<?php echo htmlspecialchars($emp['first_name_th'] ?? ''); ?>')" 
+                                class="px-2 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs rounded transition-colors mr-1" title="ลบ">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <?php elseif (isHR()): ?>
+                        <a href="employees.php?action=edit&id=<?php echo $emp['id']; ?>" 
+                           class="px-2 py-1 bg-white/10 hover:bg-white/20 text-white text-xs rounded transition-colors mr-1" title="แก้ไข">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <?php endif; ?>
                         <button onclick="viewLeaveBalance(<?php echo $emp['id']; ?>)" 
                                 class="px-2 py-1 bg-white/10 hover:bg-white/20 text-white text-xs rounded transition-colors" title="สิทธิ์การลา">
                             <i class="fas fa-calendar-alt"></i>
@@ -332,6 +382,14 @@ async function viewLeaveBalance(userId) {
 function closeLeaveModal() {
     document.getElementById('leave-modal').classList.add('hidden');
 }
+
+<?php if (canManageUsers()): ?>
+function confirmDelete(userId, name) {
+    if (confirm(`คุณต้องการลบพนักงาน "${name}" ใช่หรือไม่?\n\nข้อมูลทั้งหมดจะถูกลบถาวร!`)) {
+        window.location.href = `employees.php?action=delete&id=${userId}&_token=<?php echo csrfToken(); ?>`;
+    }
+}
+<?php endif; ?>
 
 document.getElementById('leave-modal').addEventListener('click', e => { if (e.target === document.getElementById('leave-modal')) closeLeaveModal(); });
 </script>

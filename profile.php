@@ -106,6 +106,22 @@ include 'templates/header.php';
                 <i class="fas fa-calendar w-5 text-center"></i>
                 <span>เริ่มงาน <?php echo $profile['hire_date'] ? formatDateThai($profile['hire_date']) : '-'; ?></span>
             </div>
+            <?php 
+            $stmtMySchedule = $pdo->prepare("SELECT day_off FROM hr_employee_schedules WHERE user_id = ?");
+            $stmtMySchedule->execute([$user['id']]);
+            $mySchedule = $stmtMySchedule->fetch();
+            $dayNamesFull = THAI_DAY_NAMES;
+            $myDaysOff = [];
+            if ($mySchedule) {
+                $myDaysOff[] = $dayNamesFull[(int)$mySchedule['day_off']];
+            } else {
+                $myDaysOff = ['อาทิตย์'];
+            }
+            ?>
+            <div class="flex items-center gap-3 text-white/70">
+                <i class="fas fa-calendar-minus w-5 text-center text-blue-400"></i>
+                <span>วันหยุด: <?php echo implode(', ', $myDaysOff); ?></span>
+            </div>
         </div>
         
         <button onclick="openEditModal('profile')" class="w-full mt-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">

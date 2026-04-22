@@ -1,30 +1,50 @@
 #!/bin/bash
-# Push and Deploy script for tp-hr
-# Usage: ./push-deploy.sh "commit message"
+# TP-HR Deploy Script
+# Usage: ./push-deploy.sh ["commit message"]
+# - With message: git commit + push + deploy
+# - Without message: deploy only (no git)
 
+set -e
 cd "$(dirname "$0")"
 
-MESSAGE="${1:-Update}"
-
-echo "📦 Committing changes..."
-git add -A
-git commit -m "$MESSAGE"
-
-echo "⬆️  Pushing to GitHub..."
-git push
-
-echo "🚀 Deploying to server..."
 SERVER="root@crm.tp-asset.com"
 REMOTE_DIR="/var/www/vhosts/tp-asset.com/hr.tp-asset.com"
-REPO="sakonwanth/tp-hr"
+MESSAGE="$1"
 
-# Make repo temporarily public
-gh repo edit $REPO --visibility public --accept-visibility-change-consequences 2>/dev/null
+# ── Build Tailwind CSS ──
+echo "🎨 Building Tailwind CSS..."
+npx tailwindcss -i assets/css/input.css -o assets/css/app.css --minify 2>&1 | tail -1
 
-# Deploy to server
-ssh $SERVER "cd $REMOTE_DIR && curl -sL https://codeload.github.com/$REPO/tar.gz/main | tar -xzf - --strip-components=1 && chown -R tpasset:psacln . && echo '[$(date)] Deployed: $MESSAGE' >> storage/logs/deploy.log"
+# ── Git (optional) ──
+if [ -n "$MESSAGE" ]; then
+    echo "📦 Committing: $MESSAGE"
+    git add -A
+    git commit -m "$MESSAGE" || echo "  (nothing to commit)"
+    echo "⬆️  Pushing to GitHub..."
+    git push
+fi
 
-# Make repo private again  
-gh repo edit $REPO --visibility private --accept-visibility-change-consequences 2>/dev/null
+# ── Deploy via rsync ──
+echo "🚀 Deploying to $SERVER..."
+rsync -avz --delete \
+    --exclude='.env' \
+    --exclude='.git/' \
+    --exclude='uploads' \
+    --exclude='storage/uploads/' \
+    --exclude='storage/documents/' \
+    --exclude='storage/temp/' \
+    --exclude='storage/logs/' \
+    --exclude='_work/' \
+    --exclude='.DS_Store' \
+    --exclude='node_modules/' \
+    --exclude='vendor/' \
+    --exclude='package.json' \
+    --exclude='package-lock.json' \
+    --exclude='tailwind.config.js' \
+    --exclude='assets/css/input.css' \
+    ./ "$SERVER:$REMOTE_DIR/"
 
-echo "✅ Done! Changes are live at https://hr.tp-asset.com"
+# ── Fix permissions ──
+ssh "$SERVER" "chown -R tpasset:psacln $REMOTE_DIR && echo '[$(date)] Deployed: ${MESSAGE:-manual}' >> $REMOTE_DIR/storage/logs/deploy.log"
+
+echo "✅ Done! https://hr.tp-asset.com"

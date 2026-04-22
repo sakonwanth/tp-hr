@@ -152,35 +152,78 @@ function isHoliday(string $date): bool {
 }
 
 /**
- * Check if date is weekend
+ * Get the effective day-off weekday for a user on a given date.
+ * Consults hr_employee_schedules and approved hr_dayoff_requests swaps.
+ * Returns null if the user has no schedule row.
  */
-function isWeekend(string $date): bool {
-    $dayOfWeek = date('N', strtotime($date));
-    return $dayOfWeek >= 6;
+function getUserDayOff(int $userId, string $date): ?int {
+    static $cache = [];
+    $key = $userId . '|' . $date;
+    if (isset($cache[$key])) return $cache[$key];
+
+    $pdo = getDB();
+    $stmt = $pdo->prepare("SELECT day_off FROM hr_employee_schedules WHERE user_id = ?");
+    $stmt->execute([$userId]);
+    $row = $stmt->fetch();
+    if (!$row) return $cache[$key] = null;
+
+    $defaultDayOff = (int)$row['day_off'];
+
+    // Check for an approved swap covering this date
+    $stmtSwap = $pdo->prepare("
+        SELECT requested_day_off FROM hr_dayoff_requests
+        WHERE user_id = ? AND status = 'APPROVED'
+          AND ? BETWEEN week_start AND week_end
+        LIMIT 1
+    ");
+    $stmtSwap->execute([$userId, $date]);
+    $swap = $stmtSwap->fetch();
+    if ($swap) {
+        return $cache[$key] = (int)$swap['requested_day_off'];
+    }
+    return $cache[$key] = $defaultDayOff;
 }
 
 /**
- * Check if date is working day
+ * Check if date is a day off for a specific user (per employee schedule).
+ * If $userId is null, returns false (no global weekend assumption — use
+ * hr_holidays for company-wide off days).
  */
-function isWorkingDay(string $date): bool {
-    return !isWeekend($date) && !isHoliday($date);
+function isDayOff(string $date, ?int $userId = null): bool {
+    if ($userId === null) return false;
+    $userDayOff = getUserDayOff($userId, $date);
+    if ($userDayOff === null) return false;
+    return (int)date('w', strtotime($date)) === $userDayOff;
 }
 
 /**
- * Get next working day
+ * Check if date is a working day for the given user.
+ * Working day = not day-off, not a holiday.
  */
-function getNextWorkingDay(string $date, int $days = 1): string {
+function isWorkingDay(string $date, ?int $userId = null): bool {
+    return !isDayOff($date, $userId) && !isHoliday($date);
+}
+
+/**
+ * Get next working day for user.
+ */
+function getNextWorkingDay(string $date, int $days = 1, ?int $userId = null): string {
     $current = new DateTime($date);
     $count = 0;
-    
     while ($count < $days) {
         $current->modify('+1 day');
-        if (isWorkingDay($current->format('Y-m-d'))) {
+        if (isWorkingDay($current->format('Y-m-d'), $userId)) {
             $count++;
         }
     }
-    
     return $current->format('Y-m-d');
+}
+
+/**
+ * Thai weekday name (full form). $dow = 0 (Sunday) .. 6 (Saturday).
+ */
+function thaiDayName(int $dow): string {
+    return THAI_DAY_NAMES[$dow] ?? '';
 }
 
 /**
@@ -241,6 +284,27 @@ function apiSuccess(array $data = [], ?string $message = null): void {
     if ($message) $response['message'] = $message;
     $response = array_merge($response, $data);
     apiResponse($response);
+}
+
+/**
+ * Get shift defaults merged from (in order): passed $shift row, hr_settings,
+ * then final safe fallbacks. Returns keys: grace_period_minutes, break_minutes,
+ * work_hours_per_day.
+ */
+function getShiftDefaults(?array $shift = null): array {
+    static $settingsDefaults = null;
+    if ($settingsDefaults === null) {
+        $settingsDefaults = [
+            'grace_period_minutes' => (int)getSetting('grace_period_minutes', 15),
+            'break_minutes'        => (int)getSetting('break_minutes', 60),
+            'work_hours_per_day'   => (float)getSetting('work_hours_per_day', 8),
+        ];
+    }
+    return [
+        'grace_period_minutes' => (int)($shift['grace_period_minutes'] ?? $settingsDefaults['grace_period_minutes']),
+        'break_minutes'        => (int)($shift['break_minutes']        ?? $settingsDefaults['break_minutes']),
+        'work_hours_per_day'   => (float)($shift['work_hours_per_day'] ?? $settingsDefaults['work_hours_per_day']),
+    ];
 }
 
 /**

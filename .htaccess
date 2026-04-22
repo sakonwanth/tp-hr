@@ -3,6 +3,14 @@
 # Enable URL Rewriting
 RewriteEngine On
 
+# Pass Authorization header to PHP (required for Bearer tokens)
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# External API v1: route /api/v1/* -> /api/v1/index.php
+RewriteRule ^api/v1/?$          api/v1/index.php [L]
+RewriteRule ^api/v1/(.+)$       api/v1/index.php [L,QSA]
+
 # Redirect to HTTPS (uncomment in production)
 # RewriteCond %{HTTPS} off
 # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]

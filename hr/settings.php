@@ -1,11 +1,18 @@
 <?php
 /**
  * HR Settings - System Configuration
+ * CEO level only
  */
 
 require_once __DIR__ . '/../bootstrap.php';
 Auth::requireLogin();
 Auth::requireHR();
+
+// CEO-level access only
+if (!isCEOOrAbove()) {
+    flash('error', 'คุณไม่มีสิทธิ์เข้าถึงหน้าตั้งค่าระบบ');
+    redirect('/hr/', 302);
+}
 
 $pdo = getDB();
 $user = Auth::user();

@@ -19,12 +19,12 @@ $downloadSlipId = (int)($_GET['slip_id'] ?? 0);
 if ($action === 'download' && $downloadSlipId > 0) {
     // Get slip data for print template
     $stmt = $pdo->prepare("
-        SELECT ps.*, pr.payroll_month, pr.status as run_status,
-               emp.first_name_th, emp.last_name_th, emp.employee_code, emp.department, emp.position
+        SELECT ps.*, pr.payroll_month, pr.pay_day, pr.status as run_status,
+               emp.title as emp_title, emp.first_name_th, emp.last_name_th, emp.employee_code, emp.department, emp.position
         FROM payroll_slips ps
         JOIN payroll_runs pr ON ps.payroll_run_id = pr.id
         JOIN users emp ON ps.user_id = emp.id
-        WHERE ps.id = ? AND ps.user_id = ?
+        WHERE ps.id = ? AND ps.user_id = ? AND pr.status IN ('approved', 'paid')
     ");
     $stmt->execute([$downloadSlipId, $user['id']]);
     $slip = $stmt->fetch();
@@ -59,6 +59,7 @@ $viewMonth = $_GET['month'] ?? '';
 $viewSlipId = (int)($_GET['slip_id'] ?? 0);
 
 // Get user's payroll slips - connect to tp-crm payroll_slips table
+// แสดงเฉพาะรอบที่อนุมัติแล้ว (approved/paid) เท่านั้น ซ่อน draft/calculated ตามกระบวนการ CRM
 $stmt = $pdo->prepare("
     SELECT ps.*, pr.payroll_month, pr.status as run_status,
            pr.approved_by, u.first_name_th as approver_first, u.last_name_th as approver_last
@@ -66,7 +67,7 @@ $stmt = $pdo->prepare("
     JOIN payroll_runs pr ON ps.payroll_run_id = pr.id
     LEFT JOIN users u ON pr.approved_by = u.id
     WHERE ps.user_id = ? AND YEAR(pr.payroll_month) = ?
-    AND pr.status IN ('draft', 'calculated', 'approved', 'paid')
+    AND pr.status IN ('approved', 'paid')
     ORDER BY pr.payroll_month DESC
 ");
 $stmt->execute([$user['id'], $year]);
@@ -93,12 +94,12 @@ if ($viewSlipId > 0) {
     $stmt = $pdo->prepare("
         SELECT ps.*, pr.payroll_month, pr.status as run_status,
                pr.approved_by, u.first_name_th as approver_first, u.last_name_th as approver_last,
-               emp.first_name_th, emp.last_name_th, emp.employee_code, emp.department, emp.position
+               emp.title as emp_title, emp.first_name_th, emp.last_name_th, emp.employee_code, emp.department, emp.position
         FROM payroll_slips ps
         JOIN payroll_runs pr ON ps.payroll_run_id = pr.id
         LEFT JOIN users u ON pr.approved_by = u.id
         JOIN users emp ON ps.user_id = emp.id
-        WHERE ps.id = ? AND ps.user_id = ?
+        WHERE ps.id = ? AND ps.user_id = ? AND pr.status IN ('approved', 'paid')
     ");
     $stmt->execute([$viewSlipId, $user['id']]);
     $slip = $stmt->fetch();
@@ -260,6 +261,12 @@ include 'templates/header.php';
                     <span class="text-white print:text-black font-medium"><?php echo number_format($slip['provident_fund'], 2); ?></span>
                 </div>
                 <?php endif; ?>
+                <?php if (isset($slip['group_insurance']) && (float)$slip['group_insurance'] > 0): ?>
+                <div class="flex justify-between">
+                    <span class="text-white/70 print:text-gray-700">ประกันกลุ่ม (ส่วนพนักงาน)</span>
+                    <span class="text-white print:text-black font-medium"><?php echo number_format($slip['group_insurance'], 2); ?></span>
+                </div>
+                <?php endif; ?>
                 <?php 
                 // Other deduction items
                 if (!empty($slip['deduction_other_json'])) {
@@ -374,12 +381,14 @@ include 'templates/header.php';
         $monthName = thaiMonth(date('n', strtotime($s['payroll_month'])));
         $yearBE = date('Y', strtotime($s['payroll_month'])) + 543;
         $statusColors = [
-            'pending' => 'bg-yellow-500/20 text-yellow-400',
+            'draft' => 'bg-gray-500/20 text-gray-400',
+            'calculated' => 'bg-yellow-500/20 text-yellow-400',
             'approved' => 'bg-blue-500/20 text-blue-400',
             'paid' => 'bg-green-500/20 text-green-400'
         ];
         $statusText = [
-            'pending' => 'รออนุมัติ',
+            'draft' => 'ฉบับร่าง',
+            'calculated' => 'คำนวณแล้ว',
             'approved' => 'อนุมัติแล้ว',
             'paid' => 'จ่ายแล้ว'
         ];

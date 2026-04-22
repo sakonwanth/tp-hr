@@ -1,0 +1,27 @@
+{
+  "name": "tp-hr",
+  "version": "1.0.0",
+  "description": "ระบบบริหารทรัพยากรบุคคลสำหรับ TP Asset Development เชื่อมต่อกับระบบเงินเดือน TP-CRM",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sakonwanth/tp-hr.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/sakonwanth/tp-hr/issues"
+  },
+  "homepage": "https://github.com/sakonwanth/tp-hr#readme",
+  "devDependencies": {
+    "tailwindcss": "^3.4.19"
+  }
+}

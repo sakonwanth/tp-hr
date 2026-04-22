@@ -26,7 +26,7 @@ $stmtAttendance = $pdo->prepare("
     SELECT 
         COUNT(DISTINCT a.user_id) as checked_in,
         SUM(CASE WHEN a.status = 'LATE' THEN 1 ELSE 0 END) as late_count,
-        (SELECT COUNT(*) FROM users WHERE is_active = 1) as total_employees
+        (SELECT COUNT(*) FROM users WHERE is_active = 1 AND id NOT IN (" . SYSTEM_USER_IDS_SQL . ")) as total_employees
     FROM hr_attendances a
     WHERE DATE(a.check_in_time) = ?
 ");
@@ -90,7 +90,7 @@ $stmtMonthly = $pdo->prepare("
         COUNT(DISTINCT DATE(check_in_time)) as working_days,
         COUNT(DISTINCT user_id) as unique_employees,
         AVG(CASE 
-            WHEN status = 'ON_TIME' THEN 1 
+            WHEN status = 'PRESENT' THEN 1 
             WHEN status = 'LATE' THEN 0.5 
             ELSE 0 
         END) * 100 as attendance_rate

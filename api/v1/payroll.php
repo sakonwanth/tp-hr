@@ -1,0 +1,93 @@
+<?php
+/**
+ * Payroll endpoints (read-only)
+ *
+ *   GET /api/v1/payroll-runs                      scope: payroll.read
+ *   GET /api/v1/payroll-runs/{id}                 scope: payroll.read
+ *   GET /api/v1/payroll-runs/{id}/slips           scope: payroll.read
+ *   GET /api/v1/payslips?month=YYYY-MM[&user_id=] scope: payroll.read
+ *   GET /api/v1/payslips/{id}                     scope: payroll.read
+ *
+ * Only returns runs/slips with status IN ('approved', 'paid').
+ */
+ApiAuth::require(['payroll.read']);
+ApiAuth::requireMethod(['GET']);
+
+$pdo = getDB();
+$resource = $segments[0] ?? '';
+$id = isset($segments[1]) ? (int)$segments[1] : 0;
+$sub = $segments[2] ?? '';
+
+$slipSelect = "
+    SELECT s.id, s.payroll_run_id, s.user_id, u.employee_code, u.first_name_th, u.last_name_th,
+           s.gross_salary, s.bonus, s.allowances, s.total_income,
+           s.tax_withheld, s.provident_fund, s.social_security, s.group_insurance,
+           s.total_deductions, s.net_salary,
+           s.absent_days, s.late_count_30, s.late_count_60,
+           s.absence_deduction, s.lateness_deduction,
+           r.payroll_month, r.status AS run_status, r.approved_at
+    FROM payroll_slips s
+    JOIN payroll_runs r ON r.id = s.payroll_run_id
+    JOIN users u ON u.id = s.user_id
+    WHERE r.status IN ('approved','paid')
+      AND u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")
+";
+
+if ($resource === 'payroll-runs') {
+    if ($id > 0 && $sub === 'slips') {
+        $stmt = $pdo->prepare($slipSelect . " AND r.id = ? ORDER BY u.employee_code ASC");
+        $stmt->execute([$id]);
+        ApiAuth::success(['data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+    }
+    if ($id > 0) {
+        $stmt = $pdo->prepare("
+            SELECT id, payroll_month, pay_day, status, total_gross, total_tax, total_net,
+                   employee_count, approved_at, created_at
+            FROM payroll_runs
+            WHERE id = ? AND status IN ('approved','paid')
+            LIMIT 1
+        ");
+        $stmt->execute([$id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) ApiAuth::fail(404, 'Payroll run not found');
+        ApiAuth::success(['data' => $row]);
+    }
+    $rows = $pdo->query("
+        SELECT id, payroll_month, pay_day, status, total_gross, total_tax, total_net,
+               employee_count, approved_at, created_at
+        FROM payroll_runs
+        WHERE status IN ('approved','paid')
+        ORDER BY payroll_month DESC
+        LIMIT 120
+    ")->fetchAll(PDO::FETCH_ASSOC);
+    ApiAuth::success(['data' => $rows]);
+}
+
+if ($resource === 'payslips') {
+    if ($id > 0) {
+        $stmt = $pdo->prepare($slipSelect . " AND s.id = ? LIMIT 1");
+        $stmt->execute([$id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) ApiAuth::fail(404, 'Payslip not found');
+        ApiAuth::success(['data' => $row]);
+    }
+    $month  = trim($_GET['month'] ?? '');
+    $userId = isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0;
+
+    $extra = '';
+    $params = [];
+    if ($month !== '') {
+        if (!preg_match('/^\d{4}-\d{2}$/', $month)) ApiAuth::fail(400, 'Invalid month (YYYY-MM)');
+        $extra .= " AND DATE_FORMAT(r.payroll_month, '%Y-%m') = ?";
+        $params[] = $month;
+    }
+    if ($userId > 0) {
+        $extra .= " AND s.user_id = ?";
+        $params[] = $userId;
+    }
+    $stmt = $pdo->prepare($slipSelect . $extra . " ORDER BY r.payroll_month DESC, u.employee_code ASC LIMIT 2000");
+    $stmt->execute($params);
+    ApiAuth::success(['data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+}
+
+ApiAuth::fail(404, 'Endpoint not found');

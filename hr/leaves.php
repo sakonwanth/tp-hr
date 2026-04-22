@@ -22,7 +22,7 @@ $type = (int)($_GET['type'] ?? 0);
 $department = $_GET['department'] ?? '';
 $month = $_GET['month'] ?? date('Y-m');
 $page = max(1, (int)($_GET['page'] ?? 1));
-$limit = 20;
+$limit = DEFAULT_PER_PAGE;
 $offset = ($page - 1) * $limit;
 
 // Get leave types
