@@ -4,13 +4,12 @@
  * ไฟล์เริ่มต้นระบบ - โหลดก่อนทุกหน้า
  */
 
-// Error reporting
-error_reporting(E_ALL);
-ini_set('display_errors', 0);
-ini_set('log_errors', 1);
-
 // Base path
 define('BASE_PATH', __DIR__);
+
+// Shared error handler (registered early; APP_DEBUG resolved lazily)
+require_once dirname(BASE_PATH) . '/tp-common/src/ErrorHandler.php';
+\TpCommon\ErrorHandler::register('tp-hr', BASE_PATH . '/logs');
 define('STORAGE_PATH', BASE_PATH . '/storage');
 define('UPLOAD_PATH', STORAGE_PATH . '/uploads');
 define('DOCUMENT_PATH', STORAGE_PATH . '/documents');

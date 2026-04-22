@@ -3,6 +3,15 @@
 .env.local
 .env.*.local
 
+# Secrets & Keys (defense-in-depth)
+*.key
+*.pem
+*.pfx
+*.crt
+id_rsa*
+secrets/
+.secrets/
+
 # Dependencies
 /vendor/
 /node_modules/
