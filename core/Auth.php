@@ -105,19 +105,28 @@ class Auth {
     }
     
     /**
-     * Require user to be logged in
+     * Require user to be logged in.
+     * SSO: redirects to CRM login if TpCommon\Auth\SsoGuard is available.
      */
     public static function requireLogin(): void {
-        if (!self::check()) {
-            if (self::isAjax()) {
-                http_response_code(401);
-                echo json_encode(['error' => 'Unauthorized']);
-                exit;
-            }
-            
-            $redirectUrl = urlencode($_SERVER['REQUEST_URI'] ?? '');
-            redirect('/login.php?redirect=' . $redirectUrl);
+        if (self::check()) return;
+
+        // SSO — redirect to central CRM login
+        if (defined('TP_COMMON_AVAILABLE') && TP_COMMON_AVAILABLE
+            && class_exists('TpCommon\Auth\SsoGuard')) {
+            \TpCommon\Auth\SsoGuard::requireLogin();
+            return;
         }
+
+        // Fallback — local login page
+        if (self::isAjax()) {
+            http_response_code(401);
+            echo json_encode(['error' => 'Unauthorized']);
+            exit;
+        }
+
+        $redirectUrl = urlencode($_SERVER['REQUEST_URI'] ?? '');
+        redirect('/login.php?redirect=' . $redirectUrl);
     }
     
     /**

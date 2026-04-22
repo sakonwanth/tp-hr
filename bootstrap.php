@@ -93,6 +93,13 @@ if (TP_COMMON_AVAILABLE && class_exists('TpCommon\Session\SharedSession')) {
 // Timezone
 date_default_timezone_set('Asia/Bangkok');
 
+// SSO Guard — configure central login URL
+if (TP_COMMON_AVAILABLE && class_exists('TpCommon\Auth\SsoGuard')) {
+    $crmUrl = defined('CRM_BASE_URL') ? CRM_BASE_URL
+        : ($_ENV['CRM_BASE_URL'] ?? getenv('CRM_BASE_URL') ?: 'http://localhost/tp-crm');
+    \TpCommon\Auth\SsoGuard::configure($crmUrl);
+}
+
 // Core classes
 require_once BASE_PATH . '/core/Database.php';
 require_once BASE_PATH . '/core/Auth.php';
