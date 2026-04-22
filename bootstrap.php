@@ -56,8 +56,13 @@ if (TP_COMMON_AVAILABLE) {
 require_once BASE_PATH . '/config/app.php';
 require_once BASE_PATH . '/config/database.php';
 
-// Session
-if (TP_COMMON_AVAILABLE) {
+// Session — SSO shared session (Phase 5)
+if (TP_COMMON_AVAILABLE && class_exists('TpCommon\Session\SharedSession')) {
+    \TpCommon\Session\SharedSession::start([
+        'project'  => 'tp-hr',
+        'lifetime' => defined('SESSION_LIFETIME') ? (int)SESSION_LIFETIME : 7200,
+    ]);
+} elseif (TP_COMMON_AVAILABLE) {
     \TpCommon\Auth\Session::start([
         'name'         => 'TPHRSESSID',
         'lifetime'     => defined('SESSION_LIFETIME') ? (int)SESSION_LIFETIME : 7200,
