@@ -1,0 +1,21 @@
+{
+    "name": "tpasset/tp-hr",
+    "description": "TP-HR — Human Resource Management System",
+    "type": "project",
+    "license": "proprietary",
+    "minimum-stability": "stable",
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../tp-common",
+            "options": { "symlink": true }
+        }
+    ],
+    "require": {
+        "php": ">=8.1",
+        "tpasset/tp-common": "@dev"
+    },
+    "autoload": {
+        "psr-4": {}
+    }
+}

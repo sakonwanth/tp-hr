@@ -1,74 +1,61 @@
 <?php
 /**
- * Database Connection (Singleton)
+ * Database Connection — shim extending TpCommon\Database\Connection
+ *
+ * Keeps legacy API (getInstance, getConnection, beginTransaction, etc.)
+ * while delegating to the shared library.
+ *
+ * @see TpCommon\Database\Connection
  */
-class Database {
-    private static ?Database $instance = null;
-    private PDO $connection;
-    
-    private function __construct() {
-        $dsn = sprintf(
-            "mysql:host=%s;port=%s;dbname=%s;charset=%s",
-            DB_HOST,
-            DB_PORT,
-            DB_NAME,
-            DB_CHARSET
-        );
-        
-        try {
-            $this->connection = new PDO($dsn, DB_USER, DB_PASS, DB_OPTIONS);
-        } catch (PDOException $e) {
-            if (APP_DEBUG) {
-                throw new Exception("Database connection failed: " . $e->getMessage());
-            }
-            throw new Exception("Database connection failed");
-        }
+
+use TpCommon\Database\Connection;
+
+class Database
+{
+    private static ?self $instance = null;
+
+    private function __construct()
+    {
+        Connection::configureFromConstants();
     }
-    
-    public static function getInstance(): Database {
+
+    public static function getInstance(): self
+    {
         if (self::$instance === null) {
             self::$instance = new self();
         }
         return self::$instance;
     }
-    
-    public function getConnection(): PDO {
-        return $this->connection;
+
+    public function getConnection(): PDO
+    {
+        return Connection::getConnection();
     }
-    
-    /**
-     * Begin transaction
-     */
-    public function beginTransaction(): bool {
-        return $this->connection->beginTransaction();
+
+    public function beginTransaction(): bool
+    {
+        return Connection::getInstance()->beginTransaction();
     }
-    
-    /**
-     * Commit transaction
-     */
-    public function commit(): bool {
-        return $this->connection->commit();
+
+    public function commit(): bool
+    {
+        return Connection::getInstance()->commit();
     }
-    
-    /**
-     * Rollback transaction
-     */
-    public function rollback(): bool {
-        return $this->connection->rollBack();
+
+    public function rollback(): bool
+    {
+        return Connection::getInstance()->rollback();
     }
-    
-    /**
-     * Get last insert ID
-     */
-    public function lastInsertId(): string {
-        return $this->connection->lastInsertId();
+
+    public function lastInsertId(): string
+    {
+        return Connection::getInstance()->lastInsertId();
     }
-    
-    // Prevent cloning
+
     private function __clone() {}
-    
-    // Prevent unserialization
-    public function __wakeup() {
-        throw new Exception("Cannot unserialize singleton");
+
+    public function __wakeup(): never
+    {
+        throw new RuntimeException('Cannot unserialize singleton');
     }
 }
