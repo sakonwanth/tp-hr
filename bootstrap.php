@@ -9,10 +9,12 @@ define('BASE_PATH', __DIR__);
 
 // Detect TpCommon availability (local dev has vendor/ from composer install)
 $_autoload = BASE_PATH . '/vendor/autoload.php';
-define('TP_COMMON_AVAILABLE', file_exists($_autoload));
+if (file_exists($_autoload)) {
+    require_once $_autoload;
+}
+define('TP_COMMON_AVAILABLE', class_exists('TpCommon\\ErrorHandler'));
 
 if (TP_COMMON_AVAILABLE) {
-    require_once $_autoload;
     \TpCommon\ErrorHandler::register('tp-hr', BASE_PATH . '/logs');
 } else {
     error_reporting(E_ALL);
