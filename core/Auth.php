@@ -72,8 +72,9 @@ class Auth {
             return ['success' => false, 'message' => 'รหัสผ่านไม่ถูกต้อง'];
         }
         
-        // Set session
+        // Set session (logged_in required for SSO compatibility with CRM)
         $_SESSION['user_id'] = $user['id'];
+        $_SESSION['logged_in'] = true;
         $_SESSION['logged_in_at'] = time();
         
         // Update last login
