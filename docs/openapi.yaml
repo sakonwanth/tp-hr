@@ -1,0 +1,1039 @@
+openapi: 3.0.3
+info:
+  title: TP-HR API
+  description: |
+    Human Resource Management API for the TP Platform.
+    Provides endpoints for employee management, attendance tracking,
+    leave management, payroll, and organizational data.
+  version: 1.0.0
+  contact:
+    name: TP Platform Team
+
+servers:
+  - url: /tp-hr/api/v1
+    description: Local development
+  - url: https://hr.tp-asset.com/api/v1
+    description: Production
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Auth
+    description: Health check (no auth required)
+  - name: Employees
+    description: Employee directory and profiles
+  - name: Attendance
+    description: Check-in/check-out and attendance records
+  - name: Leave
+    description: Leave requests and approvals
+  - name: Day-Off Requests
+    description: Day-off swap requests
+  - name: Overtime
+    description: Overtime requests and approvals
+  - name: Outside Attendance
+    description: Off-site work attendance
+  - name: Attendance Adjustments
+    description: Corrections to attendance records
+  - name: Payroll
+    description: Payroll runs and payslips
+  - name: HR Meta
+    description: Departments, positions, holidays, leave types, schedules, announcements
+
+paths:
+  /ping:
+    get:
+      tags: [Auth]
+      summary: Health check
+      security: []
+      responses:
+        '200':
+          description: Service is alive
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string, example: "TP-HR API v1" }
+                  time: { type: string, format: date-time }
+
+  /employees:
+    get:
+      tags: [Employees]
+      summary: List employees
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, default: 50, maximum: 200 }
+        - name: include_inactive
+          in: query
+          schema: { type: integer, enum: [0, 1], default: 0 }
+      responses:
+        '200':
+          description: Paginated employee list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/Employee' }
+                      meta: { $ref: '#/components/schemas/Pagination' }
+      security:
+        - BearerAuth: [employees.read]
+
+  /employees/{id}:
+    get:
+      tags: [Employees]
+      summary: Get employee detail
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      responses:
+        '200':
+          description: Employee detail
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/Employee' }
+        '404': { $ref: '#/components/responses/NotFound' }
+      security:
+        - BearerAuth: [employees.read]
+
+  /attendance:
+    get:
+      tags: [Attendance]
+      summary: List attendance records
+      parameters:
+        - name: date
+          in: query
+          description: Single date (mutually exclusive with from/to)
+          schema: { type: string, format: date }
+        - name: from
+          in: query
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          description: Max 90 days range from 'from'
+          schema: { type: string, format: date }
+        - name: user_id
+          in: query
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Attendance records (max 2000 rows)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/AttendanceRecord' }
+      security:
+        - BearerAuth: [attendance.read]
+
+  /attendance/checkin:
+    post:
+      tags: [Attendance]
+      summary: Record check-in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckInOutRequest'
+      responses:
+        '201':
+          description: Check-in recorded
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/CheckInOutResponse' }
+      security:
+        - BearerAuth: [attendance.write]
+
+  /attendance/checkout:
+    post:
+      tags: [Attendance]
+      summary: Record check-out
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckInOutRequest'
+      responses:
+        '201':
+          description: Check-out recorded
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/CheckInOutResponse' }
+      security:
+        - BearerAuth: [attendance.write]
+
+  /leave:
+    get:
+      tags: [Leave]
+      summary: List leave requests
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string, enum: [pending, approved, rejected, cancelled] }
+        - name: from
+          in: query
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          schema: { type: string, format: date }
+        - name: user_id
+          in: query
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Leave requests
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/LeaveRequest' }
+      security:
+        - BearerAuth: [leave.read]
+    post:
+      tags: [Leave]
+      summary: Create leave request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLeaveRequest'
+      responses:
+        '201':
+          description: Leave request created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          id: { type: integer }
+                          request_number: { type: string }
+      security:
+        - BearerAuth: [leave.write]
+
+  /leave/{id}:
+    get:
+      tags: [Leave]
+      summary: Get leave request detail
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      responses:
+        '200':
+          description: Leave request detail
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/LeaveRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+      security:
+        - BearerAuth: [leave.read]
+
+  /leave/{id}/cancel:
+    post:
+      tags: [Leave]
+      summary: Cancel leave request (owner only)
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id]
+              properties:
+                user_id: { type: integer }
+      responses:
+        '200':
+          description: Leave cancelled
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          id: { type: integer }
+                          status: { type: string }
+      security:
+        - BearerAuth: [leave.write]
+
+  /leave/{id}/approve:
+    post:
+      tags: [Leave]
+      summary: Approve leave request
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LeaveApprovalRequest' }
+      responses:
+        '200':
+          description: Leave approved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/LeaveApprovalResponse' }
+      security:
+        - BearerAuth: [leave.approve]
+
+  /leave/{id}/reject:
+    post:
+      tags: [Leave]
+      summary: Reject leave request
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LeaveApprovalRequest' }
+      responses:
+        '200':
+          description: Leave rejected
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/LeaveApprovalResponse' }
+      security:
+        - BearerAuth: [leave.approve]
+
+  /dayoff-requests:
+    get:
+      tags: [Day-Off Requests]
+      summary: List day-off swap requests
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string, enum: [pending, approved, rejected] }
+        - name: from
+          in: query
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          schema: { type: string, format: date }
+        - name: user_id
+          in: query
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Day-off requests
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data: { type: array, items: { $ref: '#/components/schemas/DayOffRequest' } }
+      security:
+        - BearerAuth: [dayoff.read]
+    post:
+      tags: [Day-Off Requests]
+      summary: Create day-off swap request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id, week_start, week_end, original_day_off, requested_day_off, reason]
+              properties:
+                user_id: { type: integer }
+                week_start: { type: string, format: date }
+                week_end: { type: string, format: date }
+                original_day_off: { type: integer, minimum: 0, maximum: 6 }
+                requested_day_off: { type: integer, minimum: 0, maximum: 6 }
+                reason: { type: string }
+      responses:
+        '201':
+          description: Day-off request created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          id: { type: integer }
+      security:
+        - BearerAuth: [dayoff.write]
+
+  /dayoff-requests/{id}/approve:
+    post:
+      tags: [Day-Off Requests]
+      summary: Approve day-off request
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reviewer_id]
+              properties:
+                reviewer_id: { type: integer }
+                note: { type: string }
+      responses:
+        '200':
+          description: Day-off approved
+      security:
+        - BearerAuth: [dayoff.approve]
+
+  /dayoff-requests/{id}/reject:
+    post:
+      tags: [Day-Off Requests]
+      summary: Reject day-off request
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reviewer_id, note]
+              properties:
+                reviewer_id: { type: integer }
+                note: { type: string }
+      responses:
+        '200':
+          description: Day-off rejected
+      security:
+        - BearerAuth: [dayoff.approve]
+
+  /overtime:
+    get:
+      tags: [Overtime]
+      summary: List overtime requests
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string, enum: [pending, approved, rejected, cancelled] }
+        - name: from
+          in: query
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          schema: { type: string, format: date }
+        - name: user_id
+          in: query
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Overtime requests
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data: { type: array, items: { $ref: '#/components/schemas/OvertimeRequest' } }
+      security:
+        - BearerAuth: [overtime.read]
+    post:
+      tags: [Overtime]
+      summary: Create overtime request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id, work_date, planned_start, planned_end]
+              properties:
+                user_id: { type: integer }
+                work_date: { type: string, format: date }
+                planned_start: { type: string, example: "18:00" }
+                planned_end: { type: string, example: "21:00" }
+                ot_type: { type: string, enum: [normal, holiday, day_off], default: normal }
+                rate_multiplier: { type: number, minimum: 1, maximum: 5 }
+                reason: { type: string }
+      responses:
+        '201':
+          description: Overtime request created
+      security:
+        - BearerAuth: [overtime.write]
+
+  /overtime/{id}/approve:
+    post:
+      tags: [Overtime]
+      summary: Approve overtime
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [approver_id]
+              properties:
+                approver_id: { type: integer }
+                actual_hours: { type: number }
+      responses:
+        '200':
+          description: Overtime approved
+      security:
+        - BearerAuth: [overtime.approve]
+
+  /overtime/{id}/reject:
+    post:
+      tags: [Overtime]
+      summary: Reject overtime
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [approver_id, reason]
+              properties:
+                approver_id: { type: integer }
+                reason: { type: string }
+      responses:
+        '200':
+          description: Overtime rejected
+      security:
+        - BearerAuth: [overtime.approve]
+
+  /outside-attendance:
+    get:
+      tags: [Outside Attendance]
+      summary: List outside attendance records
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: from
+          in: query
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          schema: { type: string, format: date }
+        - name: user_id
+          in: query
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Outside attendance records
+      security:
+        - BearerAuth: [outside.read]
+
+  /outside-attendance/{id}/approve:
+    post:
+      tags: [Outside Attendance]
+      summary: Approve outside attendance
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reviewer_id]
+              properties:
+                reviewer_id: { type: integer }
+                remarks: { type: string }
+      responses:
+        '200':
+          description: Approved
+      security:
+        - BearerAuth: [outside.approve]
+
+  /outside-attendance/{id}/reject:
+    post:
+      tags: [Outside Attendance]
+      summary: Reject outside attendance
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reviewer_id, remarks]
+              properties:
+                reviewer_id: { type: integer }
+                remarks: { type: string }
+      responses:
+        '200':
+          description: Rejected
+      security:
+        - BearerAuth: [outside.approve]
+
+  /attendance-adjustments:
+    get:
+      tags: [Attendance Adjustments]
+      summary: List attendance adjustment requests
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: from
+          in: query
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          schema: { type: string, format: date }
+        - name: user_id
+          in: query
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Adjustment requests
+      security:
+        - BearerAuth: [adjustments.read]
+
+  /attendance-adjustments/{id}/approve:
+    post:
+      tags: [Attendance Adjustments]
+      summary: Approve adjustment (applies to hr_attendances)
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reviewer_id]
+              properties:
+                reviewer_id: { type: integer }
+                remarks: { type: string }
+      responses:
+        '200':
+          description: Approved and applied
+      security:
+        - BearerAuth: [adjustments.approve]
+
+  /attendance-adjustments/{id}/reject:
+    post:
+      tags: [Attendance Adjustments]
+      summary: Reject adjustment
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reviewer_id, remarks]
+              properties:
+                reviewer_id: { type: integer }
+                remarks: { type: string }
+      responses:
+        '200':
+          description: Rejected
+      security:
+        - BearerAuth: [adjustments.approve]
+
+  /payroll-runs:
+    get:
+      tags: [Payroll]
+      summary: List payroll runs (approved/paid only)
+      responses:
+        '200':
+          description: Payroll runs
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data: { type: array, items: { $ref: '#/components/schemas/PayrollRun' } }
+      security:
+        - BearerAuth: [payroll.read]
+
+  /payroll-runs/{id}:
+    get:
+      tags: [Payroll]
+      summary: Get payroll run detail
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      responses:
+        '200':
+          description: Payroll run detail
+      security:
+        - BearerAuth: [payroll.read]
+
+  /payroll-runs/{id}/slips:
+    get:
+      tags: [Payroll]
+      summary: List payslips for a payroll run
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      responses:
+        '200':
+          description: Payslips
+      security:
+        - BearerAuth: [payroll.read]
+
+  /payslips:
+    get:
+      tags: [Payroll]
+      summary: List payslips
+      parameters:
+        - name: month
+          in: query
+          schema: { type: string, example: "2026-04" }
+        - name: user_id
+          in: query
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Payslips
+      security:
+        - BearerAuth: [payroll.read]
+
+  /payslips/{id}:
+    get:
+      tags: [Payroll]
+      summary: Get payslip detail
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      responses:
+        '200':
+          description: Payslip detail
+      security:
+        - BearerAuth: [payroll.read]
+
+  /departments:
+    get:
+      tags: [HR Meta]
+      summary: List departments
+      responses:
+        '200':
+          description: Departments
+      security:
+        - BearerAuth: [hr.read]
+
+  /positions:
+    get:
+      tags: [HR Meta]
+      summary: List positions
+      responses:
+        '200':
+          description: Positions
+      security:
+        - BearerAuth: [hr.read]
+
+  /holidays:
+    get:
+      tags: [HR Meta]
+      summary: List holidays
+      parameters:
+        - name: year
+          in: query
+          required: true
+          schema: { type: integer, example: 2026 }
+      responses:
+        '200':
+          description: Holidays
+      security:
+        - BearerAuth: [hr.read]
+
+  /leave-types:
+    get:
+      tags: [HR Meta]
+      summary: List leave types
+      responses:
+        '200':
+          description: Leave types
+      security:
+        - BearerAuth: [hr.read]
+
+  /employee-schedules:
+    get:
+      tags: [HR Meta]
+      summary: List employee work schedules
+      parameters:
+        - name: user_id
+          in: query
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Schedules
+      security:
+        - BearerAuth: [hr.read]
+
+  /announcements:
+    get:
+      tags: [HR Meta]
+      summary: List announcements
+      responses:
+        '200':
+          description: Announcements
+      security:
+        - BearerAuth: [hr.read]
+
+  /leave-entitlements:
+    get:
+      tags: [HR Meta]
+      summary: List leave entitlements
+      parameters:
+        - name: year
+          in: query
+          required: true
+          schema: { type: integer }
+        - name: user_id
+          in: query
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Leave entitlements
+      security:
+        - BearerAuth: [hr.read]
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: |
+        API key issued via `hr_api_keys`. Format: `tphr_<32hex>`.
+        Key is hashed (SHA-256) before storage. Scopes control access.
+
+  parameters:
+    ResourceId:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer }
+
+  schemas:
+    SuccessResponse:
+      type: object
+      required: [success]
+      properties:
+        success: { type: boolean, example: true }
+
+    ErrorResponse:
+      type: object
+      required: [success, error]
+      properties:
+        success: { type: boolean, example: false }
+        error: { type: string }
+
+    Pagination:
+      type: object
+      properties:
+        page: { type: integer }
+        per_page: { type: integer }
+        total: { type: integer }
+        total_pages: { type: integer }
+
+    Employee:
+      type: object
+      properties:
+        id: { type: integer }
+        employee_code: { type: string }
+        first_name: { type: string }
+        last_name: { type: string }
+        email: { type: string }
+        department: { type: string }
+        position: { type: string }
+        hire_date: { type: string, format: date }
+        status: { type: string, enum: [active, inactive, resigned] }
+
+    AttendanceRecord:
+      type: object
+      properties:
+        id: { type: integer }
+        user_id: { type: integer }
+        attendance_date: { type: string, format: date }
+        check_in_time: { type: string, example: "08:30:00" }
+        check_out_time: { type: string, example: "17:30:00" }
+        status: { type: string }
+
+    CheckInOutRequest:
+      type: object
+      required: [user_id]
+      properties:
+        user_id: { type: integer }
+        time: { type: string, format: date-time }
+        type:
+          type: string
+          enum: [GPS, WIFI, QR, FACE, FINGERPRINT, MANUAL]
+          default: MANUAL
+        latitude: { type: number, format: double }
+        longitude: { type: number, format: double }
+        location_id: { type: integer }
+        remarks: { type: string }
+
+    CheckInOutResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        user_id: { type: integer }
+        attendance_date: { type: string, format: date }
+        action: { type: string, enum: [checkin, checkout] }
+        time: { type: string }
+
+    LeaveRequest:
+      type: object
+      properties:
+        id: { type: integer }
+        request_number: { type: string }
+        user_id: { type: integer }
+        leave_type_id: { type: integer }
+        leave_type_name: { type: string }
+        start_date: { type: string, format: date }
+        end_date: { type: string, format: date }
+        total_days: { type: number }
+        status: { type: string, enum: [pending, approved, rejected, cancelled] }
+        reason: { type: string }
+
+    CreateLeaveRequest:
+      type: object
+      required: [user_id, leave_type_id, start_date, end_date, total_days]
+      properties:
+        user_id: { type: integer }
+        leave_type_id: { type: integer }
+        start_date: { type: string, format: date }
+        end_date: { type: string, format: date }
+        start_period: { type: string, enum: [FULL, AM, PM], default: FULL }
+        end_period: { type: string, enum: [FULL, AM, PM], default: FULL }
+        total_days: { type: number }
+        reason: { type: string }
+        contact_number: { type: string }
+
+    LeaveApprovalRequest:
+      type: object
+      required: [approver_level, approver_id]
+      properties:
+        approver_level: { type: integer, enum: [1, 2, 3] }
+        approver_id: { type: integer }
+        remarks: { type: string, description: Required for rejection }
+
+    LeaveApprovalResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        level: { type: integer }
+        step_status: { type: string }
+        overall_status: { type: string }
+
+    DayOffRequest:
+      type: object
+      properties:
+        id: { type: integer }
+        user_id: { type: integer }
+        week_start: { type: string, format: date }
+        week_end: { type: string, format: date }
+        original_day_off: { type: integer }
+        requested_day_off: { type: integer }
+        reason: { type: string }
+        status: { type: string }
+
+    OvertimeRequest:
+      type: object
+      properties:
+        id: { type: integer }
+        user_id: { type: integer }
+        work_date: { type: string, format: date }
+        planned_start: { type: string }
+        planned_end: { type: string }
+        ot_type: { type: string, enum: [normal, holiday, day_off] }
+        rate_multiplier: { type: number }
+        status: { type: string, enum: [pending, approved, rejected, cancelled] }
+
+    PayrollRun:
+      type: object
+      properties:
+        id: { type: integer }
+        month: { type: string, example: "2026-04" }
+        status: { type: string, enum: [approved, paid] }
+        total_employees: { type: integer }
+        total_net_pay: { type: number }
+        approved_at: { type: string, format: date-time }
+
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    Unauthorized:
+      description: Missing or invalid Bearer token
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    Forbidden:
+      description: Insufficient scope
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema: { type: integer }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }

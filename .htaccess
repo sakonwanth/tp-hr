@@ -7,6 +7,9 @@ RewriteEngine On
 RewriteCond %{HTTP:Authorization} .
 RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
+# API Documentation: /docs -> /docs/index.html
+RewriteRule ^docs/?$ docs/index.html [L]
+
 # External API v1: route /api/v1/* -> /api/v1/index.php
 RewriteRule ^api/v1/?$          api/v1/index.php [L]
 RewriteRule ^api/v1/(.+)$       api/v1/index.php [L,QSA]

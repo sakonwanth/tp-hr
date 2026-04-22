@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TP-HR API Documentation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; padding: 0; }
+    .top-bar {
+      background: #1a56db;
+      color: white;
+      padding: 12px 24px;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .top-bar h1 { margin: 0; font-size: 18px; font-weight: 600; }
+    .top-bar .badge {
+      background: rgba(255,255,255,0.2);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .top-bar a {
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      margin-left: auto;
+      font-size: 14px;
+    }
+    .top-bar a:hover { color: white; }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <h1>TP-HR API</h1>
+    <span class="badge">v1.0.0</span>
+    <a href="openapi.yaml" download>Download OpenAPI Spec</a>
+  </div>
+  <redoc spec-url="openapi.yaml"
+         hide-hostname
+         theme='{
+           "colors": { "primary": { "main": "#1a56db" } },
+           "typography": { "fontFamily": "Inter, sans-serif" },
+           "sidebar": { "backgroundColor": "#f8fafc" }
+         }'>
+  </redoc>
+  <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+</body>
+</html>
