@@ -100,6 +100,16 @@ require_once BASE_PATH . '/core/Helpers.php';
 require_once BASE_PATH . '/core/ApiAuth.php';
 require_once BASE_PATH . '/core/WfhStamp.php';
 
+// Phase 7: Structured logging + audit log
+if (TP_COMMON_AVAILABLE) {
+    if (class_exists('TpCommon\Logging\Logger')) {
+        \TpCommon\Logging\Logger::init('tp-hr', BASE_PATH . '/logs');
+    }
+    if (class_exists('TpCommon\AuditLog')) {
+        try { \TpCommon\AuditLog::init(getDB(), 'tp-hr'); } catch (\Throwable $e) {}
+    }
+}
+
 // TP-CRM shared components (ถ้ามี)
 $tpCrmPath = dirname(BASE_PATH) . '/tp-crm';
 if (file_exists($tpCrmPath . '/bootstrap.php')) {

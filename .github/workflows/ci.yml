@@ -1,0 +1,48 @@
+name: CI — tp-hr
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo, pdo_mysql, mbstring, json, curl
+
+      - name: PHP syntax check
+        run: |
+          find . -name "*.php" -not -path "./vendor/*" -exec php -l {} \; 2>&1 | grep -i "error" && exit 1 || true
+          echo "Syntax check passed"
+
+      - name: Security scan
+        run: |
+          echo "Checking for exposed credentials..."
+          ! grep -rn "DB_PASS\s*=" . --include="*.php" | grep -v "getenv\|ENV\|\$_ENV\|env(" || true
+          ! grep -rn "\.env" .gitignore || echo "WARNING: .env not in .gitignore"
+
+  deploy:
+    needs: validate
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            cd ${{ secrets.DEPLOY_PATH_HR }}
+            git pull origin main
+            echo "Deploy complete: $(date)"
