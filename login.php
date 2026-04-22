@@ -19,7 +19,7 @@ $system_name = 'TP-HR';
 $system_tagline = 'Human Resource Management';
 $system_tagline_th = 'ระบบบริหารทรัพยากรบุคคล';
 $company_name = 'TP-Asset Development Co., Ltd.';
-$company_logo = 'https://crm.tp-asset.com/asset/logo/tp-logo.png';
+$company_logo = CRM_BASE_URL . '/asset/logo/tp-logo.png';
 
 $error = '';
 $success = '';
@@ -50,10 +50,9 @@ if (isset($_GET['error'])) {
 $lineLoginEnabled = false;
 $lineChannelId = '';
 
-// Try to get LINE config from CRM
-$crmConfigPath = '/var/www/vhosts/tp-asset.com/crm.tp-asset.com/config/line.php';
-if (file_exists($crmConfigPath)) {
-    // Get LINE_CHANNEL_ID from CRM config
+// Try to get LINE config from CRM (resolve path dynamically)
+$crmConfigPath = defined('TP_CRM_PATH') && TP_CRM_PATH ? TP_CRM_PATH . '/config/line.php' : null;
+if ($crmConfigPath && file_exists($crmConfigPath)) {
     $crmConfig = file_get_contents($crmConfigPath);
     if (preg_match("/define\s*\(\s*['\"]LINE_CHANNEL_ID['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\)/", $crmConfig, $matches)) {
         $lineChannelId = $matches[1];
@@ -61,11 +60,11 @@ if (file_exists($crmConfigPath)) {
     }
 }
 
-// Also check .env for TP_CRM_LINE_LOGIN_CHANNEL_ID
+// Also check CRM .env for TP_CRM_LINE_LOGIN_CHANNEL_ID
 if (!$lineLoginEnabled) {
-    $envPath = '/var/www/vhosts/tp-asset.com/crm.tp-asset.com/.env';
-    if (file_exists($envPath)) {
-        $envContent = file_get_contents($envPath);
+    $crmEnvPath = defined('TP_CRM_PATH') && TP_CRM_PATH ? TP_CRM_PATH . '/.env' : null;
+    if ($crmEnvPath && file_exists($crmEnvPath)) {
+        $envContent = file_get_contents($crmEnvPath);
         if (preg_match("/TP_CRM_LINE_LOGIN_CHANNEL_ID\s*=\s*['\"]?([^'\"\n]+)['\"]?/", $envContent, $matches)) {
             $lineChannelId = trim($matches[1]);
             $lineLoginEnabled = !empty($lineChannelId);
@@ -339,7 +338,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="checkbox" name="remember" class="mr-2 rounded border-gray-600 bg-gray-700 text-purple-500 focus:ring-purple-500">
                     จดจำฉัน
                 </label>
-                <a href="https://crm.tp-asset.com/login.php" class="text-purple-400 hover:text-purple-300 text-sm transition-colors">
+                <a href="<?php echo htmlspecialchars(CRM_BASE_URL); ?>/login.php" class="text-purple-400 hover:text-purple-300 text-sm transition-colors">
                     ลืมรหัสผ่าน?
                 </a>
             </div>
@@ -370,7 +369,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <!-- CRM Link -->
         <div class="text-center mt-6">
-            <a href="https://crm.tp-asset.com/" class="text-white/50 hover:text-white/80 text-sm transition-colors">
+            <a href="<?php echo htmlspecialchars(CRM_BASE_URL); ?>/" class="text-white/50 hover:text-white/80 text-sm transition-colors">
                 <i class="fas fa-arrow-left mr-1"></i>
                 กลับไป TP-CRM
             </a>

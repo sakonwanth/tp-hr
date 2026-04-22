@@ -241,13 +241,13 @@ $V = [
 
 $page_title = 'หนังสือรับรอง - ' . $V['fullName_th'];
 
-$verifyUrl = 'https://hr.tp-asset.com/verify_document.php?code=' . urlencode($verifyCode ?: $docNumber);
+$verifyUrl = rtrim(APP_URL, '/') . '/verify_document.php?code=' . urlencode($verifyCode ?: $docNumber);
 $qrImg     = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=0&ecc=M&data=' . urlencode($verifyUrl);
 
 // Brand assets (prefer DB setting, fallback to CRM payslip URL)
-$LOGO_BRAND = !empty($crm['company_logo']) ? $crm['company_logo'] : 'https://crm.tp-asset.com/asset/logo/LOGO%20TP-ASSET%20-%206.png';
+$LOGO_BRAND = !empty($crm['company_logo']) ? $crm['company_logo'] : CRM_BASE_URL . '/asset/logo/LOGO%20TP-ASSET%20-%206.png';
 $COMPANY_SEAL = $crm['company_seal'] ?? '';
-$WATERMARK  = 'https://crm.tp-asset.com/asset/logo/LOGO%20TP-ASSET%20-%205.png';
+$WATERMARK  = CRM_BASE_URL . '/asset/logo/LOGO%20TP-ASSET%20-%205.png';
 
 function signerName(array $s, bool $isEn): string {
     if ($isEn) {
