@@ -43,6 +43,23 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
           script: |
+            set -e
+            
+            # Update tp-common first (shared library)
+            COMMON_PATH="${{ secrets.DEPLOY_PATH_COMMON }}"
+            if [ -n "$COMMON_PATH" ] && [ -d "$COMMON_PATH" ]; then
+              echo "📦 Updating tp-common..."
+              cd "$COMMON_PATH"
+              git pull origin main
+            fi
+            
+            # Deploy tp-hr
             cd ${{ secrets.DEPLOY_PATH_HR }}
             git pull origin main
+            
+            # Update composer dependencies (refresh tp-common symlink/files)
+            if command -v composer >/dev/null 2>&1; then
+              composer update tpasset/tp-common --no-interaction --no-dev 2>&1 || echo "composer update skipped"
+            fi
+            
             echo "Deploy complete: $(date)"
