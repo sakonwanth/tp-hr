@@ -43,12 +43,13 @@ function dt_getAllSettings(PDO $pdo): array {
 }
 
 function dt_handleUpload(array $file, string $subdir, array $allowed = ['png','jpg','jpeg','webp','svg']): string {
+    if (!in_array($subdir, ['company','signatures'], true)) throw new Exception('ประเภทการอัปโหลดไม่ถูกต้อง');
     if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) return '';
     if ($file['error'] !== UPLOAD_ERR_OK) throw new Exception('อัปโหลดล้มเหลว (error: ' . $file['error'] . ')');
     if ($file['size'] > 5 * 1024 * 1024) throw new Exception('ไฟล์เกิน 5MB');
     $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
     if (!in_array($ext, $allowed, true)) throw new Exception('อนุญาตเฉพาะ: ' . implode(', ', $allowed));
-    $dir = BASE_PATH . '/uploads/' . $subdir;
+    $dir = (defined('UPLOAD_PATH') ? UPLOAD_PATH : (BASE_PATH . '/uploads')) . '/' . $subdir;
     if (!is_dir($dir)) @mkdir($dir, 0775, true);
     $name = $subdir . '_' . bin2hex(random_bytes(6)) . '_' . time() . '.' . $ext;
     $dest = $dir . '/' . $name;
@@ -104,7 +105,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'doc_header_subtitle_th', 'doc_header_subtitle_en', 'doc_footer_note_th',
                 ];
                 foreach ($fields as $f) {
-                    if (isset($_POST[$f])) dt_setSetting($pdo, $f, trim($_POST[$f]));
+                    if (!isset($_POST[$f])) continue;
+                    $val = trim($_POST[$f]);
+                    if ($f === 'company_email' && $val !== '' && !filter_var($val, FILTER_VALIDATE_EMAIL)) {
+                        throw new Exception('รูปแบบอีเมลไม่ถูกต้อง');
+                    }
+                    if ($f === 'company_website' && $val !== '' && !filter_var($val, FILTER_VALIDATE_URL)) {
+                        throw new Exception('รูปแบบเว็บไซต์ไม่ถูกต้อง');
+                    }
+                    dt_setSetting($pdo, $f, $val);
                 }
                 dt_setSetting($pdo, 'doc_show_esignature', !empty($_POST['doc_show_esignature']) ? '1' : '0');
 
@@ -126,6 +135,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             elseif ($action === 'upload_signature') {
                 $uid = (int)($_POST['user_id'] ?? 0);
                 if ($uid <= 0) throw new Exception('ไม่พบผู้ใช้');
+                $chk = $pdo->prepare("SELECT 1 FROM users WHERE id=? AND is_active=1");
+                $chk->execute([$uid]);
+                if (!$chk->fetchColumn()) throw new Exception('ไม่พบผู้ใช้หรือผู้ใช้ถูกปิดใช้งาน');
                 if (empty($_FILES['signature']['name'])) throw new Exception('กรุณาเลือกไฟล์ลายเซ็น');
                 $url = dt_handleUpload($_FILES['signature'], 'signatures', ['png','jpg','jpeg','webp']);
                 $pdo->prepare("UPDATE users SET signature_image=? WHERE id=?")->execute([$url, $uid]);

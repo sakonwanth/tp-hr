@@ -73,18 +73,23 @@ $company = [
 // Template layout_config (per-template overrides)
 $tplLayout = [];
 if (!empty($req['tpl_layout'])) { $tplLayout = json_decode((string)$req['tpl_layout'], true) ?: []; }
+$_lh = is_array($tplLayout['header']     ?? null) ? $tplLayout['header']     : [];
+$_lb = is_array($tplLayout['body']       ?? null) ? $tplLayout['body']       : [];
+$_ls = is_array($tplLayout['signatures'] ?? null) ? $tplLayout['signatures'] : [];
+$_lf = is_array($tplLayout['footer']     ?? null) ? $tplLayout['footer']     : [];
 $LC = [
-    'header_show_logo'    => $tplLayout['header']['show_logo']            ?? 1,
-    'header_show_addr'    => $tplLayout['header']['show_company_address'] ?? 1,
-    'header_sub_th'       => $tplLayout['header']['subtitle_th']          ?? ($crm['doc_header_subtitle_th'] ?? ''),
-    'header_sub_en'       => $tplLayout['header']['subtitle_en']          ?? ($crm['doc_header_subtitle_en'] ?? ''),
-    'signer_1_uid'        => (int)($tplLayout['signatures']['signer_1_user_id'] ?? 0),
-    'signer_2_uid'        => (int)($tplLayout['signatures']['signer_2_user_id'] ?? 0),
-    'show_two_signers'    => $tplLayout['signatures']['show_two_signers']  ?? 1,
-    'show_esignature'     => ($tplLayout['signatures']['show_esignature'] ?? 0) || !empty($crm['doc_show_esignature']),
-    'footer_show_qr'      => $tplLayout['footer']['show_qr_verify']       ?? 1,
-    'footer_show_seal'    => $tplLayout['footer']['show_seal_area']       ?? 1,
-    'footer_extra_note'   => $tplLayout['footer']['extra_note_th']        ?? ($crm['doc_footer_note_th'] ?? ''),
+    'header_show_logo'    => $_lh['show_logo']            ?? 1,
+    'header_show_addr'    => $_lh['show_company_address'] ?? 1,
+    'header_sub_th'       => $_lh['subtitle_th']          ?? ($crm['doc_header_subtitle_th'] ?? ''),
+    'header_sub_en'       => $_lh['subtitle_en']          ?? ($crm['doc_header_subtitle_en'] ?? ''),
+    'use_custom_body'     => !empty($_lb['use_custom_body']),
+    'signer_1_uid'        => (int)($_ls['signer_1_user_id'] ?? 0),
+    'signer_2_uid'        => (int)($_ls['signer_2_user_id'] ?? 0),
+    'show_two_signers'    => $_ls['show_two_signers']  ?? 1,
+    'show_esignature'     => ($_ls['show_esignature'] ?? 0) || !empty($crm['doc_show_esignature']),
+    'footer_show_qr'      => $_lf['show_qr_verify']    ?? 1,
+    'footer_show_seal'    => $_lf['show_seal_area']    ?? 1,
+    'footer_extra_note'   => $_lf['extra_note_th']     ?? ($crm['doc_footer_note_th'] ?? ''),
 ];
 
 // Signers — real executives from users table (ประธานบริษัท + ประธานเจ้าหน้าที่บริหาร)
@@ -703,7 +708,46 @@ body {
         <span class="date"><?php echo $isEn ? fmtEnDate($docDate) : 'วันที่ ' . fmtThaiDate($docDate); ?></span>
     </div>
 
-    <?php if ($baseCode === 'CERT_WORK' && !$isEn): ?>
+    <?php
+    // Custom body mode: user explicitly set use_custom_body=1 OR template code is not a built-in layout
+    $isBuiltIn = in_array($baseCode, ['CERT_WORK','CERT_SALARY','TAX_50TAWI'], true) || $code === 'CERT_SALARY_BANK';
+    $useCustom = $LC['use_custom_body'] || !$isBuiltIn;
+    ?>
+
+    <?php if ($useCustom):
+        $rawBody = $isEn ? ($req['template_en'] ?? '') : ($req['template_th'] ?? '');
+        $subs = [
+            '{employee_name}'    => $V['fullName_th'],
+            '{employee_name_en}' => $V['fullName_en'],
+            '{employee_code}'    => $V['empCode'],
+            '{national_id}'      => $V['nationalId'],
+            '{position}'         => $V['position'],
+            '{department}'       => $V['department'],
+            '{salary}'           => number_format((float)$V['salary'], 2),
+            '{salary_words}'     => $V['salary'] > 0 ? thaiBaht((float)$V['salary']) : '-',
+            '{hire_date}'        => $hireStr,
+            '{years_of_service}' => $tenure,
+            '{purpose}'          => $isEn ? $V['purposeEn'] : $V['purpose'],
+            '{company_name}'     => $company['name_th'],
+            '{company_name_en}'  => $company['name_en'],
+            '{doc_number}'       => $docNumber,
+            '{doc_date}'         => $isEn ? fmtEnDate($docDate) : fmtThaiDate($docDate),
+            '{today}'            => $isEn ? fmtEnDate(date('Y-m-d')) : fmtThaiDate(date('Y-m-d')),
+        ];
+        $renderedBody = strtr($rawBody, $subs);
+    ?>
+        <h1 class="doc-title">
+            <?php echo htmlspecialchars($isEn ? ($req['tpl_name_en'] ?: $req['tpl_name']) : $req['tpl_name']); ?>
+        </h1>
+        <div class="body">
+            <?php if (trim($renderedBody) === ''): ?>
+                <p class="no-indent" style="color:#94a3b8;font-style:italic;">[ยังไม่ได้กรอกเนื้อหาเทมเพลต — กรุณาตั้งค่าในหน้า "ตั้งค่าเอกสารรับรอง"]</p>
+            <?php else: ?>
+                <?php echo nl2br(htmlspecialchars($renderedBody)); ?>
+            <?php endif; ?>
+        </div>
+
+    <?php elseif ($baseCode === 'CERT_WORK' && !$isEn): ?>
         <h1 class="doc-title">
             หนังสือรับรองการทำงาน
             <span class="sub">CERTIFICATE OF EMPLOYMENT</span>
