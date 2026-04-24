@@ -101,10 +101,19 @@ function generatePayslipHTML($slip, $monthName, $year) {
 <html lang="th">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>สลิปเงินเดือน ' . $monthName . ' ' . $year . '</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: "TH Sarabun New", "Sarabun", sans-serif; font-size: 16px; line-height: 1.5; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: "TH Sarabun New", "Sarabun", sans-serif; font-size: 16px; line-height: 1.5; min-height: 100vh; min-height: 100dvh; }
+        @media screen {
+            body {
+                padding-left: env(safe-area-inset-left, 0px);
+                padding-right: env(safe-area-inset-right, 0px);
+                padding-top: env(safe-area-inset-top, 0px);
+                padding-bottom: env(safe-area-inset-bottom, 0px);
+            }
+        }
         .container { max-width: 800px; margin: 20px auto; padding: 30px; border: 1px solid #ddd; }
         .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 20px; }
         .header h1 { font-size: 24px; margin-bottom: 5px; }
@@ -125,6 +134,7 @@ function generatePayslipHTML($slip, $monthName, $year) {
         .grid { display: flex; gap: 30px; }
         .grid > div { flex: 1; }
         @media print {
+            body { padding: 0 !important; min-height: auto !important; }
             .container { border: none; margin: 0; padding: 20px; }
         }
     </style>
