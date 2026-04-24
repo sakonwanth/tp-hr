@@ -133,11 +133,11 @@ $leave_types_form = $stmt->fetchAll();
             </div>
             
             <!-- Buttons -->
-            <div class="flex gap-4">
-                <a href="leave.php" class="flex-1 py-3 bg-white/10 hover:bg-white/20 text-white text-center rounded-lg transition-colors">
+            <div class="flex flex-col md:flex-row gap-3">
+                <a href="leave.php" class="flex-1 min-h-[44px] py-3 bg-white/10 hover:bg-white/20 text-white text-center rounded-xl transition-colors">
                     ยกเลิก
                 </a>
-                <button type="submit" class="flex-1 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
+                <button type="submit" class="flex-1 min-h-[44px] py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors font-semibold">
                     <i class="fas fa-paper-plane mr-2"></i>ส่งคำขอลา
                 </button>
             </div>

@@ -319,10 +319,10 @@ require_once __DIR__ . '/templates/header.php';
                             - <?php echo formatDateThai($req['end_date']); ?>
                             <?php endif; ?>
                         </p>
-                        <div class="mt-2 flex justify-end">
-                            <button onclick="cancelRequest(<?php echo $req['id']; ?>)" 
-                                    class="text-red-400 hover:text-red-300 text-sm">
-                                <i class="fas fa-times mr-1"></i>ยกเลิก
+                        <div class="mt-3 flex">
+                            <button onclick="cancelRequest(<?php echo $req['id']; ?>)"
+                                    class="w-full md:w-auto md:ml-auto min-h-[44px] px-4 py-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-200 text-sm font-semibold transition-colors">
+                                <i class="fas fa-times mr-2"></i>ยกเลิกคำขอ
                             </button>
                         </div>
                     </div>
