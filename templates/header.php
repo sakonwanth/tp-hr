@@ -547,6 +547,10 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
                     <i class="fas fa-file-certificate"></i>
                     <span>ขอใบรับรอง</span>
                 </a>
+                <a href="/dayoff_schedule.php" class="nav-item <?php echo $current_page === 'dayoff' ? 'active' : ''; ?>">
+                    <i class="fas fa-calendar-week"></i>
+                    <span>วันหยุดประจำสัปดาห์</span>
+                </a>
                 <a href="/profile.php" class="nav-item <?php echo $current_page === 'profile' ? 'active' : ''; ?>">
                     <i class="fas fa-user"></i>
                     <span>ข้อมูลส่วนตัว</span>
@@ -555,14 +559,42 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
                 <?php if ($isHR): ?>
                 <div class="mt-4 pt-4 border-t border-slate-700/50">
                     <p class="text-xs text-slate-500 uppercase tracking-wider mb-2 font-semibold">HR Admin</p>
-                    <a href="/hr/employees.php" class="nav-item">
+                    <a href="/hr/employees.php" class="nav-item <?php echo $current_page === 'hr-employees' ? 'active' : ''; ?>">
                         <i class="fas fa-users-cog"></i>
                         <span>จัดการพนักงาน</span>
                     </a>
-                    <a href="/hr/leaves.php" class="nav-item">
+                    <a href="/hr/attendance.php" class="nav-item <?php echo $current_page === 'hr-attendance' ? 'active' : ''; ?>">
+                        <i class="fas fa-user-clock"></i>
+                        <span>จัดการลงเวลา</span>
+                    </a>
+                    <a href="/hr/leaves.php" class="nav-item <?php echo $current_page === 'hr-leaves' ? 'active' : ''; ?>">
                         <i class="fas fa-calendar-check"></i>
                         <span>อนุมัติการลา</span>
                     </a>
+                    <?php if ($isCEO): ?>
+                    <a href="/hr/dayoff_approvals.php" class="nav-item <?php echo $current_page === 'hr-dayoff' ? 'active' : ''; ?>">
+                        <i class="fas fa-calendar-day"></i>
+                        <span>อนุมัติเปลี่ยนวันหยุด</span>
+                    </a>
+                    <?php endif; ?>
+                    <a href="/hr/documents.php" class="nav-item <?php echo $current_page === 'hr-documents' ? 'active' : ''; ?>">
+                        <i class="fas fa-file-alt"></i>
+                        <span>จัดการเอกสาร</span>
+                    </a>
+                    <a href="/hr/document_templates.php" class="nav-item <?php echo $current_page === 'hr-document-templates' ? 'active' : ''; ?>">
+                        <i class="fas fa-file-signature"></i>
+                        <span>ตั้งค่าเอกสารรับรอง</span>
+                    </a>
+                    <?php if ($isCEO): ?>
+                    <a href="/hr/reports.php" class="nav-item <?php echo $current_page === 'hr-reports' ? 'active' : ''; ?>">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>รายงาน</span>
+                    </a>
+                    <a href="/hr/settings.php" class="nav-item <?php echo $current_page === 'hr-settings' ? 'active' : ''; ?>">
+                        <i class="fas fa-cog"></i>
+                        <span>ตั้งค่าระบบ</span>
+                    </a>
+                    <?php endif; ?>
                 </div>
                 <?php endif; ?>
                 

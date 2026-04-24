@@ -13,7 +13,7 @@ $isAdminPage = is_string($cp) && strncmp($cp, 'hr-', 3) === 0;
 
 <?php if (!$isAdminPage): ?>
 <!-- Mobile Bottom Navigation (employee-first, like Checkin) -->
-<nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-xl border-t border-white/10"
+<nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-xl border-t border-white/10 overscroll-contain"
      style="padding-bottom: env(safe-area-inset-bottom, 0px);">
     <div class="max-w-lg mx-auto grid grid-cols-5 px-2 py-2">
         <?php
@@ -39,7 +39,7 @@ $isAdminPage = is_string($cp) && strncmp($cp, 'hr-', 3) === 0;
 <?php endif; ?>
 
 <!-- Toast Notification -->
-<div id="toast" class="fixed left-4 right-4 bottom-24 lg:left-auto lg:right-4 lg:bottom-4 z-50 hidden">
+<div id="toast" class="fixed left-4 right-4 z-50 hidden bottom-[calc(6rem+env(safe-area-inset-bottom,0px))] lg:left-auto lg:right-4 lg:bottom-4">
     <div class="bg-slate-800/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-xl p-4 flex items-center gap-3 w-full lg:min-w-[300px] lg:w-auto">
         <div id="toastIcon" class="w-8 h-8 rounded-lg flex items-center justify-center"></div>
         <div class="flex-1">
