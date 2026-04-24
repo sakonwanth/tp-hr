@@ -238,8 +238,14 @@ class SettingsService
         if ($this->hasSystemSettings !== null) return $this->hasSystemSettings;
 
         try {
-            $stmt = $this->pdo->query("SHOW TABLES LIKE 'system_settings'");
-            $this->hasSystemSettings = (bool)$stmt->fetchColumn();
+            if ($this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
+                $stmt = $this->pdo->prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = ? LIMIT 1");
+                $stmt->execute(['system_settings']);
+                $this->hasSystemSettings = (bool)$stmt->fetchColumn();
+            } else {
+                $stmt = $this->pdo->query("SHOW TABLES LIKE 'system_settings'");
+                $this->hasSystemSettings = (bool)$stmt->fetchColumn();
+            }
         } catch (Throwable $e) {
             $this->hasSystemSettings = false;
         }
@@ -253,9 +259,16 @@ class SettingsService
 
         $columns = [];
         try {
-            $stmt = $this->pdo->query("SHOW COLUMNS FROM {$table}");
-            foreach ($stmt as $row) {
-                $columns[$row['Field']] = true;
+            if ($this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
+                $stmt = $this->pdo->query("PRAGMA table_info({$table})");
+                foreach ($stmt as $row) {
+                    $columns[$row['name']] = true;
+                }
+            } else {
+                $stmt = $this->pdo->query("SHOW COLUMNS FROM {$table}");
+                foreach ($stmt as $row) {
+                    $columns[$row['Field']] = true;
+                }
             }
         } catch (Throwable $e) {
             // ignore
