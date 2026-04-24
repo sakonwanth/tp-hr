@@ -499,8 +499,8 @@ require_once __DIR__ . '/templates/header.php';
 </div>
 
 <!-- Planned Late Start Modal -->
-<div id="late-start-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="glass-card rounded-2xl p-5 w-full max-w-md max-h-[90vh] overflow-y-auto">
+<div id="late-start-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4 overflow-y-auto overscroll-contain">
+    <div class="glass-card rounded-2xl p-5 w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-white text-lg font-bold flex items-center gap-2">
                 <i class="fas fa-clock text-amber-400"></i>แจ้งเข้างานสายล่วงหน้า
@@ -537,10 +537,14 @@ require_once __DIR__ . '/templates/header.php';
         <!-- Time Picker -->
         <div class="mb-4">
             <label class="text-white/70 text-sm mb-2 block">เวลาที่จะเข้างาน</label>
+            <!-- iOS (Safari/Chrome WKWebView) can overflow native time input. Use select fallback on iOS. -->
+            <select id="ls-planned-time-select"
+                    class="hidden w-full max-w-full min-w-0 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-lg font-medium focus:outline-none focus:border-amber-400">
+            </select>
             <input type="time" id="ls-planned-time" step="900"
                    min="<?php echo htmlspecialchars(substr(($shift['start_time'] ?? '08:30'), 0, 5)); ?>"
                    value="<?php echo htmlspecialchars(substr(($shift['start_time'] ?? '08:30'), 0, 5)); ?>"
-                   class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-lg font-medium focus:outline-none focus:border-amber-400">
+                   class="w-full max-w-full min-w-0 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-lg font-medium focus:outline-none focus:border-amber-400">
             <p class="text-white/40 text-xs mt-1">
                 หลังเข้าในเวลาที่แจ้ง ± 30 นาที จะไม่ถูกหัก
             </p>
@@ -882,12 +886,14 @@ function openLateStartModal() {
     const modal = document.getElementById('late-start-modal');
     if (!modal) return;
     modal.classList.remove('hidden');
+    modal.classList.add('flex');
     updateLateStartDateLabel();
 }
 function closeLateStartModal() {
     const modal = document.getElementById('late-start-modal');
     if (!modal) return;
     modal.classList.add('hidden');
+    modal.classList.remove('flex');
     document.getElementById('ls-reason').value = '';
 }
 function updateLateStartDateLabel() {
@@ -903,7 +909,11 @@ function updateLateStartDateLabel() {
 }
 async function submitLateStart() {
     const target = document.querySelector('input[name="ls-target"]:checked')?.value || 'tomorrow';
-    const planned_time = document.getElementById('ls-planned-time').value;
+    const planned_time = (function () {
+        const sel = document.getElementById('ls-planned-time-select');
+        if (sel && !sel.classList.contains('hidden')) return sel.value;
+        return document.getElementById('ls-planned-time').value;
+    })();
     const reason = document.getElementById('ls-reason').value.trim();
 
     if (!planned_time) { showToast('กรุณาเลือกเวลาที่จะเข้างาน', 'error'); return; }
@@ -958,6 +968,37 @@ async function cancelLateStart(targetDate) {
         showToast('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้', 'error');
     }
 }
+
+function isIOSDevice() {
+    const ua = navigator.userAgent || '';
+    const isApple = /iPad|iPhone|iPod/.test(ua);
+    const isIpadOS13Plus = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+    return isApple || isIpadOS13Plus;
+}
+function buildTimeOptions(stepMinutes) {
+    const out = [];
+    for (let h = 0; h < 24; h++) {
+        for (let m = 0; m < 60; m += stepMinutes) {
+            out.push(String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0'));
+        }
+    }
+    return out;
+}
+function initLateStartTimePickerFallback() {
+    const input = document.getElementById('ls-planned-time');
+    const select = document.getElementById('ls-planned-time-select');
+    if (!input || !select) return;
+    if (!isIOSDevice()) return;
+
+    const current = input.value || '08:30';
+    const opts = buildTimeOptions(15);
+    select.innerHTML = opts.map(t => `<option value="${t}">${t}</option>`).join('');
+    select.value = current;
+
+    input.classList.add('hidden');
+    select.classList.remove('hidden');
+}
+document.addEventListener('DOMContentLoaded', initLateStartTimePickerFallback);
 </script>
 
 <?php require_once __DIR__ . '/templates/footer.php'; ?>
