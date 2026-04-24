@@ -574,8 +574,8 @@ require_once __DIR__ . '/templates/header.php';
 </div>
 
 <!-- Off-site Reason Modal -->
-<div id="offsite-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="glass-card rounded-2xl p-6 w-full max-w-md">
+<div id="offsite-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
+    <div class="glass-card rounded-2xl p-6 w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <div class="text-center mb-4">
             <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-yellow-500/20 flex items-center justify-center">
                 <i class="fas fa-map-marker-alt text-yellow-400 text-3xl"></i>
@@ -606,8 +606,8 @@ require_once __DIR__ . '/templates/header.php';
 </div>
 
 <!-- Check-in Modal -->
-<div id="checkin-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="glass-card rounded-2xl p-6 w-full max-w-md">
+<div id="checkin-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
+    <div class="glass-card rounded-2xl p-6 w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <div class="text-center mb-6">
             <div class="w-20 h-20 rounded-full bg-violet-600/20 flex items-center justify-center mx-auto mb-4">
                 <i class="fas fa-camera text-violet-400 text-3xl" id="modal-icon"></i>
