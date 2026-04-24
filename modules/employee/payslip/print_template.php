@@ -93,11 +93,11 @@ header('Content-Type: text/html; charset=utf-8');
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>ใบรับเงินเดือน - <?php echo htmlspecialchars($emp_code); ?> <?php echo htmlspecialchars($full_name); ?> - <?php echo $month_label_th; ?></title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         html, body {
             overflow: visible;
         }
@@ -110,6 +110,13 @@ header('Content-Type: text/html; charset=utf-8');
             margin: 0 auto;
             min-height: 297mm;
             position: relative;
+        }
+        @media screen {
+            body {
+                padding-left: env(safe-area-inset-left, 0px);
+                padding-right: env(safe-area-inset-right, 0px);
+                padding-top: env(safe-area-inset-top, 0px);
+            }
         }
         .page {
             position: relative;
@@ -281,6 +288,7 @@ header('Content-Type: text/html; charset=utf-8');
         .no-print { margin-bottom: 16px; }
         .btn-print {
             padding: 10px 20px;
+            min-height: 44px;
             background: #1a365d;
             color: #fff;
             border: none;
@@ -290,7 +298,9 @@ header('Content-Type: text/html; charset=utf-8');
             font-weight: 600;
             cursor: pointer;
             text-decoration: none;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         .btn-print:hover { background: #2d4a7c; }
         .link-back { margin-left: 12px; color: #1a365d; font-weight: 500; text-decoration: none; }

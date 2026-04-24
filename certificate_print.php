@@ -262,12 +262,12 @@ function signerName(array $s, bool $isEn): string {
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title><?php echo htmlspecialchars($page_title); ?></title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ---------- Reset / Base (cloned from CRM payroll_print design system) ---------- */
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html, body { overflow: visible; }
 body {
     font-family: 'Sarabun', sans-serif;
@@ -275,6 +275,15 @@ body {
     color: #1a1a1a;
     padding: 20px 0;
     min-height: 100vh;
+    min-height: 100dvh;
+}
+@media screen {
+    body {
+        padding-top: max(20px, env(safe-area-inset-top, 0px));
+        padding-bottom: max(20px, env(safe-area-inset-bottom, 0px));
+        padding-left: env(safe-area-inset-left, 0px);
+        padding-right: env(safe-area-inset-right, 0px);
+    }
 }
 
 /* ---------- A4 Page ---------- */
@@ -307,7 +316,11 @@ body {
 }
 .toolbar-left { display: flex; gap: 6px; }
 .toolbar a, .toolbar button {
-    padding: 9px 16px;
+    padding: 10px 16px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 6px;
     border: 1px solid #cbd5e1;
     background: #fff;

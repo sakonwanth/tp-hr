@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php $appIconPath = '/assets/icons/tphr-app-icon.svg'; ?>
     <?php $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png'; ?>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>เข้าสู่ระบบ - TP-HR</title>
     <link rel="manifest" href="/manifest.webmanifest">
     <link rel="icon" type="image/svg+xml" href="<?php echo htmlspecialchars($appIconPath); ?>">
@@ -50,10 +50,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        * { font-family: 'Sarabun', sans-serif; }
+        * {
+            font-family: 'Sarabun', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
         body {
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: max(16px, env(safe-area-inset-top, 0px));
+            padding-right: max(16px, env(safe-area-inset-right, 0px));
+            padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+            padding-left: max(16px, env(safe-area-inset-left, 0px));
         }
         .glass-card {
             background: rgba(255, 255, 255, 0.05);
@@ -62,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </style>
 </head>
-<body class="flex items-center justify-center p-4">
+<body>
     <div class="w-full max-w-md">
         <!-- Logo -->
         <div class="text-center mb-8">
@@ -125,7 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </a>
                 </div>
                 
-                <button type="submit" class="w-full py-3 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded-lg transition-colors">
+                <button type="submit" class="w-full min-h-[48px] py-3 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded-lg transition-colors">
                     <i class="fas fa-sign-in-alt mr-2"></i>
                     เข้าสู่ระบบ
                 </button>
