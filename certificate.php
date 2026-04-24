@@ -82,16 +82,16 @@ include 'templates/header.php';
             <!-- Language -->
             <div class="mb-6">
                 <label class="block text-white/80 text-sm font-medium mb-2">ภาษา</label>
-                <div class="flex gap-4">
-                    <label class="flex items-center">
+                <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4">
+                    <label class="flex items-center min-h-[44px] cursor-pointer touch-manipulation rounded-lg px-2 -mx-2 sm:px-0 sm:mx-0">
                         <input type="radio" name="language" value="TH" checked class="mr-2 accent-violet-500">
                         <span class="text-white">ภาษาไทย</span>
                     </label>
-                    <label class="flex items-center">
+                    <label class="flex items-center min-h-[44px] cursor-pointer touch-manipulation rounded-lg px-2 -mx-2 sm:px-0 sm:mx-0">
                         <input type="radio" name="language" value="EN" class="mr-2 accent-violet-500">
                         <span class="text-white">ภาษาอังกฤษ</span>
                     </label>
-                    <label class="flex items-center">
+                    <label class="flex items-center min-h-[44px] cursor-pointer touch-manipulation rounded-lg px-2 -mx-2 sm:px-0 sm:mx-0">
                         <input type="radio" name="language" value="BOTH" class="mr-2 accent-violet-500">
                         <span class="text-white">ทั้งสองภาษา</span>
                     </label>
@@ -132,8 +132,8 @@ include 'templates/header.php';
             
             <!-- Rush Request -->
             <div class="mb-6 p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
-                <label class="flex items-center">
-                    <input type="checkbox" name="is_urgent" value="1" class="mr-3 accent-yellow-500">
+                <label class="flex items-start gap-3 min-h-[44px] cursor-pointer touch-manipulation">
+                    <input type="checkbox" name="is_urgent" value="1" class="mt-1 accent-yellow-500 shrink-0">
                     <div>
                         <span class="text-white font-medium">ขอเร่งด่วน</span>
                         <p class="text-white/60 text-sm">ต้องการใช้เอกสารภายใน 1-2 วันทำการ (อาจมีค่าธรรมเนียมเพิ่มเติม)</p>
@@ -142,12 +142,12 @@ include 'templates/header.php';
             </div>
             
             <!-- Buttons -->
-            <div class="flex gap-4">
-                <a href="certificate.php" class="flex-1 py-3 bg-white/10 hover:bg-white/20 text-white text-center rounded-lg transition-colors">
+            <div class="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4">
+                <a href="certificate.php" class="touch-manipulation flex-1 min-h-[48px] inline-flex items-center justify-center py-3 bg-white/10 hover:bg-white/20 text-white text-center rounded-lg transition-colors">
                     ยกเลิก
                 </a>
-                <button type="submit" class="flex-1 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
-                    <i class="fas fa-paper-plane mr-2"></i>ส่งคำขอ
+                <button type="submit" class="touch-manipulation flex-1 min-h-[48px] inline-flex items-center justify-center gap-2 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
+                    <i class="fas fa-paper-plane"></i><span>ส่งคำขอ</span>
                 </button>
             </div>
         </form>

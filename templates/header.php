@@ -43,6 +43,10 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             -webkit-tap-highlight-color: transparent;
             box-sizing: border-box;
         }
+
+        .touch-manipulation {
+            touch-action: manipulation;
+        }
         
         body {
             background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
@@ -498,18 +502,18 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
 
 <!-- Mobile Header -->
 <header class="lg:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 bg-slate-900/90 backdrop-blur-xl border-b border-white/10 pt-[env(safe-area-inset-top,0px)] min-h-[calc(4rem+env(safe-area-inset-top,0px))]">
-    <button id="mobileMenuBtn" class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-white">
+    <button type="button" id="mobileMenuBtn" class="touch-manipulation w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-white">
         <i class="fas fa-bars"></i>
     </button>
     
-    <a href="/" class="flex items-center gap-2">
+    <a href="/" class="touch-manipulation flex items-center gap-2 min-h-[44px]">
         <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center">
             <i class="fas fa-users text-white text-sm"></i>
         </div>
         <span class="font-bold text-white">TP-HR</span>
     </a>
     
-    <a href="/profile.php" class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-white">
+    <a href="/profile.php" class="touch-manipulation w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-white">
         <i class="fas fa-user"></i>
     </a>
 </header>
