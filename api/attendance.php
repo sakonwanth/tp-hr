@@ -356,7 +356,11 @@ function getTodayAttendance(PDO $pdo, array $user): void {
     ");
     $stmt->execute([$user['id']]);
     $attendance = $stmt->fetch();
-    
+
+    if ($attendance && function_exists('shift_display_label')) {
+        $attendance['shift_label'] = shift_display_label($attendance);
+    }
+
     apiSuccess(['attendance' => $attendance]);
 }
 
@@ -371,7 +375,7 @@ function getAttendanceHistory(PDO $pdo, array $user): void {
     $month = $_GET['month'] ?? date('Y-m');
     
     $stmt = $pdo->prepare("
-        SELECT a.*, s.name as shift_name
+        SELECT a.*, s.name as shift_name, s.start_time as shift_start, s.end_time as shift_end
         FROM hr_attendances a
         LEFT JOIN hr_work_shifts s ON a.shift_id = s.id
         WHERE a.user_id = ? AND DATE_FORMAT(a.attendance_date, '%Y-%m') = ?
@@ -380,7 +384,14 @@ function getAttendanceHistory(PDO $pdo, array $user): void {
     ");
     $stmt->execute([$user['id'], $month, $limit, $offset]);
     $attendances = $stmt->fetchAll();
-    
+
+    if (function_exists('shift_display_label')) {
+        foreach ($attendances as &$att) {
+            $att['shift_label'] = shift_display_label($att);
+        }
+        unset($att);
+    }
+
     // Get total count
     $stmt = $pdo->prepare("
         SELECT COUNT(*) FROM hr_attendances 

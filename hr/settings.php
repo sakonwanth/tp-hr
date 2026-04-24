@@ -36,6 +36,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ");
                     $stmt->execute([$key, $value, $user['id']]);
                 }
+
+                // Sync ข้าม: tp-hr general settings → tp-crm system_settings + default shift
+                // เพื่อไม่ให้ค่าเวลาทำงาน "แตกกัน" ระหว่าง module
+                try {
+                    $s = $_POST['settings'] ?? [];
+                    $existsSys = $pdo->query("SHOW TABLES LIKE 'system_settings'")->fetchColumn();
+
+                    $map = [
+                        'default_work_start'    => 'work_start_time',
+                        'default_work_end'      => 'work_end_time',
+                        'grace_period_minutes'  => 'grace_period_minutes',
+                    ];
+                    if ($existsSys) {
+                        foreach ($map as $hrKey => $sysKey) {
+                            if (!isset($s[$hrKey]) || $s[$hrKey] === '') continue;
+                            $pdo->prepare("INSERT INTO system_settings (setting_key, setting_value, category, description)
+                                            VALUES (?, ?, 'HR', 'sync จาก tp-hr general settings')
+                                            ON DUPLICATE KEY UPDATE setting_value=VALUES(setting_value), updated_at=NOW()")
+                                ->execute([$sysKey, (string)$s[$hrKey]]);
+                        }
+                    }
+
+                    // Also sync default shift times ถ้า admin แก้ default_work_start/end ใน general tab
+                    if (isset($s['default_work_start'], $s['default_work_end'])) {
+                        $pdo->prepare("UPDATE hr_work_shifts
+                                        SET start_time = ?, end_time = ?, grace_period_minutes = COALESCE(?, grace_period_minutes)
+                                        WHERE is_default = 1 AND is_active = 1")
+                            ->execute([
+                                $s['default_work_start'],
+                                $s['default_work_end'],
+                                isset($s['grace_period_minutes']) && $s['grace_period_minutes'] !== '' ? (int)$s['grace_period_minutes'] : null,
+                            ]);
+                    }
+                } catch (Throwable $e) {
+                    error_log('settings.update_settings cross-sync failed: ' . $e->getMessage());
+                }
+
                 Auth::log('update_settings', 'hr_settings', null, null, $_POST['settings']);
                 $success = 'บันทึกการตั้งค่าเรียบร้อยแล้ว';
                 break;
@@ -82,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'update_shift':
                 // Sync: name column ถูกเก็บแบบ "กะปกติ (08:30-17:30)" hardcoded
                 // ตัด "(...)" ทิ้งเพื่อให้ display layer คุม format ได้ (shift_display_label ใน Helpers.php)
-                $cur = $pdo->prepare("SELECT name FROM hr_work_shifts WHERE id = ? LIMIT 1");
+                $cur = $pdo->prepare("SELECT name, is_default FROM hr_work_shifts WHERE id = ? LIMIT 1");
                 $cur->execute([$_POST['shift_id']]);
                 $curRow = $cur->fetch();
                 $newName = null;
@@ -105,6 +142,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_POST['shift_id']
                 ]);
                 Auth::log('update_shift', 'hr_work_shifts', $_POST['shift_id']);
+
+                // Sync: ถ้าแก้ default shift → update ทุกที่ที่เก็บเวลาทำงาน (kill fragmentation)
+                //   1. hr_settings.default_work_start/default_work_end (ถ้ามี table)
+                //   2. system_settings.work_start_time/work_end_time (tp-crm ใช้ผ่าน getSetting)
+                //   3. system_settings.grace_period_minutes (ถ้ามี)
+                if ($curRow && (int)($curRow['is_default'] ?? 0) === 1) {
+                    try {
+                        $startHHMM = substr((string)$_POST['start_time'], 0, 5);
+                        $endHHMM   = substr((string)$_POST['end_time'],   0, 5);
+                        $grace     = (int)($_POST['grace_period'] ?? 15);
+
+                        // hr_settings (tp-hr local)
+                        $pdo->prepare("INSERT INTO hr_settings (`key`, `value`, updated_by)
+                                        VALUES ('default_work_start', ?, ?)
+                                        ON DUPLICATE KEY UPDATE `value`=VALUES(`value`), updated_by=VALUES(updated_by), updated_at=NOW()")
+                            ->execute([$startHHMM, Auth::id()]);
+                        $pdo->prepare("INSERT INTO hr_settings (`key`, `value`, updated_by)
+                                        VALUES ('default_work_end', ?, ?)
+                                        ON DUPLICATE KEY UPDATE `value`=VALUES(`value`), updated_by=VALUES(updated_by), updated_at=NOW()")
+                            ->execute([$endHHMM, Auth::id()]);
+                        $pdo->prepare("INSERT INTO hr_settings (`key`, `value`, updated_by)
+                                        VALUES ('grace_period_minutes', ?, ?)
+                                        ON DUPLICATE KEY UPDATE `value`=VALUES(`value`), updated_by=VALUES(updated_by), updated_at=NOW()")
+                            ->execute([(string)$grace, Auth::id()]);
+
+                        // system_settings (tp-crm legacy — payroll + hr module อ่าน key เหล่านี้)
+                        $existsSys = $pdo->query("SHOW TABLES LIKE 'system_settings'")->fetchColumn();
+                        if ($existsSys) {
+                            foreach ([
+                                ['work_start_time',       $startHHMM,  'HR', 'เวลาเริ่มงาน (sync จาก default shift)'],
+                                ['work_end_time',         $endHHMM,    'HR', 'เวลาเลิกงาน (sync จาก default shift)'],
+                                ['grace_period_minutes',  (string)$grace, 'HR', 'เวลาผ่อนผันมาสาย (นาที)'],
+                            ] as [$k, $v, $cat, $desc]) {
+                                $pdo->prepare("INSERT INTO system_settings (setting_key, setting_value, category, description)
+                                                VALUES (?, ?, ?, ?)
+                                                ON DUPLICATE KEY UPDATE setting_value=VALUES(setting_value), updated_at=NOW()")
+                                    ->execute([$k, $v, $cat, $desc]);
+                            }
+                        }
+                    } catch (Throwable $e) {
+                        error_log('settings.update_shift sync failed: ' . $e->getMessage());
+                    }
+                }
+
                 $success = 'อัพเดทกะทำงานเรียบร้อยแล้ว';
                 break;
         }
@@ -170,10 +251,25 @@ require_once __DIR__ . '/../templates/header.php';
 </div>
 
 <?php if ($tab === 'general'): ?>
+<?php
+// Consistency banner: แสดงค่าปัจจุบันของ default shift เพื่อ admin ตรวจสอบ
+$defaultShiftForBanner = null;
+foreach ($workShifts as $_ws) {
+    if ((int)($_ws['is_default'] ?? 0) === 1) { $defaultShiftForBanner = $_ws; break; }
+}
+?>
 <!-- General Settings -->
 <div class="glass-card rounded-2xl p-6">
-    <h2 class="text-lg font-semibold text-white mb-6">ตั้งค่าทั่วไป</h2>
-    
+    <h2 class="text-lg font-semibold text-white mb-2">ตั้งค่าทั่วไป</h2>
+    <?php if ($defaultShiftForBanner): ?>
+    <p class="text-slate-400 text-sm mb-6">
+        <i class="fas fa-info-circle text-primary-400 mr-1"></i>
+        ค่าต่อไปนี้จะ sync กับกะเริ่มต้น
+        <strong class="text-white">(<?php echo htmlspecialchars(function_exists('shift_display_label') ? shift_display_label($defaultShiftForBanner) : $defaultShiftForBanner['name']); ?>)</strong>
+        ทุกครั้งที่บันทึก
+    </p>
+    <?php endif; ?>
+
     <form method="POST" class="space-y-6">
         <input type="hidden" name="csrf_token" value="<?php echo csrfToken(); ?>">
         <input type="hidden" name="action" value="update_settings">
