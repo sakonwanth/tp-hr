@@ -13,7 +13,8 @@ $isAdminPage = is_string($cp) && strncmp($cp, 'hr-', 3) === 0;
 
 <?php if (!$isAdminPage): ?>
 <!-- Mobile Bottom Navigation (employee-first, like Checkin) -->
-<nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800">
+<nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-xl border-t border-white/10"
+     style="padding-bottom: env(safe-area-inset-bottom, 0px);">
     <div class="max-w-lg mx-auto grid grid-cols-5 px-2 py-2">
         <?php
         $items = [
@@ -28,7 +29,7 @@ $isAdminPage = is_string($cp) && strncmp($cp, 'hr-', 3) === 0;
             $bg = ($cp === $it['key']) ? 'bg-violet-500/15 border border-violet-500/20' : 'bg-transparent';
         ?>
         <a href="<?php echo htmlspecialchars($it['href']); ?>"
-           class="flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-colors <?php echo $active; ?> <?php echo $bg; ?>">
+           class="flex flex-col items-center justify-center gap-1 min-h-[56px] py-2 rounded-xl transition-colors <?php echo $active; ?> <?php echo $bg; ?>">
             <i class="fas <?php echo htmlspecialchars($it['icon']); ?> text-lg"></i>
             <span class="text-[11px] font-medium leading-none"><?php echo htmlspecialchars($it['label']); ?></span>
         </a>
@@ -38,8 +39,8 @@ $isAdminPage = is_string($cp) && strncmp($cp, 'hr-', 3) === 0;
 <?php endif; ?>
 
 <!-- Toast Notification -->
-<div id="toast" class="fixed bottom-4 right-4 z-50 hidden">
-    <div class="bg-slate-800 border border-slate-700 rounded-xl shadow-xl p-4 flex items-center gap-3 min-w-[300px]">
+<div id="toast" class="fixed left-4 right-4 bottom-24 lg:left-auto lg:right-4 lg:bottom-4 z-50 hidden">
+    <div class="bg-slate-800/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-xl p-4 flex items-center gap-3 w-full lg:min-w-[300px] lg:w-auto">
         <div id="toastIcon" class="w-8 h-8 rounded-lg flex items-center justify-center"></div>
         <div class="flex-1">
             <p id="toastTitle" class="text-white font-medium"></p>
@@ -54,6 +55,24 @@ $isAdminPage = is_string($cp) && strncmp($cp, 'hr-', 3) === 0;
 <script>
 // Toast functions
 function showToast(type, title, message) {
+    const knownTypes = ['success', 'error', 'warning', 'info'];
+    if (!knownTypes.includes(type)) {
+        const legacyMessage = type || '';
+        const legacyType = knownTypes.includes(title) ? title : 'info';
+        type = legacyType;
+        title = legacyType === 'success' ? 'สำเร็จ'
+            : legacyType === 'error' ? 'ผิดพลาด'
+            : legacyType === 'warning' ? 'แจ้งเตือน'
+            : 'ข้อมูล';
+        message = legacyMessage;
+    } else if (message === undefined) {
+        message = title || '';
+        title = type === 'success' ? 'สำเร็จ'
+            : type === 'error' ? 'ผิดพลาด'
+            : type === 'warning' ? 'แจ้งเตือน'
+            : 'ข้อมูล';
+    }
+
     const toast = document.getElementById('toast');
     const icon = document.getElementById('toastIcon');
     const titleEl = document.getElementById('toastTitle');

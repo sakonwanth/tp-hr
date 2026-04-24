@@ -62,7 +62,7 @@ if ($action === 'request') {
 require_once __DIR__ . '/templates/header.php';
 ?>
 
-<main class="content-area p-6">
+<div>
     <?php if ($action === 'request'): ?>
     <!-- Leave Request Form -->
     <?php include __DIR__ . '/modules/employee/leaves/request_form.php'; ?>
@@ -174,7 +174,48 @@ require_once __DIR__ . '/templates/header.php';
                 </div>
                 
                 <?php if ($leave_history): ?>
-                <div class="overflow-x-auto">
+                <div class="md:hidden space-y-3">
+                    <?php foreach ($leave_history as $leave): ?>
+                    <?php
+                    $leaveDateLabel = $leave['start_date'] === $leave['end_date']
+                        ? formatDateThai($leave['start_date'])
+                        : formatDateThai($leave['start_date']) . ' - ' . formatDateThai($leave['end_date']);
+                    $statusClass = match($leave['status']) {
+                        'PENDING' => 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30',
+                        'APPROVED' => 'bg-green-500/20 text-green-300 border border-green-500/30',
+                        'REJECTED' => 'bg-red-500/20 text-red-300 border border-red-500/30',
+                        'CANCELLED' => 'bg-gray-500/20 text-gray-300 border border-gray-500/30',
+                        default => 'bg-gray-500/20 text-gray-300 border border-gray-500/30'
+                    };
+                    ?>
+                    <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <span class="inline-flex px-2.5 py-1 text-xs rounded-full"
+                                      style="background-color: <?php echo $leave['color'] ?? '#6B7280'; ?>20; color: <?php echo $leave['color'] ?? '#6B7280'; ?>">
+                                    <?php echo htmlspecialchars($leave['leave_type_name']); ?>
+                                </span>
+                                <p class="mt-2 text-white font-semibold leading-tight"><?php echo htmlspecialchars($leaveDateLabel); ?></p>
+                            </div>
+                            <span class="shrink-0 px-2.5 py-1 text-xs rounded-full <?php echo $statusClass; ?>">
+                                <?php echo LEAVE_STATUS[$leave['status']] ?? $leave['status']; ?>
+                            </span>
+                        </div>
+                        <div class="mt-3 grid grid-cols-2 gap-2">
+                            <div class="rounded-xl bg-black/20 border border-white/10 px-3 py-2">
+                                <div class="text-[11px] text-white/50">จำนวนวัน</div>
+                                <div class="text-white font-semibold"><?php echo number_format($leave['total_days'], 1); ?> วัน</div>
+                            </div>
+                            <a href="leave_history.php"
+                               class="min-h-[44px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold flex items-center justify-center">
+                                <i class="fas fa-eye mr-2"></i>รายละเอียด
+                            </a>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <div class="hidden md:block overflow-x-auto">
                     <table class="w-full">
                         <thead>
                             <tr class="border-b border-white/10">
@@ -328,7 +369,7 @@ require_once __DIR__ . '/templates/header.php';
         </div>
     </div>
     <?php endif; ?>
-</main>
+</div>
 
 <script>
 async function cancelRequest(id) {
@@ -338,7 +379,7 @@ async function cancelRequest(id) {
         const response = await fetch('/api/leave.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'cancel', id: id })
+            body: JSON.stringify({ action: 'cancel', request_id: id, _token: '<?php echo csrfToken(); ?>' })
         });
         
         const result = await response.json();

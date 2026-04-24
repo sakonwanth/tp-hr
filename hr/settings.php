@@ -16,6 +16,7 @@ if (!isCEOOrAbove()) {
 
 $pdo = getDB();
 $user = Auth::user();
+$settingsService = new SettingsService($pdo);
 
 $page_title = 'ตั้งค่าระบบ';
 $current_page = 'hr-settings';
@@ -32,36 +33,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         switch ($action) {
             case 'update_settings':
                 foreach ($_POST['settings'] as $key => $value) {
-                    $stmt = $pdo->prepare("
-                        INSERT INTO hr_settings (`key`, `value`, updated_by) 
-                        VALUES (?, ?, ?)
-                        ON DUPLICATE KEY UPDATE `value` = VALUES(`value`), updated_by = VALUES(updated_by), updated_at = NOW()
-                    ");
-                    $stmt->execute([$key, $value, $user['id']]);
+                    $settingsService->set((string)$key, $value, 'STRING', (int)$user['id'], 'HR', 'updated from HR settings page');
                 }
 
-                // Sync ข้าม: tp-hr general settings → tp-crm system_settings + default shift
-                // เพื่อไม่ให้ค่าเวลาทำงาน "แตกกัน" ระหว่าง module
+                // Keep default shift in line with the canonical settings service.
                 try {
                     $s = $_POST['settings'] ?? [];
-                    $existsSys = $pdo->query("SHOW TABLES LIKE 'system_settings'")->fetchColumn();
-
-                    $map = [
-                        'default_work_start'    => 'work_start_time',
-                        'default_work_end'      => 'work_end_time',
-                        'grace_period_minutes'  => 'grace_period_minutes',
-                    ];
-                    if ($existsSys) {
-                        foreach ($map as $hrKey => $sysKey) {
-                            if (!isset($s[$hrKey]) || $s[$hrKey] === '') continue;
-                            $pdo->prepare("INSERT INTO system_settings (setting_key, setting_value, category, description)
-                                            VALUES (?, ?, 'HR', 'sync จาก tp-hr general settings')
-                                            ON DUPLICATE KEY UPDATE setting_value=VALUES(setting_value), updated_at=NOW()")
-                                ->execute([$sysKey, (string)$s[$hrKey]]);
-                        }
-                    }
-
-                    // Also sync default shift times ถ้า admin แก้ default_work_start/end ใน general tab
                     if (isset($s['default_work_start'], $s['default_work_end'])) {
                         $pdo->prepare("UPDATE hr_work_shifts
                                         SET start_time = ?, end_time = ?, grace_period_minutes = COALESCE(?, grace_period_minutes)
@@ -146,44 +123,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ]);
                 Auth::log('update_shift', 'hr_work_shifts', $_POST['shift_id']);
 
-                // Sync: ถ้าแก้ default shift → update ทุกที่ที่เก็บเวลาทำงาน (kill fragmentation)
-                //   1. hr_settings.default_work_start/default_work_end (ถ้ามี table)
-                //   2. system_settings.work_start_time/work_end_time (tp-crm ใช้ผ่าน getSetting)
-                //   3. system_settings.grace_period_minutes (ถ้ามี)
+                // Default shift is the canonical source for standard work time.
                 if ($curRow && (int)($curRow['is_default'] ?? 0) === 1) {
                     try {
                         $startHHMM = substr((string)$_POST['start_time'], 0, 5);
                         $endHHMM   = substr((string)$_POST['end_time'],   0, 5);
                         $grace     = (int)($_POST['grace_period'] ?? 15);
 
-                        // hr_settings (tp-hr local)
-                        $pdo->prepare("INSERT INTO hr_settings (`key`, `value`, updated_by)
-                                        VALUES ('default_work_start', ?, ?)
-                                        ON DUPLICATE KEY UPDATE `value`=VALUES(`value`), updated_by=VALUES(updated_by), updated_at=NOW()")
-                            ->execute([$startHHMM, Auth::id()]);
-                        $pdo->prepare("INSERT INTO hr_settings (`key`, `value`, updated_by)
-                                        VALUES ('default_work_end', ?, ?)
-                                        ON DUPLICATE KEY UPDATE `value`=VALUES(`value`), updated_by=VALUES(updated_by), updated_at=NOW()")
-                            ->execute([$endHHMM, Auth::id()]);
-                        $pdo->prepare("INSERT INTO hr_settings (`key`, `value`, updated_by)
-                                        VALUES ('grace_period_minutes', ?, ?)
-                                        ON DUPLICATE KEY UPDATE `value`=VALUES(`value`), updated_by=VALUES(updated_by), updated_at=NOW()")
-                            ->execute([(string)$grace, Auth::id()]);
-
-                        // system_settings (tp-crm legacy — payroll + hr module อ่าน key เหล่านี้)
-                        $existsSys = $pdo->query("SHOW TABLES LIKE 'system_settings'")->fetchColumn();
-                        if ($existsSys) {
-                            foreach ([
-                                ['work_start_time',       $startHHMM,  'HR', 'เวลาเริ่มงาน (sync จาก default shift)'],
-                                ['work_end_time',         $endHHMM,    'HR', 'เวลาเลิกงาน (sync จาก default shift)'],
-                                ['grace_period_minutes',  (string)$grace, 'HR', 'เวลาผ่อนผันมาสาย (นาที)'],
-                            ] as [$k, $v, $cat, $desc]) {
-                                $pdo->prepare("INSERT INTO system_settings (setting_key, setting_value, category, description)
-                                                VALUES (?, ?, ?, ?)
-                                                ON DUPLICATE KEY UPDATE setting_value=VALUES(setting_value), updated_at=NOW()")
-                                    ->execute([$k, $v, $cat, $desc]);
-                            }
-                        }
+                        $settingsService->set('default_work_start', $startHHMM, 'STRING', Auth::id(), 'HR', 'เวลาเริ่มงานมาตรฐาน');
+                        $settingsService->set('default_work_end', $endHHMM, 'STRING', Auth::id(), 'HR', 'เวลาเลิกงานมาตรฐาน');
+                        $settingsService->set('grace_period_minutes', (string)$grace, 'NUMBER', Auth::id(), 'HR', 'เวลาผ่อนผันมาสาย (นาที)');
                     } catch (Throwable $e) {
                         error_log('settings.update_shift sync failed: ' . $e->getMessage());
                     }
@@ -201,11 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $tab = $_GET['tab'] ?? 'general';
 
 // Fetch data based on tab
-$settings = [];
-$stmt = $pdo->query("SELECT `key`, `value` FROM hr_settings");
-while ($row = $stmt->fetch()) {
-    $settings[$row['key']] = $row['value'];
-}
+$settings = $settingsService->allForHrSettingsPage();
 
 $holidays = $pdo->query("SELECT * FROM hr_holidays ORDER BY date")->fetchAll();
 $leaveTypes = $pdo->query("SELECT * FROM hr_leave_types ORDER BY sort_order")->fetchAll();
@@ -374,8 +319,34 @@ foreach ($workShifts as $_ws) {
     <!-- Holiday List -->
     <div class="lg:col-span-2 glass-card rounded-2xl p-6">
         <h2 class="text-lg font-semibold text-white mb-4">รายการวันหยุด <?php echo date('Y') + 543; ?></h2>
-        
-        <div class="overflow-x-auto">
+
+        <div class="md:hidden space-y-3">
+            <?php foreach ($holidays as $holiday): ?>
+            <div class="rounded-xl bg-slate-800/50 border border-white/10 p-4">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                        <p class="text-white font-medium break-words"><?php echo htmlspecialchars($holiday['name']); ?></p>
+                        <p class="text-slate-400 text-sm mt-1"><?php echo formatDateThai($holiday['date']); ?></p>
+                    </div>
+                    <?php if ($holiday['type'] === 'PUBLIC'): ?>
+                    <span class="badge badge-info shrink-0">ประจำปี</span>
+                    <?php else: ?>
+                    <span class="badge badge-warning shrink-0">พิเศษ</span>
+                    <?php endif; ?>
+                </div>
+                <form method="POST" class="mt-4" onsubmit="return confirm('ยืนยันการลบ?')">
+                    <input type="hidden" name="csrf_token" value="<?php echo csrfToken(); ?>">
+                    <input type="hidden" name="action" value="delete_holiday">
+                    <input type="hidden" name="holiday_id" value="<?php echo $holiday['id']; ?>">
+                    <button type="submit" class="btn-secondary w-full min-h-[44px] text-red-300 border-red-500/30">
+                        <i class="fas fa-trash mr-2"></i>ลบวันหยุด
+                    </button>
+                </form>
+            </div>
+            <?php endforeach; ?>
+        </div>
+
+        <div class="hidden md:block overflow-x-auto">
             <table class="data-table">
                 <thead>
                     <tr>
@@ -419,8 +390,60 @@ foreach ($workShifts as $_ws) {
 <!-- Leave Types -->
 <div class="glass-card rounded-2xl p-6">
     <h2 class="text-lg font-semibold text-white mb-4">ประเภทการลา</h2>
-    
-    <div class="overflow-x-auto">
+
+    <div class="md:hidden space-y-3">
+        <?php foreach ($leaveTypes as $lt): ?>
+        <?php
+        $conditions = [];
+        if ($lt['gender_restriction'] !== 'ALL') {
+            $conditions[] = $lt['gender_restriction'] === 'MALE' ? 'เฉพาะชาย' : 'เฉพาะหญิง';
+        }
+        if ($lt['min_months_employed'] > 0) {
+            $conditions[] = "ทำงานครบ {$lt['min_months_employed']} เดือน";
+        }
+        if ($lt['requires_document']) {
+            $conditions[] = 'ต้องมีเอกสาร';
+        }
+        ?>
+        <div class="rounded-xl bg-slate-800/50 border border-white/10 p-4">
+            <div class="flex items-start justify-between gap-3">
+                <div class="flex items-start gap-3 min-w-0">
+                    <div class="w-3 h-3 rounded-full mt-1.5 shrink-0" style="background: <?php echo $lt['color']; ?>"></div>
+                    <div class="min-w-0">
+                        <p class="text-white font-medium break-words"><?php echo htmlspecialchars($lt['name']); ?></p>
+                        <p class="text-slate-500 text-xs break-words"><?php echo htmlspecialchars($lt['name_en']); ?></p>
+                    </div>
+                </div>
+                <?php if ($lt['is_active']): ?>
+                <span class="badge badge-success shrink-0">เปิด</span>
+                <?php else: ?>
+                <span class="badge badge-danger shrink-0">ปิด</span>
+                <?php endif; ?>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mt-4 text-sm">
+                <div>
+                    <p class="text-slate-500">วันต่อปี</p>
+                    <p class="text-white font-medium"><?php echo number_format($lt['default_days_per_year'], 1); ?> วัน</p>
+                </div>
+                <div>
+                    <p class="text-slate-500">ค่าจ้าง</p>
+                    <?php if ($lt['is_paid']): ?>
+                    <p class="text-emerald-300 font-medium">ได้รับ</p>
+                    <?php else: ?>
+                    <p class="text-red-300 font-medium">ไม่ได้รับ</p>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <p class="text-slate-400 text-sm mt-3"><?php echo $conditions ? htmlspecialchars(implode(', ', $conditions)) : '-'; ?></p>
+            <button onclick="editLeaveType(<?php echo htmlspecialchars(json_encode($lt)); ?>)"
+                    class="btn-secondary w-full min-h-[44px] mt-4">
+                <i class="fas fa-edit mr-2"></i>แก้ไข
+            </button>
+        </div>
+        <?php endforeach; ?>
+    </div>
+
+    <div class="hidden md:block overflow-x-auto">
         <table class="data-table">
             <thead>
                 <tr>
@@ -561,7 +584,7 @@ function closeModal(id) {
     
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <?php foreach ($workShifts as $shift): ?>
-        <div class="bg-slate-800/50 rounded-xl p-4">
+        <div class="bg-slate-800/50 border border-white/10 rounded-xl p-4">
             <div class="flex items-center justify-between mb-3">
                 <div>
                     <h3 class="text-white font-medium"><?php echo htmlspecialchars(function_exists('shift_display_label') ? shift_display_label($shift) : $shift['name']); ?></h3>
@@ -602,7 +625,7 @@ function closeModal(id) {
                         <span class="text-slate-300 text-sm">เปิดใช้งาน</span>
                     </label>
                     
-                    <button type="submit" class="btn-secondary text-sm py-1">
+                    <button type="submit" class="btn-secondary text-sm min-h-[44px] px-4">
                         <i class="fas fa-save mr-1"></i>บันทึก
                     </button>
                 </div>

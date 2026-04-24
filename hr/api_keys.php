@@ -114,7 +114,7 @@ $availableScopes = [
 
 require_once __DIR__ . '/../templates/header.php';
 ?>
-<main class="content-area p-6">
+<div>
     <div class="mb-6">
         <h1 class="text-2xl font-bold text-white">External API Keys</h1>
         <p class="text-white/60 text-sm">จัดการคีย์ API สำหรับระบบภายนอก</p>
@@ -283,5 +283,5 @@ require_once __DIR__ . '/../templates/header.php';
         </table>
         </div>
     </div>
-</main>
+</div>
 <?php require_once __DIR__ . '/../templates/footer.php'; ?>

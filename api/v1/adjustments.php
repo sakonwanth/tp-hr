@@ -72,22 +72,72 @@ if ($cur['status'] !== 'PENDING') ApiAuth::fail(409, 'Already processed');
 try {
     $pdo->beginTransaction();
     if ($action === 'approve') {
-        // Apply requested times to parent attendance
-        $sets = [];
-        $params = [];
-        if (!empty($cur['requested_check_in'])) {
-            $sets[] = "check_in_time = ?"; $params[] = $cur['requested_check_in'];
+        $attStmt = $pdo->prepare("SELECT * FROM hr_attendances WHERE id = ? LIMIT 1 FOR UPDATE");
+        $attStmt->execute([(int)$cur['attendance_id']]);
+        $attendance = $attStmt->fetch(PDO::FETCH_ASSOC);
+        if (!$attendance) {
+            $pdo->rollBack();
+            ApiAuth::fail(404, 'Parent attendance not found');
         }
-        if (!empty($cur['requested_check_out'])) {
-            $sets[] = "check_out_time = ?"; $params[] = $cur['requested_check_out'];
+
+        $attendanceService = new AttendanceService($pdo);
+        $targetUser = $attendanceService->getUserForAttendance((int)$cur['user_id']);
+        if (!$targetUser) {
+            $pdo->rollBack();
+            ApiAuth::fail(404, 'User not found or inactive');
         }
-        if ($sets) {
-            $sets[] = "adjusted_by = ?"; $params[] = $reviewerId;
-            $sets[] = "adjusted_at = NOW()";
-            $sets[] = "adjustment_reason = ?"; $params[] = $cur['reason'];
-            $params[] = (int)$cur['attendance_id'];
-            $pdo->prepare("UPDATE hr_attendances SET " . implode(', ', $sets) . " WHERE id = ?")->execute($params);
-        }
+
+        $date = (string)$attendance['attendance_date'];
+        $checkIn = !empty($cur['requested_check_in'])
+            ? AttendanceService::normalizeDateTime($date, (string)$cur['requested_check_in'])
+            : ($attendance['check_in_time'] ?? null);
+        $checkOut = !empty($cur['requested_check_out'])
+            ? AttendanceService::normalizeDateTime($date, (string)$cur['requested_check_out'])
+            : ($attendance['check_out_time'] ?? null);
+        $shift = $attendanceService->getShiftById((int)($attendance['shift_id'] ?? 0));
+        $summary = $attendanceService->summarizeAttendance(
+            $targetUser,
+            $shift,
+            $date,
+            $checkIn,
+            $checkOut,
+            $attendance['planned_start_time'] ?? null,
+            $attendance['status'] ?? null
+        );
+
+        $pdo->prepare("
+            UPDATE hr_attendances
+            SET check_in_time = ?,
+                check_out_time = ?,
+                check_in_type = CASE WHEN ? = 1 THEN 'MANUAL' ELSE check_in_type END,
+                check_out_type = CASE WHEN ? = 1 THEN 'MANUAL' ELSE check_out_type END,
+                work_minutes = ?,
+                break_minutes = ?,
+                late_minutes = ?,
+                early_leave_minutes = ?,
+                ot_minutes = ?,
+                status = ?,
+                adjusted_by = ?,
+                adjusted_at = NOW(),
+                adjustment_reason = ?,
+                updated_at = NOW()
+            WHERE id = ?
+        ")->execute([
+            $checkIn,
+            $checkOut,
+            !empty($cur['requested_check_in']) ? 1 : 0,
+            !empty($cur['requested_check_out']) ? 1 : 0,
+            (int)$summary['work_minutes'],
+            (int)$summary['break_minutes'],
+            (int)$summary['late_minutes'],
+            (int)$summary['early_leave_minutes'],
+            (int)$summary['ot_minutes'],
+            (string)$summary['status'],
+            $reviewerId,
+            $cur['reason'],
+            (int)$cur['attendance_id'],
+        ]);
+
         $pdo->prepare("
             UPDATE hr_attendance_adjustments
             SET status='APPROVED', reviewed_by=?, reviewed_at=NOW(), review_remarks=?

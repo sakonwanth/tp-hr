@@ -6,8 +6,25 @@
 /**
  * Generate running number
  */
-function generateRunningNumber(string $prefix, string $table, string $column = 'request_number'): string {
-    $pdo = getDB();
+function generateRunningNumber($prefix, string $table = '', string $column = 'request_number'): string {
+    if ($prefix instanceof PDO) {
+        $pdo = $prefix;
+        $legacyType = $table;
+        $prefix = $column;
+        $column = 'request_number';
+        $table = match ($legacyType) {
+            'LEAVE' => 'hr_leave_requests',
+            'DOC_REQUEST' => 'hr_document_requests',
+            default => $legacyType,
+        };
+    } else {
+        $pdo = getDB();
+    }
+
+    if (!preg_match('/^[A-Za-z0-9_]+$/', (string)$table) || !preg_match('/^[A-Za-z0-9_]+$/', (string)$column)) {
+        throw new InvalidArgumentException('Invalid running number target');
+    }
+
     $year = date('Y');
     $pattern = $prefix . '-' . $year . '-%';
     
@@ -41,14 +58,19 @@ function uploadFile(array $file, string $destination, ?array $allowedTypes = nul
         return ['success' => false, 'message' => $errors[$file['error']] ?? 'เกิดข้อผิดพลาด'];
     }
     
+    $maxSize = MAX_UPLOAD_SIZE;
+    if (isset($allowedTypes['max_size']) && is_numeric($allowedTypes['max_size'])) {
+        $maxSize = (int)$allowedTypes['max_size'];
+    }
+
     // Check file size
-    if ($file['size'] > MAX_UPLOAD_SIZE) {
+    if ($file['size'] > $maxSize) {
         return ['success' => false, 'message' => 'ไฟล์มีขนาดใหญ่เกินไป'];
     }
     
     // Get file extension
     $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-    $allowedTypes = $allowedTypes ?? ALLOWED_FILE_TYPES;
+    $allowedTypes = $allowedTypes['types'] ?? $allowedTypes ?? ALLOWED_FILE_TYPES;
 
     if (!in_array($ext, $allowedTypes, true)) {
         return ['success' => false, 'message' => 'ประเภทไฟล์ไม่ถูกต้อง'];
@@ -74,7 +96,12 @@ function uploadFile(array $file, string $destination, ?array $allowedTypes = nul
         'jpg'  => ['image/jpeg'],
         'jpeg' => ['image/jpeg'],
         'png'  => ['image/png'],
+        'gif'  => ['image/gif'],
         'webp' => ['image/webp'],
+        'doc'  => ['application/msword', 'application/vnd.ms-office', 'application/x-ole-storage'],
+        'xls'  => ['application/vnd.ms-excel', 'application/vnd.ms-office', 'application/x-ole-storage'],
+        'docx' => ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/zip'],
+        'xlsx' => ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/zip'],
     ];
 
     if (isset($allowedMimeByExt[$ext]) && $mime !== '' && !in_array($mime, $allowedMimeByExt[$ext], true)) {
@@ -82,13 +109,56 @@ function uploadFile(array $file, string $destination, ?array $allowedTypes = nul
     }
 
     // Extra guard for images
-    if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp'], true)) {
+    if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true)) {
         try {
             if (@getimagesize($file['tmp_name']) === false) {
                 return ['success' => false, 'message' => 'ไฟล์รูปภาพไม่ถูกต้อง'];
             }
         } catch (Throwable $e) {
             return ['success' => false, 'message' => 'ไฟล์รูปภาพไม่ถูกต้อง'];
+        }
+    }
+
+    if (in_array($ext, ['doc', 'xls'], true)) {
+        try {
+            $fh = @fopen($file['tmp_name'], 'rb');
+            if (!$fh) return ['success' => false, 'message' => 'อ่านไฟล์ไม่ได้'];
+            $head = (string)fread($fh, 8);
+            fclose($fh);
+            if (bin2hex($head) !== 'd0cf11e0a1b11ae1') {
+                return ['success' => false, 'message' => 'ไฟล์ Office ไม่ถูกต้อง'];
+            }
+        } catch (Throwable $e) {
+            return ['success' => false, 'message' => 'ไฟล์ Office ไม่ถูกต้อง'];
+        }
+    }
+
+    if (in_array($ext, ['docx', 'xlsx'], true)) {
+        try {
+            $fh = @fopen($file['tmp_name'], 'rb');
+            if (!$fh) return ['success' => false, 'message' => 'อ่านไฟล์ไม่ได้'];
+            $head = (string)fread($fh, 4);
+            fclose($fh);
+            if ($head !== "PK\x03\x04" && $head !== "PK\x05\x06" && $head !== "PK\x07\x08") {
+                return ['success' => false, 'message' => 'ไฟล์ Office ไม่ถูกต้อง'];
+            }
+
+            if (class_exists('ZipArchive')) {
+                $zip = new ZipArchive();
+                if ($zip->open($file['tmp_name']) !== true) {
+                    return ['success' => false, 'message' => 'ไฟล์ Office ไม่ถูกต้อง'];
+                }
+                $hasContentTypes = $zip->locateName('[Content_Types].xml') !== false;
+                $hasAppDir = $ext === 'docx'
+                    ? $zip->locateName('word/document.xml') !== false
+                    : $zip->locateName('xl/workbook.xml') !== false;
+                $zip->close();
+                if (!$hasContentTypes || !$hasAppDir) {
+                    return ['success' => false, 'message' => 'ไฟล์ Office ไม่ถูกต้อง'];
+                }
+            }
+        } catch (Throwable $e) {
+            return ['success' => false, 'message' => 'ไฟล์ Office ไม่ถูกต้อง'];
         }
     }
 
@@ -383,33 +453,11 @@ function getSetting(string $key, $default = null) {
     
     try {
         $pdo = getDB();
-        $stmt = $pdo->prepare("SELECT `value`, `type` FROM hr_settings WHERE `key` = ?");
-        $stmt->execute([$key]);
-        $result = $stmt->fetch();
-        
-        if (!$result) {
-            return $default;
-        }
-        
-        $value = $result['value'];
-        
-        // Cast based on type
-        switch ($result['type']) {
-            case 'NUMBER':
-                $value = is_numeric($value) ? (strpos($value, '.') !== false ? (float)$value : (int)$value) : $default;
-                break;
-            case 'BOOLEAN':
-                $value = filter_var($value, FILTER_VALIDATE_BOOLEAN);
-                break;
-            case 'JSON':
-                $value = json_decode($value, true) ?? $default;
-                break;
-        }
-        
+        $value = (new SettingsService($pdo))->get($key, $default);
         $cache[$key] = $value;
         return $value;
         
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         return $default;
     }
 }
@@ -420,22 +468,8 @@ function getSetting(string $key, $default = null) {
 function setSetting(string $key, $value, string $type = 'STRING'): bool {
     try {
         $pdo = getDB();
-        
-        if ($type === 'JSON' && is_array($value)) {
-            $value = json_encode($value, JSON_UNESCAPED_UNICODE);
-        } elseif ($type === 'BOOLEAN') {
-            $value = $value ? 'true' : 'false';
-        }
-        
-        $stmt = $pdo->prepare("
-            INSERT INTO hr_settings (`key`, `value`, `type`, updated_by) 
-            VALUES (?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE `value` = VALUES(`value`), updated_by = VALUES(updated_by)
-        ");
-        
-        return $stmt->execute([$key, $value, $type, Auth::id()]);
-        
-    } catch (Exception $e) {
+        return (new SettingsService($pdo))->set($key, $value, $type, Auth::id());
+    } catch (Throwable $e) {
         return false;
     }
 }
@@ -548,10 +582,7 @@ if (!function_exists('getSystemSetting')) {
         static $cache = [];
         if (array_key_exists($key, $cache)) return $cache[$key];
         try {
-            $stmt = $pdo->prepare("SELECT setting_value FROM system_settings WHERE setting_key = ? LIMIT 1");
-            $stmt->execute([$key]);
-            $val = $stmt->fetchColumn();
-            return $cache[$key] = ($val !== false && $val !== null) ? (string)$val : $default;
+            return $cache[$key] = (new SettingsService($pdo))->getSystem($key, $default);
         } catch (Throwable $e) {
             return $cache[$key] = $default;
         }

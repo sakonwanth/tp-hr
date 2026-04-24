@@ -24,22 +24,15 @@ $success = null; $error = null;
 // Helpers
 // ------------------------------------------------------------------
 function dt_setSetting(PDO $pdo, string $key, string $value): void {
-    $stmt = $pdo->prepare("INSERT INTO system_settings (setting_key, setting_value, category)
-        VALUES (?, ?, 'ข้อมูลบริษัท')
-        ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value), updated_at = NOW()");
-    $stmt->execute([$key, $value]);
+    (new SettingsService($pdo))->setSystem($key, $value, 'STRING', Auth::id(), 'ทั่วไป', 'ตั้งค่าเอกสารรับรอง');
 }
 
 function dt_getAllSettings(PDO $pdo): array {
-    $rs = $pdo->query("SELECT setting_key, setting_value FROM system_settings
-        WHERE setting_key IN (
-            'company_name','company_name_en','company_address','company_phone','company_email',
-            'company_website','company_tax_id','company_logo','company_seal',
-            'doc_header_subtitle_th','doc_header_subtitle_en','doc_footer_note_th','doc_show_esignature'
-        )");
-    $out = [];
-    foreach ($rs as $r) { $out[$r['setting_key']] = (string)$r['setting_value']; }
-    return $out;
+    return (new SettingsService($pdo))->getSystemMany([
+        'company_name','company_name_en','company_address','company_phone','company_email',
+        'company_website','company_tax_id','company_logo','company_seal',
+        'doc_header_subtitle_th','doc_header_subtitle_en','doc_footer_note_th','doc_show_esignature',
+    ]);
 }
 
 function dt_handleUpload(array $file, string $subdir, array $allowed = ['png','jpg','jpeg','webp']): string {

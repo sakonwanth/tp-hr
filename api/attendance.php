@@ -110,43 +110,12 @@ function handleCheckIn(PDO $pdo, array $user, array $input): void {
         apiError('คุณได้ลงเวลาเข้างานวันนี้แล้ว');
     }
 
-    $stmt = $pdo->query("SELECT * FROM hr_work_shifts WHERE is_default = 1 AND is_active = 1 LIMIT 1");
-    $shift = $stmt->fetch();
-
-    $lateMinutes = 0;
-    $status      = 'PRESENT';
-
-    // S4: Planned late-start support
-    $plannedStart        = $existing['planned_start_time'] ?? null;
-    $plannedGraceMinutes = 30;
-
-    if ($shift) {
-        $defaults    = getShiftDefaults($shift);
-        $shiftGrace  = $defaults['grace_period_minutes'];
-        $now         = time();
-
-        if (!empty($plannedStart)) {
-            $effectiveStart = strtotime(date('Y-m-d') . ' ' . $plannedStart);
-            $gracePeriod    = max($shiftGrace, $plannedGraceMinutes) * 60;
-            if ($now > ($effectiveStart + $gracePeriod)) {
-                $lateMinutes = (int) floor(($now - $effectiveStart) / 60);
-                $status      = 'LATE';
-            }
-        } else {
-            $shiftStart  = strtotime(date('Y-m-d') . ' ' . $shift['start_time']);
-            $gracePeriod = $shiftGrace * 60;
-            if ($now > ($shiftStart + $gracePeriod)) {
-                $lateMinutes = (int) floor(($now - $shiftStart) / 60);
-                $status      = 'LATE';
-            }
-        }
-    }
-
-    // WFH employees — aligned with tp-checkin
-    if (($user['work_mode'] ?? 'OFFICE') === 'WFH') {
-        $status      = 'WFH';
-        $lateMinutes = 0;
-    }
+    $attendanceService = new AttendanceService($pdo);
+    $shift = $attendanceService->getDefaultShift();
+    $checkInAt = date('Y-m-d H:i:s');
+    $checkInSummary = $attendanceService->determineCheckIn($user, $shift, $checkInAt, $existing['planned_start_time'] ?? null);
+    $lateMinutes = (int)$checkInSummary['late_minutes'];
+    $status = (string)$checkInSummary['status'];
 
     // Location enforcement (HR settings)
     $enforceLocation = getHrBoolSetting($pdo, 'enforce_location_checkin', true);
@@ -193,7 +162,7 @@ function handleCheckIn(PDO $pdo, array $user, array $input): void {
     if ($existing) {
         $stmt = $pdo->prepare("
             UPDATE hr_attendances SET
-                check_in_time = NOW(),
+                check_in_time = ?,
                 check_in_type = 'GPS',
                 check_in_latitude = ?,
                 check_in_longitude = ?,
@@ -205,7 +174,7 @@ function handleCheckIn(PDO $pdo, array $user, array $input): void {
                 updated_at = NOW()
             WHERE id = ?
         ");
-        $stmt->execute([$latitude, $longitude, $locationId, $photoPath, $_SERVER['REMOTE_ADDR'] ?? '', $lateMinutes, $status, $existing['id']]);
+        $stmt->execute([$checkInAt, $latitude, $longitude, $locationId, $photoPath, $_SERVER['REMOTE_ADDR'] ?? '', $lateMinutes, $status, $existing['id']]);
         $attId = (int)$existing['id'];
     } else {
         $stmt = $pdo->prepare("
@@ -214,16 +183,16 @@ function handleCheckIn(PDO $pdo, array $user, array $input): void {
                 check_in_time, check_in_type, check_in_latitude, check_in_longitude,
                 check_in_location_id, check_in_photo, check_in_ip,
                 late_minutes, status
-            ) VALUES (?, CURDATE(), ?, NOW(), 'GPS', ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, CURDATE(), ?, ?, 'GPS', ?, ?, ?, ?, ?, ?, ?)
         ");
-        $stmt->execute([$user['id'], $shift['id'] ?? null, $latitude, $longitude, $locationId, $photoPath, $_SERVER['REMOTE_ADDR'] ?? '', $lateMinutes, $status]);
+        $stmt->execute([$user['id'], $shift['id'] ?? null, $checkInAt, $latitude, $longitude, $locationId, $photoPath, $_SERVER['REMOTE_ADDR'] ?? '', $lateMinutes, $status]);
         $attId = (int)$pdo->lastInsertId();
     }
 
     Auth::log('CHECK_IN', 'hr_attendances', $attId);
 
     apiSuccess([
-        'check_in_time' => date('H:i:s'),
+        'check_in_time' => date('H:i:s', strtotime($checkInAt)),
         'late_minutes'  => $lateMinutes,
         'status'        => $status,
         'attendance_id' => $attId,
@@ -231,14 +200,11 @@ function handleCheckIn(PDO $pdo, array $user, array $input): void {
 }
 
 /**
- * Read boolean setting from hr_settings (mirror ของ tp-checkin/api/attendance.php)
+ * Read boolean setting through the shared settings compatibility layer.
  */
 function getHrBoolSetting(PDO $pdo, string $key, bool $default = true): bool {
-    $stmt = $pdo->prepare("SELECT value FROM hr_settings WHERE `key` = ? LIMIT 1");
-    $stmt->execute([$key]);
-    $setting = $stmt->fetch();
-    if (!$setting) return $default;
-    return (string)$setting['value'] === '1';
+    $value = (new SettingsService($pdo))->get($key, $default);
+    return filter_var($value, FILTER_VALIDATE_BOOLEAN);
 }
 
 /**
@@ -320,37 +286,19 @@ function handleCheckOut(PDO $pdo, array $user, array $input): void {
         apiError('คุณได้ลงเวลาออกงานวันนี้แล้ว');
     }
 
-    $shift = null;
-    if ($attendance['shift_id']) {
-        $stmt = $pdo->prepare("SELECT * FROM hr_work_shifts WHERE id = ?");
-        $stmt->execute([$attendance['shift_id']]);
-        $shift = $stmt->fetch();
-    }
-
-    $checkInTime  = strtotime($attendance['check_in_time']);
-    $checkOutTime = time();
-    $workMinutes  = floor(($checkOutTime - $checkInTime) / 60);
-
-    $defaults     = getShiftDefaults($shift ?: null);
-    $breakMinutes = $defaults['break_minutes'];
-    $workMinutes -= $breakMinutes;
-    if ($workMinutes < 0) $workMinutes = 0;
-
-    $otMinutes = 0;
-    if ($shift) {
-        $expectedWorkMinutes = $defaults['work_hours_per_day'] * 60;
-        if ($workMinutes > $expectedWorkMinutes) {
-            $otMinutes = $workMinutes - $expectedWorkMinutes;
-        }
-    }
-
-    $earlyLeaveMinutes = 0;
-    if ($shift) {
-        $shiftEnd = strtotime(date('Y-m-d') . ' ' . $shift['end_time']);
-        if ($checkOutTime < $shiftEnd) {
-            $earlyLeaveMinutes = floor(($shiftEnd - $checkOutTime) / 60);
-        }
-    }
+    $attendanceService = new AttendanceService($pdo);
+    $shift = $attendanceService->getShiftById((int)($attendance['shift_id'] ?? 0));
+    $checkOutAt = date('Y-m-d H:i:s');
+    $workSummary = $attendanceService->summarizeWork(
+        $attendance['check_in_time'],
+        $checkOutAt,
+        $shift,
+        (string)$attendance['attendance_date']
+    );
+    $workMinutes = (int)$workSummary['work_minutes'];
+    $breakMinutes = (int)$workSummary['break_minutes'];
+    $otMinutes = (int)$workSummary['ot_minutes'];
+    $earlyLeaveMinutes = (int)$workSummary['early_leave_minutes'];
 
     // Location enforcement — mirror ของ handleCheckIn
     $enforceLocation      = getHrBoolSetting($pdo, 'enforce_location_checkin', true);
@@ -397,7 +345,7 @@ function handleCheckOut(PDO $pdo, array $user, array $input): void {
     // Update attendance record
     $stmt = $pdo->prepare("
         UPDATE hr_attendances SET
-            check_out_time = NOW(),
+            check_out_time = ?,
             check_out_type = 'GPS',
             check_out_latitude = ?,
             check_out_longitude = ?,
@@ -412,6 +360,7 @@ function handleCheckOut(PDO $pdo, array $user, array $input): void {
         WHERE id = ?
     ");
     $stmt->execute([
+        $checkOutAt,
         $latitude,
         $longitude,
         $locationId,
@@ -428,7 +377,7 @@ function handleCheckOut(PDO $pdo, array $user, array $input): void {
     Auth::log('CHECK_OUT', 'hr_attendances', $attendance['id']);
     
     apiSuccess([
-        'check_out_time' => date('H:i:s'),
+        'check_out_time' => date('H:i:s', strtotime($checkOutAt)),
         'work_minutes' => $workMinutes,
         'ot_minutes' => $otMinutes
     ], 'ลงเวลาออกงานสำเร็จ');
@@ -608,44 +557,42 @@ function handleAdjust(PDO $pdo, array $user, array $input): void {
         apiError('รูปแบบวันที่ไม่ถูกต้อง');
     }
     
+    $attendanceService = new AttendanceService($pdo);
+    $targetUser = $attendanceService->getUserForAttendance($userId);
+    if (!$targetUser) {
+        apiError('ไม่พบพนักงานที่ต้องการแก้ไข');
+    }
+
     // Get existing attendance
     $stmt = $pdo->prepare("SELECT * FROM hr_attendances WHERE user_id = ? AND attendance_date = ?");
     $stmt->execute([$userId, $date]);
     $existing = $stmt->fetch();
     
-    // Get default shift
-    $stmt = $pdo->query("SELECT * FROM hr_work_shifts WHERE is_default = 1 AND is_active = 1 LIMIT 1");
-    $shift = $stmt->fetch();
+    $shift = $existing && !empty($existing['shift_id'])
+        ? $attendanceService->getShiftById((int)$existing['shift_id'])
+        : $attendanceService->getDefaultShift();
     
     // Effective values: new value (if provided) else keep existing
-    $checkInFull  = $checkInTime  !== '' ? "$date $checkInTime:00"  : ($existing['check_in_time']  ?? null);
-    $checkOutFull = $checkOutTime !== '' ? "$date $checkOutTime:00" : ($existing['check_out_time'] ?? null);
+    $checkInFull  = $checkInTime  !== '' ? AttendanceService::normalizeDateTime($date, $checkInTime)  : ($existing['check_in_time']  ?? null);
+    $checkOutFull = $checkOutTime !== '' ? AttendanceService::normalizeDateTime($date, $checkOutTime) : ($existing['check_out_time'] ?? null);
     $checkInChanged  = ($checkInTime  !== '');
     $checkOutChanged = ($checkOutTime !== '');
     
-    // Calculate work / late / status
-    $workMinutes = 0;
-    $lateMinutes = 0;
-    $status = $existing['status'] ?? 'PRESENT';
-    $defaults = getShiftDefaults($shift ?: null);
-    
-    if ($checkInFull && $shift) {
-        $shiftStart = strtotime("$date " . $shift['start_time']);
-        $gracePeriod = $defaults['grace_period_minutes'] * 60;
-        $checkInTs = strtotime($checkInFull);
-        if ($checkInTs > ($shiftStart + $gracePeriod)) {
-            $lateMinutes = (int)floor(($checkInTs - $shiftStart) / 60);
-            $status = 'LATE';
-        } else {
-            $status = 'PRESENT';
-        }
-    }
-    
-    if ($checkInFull && $checkOutFull) {
-        $workMinutes = (int)floor((strtotime($checkOutFull) - strtotime($checkInFull)) / 60);
-        $workMinutes -= $defaults['break_minutes'];
-        if ($workMinutes < 0) $workMinutes = 0;
-    }
+    $summary = $attendanceService->summarizeAttendance(
+        $targetUser,
+        $shift,
+        $date,
+        $checkInFull,
+        $checkOutFull,
+        $existing['planned_start_time'] ?? null,
+        $existing['status'] ?? null
+    );
+    $workMinutes = (int)$summary['work_minutes'];
+    $breakMinutes = (int)$summary['break_minutes'];
+    $lateMinutes = (int)$summary['late_minutes'];
+    $earlyLeaveMinutes = (int)$summary['early_leave_minutes'];
+    $otMinutes = (int)$summary['ot_minutes'];
+    $status = (string)$summary['status'];
     
     try {
         if ($existing) {
@@ -657,7 +604,10 @@ function handleAdjust(PDO $pdo, array $user, array $input): void {
                     check_in_type = CASE WHEN ? = 1 THEN 'MANUAL' ELSE check_in_type END,
                     check_out_type = CASE WHEN ? = 1 THEN 'MANUAL' ELSE check_out_type END,
                     work_minutes = ?,
+                    break_minutes = ?,
                     late_minutes = ?,
+                    early_leave_minutes = ?,
+                    ot_minutes = ?,
                     status = ?,
                     adjustment_reason = ?,
                     adjusted_by = ?,
@@ -671,7 +621,10 @@ function handleAdjust(PDO $pdo, array $user, array $input): void {
                 $checkInChanged ? 1 : 0,
                 $checkOutChanged ? 1 : 0,
                 $workMinutes,
+                $breakMinutes,
                 $lateMinutes,
+                $earlyLeaveMinutes,
+                $otMinutes,
                 $status,
                 $note,
                 $user['id'],
@@ -684,14 +637,14 @@ function handleAdjust(PDO $pdo, array $user, array $input): void {
                     user_id, attendance_date, shift_id,
                     check_in_time, check_in_type,
                     check_out_time, check_out_type,
-                    work_minutes, late_minutes, status, adjustment_reason,
+                    work_minutes, break_minutes, late_minutes, early_leave_minutes, ot_minutes, status, adjustment_reason,
                     adjusted_by, adjusted_at
-                ) VALUES (?, ?, ?, ?, 'MANUAL', ?, 'MANUAL', ?, ?, ?, ?, ?, NOW())
+                ) VALUES (?, ?, ?, ?, 'MANUAL', ?, 'MANUAL', ?, ?, ?, ?, ?, ?, ?, ?, NOW())
             ");
             $stmt->execute([
                 $userId, $date, $shift['id'] ?? null,
                 $checkInFull, $checkOutFull,
-                $workMinutes, $lateMinutes, $status, $note,
+                $workMinutes, $breakMinutes, $lateMinutes, $earlyLeaveMinutes, $otMinutes, $status, $note,
                 $user['id']
             ]);
         }
@@ -705,7 +658,10 @@ function handleAdjust(PDO $pdo, array $user, array $input): void {
             'check_in_type'     => $existing['check_in_type'] ?? null,
             'check_out_type'    => $existing['check_out_type'] ?? null,
             'work_minutes'      => (int)($existing['work_minutes'] ?? 0),
+            'break_minutes'     => (int)($existing['break_minutes'] ?? 0),
             'late_minutes'      => (int)($existing['late_minutes'] ?? 0),
+            'early_leave_minutes' => (int)($existing['early_leave_minutes'] ?? 0),
+            'ot_minutes'        => (int)($existing['ot_minutes'] ?? 0),
             'status'            => $existing['status'] ?? null,
             'adjustment_reason' => $existing['adjustment_reason'] ?? null,
         ] : [
@@ -721,7 +677,10 @@ function handleAdjust(PDO $pdo, array $user, array $input): void {
             'check_in_type'     => $checkInFull ? 'MANUAL' : ($existing['check_in_type'] ?? null),
             'check_out_type'    => $checkOutFull ? 'MANUAL' : ($existing['check_out_type'] ?? null),
             'work_minutes'      => (int)$workMinutes,
+            'break_minutes'     => (int)$breakMinutes,
             'late_minutes'      => (int)$lateMinutes,
+            'early_leave_minutes' => (int)$earlyLeaveMinutes,
+            'ot_minutes'        => (int)$otMinutes,
             'status'            => $status,
             'adjustment_reason' => $note,
             'adjusted_by'       => (int)$user['id'],
@@ -1091,4 +1050,3 @@ function cancelLateStartRequest(PDO $pdo, array $user, array $input): void {
 
     apiSuccess([], 'ยกเลิกคำขอแจ้งเข้างานสายเรียบร้อย');
 }
-

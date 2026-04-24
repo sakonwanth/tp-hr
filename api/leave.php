@@ -14,6 +14,14 @@ $user = Auth::user();
 
 $pdo = Database::getInstance()->getConnection();
 $method = $_SERVER['REQUEST_METHOD'];
+
+if ($method === 'POST' && empty($_POST) && stripos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') !== false) {
+    $jsonInput = json_decode(file_get_contents('php://input') ?: '', true);
+    if (is_array($jsonInput)) {
+        $_POST = $jsonInput;
+    }
+}
+
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 
 try {

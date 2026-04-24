@@ -95,38 +95,51 @@ $date = date('Y-m-d', $tsNow);
 $ip = $_SERVER['REMOTE_ADDR'] ?? null;
 
 try {
+    $attendanceService = new AttendanceService($pdo);
+    $targetUser = $attendanceService->getUserForAttendance($userId);
+    if (!$targetUser) {
+        ApiAuth::fail(404, 'User not found or inactive');
+    }
+
     $pdo->beginTransaction();
-    $find = $pdo->prepare("SELECT id, check_in_time, check_out_time FROM hr_attendances WHERE user_id = ? AND attendance_date = ? LIMIT 1 FOR UPDATE");
+    $find = $pdo->prepare("SELECT * FROM hr_attendances WHERE user_id = ? AND attendance_date = ? LIMIT 1 FOR UPDATE");
     $find->execute([$userId, $date]);
     $row = $find->fetch(PDO::FETCH_ASSOC);
-
-    // Determine status: WFH for remote employees, PRESENT otherwise
-    $wmStmt = $pdo->prepare("SELECT work_mode FROM users WHERE id = ? LIMIT 1");
-    $wmStmt->execute([$userId]);
-    $checkinStatus = (($wmStmt->fetchColumn() ?: 'OFFICE') === 'WFH') ? 'WFH' : 'PRESENT';
 
     if ($action === 'checkin') {
         if ($row && !empty($row['check_in_time'])) {
             $pdo->rollBack();
             ApiAuth::fail(409, 'Already checked in today');
         }
+        $shift = $row && !empty($row['shift_id'])
+            ? $attendanceService->getShiftById((int)$row['shift_id'])
+            : $attendanceService->getDefaultShift();
+        $checkInSummary = $attendanceService->determineCheckIn(
+            $targetUser,
+            $shift,
+            $time,
+            $row['planned_start_time'] ?? null
+        );
+        $checkinStatus = (string)$checkInSummary['status'];
+        $lateMinutes = (int)$checkInSummary['late_minutes'];
+
         if ($row) {
             $pdo->prepare("
                 UPDATE hr_attendances
                 SET check_in_time=?, check_in_type=?, check_in_latitude=?, check_in_longitude=?,
-                    check_in_location_id=?, check_in_ip=?, status=?,
+                    check_in_location_id=?, check_in_ip=?, late_minutes=?, status=?,
                     remarks = COALESCE(NULLIF(?, ''), remarks)
                 WHERE id=?
-            ")->execute([$time, $type, $lat, $lng, $locId, $ip, $checkinStatus, $remarks, (int)$row['id']]);
+            ")->execute([$time, $type, $lat, $lng, $locId, $ip, $lateMinutes, $checkinStatus, $remarks, (int)$row['id']]);
             $newId = (int)$row['id'];
         } else {
             $pdo->prepare("
                 INSERT INTO hr_attendances
-                    (user_id, attendance_date, check_in_time, check_in_type,
+                    (user_id, attendance_date, shift_id, check_in_time, check_in_type,
                      check_in_latitude, check_in_longitude, check_in_location_id, check_in_ip,
-                     status, remarks)
-                VALUES (?,?,?,?,?,?,?,?, ?, ?)
-            ")->execute([$userId, $date, $time, $type, $lat, $lng, $locId, $ip, $checkinStatus, $remarks ?: null]);
+                     late_minutes, status, remarks)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ")->execute([$userId, $date, $shift['id'] ?? null, $time, $type, $lat, $lng, $locId, $ip, $lateMinutes, $checkinStatus, $remarks ?: null]);
             $newId = (int)$pdo->lastInsertId();
         }
     } else { // checkout
@@ -138,17 +151,24 @@ try {
             $pdo->rollBack();
             ApiAuth::fail(409, 'Already checked out today');
         }
-        $workMin = 0;
-        if (!empty($row['check_in_time'])) {
-            $workMin = max(0, (int)floor((strtotime($time) - strtotime($row['check_in_time'])) / 60));
-        }
+        $shift = $attendanceService->getShiftById((int)($row['shift_id'] ?? 0));
+        $workSummary = $attendanceService->summarizeWork($row['check_in_time'] ?? null, $time, $shift, $date);
         $pdo->prepare("
             UPDATE hr_attendances
             SET check_out_time=?, check_out_type=?, check_out_latitude=?, check_out_longitude=?,
-                check_out_location_id=?, check_out_ip=?, work_minutes=?,
+                check_out_location_id=?, check_out_ip=?, work_minutes=?, break_minutes=?,
+                ot_minutes=?, early_leave_minutes=?,
                 remarks = COALESCE(NULLIF(?, ''), remarks)
             WHERE id=?
-        ")->execute([$time, $type, $lat, $lng, $locId, $ip, $workMin, $remarks, (int)$row['id']]);
+        ")->execute([
+            $time, $type, $lat, $lng, $locId, $ip,
+            (int)$workSummary['work_minutes'],
+            (int)$workSummary['break_minutes'],
+            (int)$workSummary['ot_minutes'],
+            (int)$workSummary['early_leave_minutes'],
+            $remarks,
+            (int)$row['id'],
+        ]);
         $newId = (int)$row['id'];
     }
     $pdo->commit();

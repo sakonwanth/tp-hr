@@ -418,9 +418,9 @@ include dirname(__DIR__) . '/templates/header.php';
         <span class="mx-2">/</span>
         <span class="text-white"><?php echo $action === 'edit' ? 'แก้ไข' : 'เพิ่ม'; ?></span>
     </nav>
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h1 class="text-2xl font-bold text-white"><?php echo htmlspecialchars($page_title); ?></h1>
-        <a href="/hr/employees.php" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">
+        <a href="/hr/employees.php" class="px-4 py-2 min-h-[44px] inline-flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">
             <i class="fas fa-arrow-left mr-2"></i>กลับ
         </a>
     </div>
@@ -466,29 +466,29 @@ include dirname(__DIR__) . '/templates/header.php';
     <?php echo csrfField(); ?>
     
     <!-- Tab Navigation -->
-    <div class="glass-card rounded-xl p-1.5 flex flex-wrap gap-1">
-        <button type="button" onclick="switchTab('tab-personal')" id="btn-tab-personal" class="tab-btn active px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2">
+    <div class="glass-card rounded-xl p-1.5 flex flex-nowrap overflow-x-auto gap-1 sticky top-3 z-30">
+        <button type="button" onclick="switchTab('tab-personal')" id="btn-tab-personal" class="tab-btn active shrink-0 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2">
             <i class="fas fa-user"></i>
             <span class="hidden sm:inline">ข้อมูลส่วนตัว</span>
             <span class="sm:hidden">ส่วนตัว</span>
         </button>
-        <button type="button" onclick="switchTab('tab-work')" id="btn-tab-work" class="tab-btn px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2">
+        <button type="button" onclick="switchTab('tab-work')" id="btn-tab-work" class="tab-btn shrink-0 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2">
             <i class="fas fa-briefcase"></i>
             <span class="hidden sm:inline">ข้อมูลการทำงาน</span>
             <span class="sm:hidden">การทำงาน</span>
         </button>
-        <button type="button" onclick="switchTab('tab-welfare')" id="btn-tab-welfare" class="tab-btn px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2">
+        <button type="button" onclick="switchTab('tab-welfare')" id="btn-tab-welfare" class="tab-btn shrink-0 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2">
             <i class="fas fa-shield-alt"></i>
             <span class="hidden sm:inline">สวัสดิการ & การเงิน</span>
             <span class="sm:hidden">สวัสดิการ</span>
         </button>
         <?php if ($action === 'edit' && $employee): ?>
-        <button type="button" onclick="switchTab('tab-history')" id="btn-tab-history" class="tab-btn px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2">
+        <button type="button" onclick="switchTab('tab-history')" id="btn-tab-history" class="tab-btn shrink-0 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2">
             <i class="fas fa-history"></i>
             <span class="hidden sm:inline">ประวัติ & ครอบครัว</span>
             <span class="sm:hidden">ประวัติ</span>
         </button>
-        <button type="button" onclick="switchTab('tab-system')" id="btn-tab-system" class="tab-btn px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2">
+        <button type="button" onclick="switchTab('tab-system')" id="btn-tab-system" class="tab-btn shrink-0 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2">
             <i class="fas fa-cog"></i>
             <span class="hidden sm:inline">ระบบ</span>
         </button>
@@ -1332,11 +1332,11 @@ include dirname(__DIR__) . '/templates/header.php';
     <?php endif; ?>
     
     <!-- Submit Buttons -->
-    <div class="flex items-center justify-end gap-4">
-        <a href="/hr/employees.php" class="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">
+    <div class="glass-card rounded-xl p-3 sticky bottom-[calc(72px+env(safe-area-inset-bottom))] md:bottom-4 z-30 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3">
+        <a href="/hr/employees.php" class="w-full sm:w-auto min-h-[44px] px-6 py-3 inline-flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">
             ยกเลิก
         </a>
-        <button type="submit" class="px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
+        <button type="submit" class="w-full sm:w-auto min-h-[44px] px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
             <i class="fas fa-save mr-2"></i>
             <?php echo $action === 'edit' ? 'บันทึกการแก้ไข' : 'เพิ่มพนักงาน'; ?>
         </button>
@@ -1366,7 +1366,7 @@ include dirname(__DIR__) . '/templates/header.php';
             </div>
         </div>
         
-        <button type="submit" class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors">
+        <button type="submit" class="w-full sm:w-auto min-h-[44px] px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors">
             <i class="fas fa-key mr-2"></i>เปลี่ยนรหัสผ่าน
         </button>
     </form>

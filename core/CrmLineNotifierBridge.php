@@ -35,10 +35,7 @@ function crm_line_bridge_load(): bool {
 
 function crm_line_setting(PDO $pdo, string $key, string $default = ''): string {
     try {
-        $stmt = $pdo->prepare("SELECT setting_value FROM system_settings WHERE setting_key = ? LIMIT 1");
-        $stmt->execute([$key]);
-        $value = $stmt->fetchColumn();
-        return $value !== false ? (string)$value : $default;
+        return (new SettingsService($pdo))->getSystem($key, $default);
     } catch (Throwable $e) {
         return $default;
     }
@@ -160,13 +157,7 @@ function crm_line_notify_planned_late_request(PDO $pdo, array $user, string $tar
 
         // 2) Confirmation Flex → พนักงาน
         if (function_exists('hr_flex_planned_late_confirmed')) {
-            $graceMin = 30;
-            try {
-                $stmt = $pdo->prepare("SELECT setting_value FROM system_settings WHERE setting_key = 'payroll_planned_grace_minutes' LIMIT 1");
-                $stmt->execute();
-                $v = $stmt->fetchColumn();
-                if ($v !== false && is_numeric($v)) $graceMin = (int)$v;
-            } catch (Throwable $e) { /* default 30 */ }
+            $graceMin = (int)crm_line_setting($pdo, 'payroll_planned_grace_minutes', '30');
 
             $flex2 = hr_flex_planned_late_confirmed($targetDate, $plannedTime, $graceMin);
             LineNotifier::sendEvent($pdo, 'hr.planned_late_confirmed', $flex2, ['triggering_user_id' => (int)$user['id']]);

@@ -15,7 +15,7 @@ if (!isHR()) {
 }
 
 // Check for CEO-level actions (add, edit, delete)
-$action = $_GET['action'] ?? '';
+$action = $_POST['action'] ?? ($_GET['action'] ?? '');
 
 // Redirect add/edit to employee_form.php
 if ($action === 'add') {
@@ -40,6 +40,32 @@ if ($action === 'delete' && !canManageUsers()) {
 }
 
 $pdo = Database::getInstance()->getConnection();
+
+if ($action === 'delete') {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        flash('error', 'รูปแบบคำขอไม่ถูกต้อง');
+        redirect('/hr/employees.php', 302);
+    }
+    $id = (int)($_POST['id'] ?? 0);
+    if (!verifyCsrfToken($_POST['_token'] ?? null)) {
+        flash('error', 'โทเค็นความปลอดภัยไม่ถูกต้อง');
+        redirect('/hr/employees.php', 302);
+    }
+    if ($id <= 0 || in_array($id, SYSTEM_USER_IDS, true) || $id === (int)$user['id']) {
+        flash('error', 'ไม่สามารถปิดใช้งานพนักงานรายการนี้ได้');
+        redirect('/hr/employees.php', 302);
+    }
+
+    $stmt = $pdo->prepare("UPDATE users SET is_active = 0, updated_at = NOW() WHERE id = ? AND id NOT IN (" . SYSTEM_USER_IDS_SQL . ")");
+    $stmt->execute([$id]);
+    if ($stmt->rowCount() > 0) {
+        Auth::log('employee_deactivate', 'users', $id);
+        flash('success', 'ปิดใช้งานพนักงานเรียบร้อยแล้ว');
+    } else {
+        flash('error', 'ไม่พบพนักงาน หรือพนักงานถูกปิดใช้งานอยู่แล้ว');
+    }
+    redirect('/hr/employees.php', 302);
+}
 
 // Filters
 $search = $_GET['search'] ?? '';
@@ -108,6 +134,8 @@ $stmtStats = $pdo->query("
 $stats = $stmtStats->fetch();
 
 include dirname(__DIR__) . '/templates/header.php';
+$flashSuccess = flash('success');
+$flashError = flash('error');
 ?>
 
 <div class="mb-6">
@@ -125,6 +153,18 @@ include dirname(__DIR__) . '/templates/header.php';
         <?php endif; ?>
     </div>
 </div>
+
+<?php if ($flashSuccess): ?>
+<div class="mb-4 rounded-xl border border-emerald-500/30 bg-emerald-500/15 px-4 py-3 text-emerald-200">
+    <i class="fas fa-check-circle mr-2"></i><?php echo htmlspecialchars($flashSuccess); ?>
+</div>
+<?php endif; ?>
+
+<?php if ($flashError): ?>
+<div class="mb-4 rounded-xl border border-red-500/30 bg-red-500/15 px-4 py-3 text-red-200">
+    <i class="fas fa-exclamation-circle mr-2"></i><?php echo htmlspecialchars($flashError); ?>
+</div>
+<?php endif; ?>
 
 <!-- Stats -->
 <div class="grid grid-cols-3 gap-4 mb-6">
@@ -493,8 +533,17 @@ function closeLeaveModal() {
 
 <?php if (canManageUsers()): ?>
 function confirmDelete(userId, name) {
-    if (confirm(`คุณต้องการลบพนักงาน "${name}" ใช่หรือไม่?\n\nข้อมูลทั้งหมดจะถูกลบถาวร!`)) {
-        window.location.href = `employees.php?action=delete&id=${userId}&_token=<?php echo csrfToken(); ?>`;
+    if (confirm(`ต้องการปิดใช้งานพนักงาน "${name}" ใช่หรือไม่?\n\nข้อมูลประวัติจะยังถูกเก็บไว้เพื่อรายงานและ audit log`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'employees.php';
+        form.innerHTML = `
+            <input type="hidden" name="action" value="delete">
+            <input type="hidden" name="id" value="${userId}">
+            <input type="hidden" name="_token" value="<?php echo csrfToken(); ?>">
+        `;
+        document.body.appendChild(form);
+        form.submit();
     }
 }
 <?php endif; ?>

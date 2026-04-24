@@ -125,7 +125,7 @@ $monthly_summary = $stmt->fetch();
 require_once __DIR__ . '/templates/header.php';
 ?>
 
-<main class="content-area p-6">
+<div>
     <!-- Page Header -->
     <div class="mb-6">
         <h1 class="text-2xl font-bold text-white">ลงเวลาเข้า-ออกงาน</h1>
@@ -496,7 +496,7 @@ require_once __DIR__ . '/templates/header.php';
             </div>
         </div>
     </div>
-</main>
+</div>
 
 <!-- Planned Late Start Modal -->
 <div id="late-start-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">

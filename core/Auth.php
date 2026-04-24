@@ -190,6 +190,13 @@ class Auth {
                 INSERT INTO hr_audit_logs (user_id, action, module, table_name, record_id, old_values, new_values, ip_address, user_agent)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
+
+            $rawAction = $action;
+            $action = self::normalizeAuditAction($action);
+            if ($rawAction !== $action) {
+                $newValues = $newValues ?? [];
+                $newValues['_raw_action'] = $rawAction;
+            }
             
             $module = 'hr';
             if (strpos($table ?? '', 'hr_') === 0) {
@@ -211,6 +218,45 @@ class Auth {
             // Silent fail for logging
             error_log("Audit log failed: " . $e->getMessage());
         }
+    }
+
+    private static function normalizeAuditAction(string $action): string {
+        $key = strtoupper(trim(str_replace(['-', ' '], '_', $action)));
+        $aliases = [
+            'ADD_HOLIDAY' => 'HOLIDAY_ADD',
+            'DELETE_HOLIDAY' => 'HOLIDAY_DELETE',
+            'UPDATE_LEAVE_TYPE' => 'LEAVE_TYPE_UPDATE',
+            'UPDATE_SETTINGS' => 'SETTINGS_UPDATE',
+            'UPDATE_SHIFT' => 'SHIFT_UPDATE',
+            'PROFILE_UPDATE' => 'PROFILE_UPDATE',
+            'EMERGENCY_CONTACT_ADD' => 'EMERGENCY_CONTACT_ADD',
+            'EMERGENCY_CONTACT_DELETE' => 'EMERGENCY_CONTACT_DELETE',
+            'FAMILY_ADD' => 'FAMILY_MEMBER_ADD',
+            'FAMILY_DELETE' => 'FAMILY_MEMBER_DELETE',
+            'EDUCATION_ADD' => 'EDUCATION_ADD',
+            'EDUCATION_DELETE' => 'EDUCATION_DELETE',
+            'WORK_HISTORY_ADD' => 'WORK_HISTORY_ADD',
+            'WORK_HISTORY_DELETE' => 'WORK_HISTORY_DELETE',
+            'DAYOFF_REQUEST_APPROVE' => 'DAYOFF_REQUEST_APPROVE',
+            'DAYOFF_REQUEST_REJECT' => 'DAYOFF_REQUEST_REJECT',
+            'DAYOFF_REQUEST_APPROVE_ALL' => 'DAYOFF_REQUEST_APPROVE_ALL',
+            'LEAVE_REQUEST' => 'LEAVE_REQUEST_CREATE',
+            'LEAVE_CANCEL' => 'LEAVE_REQUEST_CANCEL',
+            'LEAVE_APPROVE' => 'LEAVE_REQUEST_APPROVE',
+            'LEAVE_REJECT' => 'LEAVE_REQUEST_REJECT',
+            'EMPLOYEE_DEACTIVATE' => 'EMPLOYEE_DEACTIVATE',
+            'API_KEY_CREATE' => 'API_KEY_CREATE',
+            'API_KEY_REVOKE' => 'API_KEY_REVOKE',
+            'API_KEY_ACTIVATE' => 'API_KEY_ACTIVATE',
+            'CERTIFICATE_REQUEST' => 'CERTIFICATE_REQUEST_CREATE',
+            'CERTIFICATE_CANCEL' => 'CERTIFICATE_REQUEST_CANCEL',
+            'CERTIFICATE_PROCESS' => 'CERTIFICATE_REQUEST_PROCESS',
+            'CERTIFICATE_STATUS_UPDATE' => 'CERTIFICATE_STATUS_UPDATE',
+            'CERTIFICATE_COMPLETE' => 'CERTIFICATE_REQUEST_COMPLETE',
+            'CERTIFICATE_REJECT' => 'CERTIFICATE_REQUEST_REJECT',
+        ];
+
+        return substr($aliases[$key] ?? $key, 0, 50);
     }
     
     /**

@@ -13,7 +13,11 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#7c3aed">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="csrf-token" content="<?php echo csrfToken(); ?>">
     <title><?php echo htmlspecialchars($page_title ?? 'TP-HR'); ?> - TP-HR</title>
     <link rel="manifest" href="/manifest.webmanifest">
@@ -35,11 +39,15 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
     <style>
         * {
             font-family: 'IBM Plex Sans Thai', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
         }
         
         body {
-            background: #0f172a;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
             min-height: 100vh;
+            min-height: 100dvh;
+            padding-bottom: env(safe-area-inset-bottom, 0);
         }
         
         .sidebar {
@@ -48,9 +56,11 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         }
         
         .glass-card {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
-            border: 1px solid rgba(148, 163, 184, 0.1);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            background: rgba(30, 41, 59, 0.64);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
             transition: all 0.3s ease;
         }
         
@@ -64,6 +74,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             align-items: center;
             gap: 12px;
             padding: 12px 16px;
+            min-height: 44px;
             border-radius: 12px;
             color: rgba(148, 163, 184, 1);
             font-weight: 500;
@@ -89,8 +100,10 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         }
         
         .stat-card {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
-            border: 1px solid rgba(148, 163, 184, 0.1);
+            background: rgba(30, 41, 59, 0.64);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 16px;
             padding: 20px;
             transition: all 0.3s ease;
@@ -114,6 +127,8 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+            min-height: 116px;
             padding: 24px 16px;
             border-radius: 16px;
             background: rgba(30, 41, 59, 0.5);
@@ -142,6 +157,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            min-height: 44px;
             padding: 10px 20px;
             background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
             color: #fff;
@@ -160,6 +176,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            min-height: 44px;
             padding: 10px 20px;
             background: rgba(148, 163, 184, 0.1);
             color: #fff;
@@ -176,6 +193,8 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         .input-field {
             width: 100%;
             padding: 12px 16px;
+            min-height: 44px;
+            font-size: 16px;
             background: rgba(15, 23, 42, 0.8);
             border: 1px solid rgba(148, 163, 184, 0.2);
             border-radius: 10px;
@@ -202,7 +221,26 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             .content-area {
                 margin-left: 0;
                 padding-top: 64px;
-                padding-bottom: 88px; /* space for mobile bottom nav */
+                padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); /* space for mobile bottom nav */
+            }
+        }
+
+        @media (max-width: 640px) {
+            .glass-card,
+            .stat-card {
+                border-radius: 14px;
+            }
+
+            .quick-action {
+                padding: 16px 10px;
+                min-height: 104px;
+            }
+
+            .quick-action-icon {
+                width: 48px;
+                height: 48px;
+                border-radius: 14px;
+                margin-bottom: 10px;
             }
         }
         
@@ -453,7 +491,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
 </aside>
 
 <!-- Mobile Header -->
-<header class="lg:hidden fixed top-0 left-0 right-0 h-16 bg-slate-900/95 backdrop-blur-lg border-b border-slate-800 z-40 flex items-center justify-between px-4">
+<header class="lg:hidden fixed top-0 left-0 right-0 h-16 bg-slate-900/90 backdrop-blur-xl border-b border-white/10 z-40 flex items-center justify-between px-4">
     <button id="mobileMenuBtn" class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-white">
         <i class="fas fa-bars"></i>
     </button>
@@ -553,4 +591,4 @@ document.getElementById('mobileMenuBtn')?.addEventListener('click', openMobileMe
 </script>
 
 <!-- Main Content -->
-<div class="content-area p-6">
+<div class="content-area p-4 sm:p-6">

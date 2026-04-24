@@ -103,9 +103,11 @@ if (TP_COMMON_AVAILABLE && class_exists('TpCommon\Auth\SsoGuard')) {
 // Core classes
 require_once BASE_PATH . '/core/Database.php';
 require_once BASE_PATH . '/core/Auth.php';
+require_once BASE_PATH . '/core/Services/SettingsService.php';
 require_once BASE_PATH . '/core/Helpers.php';
 require_once BASE_PATH . '/core/ApiAuth.php';
 require_once BASE_PATH . '/core/WfhStamp.php';
+require_once BASE_PATH . '/core/Services/AttendanceService.php';
 
 // Phase 7: Structured logging + audit log
 if (TP_COMMON_AVAILABLE) {
@@ -214,20 +216,28 @@ function csrfField(): string {
 }
 
 function verifyCsrf(): bool {
+    $submittedToken = $_POST['_token']
+        ?? ($_POST['csrf_token'] ?? null)
+        ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? null);
     if (TP_COMMON_AVAILABLE) {
-        return \TpCommon\Auth\Csrf::verify();
+        return \TpCommon\Auth\Csrf::verify($submittedToken);
     }
-    return isset($_POST['_token']) && hash_equals($_SESSION['csrf_token'] ?? '', $_POST['_token']);
+    return is_string($submittedToken) && $submittedToken !== ''
+        && hash_equals($_SESSION['csrf_token'] ?? '', $submittedToken);
 }
 
 function verifyCsrfToken(?string $token = null): bool {
-    if (TP_COMMON_AVAILABLE) {
-        return \TpCommon\Auth\Csrf::verify($token);
+    $submittedToken = $token;
+    if ($submittedToken === null || $submittedToken === '') {
+        $submittedToken = $_POST['_token']
+            ?? ($_POST['csrf_token'] ?? null)
+            ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? null);
     }
-    $submittedToken = $token
-        ?? ($_POST['_token'] ?? ($_POST['csrf_token'] ?? ''))
-        ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? '');
-    return hash_equals($_SESSION['csrf_token'] ?? '', $submittedToken);
+    if (TP_COMMON_AVAILABLE) {
+        return \TpCommon\Auth\Csrf::verify($submittedToken);
+    }
+    return is_string($submittedToken) && $submittedToken !== ''
+        && hash_equals($_SESSION['csrf_token'] ?? '', $submittedToken);
 }
 
 // --- Role helpers ---

@@ -135,7 +135,7 @@ for ($i = 0; $i < 12; $i++) {
 require_once __DIR__ . '/templates/header.php';
 ?>
 
-<main class="content-area p-6">
+<div>
     <!-- Page Header -->
     <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
@@ -213,7 +213,106 @@ require_once __DIR__ . '/templates/header.php';
     
     <!-- Attendance Table -->
     <div class="glass-card rounded-xl overflow-hidden">
-        <div class="overflow-x-auto">
+        <?php if ($allDays): ?>
+        <div class="md:hidden p-3 space-y-3">
+            <?php foreach ($allDays as $day): ?>
+            <?php
+            $att = $day['attendance'];
+            $isDayOff = $day['is_day_off'];
+            $holiday = $day['holiday'];
+            $dayNames = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+            $statusLabel = 'ขาดงาน';
+            $statusClass = 'bg-red-500/15 border border-red-500/30 text-red-200';
+            if ($holiday) {
+                $statusLabel = match($holiday['type']) {
+                    'PUBLIC' => 'วันหยุดราชการ',
+                    'COMPANY' => 'วันหยุดบริษัท',
+                    'SPECIAL' => 'วันหยุดพิเศษ',
+                    'SUBSTITUTE' => 'วันหยุดชดเชย',
+                    default => 'วันหยุด'
+                };
+                $statusClass = 'bg-orange-500/15 border border-orange-500/30 text-orange-200';
+            } elseif ($isDayOff) {
+                $statusLabel = 'วันหยุด';
+                $statusClass = 'bg-blue-500/15 border border-blue-500/30 text-blue-200';
+            } elseif ($att) {
+                $statusLabel = ATTENDANCE_STATUS[$att['status']] ?? $att['status'];
+                $statusClass = match($att['status']) {
+                    'PRESENT' => 'bg-green-500/15 border border-green-500/30 text-green-200',
+                    'LATE' => 'bg-yellow-500/15 border border-yellow-500/30 text-yellow-200',
+                    'ABSENT' => 'bg-red-500/15 border border-red-500/30 text-red-200',
+                    'LEAVE' => 'bg-blue-500/15 border border-blue-500/30 text-blue-200',
+                    'HOLIDAY' => 'bg-orange-500/15 border border-orange-500/30 text-orange-200',
+                    'WFH' => 'bg-purple-500/15 border border-purple-500/30 text-purple-200',
+                    default => 'bg-gray-500/15 border border-gray-500/30 text-gray-200'
+                };
+            }
+            $checkIn = ($att && $att['check_in_time']) ? date('H:i', strtotime($att['check_in_time'])) : '--:--';
+            $checkOut = ($att && $att['check_out_time']) ? date('H:i', strtotime($att['check_out_time'])) : '--:--';
+            $work = ($att && $att['work_minutes'])
+                ? floor($att['work_minutes'] / 60) . ':' . str_pad($att['work_minutes'] % 60, 2, '0', STR_PAD_LEFT)
+                : '-';
+            $ot = ($att && $att['ot_minutes'] > 0)
+                ? floor($att['ot_minutes'] / 60) . ':' . str_pad($att['ot_minutes'] % 60, 2, '0', STR_PAD_LEFT)
+                : '-';
+            ?>
+            <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <div class="text-white font-semibold"><?php echo formatDateThai($day['date']); ?></div>
+                        <div class="text-xs <?php echo $holiday ? 'text-orange-300' : ($isDayOff ? 'text-blue-300' : 'text-white/50'); ?>">
+                            <?php echo $dayNames[$day['dow']]; ?>
+                            <?php if ($holiday): ?>
+                                · <?php echo htmlspecialchars($holiday['name']); ?>
+                            <?php elseif ($isDayOff): ?>
+                                · วันหยุด
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <span class="shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold <?php echo $statusClass; ?>">
+                        <?php echo htmlspecialchars($statusLabel); ?>
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-4 gap-2 mt-4">
+                    <div class="rounded-xl bg-black/20 border border-white/10 px-2 py-2">
+                        <div class="text-[11px] text-white/50">เข้า</div>
+                        <div class="text-white font-semibold"><?php echo htmlspecialchars($checkIn); ?></div>
+                    </div>
+                    <div class="rounded-xl bg-black/20 border border-white/10 px-2 py-2">
+                        <div class="text-[11px] text-white/50">ออก</div>
+                        <div class="text-white font-semibold"><?php echo htmlspecialchars($checkOut); ?></div>
+                    </div>
+                    <div class="rounded-xl bg-black/20 border border-white/10 px-2 py-2">
+                        <div class="text-[11px] text-white/50">ชม.</div>
+                        <div class="text-white font-semibold"><?php echo htmlspecialchars($work); ?></div>
+                    </div>
+                    <div class="rounded-xl bg-black/20 border border-white/10 px-2 py-2">
+                        <div class="text-[11px] text-white/50">OT</div>
+                        <div class="text-emerald-300 font-semibold"><?php echo htmlspecialchars($ot); ?></div>
+                    </div>
+                </div>
+
+                <?php if ($att && !empty($att['shift_name'])): ?>
+                <div class="mt-3 text-xs text-white/50">
+                    <i class="fas fa-clock mr-1"></i>
+                    <?php echo htmlspecialchars(function_exists('shift_display_label') ? shift_display_label($att) : $att['shift_name']); ?>
+                    <?php if (($att['late_minutes'] ?? 0) > 0): ?>
+                        <span class="text-red-300 ml-2">สาย <?php echo (int)$att['late_minutes']; ?> นาที</span>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
+            </div>
+            <?php endforeach; ?>
+        </div>
+        <?php else: ?>
+        <div class="md:hidden px-4 py-8 text-center text-white/50">
+            <i class="fas fa-calendar-times text-4xl mb-3 block"></i>
+            <p>ไม่พบข้อมูลในเดือนนี้</p>
+        </div>
+        <?php endif; ?>
+
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full">
                 <thead>
                     <tr class="border-b border-white/10">
@@ -356,6 +455,6 @@ require_once __DIR__ . '/templates/header.php';
             </table>
         </div>
     </div>
-</main>
+</div>
 
 <?php require_once __DIR__ . '/templates/footer.php'; ?>

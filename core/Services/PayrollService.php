@@ -111,8 +111,10 @@ class PayrollService
         }
 
         $absentDates = [];
+        $loggedDates = [];
         foreach ($logs as $log) {
             $date = $log['attendance_date'];
+            $loggedDates[$date] = true;
             $status = $log['status'] ?? 'PRESENT';
             $lateMin = (int)($log['late_minutes'] ?? 0);
             $excused = (int)($log['late_excused'] ?? 0);
@@ -144,6 +146,18 @@ class PayrollService
                     }
                 }
             }
+        }
+
+        foreach ($this->findMissingAbsentDates($userId, $monthStart, $monthEnd, $loggedDates) as $date) {
+            if (!empty($absentDates[$date])) continue;
+            $result['absent_days'] += 1;
+            $absentDates[$date] = true;
+            $result['breakdown'][] = [
+                'date' => $date,
+                'kind' => 'missing_attendance_absent',
+                'amount' => $rateAbsent,
+                'note' => 'ไม่พบการลงเวลาในวันทำงาน',
+            ];
         }
 
         try {
@@ -198,6 +212,97 @@ class PayrollService
         $result['absence_deduction'] = $result['absent_days'] * $rateAbsent;
         $result['total_deduction'] = $result['absence_deduction'] + $result['lateness_deduction'];
         return $result;
+    }
+
+    /**
+     * Calculate missing workdays directly from calendars/schedules, so payroll
+     * does not silently under-deduct when the absence backfill cron has not run.
+     */
+    private function findMissingAbsentDates(int $userId, string $monthStart, string $monthEnd, array $loggedDates): array
+    {
+        try {
+            $stmt = $this->pdo->prepare("
+                SELECT u.id, u.work_mode, COALESCE(s.day_off, 0) AS day_off
+                FROM users u
+                LEFT JOIN hr_employee_schedules s ON s.user_id = u.id
+                WHERE u.id = ? AND u.is_active = 1
+                LIMIT 1
+            ");
+            $stmt->execute([$userId]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$user) return [];
+            if (($user['work_mode'] ?? 'OFFICE') === 'WFH') return [];
+        } catch (Throwable $e) {
+            return [];
+        }
+
+        $holidays = [];
+        try {
+            $stmt = $this->pdo->prepare("SELECT date FROM hr_holidays WHERE is_active = 1 AND date BETWEEN ? AND ?");
+            $stmt->execute([$monthStart, $monthEnd]);
+            foreach ($stmt->fetchAll(PDO::FETCH_COLUMN) as $date) {
+                $holidays[$date] = true;
+            }
+        } catch (Throwable $e) {
+            $holidays = [];
+        }
+
+        $leaveDates = [];
+        try {
+            $stmt = $this->pdo->prepare("
+                SELECT start_date, end_date
+                FROM hr_leave_requests
+                WHERE user_id = ?
+                  AND status NOT IN ('REJECTED','CANCELLED')
+                  AND start_date <= ? AND end_date >= ?
+            ");
+            $stmt->execute([$userId, $monthEnd, $monthStart]);
+            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $leave) {
+                $start = max($monthStart, (string)$leave['start_date']);
+                $end = min($monthEnd, (string)$leave['end_date']);
+                for ($ts = strtotime($start); $ts !== false && $ts <= strtotime($end); $ts += 86400) {
+                    $leaveDates[date('Y-m-d', $ts)] = true;
+                }
+            }
+        } catch (Throwable $e) {
+            $leaveDates = [];
+        }
+
+        $dayoffRequests = [];
+        try {
+            $stmt = $this->pdo->prepare("
+                SELECT week_start, week_end, requested_day_off
+                FROM hr_dayoff_requests
+                WHERE user_id = ? AND status = 'APPROVED'
+                  AND week_start <= ? AND week_end >= ?
+            ");
+            $stmt->execute([$userId, $monthEnd, $monthStart]);
+            $dayoffRequests = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Throwable $e) {
+            $dayoffRequests = [];
+        }
+
+        $missingAbsentDates = [];
+        $defaultDayOff = (int)($user['day_off'] ?? 0);
+        for ($ts = strtotime($monthStart); $ts !== false && $ts <= strtotime($monthEnd); $ts += 86400) {
+            $date = date('Y-m-d', $ts);
+            if (!empty($loggedDates[$date])) continue;
+            if (!empty($holidays[$date])) continue;
+            if (!empty($leaveDates[$date])) continue;
+
+            $effectiveDayOff = $defaultDayOff;
+            foreach ($dayoffRequests as $request) {
+                if ($date >= $request['week_start'] && $date <= $request['week_end']) {
+                    $effectiveDayOff = (int)$request['requested_day_off'];
+                    break;
+                }
+            }
+            if ((int)date('w', $ts) === $effectiveDayOff) continue;
+
+            $missingAbsentDates[] = $date;
+        }
+
+        return $missingAbsentDates;
     }
 
     // ──────────────── Salary Setup ────────────────
@@ -469,10 +574,7 @@ class PayrollService
     private function getSetting(string $key, string $default = ''): string
     {
         try {
-            $stmt = $this->pdo->prepare("SELECT setting_value FROM system_settings WHERE setting_key = ?");
-            $stmt->execute([$key]);
-            $val = $stmt->fetchColumn();
-            return $val !== false ? (string)$val : $default;
+            return (new SettingsService($this->pdo))->getSystem($key, $default);
         } catch (\Throwable $e) {
             return $default;
         }

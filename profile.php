@@ -54,19 +54,19 @@ include 'templates/header.php';
 
 <!-- Profile Tabs -->
 <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
-    <a href="profile.php" class="px-4 py-2 rounded-lg <?php echo !$action ? 'bg-violet-600 text-white' : 'bg-white/10 text-white/70 hover:text-white'; ?> transition-colors whitespace-nowrap">
+    <a href="profile.php" class="px-4 py-2 rounded-lg min-h-[44px] flex items-center <?php echo !$action ? 'bg-violet-600 text-white' : 'bg-white/10 text-white/70 hover:text-white'; ?> transition-colors whitespace-nowrap">
         <i class="fas fa-user mr-2"></i>ข้อมูลทั่วไป
     </a>
-    <a href="profile.php?action=contact" class="px-4 py-2 rounded-lg <?php echo $action === 'contact' ? 'bg-violet-600 text-white' : 'bg-white/10 text-white/70 hover:text-white'; ?> transition-colors whitespace-nowrap">
+    <a href="profile.php?action=contact" class="px-4 py-2 rounded-lg min-h-[44px] flex items-center <?php echo $action === 'contact' ? 'bg-violet-600 text-white' : 'bg-white/10 text-white/70 hover:text-white'; ?> transition-colors whitespace-nowrap">
         <i class="fas fa-phone mr-2"></i>ผู้ติดต่อฉุกเฉิน
     </a>
-    <a href="profile.php?action=family" class="px-4 py-2 rounded-lg <?php echo $action === 'family' ? 'bg-violet-600 text-white' : 'bg-white/10 text-white/70 hover:text-white'; ?> transition-colors whitespace-nowrap">
+    <a href="profile.php?action=family" class="px-4 py-2 rounded-lg min-h-[44px] flex items-center <?php echo $action === 'family' ? 'bg-violet-600 text-white' : 'bg-white/10 text-white/70 hover:text-white'; ?> transition-colors whitespace-nowrap">
         <i class="fas fa-users mr-2"></i>ครอบครัว
     </a>
-    <a href="profile.php?action=education" class="px-4 py-2 rounded-lg <?php echo $action === 'education' ? 'bg-violet-600 text-white' : 'bg-white/10 text-white/70 hover:text-white'; ?> transition-colors whitespace-nowrap">
+    <a href="profile.php?action=education" class="px-4 py-2 rounded-lg min-h-[44px] flex items-center <?php echo $action === 'education' ? 'bg-violet-600 text-white' : 'bg-white/10 text-white/70 hover:text-white'; ?> transition-colors whitespace-nowrap">
         <i class="fas fa-graduation-cap mr-2"></i>การศึกษา
     </a>
-    <a href="profile.php?action=work" class="px-4 py-2 rounded-lg <?php echo $action === 'work' ? 'bg-violet-600 text-white' : 'bg-white/10 text-white/70 hover:text-white'; ?> transition-colors whitespace-nowrap">
+    <a href="profile.php?action=work" class="px-4 py-2 rounded-lg min-h-[44px] flex items-center <?php echo $action === 'work' ? 'bg-violet-600 text-white' : 'bg-white/10 text-white/70 hover:text-white'; ?> transition-colors whitespace-nowrap">
         <i class="fas fa-briefcase mr-2"></i>ประวัติการทำงาน
     </a>
 </div>
@@ -124,7 +124,7 @@ include 'templates/header.php';
             </div>
         </div>
         
-        <button onclick="openEditModal('profile')" class="w-full mt-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">
+        <button onclick="openEditModal('profile')" class="w-full mt-6 min-h-[44px] bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">
             <i class="fas fa-edit mr-2"></i>แก้ไขข้อมูลติดต่อ
         </button>
     </div>
@@ -232,9 +232,9 @@ include 'templates/header.php';
 <?php elseif ($action === 'contact'): ?>
 <!-- Emergency Contacts -->
 <div class="glass-card rounded-xl p-6">
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <h3 class="text-lg font-semibold text-white">ผู้ติดต่อฉุกเฉิน</h3>
-        <button onclick="openAddModal('emergency')" class="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
+        <button onclick="openAddModal('emergency')" class="px-4 py-2 min-h-[44px] bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
             <i class="fas fa-plus mr-2"></i>เพิ่มผู้ติดต่อ
         </button>
     </div>
@@ -248,27 +248,27 @@ include 'templates/header.php';
     <?php else: ?>
     <div class="space-y-4">
         <?php foreach ($emergencyContacts as $contact): ?>
-        <div class="p-4 rounded-lg bg-white/5 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-full bg-violet-600/20 flex items-center justify-center">
+        <div class="p-4 rounded-lg bg-white/5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex items-start sm:items-center gap-4 min-w-0">
+                <div class="w-12 h-12 rounded-full bg-violet-600/20 flex items-center justify-center shrink-0">
                     <i class="fas fa-user text-violet-400"></i>
                 </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <p class="text-white font-medium"><?php echo htmlspecialchars($contact['name']); ?></p>
+                <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <p class="text-white font-medium break-words"><?php echo htmlspecialchars($contact['name']); ?></p>
                         <?php if ($contact['is_primary']): ?>
                         <span class="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded">หลัก</span>
                         <?php endif; ?>
                     </div>
-                    <p class="text-white/60 text-sm"><?php echo htmlspecialchars($contact['relationship']); ?></p>
-                    <p class="text-white/70"><?php echo htmlspecialchars($contact['phone']); ?></p>
+                    <p class="text-white/60 text-sm break-words"><?php echo htmlspecialchars($contact['relationship']); ?></p>
+                    <p class="text-white/70 break-words"><?php echo htmlspecialchars($contact['phone']); ?></p>
                 </div>
             </div>
-            <div class="flex gap-2">
-                <button onclick="editEmergency(<?php echo $contact['id']; ?>)" class="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg">
+            <div class="flex gap-2 sm:justify-end">
+                <button onclick="editEmergency(<?php echo $contact['id']; ?>)" class="min-h-[44px] min-w-[44px] p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button onclick="deleteEmergency(<?php echo $contact['id']; ?>)" class="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg">
+                <button onclick="deleteEmergency(<?php echo $contact['id']; ?>)" class="min-h-[44px] min-w-[44px] p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -281,9 +281,9 @@ include 'templates/header.php';
 <?php elseif ($action === 'family'): ?>
 <!-- Family Members -->
 <div class="glass-card rounded-xl p-6">
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <h3 class="text-lg font-semibold text-white">ข้อมูลครอบครัว</h3>
-        <button onclick="openAddModal('family')" class="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
+        <button onclick="openAddModal('family')" class="px-4 py-2 min-h-[44px] bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
             <i class="fas fa-plus mr-2"></i>เพิ่มสมาชิก
         </button>
     </div>
@@ -294,7 +294,37 @@ include 'templates/header.php';
         <p class="text-white/60">ยังไม่มีข้อมูลครอบครัว</p>
     </div>
     <?php else: ?>
-    <div class="overflow-x-auto">
+    <div class="md:hidden space-y-3">
+        <?php foreach ($familyMembers as $member): ?>
+        <?php
+        $relations = [
+            'FATHER' => 'บิดา', 'MOTHER' => 'มารดา', 'SPOUSE' => 'คู่สมรส',
+            'CHILD' => 'บุตร', 'SIBLING' => 'พี่น้อง'
+        ];
+        $age = $member['birth_date'] ? (new DateTime())->diff(new DateTime($member['birth_date']))->y : '-';
+        ?>
+        <div class="rounded-xl bg-white/5 border border-white/10 p-4">
+            <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                    <p class="text-white font-medium break-words"><?php echo htmlspecialchars($member['name']); ?></p>
+                    <p class="text-white/60 text-sm"><?php echo htmlspecialchars($relations[$member['relationship']] ?? $member['relationship']); ?></p>
+                </div>
+                <span class="px-2 py-1 rounded bg-white/10 text-white/70 text-xs shrink-0"><?php echo $age; ?> ปี</span>
+            </div>
+            <p class="text-white/70 text-sm mt-3"><?php echo htmlspecialchars($member['occupation'] ?? '-'); ?></p>
+            <div class="grid grid-cols-2 gap-2 mt-4">
+                <button onclick="editFamily(<?php echo $member['id']; ?>)" class="min-h-[44px] rounded-lg bg-white/10 text-white/70 hover:text-white hover:bg-white/20">
+                    <i class="fas fa-edit mr-2"></i>แก้ไข
+                </button>
+                <button onclick="deleteFamily(<?php echo $member['id']; ?>)" class="min-h-[44px] rounded-lg bg-red-500/10 text-red-300 hover:bg-red-500/20">
+                    <i class="fas fa-trash mr-2"></i>ลบ
+                </button>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+
+    <div class="hidden md:block overflow-x-auto">
         <table class="w-full">
             <thead class="bg-white/5">
                 <tr>
@@ -338,9 +368,9 @@ include 'templates/header.php';
 <?php elseif ($action === 'education'): ?>
 <!-- Education -->
 <div class="glass-card rounded-xl p-6">
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <h3 class="text-lg font-semibold text-white">ประวัติการศึกษา</h3>
-        <button onclick="openAddModal('education')" class="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
+        <button onclick="openAddModal('education')" class="px-4 py-2 min-h-[44px] bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
             <i class="fas fa-plus mr-2"></i>เพิ่มประวัติ
         </button>
     </div>
@@ -353,14 +383,14 @@ include 'templates/header.php';
     <?php else: ?>
     <div class="space-y-4">
         <?php foreach ($educations as $edu): ?>
-        <div class="p-4 rounded-lg bg-white/5 flex items-start justify-between">
-            <div class="flex gap-4">
+        <div class="p-4 rounded-lg bg-white/5 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div class="flex gap-4 min-w-0">
                 <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center flex-shrink-0">
                     <i class="fas fa-graduation-cap text-blue-400"></i>
                 </div>
-                <div>
-                    <p class="text-white font-medium"><?php echo htmlspecialchars($edu['degree']); ?></p>
-                    <p class="text-white/70"><?php echo htmlspecialchars($edu['institution']); ?></p>
+                <div class="min-w-0">
+                    <p class="text-white font-medium break-words"><?php echo htmlspecialchars($edu['degree']); ?></p>
+                    <p class="text-white/70 break-words"><?php echo htmlspecialchars($edu['institution']); ?></p>
                     <p class="text-white/50 text-sm">
                         <?php echo htmlspecialchars($edu['field_of_study'] ?? ''); ?>
                         <?php if ($edu['graduation_year']): ?>
@@ -373,10 +403,10 @@ include 'templates/header.php';
                 </div>
             </div>
             <div class="flex gap-2">
-                <button onclick="editEducation(<?php echo $edu['id']; ?>)" class="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg">
+                <button onclick="editEducation(<?php echo $edu['id']; ?>)" class="min-h-[44px] min-w-[44px] p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button onclick="deleteEducation(<?php echo $edu['id']; ?>)" class="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg">
+                <button onclick="deleteEducation(<?php echo $edu['id']; ?>)" class="min-h-[44px] min-w-[44px] p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -389,9 +419,9 @@ include 'templates/header.php';
 <?php elseif ($action === 'work'): ?>
 <!-- Work History -->
 <div class="glass-card rounded-xl p-6">
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <h3 class="text-lg font-semibold text-white">ประวัติการทำงาน (ก่อนเข้าบริษัท)</h3>
-        <button onclick="openAddModal('work')" class="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
+        <button onclick="openAddModal('work')" class="px-4 py-2 min-h-[44px] bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
             <i class="fas fa-plus mr-2"></i>เพิ่มประวัติ
         </button>
     </div>
@@ -404,14 +434,14 @@ include 'templates/header.php';
     <?php else: ?>
     <div class="space-y-4">
         <?php foreach ($workHistory as $work): ?>
-        <div class="p-4 rounded-lg bg-white/5 flex items-start justify-between">
-            <div class="flex gap-4">
+        <div class="p-4 rounded-lg bg-white/5 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div class="flex gap-4 min-w-0">
                 <div class="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center flex-shrink-0">
                     <i class="fas fa-building text-green-400"></i>
                 </div>
-                <div>
-                    <p class="text-white font-medium"><?php echo htmlspecialchars($work['position']); ?></p>
-                    <p class="text-white/70"><?php echo htmlspecialchars($work['company_name']); ?></p>
+                <div class="min-w-0">
+                    <p class="text-white font-medium break-words"><?php echo htmlspecialchars($work['position']); ?></p>
+                    <p class="text-white/70 break-words"><?php echo htmlspecialchars($work['company_name']); ?></p>
                     <p class="text-white/50 text-sm">
                         <?php echo formatDateThai($work['start_date']); ?>
                         - <?php echo $work['end_date'] ? formatDateThai($work['end_date']) : 'ปัจจุบัน'; ?>
@@ -422,10 +452,10 @@ include 'templates/header.php';
                 </div>
             </div>
             <div class="flex gap-2">
-                <button onclick="editWork(<?php echo $work['id']; ?>)" class="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg">
+                <button onclick="editWork(<?php echo $work['id']; ?>)" class="min-h-[44px] min-w-[44px] p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button onclick="deleteWork(<?php echo $work['id']; ?>)" class="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg">
+                <button onclick="deleteWork(<?php echo $work['id']; ?>)" class="min-h-[44px] min-w-[44px] p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>

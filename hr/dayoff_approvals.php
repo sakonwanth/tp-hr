@@ -36,6 +36,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             WHERE id = ? AND status = 'PENDING'
         ");
         $stmt->execute([$user['id'], $_POST['review_note'] ?? null, $requestId]);
+        if ($stmt->rowCount() > 0) {
+            Auth::log('dayoff_request_approve', 'hr_dayoff_requests', $requestId, null, [
+                'review_note' => $_POST['review_note'] ?? null,
+            ]);
+        }
         flash('success', 'อนุมัติคำขอเรียบร้อยแล้ว');
     } elseif ($action === 'reject' && $requestId) {
         $stmt = $pdo->prepare("
@@ -44,6 +49,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             WHERE id = ? AND status = 'PENDING'
         ");
         $stmt->execute([$user['id'], $_POST['review_note'] ?? null, $requestId]);
+        if ($stmt->rowCount() > 0) {
+            Auth::log('dayoff_request_reject', 'hr_dayoff_requests', $requestId, null, [
+                'review_note' => $_POST['review_note'] ?? null,
+            ]);
+        }
         flash('success', 'ปฏิเสธคำขอเรียบร้อยแล้ว');
     } elseif ($action === 'approve_all') {
         $stmt = $pdo->prepare("
@@ -52,6 +62,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             WHERE status = 'PENDING'
         ");
         $stmt->execute([$user['id']]);
+        Auth::log('dayoff_request_approve_all', 'hr_dayoff_requests', null, null, [
+            'approved_count' => $stmt->rowCount(),
+        ]);
         flash('success', 'อนุมัติทั้งหมดเรียบร้อยแล้ว');
     }
     
@@ -103,7 +116,7 @@ include dirname(__DIR__) . '/templates/header.php';
         <span class="mx-2">/</span>
         <span class="text-white">อนุมัติเปลี่ยนวันหยุด</span>
     </nav>
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold text-white">อนุมัติเปลี่ยนวันหยุดประจำสัปดาห์</h1>
             <p class="text-white/60 text-sm mt-1">พนักงานขอเปลี่ยนวันหยุดในแต่ละสัปดาห์</p>
@@ -112,7 +125,7 @@ include dirname(__DIR__) . '/templates/header.php';
         <form method="POST" class="inline" onsubmit="return confirm('อนุมัติคำขอทั้งหมด <?php echo $pendingCount; ?> รายการ?')">
             <?php echo csrfField(); ?>
             <input type="hidden" name="action" value="approve_all">
-            <button class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
+            <button class="w-full sm:w-auto min-h-[44px] px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
                 <i class="fas fa-check-double mr-2"></i>อนุมัติทั้งหมด (<?php echo $pendingCount; ?>)
             </button>
         </form>
@@ -128,10 +141,10 @@ include dirname(__DIR__) . '/templates/header.php';
 
 <!-- Filters -->
 <div class="glass-card rounded-xl p-4 mb-6">
-    <form method="GET" class="flex flex-wrap items-center gap-4">
-        <div class="flex items-center gap-2">
+    <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
             <label class="text-white/70 text-sm">สถานะ:</label>
-            <select name="status" class="input-field w-auto" onchange="this.form.submit()">
+            <select name="status" class="input-field mt-1" onchange="this.form.submit()">
                 <option value="PENDING" <?php echo $statusFilter === 'PENDING' ? 'selected' : ''; ?>>
                     รออนุมัติ<?php echo $pendingCount > 0 ? " ($pendingCount)" : ''; ?>
                 </option>
@@ -140,9 +153,9 @@ include dirname(__DIR__) . '/templates/header.php';
                 <option value="" <?php echo $statusFilter === '' ? 'selected' : ''; ?>>ทั้งหมด</option>
             </select>
         </div>
-        <div class="flex items-center gap-2">
+        <div>
             <label class="text-white/70 text-sm">เดือน:</label>
-            <input type="month" name="month" class="input-field w-auto" value="<?php echo $month; ?>" onchange="this.form.submit()">
+            <input type="month" name="month" class="input-field mt-1" value="<?php echo $month; ?>" onchange="this.form.submit()">
         </div>
     </form>
 </div>
@@ -155,7 +168,71 @@ include dirname(__DIR__) . '/templates/header.php';
         <p class="text-white/60">ไม่มีคำขอ</p>
     </div>
     <?php else: ?>
-    <div class="overflow-x-auto">
+    <div class="md:hidden p-4 space-y-3">
+        <?php foreach ($allRequests as $req): ?>
+        <div class="rounded-xl bg-white/5 border border-white/10 p-4">
+            <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                    <p class="text-white font-medium break-words"><?php echo htmlspecialchars($req['first_name_th'] . ' ' . $req['last_name_th']); ?></p>
+                    <p class="text-white/50 text-xs break-words"><?php echo htmlspecialchars($req['employee_code'] ?? ''); ?> | <?php echo htmlspecialchars($req['department'] ?? '-'); ?></p>
+                </div>
+                <span class="px-2 py-1 text-xs rounded-full shrink-0 <?php 
+                echo match($req['status']) {
+                    'PENDING' => 'bg-yellow-500/20 text-yellow-400',
+                    'APPROVED' => 'bg-green-500/20 text-green-400',
+                    'REJECTED' => 'bg-red-500/20 text-red-400',
+                    default => 'bg-gray-500/20 text-gray-400'
+                }; ?>">
+                    <?php echo match($req['status']) {
+                        'PENDING' => 'รออนุมัติ',
+                        'APPROVED' => 'อนุมัติ',
+                        'REJECTED' => 'ไม่อนุมัติ',
+                        default => $req['status']
+                    }; ?>
+                </span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mt-4 text-sm">
+                <div>
+                    <p class="text-white/50">สัปดาห์</p>
+                    <p class="text-white"><?php echo formatDateThai($req['week_start']); ?></p>
+                    <p class="text-white/50 text-xs">ถึง <?php echo formatDateThai($req['week_end']); ?></p>
+                </div>
+                <div>
+                    <p class="text-white/50">เปลี่ยนวันหยุด</p>
+                    <p><span class="text-blue-400"><?php echo $dayNames[(int)$req['original_day_off']]; ?></span>
+                        <i class="fas fa-arrow-right text-white/30 mx-1"></i>
+                        <span class="text-violet-400 font-medium"><?php echo $dayNames[(int)$req['requested_day_off']]; ?></span>
+                    </p>
+                </div>
+            </div>
+
+            <p class="text-white/60 text-sm mt-3 break-words"><?php echo htmlspecialchars($req['reason'] ?? '-'); ?></p>
+            <?php if ($req['status'] !== 'PENDING' && $req['reviewer_name_first']): ?>
+            <p class="text-white/40 text-xs mt-2">โดย <?php echo htmlspecialchars($req['reviewer_name_first']); ?></p>
+            <?php endif; ?>
+
+            <?php if ($req['status'] === 'PENDING'): ?>
+            <div class="grid grid-cols-2 gap-2 mt-4">
+                <form method="POST">
+                    <?php echo csrfField(); ?>
+                    <input type="hidden" name="action" value="approve">
+                    <input type="hidden" name="request_id" value="<?php echo $req['id']; ?>">
+                    <button class="w-full min-h-[44px] rounded-lg bg-green-500/20 hover:bg-green-500/30 text-green-300 transition-colors">
+                        <i class="fas fa-check mr-2"></i>อนุมัติ
+                    </button>
+                </form>
+                <button onclick="openRejectModal(<?php echo $req['id']; ?>, '<?php echo htmlspecialchars($req['first_name_th']); ?>')"
+                        class="min-h-[44px] rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 transition-colors">
+                    <i class="fas fa-times mr-2"></i>ไม่อนุมัติ
+                </button>
+            </div>
+            <?php endif; ?>
+        </div>
+        <?php endforeach; ?>
+    </div>
+
+    <div class="hidden md:block overflow-x-auto">
         <table class="w-full">
             <thead class="bg-white/5">
                 <tr>
@@ -216,12 +293,12 @@ include dirname(__DIR__) . '/templates/header.php';
                                 <?php echo csrfField(); ?>
                                 <input type="hidden" name="action" value="approve">
                                 <input type="hidden" name="request_id" value="<?php echo $req['id']; ?>">
-                                <button class="px-2 py-1 bg-green-500/20 hover:bg-green-500/30 text-green-400 text-xs rounded transition-colors" title="อนุมัติ">
+                                <button class="min-h-[36px] min-w-[36px] px-2 py-1 bg-green-500/20 hover:bg-green-500/30 text-green-400 text-xs rounded transition-colors" title="อนุมัติ">
                                     <i class="fas fa-check"></i>
                                 </button>
                             </form>
                             <button onclick="openRejectModal(<?php echo $req['id']; ?>, '<?php echo htmlspecialchars($req['first_name_th']); ?>')"
-                                    class="px-2 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs rounded transition-colors" title="ไม่อนุมัติ">
+                                    class="min-h-[36px] min-w-[36px] px-2 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs rounded transition-colors" title="ไม่อนุมัติ">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
@@ -253,9 +330,9 @@ include dirname(__DIR__) . '/templates/header.php';
                 <input type="text" name="review_note" class="input-field" placeholder="เหตุผลที่ไม่อนุมัติ">
             </div>
             
-            <div class="flex gap-3">
-                <button type="button" onclick="closeRejectModal()" class="flex-1 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">ยกเลิก</button>
-                <button type="submit" class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">
+            <div class="flex flex-col-reverse sm:flex-row gap-3">
+                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[44px] bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">ยกเลิก</button>
+                <button type="submit" class="flex-1 min-h-[44px] bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">
                     <i class="fas fa-times mr-2"></i>ไม่อนุมัติ
                 </button>
             </div>
