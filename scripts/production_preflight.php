@@ -5,6 +5,9 @@
  *
  * This script is intentionally read-only. It checks the production schema
  * contract that TP-HR shares with tp-crm and tp-checkin before deploy.
+ * Run it against the same database you ship against (often production or a
+ * replica): a stale local-only database without HR migrations will show many
+ * failures that do not reflect production.
  *
  * Usage:
  *   php scripts/production_preflight.php
