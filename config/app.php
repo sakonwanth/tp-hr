@@ -16,8 +16,16 @@ define('SESSION_LIFETIME', 7200); // 2 hours
 // Security
 define('MIN_PASSWORD_LENGTH', 8);
 
-// External services (CRM_BASE_URL preferred; CRM_URL alias matches tp-erp)
-define('CRM_BASE_URL', $_ENV['CRM_BASE_URL'] ?? $_ENV['CRM_URL'] ?? 'http://localhost/tp-crm');
+// External services
+define('CRM_BASE_URL', $_ENV['CRM_BASE_URL'] ?? 'http://localhost/tp-crm');
+
+// Filesystem path to TP-CRM (LINE bridge loads LineNotifier from disk). Optional if tp-crm is not ../tp-crm.
+if (!defined('TP_CRM_PATH')) {
+    $crmFs = $_ENV['TP_CRM_PATH'] ?? getenv('TP_CRM_PATH');
+    if (is_string($crmFs) && $crmFs !== '' && is_dir($crmFs)) {
+        define('TP_CRM_PATH', rtrim($crmFs, '/\\'));
+    }
+}
 
 // File Upload
 define('MAX_UPLOAD_SIZE', 10 * 1024 * 1024); // 10MB

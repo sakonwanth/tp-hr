@@ -4,19 +4,57 @@
  *
  * The event configuration remains centralized in CRM:
  * settings.php?tab=line_notifications
+ *
+ * Deployment: set TP_CRM_PATH in .env to the filesystem path of tp-crm when it is not
+ * a sibling directory (../tp-crm). See config/app.php.
  */
 
 function crm_line_bridge_path(): ?string {
-    $path = defined('TP_CRM_PATH') ? TP_CRM_PATH : dirname(BASE_PATH) . '/tp-crm';
-    return is_dir($path) ? $path : null;
+    if (defined('TP_CRM_PATH')) {
+        $p = (string) TP_CRM_PATH;
+        if ($p !== '' && is_dir($p)) {
+            return rtrim($p, '/\\');
+        }
+    }
+    $env = $_ENV['TP_CRM_PATH'] ?? getenv('TP_CRM_PATH');
+    if (is_string($env) && $env !== '') {
+        $p = rtrim($env, '/\\');
+        if (is_dir($p)) {
+            return $p;
+        }
+    }
+    $fallback = dirname(BASE_PATH) . DIRECTORY_SEPARATOR . 'tp-crm';
+    return is_dir($fallback) ? $fallback : null;
+}
+
+function crm_line_bridge_warn_missing_path(): void {
+    static $done = false;
+    if ($done) {
+        return;
+    }
+    $done = true;
+    error_log(
+        'TP-HR CRM LINE bridge: tp-crm directory not found. Set TP_CRM_PATH in .env to the absolute path '
+        . 'of tp-crm (folder containing config/line.php), or deploy tp-crm as a sibling of tp-hr.'
+    );
 }
 
 function crm_line_bridge_load(): bool {
+    static $loadedOk = false;
+    if ($loadedOk) {
+        return true;
+    }
+
     $crmPath = crm_line_bridge_path();
-    if (!$crmPath) return false;
+    if (!$crmPath) {
+        crm_line_bridge_warn_missing_path();
+        return false;
+    }
 
     try {
-        if (!defined('TP_CRM_PATH')) define('TP_CRM_PATH', $crmPath);
+        if (!defined('TP_CRM_PATH')) {
+            define('TP_CRM_PATH', $crmPath);
+        }
         if (!function_exists('env_value')) {
             function env_value($key, $default = null) {
                 $value = $_ENV[$key] ?? getenv($key);
@@ -26,9 +64,17 @@ function crm_line_bridge_load(): bool {
         require_once $crmPath . '/config/line.php';
         require_once $crmPath . '/core/Services/LineNotifier.php';
         require_once $crmPath . '/modules/hr/notifications.php';
-        return class_exists('LineNotifier') && function_exists('hr_flex_new_leave');
+        if (!class_exists('LineNotifier') || !function_exists('hr_flex_new_leave')) {
+            error_log(
+                'TP-HR CRM LINE bridge: files loaded from ' . $crmPath
+                . ' but LineNotifier class or hr_flex_new_leave() is missing.'
+            );
+            return false;
+        }
+        $loadedOk = true;
+        return true;
     } catch (Throwable $e) {
-        error_log('crm_line_bridge_load error: ' . $e->getMessage());
+        error_log('TP-HR CRM LINE bridge load error: ' . $e->getMessage());
         return false;
     }
 }
