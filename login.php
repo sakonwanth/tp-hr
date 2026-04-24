@@ -19,7 +19,10 @@ $system_name = 'TP-HR';
 $system_tagline = 'Human Resource Management';
 $system_tagline_th = 'ระบบบริหารทรัพยากรบุคคล';
 $company_name = 'TP-Asset Development Co., Ltd.';
-$company_logo = CRM_BASE_URL . '/asset/logo/tp-logo.png';
+// CRM repo ships "LOGO TP-ASSET - 6.png" under asset/logo/ (tp-logo.png does not exist → broken image on login).
+$hr_login_logo_fallback = '/assets/icons/tphr-app-icon.svg';
+$crm_brand_logo_path = rtrim(CRM_BASE_URL, '/') . '/asset/logo/' . rawurlencode('LOGO TP-ASSET - 6.png');
+$company_logo = !empty($_ENV['HR_LOGIN_LOGO']) ? $_ENV['HR_LOGIN_LOGO'] : $crm_brand_logo_path;
 
 $error = '';
 $success = '';
@@ -225,7 +228,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .input-field::placeholder {
-            color: rgba(255, 255, 255, 0.4);
+            color: rgba(255, 255, 255, 0.5);
         }
 
         .btn-login {
@@ -312,8 +315,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Login Card -->
     <div class="login-card w-full max-w-md p-4 sm:p-6 lg:p-8">
         <!-- Logo -->
-        <div class="text-center mb-8">
-            <img src="<?php echo htmlspecialchars($company_logo); ?>" alt="<?php echo htmlspecialchars($system_name); ?> Logo" class="w-24 h-24 mx-auto mb-4 logo-glow object-contain">
+        <div class="text-center mb-6 sm:mb-8">
+            <img src="<?php echo htmlspecialchars($company_logo); ?>" alt="<?php echo htmlspecialchars($system_name); ?>" width="96" height="96" decoding="async" fetchpriority="high" class="w-24 h-24 mx-auto mb-4 logo-glow object-contain" onerror="this.onerror=null;this.src='<?php echo htmlspecialchars($hr_login_logo_fallback, ENT_QUOTES, 'UTF-8'); ?>';">
             <h1 class="text-white text-xl sm:text-2xl font-bold"><?php echo htmlspecialchars($system_name); ?></h1>
             <p class="tagline text-sm mt-1 font-medium"><?php echo htmlspecialchars($system_tagline); ?></p>
             <p class="text-white text-opacity-50 text-xs mt-1"><?php echo htmlspecialchars($system_tagline_th); ?></p>
@@ -335,8 +338,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         <?php endif; ?>
         
-        <!-- Login Form -->
-        <form method="POST" action="" class="space-y-6">
+        <!-- Login Form: field stack tighter than meta→submit so the button does not feel "floating" far below -->
+        <form method="POST" action="">
+            <div class="space-y-4">
             <!-- Username -->
             <div>
                 <label class="block text-white text-opacity-80 text-sm font-medium mb-2">
@@ -363,37 +367,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         type="password" 
                         name="password" 
                         id="password"
-                        class="input-field w-full px-4 py-3 pr-12"
+                        class="input-field w-full px-4 py-3 pr-14"
                         placeholder="กรอกรหัสผ่าน"
                         required
                     >
                     <button 
                         type="button" 
                         onclick="togglePassword()"
-                        class="login-password-toggle absolute right-2 top-1/2 -translate-y-1/2 text-white text-opacity-50 hover:text-opacity-100 transition-opacity"
+                        class="login-password-toggle absolute right-1 top-1/2 -translate-y-1/2 rounded-lg text-white text-opacity-60 hover:text-opacity-100 transition-opacity"
                         aria-label="แสดงหรือซ่อนรหัสผ่าน"
                     >
                         <i class="fas fa-eye" id="toggleIcon"></i>
                     </button>
                 </div>
             </div>
+            </div>
             
             <!-- Remember Me -->
-            <div class="flex items-center justify-between">
-                <label class="flex items-center text-white text-opacity-70 text-sm cursor-pointer">
-                    <input type="checkbox" name="remember" class="mr-2 rounded border-gray-600 bg-gray-700 text-purple-500 focus:ring-purple-500">
+            <div class="mt-3 flex min-h-[44px] items-center justify-between gap-3">
+                <label class="flex cursor-pointer select-none items-center gap-2 text-sm text-white text-opacity-80">
+                    <input type="checkbox" name="remember" class="h-4 w-4 shrink-0 rounded border-white/30 bg-white/10 text-purple-500 focus:ring-purple-500 focus:ring-offset-0">
                     จดจำฉัน
                 </label>
-                <a href="<?php echo htmlspecialchars(CRM_BASE_URL); ?>/login.php" class="inline-flex min-h-[44px] items-center text-purple-400 hover:text-purple-300 text-sm transition-colors touch-manipulation py-1">
+                <a href="<?php echo htmlspecialchars(CRM_BASE_URL); ?>/login.php" class="inline-flex min-h-[44px] shrink-0 items-center text-purple-400 hover:text-purple-300 text-sm transition-colors touch-manipulation">
                     ลืมรหัสผ่าน?
                 </a>
             </div>
             
             <!-- Login Button -->
+            <div class="mt-4">
             <button type="submit" class="btn-login w-full py-3 text-white font-semibold flex items-center justify-center">
                 <i class="fas fa-sign-in-alt mr-2"></i>
                 เข้าสู่ระบบ
             </button>
+            </div>
         </form>
         
         <?php if ($lineLoginEnabled): ?>
@@ -415,14 +422,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <!-- CRM Link -->
         <div class="text-center mt-6">
-            <a href="<?php echo htmlspecialchars(CRM_BASE_URL); ?>/" class="text-white/50 hover:text-white/80 text-sm transition-colors">
+            <a href="<?php echo htmlspecialchars(CRM_BASE_URL); ?>/" class="inline-flex min-h-[44px] items-center justify-center text-sm text-white/60 transition-colors hover:text-white/90 touch-manipulation">
                 <i class="fas fa-arrow-left mr-1"></i>
                 กลับไป TP-CRM
             </a>
         </div>
         
         <!-- Footer -->
-        <p class="text-center text-white text-opacity-40 text-xs mt-6">
+        <p class="text-center text-xs mt-6 text-white/50">
             &copy; <?php echo date('Y'); ?> <?php echo htmlspecialchars($company_name); ?>. All rights reserved.
         </p>
     </div>
