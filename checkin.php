@@ -538,7 +538,7 @@ require_once __DIR__ . '/templates/header.php';
         <div class="mb-4">
             <label class="text-white/70 text-sm mb-2 block">เวลาที่จะเข้างาน</label>
             <!-- iOS (Safari/Chrome WKWebView) can overflow native time input. Use select fallback on iOS. -->
-            <select id="ls-planned-time-select"
+            <select id="ls-planned-time-select" data-ios-time-select-for="ls-planned-time"
                     class="hidden w-full max-w-full min-w-0 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-lg font-medium focus:outline-none focus:border-amber-400">
             </select>
             <input type="time" id="ls-planned-time" step="900"
@@ -885,15 +885,15 @@ function submitOffsite() {
 function openLateStartModal() {
     const modal = document.getElementById('late-start-modal');
     if (!modal) return;
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
+    if (typeof uiOpenModal === 'function') uiOpenModal('late-start-modal');
+    else { modal.classList.remove('hidden'); modal.classList.add('flex'); }
     updateLateStartDateLabel();
 }
 function closeLateStartModal() {
     const modal = document.getElementById('late-start-modal');
     if (!modal) return;
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
+    if (typeof uiCloseModal === 'function') uiCloseModal('late-start-modal');
+    else { modal.classList.add('hidden'); modal.classList.remove('flex'); }
     document.getElementById('ls-reason').value = '';
 }
 function updateLateStartDateLabel() {
@@ -969,36 +969,7 @@ async function cancelLateStart(targetDate) {
     }
 }
 
-function isIOSDevice() {
-    const ua = navigator.userAgent || '';
-    const isApple = /iPad|iPhone|iPod/.test(ua);
-    const isIpadOS13Plus = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
-    return isApple || isIpadOS13Plus;
-}
-function buildTimeOptions(stepMinutes) {
-    const out = [];
-    for (let h = 0; h < 24; h++) {
-        for (let m = 0; m < 60; m += stepMinutes) {
-            out.push(String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0'));
-        }
-    }
-    return out;
-}
-function initLateStartTimePickerFallback() {
-    const input = document.getElementById('ls-planned-time');
-    const select = document.getElementById('ls-planned-time-select');
-    if (!input || !select) return;
-    if (!isIOSDevice()) return;
-
-    const current = input.value || '08:30';
-    const opts = buildTimeOptions(15);
-    select.innerHTML = opts.map(t => `<option value="${t}">${t}</option>`).join('');
-    select.value = current;
-
-    input.classList.add('hidden');
-    select.classList.remove('hidden');
-}
-document.addEventListener('DOMContentLoaded', initLateStartTimePickerFallback);
+// iOS time picker fallback is initialized globally in templates/footer.php
 </script>
 
 <?php require_once __DIR__ . '/templates/footer.php'; ?>

@@ -151,6 +151,82 @@ function formatDate(dateStr) {
         day: 'numeric'
     });
 }
+
+/* =========================================================
+ * Mobile UI Utilities (employee-first, native-like)
+ * ========================================================= */
+function uiIsIOS() {
+    const ua = navigator.userAgent || '';
+    const isApple = /iPad|iPhone|iPod/.test(ua);
+    const isIpadOS13Plus = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+    return isApple || isIpadOS13Plus;
+}
+
+function uiLockBodyScroll(lock) {
+    if (lock) {
+        document.documentElement.classList.add('overflow-hidden');
+        document.body.classList.add('overflow-hidden');
+    } else {
+        document.documentElement.classList.remove('overflow-hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+}
+
+function uiOpenModal(modalId) {
+    const m = document.getElementById(modalId);
+    if (!m) return;
+    m.classList.remove('hidden');
+    // most modals use flex overlay
+    m.classList.add('flex');
+    uiLockBodyScroll(true);
+}
+
+function uiCloseModal(modalId) {
+    const m = document.getElementById(modalId);
+    if (!m) return;
+    m.classList.add('hidden');
+    m.classList.remove('flex');
+    uiLockBodyScroll(false);
+}
+
+function uiBuildTimeOptions(stepMinutes) {
+    const out = [];
+    for (let h = 0; h < 24; h++) {
+        for (let m = 0; m < 60; m += stepMinutes) {
+            out.push(String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0'));
+        }
+    }
+    return out;
+}
+
+/**
+ * iOS-safe time picker: swap <input type="time"> with a <select>.
+ * Usage:
+ *   <select data-ios-time-select-for="myTimeInput" class="hidden ..."></select>
+ *   <input type="time" id="myTimeInput" ...>
+ */
+function uiInitIOSTimePickerFallback(stepMinutes = 15) {
+    if (!uiIsIOS()) return;
+    const selects = document.querySelectorAll('select[data-ios-time-select-for]');
+    selects.forEach(sel => {
+        const inputId = sel.getAttribute('data-ios-time-select-for');
+        if (!inputId) return;
+        const input = document.getElementById(inputId);
+        if (!input) return;
+
+        const current = input.value || input.getAttribute('value') || '08:30';
+        const opts = uiBuildTimeOptions(stepMinutes);
+        sel.innerHTML = opts.map(t => `<option value="${t}">${t}</option>`).join('');
+        sel.value = current;
+
+        input.classList.add('hidden');
+        sel.classList.remove('hidden');
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    uiInitIOSTimePickerFallback(15);
+});
 </script>
 
 </body>

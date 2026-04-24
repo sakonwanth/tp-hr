@@ -519,7 +519,8 @@ function openEditModal(type) {
         `;
     }
     
-    modal.classList.remove('hidden');
+    if (typeof uiOpenModal === 'function') uiOpenModal('edit-modal');
+    else modal.classList.remove('hidden');
 }
 
 function openAddModal(type) {
@@ -676,12 +677,14 @@ function openAddModal(type) {
     if (templates[type]) {
         title.textContent = templates[type].title;
         content.innerHTML = templates[type].content;
-        modal.classList.remove('hidden');
+        if (typeof uiOpenModal === 'function') uiOpenModal('edit-modal');
+        else modal.classList.remove('hidden');
     }
 }
 
 function closeModal() {
-    document.getElementById('edit-modal').classList.add('hidden');
+    if (typeof uiCloseModal === 'function') uiCloseModal('edit-modal');
+    else document.getElementById('edit-modal').classList.add('hidden');
 }
 
 // Form submission
