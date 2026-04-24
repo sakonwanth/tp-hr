@@ -85,6 +85,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             font-weight: 500;
             transition: all 0.2s ease;
             margin-bottom: 4px;
+            touch-action: manipulation;
         }
         
         .nav-item:hover {
@@ -139,6 +140,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             background: rgba(30, 41, 59, 0.5);
             border: 1px solid rgba(148, 163, 184, 0.1);
             transition: all 0.3s ease;
+            touch-action: manipulation;
         }
         
         .quick-action:hover {
@@ -170,6 +172,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             font-weight: 500;
             transition: all 0.2s ease;
             box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+            touch-action: manipulation;
         }
         
         .btn-primary:hover {
@@ -189,6 +192,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             font-weight: 500;
             border: 1px solid rgba(148, 163, 184, 0.2);
             transition: all 0.2s ease;
+            touch-action: manipulation;
         }
         
         .btn-secondary:hover {
