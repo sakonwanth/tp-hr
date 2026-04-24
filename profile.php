@@ -5,6 +5,7 @@
  */
 
 $page_title = 'ข้อมูลส่วนตัว';
+$current_page = 'profile';
 require_once __DIR__ . '/bootstrap.php';
 
 Auth::requireLogin();
@@ -12,40 +13,74 @@ $user = Auth::user();
 
 $pdo = Database::getInstance()->getConnection();
 
-// Get full user data
-$stmt = $pdo->prepare("
-    SELECT u.*, r.name as role_name, u.department as department_name, u.position as position_name
-    FROM users u
-    LEFT JOIN roles r ON u.role_id = r.id
-    WHERE u.id = ?
-");
-$stmt->execute([$user['id']]);
-$profile = $stmt->fetch();
+/** @var array<string,mixed>|false $profile */
+$profile = false;
+$emergencyContacts = [];
+$familyMembers = [];
+$educations = [];
+$workHistory = [];
 
-// Get emergency contacts
-$stmtEmergency = $pdo->prepare("SELECT * FROM hr_emergency_contacts WHERE user_id = ? ORDER BY is_primary DESC");
-$stmtEmergency->execute([$user['id']]);
-$emergencyContacts = $stmtEmergency->fetchAll();
+try {
+    $stmt = $pdo->prepare("
+        SELECT u.*, r.name as role_name, u.department as department_name, u.position as position_name
+        FROM users u
+        LEFT JOIN roles r ON u.role_id = r.id
+        WHERE u.id = ?
+    ");
+    $stmt->execute([$user['id']]);
+    $profile = $stmt->fetch(PDO::FETCH_ASSOC);
+} catch (Throwable $e) {
+    error_log('profile.php users query: ' . $e->getMessage());
+}
 
-// Get family members
-$stmtFamily = $pdo->prepare("SELECT * FROM hr_employee_family WHERE user_id = ? ORDER BY relationship");
-$stmtFamily->execute([$user['id']]);
-$familyMembers = $stmtFamily->fetchAll();
-
-// Get education
-$stmtEducation = $pdo->prepare("SELECT * FROM hr_employee_education WHERE user_id = ? ORDER BY graduation_year DESC");
-$stmtEducation->execute([$user['id']]);
-$educations = $stmtEducation->fetchAll();
-
-// Get work history
-$stmtWork = $pdo->prepare("SELECT * FROM hr_employee_work_history WHERE user_id = ? ORDER BY start_date DESC");
-$stmtWork->execute([$user['id']]);
-$workHistory = $stmtWork->fetchAll();
+if ($profile) {
+    try {
+        $stmtEmergency = $pdo->prepare("SELECT * FROM hr_emergency_contacts WHERE user_id = ? ORDER BY is_primary DESC");
+        $stmtEmergency->execute([$user['id']]);
+        $emergencyContacts = $stmtEmergency->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Throwable $e) {
+        error_log('profile.php emergency: ' . $e->getMessage());
+    }
+    try {
+        $stmtFamily = $pdo->prepare("SELECT * FROM hr_employee_family WHERE user_id = ? ORDER BY relationship");
+        $stmtFamily->execute([$user['id']]);
+        $familyMembers = $stmtFamily->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Throwable $e) {
+        error_log('profile.php family: ' . $e->getMessage());
+    }
+    try {
+        $stmtEducation = $pdo->prepare("SELECT * FROM hr_employee_education WHERE user_id = ? ORDER BY graduation_year DESC");
+        $stmtEducation->execute([$user['id']]);
+        $educations = $stmtEducation->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Throwable $e) {
+        error_log('profile.php education: ' . $e->getMessage());
+    }
+    try {
+        $stmtWork = $pdo->prepare("SELECT * FROM hr_employee_work_history WHERE user_id = ? ORDER BY start_date DESC");
+        $stmtWork->execute([$user['id']]);
+        $workHistory = $stmtWork->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Throwable $e) {
+        error_log('profile.php work_history: ' . $e->getMessage());
+    }
+}
 
 $action = $_GET['action'] ?? '';
 
 include 'templates/header.php';
 ?>
+
+<?php if (!$profile): ?>
+<div class="glass-card rounded-xl p-10 text-center max-w-lg mx-auto">
+    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-violet-500/20 flex items-center justify-center">
+        <i class="fas fa-user-slash text-violet-300 text-2xl"></i>
+    </div>
+    <p class="text-white font-medium mb-2">ไม่พบข้อมูลบัญชีในฐานข้อมูล</p>
+    <p class="text-white/60 text-sm mb-6">กรุณาออกจากระบบแล้วเข้าใหม่ หรือติดต่อฝ่าย HR หากยังเห็นข้อความนี้</p>
+    <a href="/logout.php" class="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-violet-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-violet-700 touch-manipulation">ออกจากระบบ</a>
+</div>
+<?php include 'templates/footer.php';
+exit;
+endif; ?>
 
 <div class="mb-6">
     <h1 class="text-2xl font-bold text-white">ข้อมูลส่วนตัว</h1>
@@ -78,7 +113,7 @@ include 'templates/header.php';
     <div class="glass-card rounded-xl p-6">
         <div class="text-center mb-6">
             <div class="w-24 h-24 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mx-auto mb-4">
-                <?php if ($profile['profile_image']): ?>
+                <?php if (!empty($profile['profile_image'])): ?>
                 <img src="<?php echo htmlspecialchars($profile['profile_image']); ?>" alt="" class="w-full h-full rounded-full object-cover">
                 <?php else: ?>
                 <span class="text-3xl text-white font-bold"><?php echo mb_substr($profile['first_name_th'] ?? 'U', 0, 1); ?></span>
@@ -106,16 +141,18 @@ include 'templates/header.php';
                 <i class="fas fa-calendar w-5 text-center"></i>
                 <span>เริ่มงาน <?php echo $profile['hire_date'] ? formatDateThai($profile['hire_date']) : '-'; ?></span>
             </div>
-            <?php 
-            $stmtMySchedule = $pdo->prepare("SELECT day_off FROM hr_employee_schedules WHERE user_id = ?");
-            $stmtMySchedule->execute([$user['id']]);
-            $mySchedule = $stmtMySchedule->fetch();
+            <?php
+            $myDaysOff = ['อาทิตย์'];
             $dayNamesFull = THAI_DAY_NAMES;
-            $myDaysOff = [];
-            if ($mySchedule) {
-                $myDaysOff[] = $dayNamesFull[(int)$mySchedule['day_off']];
-            } else {
-                $myDaysOff = ['อาทิตย์'];
+            try {
+                $stmtMySchedule = $pdo->prepare("SELECT day_off FROM hr_employee_schedules WHERE user_id = ?");
+                $stmtMySchedule->execute([$user['id']]);
+                $mySchedule = $stmtMySchedule->fetch(PDO::FETCH_ASSOC);
+                if ($mySchedule && isset($dayNamesFull[(int)$mySchedule['day_off']])) {
+                    $myDaysOff = [$dayNamesFull[(int)$mySchedule['day_off']]];
+                }
+            } catch (Throwable $e) {
+                error_log('profile.php hr_employee_schedules: ' . $e->getMessage());
             }
             ?>
             <div class="flex items-center gap-3 text-white/70">
