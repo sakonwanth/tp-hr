@@ -264,7 +264,13 @@ require_once __DIR__ . '/templates/header.php';
                                 </div>
                             </td>
                             <td class="px-4 py-3 text-center text-white/70 text-sm">
-                                <?php echo $att ? ($att['shift_name'] ?? '-') : '-'; ?>
+                                <?php
+                                if ($att && !empty($att['shift_name'])) {
+                                    echo htmlspecialchars(function_exists('shift_display_label') ? shift_display_label($att) : $att['shift_name']);
+                                } else {
+                                    echo '-';
+                                }
+                                ?>
                             </td>
                             <td class="px-4 py-3 text-center">
                                 <?php if ($att && $att['check_in_time']): ?>

@@ -384,3 +384,51 @@ function setSetting(string $key, $value, string $type = 'STRING'): bool {
         return false;
     }
 }
+
+/**
+ * Shift display label helpers
+ *
+ * ปัญหาเดิม: hr_work_shifts.name ถูกเก็บแบบ hardcoded เช่น "กะปกติ (08:30-17:30)"
+ * ทำให้เวลา admin แก้ start_time/end_time แล้ว label ไม่ sync
+ *
+ * Solution:
+ *   - shift_base_name(): strip "(HH:MM-HH:MM)" ออกจาก name → ได้ชื่อ base
+ *   - shift_display_label(): ประกอบ base + "(start-end)" สด ๆ จาก column จริง
+ *   - shift_sanitize_name_on_save(): clean name ก่อน INSERT/UPDATE — เก็บเฉพาะ base
+ */
+if (!function_exists('shift_base_name')) {
+    function shift_base_name(string $name): string {
+        // ลบ "(...)" ที่อยู่ท้ายชื่อ — รองรับทั้งตัวเลขล้วน, HH:MM, HH.MM, เว้นวรรค
+        $clean = preg_replace('/\s*\(\s*\d{1,2}[.:]\d{2}\s*[-–—]\s*\d{1,2}[.:]\d{2}\s*\)\s*$/u', '', $name);
+        return trim($clean ?? $name);
+    }
+}
+
+if (!function_exists('shift_display_label')) {
+    /**
+     * @param array|null $shift assoc row with name + start_time + end_time, or [shift_name, shift_start, shift_end]
+     * @return string "base (HH:MM-HH:MM)" or '-' if empty
+     */
+    function shift_display_label($shift): string {
+        if (!is_array($shift)) return '-';
+        $name  = $shift['name']       ?? ($shift['shift_name']  ?? '');
+        $start = $shift['start_time'] ?? ($shift['shift_start'] ?? '');
+        $end   = $shift['end_time']   ?? ($shift['shift_end']   ?? '');
+        if ($name === '' && $start === '') return '-';
+        $base = shift_base_name((string)$name);
+        if ($start !== '' && $end !== '') {
+            return $base . ' (' . substr((string)$start, 0, 5) . '-' . substr((string)$end, 0, 5) . ')';
+        }
+        return $base ?: '-';
+    }
+}
+
+if (!function_exists('shift_sanitize_name_on_save')) {
+    /**
+     * เมื่อ admin บันทึกกะใหม่ — ตัด "(...)" ทิ้ง เหลือแค่ชื่อ base
+     * เพื่อให้ display layer คุม format "(start-end)" ได้ 100%
+     */
+    function shift_sanitize_name_on_save(string $name): string {
+        return shift_base_name($name);
+    }
+}

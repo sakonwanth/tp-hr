@@ -80,9 +80,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break;
                 
             case 'update_shift':
+                // Sync: name column ถูกเก็บแบบ "กะปกติ (08:30-17:30)" hardcoded
+                // ตัด "(...)" ทิ้งเพื่อให้ display layer คุม format ได้ (shift_display_label ใน Helpers.php)
+                $cur = $pdo->prepare("SELECT name FROM hr_work_shifts WHERE id = ? LIMIT 1");
+                $cur->execute([$_POST['shift_id']]);
+                $curRow = $cur->fetch();
+                $newName = null;
+                if ($curRow && !empty($curRow['name']) && function_exists('shift_sanitize_name_on_save')) {
+                    $newName = shift_sanitize_name_on_save($curRow['name']);
+                }
+
                 $stmt = $pdo->prepare("
                     UPDATE hr_work_shifts 
-                    SET start_time = ?, end_time = ?, grace_period_minutes = ?, is_active = ?
+                    SET start_time = ?, end_time = ?, grace_period_minutes = ?, is_active = ?,
+                        name = COALESCE(?, name)
                     WHERE id = ?
                 ");
                 $stmt->execute([
@@ -90,6 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_POST['end_time'],
                     $_POST['grace_period'] ?? 15,
                     isset($_POST['is_active']) ? 1 : 0,
+                    $newName,
                     $_POST['shift_id']
                 ]);
                 Auth::log('update_shift', 'hr_work_shifts', $_POST['shift_id']);
@@ -447,7 +459,7 @@ function closeModal(id) {
         <div class="bg-slate-800/50 rounded-xl p-4">
             <div class="flex items-center justify-between mb-3">
                 <div>
-                    <h3 class="text-white font-medium"><?php echo htmlspecialchars($shift['name']); ?></h3>
+                    <h3 class="text-white font-medium"><?php echo htmlspecialchars(function_exists('shift_display_label') ? shift_display_label($shift) : $shift['name']); ?></h3>
                     <p class="text-slate-500 text-sm"><?php echo htmlspecialchars($shift['code']); ?></p>
                 </div>
                 <?php if ($shift['is_default']): ?>

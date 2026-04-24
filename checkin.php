@@ -91,7 +91,7 @@ require_once __DIR__ . '/templates/header.php';
                     <?php if ($shift): ?>
                     <div class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10">
                         <i class="fas fa-clock text-violet-400"></i>
-                        <span class="text-white"><?php echo htmlspecialchars($shift['name']); ?></span>
+                        <span class="text-white"><?php echo htmlspecialchars(function_exists('shift_base_name') ? shift_base_name($shift['name']) : $shift['name']); ?></span>
                         <span class="text-white/60">
                             (<?php echo substr($shift['start_time'], 0, 5); ?> - <?php echo substr($shift['end_time'], 0, 5); ?>)
                         </span>
