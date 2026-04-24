@@ -238,19 +238,25 @@ require_once __DIR__ . '/../templates/header.php';
 <?php endif; ?>
 
 <!-- Tabs -->
-<div class="flex gap-2 mb-6 border-b border-slate-700 pb-4">
-    <a href="?tab=general" class="px-4 py-2 rounded-lg <?php echo $tab === 'general' ? 'bg-primary-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'; ?>">
-        <i class="fas fa-sliders-h mr-2"></i>ทั่วไป
-    </a>
-    <a href="?tab=holidays" class="px-4 py-2 rounded-lg <?php echo $tab === 'holidays' ? 'bg-primary-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'; ?>">
-        <i class="fas fa-calendar-day mr-2"></i>วันหยุด
-    </a>
-    <a href="?tab=leave-types" class="px-4 py-2 rounded-lg <?php echo $tab === 'leave-types' ? 'bg-primary-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'; ?>">
-        <i class="fas fa-umbrella-beach mr-2"></i>ประเภทการลา
-    </a>
-    <a href="?tab=shifts" class="px-4 py-2 rounded-lg <?php echo $tab === 'shifts' ? 'bg-primary-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'; ?>">
-        <i class="fas fa-clock mr-2"></i>กะทำงาน
-    </a>
+<div class="mb-6 border-b border-slate-700 pb-4">
+    <div class="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+        <a href="?tab=general"
+           class="shrink-0 px-4 py-2 rounded-xl whitespace-nowrap min-h-[44px] flex items-center gap-2 <?php echo $tab === 'general' ? 'bg-primary-600 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'; ?>">
+            <i class="fas fa-sliders-h"></i><span>ทั่วไป</span>
+        </a>
+        <a href="?tab=holidays"
+           class="shrink-0 px-4 py-2 rounded-xl whitespace-nowrap min-h-[44px] flex items-center gap-2 <?php echo $tab === 'holidays' ? 'bg-primary-600 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'; ?>">
+            <i class="fas fa-calendar-day"></i><span>วันหยุด</span>
+        </a>
+        <a href="?tab=leave-types"
+           class="shrink-0 px-4 py-2 rounded-xl whitespace-nowrap min-h-[44px] flex items-center gap-2 <?php echo $tab === 'leave-types' ? 'bg-primary-600 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'; ?>">
+            <i class="fas fa-umbrella-beach"></i><span>ประเภทการลา</span>
+        </a>
+        <a href="?tab=shifts"
+           class="shrink-0 px-4 py-2 rounded-xl whitespace-nowrap min-h-[44px] flex items-center gap-2 <?php echo $tab === 'shifts' ? 'bg-primary-600 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'; ?>">
+            <i class="fas fa-clock"></i><span>กะทำงาน</span>
+        </a>
+    </div>
 </div>
 
 <?php if ($tab === 'general'): ?>
@@ -277,7 +283,7 @@ foreach ($workShifts as $_ws) {
         <input type="hidden" name="csrf_token" value="<?php echo csrfToken(); ?>">
         <input type="hidden" name="action" value="update_settings">
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div>
                 <label class="block text-slate-400 text-sm mb-2">ชื่อบริษัท</label>
                 <input type="text" name="settings[company_name]" class="input-field" 
@@ -320,8 +326,8 @@ foreach ($workShifts as $_ws) {
             </div>
         </div>
         
-        <div class="flex justify-end">
-            <button type="submit" class="btn-primary">
+        <div class="flex flex-col md:flex-row md:justify-end gap-3">
+            <button type="submit" class="btn-primary w-full md:w-auto min-h-[44px]">
                 <i class="fas fa-save mr-2"></i>บันทึกการตั้งค่า
             </button>
         </div>
