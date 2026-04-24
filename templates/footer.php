@@ -251,6 +251,12 @@ document.addEventListener('keydown', (e) => {
         e.preventDefault();
         return;
     }
+    const toast = document.getElementById('toast');
+    if (toast && !toast.classList.contains('hidden')) {
+        if (typeof hideToast === 'function') hideToast();
+        e.preventDefault();
+        return;
+    }
     if (typeof uiCloseModal !== 'function') return;
     let closed = false;
     document.querySelectorAll('div[id].fixed.inset-0').forEach((el) => {

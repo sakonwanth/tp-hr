@@ -155,9 +155,9 @@ require_once __DIR__ . '/templates/header.php';
     <!-- Filters -->
     <div class="glass-card rounded-xl p-4 mb-6">
         <form method="GET" class="flex flex-wrap items-center gap-4">
-            <div class="flex items-center gap-2">
-                <label class="text-white/70 text-sm">เดือน:</label>
-                <select name="month" class="input-field w-auto" onchange="this.form.submit()">
+            <div class="flex items-center gap-2 min-h-[44px]">
+                <label class="text-white/70 text-sm shrink-0">เดือน:</label>
+                <select name="month" class="input-field w-auto min-h-[44px]" onchange="this.form.submit()">
                     <?php foreach ($month_options as $opt): ?>
                     <option value="<?php echo $opt['value']; ?>" <?php echo $month === $opt['value'] ? 'selected' : ''; ?>>
                         <?php echo $opt['label']; ?>
@@ -166,9 +166,9 @@ require_once __DIR__ . '/templates/header.php';
                 </select>
             </div>
             
-            <div class="flex items-center gap-2">
-                <label class="text-white/70 text-sm">สถานะ:</label>
-                <select name="status" class="input-field w-auto" onchange="this.form.submit()">
+            <div class="flex items-center gap-2 min-h-[44px]">
+                <label class="text-white/70 text-sm shrink-0">สถานะ:</label>
+                <select name="status" class="input-field w-auto min-h-[44px]" onchange="this.form.submit()">
                     <option value="">ทั้งหมด</option>
                     <option value="PRESENT" <?php echo $status_filter === 'PRESENT' ? 'selected' : ''; ?>>มาทำงาน</option>
                     <option value="LATE" <?php echo $status_filter === 'LATE' ? 'selected' : ''; ?>>มาสาย</option>
