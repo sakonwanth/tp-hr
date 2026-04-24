@@ -187,7 +187,115 @@ include dirname(__DIR__) . '/templates/header.php';
         <p class="text-white/60">ไม่พบพนักงาน</p>
     </div>
     <?php else: ?>
-    <div class="overflow-x-auto">
+    <!-- Mobile-first: card list (desktop keeps table) -->
+    <div class="lg:hidden p-3 space-y-3">
+        <?php foreach ($employees as $emp): ?>
+        <?php
+        $fullName = trim((string)($emp['first_name_th'] ?? '') . ' ' . (string)($emp['last_name_th'] ?? ''));
+        $empCode = (string)($emp['employee_code'] ?? 'ไม่มีรหัส');
+        $dept = (string)($emp['department'] ?? '-');
+        $pos = (string)($emp['position'] ?? '-');
+        $email = (string)($emp['email'] ?? '-');
+        $phone = (string)($emp['phone'] ?? '-');
+        $hire = $emp['hire_date'] ? formatDateThai($emp['hire_date']) : '-';
+        $leaveDays = number_format((float)($emp['total_leave_days'] ?? 0), 1);
+        $isWfh = (($emp['work_mode'] ?? 'OFFICE') === 'WFH');
+        $checkedIn = !empty($emp['checked_in_today']);
+        $isActive = !empty($emp['is_active']);
+
+        $todayLabel = $checkedIn ? 'เข้างาน' : ($isWfh ? 'WFH' : '-');
+        $todayCls = $checkedIn ? 'bg-green-500/15 border border-green-500/30 text-green-200'
+            : ($isWfh ? 'bg-blue-500/15 border border-blue-500/30 text-blue-200' : 'bg-white/5 border border-white/10 text-white/60');
+
+        $activeLabel = $isActive ? 'ทำงาน' : 'พ้นสภาพ';
+        $activeCls = $isActive ? 'bg-green-500/15 border border-green-500/30 text-green-200'
+            : 'bg-red-500/15 border border-red-500/30 text-red-200';
+        ?>
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+            <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <?php if (!empty($emp['avatar'])): ?>
+                    <img src="<?php echo htmlspecialchars($emp['avatar']); ?>" class="w-12 h-12 rounded-2xl object-cover">
+                    <?php else: ?>
+                    <div class="w-12 h-12 rounded-2xl bg-violet-600/30 flex items-center justify-center text-white font-bold">
+                        <?php echo mb_substr($emp['first_name_th'] ?? '', 0, 1); ?>
+                    </div>
+                    <?php endif; ?>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2">
+                            <a href="employee_view.php?id=<?php echo (int)$emp['id']; ?>"
+                               class="text-white font-semibold leading-tight hover:text-violet-300 transition-colors truncate">
+                                <?php echo htmlspecialchars($fullName); ?>
+                            </a>
+                            <?php if ($isWfh): ?>
+                            <span class="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] bg-blue-500/20 text-blue-300" title="Work From Home">
+                                <i class="fas fa-home mr-1"></i>WFH
+                            </span>
+                            <?php endif; ?>
+                        </div>
+                        <div class="text-white/50 text-xs truncate"><?php echo htmlspecialchars($empCode); ?></div>
+                        <div class="text-white/60 text-xs truncate"><?php echo htmlspecialchars($dept); ?> · <?php echo htmlspecialchars($pos); ?></div>
+                    </div>
+                </div>
+                <div class="flex flex-col items-end gap-2 shrink-0">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold <?php echo $todayCls; ?>">
+                        <?php echo htmlspecialchars($todayLabel); ?>
+                    </span>
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold <?php echo $activeCls; ?>">
+                        <?php echo htmlspecialchars($activeLabel); ?>
+                    </span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 mt-4">
+                <div class="rounded-xl bg-black/20 border border-white/10 px-3 py-2">
+                    <div class="text-[11px] text-white/50">เริ่มงาน</div>
+                    <div class="text-white font-semibold text-sm"><?php echo htmlspecialchars($hire); ?></div>
+                </div>
+                <div class="rounded-xl bg-black/20 border border-white/10 px-3 py-2">
+                    <div class="text-[11px] text-white/50">ลาปีนี้</div>
+                    <div class="text-white font-semibold text-sm"><?php echo htmlspecialchars($leaveDays); ?> วัน</div>
+                </div>
+            </div>
+
+            <div class="mt-3 text-white/70 text-xs space-y-1">
+                <div class="truncate"><i class="fas fa-envelope text-white/40 mr-2"></i><?php echo htmlspecialchars($email); ?></div>
+                <div class="truncate"><i class="fas fa-phone text-white/40 mr-2"></i><?php echo htmlspecialchars($phone); ?></div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 mt-4">
+                <a href="/hr/employee_attendance.php?id=<?php echo (int)$emp['id']; ?>"
+                   class="min-h-[44px] rounded-xl bg-violet-500/15 hover:bg-violet-500/25 border border-violet-500/20 text-violet-200 text-sm font-semibold flex items-center justify-center">
+                    <i class="fas fa-clock mr-2"></i>ลงเวลา
+                </a>
+                <button type="button"
+                        onclick="viewLeaveBalance(<?php echo (int)$emp['id']; ?>)"
+                        class="min-h-[44px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold">
+                    <i class="fas fa-calendar-alt mr-2"></i>สิทธิ์ลา
+                </button>
+                <?php if (canManageUsers() || isHR()): ?>
+                <a href="employees.php?action=edit&id=<?php echo (int)$emp['id']; ?>"
+                   class="min-h-[44px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold flex items-center justify-center">
+                    <i class="fas fa-edit mr-2"></i>แก้ไข
+                </a>
+                <?php endif; ?>
+                <a href="employee_view.php?id=<?php echo (int)$emp['id']; ?>"
+                   class="min-h-[44px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold flex items-center justify-center">
+                    <i class="fas fa-eye mr-2"></i>ดูข้อมูล
+                </a>
+                <?php if (canManageUsers()): ?>
+                <button type="button"
+                        onclick="confirmDelete(<?php echo (int)$emp['id']; ?>, '<?php echo htmlspecialchars($emp['first_name_th'] ?? '', ENT_QUOTES); ?>')"
+                        class="col-span-2 min-h-[44px] rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-200 text-sm font-semibold">
+                    <i class="fas fa-trash mr-2"></i>ลบพนักงาน
+                </button>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+
+    <div class="hidden lg:block overflow-x-auto">
         <table class="w-full">
             <thead class="bg-white/5">
                 <tr>
