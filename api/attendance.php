@@ -90,60 +90,106 @@ if ($method === 'POST') {
 
 /**
  * Handle Check-in
+ *
+ * Mirror of tp-checkin/api/attendance.php::handleCheckIn — รองรับ:
+ * - Planned late-start (S4): ถ้ามี planned_start_time ใช้เป็น baseline แทน shift.start_time
+ * - WFH: force status='WFH', skip location enforcement
+ * - Off-site workflow: outside_reason → hr_attendance_outside_requests (PENDING)
  */
 function handleCheckIn(PDO $pdo, array $user, array $input): void {
-    $latitude = $input['latitude'] ?? null;
-    $longitude = $input['longitude'] ?? null;
-    $photo = $input['photo'] ?? null;
-    
-    // Check if already checked in today
+    $latitude      = $input['latitude']  ?? null;
+    $longitude     = $input['longitude'] ?? null;
+    $photo         = $input['photo']     ?? null;
+    $outsideReason = trim((string)($input['outside_reason'] ?? $input['offsite_reason'] ?? ''));
+
     $stmt = $pdo->prepare("SELECT * FROM hr_attendances WHERE user_id = ? AND attendance_date = CURDATE()");
     $stmt->execute([$user['id']]);
     $existing = $stmt->fetch();
-    
+
     if ($existing && $existing['check_in_time']) {
         apiError('คุณได้ลงเวลาเข้างานวันนี้แล้ว');
     }
-    
-    // Get default shift
+
     $stmt = $pdo->query("SELECT * FROM hr_work_shifts WHERE is_default = 1 AND is_active = 1 LIMIT 1");
     $shift = $stmt->fetch();
-    
-    // Calculate late minutes
+
     $lateMinutes = 0;
-    $status = 'PRESENT';
-    
+    $status      = 'PRESENT';
+
+    // S4: Planned late-start support
+    $plannedStart        = $existing['planned_start_time'] ?? null;
+    $plannedGraceMinutes = 30;
+
     if ($shift) {
-        $defaults = getShiftDefaults($shift);
-        $shiftStart = strtotime(date('Y-m-d') . ' ' . $shift['start_time']);
-        $gracePeriod = $defaults['grace_period_minutes'] * 60;
-        $now = time();
-        
-        if ($now > ($shiftStart + $gracePeriod)) {
-            $lateMinutes = floor(($now - $shiftStart) / 60);
-            $status = 'LATE';
+        $defaults    = getShiftDefaults($shift);
+        $shiftGrace  = $defaults['grace_period_minutes'];
+        $now         = time();
+
+        if (!empty($plannedStart)) {
+            $effectiveStart = strtotime(date('Y-m-d') . ' ' . $plannedStart);
+            $gracePeriod    = max($shiftGrace, $plannedGraceMinutes) * 60;
+            if ($now > ($effectiveStart + $gracePeriod)) {
+                $lateMinutes = (int) floor(($now - $effectiveStart) / 60);
+                $status      = 'LATE';
+            }
+        } else {
+            $shiftStart  = strtotime(date('Y-m-d') . ' ' . $shift['start_time']);
+            $gracePeriod = $shiftGrace * 60;
+            if ($now > ($shiftStart + $gracePeriod)) {
+                $lateMinutes = (int) floor(($now - $shiftStart) / 60);
+                $status      = 'LATE';
+            }
         }
     }
 
-    // WFH employees: force status to WFH, no lateness tracking
+    // WFH employees — aligned with tp-checkin
     if (($user['work_mode'] ?? 'OFFICE') === 'WFH') {
-        $status = 'WFH';
+        $status      = 'WFH';
         $lateMinutes = 0;
     }
-    
-    // Validate location (optional)
-    $locationId = null;
-    if ($latitude && $longitude) {
-        $locationId = validateLocation($pdo, $latitude, $longitude);
+
+    // Location enforcement (HR settings)
+    $enforceLocation = getHrBoolSetting($pdo, 'enforce_location_checkin', true);
+    $outsideNeedsApproval = getHrBoolSetting($pdo, 'outside_location_requires_approval', true);
+    if (($user['work_mode'] ?? 'OFFICE') === 'WFH') {
+        $enforceLocation = false;
     }
-    
-    // Save photo
+
+    $locationId = null;
+    if ($enforceLocation) {
+        if (empty($latitude) || empty($longitude)) {
+            apiError('กรุณาเปิด GPS เพื่อระบุตำแหน่ง');
+        }
+        $locationId = validateLocation($pdo, (float)$latitude, (float)$longitude);
+        if ($locationId === null) {
+            if ($outsideNeedsApproval) {
+                if (mb_strlen($outsideReason) < 5) {
+                    header('Content-Type: application/json');
+                    http_response_code(200);
+                    echo json_encode([
+                        'success' => false,
+                        'error'   => 'คุณไม่ได้อยู่ในพื้นที่ที่อนุญาตให้ลงเวลา กรุณาระบุเหตุผลอย่างน้อย 5 ตัวอักษร',
+                        'data'    => ['requires_outside_reason' => true, 'request_type' => 'CHECK_IN'],
+                    ]);
+                    exit;
+                }
+                $pending = createOutsideLocationRequest($pdo, $user, 'CHECK_IN', null, (float)$latitude, (float)$longitude, $photo, $outsideReason);
+                apiSuccess([
+                    'pending_approval' => true,
+                    'request_id'       => $pending['request_id'],
+                ], 'ส่งคำขอลงเวลาเข้างานนอกสถานที่เรียบร้อยแล้ว รอผู้อนุมัติ');
+            }
+            apiError('คุณไม่ได้อยู่ในพื้นที่ที่อนุญาตให้ลงเวลา กรุณาตรวจสอบตำแหน่งของคุณ');
+        }
+    } elseif ($latitude && $longitude) {
+        $locationId = validateLocation($pdo, (float)$latitude, (float)$longitude);
+    }
+
     $photoPath = null;
     if ($photo) {
         $photoPath = savePhoto($photo, $user['id'], 'checkin');
     }
-    
-    // Insert or update attendance record
+
     if ($existing) {
         $stmt = $pdo->prepare("
             UPDATE hr_attendances SET
@@ -159,16 +205,8 @@ function handleCheckIn(PDO $pdo, array $user, array $input): void {
                 updated_at = NOW()
             WHERE id = ?
         ");
-        $stmt->execute([
-            $latitude,
-            $longitude,
-            $locationId,
-            $photoPath,
-            $_SERVER['REMOTE_ADDR'] ?? '',
-            $lateMinutes,
-            $status,
-            $existing['id']
-        ]);
+        $stmt->execute([$latitude, $longitude, $locationId, $photoPath, $_SERVER['REMOTE_ADDR'] ?? '', $lateMinutes, $status, $existing['id']]);
+        $attId = (int)$existing['id'];
     } else {
         $stmt = $pdo->prepare("
             INSERT INTO hr_attendances (
@@ -178,81 +216,134 @@ function handleCheckIn(PDO $pdo, array $user, array $input): void {
                 late_minutes, status
             ) VALUES (?, CURDATE(), ?, NOW(), 'GPS', ?, ?, ?, ?, ?, ?, ?)
         ");
-        $stmt->execute([
-            $user['id'],
-            $shift['id'] ?? null,
-            $latitude,
-            $longitude,
-            $locationId,
-            $photoPath,
-            $_SERVER['REMOTE_ADDR'] ?? '',
-            $lateMinutes,
-            $status
-        ]);
+        $stmt->execute([$user['id'], $shift['id'] ?? null, $latitude, $longitude, $locationId, $photoPath, $_SERVER['REMOTE_ADDR'] ?? '', $lateMinutes, $status]);
+        $attId = (int)$pdo->lastInsertId();
     }
-    
-    // Log action
-    Auth::log('CHECK_IN', 'hr_attendances', $pdo->lastInsertId() ?: $existing['id']);
-    
+
+    Auth::log('CHECK_IN', 'hr_attendances', $attId);
+
     apiSuccess([
         'check_in_time' => date('H:i:s'),
-        'late_minutes' => $lateMinutes,
-        'status' => $status
+        'late_minutes'  => $lateMinutes,
+        'status'        => $status,
+        'attendance_id' => $attId,
     ], 'ลงเวลาเข้างานสำเร็จ');
+}
+
+/**
+ * Read boolean setting from hr_settings (mirror ของ tp-checkin/api/attendance.php)
+ */
+function getHrBoolSetting(PDO $pdo, string $key, bool $default = true): bool {
+    $stmt = $pdo->prepare("SELECT value FROM hr_settings WHERE `key` = ? LIMIT 1");
+    $stmt->execute([$key]);
+    $setting = $stmt->fetch();
+    if (!$setting) return $default;
+    return (string)$setting['value'] === '1';
+}
+
+/**
+ * Create pending outside-location request (mirror ของ tp-checkin)
+ */
+function createOutsideLocationRequest(
+    PDO $pdo,
+    array $user,
+    string $requestType,
+    ?int $attendanceId,
+    ?float $latitude,
+    ?float $longitude,
+    ?string $photo,
+    string $reason
+): array {
+    $requestDate = date('Y-m-d');
+    $requestTime = date('Y-m-d H:i:s');
+
+    if ($requestType === 'CHECK_OUT' && $attendanceId) {
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM hr_attendance_outside_requests WHERE attendance_id = ? AND request_type = ? AND status = 'PENDING'");
+        $stmt->execute([$attendanceId, $requestType]);
+    } else {
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM hr_attendance_outside_requests WHERE user_id = ? AND request_type = ? AND request_date = ? AND status = 'PENDING'");
+        $stmt->execute([$user['id'], $requestType, $requestDate]);
+    }
+    if ((int)$stmt->fetchColumn() > 0) {
+        apiError('มีคำขอที่รออนุมัติอยู่แล้วสำหรับรายการนี้');
+    }
+
+    $photoPath = null;
+    if ($photo) {
+        $photoPath = savePhoto($photo, $user['id'], strtolower($requestType) . '_outside');
+    }
+
+    $stmt = $pdo->prepare("
+        INSERT INTO hr_attendance_outside_requests (
+            user_id, attendance_id, request_type,
+            request_date, request_time,
+            latitude, longitude,
+            photo_path, reason,
+            status, request_ip
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', ?)
+    ");
+    $stmt->execute([
+        $user['id'], $attendanceId, $requestType,
+        $requestDate, $requestTime,
+        $latitude, $longitude,
+        $photoPath, $reason,
+        $_SERVER['REMOTE_ADDR'] ?? '',
+    ]);
+
+    $requestId = (int)$pdo->lastInsertId();
+    Auth::log('OUTSIDE_LOCATION_REQUEST', 'hr_attendance_outside_requests', $requestId, [
+        'request_type'  => $requestType,
+        'request_date'  => $requestDate,
+        'attendance_id' => $attendanceId,
+    ]);
+
+    return ['request_id' => $requestId, 'photo_path' => $photoPath];
 }
 
 /**
  * Handle Check-out
  */
 function handleCheckOut(PDO $pdo, array $user, array $input): void {
-    $latitude = $input['latitude'] ?? null;
-    $longitude = $input['longitude'] ?? null;
-    $photo = $input['photo'] ?? null;
-    
-    // Check if checked in today
+    $latitude      = $input['latitude']  ?? null;
+    $longitude     = $input['longitude'] ?? null;
+    $photo         = $input['photo']     ?? null;
+    $outsideReason = trim((string)($input['outside_reason'] ?? $input['offsite_reason'] ?? ''));
+
     $stmt = $pdo->prepare("SELECT * FROM hr_attendances WHERE user_id = ? AND attendance_date = CURDATE()");
     $stmt->execute([$user['id']]);
     $attendance = $stmt->fetch();
-    
+
     if (!$attendance || !$attendance['check_in_time']) {
         apiError('คุณยังไม่ได้ลงเวลาเข้างานวันนี้');
     }
-    
     if ($attendance['check_out_time']) {
         apiError('คุณได้ลงเวลาออกงานวันนี้แล้ว');
     }
-    
-    // Get shift info
+
     $shift = null;
     if ($attendance['shift_id']) {
         $stmt = $pdo->prepare("SELECT * FROM hr_work_shifts WHERE id = ?");
         $stmt->execute([$attendance['shift_id']]);
         $shift = $stmt->fetch();
     }
-    
-    // Calculate work minutes
-    $checkInTime = strtotime($attendance['check_in_time']);
+
+    $checkInTime  = strtotime($attendance['check_in_time']);
     $checkOutTime = time();
-    $workMinutes = floor(($checkOutTime - $checkInTime) / 60);
-    
-    // Subtract break time
-    $defaults = getShiftDefaults($shift ?: null);
+    $workMinutes  = floor(($checkOutTime - $checkInTime) / 60);
+
+    $defaults     = getShiftDefaults($shift ?: null);
     $breakMinutes = $defaults['break_minutes'];
     $workMinutes -= $breakMinutes;
     if ($workMinutes < 0) $workMinutes = 0;
-    
-    // Calculate OT
+
     $otMinutes = 0;
     if ($shift) {
-        $shiftEnd = strtotime(date('Y-m-d') . ' ' . $shift['end_time']);
         $expectedWorkMinutes = $defaults['work_hours_per_day'] * 60;
-        
         if ($workMinutes > $expectedWorkMinutes) {
             $otMinutes = $workMinutes - $expectedWorkMinutes;
         }
     }
-    
-    // Calculate early leave
+
     $earlyLeaveMinutes = 0;
     if ($shift) {
         $shiftEnd = strtotime(date('Y-m-d') . ' ' . $shift['end_time']);
@@ -260,14 +351,44 @@ function handleCheckOut(PDO $pdo, array $user, array $input): void {
             $earlyLeaveMinutes = floor(($shiftEnd - $checkOutTime) / 60);
         }
     }
-    
-    // Validate location
-    $locationId = null;
-    if ($latitude && $longitude) {
-        $locationId = validateLocation($pdo, $latitude, $longitude);
+
+    // Location enforcement — mirror ของ handleCheckIn
+    $enforceLocation      = getHrBoolSetting($pdo, 'enforce_location_checkin', true);
+    $outsideNeedsApproval = getHrBoolSetting($pdo, 'outside_location_requires_approval', true);
+    if (($user['work_mode'] ?? 'OFFICE') === 'WFH') {
+        $enforceLocation = false;
     }
-    
-    // Save photo
+
+    $locationId = null;
+    if ($enforceLocation) {
+        if (empty($latitude) || empty($longitude)) {
+            apiError('กรุณาเปิด GPS เพื่อระบุตำแหน่ง');
+        }
+        $locationId = validateLocation($pdo, (float)$latitude, (float)$longitude);
+        if ($locationId === null) {
+            if ($outsideNeedsApproval) {
+                if (mb_strlen($outsideReason) < 5) {
+                    header('Content-Type: application/json');
+                    http_response_code(200);
+                    echo json_encode([
+                        'success' => false,
+                        'error'   => 'คุณไม่ได้อยู่ในพื้นที่ที่อนุญาตให้ลงเวลา กรุณาระบุเหตุผลอย่างน้อย 5 ตัวอักษร',
+                        'data'    => ['requires_outside_reason' => true, 'request_type' => 'CHECK_OUT'],
+                    ]);
+                    exit;
+                }
+                $pending = createOutsideLocationRequest($pdo, $user, 'CHECK_OUT', (int)$attendance['id'], (float)$latitude, (float)$longitude, $photo, $outsideReason);
+                apiSuccess([
+                    'pending_approval' => true,
+                    'request_id'       => $pending['request_id'],
+                ], 'ส่งคำขอลงเวลาออกงานนอกสถานที่เรียบร้อยแล้ว รอผู้อนุมัติ');
+            }
+            apiError('คุณไม่ได้อยู่ในพื้นที่ที่อนุญาตให้ลงเวลา กรุณาตรวจสอบตำแหน่งของคุณ');
+        }
+    } elseif ($latitude && $longitude) {
+        $locationId = validateLocation($pdo, (float)$latitude, (float)$longitude);
+    }
+
     $photoPath = null;
     if ($photo) {
         $photoPath = savePhoto($photo, $user['id'], 'checkout');

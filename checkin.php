@@ -79,7 +79,7 @@ $locations = $stmt->fetchAll();
 
 // Get attendance history (last 7 days)
 $stmt = $pdo->prepare("
-    SELECT a.*, s.name as shift_name 
+    SELECT a.*, s.name as shift_name, s.start_time as shift_start, s.end_time as shift_end
     FROM hr_attendances a
     LEFT JOIN hr_work_shifts s ON a.shift_id = s.id
     WHERE a.user_id = ? AND a.attendance_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
@@ -87,6 +87,24 @@ $stmt = $pdo->prepare("
 ");
 $stmt->execute([$user['id']]);
 $attendance_history = $stmt->fetchAll();
+
+// Build holiday map for last 7 days (สำหรับแสดง marker ใน history)
+$holidayMap = [];
+try {
+    $hstmt = $pdo->prepare("SELECT `date` as d, name, type FROM hr_holidays WHERE `date` >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) AND is_active = 1");
+    $hstmt->execute();
+    foreach ($hstmt->fetchAll(PDO::FETCH_ASSOC) as $h) {
+        $holidayMap[$h['d']] = $h;
+    }
+} catch (Throwable $e) {
+    try {
+        $hstmt = $pdo->prepare("SELECT holiday_date as d, name, type FROM hr_holidays WHERE holiday_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) AND is_active = 1");
+        $hstmt->execute();
+        foreach ($hstmt->fetchAll(PDO::FETCH_ASSOC) as $h) {
+            $holidayMap[$h['d']] = $h;
+        }
+    } catch (Throwable $e2) { $holidayMap = []; }
+}
 
 // Calculate this month's summary
 $stmt = $pdo->prepare("
@@ -148,23 +166,44 @@ require_once __DIR__ . '/templates/header.php';
                     <div class="text-6xl font-bold text-white mb-2" id="current-time">--:--:--</div>
                     <p class="text-white/60"><?php echo formatDateThai(date('Y-m-d')); ?></p>
                     
-                    <?php if ($shift): ?>
-                    <div class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10">
-                        <i class="fas fa-clock text-violet-400"></i>
-                        <span class="text-white"><?php echo htmlspecialchars(function_exists('shift_base_name') ? shift_base_name($shift['name']) : $shift['name']); ?></span>
-                        <span class="text-white/60">
-                            (<?php echo substr($shift['start_time'], 0, 5); ?> - <?php echo substr($shift['end_time'], 0, 5); ?>)
-                        </span>
+                    <div class="mt-4 flex items-center justify-center gap-2 flex-wrap">
+                        <?php if ($shift): ?>
+                        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10">
+                            <i class="fas fa-clock text-violet-400"></i>
+                            <span class="text-white"><?php echo htmlspecialchars(function_exists('shift_base_name') ? shift_base_name($shift['name']) : $shift['name']); ?></span>
+                            <span class="text-white/60">
+                                (<?php echo substr($shift['start_time'], 0, 5); ?> - <?php echo substr($shift['end_time'], 0, 5); ?>)
+                            </span>
+                        </div>
+                        <?php endif; ?>
+                        <?php if (($user['work_mode'] ?? 'OFFICE') === 'WFH'): ?>
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/30">
+                            <i class="fas fa-home text-emerald-300"></i>
+                            <span class="text-emerald-200 text-sm font-semibold">WFH</span>
+                        </div>
+                        <?php endif; ?>
                     </div>
-                    <?php endif; ?>
                 </div>
                 
+                <?php
+                // Check pending outside-location request (today)
+                $pending_in  = null;
+                $pending_out = null;
+                try {
+                    $pstmt = $pdo->prepare("SELECT id, request_type, status FROM hr_attendance_outside_requests WHERE user_id = ? AND request_date = CURDATE() AND status = 'PENDING'");
+                    $pstmt->execute([$user['id']]);
+                    foreach ($pstmt->fetchAll(PDO::FETCH_ASSOC) as $pr) {
+                        if ($pr['request_type'] === 'CHECK_IN')  $pending_in  = $pr;
+                        if ($pr['request_type'] === 'CHECK_OUT') $pending_out = $pr;
+                    }
+                } catch (Throwable $e) { /* table may not exist yet */ }
+                ?>
                 <!-- Today's Status -->
                 <div class="grid grid-cols-2 gap-4 mb-8">
                     <div class="p-4 rounded-lg bg-white/5 text-center">
                         <p class="text-white/60 text-sm mb-1">เวลาเข้างาน</p>
                         <p class="text-2xl font-bold <?php echo $today_attendance && $today_attendance['check_in_time'] ? 'text-green-400' : 'text-white/30'; ?>">
-                            <?php 
+                            <?php
                             if ($today_attendance && $today_attendance['check_in_time']) {
                                 echo date('H:i', strtotime($today_attendance['check_in_time']));
                             } else {
@@ -177,13 +216,22 @@ require_once __DIR__ . '/templates/header.php';
                             <i class="fas fa-exclamation-triangle mr-1"></i>
                             สาย <?php echo $today_attendance['late_minutes']; ?> นาที
                         </p>
+                        <?php elseif ($today_attendance && $today_attendance['check_in_time'] && empty($today_attendance['check_in_location_id'])): ?>
+                        <p class="text-amber-300 text-xs mt-1">
+                            <i class="fas fa-map-pin mr-1"></i>นอกสถานที่
+                        </p>
+                        <?php endif; ?>
+                        <?php if ($pending_in): ?>
+                        <p class="text-yellow-300 text-xs mt-1 bg-yellow-500/10 rounded px-2 py-0.5 inline-block">
+                            <i class="fas fa-hourglass-half mr-1"></i>รออนุมัติ (นอกสถานที่)
+                        </p>
                         <?php endif; ?>
                     </div>
-                    
+
                     <div class="p-4 rounded-lg bg-white/5 text-center">
                         <p class="text-white/60 text-sm mb-1">เวลาออกงาน</p>
                         <p class="text-2xl font-bold <?php echo $today_attendance && $today_attendance['check_out_time'] ? 'text-blue-400' : 'text-white/30'; ?>">
-                            <?php 
+                            <?php
                             if ($today_attendance && $today_attendance['check_out_time']) {
                                 echo date('H:i', strtotime($today_attendance['check_out_time']));
                             } else {
@@ -194,6 +242,11 @@ require_once __DIR__ . '/templates/header.php';
                         <?php if ($today_attendance && $today_attendance['work_minutes'] > 0): ?>
                         <p class="text-white/60 text-sm mt-1">
                             ทำงาน <?php echo floor($today_attendance['work_minutes'] / 60); ?> ชม. <?php echo $today_attendance['work_minutes'] % 60; ?> น.
+                        </p>
+                        <?php endif; ?>
+                        <?php if ($pending_out): ?>
+                        <p class="text-yellow-300 text-xs mt-1 bg-yellow-500/10 rounded px-2 py-0.5 inline-block">
+                            <i class="fas fa-hourglass-half mr-1"></i>รออนุมัติ (นอกสถานที่)
                         </p>
                         <?php endif; ?>
                     </div>
@@ -382,36 +435,50 @@ require_once __DIR__ . '/templates/header.php';
                 
                 <?php if ($attendance_history): ?>
                 <div class="space-y-2">
-                    <?php foreach ($attendance_history as $att): ?>
+                    <?php foreach ($attendance_history as $att):
+                        $attDate = $att['attendance_date'];
+                        $hol = $holidayMap[$attDate] ?? null;
+                    ?>
                     <div class="p-3 rounded-lg bg-white/5 flex items-center justify-between">
-                        <div>
-                            <p class="text-white text-sm">
-                                <?php echo formatDateThai($att['attendance_date']); ?>
-                            </p>
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-2">
+                                <p class="text-white text-sm truncate">
+                                    <?php echo formatDateThai($attDate); ?>
+                                </p>
+                                <?php if ($hol): ?>
+                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-400/30" title="<?php echo htmlspecialchars($hol['name']); ?>">
+                                    <i class="fas fa-umbrella-beach"></i>
+                                </span>
+                                <?php endif; ?>
+                                <?php if ($att['status'] === 'WFH' || (!empty($att['check_in_time']) && empty($att['check_in_location_id']))): ?>
+                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300" title="นอกสถานที่/WFH">
+                                    <i class="fas fa-home"></i>
+                                </span>
+                                <?php endif; ?>
+                            </div>
                             <p class="text-white/50 text-xs">
-                                <?php 
-                                if ($att['check_in_time']) {
-                                    echo date('H:i', strtotime($att['check_in_time']));
-                                } else {
-                                    echo '--:--';
-                                }
+                                <?php
+                                echo $att['check_in_time']  ? date('H:i', strtotime($att['check_in_time']))  : '--:--';
                                 echo ' - ';
-                                if ($att['check_out_time']) {
-                                    echo date('H:i', strtotime($att['check_out_time']));
-                                } else {
-                                    echo '--:--';
+                                echo $att['check_out_time'] ? date('H:i', strtotime($att['check_out_time'])) : '--:--';
+                                if (!empty($att['late_minutes']) && (int)$att['late_minutes'] > 0) {
+                                    echo ' <span class="text-amber-300">(สาย ' . (int)$att['late_minutes'] . ' น.)</span>';
                                 }
                                 ?>
                             </p>
+                            <?php if ($hol): ?>
+                            <p class="text-rose-300/80 text-[10px] mt-0.5 truncate"><?php echo htmlspecialchars($hol['name']); ?></p>
+                            <?php endif; ?>
                         </div>
-                        <span class="px-2 py-1 text-xs rounded <?php 
+                        <span class="shrink-0 px-2 py-1 text-xs rounded <?php
                             echo match($att['status']) {
                                 'PRESENT' => 'bg-green-500/20 text-green-400',
-                                'LATE' => 'bg-yellow-500/20 text-yellow-400',
-                                'ABSENT' => 'bg-red-500/20 text-red-400',
-                                'LEAVE' => 'bg-blue-500/20 text-blue-400',
+                                'LATE'    => 'bg-yellow-500/20 text-yellow-400',
+                                'ABSENT'  => 'bg-red-500/20 text-red-400',
+                                'LEAVE'   => 'bg-blue-500/20 text-blue-400',
                                 'HOLIDAY' => 'bg-gray-500/20 text-gray-400',
-                                default => 'bg-gray-500/20 text-gray-400'
+                                'WFH'     => 'bg-emerald-500/20 text-emerald-400',
+                                default   => 'bg-gray-500/20 text-gray-400'
                             };
                         ?>">
                             <?php echo ATTENDANCE_STATUS[$att['status']] ?? $att['status']; ?>
@@ -497,6 +564,38 @@ require_once __DIR__ . '/templates/header.php';
             <button type="button" onclick="submitLateStart()"
                     class="flex-1 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl font-medium transition-colors">
                 <i class="fas fa-paper-plane mr-2"></i>ส่งคำขอ
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Off-site Reason Modal -->
+<div id="offsite-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-card rounded-2xl p-6 w-full max-w-md">
+        <div class="text-center mb-4">
+            <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                <i class="fas fa-map-marker-alt text-yellow-400 text-3xl"></i>
+            </div>
+            <h3 class="text-white text-lg font-bold mb-1">คุณอยู่นอกพื้นที่ที่อนุญาต</h3>
+            <p class="text-white/60 text-sm" id="offsite-info">การลงเวลานอกพื้นที่ต้องระบุเหตุผลและรอผู้บังคับบัญชาอนุมัติ</p>
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-white/70 text-sm mb-2">
+                <i class="fas fa-pen mr-1"></i>เหตุผล <span class="text-red-400">*</span>
+            </label>
+            <textarea id="offsite-reason" rows="3" maxlength="500"
+                      placeholder="เช่น ไปพบลูกค้า, ประชุมนอกสำนักงาน, ทำงานนอกสถานที่"
+                      class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white text-sm placeholder-white/40 focus:outline-none focus:border-yellow-400 resize-none"></textarea>
+            <p class="text-white/40 text-xs mt-1">อย่างน้อย 5 ตัวอักษร</p>
+        </div>
+
+        <div class="flex gap-3">
+            <button type="button" onclick="closeOffsiteModal()" class="flex-1 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-medium transition-colors">
+                ยกเลิก
+            </button>
+            <button type="button" onclick="submitOffsite()" class="flex-1 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-medium transition-colors">
+                <i class="fas fa-paper-plane mr-1"></i>ส่งคำขอ
             </button>
         </div>
     </div>
@@ -701,41 +800,79 @@ function capturePhoto() {
     stopCamera();
 }
 
-// Confirm check-in
-async function confirmCheckin() {
+// Confirm check-in (รองรับ outside_reason retry flow)
+async function confirmCheckin(outsideReason = null) {
     const btn = document.getElementById('btn-confirm');
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>กำลังบันทึก...';
-    
+
     try {
+        const body = {
+            action: checkinType === 'in' ? 'check_in' : 'check_out',
+            latitude: userLatitude,
+            longitude: userLongitude,
+            photo: photoData,
+        };
+        if (outsideReason) body.outside_reason = outsideReason;
+
         const response = await fetch('/api/attendance.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: checkinType === 'in' ? 'check_in' : 'check_out',
-                latitude: userLatitude,
-                longitude: userLongitude,
-                photo: photoData
-            })
+            body: JSON.stringify(body),
         });
-        
         const result = await response.json();
-        
+
         if (result.success) {
+            const isPending = !!(result.data && result.data.pending_approval);
             closeCheckinModal();
-            showToast(checkinType === 'in' ? 'ลงเวลาเข้างานสำเร็จ' : 'ลงเวลาออกงานสำเร็จ', 'success');
+            if (isPending) {
+                showToast(result.message || 'ส่งคำขอเรียบร้อย รอผู้อนุมัติ', 'success');
+            } else {
+                showToast(checkinType === 'in' ? 'ลงเวลาเข้างานสำเร็จ' : 'ลงเวลาออกงานสำเร็จ', 'success');
+            }
             setTimeout(() => location.reload(), 1500);
-        } else {
-            showToast(result.error || 'เกิดข้อผิดพลาด', 'error');
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-check mr-2"></i>ยืนยัน';
+            return;
         }
+
+        // Error paths
+        if (result.data && result.data.requires_outside_reason) {
+            // ปิด checkin modal ก่อน แล้วเปิด offsite modal (retry)
+            closeCheckinModal();
+            openOffsiteModal(result.error);
+            return;
+        }
+        showToast(result.error || 'เกิดข้อผิดพลาด', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check mr-2"></i>ยืนยัน';
     } catch (err) {
         console.error('Check-in error:', err);
         showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-check mr-2"></i>ยืนยัน';
     }
+}
+
+/* Off-site reason modal — retry flow when user is outside geofence */
+function openOffsiteModal(infoMsg = null) {
+    if (infoMsg) document.getElementById('offsite-info').textContent = infoMsg;
+    document.getElementById('offsite-reason').value = '';
+    const modal = document.getElementById('offsite-modal');
+    modal.classList.remove('hidden');
+    setTimeout(() => document.getElementById('offsite-reason').focus(), 300);
+}
+function closeOffsiteModal() {
+    document.getElementById('offsite-modal').classList.add('hidden');
+}
+function submitOffsite() {
+    const reason = document.getElementById('offsite-reason').value.trim();
+    if (reason.length < 5) {
+        showToast('กรุณาระบุเหตุผลอย่างน้อย 5 ตัวอักษร', 'error');
+        document.getElementById('offsite-reason').focus();
+        return;
+    }
+    closeOffsiteModal();
+    // Re-submit with reason — photoData still in memory
+    confirmCheckin(reason);
 }
 
 /* =====================================================
