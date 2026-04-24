@@ -140,11 +140,13 @@ include 'templates/header.php';
         <h1 class="text-2xl font-bold text-white">
             สลิปเงินเดือน <?php echo thaiMonth(date('n', strtotime($slip['payroll_month']))); ?> <?php echo date('Y', strtotime($slip['payroll_month'])) + 543; ?>
         </h1>
-        <div class="flex gap-2">
-            <a href="payslip.php?action=download&slip_id=<?php echo $slip['id']; ?>" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">
+        <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
+            <a href="payslip.php?action=download&slip_id=<?php echo $slip['id']; ?>"
+               class="w-full sm:w-auto min-h-[44px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors inline-flex items-center justify-center">
                 <i class="fas fa-print mr-2"></i>พิมพ์
             </a>
-            <a href="payslip.php?action=download&slip_id=<?php echo $slip['id']; ?>" target="_blank" class="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
+            <a href="payslip.php?action=download&slip_id=<?php echo $slip['id']; ?>" target="_blank"
+               class="w-full sm:w-auto min-h-[44px] px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors inline-flex items-center justify-center font-semibold">
                 <i class="fas fa-download mr-2"></i>ดาวน์โหลด PDF
             </a>
         </div>
@@ -357,7 +359,7 @@ include 'templates/header.php';
 
 <!-- Year Filter -->
 <div class="glass-card rounded-xl p-4 mb-6">
-    <form method="GET" class="flex items-center gap-4">
+    <form method="GET" class="flex flex-wrap items-center gap-3">
         <label class="text-white/60">ปี:</label>
         <select name="year" class="input-field w-32" onchange="this.form.submit()">
             <?php foreach ($availableYears as $y): ?>
@@ -417,12 +419,12 @@ include 'templates/header.php';
                     </span>
                     <div class="flex gap-2">
                         <a href="payslip.php?slip_id=<?php echo $s['id']; ?>" 
-                           class="p-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors" 
+                           class="min-w-[44px] min-h-[44px] p-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors flex items-center justify-center" 
                            title="ดูรายละเอียด">
                             <i class="fas fa-eye"></i>
                         </a>
                         <a href="payslip.php?action=download&slip_id=<?php echo $s['id']; ?>" 
-                           class="p-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors"
+                           class="min-w-[44px] min-h-[44px] p-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors flex items-center justify-center"
                            title="ดาวน์โหลด PDF">
                             <i class="fas fa-download"></i>
                         </a>
