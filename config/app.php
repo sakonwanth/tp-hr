@@ -16,8 +16,8 @@ define('SESSION_LIFETIME', 7200); // 2 hours
 // Security
 define('MIN_PASSWORD_LENGTH', 8);
 
-// External services
-define('CRM_BASE_URL', $_ENV['CRM_BASE_URL'] ?? 'http://localhost/tp-crm');
+// External services (CRM_BASE_URL preferred; CRM_URL alias matches tp-erp)
+define('CRM_BASE_URL', $_ENV['CRM_BASE_URL'] ?? $_ENV['CRM_URL'] ?? 'http://localhost/tp-crm');
 
 // File Upload
 define('MAX_UPLOAD_SIZE', 10 * 1024 * 1024); // 10MB
