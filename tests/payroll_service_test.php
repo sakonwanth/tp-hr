@@ -1,0 +1,70 @@
+<?php
+
+require_once dirname(__DIR__) . '/core/Services/SettingsService.php';
+require_once dirname(__DIR__) . '/core/Services/PayrollService.php';
+
+function assertSameValue($expected, $actual, string $label): void {
+    if ($expected !== $actual) {
+        fwrite(STDERR, "[FAIL] {$label}: expected " . var_export($expected, true) . ', got ' . var_export($actual, true) . PHP_EOL);
+        exit(1);
+    }
+    echo "[OK] {$label}" . PHP_EOL;
+}
+
+$pdo = new PDO('sqlite::memory:');
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+$pdo->exec("
+    CREATE TABLE users (
+        id INTEGER PRIMARY KEY,
+        is_active INTEGER NOT NULL DEFAULT 1,
+        work_mode TEXT DEFAULT 'OFFICE'
+    );
+    CREATE TABLE hr_employee_schedules (
+        user_id INTEGER PRIMARY KEY,
+        day_off INTEGER NOT NULL
+    );
+    CREATE TABLE hr_holidays (
+        date TEXT PRIMARY KEY,
+        is_active INTEGER NOT NULL DEFAULT 1
+    );
+    CREATE TABLE hr_leave_requests (
+        user_id INTEGER,
+        start_date TEXT,
+        end_date TEXT,
+        status TEXT
+    );
+    CREATE TABLE hr_dayoff_requests (
+        user_id INTEGER,
+        week_start TEXT,
+        week_end TEXT,
+        requested_day_off INTEGER,
+        status TEXT
+    );
+");
+
+$pdo->exec("INSERT INTO users (id, is_active, work_mode) VALUES (1, 1, 'OFFICE'), (2, 1, 'WFH'), (3, 0, 'OFFICE')");
+$pdo->exec("INSERT INTO hr_employee_schedules (user_id, day_off) VALUES (1, 0), (2, 0), (3, 0)");
+$pdo->exec("INSERT INTO hr_holidays (date, is_active) VALUES ('2026-04-22', 1)");
+$pdo->exec("INSERT INTO hr_leave_requests (user_id, start_date, end_date, status) VALUES (1, '2026-04-23', '2026-04-23', 'PENDING')");
+$pdo->exec("INSERT INTO hr_dayoff_requests (user_id, week_start, week_end, requested_day_off, status) VALUES (1, '2026-04-20', '2026-04-26', 5, 'APPROVED')");
+
+$service = new PayrollService($pdo);
+$method = new ReflectionMethod(PayrollService::class, 'findMissingAbsentDates');
+$method->setAccessible(true);
+
+$loggedDates = [
+    '2026-04-20' => true,
+    '2026-04-21' => true,
+];
+
+$missing = $method->invoke($service, 1, '2026-04-20', '2026-04-26', $loggedDates);
+assertSameValue(['2026-04-25', '2026-04-26'], $missing, 'missing workdays skip logged, holiday, leave, and swapped day off');
+
+$wfhMissing = $method->invoke($service, 2, '2026-04-20', '2026-04-26', []);
+assertSameValue([], $wfhMissing, 'WFH user has no missing absent dates');
+
+$inactiveMissing = $method->invoke($service, 3, '2026-04-20', '2026-04-26', []);
+assertSameValue([], $inactiveMissing, 'inactive user has no missing absent dates');
+
+echo "PayrollService regression fixtures passed." . PHP_EOL;
