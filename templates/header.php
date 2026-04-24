@@ -221,7 +221,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         @media (max-width: 1024px) {
             .content-area {
                 margin-left: 0;
-                padding-top: 64px;
+                padding-top: calc(4rem + env(safe-area-inset-top, 0px));
                 padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); /* space for mobile bottom nav */
             }
         }
@@ -492,7 +492,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
 </aside>
 
 <!-- Mobile Header -->
-<header class="lg:hidden fixed top-0 left-0 right-0 h-16 bg-slate-900/90 backdrop-blur-xl border-b border-white/10 z-40 flex items-center justify-between px-4">
+<header class="lg:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 bg-slate-900/90 backdrop-blur-xl border-b border-white/10 pt-[env(safe-area-inset-top,0px)] min-h-[calc(4rem+env(safe-area-inset-top,0px))]">
     <button id="mobileMenuBtn" class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-white">
         <i class="fas fa-bars"></i>
     </button>
@@ -510,9 +510,9 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
 </header>
 
 <!-- Mobile Sidebar -->
-<div id="mobileSidebar" class="lg:hidden fixed inset-0 z-50 hidden">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeMobileMenu()"></div>
-    <aside class="sidebar absolute left-0 top-0 w-[280px] h-full overflow-y-auto transform transition-transform">
+<div id="mobileSidebar" class="lg:hidden fixed inset-0 z-50 hidden overflow-y-auto overscroll-contain">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm overscroll-contain" onclick="closeMobileMenu()"></div>
+    <aside class="sidebar absolute left-0 top-0 w-[280px] h-full overflow-y-auto overscroll-contain transform transition-transform pt-[env(safe-area-inset-top,0px)]">
         <div class="p-6">
             <div class="flex items-center justify-between mb-6">
                 <a href="/" class="flex items-center gap-3">
@@ -580,12 +580,14 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
 <script>
 function openMobileMenu() {
     document.getElementById('mobileSidebar').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
+    if (typeof uiLockBodyScroll === 'function') uiLockBodyScroll(true);
+    else document.body.style.overflow = 'hidden';
 }
 
 function closeMobileMenu() {
     document.getElementById('mobileSidebar').classList.add('hidden');
-    document.body.style.overflow = '';
+    if (typeof uiLockBodyScroll === 'function') uiLockBodyScroll(false);
+    else document.body.style.overflow = '';
 }
 
 document.getElementById('mobileMenuBtn')?.addEventListener('click', openMobileMenu);
