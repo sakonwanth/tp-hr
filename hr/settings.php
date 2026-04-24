@@ -514,8 +514,8 @@ foreach ($workShifts as $_ws) {
 </div>
 
 <!-- Edit Leave Type Modal -->
-<div id="editLeaveTypeModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center">
-    <div class="glass-card rounded-2xl p-6 w-full max-w-md m-4">
+<div id="editLeaveTypeModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
+    <div class="glass-card rounded-2xl p-6 w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-white">แก้ไขประเภทการลา</h3>
             <button onclick="closeModal('editLeaveTypeModal')" class="text-slate-400 hover:text-white">
@@ -569,11 +569,22 @@ function editLeaveType(lt) {
     document.getElementById('edit_default_days').value = lt.default_days_per_year;
     document.getElementById('edit_is_paid').checked = lt.is_paid == 1;
     document.getElementById('edit_is_active').checked = lt.is_active == 1;
-    document.getElementById('editLeaveTypeModal').classList.remove('hidden');
+    if (typeof uiOpenModal === 'function') uiOpenModal('editLeaveTypeModal');
+    else {
+        const m = document.getElementById('editLeaveTypeModal');
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+    }
 }
 
 function closeModal(id) {
-    document.getElementById(id).classList.add('hidden');
+    if (typeof uiCloseModal === 'function') uiCloseModal(id);
+    else {
+        const m = document.getElementById(id);
+        if (!m) return;
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+    }
 }
 </script>
 

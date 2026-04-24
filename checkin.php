@@ -702,7 +702,8 @@ function startCheckin(type) {
         icon.className = 'fas fa-sign-out-alt text-blue-400 text-3xl';
     }
     
-    modal.classList.remove('hidden');
+    if (typeof uiOpenModal === 'function') uiOpenModal('checkin-modal');
+    else modal.classList.remove('hidden');
     startCamera();
     getLocation();
 }
@@ -710,7 +711,8 @@ function startCheckin(type) {
 // Close modal
 function closeCheckinModal() {
     const modal = document.getElementById('checkin-modal');
-    modal.classList.add('hidden');
+    if (typeof uiCloseModal === 'function') uiCloseModal('checkin-modal');
+    else modal.classList.add('hidden');
     stopCamera();
     resetModal();
 }
@@ -860,12 +862,13 @@ async function confirmCheckin(outsideReason = null) {
 function openOffsiteModal(infoMsg = null) {
     if (infoMsg) document.getElementById('offsite-info').textContent = infoMsg;
     document.getElementById('offsite-reason').value = '';
-    const modal = document.getElementById('offsite-modal');
-    modal.classList.remove('hidden');
+    if (typeof uiOpenModal === 'function') uiOpenModal('offsite-modal');
+    else document.getElementById('offsite-modal').classList.remove('hidden');
     setTimeout(() => document.getElementById('offsite-reason').focus(), 300);
 }
 function closeOffsiteModal() {
-    document.getElementById('offsite-modal').classList.add('hidden');
+    if (typeof uiCloseModal === 'function') uiCloseModal('offsite-modal');
+    else document.getElementById('offsite-modal').classList.add('hidden');
 }
 function submitOffsite() {
     const reason = document.getElementById('offsite-reason').value.trim();

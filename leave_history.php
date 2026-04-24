@@ -318,8 +318,8 @@ include 'templates/header.php';
 </div>
 
 <!-- Detail Modal -->
-<div id="detail-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-    <div class="glass-card rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+<div id="detail-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
+    <div class="glass-card rounded-2xl w-full max-w-lg my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <div class="p-6">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="text-xl font-bold text-white">รายละเอียดคำขอลา</h3>
@@ -341,7 +341,8 @@ async function viewDetail(id) {
     const modal = document.getElementById('detail-modal');
     const content = document.getElementById('detail-content');
     
-    modal.classList.remove('hidden');
+    if (typeof uiOpenModal === 'function') uiOpenModal('detail-modal');
+    else modal.classList.remove('hidden');
     content.innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-white/30"></i></div>';
     
     try {
@@ -426,7 +427,8 @@ async function viewDetail(id) {
 }
 
 function closeModal() {
-    document.getElementById('detail-modal').classList.add('hidden');
+    if (typeof uiCloseModal === 'function') uiCloseModal('detail-modal');
+    else document.getElementById('detail-modal').classList.add('hidden');
 }
 
 async function cancelRequest(id) {

@@ -283,8 +283,8 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <!-- Complete Modal -->
-<div id="complete-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-    <div class="glass-card rounded-2xl w-full max-w-md">
+<div id="complete-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
+    <div class="glass-card rounded-2xl w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <form id="complete-form" class="p-6" enctype="multipart/form-data">
             <h3 class="text-xl font-bold text-white mb-4">จัดทำเอกสารเสร็จสิ้น</h3>
             <input type="hidden" name="request_id" id="complete-request-id">
@@ -309,8 +309,8 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <!-- Reject Modal -->
-<div id="reject-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-    <div class="glass-card rounded-2xl w-full max-w-md">
+<div id="reject-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
+    <div class="glass-card rounded-2xl w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <form id="reject-form" class="p-6">
             <h3 class="text-xl font-bold text-white mb-4">ปฏิเสธคำขอเอกสาร</h3>
             <input type="hidden" name="request_id" id="reject-request-id">
@@ -349,11 +349,21 @@ function completeDoc(id) {
     document.getElementById('complete-request-id').value = id;
     document.getElementById('complete-file').value = '';
     document.getElementById('complete-note').value = '';
-    document.getElementById('complete-modal').classList.remove('hidden');
+    if (typeof uiOpenModal === 'function') uiOpenModal('complete-modal');
+    else {
+        const m = document.getElementById('complete-modal');
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+    }
 }
 
 function closeCompleteModal() {
-    document.getElementById('complete-modal').classList.add('hidden');
+    if (typeof uiCloseModal === 'function') uiCloseModal('complete-modal');
+    else {
+        const m = document.getElementById('complete-modal');
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+    }
 }
 
 document.getElementById('complete-form').addEventListener('submit', async function(e) {
@@ -377,11 +387,21 @@ document.getElementById('complete-form').addEventListener('submit', async functi
 function rejectDoc(id) {
     document.getElementById('reject-request-id').value = id;
     document.getElementById('reject-reason').value = '';
-    document.getElementById('reject-modal').classList.remove('hidden');
+    if (typeof uiOpenModal === 'function') uiOpenModal('reject-modal');
+    else {
+        const m = document.getElementById('reject-modal');
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+    }
 }
 
 function closeRejectModal() {
-    document.getElementById('reject-modal').classList.add('hidden');
+    if (typeof uiCloseModal === 'function') uiCloseModal('reject-modal');
+    else {
+        const m = document.getElementById('reject-modal');
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+    }
 }
 
 document.getElementById('reject-form').addEventListener('submit', async function(e) {

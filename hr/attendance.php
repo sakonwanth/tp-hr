@@ -521,8 +521,8 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <!-- Edit Modal -->
-<div id="edit-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-    <div class="glass-card rounded-2xl w-full max-w-md">
+<div id="edit-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
+    <div class="glass-card rounded-2xl w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <form id="edit-form" class="p-6">
             <h3 class="text-xl font-bold text-white mb-4">แก้ไขเวลาทำงาน</h3>
             <input type="hidden" name="user_id" id="edit-user-id">
@@ -532,10 +532,14 @@ include dirname(__DIR__) . '/templates/header.php';
             <div class="grid grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="block text-white/80 text-sm mb-2">เวลาเข้างาน</label>
+                    <select id="edit-check-in-select" data-ios-time-select-for="edit-check-in"
+                            class="hidden w-full input-field"></select>
                     <input type="time" name="check_in_time" id="edit-check-in" class="input-field">
                 </div>
                 <div>
                     <label class="block text-white/80 text-sm mb-2">เวลาออกงาน</label>
+                    <select id="edit-check-out-select" data-ios-time-select-for="edit-check-out"
+                            class="hidden w-full input-field"></select>
                     <input type="time" name="check_out_time" id="edit-check-out" class="input-field">
                 </div>
             </div>
@@ -555,8 +559,8 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <!-- Location Modal -->
-<div id="location-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-    <div class="glass-card rounded-2xl w-full max-w-lg">
+<div id="location-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
+    <div class="glass-card rounded-2xl w-full max-w-lg my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <div class="p-4">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-bold text-white">ตำแหน่ง Check-in</h3>
@@ -575,8 +579,8 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div id="delete-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-    <div class="glass-card rounded-2xl w-full max-w-md">
+<div id="delete-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
+    <div class="glass-card rounded-2xl w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <form id="delete-form" class="p-6">
             <div class="flex items-center gap-3 mb-4">
                 <div class="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center text-red-400">
@@ -605,8 +609,8 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <!-- History Modal -->
-<div id="history-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-    <div class="glass-card rounded-2xl w-full max-w-3xl max-h-[85vh] flex flex-col">
+<div id="history-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
+    <div class="glass-card rounded-2xl w-full max-w-3xl my-auto max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden">
         <div class="p-6 border-b border-white/10 flex items-center justify-between">
             <div>
                 <h3 class="text-xl font-bold text-white">ประวัติการแก้ไขเวลาทำงาน</h3>
@@ -629,6 +633,28 @@ include dirname(__DIR__) . '/templates/header.php';
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
+function syncEditTimeSelectFromInput(inputId) {
+    const input = document.getElementById(inputId);
+    const sel = document.querySelector('select[data-ios-time-select-for="' + inputId + '"]');
+    if (!input || !sel || sel.classList.contains('hidden')) return;
+    const v = input.value || '';
+    if (v && [...sel.options].some(o => o.value === v)) sel.value = v;
+}
+
+function syncEditTimeInputFromSelect(inputId) {
+    const input = document.getElementById(inputId);
+    const sel = document.querySelector('select[data-ios-time-select-for="' + inputId + '"]');
+    if (!input || !sel || sel.classList.contains('hidden')) return;
+    input.value = sel.value || '';
+}
+
+(function initEditAttendanceTimeSync() {
+    ['edit-check-in', 'edit-check-out'].forEach(id => {
+        const sel = document.querySelector('select[data-ios-time-select-for="' + id + '"]');
+        if (sel) sel.addEventListener('change', () => syncEditTimeInputFromSelect(id));
+    });
+})();
+
 function editAttendance(userId, date, attendanceId, checkIn, checkOut) {
     document.getElementById('edit-user-id').value = userId;
     document.getElementById('edit-date').value = date;
@@ -636,7 +662,14 @@ function editAttendance(userId, date, attendanceId, checkIn, checkOut) {
     document.getElementById('edit-check-in').value = checkIn || '';
     document.getElementById('edit-check-out').value = checkOut || '';
     document.getElementById('edit-note').value = '';
-    document.getElementById('edit-modal').classList.remove('hidden');
+    syncEditTimeSelectFromInput('edit-check-in');
+    syncEditTimeSelectFromInput('edit-check-out');
+    if (typeof uiOpenModal === 'function') uiOpenModal('edit-modal');
+    else {
+        const m = document.getElementById('edit-modal');
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+    }
 }
 
 function deleteAttendance(userId, date, empName) {
@@ -644,14 +677,29 @@ function deleteAttendance(userId, date, empName) {
     document.getElementById('delete-date').value = date;
     document.getElementById('delete-note').value = '';
     document.getElementById('delete-subtitle').textContent = empName + ' — ' + date;
-    document.getElementById('delete-modal').classList.remove('hidden');
+    if (typeof uiOpenModal === 'function') uiOpenModal('delete-modal');
+    else {
+        const m = document.getElementById('delete-modal');
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+    }
 }
 function closeDeleteModal() {
-    document.getElementById('delete-modal').classList.add('hidden');
+    if (typeof uiCloseModal === 'function') uiCloseModal('delete-modal');
+    else {
+        const m = document.getElementById('delete-modal');
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+    }
 }
 
 function closeEditModal() {
-    document.getElementById('edit-modal').classList.add('hidden');
+    if (typeof uiCloseModal === 'function') uiCloseModal('edit-modal');
+    else {
+        const m = document.getElementById('edit-modal');
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+    }
 }
 
 document.getElementById('edit-form').addEventListener('submit', async function(e) {
@@ -663,6 +711,8 @@ document.getElementById('edit-form').addEventListener('submit', async function(e
         return;
     }
     
+    syncEditTimeInputFromSelect('edit-check-in');
+    syncEditTimeInputFromSelect('edit-check-out');
     const ci = document.getElementById('edit-check-in').value;
     const co = document.getElementById('edit-check-out').value;
     if (!ci && !co) {
@@ -717,7 +767,12 @@ document.getElementById('delete-form').addEventListener('submit', async function
 
 let map, marker;
 function viewLocation(lat, lng) {
-    document.getElementById('location-modal').classList.remove('hidden');
+    if (typeof uiOpenModal === 'function') uiOpenModal('location-modal');
+    else {
+        const m = document.getElementById('location-modal');
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+    }
     document.getElementById('map-link').href = 'https://www.google.com/maps?q=' + lat + ',' + lng;
     
     setTimeout(() => {
@@ -736,7 +791,12 @@ function viewLocation(lat, lng) {
 }
 
 function closeLocationModal() {
-    document.getElementById('location-modal').classList.add('hidden');
+    if (typeof uiCloseModal === 'function') uiCloseModal('location-modal');
+    else {
+        const m = document.getElementById('location-modal');
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+    }
 }
 
 document.getElementById('edit-modal').addEventListener('click', e => { if (e.target === document.getElementById('edit-modal')) closeEditModal(); });
@@ -745,7 +805,12 @@ document.getElementById('history-modal').addEventListener('click', e => { if (e.
 document.getElementById('delete-modal').addEventListener('click', e => { if (e.target === document.getElementById('delete-modal')) closeDeleteModal(); });
 
 function closeHistoryModal() {
-    document.getElementById('history-modal').classList.add('hidden');
+    if (typeof uiCloseModal === 'function') uiCloseModal('history-modal');
+    else {
+        const m = document.getElementById('history-modal');
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+    }
 }
 
 function fmtVal(v) {
@@ -769,7 +834,12 @@ function diffRow(label, oldV, newV) {
 async function viewHistory(userId, date, empName) {
     document.getElementById('history-subtitle').textContent = empName + ' — ' + date;
     document.getElementById('history-body').innerHTML = '<div class="text-center text-white/60 py-8"><i class="fas fa-spinner fa-spin text-2xl"></i></div>';
-    document.getElementById('history-modal').classList.remove('hidden');
+    if (typeof uiOpenModal === 'function') uiOpenModal('history-modal');
+    else {
+        const m = document.getElementById('history-modal');
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+    }
 
     try {
         const res = await fetch('/api/attendance.php?action=adjustment_history&user_id=' + encodeURIComponent(userId) + '&date=' + encodeURIComponent(date));

@@ -334,8 +334,8 @@ include dirname(__DIR__) . '/templates/header.php';
 <?php endif; ?>
 
 <!-- Reject Modal -->
-<div id="reject-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-    <div class="glass-card rounded-2xl w-full max-w-md">
+<div id="reject-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
+    <div class="glass-card rounded-2xl w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <form id="reject-form" class="p-6">
             <h3 class="text-xl font-bold text-white mb-4">ไม่อนุมัติคำขอลา</h3>
             <input type="hidden" name="request_id" id="reject-request-id">
@@ -388,11 +388,21 @@ async function approveLeave(id) {
 function rejectLeave(id) {
     document.getElementById('reject-request-id').value = id;
     document.getElementById('reject-reason').value = '';
-    document.getElementById('reject-modal').classList.remove('hidden');
+    if (typeof uiOpenModal === 'function') uiOpenModal('reject-modal');
+    else {
+        const m = document.getElementById('reject-modal');
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+    }
 }
 
 function closeRejectModal() {
-    document.getElementById('reject-modal').classList.add('hidden');
+    if (typeof uiCloseModal === 'function') uiCloseModal('reject-modal');
+    else {
+        const m = document.getElementById('reject-modal');
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+    }
 }
 
 document.getElementById('reject-form').addEventListener('submit', async function(e) {

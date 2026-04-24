@@ -315,8 +315,8 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <!-- Reject Modal -->
-<div id="reject-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-    <div class="glass-card rounded-2xl w-full max-w-md">
+<div id="reject-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
+    <div class="glass-card rounded-2xl w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <form method="POST" class="p-6">
             <?php echo csrfField(); ?>
             <input type="hidden" name="action" value="reject">
@@ -344,10 +344,12 @@ include dirname(__DIR__) . '/templates/header.php';
 function openRejectModal(id, name) {
     document.getElementById('reject-request-id').value = id;
     document.getElementById('reject-label').textContent = 'คำขอของ ' + name;
-    document.getElementById('reject-modal').classList.remove('hidden');
+    if (typeof uiOpenModal === 'function') uiOpenModal('reject-modal');
+    else document.getElementById('reject-modal').classList.remove('hidden');
 }
 function closeRejectModal() {
-    document.getElementById('reject-modal').classList.add('hidden');
+    if (typeof uiCloseModal === 'function') uiCloseModal('reject-modal');
+    else document.getElementById('reject-modal').classList.add('hidden');
 }
 document.getElementById('reject-modal').addEventListener('click', function(e) {
     if (e.target === this) closeRejectModal();

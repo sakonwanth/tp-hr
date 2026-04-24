@@ -336,8 +336,8 @@ include __DIR__ . '/templates/header.php';
 </div>
 
 <!-- Change Day-Off Modal -->
-<div id="change-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-    <div class="glass-card rounded-2xl w-full max-w-md">
+<div id="change-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
+    <div class="glass-card rounded-2xl w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <form method="POST" class="p-6">
             <?php echo csrfField(); ?>
             <input type="hidden" name="action" value="request_change">
@@ -387,11 +387,13 @@ function openChangeModal(weekStart, weekEnd, weekNum) {
     document.getElementById('modal-week-start').value = weekStart;
     document.getElementById('modal-week-end').value = weekEnd;
     document.getElementById('modal-week-label').textContent = 'สัปดาห์ที่ ' + weekNum + ' (' + weekStart + ' - ' + weekEnd + ')';
-    document.getElementById('change-modal').classList.remove('hidden');
+    if (typeof uiOpenModal === 'function') uiOpenModal('change-modal');
+    else document.getElementById('change-modal').classList.remove('hidden');
 }
 
 function closeChangeModal() {
-    document.getElementById('change-modal').classList.add('hidden');
+    if (typeof uiCloseModal === 'function') uiCloseModal('change-modal');
+    else document.getElementById('change-modal').classList.add('hidden');
 }
 
 document.getElementById('change-modal').addEventListener('click', function(e) {
