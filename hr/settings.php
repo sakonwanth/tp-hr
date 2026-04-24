@@ -237,13 +237,15 @@ foreach ($workShifts as $_ws) {
             
             <div>
                 <label class="block text-slate-400 text-sm mb-2">เวลาเริ่มงานมาตรฐาน</label>
-                <input type="time" name="settings[default_work_start]" class="input-field" 
+                <select data-ios-time-select-for="settings-default-work-start" class="hidden w-full input-field"></select>
+                <input type="time" name="settings[default_work_start]" id="settings-default-work-start" class="input-field"
                        value="<?php echo htmlspecialchars($settings['default_work_start'] ?? '08:30'); ?>">
             </div>
             
             <div>
                 <label class="block text-slate-400 text-sm mb-2">เวลาเลิกงานมาตรฐาน</label>
-                <input type="time" name="settings[default_work_end]" class="input-field" 
+                <select data-ios-time-select-for="settings-default-work-end" class="hidden w-full input-field"></select>
+                <input type="time" name="settings[default_work_end]" id="settings-default-work-end" class="input-field"
                        value="<?php echo htmlspecialchars($settings['default_work_end'] ?? '17:30'); ?>">
             </div>
             
@@ -595,6 +597,7 @@ function closeModal(id) {
     
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <?php foreach ($workShifts as $shift): ?>
+        <?php $shiftRowId = (int)$shift['id']; ?>
         <div class="bg-slate-800/50 border border-white/10 rounded-xl p-4">
             <div class="flex items-center justify-between mb-3">
                 <div>
@@ -614,12 +617,14 @@ function closeModal(id) {
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-slate-500 text-xs mb-1">เวลาเริ่ม</label>
-                        <input type="time" name="start_time" class="input-field text-sm" 
+                        <select data-ios-time-select-for="shift-<?php echo $shiftRowId; ?>-start" class="hidden w-full input-field text-sm"></select>
+                        <input type="time" name="start_time" id="shift-<?php echo $shiftRowId; ?>-start" class="input-field text-sm"
                                value="<?php echo substr($shift['start_time'], 0, 5); ?>">
                     </div>
                     <div>
                         <label class="block text-slate-500 text-xs mb-1">เวลาสิ้นสุด</label>
-                        <input type="time" name="end_time" class="input-field text-sm" 
+                        <select data-ios-time-select-for="shift-<?php echo $shiftRowId; ?>-end" class="hidden w-full input-field text-sm"></select>
+                        <input type="time" name="end_time" id="shift-<?php echo $shiftRowId; ?>-end" class="input-field text-sm"
                                value="<?php echo substr($shift['end_time'], 0, 5); ?>">
                     </div>
                 </div>

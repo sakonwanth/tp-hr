@@ -218,11 +218,30 @@ function uiInitIOSTimePickerFallback(stepMinutes = 15) {
         const opts = uiBuildTimeOptions(stepMinutes);
         sel.innerHTML = opts.map(t => `<option value="${t}">${t}</option>`).join('');
         sel.value = current;
+        input.value = sel.value || '';
 
         input.classList.add('hidden');
         sel.classList.remove('hidden');
+
+        sel.addEventListener('change', () => {
+            input.value = sel.value || '';
+        });
     });
 }
+
+/** Sync iOS fallback selects into their target time inputs before native form POST. */
+function uiSyncIOSTimeSelectsToInputs() {
+    document.querySelectorAll('select[data-ios-time-select-for]').forEach(sel => {
+        if (sel.classList.contains('hidden')) return;
+        const inputId = sel.getAttribute('data-ios-time-select-for');
+        const input = inputId && document.getElementById(inputId);
+        if (input) input.value = sel.value || '';
+    });
+}
+
+document.addEventListener('submit', () => {
+    uiSyncIOSTimeSelectsToInputs();
+}, true);
 
 document.addEventListener('DOMContentLoaded', () => {
     uiInitIOSTimePickerFallback(15);
