@@ -13,11 +13,12 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#7c3aed">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="TP-HR">
     <meta name="csrf-token" content="<?php echo csrfToken(); ?>">
     <title><?php echo htmlspecialchars($page_title ?? 'TP-HR'); ?> - TP-HR</title>
     <link rel="manifest" href="/manifest.webmanifest">
