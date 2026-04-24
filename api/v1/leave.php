@@ -14,6 +14,8 @@
  *   POST /api/v1/leave/{id}/cancel                    scope: leave.write
  *        body: { user_id } (must match request owner)
  */
+require_once BASE_PATH . '/core/CrmLineNotifierBridge.php';
+
 $method = ApiAuth::requireMethod(['GET', 'POST']);
 $pdo = getDB();
 $id = isset($segments[1]) ? (int)$segments[1] : 0;
@@ -116,7 +118,10 @@ if ($id <= 0) {
     }
     if ($reqNum === null) ApiAuth::fail(500, 'Failed to generate unique request number');
 
-    ApiAuth::success(['data' => ['id' => (int)$pdo->lastInsertId(), 'request_number' => $reqNum]], 201);
+    $newId = (int)$pdo->lastInsertId();
+    crm_line_notify_new_leave($pdo, $newId);
+
+    ApiAuth::success(['data' => ['id' => $newId, 'request_number' => $reqNum]], 201);
 }
 
 // Actions (require at least read scope to probe; real scope enforced per-action below)
@@ -170,6 +175,12 @@ if (in_array('REJECTED', [$st['approver_1_status'], $st['approver_2_status'], $s
 }
 if ($overall !== $cur['status']) {
     $pdo->prepare("UPDATE hr_leave_requests SET status=? WHERE id=?")->execute([$overall, $id]);
+    if ($overall === 'APPROVED') {
+        crm_line_sync_approved_leave_attendance($pdo, $id, $approverId, 'api-v1');
+        crm_line_notify_leave_decision($pdo, $id, 'APPROVED', $remarks);
+    } elseif ($overall === 'REJECTED') {
+        crm_line_notify_leave_decision($pdo, $id, 'REJECTED', $remarks);
+    }
 }
 
 ApiAuth::success(['data' => ['id' => $id, 'level' => $level, 'step_status' => $newStepStatus, 'overall_status' => $overall]]);

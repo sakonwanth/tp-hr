@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once BASE_PATH . '/core/CrmLineNotifierBridge.php';
 
 header('Content-Type: application/json');
 
@@ -478,6 +479,8 @@ function createLeaveRequest($pdo, $user) {
         ]);
         
         $pdo->commit();
+
+        crm_line_notify_new_leave($pdo, (int)$requestId);
         
         echo json_encode([
             'success' => true,
@@ -595,12 +598,17 @@ function approveLeaveRequest($pdo, $user) {
             date('Y', strtotime($request['start_date']))
         ]);
         
+        $actorName = trim(($user['first_name_th'] ?? '') . ' ' . ($user['last_name_th'] ?? '')) ?: ($user['username'] ?? 'system');
+        crm_line_sync_approved_leave_attendance($pdo, (int)$requestId, (int)$user['id'], $actorName);
+
         // Log action
         Auth::log('leave_approve', 'hr_leave_requests', $requestId, null, [
             'request_number' => $request['request_number']
         ]);
         
         $pdo->commit();
+
+        crm_line_notify_leave_decision($pdo, (int)$requestId, 'APPROVED', $comment);
         
         echo json_encode(['success' => true, 'message' => 'อนุมัติคำขอลาสำเร็จ']);
         
@@ -674,6 +682,8 @@ function rejectLeaveRequest($pdo, $user) {
         ]);
         
         $pdo->commit();
+
+        crm_line_notify_leave_decision($pdo, (int)$requestId, 'REJECTED', $reason);
         
         echo json_encode(['success' => true, 'message' => 'ไม่อนุมัติคำขอลาสำเร็จ']);
         
