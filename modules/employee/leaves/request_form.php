@@ -121,9 +121,9 @@ $leave_types_form = $stmt->fetchAll();
                     เอกสารประกอบ
                     <span class="text-white/50 text-xs" id="doc-required-label">(ถ้ามี)</span>
                 </label>
-                <div class="border-2 border-dashed border-white/20 rounded-lg p-6 text-center hover:border-violet-500/50 transition-colors">
+                <div class="border-2 border-dashed border-white/20 rounded-lg p-4 sm:p-6 text-center hover:border-violet-500/50 transition-colors">
                     <input type="file" name="document" id="document" class="hidden" accept=".pdf,.jpg,.jpeg,.png">
-                    <label for="document" class="cursor-pointer">
+                    <label for="document" class="touch-manipulation cursor-pointer flex flex-col items-center justify-center min-h-[52px] py-2">
                         <i class="fas fa-cloud-upload-alt text-3xl text-white/30 mb-2"></i>
                         <p class="text-white/60 text-sm">คลิกเพื่ออัปโหลดเอกสาร</p>
                         <p class="text-white/40 text-xs mt-1">PDF, JPG, PNG (ไม่เกิน 5MB)</p>
@@ -133,12 +133,12 @@ $leave_types_form = $stmt->fetchAll();
             </div>
             
             <!-- Buttons -->
-            <div class="flex flex-col md:flex-row gap-3">
-                <a href="leave.php" class="flex-1 min-h-[44px] py-3 bg-white/10 hover:bg-white/20 text-white text-center rounded-xl transition-colors">
+            <div class="flex flex-col-reverse md:flex-row gap-3">
+                <a href="leave.php" class="touch-manipulation flex-1 min-h-[48px] inline-flex items-center justify-center py-3 bg-white/10 hover:bg-white/20 text-white text-center rounded-xl transition-colors">
                     ยกเลิก
                 </a>
-                <button type="submit" class="flex-1 min-h-[44px] py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors font-semibold">
-                    <i class="fas fa-paper-plane mr-2"></i>ส่งคำขอลา
+                <button type="submit" class="touch-manipulation flex-1 min-h-[48px] inline-flex items-center justify-center gap-2 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors font-semibold">
+                    <i class="fas fa-paper-plane"></i><span>ส่งคำขอลา</span>
                 </button>
             </div>
         </form>

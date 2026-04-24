@@ -209,6 +209,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             border-radius: 10px;
             color: #fff;
             transition: all 0.2s ease;
+            touch-action: manipulation;
         }
         
         .input-field:focus {
