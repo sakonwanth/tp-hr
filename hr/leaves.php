@@ -178,7 +178,93 @@ include dirname(__DIR__) . '/templates/header.php';
         <p class="text-white/60">ไม่พบคำขอลา</p>
     </div>
     <?php else: ?>
-    <div class="overflow-x-auto">
+    <!-- Mobile-first: card list (desktop keeps table) -->
+    <div class="lg:hidden p-3 space-y-3">
+        <?php
+        $statusColors = [
+            'PENDING' => 'bg-yellow-500/15 border border-yellow-500/30 text-yellow-200',
+            'APPROVED' => 'bg-green-500/15 border border-green-500/30 text-green-200',
+            'REJECTED' => 'bg-red-500/15 border border-red-500/30 text-red-200',
+            'CANCELLED' => 'bg-slate-500/15 border border-slate-500/30 text-slate-200'
+        ];
+        $statusText = [
+            'PENDING' => 'รออนุมัติ',
+            'APPROVED' => 'อนุมัติ',
+            'REJECTED' => 'ไม่อนุมัติ',
+            'CANCELLED' => 'ยกเลิก'
+        ];
+        ?>
+        <?php foreach ($requests as $req): ?>
+        <?php
+        $fullName = trim((string)($req['first_name_th'] ?? '') . ' ' . (string)($req['last_name_th'] ?? ''));
+        $empCode = (string)($req['employee_code'] ?? '');
+        $dept = (string)($req['department'] ?? '-');
+        $leaveName = (string)($req['leave_type_name'] ?? 'ลา');
+        $color = (string)($req['color_code'] ?? '#a78bfa');
+        $days = number_format((float)($req['total_days'] ?? 0), 1);
+        $dateLabel = formatDateThai($req['start_date']);
+        if (($req['start_date'] ?? '') !== ($req['end_date'] ?? '')) {
+            $dateLabel .= ' - ' . formatDateThai($req['end_date']);
+        }
+        $reason = trim((string)($req['reason'] ?? ''));
+        $statusKey = (string)($req['status'] ?? 'PENDING');
+        $chipCls = $statusColors[$statusKey] ?? 'bg-white/5 border border-white/10 text-white/70';
+        $chipText = $statusText[$statusKey] ?? $statusKey;
+        ?>
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+            <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                    <div class="text-white font-semibold truncate"><?php echo htmlspecialchars($fullName); ?></div>
+                    <div class="text-white/50 text-xs truncate"><?php echo htmlspecialchars($empCode); ?> · <?php echo htmlspecialchars($dept); ?></div>
+                </div>
+                <span class="shrink-0 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold <?php echo $chipCls; ?>">
+                    <?php echo htmlspecialchars($chipText); ?>
+                </span>
+            </div>
+
+            <div class="mt-3 flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full" style="background-color: <?php echo htmlspecialchars($color); ?>"></span>
+                <span class="text-white/90 font-semibold text-sm"><?php echo htmlspecialchars($leaveName); ?></span>
+                <span class="text-white/50 text-xs">·</span>
+                <span class="text-white/70 text-xs"><?php echo htmlspecialchars($days); ?> วัน</span>
+            </div>
+
+            <div class="mt-2 rounded-xl bg-black/20 border border-white/10 px-3 py-2">
+                <div class="text-[11px] text-white/50">ช่วงวันที่ลา</div>
+                <div class="text-white font-semibold text-sm"><?php echo htmlspecialchars($dateLabel); ?></div>
+            </div>
+
+            <?php if ($reason !== ''): ?>
+            <div class="mt-3 text-white/70 text-xs line-clamp-2">
+                <i class="fas fa-note-sticky text-white/40 mr-1"></i><?php echo htmlspecialchars($reason); ?>
+            </div>
+            <?php endif; ?>
+
+            <div class="grid grid-cols-2 gap-2 mt-4">
+                <?php if ($statusKey === 'PENDING'): ?>
+                <button type="button"
+                        onclick="approveLeave(<?php echo (int)$req['id']; ?>)"
+                        class="min-h-[44px] rounded-xl bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-100 text-sm font-semibold">
+                    <i class="fas fa-check mr-2"></i>อนุมัติ
+                </button>
+                <button type="button"
+                        onclick="rejectLeave(<?php echo (int)$req['id']; ?>)"
+                        class="min-h-[44px] rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-200 text-sm font-semibold">
+                    <i class="fas fa-times mr-2"></i>ไม่อนุมัติ
+                </button>
+                <?php else: ?>
+                <button type="button"
+                        onclick="viewDetail(<?php echo (int)$req['id']; ?>)"
+                        class="col-span-2 min-h-[44px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold">
+                    <i class="fas fa-eye mr-2"></i>ดูรายละเอียด
+                </button>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+
+    <div class="hidden lg:block overflow-x-auto">
         <table class="w-full">
             <thead class="bg-white/5">
                 <tr>
