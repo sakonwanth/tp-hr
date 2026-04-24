@@ -51,18 +51,22 @@ function thaiDate(?string $d): string {
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ตรวจสอบความถูกต้องของเอกสาร</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body {
         font-family: 'Sarabun', sans-serif;
         background: #f1f5f9;
         color: #0f172a;
         min-height: 100vh;
+        min-height: 100dvh;
         display: flex; align-items: center; justify-content: center;
-        padding: 24px;
+        padding-top: max(24px, env(safe-area-inset-top, 0px));
+        padding-right: max(24px, env(safe-area-inset-right, 0px));
+        padding-bottom: max(24px, env(safe-area-inset-bottom, 0px));
+        padding-left: max(24px, env(safe-area-inset-left, 0px));
     }
     .card {
         max-width: 560px; width: 100%;

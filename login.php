@@ -121,13 +121,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="/assets/css/app.css">
     
     <style>
-        * { font-family: 'Kanit', sans-serif; }
+        * {
+            font-family: 'Kanit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
         
         body {
             min-height: 100vh;
+            min-height: 100dvh;
             position: relative;
             overflow-x: hidden;
             background: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: max(12px, env(safe-area-inset-top, 0px));
+            padding-right: max(12px, env(safe-area-inset-right, 0px));
+            padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+            padding-left: max(12px, env(safe-area-inset-left, 0px));
+        }
+
+        @media (min-width: 640px) {
+            body {
+                padding-top: max(16px, env(safe-area-inset-top, 0px));
+                padding-right: max(16px, env(safe-area-inset-right, 0px));
+                padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+                padding-left: max(16px, env(safe-area-inset-left, 0px));
+            }
+        }
+
+        @media (min-width: 1024px) {
+            body {
+                padding-top: max(24px, env(safe-area-inset-top, 0px));
+                padding-right: max(24px, env(safe-area-inset-right, 0px));
+                padding-bottom: max(24px, env(safe-area-inset-bottom, 0px));
+                padding-left: max(24px, env(safe-area-inset-left, 0px));
+            }
         }
 
         .bg-image {
@@ -257,7 +286,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-3 sm:p-4 lg:p-6">
+<body>
     <!-- Background Image -->
     <div class="bg-image"></div>
     
