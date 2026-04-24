@@ -34,6 +34,7 @@ rsync -avz --delete \
     --exclude='storage/documents/' \
     --exclude='storage/temp/' \
     --exclude='storage/logs/' \
+    --exclude='logs/' \
     --exclude='_work/' \
     --exclude='.DS_Store' \
     --exclude='node_modules/' \
