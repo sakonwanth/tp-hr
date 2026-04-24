@@ -224,6 +224,11 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
                 padding-top: calc(4rem + env(safe-area-inset-top, 0px));
                 padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); /* space for mobile bottom nav */
             }
+            /* Tables / wide blocks: less scroll “bleed” into the page behind */
+            .overflow-x-auto {
+                overscroll-behavior-x: contain;
+                -webkit-overflow-scrolling: touch;
+            }
         }
 
         @media (max-width: 640px) {

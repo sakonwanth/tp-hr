@@ -243,6 +243,25 @@ document.addEventListener('submit', () => {
     uiSyncIOSTimeSelectsToInputs();
 }, true);
 
+document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    const sidebar = document.getElementById('mobileSidebar');
+    if (sidebar && !sidebar.classList.contains('hidden')) {
+        if (typeof closeMobileMenu === 'function') closeMobileMenu();
+        e.preventDefault();
+        return;
+    }
+    if (typeof uiCloseModal !== 'function') return;
+    let closed = false;
+    document.querySelectorAll('div[id].fixed.inset-0').forEach((el) => {
+        if (el.id === 'mobileSidebar') return;
+        if (el.classList.contains('hidden')) return;
+        uiCloseModal(el.id);
+        closed = true;
+    });
+    if (closed) e.preventDefault();
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     uiInitIOSTimePickerFallback(15);
 });
