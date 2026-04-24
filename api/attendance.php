@@ -17,6 +17,11 @@ $pdo = getDB();
 $user = Auth::user();
 $method = $_SERVER['REQUEST_METHOD'];
 
+// Self-heal planned_start_time columns (mirror of tp-checkin)
+if (function_exists('ensurePlannedStartTimeColumns')) {
+    try { ensurePlannedStartTimeColumns($pdo); } catch (Throwable $e) { /* non-fatal */ }
+}
+
 // Handle requests
 if ($method === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
@@ -44,7 +49,15 @@ if ($method === 'POST') {
         case 'delete':
             handleDelete($pdo, $user, $input);
             break;
-            
+
+        case 'request_late_start':
+            handleLateStartRequest($pdo, $user, $input);
+            break;
+
+        case 'cancel_late_start':
+            cancelLateStartRequest($pdo, $user, $input);
+            break;
+
         default:
             apiError('Invalid action');
     }
@@ -790,5 +803,171 @@ function handleDelete(PDO $pdo, array $user, array $input): void {
         error_log('handleDelete exception: ' . $e->getMessage());
         apiError('เกิดข้อผิดพลาด: ' . $e->getMessage());
     }
+}
+
+/**
+ * POST action=request_late_start
+ * Mirror ของ tp-checkin/api/attendance.php — ใช้ table เดียวกัน (hr_attendances)
+ * Input: { target_date: Y-m-d, planned_start_time: HH:MM, reason: string }
+ */
+function handleLateStartRequest(PDO $pdo, array $user, array $input): void {
+    $target_date   = trim((string)($input['target_date'] ?? ''));
+    $planned_start = trim((string)($input['planned_start_time'] ?? ''));
+    $reason        = trim((string)($input['reason'] ?? ''));
+
+    if (!function_exists('canRequestLateStart') || !function_exists('validatePlannedStartTime')) {
+        apiError('ระบบแจ้งเข้างานสายยังไม่พร้อมใช้งาน', 503);
+    }
+
+    $canRequest = canRequestLateStart($pdo, $target_date);
+    if (!$canRequest['ok']) {
+        header('Content-Type: application/json');
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'error'   => $canRequest['message'],
+            'data'    => ['reason' => $canRequest['reason'], 'fallback' => $canRequest['fallback']],
+        ]);
+        exit;
+    }
+
+    if (mb_strlen($reason) < 5) {
+        apiError('กรุณาระบุเหตุผลอย่างน้อย 5 ตัวอักษร');
+    }
+
+    $shift = $pdo->query("SELECT id, name, start_time, end_time, grace_period_minutes FROM hr_work_shifts WHERE is_default = 1 AND is_active = 1 LIMIT 1")->fetch(PDO::FETCH_ASSOC) ?: null;
+    $timeCheck = validatePlannedStartTime($planned_start, $shift);
+    if (!$timeCheck['ok']) {
+        apiError($timeCheck['message']);
+    }
+
+    $stmt = $pdo->prepare("SELECT id, check_in_time FROM hr_attendances WHERE user_id = ? AND attendance_date = ? LIMIT 1");
+    $stmt->execute([$user['id'], $target_date]);
+    $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($existing && !empty($existing['check_in_time'])) {
+        apiError('ลงเวลาเข้างานวันดังกล่าวไปแล้ว — กรุณาใช้แบบฟอร์มขอแก้ไขเวลาเข้างานแทน');
+    }
+
+    try {
+        if ($existing) {
+            $stmt = $pdo->prepare("
+                UPDATE hr_attendances
+                SET planned_start_time = ?,
+                    planned_reason = ?,
+                    planned_requested_at = NOW(),
+                    planned_requested_by = ?,
+                    updated_at = NOW()
+                WHERE id = ?
+            ");
+            $stmt->execute([$planned_start . ':00', $reason, $user['id'], $existing['id']]);
+            $attendanceId = (int)$existing['id'];
+        } else {
+            $shift_id = $shift['id'] ?? null;
+            $stmt = $pdo->prepare("
+                INSERT INTO hr_attendances
+                    (user_id, attendance_date, shift_id,
+                     planned_start_time, planned_reason, planned_requested_at, planned_requested_by,
+                     created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, NOW(), ?, NOW(), NOW())
+            ");
+            $stmt->execute([$user['id'], $target_date, $shift_id, $planned_start . ':00', $reason, $user['id']]);
+            $attendanceId = (int)$pdo->lastInsertId();
+        }
+    } catch (PDOException $e) {
+        apiError('บันทึกคำขอไม่สำเร็จ: ' . $e->getMessage(), 500);
+    }
+
+    if (class_exists('Auth') && method_exists('Auth', 'log')) {
+        try {
+            Auth::log('REQUEST_LATE_START', 'hr_attendances', $attendanceId, [
+                'target_date'   => $target_date,
+                'planned_start' => $planned_start,
+                'reason'        => $reason,
+            ]);
+        } catch (Throwable $e) { /* non-fatal */ }
+    }
+
+    // LINE notification via CRM bridge (HR + Admin + Chairman + CEO)
+    if (is_file(__DIR__ . '/../core/CrmLineNotifierBridge.php')) {
+        try {
+            require_once __DIR__ . '/../core/CrmLineNotifierBridge.php';
+            if (function_exists('crm_line_notify_planned_late_request')) {
+                crm_line_notify_planned_late_request(
+                    $pdo, $user, $target_date, $planned_start . ':00', $reason, date('Y-m-d H:i:s')
+                );
+            }
+        } catch (Throwable $e) { error_log('notify_planned_late_request error: ' . $e->getMessage()); }
+    }
+
+    apiSuccess([
+        'attendance_id' => $attendanceId,
+        'target_date'   => $target_date,
+        'planned_start' => $planned_start,
+    ], sprintf('แจ้งเข้างานสายวันที่ %s เวลา %s เรียบร้อย', $target_date, $planned_start));
+}
+
+/**
+ * POST action=cancel_late_start
+ * Input: { target_date: Y-m-d }
+ */
+function cancelLateStartRequest(PDO $pdo, array $user, array $input): void {
+    $target_date = trim((string)($input['target_date'] ?? ''));
+
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $target_date)) {
+        apiError('รูปแบบวันที่ไม่ถูกต้อง');
+    }
+
+    $stmt = $pdo->prepare("SELECT id, check_in_time, planned_start_time FROM hr_attendances WHERE user_id = ? AND attendance_date = ? LIMIT 1");
+    $stmt->execute([$user['id'], $target_date]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$row || empty($row['planned_start_time'])) {
+        apiError('ไม่พบคำขอแจ้งเข้างานสายของวันดังกล่าว', 404);
+    }
+    if (!empty($row['check_in_time'])) {
+        apiError('ลงเวลาเข้างานไปแล้ว — ไม่สามารถยกเลิกได้');
+    }
+
+    if (function_exists('canRequestLateStart')) {
+        $canRequest = canRequestLateStart($pdo, $target_date);
+        if (!$canRequest['ok']) {
+            apiError($canRequest['message']);
+        }
+    }
+
+    try {
+        $stmt = $pdo->prepare("
+            UPDATE hr_attendances
+            SET planned_start_time = NULL,
+                planned_reason = NULL,
+                planned_requested_at = NULL,
+                planned_requested_by = NULL,
+                updated_at = NOW()
+            WHERE id = ?
+        ");
+        $stmt->execute([$row['id']]);
+    } catch (PDOException $e) {
+        apiError('ยกเลิกคำขอไม่สำเร็จ: ' . $e->getMessage(), 500);
+    }
+
+    if (class_exists('Auth') && method_exists('Auth', 'log')) {
+        try {
+            Auth::log('CANCEL_LATE_START', 'hr_attendances', (int)$row['id'], [
+                'target_date' => $target_date,
+            ]);
+        } catch (Throwable $e) { /* non-fatal */ }
+    }
+
+    if (is_file(__DIR__ . '/../core/CrmLineNotifierBridge.php')) {
+        try {
+            require_once __DIR__ . '/../core/CrmLineNotifierBridge.php';
+            if (function_exists('crm_line_notify_planned_late_cancelled')) {
+                crm_line_notify_planned_late_cancelled($pdo, $user, $target_date, $row['planned_start_time'] ?? null);
+            }
+        } catch (Throwable $e) { error_log('notify_planned_late_cancelled error: ' . $e->getMessage()); }
+    }
+
+    apiSuccess([], 'ยกเลิกคำขอแจ้งเข้างานสายเรียบร้อย');
 }
 

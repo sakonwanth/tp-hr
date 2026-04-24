@@ -432,3 +432,142 @@ if (!function_exists('shift_sanitize_name_on_save')) {
         return shift_base_name($name);
     }
 }
+
+/**
+ * =============================================================================
+ * Planned Late Start helpers — mirror ของ tp-checkin/core/Helpers.php
+ * =============================================================================
+ * tp-hr/checkin.php ต้องมีฟีเจอร์ "แจ้งเข้างานสายล่วงหน้า" เหมือน tp-checkin
+ * โดย write ลง table เดียวกัน (hr_attendances.planned_start_time)
+ */
+if (!function_exists('ensurePlannedStartTimeColumns')) {
+    function ensurePlannedStartTimeColumns(PDO $pdo): void {
+        static $checked = false;
+        if ($checked) return;
+        $checked = true;
+
+        $flagDir  = sys_get_temp_dir() . '/tp_hr_schema';
+        if (!is_dir($flagDir)) @mkdir($flagDir, 0755, true);
+        $flagFile = $flagDir . '/hr_attendances_planned_start.ok';
+        if (file_exists($flagFile) && (time() - filemtime($flagFile)) < 86400) {
+            return;
+        }
+
+        try {
+            $hasCol = function (string $col) use ($pdo): bool {
+                $s = $pdo->prepare(
+                    "SELECT 1 FROM information_schema.COLUMNS
+                     WHERE TABLE_SCHEMA = DATABASE()
+                       AND TABLE_NAME   = 'hr_attendances'
+                       AND COLUMN_NAME  = ?"
+                );
+                $s->execute([$col]);
+                return (bool) $s->fetchColumn();
+            };
+
+            $cols = [
+                ['planned_start_time',   "TIME NULL DEFAULT NULL",         'shift_id'],
+                ['planned_reason',       "VARCHAR(255) NULL DEFAULT NULL", 'planned_start_time'],
+                ['planned_requested_at', "DATETIME NULL DEFAULT NULL",     'planned_reason'],
+                ['planned_requested_by', "INT NULL DEFAULT NULL",          'planned_requested_at'],
+            ];
+            foreach ($cols as [$name, $def, $after]) {
+                if (!$hasCol($name)) {
+                    try { $pdo->exec("ALTER TABLE hr_attendances ADD COLUMN {$name} {$def} AFTER {$after}"); }
+                    catch (PDOException $e) { /* ignore */ }
+                }
+            }
+        } catch (Throwable $e) {
+            error_log('[tp-hr] ensurePlannedStartTimeColumns failed: ' . $e->getMessage());
+        }
+
+        @file_put_contents($flagFile, date('c'));
+    }
+}
+
+/**
+ * อ่าน system_settings (tp-crm shared table) — tp-hr เก็บ config ในตารางนี้ด้วย
+ */
+if (!function_exists('getSystemSetting')) {
+    function getSystemSetting(PDO $pdo, string $key, string $default = ''): string {
+        static $cache = [];
+        if (array_key_exists($key, $cache)) return $cache[$key];
+        try {
+            $stmt = $pdo->prepare("SELECT setting_value FROM system_settings WHERE setting_key = ? LIMIT 1");
+            $stmt->execute([$key]);
+            $val = $stmt->fetchColumn();
+            return $cache[$key] = ($val !== false && $val !== null) ? (string)$val : $default;
+        } catch (Throwable $e) {
+            return $cache[$key] = $default;
+        }
+    }
+}
+
+if (!function_exists('lateRequestCutoffHour')) {
+    function lateRequestCutoffHour(PDO $pdo): int {
+        $h = (int) getSystemSetting($pdo, 'hr_late_request_cutoff_hour', '7');
+        return ($h >= 0 && $h <= 12) ? $h : 7;
+    }
+}
+
+if (!function_exists('canRequestLateStart')) {
+    /**
+     * @return array { ok: bool, reason: string, message: string, fallback: ?string }
+     */
+    function canRequestLateStart(PDO $pdo, string $target_date, ?int $now_ts = null): array {
+        $now      = $now_ts ?? time();
+        $today    = date('Y-m-d', $now);
+        $valid_dt = preg_match('/^\d{4}-\d{2}-\d{2}$/', $target_date) === 1;
+
+        if (!$valid_dt) {
+            return ['ok' => false, 'reason' => 'invalid_date', 'message' => 'รูปแบบวันที่ไม่ถูกต้อง', 'fallback' => null];
+        }
+
+        if ($target_date < $today) {
+            return [
+                'ok'       => false,
+                'reason'   => 'past_date',
+                'message'  => 'ไม่สามารถแจ้งเข้างานสายย้อนหลังได้ — กรุณาใช้แบบฟอร์ม "ขอแก้ไขเวลาเข้างาน" แทน',
+                'fallback' => 'request_adjustment',
+            ];
+        }
+
+        if ($target_date === $today) {
+            $cutoff_h  = lateRequestCutoffHour($pdo);
+            $cutoff_ts = strtotime($today . ' ' . sprintf('%02d:00:00', $cutoff_h));
+            if ($now >= $cutoff_ts) {
+                return [
+                    'ok'       => false,
+                    'reason'   => 'after_cutoff',
+                    'message'  => sprintf(
+                        'เลยเวลาแจ้งเข้างานสายของวันนี้แล้ว (ต้องแจ้งก่อน %02d:00) — กรุณาเข้างานตามเวลาปกติ',
+                        $cutoff_h
+                    ),
+                    'fallback' => 'request_adjustment',
+                ];
+            }
+        }
+
+        return ['ok' => true, 'reason' => 'allowed', 'message' => '', 'fallback' => null];
+    }
+}
+
+if (!function_exists('validatePlannedStartTime')) {
+    function validatePlannedStartTime(string $planned_time, ?array $shift = null): array {
+        if (!preg_match('/^\d{2}:\d{2}$/', $planned_time)) {
+            return ['ok' => false, 'message' => 'รูปแบบเวลาไม่ถูกต้อง (ต้องเป็น HH:MM)'];
+        }
+        $ps_ts  = strtotime('1970-01-01 ' . $planned_time);
+        $start  = ($shift['start_time'] ?? null) ?: '08:30';
+        $end    = ($shift['end_time']   ?? null) ?: '17:30';
+        $start_ts = strtotime('1970-01-01 ' . $start);
+        if ($ps_ts < $start_ts) {
+            return ['ok' => false, 'message' => sprintf('เวลาที่แจ้งต้องไม่เร็วกว่าเวลาเข้างานปกติ (%s)', substr($start, 0, 5))];
+        }
+        $end_ts = strtotime('1970-01-01 ' . $end);
+        if (($end_ts - $ps_ts) < (4 * 3600)) {
+            return ['ok' => false, 'message' => sprintf('ต้องเหลือเวลาทำงานอย่างน้อย 4 ชั่วโมง (สิ้นสุดงาน %s)', substr($end, 0, 5))];
+        }
+        return ['ok' => true, 'message' => ''];
+    }
+}

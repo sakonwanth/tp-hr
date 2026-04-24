@@ -136,3 +136,62 @@ function crm_line_sync_approved_leave_attendance(PDO $pdo, int $requestId, int $
         $sync->execute([(int)$ctx['user_id'], date('Y-m-d', $t), $audit, $actorId, $actorId]);
     }
 }
+
+/**
+ * Post-S5: แจ้ง HR + Admin + Chairman + CEO เมื่อพนักงานยื่นคำขอเข้างานสายล่วงหน้า
+ * และส่ง confirmation Flex กลับให้พนักงานด้วย
+ * (mirror ของ tp-checkin/core/CrmLineNotifierBridge.php)
+ */
+function crm_line_notify_planned_late_request(PDO $pdo, array $user, string $targetDate, string $plannedTime, string $reason, ?string $requestedAt = null): void {
+    if (!crm_line_bridge_load()) return;
+
+    try {
+        if (function_exists('ensurePlannedLateNotificationEvents')) {
+            try { ensurePlannedLateNotificationEvents($pdo); } catch (Throwable $e) { /* non-fatal */ }
+        }
+
+        $employeeName = crm_line_user_name($user);
+
+        // 1) HR + Admin + Chairman + CEO
+        if (function_exists('hr_flex_planned_late_request')) {
+            $flex = hr_flex_planned_late_request($employeeName, $targetDate, $plannedTime, mb_substr($reason, 0, 200), $requestedAt);
+            LineNotifier::sendEvent($pdo, 'hr.new_planned_late', $flex, ['triggering_user_id' => (int)$user['id']]);
+        }
+
+        // 2) Confirmation Flex → พนักงาน
+        if (function_exists('hr_flex_planned_late_confirmed')) {
+            $graceMin = 30;
+            try {
+                $stmt = $pdo->prepare("SELECT setting_value FROM system_settings WHERE setting_key = 'payroll_planned_grace_minutes' LIMIT 1");
+                $stmt->execute();
+                $v = $stmt->fetchColumn();
+                if ($v !== false && is_numeric($v)) $graceMin = (int)$v;
+            } catch (Throwable $e) { /* default 30 */ }
+
+            $flex2 = hr_flex_planned_late_confirmed($targetDate, $plannedTime, $graceMin);
+            LineNotifier::sendEvent($pdo, 'hr.planned_late_confirmed', $flex2, ['triggering_user_id' => (int)$user['id']]);
+        }
+    } catch (Throwable $e) {
+        error_log('crm_line_notify_planned_late_request error: ' . $e->getMessage());
+    }
+}
+
+/**
+ * Post-S5: แจ้ง HR + Admin + Chairman + CEO เมื่อพนักงานยกเลิกคำขอเข้างานสายล่วงหน้า
+ */
+function crm_line_notify_planned_late_cancelled(PDO $pdo, array $user, string $targetDate, ?string $previousTime = null): void {
+    if (!crm_line_bridge_load()) return;
+
+    try {
+        if (function_exists('ensurePlannedLateNotificationEvents')) {
+            try { ensurePlannedLateNotificationEvents($pdo); } catch (Throwable $e) { /* non-fatal */ }
+        }
+
+        if (function_exists('hr_flex_planned_late_cancelled')) {
+            $flex = hr_flex_planned_late_cancelled(crm_line_user_name($user), $targetDate, $previousTime);
+            LineNotifier::sendEvent($pdo, 'hr.cancel_planned_late', $flex, ['triggering_user_id' => (int)$user['id']]);
+        }
+    } catch (Throwable $e) {
+        error_log('crm_line_notify_planned_late_cancelled error: ' . $e->getMessage());
+    }
+}

@@ -26,6 +26,53 @@ $stmt = $pdo->prepare("SELECT * FROM hr_work_shifts WHERE is_default = 1 AND is_
 $stmt->execute();
 $shift = $stmt->fetch();
 
+// Holiday banner (today)
+$today_holiday = null;
+try {
+    $stmt = $pdo->prepare("SELECT name, type FROM hr_holidays WHERE `date` = CURDATE() AND is_active = 1 LIMIT 1");
+    $stmt->execute();
+    $today_holiday = $stmt->fetch();
+} catch (Throwable $e) {
+    // tp-checkin variant — column name "holiday_date"
+    try {
+        $stmt = $pdo->prepare("SELECT name, type FROM hr_holidays WHERE holiday_date = CURDATE() AND is_active = 1 LIMIT 1");
+        $stmt->execute();
+        $today_holiday = $stmt->fetch();
+    } catch (Throwable $e2) { $today_holiday = null; }
+}
+
+// Planned Late Start state (today + tomorrow) — mirror ของ tp-checkin/index.php
+$ls_today    = date('Y-m-d');
+$ls_tomorrow = date('Y-m-d', strtotime('+1 day'));
+$late_start_by_date = [];
+$late_start_cutoff_hour = 7;
+$late_start_can_today_request = ['ok' => false];
+$late_start_can_tomorrow_request = ['ok' => true];
+try {
+    if (function_exists('ensurePlannedStartTimeColumns')) {
+        ensurePlannedStartTimeColumns($pdo);
+    }
+    $ls_stmt = $pdo->prepare("
+        SELECT attendance_date, planned_start_time, planned_reason, planned_requested_at
+        FROM hr_attendances
+        WHERE user_id = ? AND attendance_date IN (?, ?)
+    ");
+    $ls_stmt->execute([$user['id'], $ls_today, $ls_tomorrow]);
+    foreach ($ls_stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        $late_start_by_date[$r['attendance_date']] = $r;
+    }
+    if (function_exists('lateRequestCutoffHour'))  $late_start_cutoff_hour       = lateRequestCutoffHour($pdo);
+    if (function_exists('canRequestLateStart'))   {
+        $late_start_can_today_request    = canRequestLateStart($pdo, $ls_today);
+        $late_start_can_tomorrow_request = canRequestLateStart($pdo, $ls_tomorrow);
+    }
+} catch (Throwable $e) {
+    error_log('tp-hr checkin.php late-start load: ' . $e->getMessage());
+}
+$ls_today_row    = $late_start_by_date[$ls_today]    ?? null;
+$ls_tomorrow_row = $late_start_by_date[$ls_tomorrow] ?? null;
+$ls_has_any      = $ls_today_row || $ls_tomorrow_row;
+
 // Get allowed check-in locations
 $stmt = $pdo->query("SELECT * FROM hr_checkin_locations WHERE is_active = 1");
 $locations = $stmt->fetchAll();
@@ -78,7 +125,20 @@ require_once __DIR__ . '/templates/header.php';
         <i class="fas fa-check-circle mr-2"></i><?php echo htmlspecialchars($message); ?>
     </div>
     <?php endif; ?>
-    
+
+    <?php if ($today_holiday): ?>
+    <div class="mb-6 rounded-xl bg-gradient-to-r from-rose-500/20 to-pink-500/15 border border-rose-400/30 px-4 py-3 flex items-center gap-3">
+        <i class="fas fa-umbrella-beach text-rose-300 text-xl"></i>
+        <div>
+            <p class="text-rose-200 font-semibold">วันหยุด: <?php echo htmlspecialchars($today_holiday['name']); ?></p>
+            <p class="text-rose-100/70 text-xs">
+                <?php echo htmlspecialchars($today_holiday['type'] ?? ''); ?>
+                &middot; หากต้องทำงานวันนี้ จะถูกนับเป็น OT โดยอัตโนมัติ
+            </p>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Left Column: Check-in Card -->
         <div class="lg:col-span-2">
@@ -177,6 +237,94 @@ require_once __DIR__ . '/templates/header.php';
         
         <!-- Right Column: Summary & History -->
         <div class="space-y-6">
+            <!-- Planned Late Start (แจ้งเข้างานสายล่วงหน้า) -->
+            <?php if ($ls_has_any): ?>
+            <div>
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-lg font-semibold text-white">
+                        <i class="fas fa-clock text-amber-400 mr-2"></i>แจ้งเข้างานสาย
+                    </h2>
+                    <span class="text-white/40 text-xs"><?php echo ($ls_today_row ? 1 : 0) + ($ls_tomorrow_row ? 1 : 0); ?> รายการ</span>
+                </div>
+                <div class="space-y-3">
+                    <?php if ($ls_today_row): ?>
+                    <div class="rounded-2xl bg-gradient-to-br from-amber-500/15 to-orange-500/10 border border-amber-400/30 p-4">
+                        <p class="text-amber-300 text-xs font-semibold uppercase tracking-wide mb-1">
+                            <i class="fas fa-sun mr-1"></i>วันนี้ · <?php echo date('d M', strtotime($ls_today)); ?>
+                        </p>
+                        <p class="text-white text-2xl font-bold tracking-tight">
+                            <?php echo date('H:i', strtotime($ls_today_row['planned_start_time'])); ?>
+                            <span class="text-white/50 text-sm font-normal">น.</span>
+                        </p>
+                        <?php if (!empty($ls_today_row['planned_reason'])): ?>
+                        <p class="text-white/70 text-xs mt-1 line-clamp-2"><?php echo htmlspecialchars($ls_today_row['planned_reason']); ?></p>
+                        <?php endif; ?>
+                        <button type="button" onclick="cancelLateStart('<?php echo $ls_today; ?>')"
+                                class="mt-3 w-full py-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-400/30 text-red-300 text-sm font-semibold transition-colors">
+                            <i class="fas fa-times-circle mr-1"></i>ยกเลิกการแจ้ง
+                        </button>
+                    </div>
+                    <?php endif; ?>
+                    <?php if ($ls_tomorrow_row): ?>
+                    <div class="rounded-2xl bg-gradient-to-br from-blue-500/15 to-indigo-500/10 border border-blue-400/30 p-4">
+                        <p class="text-blue-300 text-xs font-semibold uppercase tracking-wide mb-1">
+                            <i class="fas fa-moon mr-1"></i>พรุ่งนี้ · <?php echo date('d M', strtotime($ls_tomorrow)); ?>
+                        </p>
+                        <p class="text-white text-2xl font-bold tracking-tight">
+                            <?php echo date('H:i', strtotime($ls_tomorrow_row['planned_start_time'])); ?>
+                            <span class="text-white/50 text-sm font-normal">น.</span>
+                        </p>
+                        <?php if (!empty($ls_tomorrow_row['planned_reason'])): ?>
+                        <p class="text-white/70 text-xs mt-1 line-clamp-2"><?php echo htmlspecialchars($ls_tomorrow_row['planned_reason']); ?></p>
+                        <?php endif; ?>
+                        <button type="button" onclick="cancelLateStart('<?php echo $ls_tomorrow; ?>')"
+                                class="mt-3 w-full py-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-400/30 text-red-300 text-sm font-semibold transition-colors">
+                            <i class="fas fa-times-circle mr-1"></i>ยกเลิกการแจ้ง
+                        </button>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (!($ls_today_row && $ls_tomorrow_row)): ?>
+                    <button type="button" onclick="openLateStartModal()"
+                            class="w-full py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-dashed border-white/20 text-white/70 text-sm font-medium transition-colors">
+                        <i class="fas fa-plus-circle mr-1"></i>เพิ่มการแจ้งอีกวัน
+                    </button>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php else: ?>
+            <button type="button" onclick="openLateStartModal()"
+                    class="group w-full relative overflow-hidden rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/15 hover:from-amber-500/30 hover:to-orange-500/25 active:from-amber-500/40 active:to-orange-500/35 border border-amber-400/30 hover:border-amber-400/60 p-5 text-left transition-all duration-200 shadow-lg shadow-amber-500/5">
+                <span class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-amber-400/10 blur-2xl group-hover:bg-amber-400/20 transition-colors"></span>
+                <div class="relative flex items-center gap-4">
+                    <div class="shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:scale-105 transition-transform">
+                        <i class="fas fa-clock text-white text-xl"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h2 class="text-white font-bold text-base leading-tight mb-0.5 flex items-center gap-2">
+                            แจ้งเข้างานสาย
+                            <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-400/25 text-amber-200">ล่วงหน้า</span>
+                        </h2>
+                        <p class="text-white/70 text-xs leading-snug">
+                            ทำงานดึก? แจ้งก่อน <?php echo sprintf('%02d:00', $late_start_cutoff_hour); ?> น. ของวันทำงาน
+                        </p>
+                    </div>
+                    <div class="shrink-0 w-8 h-8 rounded-full bg-white/10 group-hover:bg-white/20 flex items-center justify-center transition-colors">
+                        <i class="fas fa-chevron-right text-white text-xs"></i>
+                    </div>
+                </div>
+            </button>
+            <?php endif; ?>
+
+            <!-- Quick links -->
+            <div class="grid grid-cols-2 gap-3">
+                <a href="attendance_history.php" class="flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-2.5 text-white/80 hover:text-white text-sm transition-colors">
+                    <i class="fas fa-history text-violet-400"></i>ประวัติเข้างาน
+                </a>
+                <a href="leave.php" class="flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-2.5 text-white/80 hover:text-white text-sm transition-colors">
+                    <i class="fas fa-calendar-check text-emerald-400"></i>ขอลา / OT
+                </a>
+            </div>
+
             <!-- Monthly Summary -->
             <div class="glass-card rounded-xl p-6">
                 <h2 class="text-lg font-semibold text-white mb-4">
@@ -282,6 +430,77 @@ require_once __DIR__ . '/templates/header.php';
         </div>
     </div>
 </main>
+
+<!-- Planned Late Start Modal -->
+<div id="late-start-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-card rounded-2xl p-5 w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-white text-lg font-bold flex items-center gap-2">
+                <i class="fas fa-clock text-amber-400"></i>แจ้งเข้างานสายล่วงหน้า
+            </h3>
+            <button onclick="closeLateStartModal()" class="text-white/60 hover:text-white p-1">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Target Date -->
+        <div class="mb-4">
+            <label class="text-white/70 text-sm mb-2 block">แจ้งสำหรับวันไหน</label>
+            <div class="grid grid-cols-2 gap-2">
+                <label class="flex items-center justify-center p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer has-[:checked]:bg-amber-500/20 has-[:checked]:border-amber-400 transition-colors">
+                    <input type="radio" name="ls-target" value="tomorrow" class="hidden" onchange="updateLateStartDateLabel()" <?php echo $late_start_can_tomorrow_request['ok'] ? 'checked' : ''; ?>>
+                    <div class="text-center">
+                        <div class="text-white font-medium">พรุ่งนี้</div>
+                        <div class="text-white/50 text-xs mt-0.5">แจ้งล่วงหน้า</div>
+                    </div>
+                </label>
+                <label class="flex items-center justify-center p-3 rounded-xl bg-white/5 border border-white/10 <?php echo $late_start_can_today_request['ok'] ? 'cursor-pointer has-[:checked]:bg-amber-500/20 has-[:checked]:border-amber-400' : 'opacity-40 cursor-not-allowed'; ?> transition-colors">
+                    <input type="radio" name="ls-target" value="today" class="hidden" onchange="updateLateStartDateLabel()" <?php echo $late_start_can_today_request['ok'] ? '' : 'disabled'; ?>>
+                    <div class="text-center">
+                        <div class="text-white font-medium">วันนี้</div>
+                        <div class="text-white/50 text-xs mt-0.5">ก่อน <?php echo sprintf('%02d:00', $late_start_cutoff_hour); ?></div>
+                    </div>
+                </label>
+            </div>
+            <p class="text-amber-300 text-xs mt-2">
+                <i class="fas fa-calendar-day mr-1"></i><span id="ls-date-label">—</span>
+            </p>
+        </div>
+
+        <!-- Time Picker -->
+        <div class="mb-4">
+            <label class="text-white/70 text-sm mb-2 block">เวลาที่จะเข้างาน</label>
+            <input type="time" id="ls-planned-time" step="900"
+                   min="<?php echo htmlspecialchars(substr(($shift['start_time'] ?? '08:30'), 0, 5)); ?>"
+                   value="<?php echo htmlspecialchars(substr(($shift['start_time'] ?? '08:30'), 0, 5)); ?>"
+                   class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-lg font-medium focus:outline-none focus:border-amber-400">
+            <p class="text-white/40 text-xs mt-1">
+                หลังเข้าในเวลาที่แจ้ง ± 30 นาที จะไม่ถูกหัก
+            </p>
+        </div>
+
+        <!-- Reason -->
+        <div class="mb-5">
+            <label class="text-white/70 text-sm mb-2 block">เหตุผล <span class="text-red-400">*</span></label>
+            <textarea id="ls-reason" rows="3" maxlength="255"
+                      placeholder="เช่น ทำงานดึกเมื่อคืน / มีนัดหมอ / ติดธุระส่วนตัว"
+                      class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/30 focus:outline-none focus:border-amber-400 resize-none"></textarea>
+            <p class="text-white/40 text-xs mt-1">อย่างน้อย 5 ตัวอักษร</p>
+        </div>
+
+        <!-- Submit -->
+        <div class="flex gap-2">
+            <button type="button" onclick="closeLateStartModal()"
+                    class="flex-1 py-3 bg-white/10 hover:bg-white/15 text-white rounded-xl font-medium transition-colors">
+                ยกเลิก
+            </button>
+            <button type="button" onclick="submitLateStart()"
+                    class="flex-1 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl font-medium transition-colors">
+                <i class="fas fa-paper-plane mr-2"></i>ส่งคำขอ
+            </button>
+        </div>
+    </div>
+</div>
 
 <!-- Check-in Modal -->
 <div id="checkin-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
@@ -516,6 +735,90 @@ async function confirmCheckin() {
         showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-check mr-2"></i>ยืนยัน';
+    }
+}
+
+/* =====================================================
+ * Planned Late Start — mirror ของ tp-checkin/index.php
+ * ===================================================== */
+function openLateStartModal() {
+    const modal = document.getElementById('late-start-modal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    updateLateStartDateLabel();
+}
+function closeLateStartModal() {
+    const modal = document.getElementById('late-start-modal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    document.getElementById('ls-reason').value = '';
+}
+function updateLateStartDateLabel() {
+    const target = document.querySelector('input[name="ls-target"]:checked')?.value || 'tomorrow';
+    const now = new Date();
+    if (target === 'today') {
+        const d = now;
+        document.getElementById('ls-date-label').textContent = d.toLocaleDateString('th-TH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + ' (วันนี้)';
+    } else {
+        const d = new Date(now.getTime() + 86400000);
+        document.getElementById('ls-date-label').textContent = d.toLocaleDateString('th-TH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + ' (พรุ่งนี้)';
+    }
+}
+async function submitLateStart() {
+    const target = document.querySelector('input[name="ls-target"]:checked')?.value || 'tomorrow';
+    const planned_time = document.getElementById('ls-planned-time').value;
+    const reason = document.getElementById('ls-reason').value.trim();
+
+    if (!planned_time) { showToast('กรุณาเลือกเวลาที่จะเข้างาน', 'error'); return; }
+    if (reason.length < 5) { showToast('กรุณาระบุเหตุผลอย่างน้อย 5 ตัวอักษร', 'error'); return; }
+
+    const now = new Date();
+    const targetDate = (target === 'today')
+        ? now.toISOString().slice(0, 10)
+        : new Date(now.getTime() + 86400000).toISOString().slice(0, 10);
+
+    try {
+        const resp = await fetch('/api/attendance.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'request_late_start',
+                target_date: targetDate,
+                planned_start_time: planned_time,
+                reason: reason,
+            }),
+        });
+        const data = await resp.json();
+        if (data.success) {
+            showToast(data.message || 'แจ้งเข้างานสายเรียบร้อย', 'success');
+            closeLateStartModal();
+            setTimeout(() => location.reload(), 800);
+        } else {
+            showToast(data.error || 'เกิดข้อผิดพลาด', 'error');
+        }
+    } catch (err) {
+        console.error('submitLateStart:', err);
+        showToast('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้', 'error');
+    }
+}
+async function cancelLateStart(targetDate) {
+    if (!confirm('ยกเลิกการแจ้งเข้างานสายของ ' + targetDate + ' ?')) return;
+    try {
+        const resp = await fetch('/api/attendance.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'cancel_late_start', target_date: targetDate }),
+        });
+        const data = await resp.json();
+        if (data.success) {
+            showToast(data.message || 'ยกเลิกเรียบร้อย', 'success');
+            setTimeout(() => location.reload(), 800);
+        } else {
+            showToast(data.error || 'เกิดข้อผิดพลาด', 'error');
+        }
+    } catch (err) {
+        console.error('cancelLateStart:', err);
+        showToast('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้', 'error');
     }
 }
 </script>
