@@ -467,8 +467,8 @@ include 'templates/header.php';
 <?php endif; ?>
 
 <!-- Edit Contact Modal -->
-<div id="edit-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-    <div class="glass-card rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+<div id="edit-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
+    <div class="glass-card rounded-2xl w-full max-w-lg my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <form id="edit-form" class="p-6">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="text-xl font-bold text-white" id="modal-title">แก้ไขข้อมูล</h3>
@@ -479,11 +479,11 @@ include 'templates/header.php';
             <div id="modal-content">
                 <!-- Dynamic content -->
             </div>
-            <div class="flex gap-4 mt-6">
-                <button type="button" onclick="closeModal()" class="flex-1 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">
+            <div class="flex flex-col sm:flex-row gap-3 mt-6">
+                <button type="button" onclick="closeModal()" class="flex-1 min-h-[44px] py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors font-semibold">
                     ยกเลิก
                 </button>
-                <button type="submit" class="flex-1 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
+                <button type="submit" class="flex-1 min-h-[44px] py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors font-semibold">
                     บันทึก
                 </button>
             </div>
