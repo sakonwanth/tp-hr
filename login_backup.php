@@ -71,6 +71,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
+
+        .touch-manipulation {
+            touch-action: manipulation;
+        }
+
+        .login-backup-password-toggle {
+            touch-action: manipulation;
+            min-width: 44px;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            touch-action: manipulation;
+        }
     </style>
 </head>
 <body>
@@ -119,7 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                placeholder="กรอกรหัสผ่าน"
                                required>
                         <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-white/50"></i>
-                        <button type="button" onclick="togglePassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white">
+                        <button type="button" onclick="togglePassword()" class="login-backup-password-toggle absolute right-2 top-1/2 -translate-y-1/2 text-white/50 hover:text-white" aria-label="แสดงหรือซ่อนรหัสผ่าน">
                             <i class="fas fa-eye" id="toggleIcon"></i>
                         </button>
                     </div>
@@ -131,12 +149,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <span>จดจำการเข้าสู่ระบบ</span>
                     </label>
                     
-                    <a href="/tp-crm/forgot-password.php" class="text-violet-400 hover:text-violet-300">
+                    <a href="/tp-crm/forgot-password.php" class="touch-manipulation inline-flex min-h-[44px] items-center text-violet-400 hover:text-violet-300 py-1">
                         ลืมรหัสผ่าน?
                     </a>
                 </div>
                 
-                <button type="submit" class="w-full min-h-[48px] py-3 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded-lg transition-colors">
+                <button type="submit" class="touch-manipulation w-full min-h-[48px] py-3 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded-lg transition-colors">
                     <i class="fas fa-sign-in-alt mr-2"></i>
                     เข้าสู่ระบบ
                 </button>
@@ -145,8 +163,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <!-- TP-CRM Link -->
         <div class="text-center mt-6">
-            <a href="/tp-crm/" class="text-white/60 hover:text-white text-sm">
-                <i class="fas fa-arrow-left mr-1"></i>
+            <a href="/tp-crm/" class="touch-manipulation inline-flex min-h-[44px] items-center justify-center gap-1 text-white/60 hover:text-white text-sm py-1">
+                <i class="fas fa-arrow-left"></i>
                 กลับไป TP-CRM
             </a>
         </div>

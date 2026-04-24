@@ -371,6 +371,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         type="button" 
                         onclick="togglePassword()"
                         class="login-password-toggle absolute right-2 top-1/2 -translate-y-1/2 text-white text-opacity-50 hover:text-opacity-100 transition-opacity"
+                        aria-label="แสดงหรือซ่อนรหัสผ่าน"
                     >
                         <i class="fas fa-eye" id="toggleIcon"></i>
                     </button>
