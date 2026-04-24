@@ -264,7 +264,124 @@ include dirname(__DIR__) . '/templates/header.php';
         <p class="text-white/60">ไม่พบข้อมูล</p>
     </div>
     <?php else: ?>
-    <div class="overflow-x-auto">
+    <!-- Mobile-first: card list (desktop keeps table) -->
+    <div class="lg:hidden p-3 space-y-3">
+        <?php foreach ($records as $rec): ?>
+        <?php
+        $hasAttendance = !empty($rec['attendance_id']);
+        $isLate = ($rec['late_minutes'] ?? 0) > 0;
+        $isEarlyLeave = ($rec['early_leave_minutes'] ?? 0) > 0;
+        $isUserDayOff = !$hasAttendance
+            && $rec['effective_day_off'] !== null
+            && (int)$rec['effective_day_off'] === $weekday;
+        $onLeave = !$hasAttendance && !empty($rec['approved_leave_name']);
+
+        $statusLabel = 'ปกติ';
+        $statusCls = 'bg-green-500/15 border border-green-500/30 text-green-300';
+        if (!$hasAttendance && $holidayInfo) {
+            $statusLabel = 'วันหยุด';
+            $statusCls = 'bg-orange-500/15 border border-orange-500/30 text-orange-200';
+        } elseif (!$hasAttendance && $onLeave) {
+            $statusLabel = 'ลา';
+            $statusCls = 'bg-blue-500/15 border border-blue-500/30 text-blue-200';
+        } elseif (!$hasAttendance && $isUserDayOff) {
+            $statusLabel = 'วันหยุดประจำสัปดาห์';
+            $statusCls = 'bg-sky-500/15 border border-sky-500/30 text-sky-200';
+        } elseif (!$hasAttendance) {
+            $statusLabel = 'ขาดงาน';
+            $statusCls = 'bg-red-500/15 border border-red-500/30 text-red-200';
+        } elseif ($isLate) {
+            $statusLabel = 'มาสาย';
+            $statusCls = 'bg-yellow-500/15 border border-yellow-500/30 text-yellow-200';
+        }
+
+        $notes = [];
+        if ($onLeave) $notes[] = htmlspecialchars($rec['approved_leave_name']);
+        if ($isLate) $notes[] = 'สาย ' . (int)$rec['late_minutes'] . ' นาที';
+        if ($isEarlyLeave) $notes[] = 'ออกก่อน ' . (int)$rec['early_leave_minutes'] . ' นาที';
+        $noteText = implode(' • ', $notes);
+
+        $fullName = trim((string)($rec['first_name_th'] ?? '') . ' ' . (string)($rec['last_name_th'] ?? ''));
+        $empCode = (string)($rec['employee_code'] ?? '');
+        $dept = (string)($rec['department'] ?? '-');
+        $checkInHHMM = $rec['check_in_time'] ? date('H:i', strtotime($rec['check_in_time'])) : '--:--';
+        $checkOutHHMM = $rec['check_out_time'] ? date('H:i', strtotime($rec['check_out_time'])) : '--:--';
+        $workHours = $rec['work_minutes'] ? number_format(((float)$rec['work_minutes']) / 60, 1) : '-';
+        $otHours = ($rec['ot_minutes'] ?? 0) > 0 ? (int)floor(((int)$rec['ot_minutes']) / 60) : 0;
+        ?>
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+            <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                    <a href="/hr/employee_attendance.php?id=<?php echo (int)$rec['id']; ?>"
+                       class="text-white font-semibold leading-tight hover:text-violet-300 transition-colors block truncate">
+                        <?php echo htmlspecialchars($fullName); ?>
+                    </a>
+                    <div class="text-white/50 text-xs mt-0.5 truncate">
+                        <?php echo htmlspecialchars($empCode); ?> · <?php echo htmlspecialchars($dept); ?>
+                    </div>
+                </div>
+                <span class="shrink-0 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold <?php echo $statusCls; ?>">
+                    <?php echo htmlspecialchars($statusLabel); ?>
+                </span>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 mt-4">
+                <div class="rounded-xl bg-black/20 border border-white/10 px-3 py-2">
+                    <div class="text-[11px] text-white/50">เข้า</div>
+                    <div class="text-white font-semibold"><?php echo htmlspecialchars($checkInHHMM); ?></div>
+                </div>
+                <div class="rounded-xl bg-black/20 border border-white/10 px-3 py-2">
+                    <div class="text-[11px] text-white/50">ออก</div>
+                    <div class="text-white font-semibold"><?php echo htmlspecialchars($checkOutHHMM); ?></div>
+                </div>
+                <div class="rounded-xl bg-black/20 border border-white/10 px-3 py-2">
+                    <div class="text-[11px] text-white/50">ชั่วโมง</div>
+                    <div class="text-white font-semibold">
+                        <?php echo htmlspecialchars($workHours); ?>
+                        <?php if ($otHours > 0): ?>
+                        <span class="text-emerald-300 text-xs font-bold ml-1">+<?php echo $otHours; ?>h</span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+
+            <?php if ($noteText !== ''): ?>
+            <div class="mt-3 text-white/70 text-xs">
+                <i class="fas fa-note-sticky text-white/40 mr-1"></i><?php echo $noteText; ?>
+            </div>
+            <?php endif; ?>
+
+            <div class="grid grid-cols-2 gap-2 mt-4">
+                <button type="button"
+                        onclick="editAttendance(<?php echo (int)$rec['id']; ?>, '<?php echo $date; ?>', <?php echo $rec['attendance_id'] ?? 'null'; ?>, '<?php echo $rec['check_in_time'] ? date('H:i', strtotime($rec['check_in_time'])) : ''; ?>', '<?php echo $rec['check_out_time'] ? date('H:i', strtotime($rec['check_out_time'])) : ''; ?>')"
+                        class="min-h-[44px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold">
+                    <i class="fas fa-edit mr-2"></i>แก้ไขเวลา
+                </button>
+                <button type="button"
+                        onclick="viewHistory(<?php echo (int)$rec['id']; ?>, '<?php echo $date; ?>', '<?php echo htmlspecialchars(($rec['first_name_th'] ?? '') . ' ' . ($rec['last_name_th'] ?? ''), ENT_QUOTES); ?>')"
+                        class="min-h-[44px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold">
+                    <i class="fas fa-history mr-2"></i>ประวัติ
+                </button>
+                <?php if ($hasAttendance && $rec['check_in_latitude']): ?>
+                <button type="button"
+                        onclick="viewLocation(<?php echo $rec['check_in_latitude']; ?>, <?php echo $rec['check_in_longitude']; ?>)"
+                        class="min-h-[44px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold">
+                    <i class="fas fa-map-marker-alt mr-2"></i>ตำแหน่ง
+                </button>
+                <?php endif; ?>
+                <?php if ($hasAttendance): ?>
+                <button type="button"
+                        onclick="deleteAttendance(<?php echo (int)$rec['id']; ?>, '<?php echo $date; ?>', '<?php echo htmlspecialchars(($rec['first_name_th'] ?? '') . ' ' . ($rec['last_name_th'] ?? ''), ENT_QUOTES); ?>')"
+                        class="min-h-[44px] rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-200 text-sm font-semibold">
+                    <i class="fas fa-trash mr-2"></i>ลบข้อมูล
+                </button>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+
+    <div class="hidden lg:block overflow-x-auto">
         <table class="w-full">
             <thead class="bg-white/5">
                 <tr>
