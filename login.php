@@ -214,6 +214,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: white;
             transition: all 0.3s ease;
             font-size: 16px !important;
+            touch-action: manipulation;
         }
 
         .input-field:focus {
@@ -233,6 +234,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             transition: all 0.3s ease;
             font-weight: 600;
             min-height: 48px;
+            touch-action: manipulation;
         }
 
         .btn-login:hover {
@@ -250,6 +252,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-weight: 600;
             transition: all 0.3s ease;
             min-height: 48px;
+            touch-action: manipulation;
+        }
+
+        .login-password-toggle {
+            touch-action: manipulation;
+            min-width: 44px;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .touch-manipulation {
+            touch-action: manipulation;
         }
 
         .btn-line:hover {
@@ -354,7 +370,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <button 
                         type="button" 
                         onclick="togglePassword()"
-                        class="absolute right-4 top-1/2 transform -translate-y-1/2 text-white text-opacity-50 hover:text-opacity-100 transition-opacity"
+                        class="login-password-toggle absolute right-2 top-1/2 -translate-y-1/2 text-white text-opacity-50 hover:text-opacity-100 transition-opacity"
                     >
                         <i class="fas fa-eye" id="toggleIcon"></i>
                     </button>
@@ -367,7 +383,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="checkbox" name="remember" class="mr-2 rounded border-gray-600 bg-gray-700 text-purple-500 focus:ring-purple-500">
                     จดจำฉัน
                 </label>
-                <a href="<?php echo htmlspecialchars(CRM_BASE_URL); ?>/login.php" class="text-purple-400 hover:text-purple-300 text-sm transition-colors">
+                <a href="<?php echo htmlspecialchars(CRM_BASE_URL); ?>/login.php" class="inline-flex min-h-[44px] items-center text-purple-400 hover:text-purple-300 text-sm transition-colors touch-manipulation py-1">
                     ลืมรหัสผ่าน?
                 </a>
             </div>
