@@ -42,13 +42,39 @@ function dt_getAllSettings(PDO $pdo): array {
     return $out;
 }
 
-function dt_handleUpload(array $file, string $subdir, array $allowed = ['png','jpg','jpeg','webp','svg']): string {
+function dt_handleUpload(array $file, string $subdir, array $allowed = ['png','jpg','jpeg','webp']): string {
     if (!in_array($subdir, ['company','signatures'], true)) throw new Exception('ประเภทการอัปโหลดไม่ถูกต้อง');
     if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) return '';
     if ($file['error'] !== UPLOAD_ERR_OK) throw new Exception('อัปโหลดล้มเหลว (error: ' . $file['error'] . ')');
     if ($file['size'] > 5 * 1024 * 1024) throw new Exception('ไฟล์เกิน 5MB');
     $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
     if (!in_array($ext, $allowed, true)) throw new Exception('อนุญาตเฉพาะ: ' . implode(', ', $allowed));
+
+    // Validate content-type + ensure it's a real image (don't trust extension)
+    $mime = '';
+    try {
+        if (function_exists('finfo_open')) {
+            $fi = finfo_open(FILEINFO_MIME_TYPE);
+            if ($fi) {
+                $mime = (string)finfo_file($fi, $file['tmp_name']);
+                finfo_close($fi);
+            }
+        }
+    } catch (Throwable $e) { /* ignore */ }
+    $mime = strtolower(trim($mime));
+    $allowedMimeByExt = [
+        'jpg'  => ['image/jpeg'],
+        'jpeg' => ['image/jpeg'],
+        'png'  => ['image/png'],
+        'webp' => ['image/webp'],
+    ];
+    if (isset($allowedMimeByExt[$ext]) && $mime !== '' && !in_array($mime, $allowedMimeByExt[$ext], true)) {
+        throw new Exception('ไฟล์ไม่ถูกต้อง (ชนิดไฟล์ไม่ตรงกับนามสกุล)');
+    }
+    if (@getimagesize($file['tmp_name']) === false) {
+        throw new Exception('ไฟล์รูปภาพไม่ถูกต้อง');
+    }
+
     $dir = (defined('UPLOAD_PATH') ? UPLOAD_PATH : (BASE_PATH . '/uploads')) . '/' . $subdir;
     if (!is_dir($dir)) @mkdir($dir, 0775, true);
     $name = $subdir . '_' . bin2hex(random_bytes(6)) . '_' . time() . '.' . $ext;

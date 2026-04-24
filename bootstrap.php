@@ -224,7 +224,9 @@ function verifyCsrfToken(?string $token = null): bool {
     if (TP_COMMON_AVAILABLE) {
         return \TpCommon\Auth\Csrf::verify($token);
     }
-    $submittedToken = $token ?? ($_POST['_token'] ?? '');
+    $submittedToken = $token
+        ?? ($_POST['_token'] ?? ($_POST['csrf_token'] ?? ''))
+        ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? '');
     return hash_equals($_SESSION['csrf_token'] ?? '', $submittedToken);
 }
 

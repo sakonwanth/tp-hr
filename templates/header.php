@@ -202,6 +202,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             .content-area {
                 margin-left: 0;
                 padding-top: 64px;
+                padding-bottom: 88px; /* space for mobile bottom nav */
             }
         }
         

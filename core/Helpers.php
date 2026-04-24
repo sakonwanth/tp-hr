@@ -49,9 +49,62 @@ function uploadFile(array $file, string $destination, ?array $allowedTypes = nul
     // Get file extension
     $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
     $allowedTypes = $allowedTypes ?? ALLOWED_FILE_TYPES;
-    
-    if (!in_array($ext, $allowedTypes)) {
+
+    if (!in_array($ext, $allowedTypes, true)) {
         return ['success' => false, 'message' => 'ประเภทไฟล์ไม่ถูกต้อง'];
+    }
+
+    // Best-effort content validation (don't trust extension)
+    $mime = '';
+    try {
+        if (function_exists('finfo_open')) {
+            $fi = finfo_open(FILEINFO_MIME_TYPE);
+            if ($fi) {
+                $mime = (string)finfo_file($fi, $file['tmp_name']);
+                finfo_close($fi);
+            }
+        }
+    } catch (Throwable $e) {
+        // ignore
+    }
+    $mime = strtolower(trim($mime));
+
+    $allowedMimeByExt = [
+        'pdf'  => ['application/pdf'],
+        'jpg'  => ['image/jpeg'],
+        'jpeg' => ['image/jpeg'],
+        'png'  => ['image/png'],
+        'webp' => ['image/webp'],
+    ];
+
+    if (isset($allowedMimeByExt[$ext]) && $mime !== '' && !in_array($mime, $allowedMimeByExt[$ext], true)) {
+        return ['success' => false, 'message' => 'ไฟล์ไม่ถูกต้อง (ชนิดไฟล์ไม่ตรงกับนามสกุล)'];
+    }
+
+    // Extra guard for images
+    if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp'], true)) {
+        try {
+            if (@getimagesize($file['tmp_name']) === false) {
+                return ['success' => false, 'message' => 'ไฟล์รูปภาพไม่ถูกต้อง'];
+            }
+        } catch (Throwable $e) {
+            return ['success' => false, 'message' => 'ไฟล์รูปภาพไม่ถูกต้อง'];
+        }
+    }
+
+    // Extra guard for PDF
+    if ($ext === 'pdf') {
+        try {
+            $fh = @fopen($file['tmp_name'], 'rb');
+            if (!$fh) return ['success' => false, 'message' => 'อ่านไฟล์ไม่ได้'];
+            $head = (string)fread($fh, 5);
+            fclose($fh);
+            if ($head !== '%PDF-') {
+                return ['success' => false, 'message' => 'ไฟล์ PDF ไม่ถูกต้อง'];
+            }
+        } catch (Throwable $e) {
+            return ['success' => false, 'message' => 'ไฟล์ PDF ไม่ถูกต้อง'];
+        }
     }
     
     // Create destination directory if not exists
@@ -67,6 +120,8 @@ function uploadFile(array $file, string $destination, ?array $allowedTypes = nul
     if (!move_uploaded_file($file['tmp_name'], $filePath)) {
         return ['success' => false, 'message' => 'ไม่สามารถบันทึกไฟล์ได้'];
     }
+
+    @chmod($filePath, 0644);
     
     return [
         'success' => true,

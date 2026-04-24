@@ -22,7 +22,10 @@ $dayNames = THAI_DAY_NAMES;
 
 // Handle POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    verifyCsrfToken();
+    if (!verifyCsrfToken($_POST['_token'] ?? ($_POST['csrf_token'] ?? ''))) {
+        flash('error', 'เซสชันหมดอายุหรือข้อมูลไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง');
+        redirect($_SERVER['REQUEST_URI'] ?? '/hr/dayoff_approvals.php', 302);
+    }
     $action = $_POST['action'] ?? '';
     $requestId = (int)($_POST['request_id'] ?? 0);
     

@@ -22,7 +22,10 @@ $current_page = 'hr-settings';
 
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    verifyCsrfToken();
+    if (!verifyCsrfToken($_POST['_token'] ?? ($_POST['csrf_token'] ?? ''))) {
+        flash('error', 'เซสชันหมดอายุหรือข้อมูลไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง');
+        redirect($_SERVER['REQUEST_URI'] ?? '/hr/settings.php', 302);
+    }
     $action = $_POST['action'] ?? '';
     
     try {
