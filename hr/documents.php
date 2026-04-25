@@ -154,7 +154,107 @@ include dirname(__DIR__) . '/templates/header.php';
         <p class="text-white/60">ไม่พบคำขอเอกสาร</p>
     </div>
     <?php else: ?>
-    <div class="overflow-x-auto">
+    <?php
+    $statusColors = [
+        'PENDING' => 'bg-yellow-500/20 text-yellow-400',
+        'PROCESSING' => 'bg-blue-500/20 text-blue-400',
+        'READY' => 'bg-green-500/20 text-green-400',
+        'DELIVERED' => 'bg-emerald-500/20 text-emerald-300',
+        'COMPLETED' => 'bg-green-500/20 text-green-400',
+        'REJECTED' => 'bg-red-500/20 text-red-400',
+        'CANCELLED' => 'bg-gray-500/20 text-gray-400'
+    ];
+    $statusText = [
+        'PENDING' => 'รอดำเนินการ',
+        'PROCESSING' => 'กำลังจัดทำ',
+        'READY' => 'จัดทำแล้ว',
+        'DELIVERED' => 'รับแล้ว',
+        'COMPLETED' => 'จัดทำแล้ว',
+        'REJECTED' => 'ปฏิเสธ',
+        'CANCELLED' => 'ยกเลิก'
+    ];
+    ?>
+    <div class="md:hidden p-3 space-y-3">
+        <?php foreach ($requests as $req): ?>
+        <?php
+        $reqId = (int)$req['id'];
+        $reqNo = trim((string)($req['request_number'] ?? ''));
+        if ($reqNo === '') {
+            $reqNo = '#' . str_pad((string)$reqId, 6, '0', STR_PAD_LEFT);
+        }
+        $st = (string)($req['status'] ?? '');
+        $chipCls = $statusColors[$st] ?? 'bg-white/10 text-white/70';
+        $chipLbl = $statusText[$st] ?? $st;
+        ?>
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-4 space-y-3">
+            <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                    <p class="text-white/50 text-xs uppercase tracking-wide">รหัสคำขอ</p>
+                    <p class="text-white font-mono text-sm"><?php echo htmlspecialchars($reqNo); ?></p>
+                </div>
+                <span class="shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold <?php echo $chipCls; ?>">
+                    <?php echo htmlspecialchars($chipLbl); ?>
+                </span>
+            </div>
+            <div>
+                <p class="text-white/50 text-xs">พนักงาน</p>
+                <p class="text-white font-medium"><?php echo htmlspecialchars($req['first_name_th'] . ' ' . $req['last_name_th']); ?></p>
+                <p class="text-white/40 text-xs mt-0.5"><?php echo htmlspecialchars($req['employee_code'] ?? ''); ?></p>
+            </div>
+            <div>
+                <p class="text-white/50 text-xs">ประเภทเอกสาร</p>
+                <p class="text-white text-sm"><?php echo htmlspecialchars($req['template_name']); ?>
+                    <?php if (!empty($req['language'])): ?>
+                    <span class="text-white/50 text-xs">(<?php echo $req['language'] === 'TH' ? 'ไทย' : 'อังกฤษ'; ?>)</span>
+                    <?php endif; ?>
+                </p>
+            </div>
+            <div>
+                <p class="text-white/50 text-xs">วัตถุประสงค์</p>
+                <p class="text-white/80 text-sm line-clamp-3"><?php echo htmlspecialchars($req['purpose'] ?? '-'); ?></p>
+            </div>
+            <div>
+                <p class="text-white/50 text-xs">วันที่ขอ</p>
+                <p class="text-white/80 text-sm"><?php echo formatDateThai($req['created_at']); ?></p>
+            </div>
+
+            <a href="/certificate_print.php?id=<?php echo $reqId; ?>&preview=1" target="_blank" rel="noopener noreferrer"
+               class="flex min-h-[44px] items-center justify-center rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold transition-colors touch-manipulation">
+                <i class="fas fa-print mr-2"></i>ดู / พิมพ์เอกสาร
+            </a>
+
+            <?php if ($st === 'PENDING'): ?>
+            <div class="grid grid-cols-2 gap-2">
+                <button type="button" onclick="updateDocStatus(<?php echo $reqId; ?>, 'PROCESSING')"
+                        class="min-h-[44px] rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold touch-manipulation">
+                    <i class="fas fa-play mr-2"></i>เริ่มจัดทำ
+                </button>
+                <button type="button" onclick="rejectDoc(<?php echo $reqId; ?>)"
+                        class="min-h-[44px] rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-200 text-sm font-semibold touch-manipulation">
+                    <i class="fas fa-times mr-2"></i>ปฏิเสธ
+                </button>
+            </div>
+            <?php elseif ($st === 'PROCESSING'): ?>
+            <button type="button" onclick="completeDoc(<?php echo $reqId; ?>)"
+                    class="w-full min-h-[44px] rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-semibold touch-manipulation">
+                <i class="fas fa-check mr-2"></i>จัดทำเสร็จ
+            </button>
+            <?php elseif (in_array($st, ['COMPLETED', 'READY', 'DELIVERED'], true) && !empty($req['document_url'])): ?>
+            <a href="<?php echo htmlspecialchars($req['document_url']); ?>" target="_blank" rel="noopener noreferrer"
+               class="flex min-h-[44px] items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
+                <i class="fas fa-download mr-2"></i>ดาวน์โหลดเอกสาร
+            </a>
+            <?php else: ?>
+            <button type="button" onclick="viewDocDetail(<?php echo $reqId; ?>)"
+                    class="w-full min-h-[44px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
+                <i class="fas fa-eye mr-2"></i>ดูรายละเอียด
+            </button>
+            <?php endif; ?>
+        </div>
+        <?php endforeach; ?>
+    </div>
+
+    <div class="hidden md:block overflow-x-auto">
         <table class="w-full">
             <thead class="bg-white/5">
                 <tr>
@@ -169,22 +269,6 @@ include dirname(__DIR__) . '/templates/header.php';
             </thead>
             <tbody class="divide-y divide-white/10">
                 <?php foreach ($requests as $req): ?>
-                <?php
-                $statusColors = [
-                    'PENDING' => 'bg-yellow-500/20 text-yellow-400',
-                    'PROCESSING' => 'bg-blue-500/20 text-blue-400',
-                    'COMPLETED' => 'bg-green-500/20 text-green-400',
-                    'REJECTED' => 'bg-red-500/20 text-red-400',
-                    'CANCELLED' => 'bg-gray-500/20 text-gray-400'
-                ];
-                $statusText = [
-                    'PENDING' => 'รอดำเนินการ',
-                    'PROCESSING' => 'กำลังจัดทำ',
-                    'COMPLETED' => 'จัดทำแล้ว',
-                    'REJECTED' => 'ปฏิเสธ',
-                    'CANCELLED' => 'ยกเลิก'
-                ];
-                ?>
                 <tr class="hover:bg-white/5">
                     <td class="px-4 py-3 text-white font-mono text-sm">
                         #<?php echo str_pad($req['id'], 6, '0', STR_PAD_LEFT); ?>
@@ -213,7 +297,7 @@ include dirname(__DIR__) . '/templates/header.php';
                         </span>
                     </td>
                     <td class="px-4 py-3 text-center">
-                        <a href="/certificate_print.php?id=<?php echo $req['id']; ?>&preview=1" target="_blank"
+                        <a href="/certificate_print.php?id=<?php echo $req['id']; ?>&preview=1" target="_blank" rel="noopener noreferrer"
                            class="px-2 py-1 bg-violet-600 hover:bg-violet-700 text-white text-xs rounded transition-colors mr-1" title="ดู / พิมพ์เอกสาร">
                             <i class="fas fa-print"></i>
                         </a>
@@ -231,8 +315,8 @@ include dirname(__DIR__) . '/templates/header.php';
                                 class="px-2 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded transition-colors" title="จัดทำเสร็จ">
                             <i class="fas fa-check"></i>
                         </button>
-                        <?php elseif ($req['status'] === 'COMPLETED' && $req['document_url']): ?>
-                        <a href="<?php echo htmlspecialchars($req['document_url']); ?>" target="_blank" 
+                        <?php elseif (in_array($req['status'], ['COMPLETED', 'READY', 'DELIVERED'], true) && $req['document_url']): ?>
+                        <a href="<?php echo htmlspecialchars($req['document_url']); ?>" target="_blank" rel="noopener noreferrer"
                            class="px-2 py-1 bg-white/10 hover:bg-white/20 text-white text-xs rounded transition-colors inline-block" title="ดาวน์โหลด">
                             <i class="fas fa-download"></i>
                         </a>
