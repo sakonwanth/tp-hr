@@ -5,6 +5,9 @@
  */
 class Auth {
     private static ?array $user = null;
+
+    /** @var \TpCommon\Auth\Acl|null|false Cached ACL; false = tp-common Acl unavailable */
+    private static $aclInstance = false;
     
     /**
      * Check if user is logged in
@@ -83,6 +86,9 @@ class Auth {
         
         // Log
         self::log('LOGIN', 'users', $user['id']);
+
+        self::$user = null;
+        self::$aclInstance = false;
         
         return ['success' => true, 'user' => $user];
     }
@@ -96,6 +102,7 @@ class Auth {
         }
         
         self::$user = null;
+        self::$aclInstance = false;
 
         if (defined('TP_COMMON_AVAILABLE') && TP_COMMON_AVAILABLE
             && class_exists('TpCommon\Session\SharedSession')) {
@@ -165,6 +172,30 @@ class Auth {
     }
     
     /**
+     * TpCommon ACL for dot-notation permissions (Phase C pilot). Null if unavailable.
+     */
+    public static function acl(): ?\TpCommon\Auth\Acl {
+        if (self::$aclInstance !== false) {
+            return self::$aclInstance;
+        }
+        if (!defined('TP_COMMON_AVAILABLE') || !TP_COMMON_AVAILABLE
+            || !class_exists(\TpCommon\Auth\Acl::class)) {
+            return self::$aclInstance = null;
+        }
+        $user = self::user();
+        if (!$user) {
+            return self::$aclInstance = null;
+        }
+        try {
+            $acl = new \TpCommon\Auth\Acl(getDB());
+            $acl->loadForUser((int) $user['id']);
+            return self::$aclInstance = $acl;
+        } catch (\Throwable $e) {
+            return self::$aclInstance = null;
+        }
+    }
+
+    /**
      * Check if user has specific permission
      */
     public static function can(string $permission): bool {
@@ -175,9 +206,17 @@ class Auth {
         if (($user['role_name'] ?? '') === 'Admin') {
             return true;
         }
+
+        $acl = self::acl();
+        if ($acl !== null && str_contains($permission, '.') && $acl->can($permission)) {
+            return true;
+        }
         
         $permissions = json_decode($user['role_permissions'] ?? '[]', true);
-        return in_array($permission, $permissions);
+        if (!is_array($permissions)) {
+            return false;
+        }
+        return in_array($permission, $permissions, true);
     }
     
     /**

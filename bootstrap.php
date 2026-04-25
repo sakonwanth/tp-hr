@@ -158,6 +158,21 @@ function isHR(): bool {
     return in_array($user['role_name'] ?? '', HR_ROLES);
 }
 
+/**
+ * HR admin dashboard (/hr/) — legacy HR_ROLES plus optional Acl grants (Phase C).
+ * Grant `hr.dashboard` or `hr.*` in permissions / role_permissions for non–HR-named roles.
+ */
+function hr_can_access_hr_dashboard(): bool {
+    if (isHR()) {
+        return true;
+    }
+    $acl = Auth::acl();
+    if ($acl === null) {
+        return false;
+    }
+    return $acl->can('hr.dashboard') || $acl->can('hr.*');
+}
+
 function isCEOOrAbove(): bool {
     $user = getCurrentUser();
     if (!$user) return false;

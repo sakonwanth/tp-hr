@@ -10,8 +10,8 @@ require_once dirname(__DIR__) . '/bootstrap.php';
 Auth::requireLogin();
 $user = Auth::user();
 
-// Check HR permission
-if (!isHR()) {
+// Check HR permission (role names or Acl hr.dashboard / hr.*)
+if (!hr_can_access_hr_dashboard()) {
     redirect('/', 302);
 }
 
