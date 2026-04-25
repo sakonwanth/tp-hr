@@ -256,18 +256,24 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             background-size: 1.1rem 1.1rem;
         }
 
+        /* แถบบนมือถือ — โทนเอกสาร / องค์กร (คงโครงสร้างเดิม) */
         .mobile-app-header.header-glass {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.97) 0%, rgba(15, 23, 42, 0.9) 100%);
+            backdrop-filter: blur(28px) saturate(1.12);
+            -webkit-backdrop-filter: blur(28px) saturate(1.12);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.05) inset,
+                0 12px 40px rgba(0, 0, 0, 0.22);
         }
 
-        /* Mobile top bar — flex + กลางจริง (ไม่พึ่ง Tailwind arbitrary ที่อาจไม่อยู่ใน app.css) */
         .mobile-app-header-bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
-            padding: calc(env(safe-area-inset-top, 0px) + 12px) 1rem 18px;
-            min-height: calc(env(safe-area-inset-top, 0px) + 56px);
+            gap: 14px;
+            padding: calc(env(safe-area-inset-top, 0px) + 14px) 1.125rem 20px;
+            min-height: calc(env(safe-area-inset-top, 0px) + 58px);
         }
         .mobile-app-header-bar .mobile-nav-side {
             flex: 1 1 0;
@@ -280,40 +286,53 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         }
         .mobile-app-header-bar .mobile-nav-brand {
             flex: 0 0 auto;
-            font-size: 1.125rem;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            color: #faf5ff;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            letter-spacing: 0.24em;
+            color: #f8fafc;
             text-decoration: none;
-            padding: 0 4px;
+            padding: 6px 2px 4px;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+            font-variant-numeric: tabular-nums;
         }
         .mobile-nav-menu-btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-height: 48px;
-            padding: 0 14px;
-            border-radius: 9999px;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            background: rgba(255, 255, 255, 0.06);
-            color: #e9d5ff;
-            font-size: 0.875rem;
-            font-weight: 600;
-            transition: background 0.15s ease, border-color 0.15s ease;
+            min-height: 46px;
+            padding: 0 18px;
+            border-radius: 11px;
+            border: 1px solid rgba(203, 213, 225, 0.16);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.04) 100%);
+            color: #f1f5f9;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+            transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
         }
         .mobile-nav-menu-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.2);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.07) 100%);
+            border-color: rgba(196, 181, 253, 0.28);
             color: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+        .mobile-nav-menu-btn:active {
+            transform: scale(0.98);
+        }
+        .mobile-nav-menu-btn:focus-visible {
+            outline: 2px solid rgba(167, 139, 250, 0.65);
+            outline-offset: 2px;
         }
         .mobile-nav-spacer {
-            width: 48px;
-            height: 48px;
+            min-width: 92px;
+            height: 46px;
             flex-shrink: 0;
         }
 
         /* Dashboard hero — การ์ดเดียว แถวละ ไอคอน + ข้อความ (แนวนอนชัดเจน) */
         .dashboard-hero {
+            margin-top: 0.375rem;
             margin-bottom: 2rem;
         }
         .dashboard-hero h1.dashboard-hero-title {
@@ -339,9 +358,9 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         .dashboard-hero-row {
             display: flex;
             align-items: center;
-            gap: 14px;
-            padding: 12px 14px;
-            min-height: 48px;
+            gap: 18px;
+            padding: 14px 18px;
+            min-height: 52px;
         }
         .dashboard-hero-row + .dashboard-hero-row {
             border-top: 1px solid rgba(255, 255, 255, 0.07);
@@ -406,7 +425,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             .content-area {
                 margin-left: 0;
                 /* One safe-area term only: inset + fixed toolbar slack (must match .mobile-app-header height) */
-                padding-top: calc(env(safe-area-inset-top, 0px) + 5.75rem);
+                padding-top: calc(env(safe-area-inset-top, 0px) + 6rem);
                 padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
                 padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
                 padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); /* space for mobile bottom nav */
