@@ -19,6 +19,9 @@ define('MIN_PASSWORD_LENGTH', 8);
 // External services
 define('CRM_BASE_URL', $_ENV['CRM_BASE_URL'] ?? 'http://localhost/tp-crm');
 
+/** Public base URL of TP-Checkin (รูปลงเวลาเก็บใต้ {CHECKIN}/storage/photos/...) */
+define('CHECKIN_APP_URL', $_ENV['CHECKIN_APP_URL'] ?? '');
+
 // Filesystem path to TP-CRM (LINE bridge loads LineNotifier from disk). Optional if tp-crm is not ../tp-crm.
 if (!defined('TP_CRM_PATH')) {
     $crmFs = $_ENV['TP_CRM_PATH'] ?? getenv('TP_CRM_PATH');

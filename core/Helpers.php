@@ -222,6 +222,28 @@ function fileUrl(string $path): string {
 }
 
 /**
+ * Public URL for attendance check-in/out photos (DB may store tp-checkin paths or tp-hr uploads).
+ */
+function attendancePhotoPublicUrl(?string $path): string {
+    $path = trim((string) $path);
+    if ($path === '') {
+        return '';
+    }
+    if (preg_match('#^https?://#i', $path)) {
+        return $path;
+    }
+    $path = ltrim($path, '/');
+    $checkinBase = CHECKIN_APP_URL !== '' ? rtrim(CHECKIN_APP_URL, '/') : rtrim(APP_URL, '/');
+    if (strpos($path, 'photos/') === 0) {
+        return $checkinBase . '/storage/' . $path;
+    }
+    if (strpos($path, 'storage/') === 0) {
+        return $checkinBase . '/' . $path;
+    }
+    return fileUrl($path);
+}
+
+/**
  * Validate Thai ID Card
  */
 function validateThaiIdCard(string $idCard): bool {

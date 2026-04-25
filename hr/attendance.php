@@ -409,7 +409,7 @@ include dirname(__DIR__) . '/templates/header.php';
                     <td class="px-4 py-3">
                         <div class="flex items-center gap-3">
                             <?php if ($rec['check_in_photo']): ?>
-                            <img src="<?php echo htmlspecialchars($rec['check_in_photo']); ?>" class="w-10 h-10 rounded-full object-cover">
+                            <img src="<?php echo htmlspecialchars(attendancePhotoPublicUrl($rec['check_in_photo'])); ?>" alt="" class="w-10 h-10 rounded-full object-cover">
                             <?php else: ?>
                             <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/50">
                                 <i class="fas fa-user"></i>
