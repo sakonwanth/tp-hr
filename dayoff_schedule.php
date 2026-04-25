@@ -156,15 +156,15 @@ for ($i = -1; $i < 6; $i++) {
 include __DIR__ . '/templates/header.php';
 ?>
 
-<div class="mb-6">
-    <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
-        <a href="checkin.php" class="hover:text-white touch-manipulation inline-flex min-h-[44px] items-center">ลงเวลา</a>
+<div class="mb-8 max-w-3xl">
+    <nav class="mb-4 text-sm text-white/60" aria-label="Breadcrumb">
+        <a href="checkin.php" class="inline-flex min-h-[44px] items-center hover:text-white touch-manipulation">ลงเวลา</a>
         <span class="mx-2">/</span>
         <span class="text-white">วันหยุดประจำสัปดาห์</span>
     </nav>
-    <h1 class="text-2xl sm:text-3xl font-bold text-white leading-tight">วันหยุดประจำสัปดาห์</h1>
-    <div class="mt-3 max-w-3xl space-y-1.5 text-sm text-white/65">
-        <p class="text-base text-white/90">
+    <h1 class="mb-4 text-2xl font-bold leading-tight text-white sm:text-3xl">วันหยุดประจำสัปดาห์</h1>
+    <div class="space-y-3 text-sm leading-relaxed text-white/70">
+        <p class="text-base text-white/95">
             วันหยุดเริ่มต้น: <span class="font-semibold text-violet-200">วัน<?php echo htmlspecialchars($dayNames[$defaultDayOff]); ?></span>
         </p>
         <p>ขอเปลี่ยนวันหยุดรายสัปดาห์ได้ รอผู้บริหารอนุมัติ</p>

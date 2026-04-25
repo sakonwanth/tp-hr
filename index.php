@@ -82,23 +82,27 @@ $announcements = $stmt->fetchAll();
 require_once __DIR__ . '/templates/header.php';
 ?>
 
-<!-- Page Header: meta แยกบรรทัดบนมือถือ — ไอคอนเว้นจากข้อความชัดเจน -->
-<div class="mb-7 mt-1 lg:mb-8">
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
-        <div class="min-w-0 space-y-3">
+<!-- Page Header: คอลัมน์ไอคอนคงที่ — กันไอคอนทับตัวอักษร (FA + สระบนไทย) -->
+<div class="mb-8 mt-2 lg:mb-8">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div class="min-w-0 space-y-4">
             <h1 class="text-2xl sm:text-3xl font-bold text-white leading-tight">
                 สวัสดี, <?php echo htmlspecialchars($user['first_name_th'] ?? $user['username']); ?>
             </h1>
-            <div class="flex flex-col gap-2.5 text-sm sm:text-base text-slate-400 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-1">
-                <span class="inline-flex items-start gap-3 sm:items-center">
-                    <i class="fas fa-calendar-day mt-0.5 w-5 shrink-0 text-center text-violet-300/90 sm:mt-0" aria-hidden="true"></i>
-                    <span class="leading-snug"><?php echo formatDateThai(date('Y-m-d')); ?></span>
-                </span>
-                <span class="hidden h-4 w-px bg-slate-600 sm:inline-block" aria-hidden="true"></span>
-                <span class="inline-flex items-start gap-3 sm:items-center min-w-0">
-                    <i class="fas fa-briefcase mt-0.5 w-5 shrink-0 text-center text-violet-300/90 sm:mt-0" aria-hidden="true"></i>
-                    <span class="leading-snug break-words"><?php echo htmlspecialchars($user['position'] ?? $user['role_name'] ?? 'พนักงาน'); ?></span>
-                </span>
+            <div class="flex flex-col gap-3 text-sm sm:text-base text-slate-300 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-2">
+                <div class="grid grid-cols-[2rem_minmax(0,1fr)] items-start gap-x-3 gap-y-0">
+                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/5 text-violet-300" aria-hidden="true">
+                        <i class="fas fa-calendar-day text-sm"></i>
+                    </span>
+                    <span class="min-w-0 pt-0.5 leading-relaxed"><?php echo formatDateThai(date('Y-m-d')); ?></span>
+                </div>
+                <span class="hidden h-5 w-px shrink-0 bg-slate-600 sm:block" aria-hidden="true"></span>
+                <div class="grid grid-cols-[2rem_minmax(0,1fr)] items-start gap-x-3 sm:max-w-xl">
+                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/5 text-violet-300" aria-hidden="true">
+                        <i class="fas fa-briefcase text-sm"></i>
+                    </span>
+                    <span class="min-w-0 pt-0.5 leading-relaxed break-words"><?php echo htmlspecialchars($user['position'] ?? $user['role_name'] ?? 'พนักงาน'); ?></span>
+                </div>
             </div>
         </div>
         <div class="flex items-stretch sm:items-center gap-3 shrink-0">
@@ -119,7 +123,7 @@ require_once __DIR__ . '/templates/header.php';
                 <i class="fas fa-users text-blue-400 text-xl"></i>
             </div>
             <div>
-                <p class="text-slate-400 text-sm">พนักงานทั้งหมด</p>
+                <p class="text-slate-300 text-sm">พนักงานทั้งหมด</p>
                 <p class="text-2xl font-bold text-white"><?php echo number_format($stats['total_employees']); ?></p>
             </div>
         </div>
@@ -131,7 +135,7 @@ require_once __DIR__ . '/templates/header.php';
                 <i class="fas fa-user-check text-emerald-400 text-xl"></i>
             </div>
             <div>
-                <p class="text-slate-400 text-sm">ลงเวลาวันนี้</p>
+                <p class="text-slate-300 text-sm">ลงเวลาวันนี้</p>
                 <p class="text-2xl font-bold text-white"><?php echo number_format($stats['today_attendance']); ?></p>
             </div>
         </div>
@@ -143,7 +147,7 @@ require_once __DIR__ . '/templates/header.php';
                 <i class="fas fa-calendar-times text-amber-400 text-xl"></i>
             </div>
             <div>
-                <p class="text-slate-400 text-sm">คำขอลารออนุมัติ</p>
+                <p class="text-slate-300 text-sm">คำขอลารออนุมัติ</p>
                 <p class="text-2xl font-bold text-white"><?php echo number_format($stats['pending_leaves']); ?></p>
             </div>
         </div>
@@ -155,7 +159,7 @@ require_once __DIR__ . '/templates/header.php';
                 <i class="fas fa-file-alt text-purple-400 text-xl"></i>
             </div>
             <div>
-                <p class="text-slate-400 text-sm">คำขอเอกสาร</p>
+                <p class="text-slate-300 text-sm">คำขอเอกสาร</p>
                 <p class="text-2xl font-bold text-white"><?php echo number_format($stats['pending_documents']); ?></p>
             </div>
         </div>

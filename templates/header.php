@@ -256,13 +256,12 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             background-size: 1.1rem 1.1rem;
         }
 
+        /* Solid fallback first (some WebKit builds clip gradient text poorly on toolbars) */
         .brand-wordmark {
             font-weight: 700;
-            letter-spacing: -0.02em;
-            background: linear-gradient(135deg, #fff 0%, #e9d5ff 45%, #c4b5fd 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+            letter-spacing: 0.04em;
+            color: #f5f3ff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
         }
         
         .content-area {
@@ -273,8 +272,10 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         @media (max-width: 1024px) {
             .content-area {
                 margin-left: 0;
-                /* Taller mobile header (~native app) + safe area */
-                padding-top: calc(5.75rem + env(safe-area-inset-top, 0px));
+                /* One safe-area term only: inset + fixed toolbar slack (must match .mobile-app-header height) */
+                padding-top: calc(env(safe-area-inset-top, 0px) + 5.25rem);
+                padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+                padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
                 padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); /* space for mobile bottom nav */
             }
             /* Tables / wide blocks: less scroll “bleed” into the page behind */
@@ -549,16 +550,17 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
     </div>
 </aside>
 
-<!-- Mobile header: taller bar, text “เมนู”, centered wordmark (profile → bottom nav “ฉัน”) -->
-<header class="header-glass lg:hidden fixed top-0 left-0 right-0 z-40">
-    <div class="grid grid-cols-3 items-center gap-2 px-4 pb-4 pt-[max(0.875rem,env(safe-area-inset-top,0px))] min-h-[calc(3.5rem+env(safe-area-inset-top,0px))]">
-        <button type="button" id="mobileMenuBtn" class="touch-manipulation justify-self-start flex min-h-[48px] items-center rounded-xl px-3 text-sm font-semibold text-violet-200 transition-colors hover:bg-white/10 hover:text-white">
+<!-- Mobile header: safe-area นับครั้งเดียวที่ padding-top — กลางยืดหยุ่น (minmax 0) กัน label ชนกัน -->
+<header class="mobile-app-header header-glass lg:hidden fixed top-0 left-0 right-0 z-40">
+    <div class="grid items-center gap-x-2 px-4 pb-4 pt-[calc(env(safe-area-inset-top,0px)+14px)]"
+         style="grid-template-columns: minmax(0,auto) minmax(0,1fr) minmax(0,auto);">
+        <button type="button" id="mobileMenuBtn" class="touch-manipulation flex min-h-[52px] min-w-[3.25rem] items-center justify-center rounded-xl px-3 text-sm font-semibold text-violet-100 transition-colors hover:bg-white/10 hover:text-white">
             เมนู
         </button>
-        <a href="/" class="touch-manipulation justify-self-center min-w-0 text-center">
-            <span class="brand-wordmark block truncate text-lg sm:text-xl tracking-tight">TP-HR</span>
+        <a href="/" class="touch-manipulation flex min-h-[52px] min-w-0 items-center justify-center px-1 text-center no-underline">
+            <span class="brand-wordmark text-lg leading-none">TP-HR</span>
         </a>
-        <span class="justify-self-end w-[3.25rem]" aria-hidden="true"></span>
+        <span class="min-w-[3.25rem]" aria-hidden="true"></span>
     </div>
 </header>
 
