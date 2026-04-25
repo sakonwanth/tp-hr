@@ -224,6 +224,8 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         
         .input-field {
             width: 100%;
+            max-width: 100%;
+            min-width: 0;
             padding: 12px 16px;
             min-height: 44px;
             font-size: 16px;
@@ -233,6 +235,15 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             color: #fff;
             transition: all 0.2s ease;
             touch-action: manipulation;
+        }
+
+        /* type=date ใน WebKit มี intrinsic min-width — ต้องบังคับให้อยู่ในการ์ด */
+        input.input-field[type="date"],
+        input.input-field[type="time"],
+        input.input-field[type="datetime-local"] {
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
         }
         
         .input-field:focus {

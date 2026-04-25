@@ -61,13 +61,13 @@ $leave_types_form = $stmt->fetchAll();
             </div>
             
             <!-- Date Range -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 min-w-0">
+                <div class="min-w-0">
                     <label class="block text-white/80 text-sm font-medium mb-2">วันที่เริ่มต้น <span class="text-red-400">*</span></label>
-                    <input type="date" name="start_date" id="start_date" required class="input-field" 
+                    <input type="date" name="start_date" id="start_date" required class="input-field w-full max-w-full" 
                            min="<?php echo date('Y-m-d'); ?>" onchange="calculateDays()">
                 </div>
-                <div>
+                <div class="min-w-0">
                     <label class="block text-white/80 text-sm font-medium mb-2">ช่วงเวลา</label>
                     <select name="start_period" id="start_period" class="input-field" onchange="calculateDays()">
                         <option value="FULL">ทั้งวัน</option>
@@ -77,13 +77,13 @@ $leave_types_form = $stmt->fetchAll();
                 </div>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 min-w-0">
+                <div class="min-w-0">
                     <label class="block text-white/80 text-sm font-medium mb-2">วันที่สิ้นสุด <span class="text-red-400">*</span></label>
-                    <input type="date" name="end_date" id="end_date" required class="input-field" 
+                    <input type="date" name="end_date" id="end_date" required class="input-field w-full max-w-full" 
                            min="<?php echo date('Y-m-d'); ?>" onchange="calculateDays()">
                 </div>
-                <div>
+                <div class="min-w-0">
                     <label class="block text-white/80 text-sm font-medium mb-2">ช่วงเวลา</label>
                     <select name="end_period" id="end_period" class="input-field" onchange="calculateDays()">
                         <option value="FULL">ทั้งวัน</option>
