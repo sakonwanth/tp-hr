@@ -649,8 +649,11 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             }
         }
         @media (min-width: 1280px) {
+            /* margin-left + width:100% เดิม = ล้นขวา (ต้องหักความกว้าง sidebar) */
             .content-area {
                 margin-left: 280px;
+                width: calc(100% - 280px);
+                max-width: calc(100% - 280px);
             }
         }
 
