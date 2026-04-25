@@ -9,6 +9,7 @@ require_once __DIR__ . '/bootstrap.php';
 
 Auth::requireLogin();
 $user = Auth::user();
+$current_page = 'leave';
 
 $pdo = Database::getInstance()->getConnection();
 
@@ -91,15 +92,18 @@ if (!in_array($year, $availableYears)) {
 include 'templates/header.php';
 ?>
 
-<div class="mb-6">
-    <nav class="text-sm text-white/60 mb-1">
-        <a href="leave.php" class="hover:text-white">การลา</a>
+<div class="mb-6 min-w-0">
+    <nav class="text-sm text-white/60 mb-1" aria-label="Breadcrumb">
+        <a href="leave.php" class="hover:text-white touch-manipulation">การลา</a>
         <span class="mx-2">/</span>
         <span class="text-white">ประวัติการลา</span>
     </nav>
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <h1 class="text-2xl font-bold text-white">ประวัติการลา</h1>
-        <a href="leave.php?action=new" class="inline-flex items-center px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
+    <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+        <div class="min-w-0 flex-1">
+            <h1 class="text-2xl font-bold text-white tracking-tight">ประวัติการลา</h1>
+            <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">กรองตามปี ประเภท และสถานะ ดูสรุปวันลาที่ใช้ไปในแต่ละประเภท</p>
+        </div>
+        <a href="leave.php?action=request" class="btn-primary btn-primary-prominent w-full sm:w-auto shrink-0 inline-flex items-center justify-center touch-manipulation">
             <i class="fas fa-plus mr-2"></i>ยื่นขอลาใหม่
         </a>
     </div>
@@ -107,12 +111,12 @@ include 'templates/header.php';
 
 <!-- Summary Cards -->
 <?php if (!empty($summary)): ?>
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6 min-w-0 max-w-full">
     <?php foreach ($summary as $sum): ?>
-    <div class="glass-card rounded-xl p-4">
-        <div class="flex items-center gap-3">
-            <div class="w-3 h-3 rounded-full" style="background-color: <?php echo $sum['color_code']; ?>"></div>
-            <span class="text-white/70 text-sm"><?php echo htmlspecialchars($sum['name']); ?></span>
+    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden">
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="w-3 h-3 rounded-full shrink-0" style="background-color: <?php echo htmlspecialchars($sum['color_code'] ?? '#6B7280'); ?>"></div>
+            <span class="text-white/70 text-sm truncate min-w-0"><?php echo htmlspecialchars($sum['name']); ?></span>
         </div>
         <p class="text-2xl font-bold text-white mt-2">
             <?php echo number_format($sum['approved_days'], 1); ?> <span class="text-sm font-normal text-white/60">วัน</span>
@@ -129,9 +133,9 @@ include 'templates/header.php';
 <?php endif; ?>
 
 <!-- Filters -->
-<div class="glass-card rounded-xl p-4 mb-6">
-    <form method="GET" class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div>
+<div class="glass-card rounded-xl p-4 mb-6 min-w-0 overflow-hidden">
+    <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 min-w-0">
+        <div class="min-w-0">
             <label class="block text-white/60 text-xs mb-1">ปี</label>
             <select name="year" class="input-field" onchange="this.form.submit()">
                 <?php foreach ($availableYears as $y): ?>
@@ -139,7 +143,7 @@ include 'templates/header.php';
                 <?php endforeach; ?>
             </select>
         </div>
-        <div>
+        <div class="min-w-0">
             <label class="block text-white/60 text-xs mb-1">ประเภทการลา</label>
             <select name="type" class="input-field" onchange="this.form.submit()">
                 <option value="">ทั้งหมด</option>
@@ -150,7 +154,7 @@ include 'templates/header.php';
                 <?php endforeach; ?>
             </select>
         </div>
-        <div>
+        <div class="min-w-0">
             <label class="block text-white/60 text-xs mb-1">สถานะ</label>
             <select name="status" class="input-field" onchange="this.form.submit()">
                 <option value="">ทั้งหมด</option>
@@ -160,8 +164,8 @@ include 'templates/header.php';
                 <option value="CANCELLED" <?php echo $status === 'CANCELLED' ? 'selected' : ''; ?>>ยกเลิก</option>
             </select>
         </div>
-        <div class="flex items-end">
-            <a href="leave_history.php?year=<?php echo $year; ?>" class="w-full py-2.5 bg-white/10 hover:bg-white/20 text-white text-center rounded-lg transition-colors">
+        <div class="flex items-end min-w-0">
+            <a href="leave_history.php?year=<?php echo (int)$year; ?>" class="touch-manipulation w-full min-h-[44px] inline-flex items-center justify-center py-2.5 bg-white/10 hover:bg-white/20 text-white text-center rounded-xl transition-colors">
                 <i class="fas fa-redo mr-2"></i>รีเซ็ต
             </a>
         </div>
@@ -169,38 +173,38 @@ include 'templates/header.php';
 </div>
 
 <!-- Results -->
-<div class="glass-card rounded-xl overflow-hidden">
+<div class="glass-card rounded-xl overflow-hidden min-w-0 max-w-full">
     <?php if (empty($requests)): ?>
     <div class="p-12 text-center">
         <i class="fas fa-calendar-times text-4xl text-white/20 mb-4"></i>
         <p class="text-white/60">ไม่พบประวัติการลา</p>
     </div>
     <?php else: ?>
+    <?php
+    $statusColors = [
+        'PENDING' => 'bg-yellow-500/20 text-yellow-400',
+        'APPROVED' => 'bg-green-500/20 text-green-400',
+        'REJECTED' => 'bg-red-500/20 text-red-400',
+        'CANCELLED' => 'bg-gray-500/20 text-gray-400',
+    ];
+    $statusText = [
+        'PENDING' => 'รออนุมัติ',
+        'APPROVED' => 'อนุมัติ',
+        'REJECTED' => 'ไม่อนุมัติ',
+        'CANCELLED' => 'ยกเลิก',
+    ];
+    ?>
     <!-- Mobile View -->
-    <div class="md:hidden divide-y divide-white/10">
+    <div class="md:hidden divide-y divide-white/10 min-w-0">
         <?php foreach ($requests as $req): ?>
-        <div class="p-4">
-            <div class="flex items-center justify-between mb-2">
-                <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full" style="background-color: <?php echo $req['color_code']; ?>"></span>
-                    <span class="text-white font-medium"><?php echo htmlspecialchars($req['leave_type_name']); ?></span>
+        <div class="p-4 min-w-0">
+            <div class="flex items-center justify-between gap-2 mb-2 min-w-0">
+                <div class="flex items-center gap-2 min-w-0">
+                    <span class="w-2 h-2 rounded-full shrink-0" style="background-color: <?php echo htmlspecialchars($req['color_code'] ?? '#6B7280'); ?>"></span>
+                    <span class="text-white font-medium truncate min-w-0"><?php echo htmlspecialchars($req['leave_type_name']); ?></span>
                 </div>
-                <?php
-                $statusColors = [
-                    'PENDING' => 'bg-yellow-500/20 text-yellow-400',
-                    'APPROVED' => 'bg-green-500/20 text-green-400',
-                    'REJECTED' => 'bg-red-500/20 text-red-400',
-                    'CANCELLED' => 'bg-gray-500/20 text-gray-400'
-                ];
-                $statusText = [
-                    'PENDING' => 'รออนุมัติ',
-                    'APPROVED' => 'อนุมัติ',
-                    'REJECTED' => 'ไม่อนุมัติ',
-                    'CANCELLED' => 'ยกเลิก'
-                ];
-                ?>
-                <span class="px-2 py-0.5 rounded text-xs <?php echo $statusColors[$req['status']]; ?>">
-                    <?php echo $statusText[$req['status']]; ?>
+                <span class="px-2 py-0.5 rounded text-xs shrink-0 <?php echo $statusColors[$req['status']] ?? 'bg-gray-500/20 text-gray-400'; ?>">
+                    <?php echo $statusText[$req['status']] ?? $req['status']; ?>
                 </span>
             </div>
             <p class="text-white/60 text-sm">
@@ -229,7 +233,8 @@ include 'templates/header.php';
     </div>
     
     <!-- Desktop View -->
-    <table class="hidden md:table w-full">
+    <div class="hidden md:block overflow-x-auto min-w-0 max-w-full overscroll-x-contain -mx-1 px-1">
+    <table class="w-full" style="min-width:640px">
         <thead class="bg-white/5">
             <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-white/60 uppercase">เลขที่</th>
@@ -264,8 +269,8 @@ include 'templates/header.php';
                     <?php echo htmlspecialchars($req['reason']); ?>
                 </td>
                 <td class="px-6 py-4 text-center">
-                    <span class="px-3 py-1 rounded-full text-xs <?php echo $statusColors[$req['status']]; ?>">
-                        <?php echo $statusText[$req['status']]; ?>
+                    <span class="px-3 py-1 rounded-full text-xs <?php echo $statusColors[$req['status']] ?? 'bg-gray-500/20 text-gray-400'; ?>">
+                        <?php echo $statusText[$req['status']] ?? htmlspecialchars($req['status']); ?>
                     </span>
                 </td>
                 <td class="px-6 py-4 text-center">
@@ -282,32 +287,33 @@ include 'templates/header.php';
             <?php endforeach; ?>
         </tbody>
     </table>
+    </div>
     
     <!-- Pagination -->
     <?php if ($totalPages > 1): ?>
-    <div class="px-6 py-4 border-t border-white/10 flex items-center justify-between">
-        <p class="text-white/60 text-sm">
+    <div class="px-4 sm:px-6 py-4 border-t border-white/10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
+        <p class="text-white/60 text-sm min-w-0">
             แสดง <?php echo $offset + 1; ?> - <?php echo min($offset + $limit, $totalRecords); ?> 
             จาก <?php echo $totalRecords; ?> รายการ
         </p>
-        <div class="flex gap-2">
+        <div class="flex flex-wrap gap-2 justify-center sm:justify-end">
             <?php if ($page > 1): ?>
-            <a href="?year=<?php echo $year; ?>&type=<?php echo $type; ?>&status=<?php echo $status; ?>&page=<?php echo $page - 1; ?>" 
-               class="px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded transition-colors">
+            <a href="?year=<?php echo $year; ?>&type=<?php echo $type; ?>&status=<?php echo urlencode($status); ?>&page=<?php echo $page - 1; ?>" 
+               class="touch-manipulation min-h-[44px] min-w-[44px] inline-flex items-center justify-center px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors">
                 <i class="fas fa-chevron-left"></i>
             </a>
             <?php endif; ?>
             
             <?php for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++): ?>
-            <a href="?year=<?php echo $year; ?>&type=<?php echo $type; ?>&status=<?php echo $status; ?>&page=<?php echo $i; ?>" 
-               class="px-3 py-1 <?php echo $i === $page ? 'bg-violet-600 text-white' : 'bg-white/10 hover:bg-white/20 text-white'; ?> rounded transition-colors">
+            <a href="?year=<?php echo $year; ?>&type=<?php echo $type; ?>&status=<?php echo urlencode($status); ?>&page=<?php echo $i; ?>" 
+               class="touch-manipulation min-h-[44px] min-w-[44px] inline-flex items-center justify-center px-3 py-2 <?php echo $i === $page ? 'bg-violet-600 text-white' : 'bg-white/10 hover:bg-white/20 text-white'; ?> rounded-xl transition-colors">
                 <?php echo $i; ?>
             </a>
             <?php endfor; ?>
             
             <?php if ($page < $totalPages): ?>
-            <a href="?year=<?php echo $year; ?>&type=<?php echo $type; ?>&status=<?php echo $status; ?>&page=<?php echo $page + 1; ?>" 
-               class="px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded transition-colors">
+            <a href="?year=<?php echo $year; ?>&type=<?php echo $type; ?>&status=<?php echo urlencode($status); ?>&page=<?php echo $page + 1; ?>" 
+               class="touch-manipulation min-h-[44px] min-w-[44px] inline-flex items-center justify-center px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors">
                 <i class="fas fa-chevron-right"></i>
             </a>
             <?php endif; ?>
@@ -448,14 +454,14 @@ async function cancelRequest(id) {
         const result = await response.json();
         
         if (result.success) {
-            showToast('ยกเลิกคำขอลาสำเร็จ', 'success');
+            showToast('success', 'สำเร็จ', 'ยกเลิกคำขอลาเรียบร้อยแล้ว');
             setTimeout(() => location.reload(), 1000);
         } else {
-            showToast(result.error || 'เกิดข้อผิดพลาด', 'error');
+            showToast('error', 'ผิดพลาด', result.error || 'เกิดข้อผิดพลาด');
         }
     } catch (err) {
         console.error(err);
-        showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+        showToast('error', 'ผิดพลาด', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
     }
 }
 
