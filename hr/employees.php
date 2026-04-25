@@ -227,8 +227,8 @@ $flashError = flash('error');
         <p class="text-white/60">ไม่พบพนักงาน</p>
     </div>
     <?php else: ?>
-    <!-- Mobile-first: card list (desktop keeps table) -->
-    <div class="lg:hidden p-3 space-y-3">
+    <!-- Mobile-first: card list below md (tablet/desktop use table) -->
+    <div class="md:hidden p-3 space-y-3">
         <?php foreach ($employees as $emp): ?>
         <?php
         $fullName = trim((string)($emp['first_name_th'] ?? '') . ' ' . (string)($emp['last_name_th'] ?? ''));
@@ -335,7 +335,7 @@ $flashError = flash('error');
         <?php endforeach; ?>
     </div>
 
-    <div class="hidden lg:block overflow-x-auto">
+    <div class="hidden md:block overflow-x-auto">
         <table class="w-full">
             <thead class="bg-white/5">
                 <tr>

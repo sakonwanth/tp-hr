@@ -179,7 +179,7 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
     <?php else: ?>
     <!-- Mobile-first: card list (desktop keeps table) -->
-    <div class="lg:hidden p-3 space-y-3">
+    <div class="md:hidden p-3 space-y-3">
         <?php
         $statusColors = [
             'PENDING' => 'bg-yellow-500/15 border border-yellow-500/30 text-yellow-200',
@@ -264,7 +264,7 @@ include dirname(__DIR__) . '/templates/header.php';
         <?php endforeach; ?>
     </div>
 
-    <div class="hidden lg:block overflow-x-auto">
+    <div class="hidden md:block overflow-x-auto">
         <table class="w-full">
             <thead class="bg-white/5">
                 <tr>

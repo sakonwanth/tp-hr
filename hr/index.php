@@ -197,13 +197,13 @@ include dirname(__DIR__) . '/templates/header.php';
                             (<?php echo number_format($leave['total_days'], 1); ?> วัน)
                         </p>
                     </div>
-                    <div class="flex gap-2">
-                        <button onclick="approveLeave(<?php echo $leave['id']; ?>)" 
-                                class="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded transition-colors">
+                    <div class="flex flex-col sm:flex-row gap-2 shrink-0 w-full sm:w-auto">
+                        <button type="button" onclick="approveLeave(<?php echo $leave['id']; ?>)" 
+                                class="min-h-[44px] px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors touch-manipulation">
                             อนุมัติ
                         </button>
-                        <button onclick="rejectLeave(<?php echo $leave['id']; ?>)"
-                                class="px-3 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-sm rounded transition-colors">
+                        <button type="button" onclick="rejectLeave(<?php echo $leave['id']; ?>)"
+                                class="min-h-[44px] px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-sm rounded-lg transition-colors touch-manipulation">
                             ไม่อนุมัติ
                         </button>
                     </div>
@@ -293,7 +293,42 @@ include dirname(__DIR__) . '/templates/header.php';
         <a href="documents.php" class="text-blue-400 text-sm hover:underline">ดูทั้งหมด</a>
     </div>
     
-    <div class="overflow-x-auto">
+    <div class="md:hidden p-3 space-y-3">
+        <?php foreach ($recentDocs as $doc): ?>
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-4 space-y-3">
+            <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                    <p class="text-white/50 text-xs uppercase tracking-wide">เลขที่</p>
+                    <p class="text-white font-mono text-sm"><?php echo htmlspecialchars($doc['request_number']); ?></p>
+                </div>
+                <?php if ($doc['status'] === 'PENDING'): ?>
+                <span class="shrink-0 px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs rounded">รอดำเนินการ</span>
+                <?php else: ?>
+                <span class="shrink-0 px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded">กำลังดำเนินการ</span>
+                <?php endif; ?>
+            </div>
+            <div>
+                <p class="text-white/50 text-xs">พนักงาน</p>
+                <p class="text-white font-medium"><?php echo htmlspecialchars($doc['first_name_th'] . ' ' . $doc['last_name_th']); ?></p>
+                <p class="text-white/40 text-xs mt-0.5"><?php echo htmlspecialchars($doc['employee_code'] ?? ''); ?></p>
+            </div>
+            <div>
+                <p class="text-white/50 text-xs">ประเภทเอกสาร</p>
+                <p class="text-white text-sm"><?php echo htmlspecialchars($doc['template_name']); ?></p>
+            </div>
+            <div>
+                <p class="text-white/50 text-xs">วันที่ขอ</p>
+                <p class="text-white/80 text-sm"><?php echo formatDateThai($doc['created_at']); ?></p>
+            </div>
+            <a href="documents.php?action=process&id=<?php echo (int)$doc['id']; ?>"
+               class="flex min-h-[44px] items-center justify-center rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold transition-colors touch-manipulation">
+                ดำเนินการ
+            </a>
+        </div>
+        <?php endforeach; ?>
+    </div>
+
+    <div class="hidden md:block overflow-x-auto">
         <table class="w-full">
             <thead class="bg-white/5">
                 <tr>
