@@ -626,25 +626,55 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             }
         }
         
+        /* โครงเนื้อหา: mobile-first — กันกรณี Tailwind ไม่มี xl: แต่ยังจอง margin ซ้ายแบบเดสก์ท็อป */
         .content-area {
-            margin-left: 280px;
+            margin-left: 0;
+            margin-right: 0;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
             min-height: 100vh;
         }
-        
-        /* แท็บเล็ต (รวม iPad ~1024px) ใช้โครงมือถือ; sidebar เดสก์ท็อปที่ min-width ตรงกับ Tailwind xl */
         @media (max-width: 1279px) {
             .content-area {
-                margin-left: 0;
-                /* One safe-area term only: inset + fixed toolbar slack (must match .mobile-app-header height) */
+                /* ตรงกับ .mobile-app-header + bottom nav */
                 padding-top: calc(env(safe-area-inset-top, 0px) + 6.75rem);
                 padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
                 padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
-                padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); /* space for mobile bottom nav */
+                padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
             }
-            /* Tables / wide blocks: less scroll “bleed” into the page behind */
             .overflow-x-auto {
                 overscroll-behavior-x: contain;
                 -webkit-overflow-scrolling: touch;
+            }
+        }
+        @media (min-width: 1280px) {
+            .content-area {
+                margin-left: 280px;
+            }
+        }
+
+        /* Shell 1280px+ = sidebar; ต่ำกว่านั้น = แถบบน/ล่าง + เมนูเต็มจอ (ไม่พึ่ง xl: ใน app.css) */
+        aside.app-sidebar-desktop {
+            display: none;
+        }
+        @media (min-width: 1280px) {
+            aside.app-sidebar-desktop {
+                display: block;
+            }
+            .app-shell-mobile-only {
+                display: none !important;
+            }
+            /* Toast: มุมขวาล่างบนเดสก์ท็อป (ไม่พึ่ง Tailwind xl:) */
+            #toast:not(.hidden) {
+                left: auto;
+                right: 1rem;
+                bottom: 1rem;
+                max-width: min(28rem, calc(100vw - 280px - 2rem));
+            }
+            #toast:not(.hidden) .toast-panel {
+                min-width: 300px;
+                width: auto;
             }
         }
 
@@ -786,7 +816,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
 <body class="text-slate-300">
 
 <!-- Sidebar -->
-<aside class="sidebar fixed left-0 top-0 w-[280px] h-screen overflow-y-auto hidden xl:block z-50">
+<aside class="app-sidebar-desktop sidebar fixed left-0 top-0 w-[280px] h-screen overflow-y-auto z-50">
     <div class="p-6">
         <!-- Logo -->
         <a href="/" class="flex items-center gap-4 mb-8 group">
@@ -914,7 +944,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
 </aside>
 
 <!-- Mobile header: เมนู + wordmark ชิดซ้าย (ไม่แสดงไอคอนในแถบ) -->
-<header class="mobile-app-header header-glass xl:hidden fixed top-0 left-0 right-0 z-40">
+<header class="app-shell-mobile-only mobile-app-header header-glass fixed top-0 left-0 right-0 z-40">
     <div class="mobile-app-header-bar">
         <div class="mobile-nav-cluster">
             <button type="button" id="mobileMenuBtn" class="mobile-nav-menu-btn touch-manipulation">
@@ -931,7 +961,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
 </header>
 
 <!-- Mobile menu: เต็มจอ + กริดไอคอน -->
-<div id="mobileSidebar" class="mobile-menu-overlay xl:hidden hidden" role="dialog" aria-modal="true" aria-label="เมนูระบบ TP-HR">
+<div id="mobileSidebar" class="app-shell-mobile-only mobile-menu-overlay hidden" role="dialog" aria-modal="true" aria-label="เมนูระบบ TP-HR">
     <div class="mobile-menu-sheet">
         <header class="mobile-menu-header">
             <a href="/" class="flex items-center gap-3 min-w-0 touch-manipulation">

@@ -13,7 +13,7 @@ $isAdminPage = is_string($cp) && strncmp($cp, 'hr-', 3) === 0;
 
 <?php if (!$isAdminPage): ?>
 <!-- Mobile Bottom Navigation (employee-first, like Checkin) -->
-<nav class="xl:hidden fixed bottom-0 left-0 right-0 z-40 touch-manipulation bg-slate-900/95 backdrop-blur-xl border-t border-white/10 overscroll-contain"
+<nav class="app-shell-mobile-only fixed bottom-0 left-0 right-0 z-40 touch-manipulation bg-slate-900/95 backdrop-blur-xl border-t border-white/10 overscroll-contain"
      style="padding-bottom: env(safe-area-inset-bottom, 0px);">
     <div class="max-w-lg mx-auto grid grid-cols-5 px-2 py-2">
         <?php
@@ -39,8 +39,8 @@ $isAdminPage = is_string($cp) && strncmp($cp, 'hr-', 3) === 0;
 <?php endif; ?>
 
 <!-- Toast Notification -->
-<div id="toast" class="fixed left-4 right-4 z-50 hidden bottom-[calc(6rem+env(safe-area-inset-bottom,0px))] xl:left-auto xl:right-4 xl:bottom-4">
-    <div class="bg-slate-800/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-xl p-4 flex items-center gap-3 w-full xl:min-w-[300px] xl:w-auto">
+<div id="toast" class="fixed left-4 right-4 z-50 hidden bottom-[calc(6rem+env(safe-area-inset-bottom,0px))]">
+    <div class="toast-panel bg-slate-800/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-xl p-4 flex items-center gap-3 w-full">
         <div id="toastIcon" class="w-8 h-8 rounded-lg flex items-center justify-center"></div>
         <div class="flex-1">
             <p id="toastTitle" class="text-white font-medium"></p>
