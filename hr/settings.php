@@ -375,7 +375,7 @@ foreach ($workShifts as $_ws) {
                                 <input type="hidden" name="csrf_token" value="<?php echo csrfToken(); ?>">
                                 <input type="hidden" name="action" value="delete_holiday">
                                 <input type="hidden" name="holiday_id" value="<?php echo $holiday['id']; ?>">
-                                <button type="submit" class="text-red-400 hover:text-red-300">
+                                <button type="submit" class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-red-400 hover:text-red-300 touch-manipulation" aria-label="ลบวันหยุด">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>

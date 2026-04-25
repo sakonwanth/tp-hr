@@ -90,9 +90,9 @@ function thaiDate(?string $d): string {
         border-radius: 8px; font-family: inherit; font-size: 15px;
     }
     .form button {
-        padding: 12px 20px; background: #1a365d; color: #fff;
+        min-height: 44px; padding: 12px 20px; background: #1a365d; color: #fff;
         border: 0; border-radius: 8px; font-family: inherit; font-weight: 600;
-        cursor: pointer;
+        cursor: pointer; touch-action: manipulation;
     }
     .info-table { width: 100%; margin-top: 16px; border-collapse: collapse; }
     .info-table th {

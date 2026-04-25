@@ -168,7 +168,7 @@ require_once __DIR__ . '/templates/header.php';
                         <i class="fas fa-history text-blue-400 mr-2"></i>
                         ประวัติการลา
                     </h2>
-                    <a href="leave_history.php" class="text-violet-400 hover:text-violet-300 text-sm">
+                    <a href="leave_history.php" class="inline-flex min-h-[44px] items-center text-violet-400 hover:text-violet-300 text-sm touch-manipulation">
                         ดูทั้งหมด <i class="fas fa-arrow-right ml-1"></i>
                     </a>
                 </div>
@@ -207,7 +207,7 @@ require_once __DIR__ . '/templates/header.php';
                                 <div class="text-white font-semibold"><?php echo number_format($leave['total_days'], 1); ?> วัน</div>
                             </div>
                             <a href="leave_history.php"
-                               class="min-h-[44px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold flex items-center justify-center">
+                               class="min-h-[44px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold flex items-center justify-center touch-manipulation">
                                 <i class="fas fa-eye mr-2"></i>รายละเอียด
                             </a>
                         </div>

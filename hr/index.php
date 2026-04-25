@@ -246,7 +246,7 @@ include dirname(__DIR__) . '/templates/header.php';
 
 <!-- Quick Actions -->
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-    <a href="leaves.php" class="glass-card rounded-xl p-4 hover:bg-white/10 transition-colors group">
+    <a href="leaves.php" class="glass-card rounded-xl p-4 flex min-h-[44px] items-center hover:bg-white/10 transition-colors group touch-manipulation">
         <div class="flex items-center gap-4">
             <div class="w-10 h-10 rounded-lg bg-violet-600/20 flex items-center justify-center group-hover:bg-violet-600/30">
                 <i class="fas fa-calendar-check text-violet-400"></i>
@@ -255,7 +255,7 @@ include dirname(__DIR__) . '/templates/header.php';
         </div>
     </a>
     
-    <a href="attendance.php" class="glass-card rounded-xl p-4 hover:bg-white/10 transition-colors group">
+    <a href="attendance.php" class="glass-card rounded-xl p-4 flex min-h-[44px] items-center hover:bg-white/10 transition-colors group touch-manipulation">
         <div class="flex items-center gap-4">
             <div class="w-10 h-10 rounded-lg bg-green-600/20 flex items-center justify-center group-hover:bg-green-600/30">
                 <i class="fas fa-user-clock text-green-400"></i>
@@ -264,7 +264,7 @@ include dirname(__DIR__) . '/templates/header.php';
         </div>
     </a>
     
-    <a href="documents.php" class="glass-card rounded-xl p-4 hover:bg-white/10 transition-colors group">
+    <a href="documents.php" class="glass-card rounded-xl p-4 flex min-h-[44px] items-center hover:bg-white/10 transition-colors group touch-manipulation">
         <div class="flex items-center gap-4">
             <div class="w-10 h-10 rounded-lg bg-blue-600/20 flex items-center justify-center group-hover:bg-blue-600/30">
                 <i class="fas fa-file-alt text-blue-400"></i>
@@ -273,7 +273,7 @@ include dirname(__DIR__) . '/templates/header.php';
         </div>
     </a>
     
-    <a href="employees.php" class="glass-card rounded-xl p-4 hover:bg-white/10 transition-colors group">
+    <a href="employees.php" class="glass-card rounded-xl p-4 flex min-h-[44px] items-center hover:bg-white/10 transition-colors group touch-manipulation">
         <div class="flex items-center gap-4">
             <div class="w-10 h-10 rounded-lg bg-yellow-600/20 flex items-center justify-center group-hover:bg-yellow-600/30">
                 <i class="fas fa-users text-yellow-400"></i>
@@ -356,7 +356,7 @@ include dirname(__DIR__) . '/templates/header.php';
                     </td>
                     <td class="px-4 py-3 text-center">
                         <a href="documents.php?action=process&id=<?php echo $doc['id']; ?>" 
-                           class="px-3 py-1 bg-violet-600 hover:bg-violet-700 text-white text-sm rounded transition-colors">
+                           class="inline-flex min-h-[44px] items-center justify-center px-4 bg-violet-600 hover:bg-violet-700 text-white text-sm rounded transition-colors touch-manipulation">
                             ดำเนินการ
                         </a>
                     </td>
@@ -380,10 +380,10 @@ include dirname(__DIR__) . '/templates/header.php';
                           placeholder="ระบุเหตุผลที่ไม่อนุมัติ..."></textarea>
             </div>
             <div class="flex gap-4">
-                <button type="button" onclick="closeRejectModal()" class="flex-1 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg">
+                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[44px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg touch-manipulation">
                     ยกเลิก
                 </button>
-                <button type="submit" class="flex-1 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg">
+                <button type="submit" class="flex-1 min-h-[44px] py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg touch-manipulation">
                     ไม่อนุมัติ
                 </button>
             </div>

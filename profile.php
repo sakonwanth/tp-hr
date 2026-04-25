@@ -350,10 +350,10 @@ endif; ?>
             </div>
             <p class="text-white/70 text-sm mt-3"><?php echo htmlspecialchars($member['occupation'] ?? '-'); ?></p>
             <div class="grid grid-cols-2 gap-2 mt-4">
-                <button onclick="editFamily(<?php echo $member['id']; ?>)" class="min-h-[44px] rounded-lg bg-white/10 text-white/70 hover:text-white hover:bg-white/20">
+                <button type="button" onclick="editFamily(<?php echo $member['id']; ?>)" class="min-h-[44px] rounded-lg bg-white/10 text-white/70 hover:text-white hover:bg-white/20 touch-manipulation">
                     <i class="fas fa-edit mr-2"></i>แก้ไข
                 </button>
-                <button onclick="deleteFamily(<?php echo $member['id']; ?>)" class="min-h-[44px] rounded-lg bg-red-500/10 text-red-300 hover:bg-red-500/20">
+                <button type="button" onclick="deleteFamily(<?php echo $member['id']; ?>)" class="min-h-[44px] rounded-lg bg-red-500/10 text-red-300 hover:bg-red-500/20 touch-manipulation">
                     <i class="fas fa-trash mr-2"></i>ลบ
                 </button>
             </div>
@@ -387,10 +387,10 @@ endif; ?>
                     <td class="px-4 py-3 text-white/70"><?php echo $age; ?> ปี</td>
                     <td class="px-4 py-3 text-white/70"><?php echo htmlspecialchars($member['occupation'] ?? '-'); ?></td>
                     <td class="px-4 py-3 text-center">
-                        <button onclick="editFamily(<?php echo $member['id']; ?>)" class="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg">
+                        <button type="button" onclick="editFamily(<?php echo $member['id']; ?>)" class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg touch-manipulation" aria-label="แก้ไข">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button onclick="deleteFamily(<?php echo $member['id']; ?>)" class="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg">
+                        <button type="button" onclick="deleteFamily(<?php echo $member['id']; ?>)" class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg touch-manipulation" aria-label="ลบ">
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>
@@ -509,7 +509,7 @@ endif; ?>
         <form id="edit-form" class="p-6">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="text-xl font-bold text-white" id="modal-title">แก้ไขข้อมูล</h3>
-                <button type="button" onclick="closeModal()" class="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg">
+                <button type="button" onclick="closeModal()" class="min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 rounded-lg touch-manipulation" aria-label="ปิด">
                     <i class="fas fa-times"></i>
                 </button>
             </div>

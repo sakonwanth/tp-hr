@@ -125,7 +125,7 @@ include dirname(__DIR__) . '/templates/header.php';
         <form method="POST" class="inline" onsubmit="return confirm('อนุมัติคำขอทั้งหมด <?php echo $pendingCount; ?> รายการ?')">
             <?php echo csrfField(); ?>
             <input type="hidden" name="action" value="approve_all">
-            <button class="w-full sm:w-auto min-h-[44px] px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
+            <button type="submit" class="w-full sm:w-auto min-h-[44px] px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors touch-manipulation">
                 <i class="fas fa-check-double mr-2"></i>อนุมัติทั้งหมด (<?php echo $pendingCount; ?>)
             </button>
         </form>
@@ -218,12 +218,12 @@ include dirname(__DIR__) . '/templates/header.php';
                     <?php echo csrfField(); ?>
                     <input type="hidden" name="action" value="approve">
                     <input type="hidden" name="request_id" value="<?php echo $req['id']; ?>">
-                    <button class="w-full min-h-[44px] rounded-lg bg-green-500/20 hover:bg-green-500/30 text-green-300 transition-colors">
+                    <button type="submit" class="w-full min-h-[44px] rounded-lg bg-green-500/20 hover:bg-green-500/30 text-green-300 transition-colors touch-manipulation">
                         <i class="fas fa-check mr-2"></i>อนุมัติ
                     </button>
                 </form>
-                <button onclick="openRejectModal(<?php echo $req['id']; ?>, '<?php echo htmlspecialchars($req['first_name_th']); ?>')"
-                        class="min-h-[44px] rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 transition-colors">
+                <button type="button" onclick="openRejectModal(<?php echo $req['id']; ?>, '<?php echo htmlspecialchars($req['first_name_th']); ?>')"
+                        class="min-h-[44px] rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 transition-colors touch-manipulation">
                     <i class="fas fa-times mr-2"></i>ไม่อนุมัติ
                 </button>
             </div>
@@ -293,12 +293,12 @@ include dirname(__DIR__) . '/templates/header.php';
                                 <?php echo csrfField(); ?>
                                 <input type="hidden" name="action" value="approve">
                                 <input type="hidden" name="request_id" value="<?php echo $req['id']; ?>">
-                                <button class="min-h-[36px] min-w-[36px] px-2 py-1 bg-green-500/20 hover:bg-green-500/30 text-green-400 text-xs rounded transition-colors" title="อนุมัติ">
+                                <button type="submit" class="inline-flex items-center justify-center min-h-[44px] min-w-[44px] px-2 py-1 bg-green-500/20 hover:bg-green-500/30 text-green-400 text-xs rounded transition-colors touch-manipulation" title="อนุมัติ">
                                     <i class="fas fa-check"></i>
                                 </button>
                             </form>
-                            <button onclick="openRejectModal(<?php echo $req['id']; ?>, '<?php echo htmlspecialchars($req['first_name_th']); ?>')"
-                                    class="min-h-[36px] min-w-[36px] px-2 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs rounded transition-colors" title="ไม่อนุมัติ">
+                            <button type="button" onclick="openRejectModal(<?php echo $req['id']; ?>, '<?php echo htmlspecialchars($req['first_name_th']); ?>')"
+                                    class="inline-flex items-center justify-center min-h-[44px] min-w-[44px] px-2 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs rounded transition-colors touch-manipulation" title="ไม่อนุมัติ">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
@@ -331,8 +331,8 @@ include dirname(__DIR__) . '/templates/header.php';
             </div>
             
             <div class="flex flex-col-reverse sm:flex-row gap-3">
-                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[44px] bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">ยกเลิก</button>
-                <button type="submit" class="flex-1 min-h-[44px] bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">
+                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[44px] bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors touch-manipulation">ยกเลิก</button>
+                <button type="submit" class="flex-1 min-h-[44px] bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors touch-manipulation">
                     <i class="fas fa-times mr-2"></i>ไม่อนุมัติ
                 </button>
             </div>
