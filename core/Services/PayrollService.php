@@ -550,11 +550,15 @@ class PayrollService
 
     public function listRuns(int $limit = 50): array
     {
-        return $this->pdo->query("
+        $limit = max(1, min(200, $limit));
+        $stmt = $this->pdo->prepare("
             SELECT r.*, u.first_name_th as approver_first, u.last_name_th as approver_last
             FROM payroll_runs r LEFT JOIN users u ON r.approved_by = u.id
-            ORDER BY r.payroll_month DESC LIMIT {$limit}
-        ")->fetchAll(PDO::FETCH_ASSOC);
+            ORDER BY r.payroll_month DESC LIMIT ?
+        ");
+        $stmt->execute([$limit]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getSlips(int $runId): array
