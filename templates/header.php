@@ -237,13 +237,40 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             touch-action: manipulation;
         }
 
-        /* type=date ใน WebKit มี intrinsic min-width — ต้องบังคับให้อยู่ในการ์ด */
-        input.input-field[type="date"],
+        /* type=date/time: intrinsic width ใหญ่ — ต้องห่อด้วย .input-date-shell และย่อด้วย flex */
         input.input-field[type="time"],
         input.input-field[type="datetime-local"] {
             max-width: 100%;
             min-width: 0;
             box-sizing: border-box;
+        }
+
+        .input-date-shell {
+            display: flex;
+            align-items: stretch;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+
+        .input-date-shell input.input-field[type="date"] {
+            flex: 1 1 0%;
+            width: auto; /* ทับ width:100% ของ .input-field ให้ flex ย่อตามกรอบได้ */
+            min-width: 0;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* WebKit: ลด padding ภายใน datetime-edit ให้ไม่ดันเกินกรอบ */
+        .input-date-shell input.input-field[type="date"]::-webkit-datetime-edit,
+        .input-date-shell input.input-field[type="date"]::-webkit-datetime-edit-fields-wrapper {
+            padding: 0;
+        }
+        .input-date-shell input.input-field[type="date"]::-webkit-calendar-picker-indicator {
+            margin: 0;
+            padding: 0;
+            cursor: pointer;
         }
         
         .input-field:focus {

@@ -35,12 +35,12 @@ $leave_types_form = $stmt->fetchAll();
 
 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 min-w-0 max-w-full">
     <div class="xl:col-span-2 min-w-0">
-        <form id="leave-form" class="glass-card rounded-xl p-6 min-w-0 overflow-hidden" method="POST" action="/api/leave.php" enctype="multipart/form-data">
+        <form id="leave-form" class="glass-card rounded-xl p-4 sm:p-6 min-w-0 max-w-full overflow-x-clip" method="POST" action="/api/leave.php" enctype="multipart/form-data">
             <input type="hidden" name="action" value="create">
             <?php echo csrfField(); ?>
             
             <!-- Leave Type -->
-            <div class="mb-6">
+            <div class="mb-6 min-w-0 max-w-full">
                 <label class="block text-white/80 text-sm font-medium mb-2">ประเภทการลา <span class="text-red-400">*</span></label>
                 <select name="leave_type_id" id="leave_type_id" required class="input-field" onchange="updateLeaveInfo()">
                     <option value="">-- เลือกประเภทการลา --</option>
@@ -61,13 +61,15 @@ $leave_types_form = $stmt->fetchAll();
             </div>
             
             <!-- Date Range -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 min-w-0">
-                <div class="min-w-0">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 min-w-0 max-w-full">
+                <div class="min-w-0 max-w-full">
                     <label class="block text-white/80 text-sm font-medium mb-2">วันที่เริ่มต้น <span class="text-red-400">*</span></label>
-                    <input type="date" name="start_date" id="start_date" required class="input-field w-full max-w-full" 
-                           min="<?php echo date('Y-m-d'); ?>" onchange="calculateDays()">
+                    <div class="input-date-shell">
+                        <input type="date" name="start_date" id="start_date" required class="input-field"
+                               min="<?php echo date('Y-m-d'); ?>" onchange="calculateDays()">
+                    </div>
                 </div>
-                <div class="min-w-0">
+                <div class="min-w-0 max-w-full">
                     <label class="block text-white/80 text-sm font-medium mb-2">ช่วงเวลา</label>
                     <select name="start_period" id="start_period" class="input-field" onchange="calculateDays()">
                         <option value="FULL">ทั้งวัน</option>
@@ -78,12 +80,14 @@ $leave_types_form = $stmt->fetchAll();
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 min-w-0">
-                <div class="min-w-0">
+                <div class="min-w-0 max-w-full">
                     <label class="block text-white/80 text-sm font-medium mb-2">วันที่สิ้นสุด <span class="text-red-400">*</span></label>
-                    <input type="date" name="end_date" id="end_date" required class="input-field w-full max-w-full" 
-                           min="<?php echo date('Y-m-d'); ?>" onchange="calculateDays()">
+                    <div class="input-date-shell">
+                        <input type="date" name="end_date" id="end_date" required class="input-field"
+                               min="<?php echo date('Y-m-d'); ?>" onchange="calculateDays()">
+                    </div>
                 </div>
-                <div class="min-w-0">
+                <div class="min-w-0 max-w-full">
                     <label class="block text-white/80 text-sm font-medium mb-2">ช่วงเวลา</label>
                     <select name="end_period" id="end_period" class="input-field" onchange="calculateDays()">
                         <option value="FULL">ทั้งวัน</option>
