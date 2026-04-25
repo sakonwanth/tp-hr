@@ -188,6 +188,20 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             transform: translateY(-1px);
             box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
         }
+
+        /* Hero primary CTA on dashboard — reads clearly as main action */
+        .btn-primary-prominent {
+            min-height: 56px;
+            padding: 14px 28px;
+            font-size: 1.0625rem;
+            font-weight: 600;
+            border-radius: 14px;
+            box-shadow: 0 8px 32px rgba(124, 58, 237, 0.45), 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary-prominent:hover {
+            box-shadow: 0 12px 36px rgba(124, 58, 237, 0.5), 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
         
         .btn-secondary {
             display: inline-flex;
@@ -230,6 +244,26 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         .input-field::placeholder {
             color: rgba(148, 163, 184, 0.5);
         }
+
+        /* Native-style <select>: room for dropdown chevron (Safari / Chrome) */
+        select.input-field {
+            -webkit-appearance: none;
+            appearance: none;
+            padding-right: 2.75rem;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23a78bfa'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.85rem center;
+            background-size: 1.1rem 1.1rem;
+        }
+
+        .brand-wordmark {
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #fff 0%, #e9d5ff 45%, #c4b5fd 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
         
         .content-area {
             margin-left: 280px;
@@ -239,7 +273,8 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         @media (max-width: 1024px) {
             .content-area {
                 margin-left: 0;
-                padding-top: calc(4rem + env(safe-area-inset-top, 0px));
+                /* Taller mobile header (~native app) + safe area */
+                padding-top: calc(5.75rem + env(safe-area-inset-top, 0px));
                 padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); /* space for mobile bottom nav */
             }
             /* Tables / wide blocks: less scroll “bleed” into the page behind */
@@ -514,22 +549,17 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
     </div>
 </aside>
 
-<!-- Mobile Header (tp-checkin header-glass parity) -->
-<header class="header-glass lg:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 pt-[env(safe-area-inset-top,0px)] min-h-[calc(4rem+env(safe-area-inset-top,0px))]">
-    <button type="button" id="mobileMenuBtn" class="touch-manipulation w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-white">
-        <i class="fas fa-bars"></i>
-    </button>
-    
-    <a href="/" class="touch-manipulation flex items-center gap-2 min-h-[44px]">
-        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center">
-            <i class="fas fa-users text-white text-sm"></i>
-        </div>
-        <span class="font-bold text-white">TP-HR</span>
-    </a>
-    
-    <a href="/profile.php" class="touch-manipulation w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-white">
-        <i class="fas fa-user"></i>
-    </a>
+<!-- Mobile header: taller bar, text “เมนู”, centered wordmark (profile → bottom nav “ฉัน”) -->
+<header class="header-glass lg:hidden fixed top-0 left-0 right-0 z-40">
+    <div class="grid grid-cols-3 items-center gap-2 px-4 pb-4 pt-[max(0.875rem,env(safe-area-inset-top,0px))] min-h-[calc(3.5rem+env(safe-area-inset-top,0px))]">
+        <button type="button" id="mobileMenuBtn" class="touch-manipulation justify-self-start flex min-h-[48px] items-center rounded-xl px-3 text-sm font-semibold text-violet-200 transition-colors hover:bg-white/10 hover:text-white">
+            เมนู
+        </button>
+        <a href="/" class="touch-manipulation justify-self-center min-w-0 text-center">
+            <span class="brand-wordmark block truncate text-lg sm:text-xl tracking-tight">TP-HR</span>
+        </a>
+        <span class="justify-self-end w-[3.25rem]" aria-hidden="true"></span>
+    </div>
 </header>
 
 <!-- Mobile Sidebar -->

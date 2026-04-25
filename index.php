@@ -82,22 +82,28 @@ $announcements = $stmt->fetchAll();
 require_once __DIR__ . '/templates/header.php';
 ?>
 
-<!-- Page Header (mobile-first: compact title, full-width primary CTA on narrow screens) -->
-<div class="mb-6 lg:mb-8">
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div class="min-w-0">
-            <h1 class="text-2xl sm:text-3xl font-bold text-white mb-2 leading-tight">
+<!-- Page Header: meta แยกบรรทัดบนมือถือ — ไอคอนเว้นจากข้อความชัดเจน -->
+<div class="mb-7 mt-1 lg:mb-8">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+        <div class="min-w-0 space-y-3">
+            <h1 class="text-2xl sm:text-3xl font-bold text-white leading-tight">
                 สวัสดี, <?php echo htmlspecialchars($user['first_name_th'] ?? $user['username']); ?>
             </h1>
-            <p class="text-slate-400 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm sm:text-base">
-                <span class="inline-flex items-center gap-2"><i class="fas fa-calendar-day shrink-0"></i><?php echo formatDateThai(date('Y-m-d')); ?></span>
-                <span class="text-slate-600 hidden sm:inline">|</span>
-                <span class="inline-flex items-center gap-2 min-w-0"><i class="fas fa-briefcase shrink-0"></i><span class="truncate"><?php echo htmlspecialchars($user['position'] ?? $user['role_name'] ?? 'พนักงาน'); ?></span></span>
-            </p>
+            <div class="flex flex-col gap-2.5 text-sm sm:text-base text-slate-400 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-1">
+                <span class="inline-flex items-start gap-3 sm:items-center">
+                    <i class="fas fa-calendar-day mt-0.5 w-5 shrink-0 text-center text-violet-300/90 sm:mt-0" aria-hidden="true"></i>
+                    <span class="leading-snug"><?php echo formatDateThai(date('Y-m-d')); ?></span>
+                </span>
+                <span class="hidden h-4 w-px bg-slate-600 sm:inline-block" aria-hidden="true"></span>
+                <span class="inline-flex items-start gap-3 sm:items-center min-w-0">
+                    <i class="fas fa-briefcase mt-0.5 w-5 shrink-0 text-center text-violet-300/90 sm:mt-0" aria-hidden="true"></i>
+                    <span class="leading-snug break-words"><?php echo htmlspecialchars($user['position'] ?? $user['role_name'] ?? 'พนักงาน'); ?></span>
+                </span>
+            </div>
         </div>
         <div class="flex items-stretch sm:items-center gap-3 shrink-0">
-            <a href="/checkin.php" class="btn-primary w-full sm:w-auto justify-center touch-manipulation">
-                <i class="fas fa-fingerprint mr-2"></i>
+            <a href="/checkin.php" class="btn-primary btn-primary-prominent w-full sm:w-auto justify-center touch-manipulation">
+                <i class="fas fa-fingerprint mr-2 text-lg"></i>
                 ลงเวลา
             </a>
         </div>
@@ -168,11 +174,11 @@ require_once __DIR__ . '/templates/header.php';
                 ทางลัดด่วน
             </h2>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <a href="/checkin.php" class="quick-action group">
-                    <div class="quick-action-icon bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 group-hover:from-emerald-500/40 group-hover:to-emerald-600/40">
-                        <i class="fas fa-fingerprint text-emerald-400"></i>
+                <a href="/checkin.php" class="quick-action group relative ring-2 ring-emerald-400/35 ring-offset-2 ring-offset-slate-900/80 shadow-lg shadow-emerald-500/10">
+                    <div class="quick-action-icon bg-gradient-to-br from-emerald-500/30 to-emerald-600/25 group-hover:from-emerald-500/45 group-hover:to-emerald-600/40">
+                        <i class="fas fa-fingerprint text-emerald-300 text-xl" aria-hidden="true"></i>
                     </div>
-                    <span class="text-white font-medium">ลงเวลา</span>
+                    <span class="text-white font-semibold">ลงเวลา</span>
                 </a>
                 
                 <a href="/leave.php?action=request" class="quick-action group">
@@ -191,7 +197,7 @@ require_once __DIR__ . '/templates/header.php';
                 
                 <a href="/certificate.php" class="quick-action group">
                     <div class="quick-action-icon bg-gradient-to-br from-purple-500/20 to-purple-600/20 group-hover:from-purple-500/40 group-hover:to-purple-600/40">
-                        <i class="fas fa-file-certificate text-purple-400"></i>
+                        <i class="fas fa-file-signature text-purple-400" aria-hidden="true"></i>
                     </div>
                     <span class="text-white font-medium">ขอใบรับรอง</span>
                 </a>
@@ -235,8 +241,8 @@ require_once __DIR__ . '/templates/header.php';
                         ลงเวลาออก
                     </a>
                     <?php else: ?>
-                    <span class="badge badge-success self-center sm:self-auto shrink-0">
-                        <i class="fas fa-check mr-1"></i>
+                    <span class="mx-auto inline-flex w-fit max-w-full shrink-0 items-center gap-2 rounded-full border border-emerald-500/35 bg-emerald-500/15 px-4 py-2.5 text-sm font-semibold text-emerald-300 sm:mx-0 sm:self-auto">
+                        <i class="fas fa-check-circle text-base" aria-hidden="true"></i>
                         เสร็จสิ้น
                     </span>
                     <?php endif; ?>

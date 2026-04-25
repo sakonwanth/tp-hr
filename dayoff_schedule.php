@@ -163,11 +163,12 @@ include __DIR__ . '/templates/header.php';
         <span class="text-white">วันหยุดประจำสัปดาห์</span>
     </nav>
     <h1 class="text-2xl sm:text-3xl font-bold text-white leading-tight">วันหยุดประจำสัปดาห์</h1>
-    <p class="text-white/60 text-sm mt-2 max-w-3xl">
-        วันหยุดเริ่มต้น: <span class="text-violet-300 font-medium"><?php echo $dayNames[$defaultDayOff]; ?></span>
-        <span class="text-white/40"> — </span>
-        ขอเปลี่ยนวันหยุดรายสัปดาห์ได้ รอผู้บริหารอนุมัติ
-    </p>
+    <div class="mt-3 max-w-3xl space-y-1.5 text-sm text-white/65">
+        <p class="text-base text-white/90">
+            วันหยุดเริ่มต้น: <span class="font-semibold text-violet-200">วัน<?php echo htmlspecialchars($dayNames[$defaultDayOff]); ?></span>
+        </p>
+        <p>ขอเปลี่ยนวันหยุดรายสัปดาห์ได้ รอผู้บริหารอนุมัติ</p>
+    </div>
 </div>
 
 <?php if ($success): ?>
@@ -267,35 +268,69 @@ include __DIR__ . '/templates/header.php';
             <?php endif; ?>
         </div>
         
-        <!-- Week Calendar Grid (horizontal scroll on very narrow screens) -->
-        <div class="min-w-0 overflow-x-auto [-webkit-overflow-scrolling:touch] overscroll-x-contain pb-1">
-            <div class="grid grid-cols-7 gap-1 min-w-[20rem] sm:min-w-0">
+        <?php
+        // Mobile: รายการ 7 วัน — ข้อความยาว (เช่น วันสงกรานต์) ไม่ล้นซ้อนช่อง
+        ?>
+        <div class="mt-3 space-y-2 sm:hidden">
+            <?php foreach ($weekDays as $wd):
+                $dowShort = $dayNamesShort[$wd['dow']] ?? '';
+                $sub = '';
+                if (!$wd['in_month']) {
+                    $rowCls = 'border-white/10 bg-white/5 text-white/45';
+                    $sub = 'นอกเดือนที่เลือก';
+                } elseif ($wd['is_holiday']) {
+                    $rowCls = 'border-orange-400/35 bg-orange-500/15 text-orange-100';
+                    $sub = htmlspecialchars($wd['is_holiday']['name']);
+                } elseif ($wd['is_day_off']) {
+                    $rowCls = 'border-violet-400/35 bg-violet-500/10 text-violet-100';
+                    $sub = 'วันหยุดประจำ';
+                } elseif ($wd['is_pending_day_off']) {
+                    $rowCls = 'border-yellow-400/35 bg-yellow-500/15 text-yellow-100 animate-pulse';
+                    $sub = 'รออนุมัติเปลี่ยนวันหยุด';
+                } else {
+                    $rowCls = 'border-white/10 bg-white/5 text-white/80';
+                    $sub = 'วันทำงาน';
+                }
+            ?>
+            <div class="flex items-start gap-3 rounded-xl border px-3 py-3 <?php echo $rowCls; ?>">
+                <div class="shrink-0 pt-0.5 text-sm font-semibold tabular-nums">
+                    <span class="text-white/70"><?php echo htmlspecialchars($dowShort); ?></span>
+                    <span class="ml-1 text-white"><?php echo (int)$wd['day']; ?></span>
+                </div>
+                <div class="min-w-0 flex-1 break-words text-sm leading-snug"><?php echo $sub; ?></div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+
+        <!-- sm+: ตาราง 7 ช่อง — เว้นระยะมากขึ้น + ห่อข้อความในช่อง -->
+        <div class="hidden min-w-0 overflow-x-auto pb-1 sm:block [-webkit-overflow-scrolling:touch] overscroll-x-contain">
+            <div class="grid grid-cols-7 gap-2 min-w-0">
             <?php foreach ($dayNamesGrid as $dn): ?>
-            <div class="text-center text-white/40 text-xs py-1"><?php echo $dn; ?></div>
+            <div class="text-center text-white/45 text-xs font-medium py-1"><?php echo $dn; ?></div>
             <?php endforeach; ?>
             
             <?php foreach ($weekDays as $wd): 
-                $cellClass = 'rounded-lg px-1 py-2 sm:p-2 text-center text-sm min-h-[52px] flex flex-col items-center justify-center touch-manipulation ';
+                $cellClass = 'rounded-xl px-1.5 py-2 text-center text-sm min-h-[4.5rem] flex flex-col items-center justify-start gap-1 touch-manipulation ';
                 if (!$wd['in_month']) {
-                    $cellClass .= 'opacity-30 bg-white/5 text-white/50';
+                    $cellClass .= 'opacity-35 bg-white/5 text-white/50';
                 } elseif ($wd['is_holiday']) {
-                    $cellClass .= 'bg-orange-500/20 text-orange-400 ring-1 ring-orange-500/30';
+                    $cellClass .= 'bg-orange-500/20 text-orange-200 ring-1 ring-orange-500/35';
                 } elseif ($wd['is_day_off']) {
-                    $cellClass .= 'bg-violet-500/15 text-violet-200 ring-1 ring-violet-500/35';
+                    $cellClass .= 'bg-violet-500/15 text-violet-100 ring-1 ring-violet-500/35';
                 } elseif ($wd['is_pending_day_off']) {
-                    $cellClass .= 'bg-yellow-500/20 text-yellow-400 ring-1 ring-yellow-500/30 animate-pulse';
+                    $cellClass .= 'bg-yellow-500/20 text-yellow-200 ring-1 ring-yellow-500/35 animate-pulse';
                 } else {
-                    $cellClass .= 'bg-white/5 text-white/70';
+                    $cellClass .= 'bg-white/5 text-white/75';
                 }
             ?>
             <div class="<?php echo $cellClass; ?>">
-                <div class="font-medium"><?php echo $wd['day']; ?></div>
+                <div class="font-semibold tabular-nums"><?php echo $wd['day']; ?></div>
                 <?php if ($wd['is_holiday']): ?>
-                <div class="text-[10px] truncate mt-0.5"><?php echo htmlspecialchars($wd['is_holiday']['name']); ?></div>
+                <div class="w-full px-0.5 text-center text-[10px] font-medium leading-tight text-orange-100/95 line-clamp-3 break-words"><?php echo htmlspecialchars($wd['is_holiday']['name']); ?></div>
                 <?php elseif ($wd['is_day_off']): ?>
-                <div class="text-[10px] mt-0.5">หยุด</div>
+                <div class="text-[10px] font-medium text-violet-200/90">หยุด</div>
                 <?php elseif ($wd['is_pending_day_off']): ?>
-                <div class="text-[10px] mt-0.5">รออนุมัติ</div>
+                <div class="text-[10px] font-medium text-yellow-200/90">รออนุมัติ</div>
                 <?php endif; ?>
             </div>
             <?php endforeach; ?>
