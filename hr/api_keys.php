@@ -194,7 +194,57 @@ require_once __DIR__ . '/../templates/header.php';
         <div class="p-4 border-b border-white/10">
             <h2 class="text-lg font-semibold text-white">คีย์ทั้งหมด (<?= count($keys) ?>)</h2>
         </div>
-        <div class="overflow-x-auto">
+        <div class="md:hidden p-3 space-y-3">
+            <?php foreach ($keys as $k): $scopes = json_decode($k['scopes'] ?? '[]', true) ?: []; ?>
+                <div class="rounded-2xl bg-white/5 border border-white/10 p-4 space-y-3">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="min-w-0">
+                            <p class="text-white font-semibold break-words"><?= htmlspecialchars($k['name']) ?></p>
+                            <?php if (!empty($k['notes'])): ?><p class="text-white/45 text-xs mt-1 break-words"><?= htmlspecialchars($k['notes']) ?></p><?php endif; ?>
+                            <p class="text-white/50 text-xs font-mono mt-1"><?= htmlspecialchars($k['key_prefix']) ?>…</p>
+                        </div>
+                        <?php if ((int)$k['is_active'] === 1 && (empty($k['expires_at']) || strtotime($k['expires_at']) > time())): ?>
+                            <span class="shrink-0 px-2 py-1 rounded-full text-xs bg-emerald-500/20 text-emerald-300">Active</span>
+                        <?php elseif (!empty($k['revoked_at'])): ?>
+                            <span class="shrink-0 px-2 py-1 rounded-full text-xs bg-rose-500/20 text-rose-300">Revoked</span>
+                        <?php else: ?>
+                            <span class="shrink-0 px-2 py-1 rounded-full text-xs bg-yellow-500/20 text-yellow-300">Expired</span>
+                        <?php endif; ?>
+                    </div>
+                    <div>
+                        <p class="text-white/45 text-[10px] uppercase tracking-wide">Scopes</p>
+                        <p class="text-white/75 text-xs break-words line-clamp-4"><?= htmlspecialchars(implode(', ', $scopes) ?: '—') ?></p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="rounded-lg bg-black/20 border border-white/10 px-2 py-2">
+                            <span class="text-white/45">Rate</span>
+                            <p class="text-white font-medium"><?= (int)$k['rate_limit_per_min'] ?>/min</p>
+                        </div>
+                        <div class="rounded-lg bg-black/20 border border-white/10 px-2 py-2">
+                            <span class="text-white/45">หมดอายุ</span>
+                            <p class="text-white/80"><?= htmlspecialchars($k['expires_at'] ?? '—') ?></p>
+                        </div>
+                    </div>
+                    <div class="text-xs text-white/50">
+                        <span class="text-white/45">ล่าสุด:</span> <?= htmlspecialchars($k['last_used_at'] ?? '—') ?>
+                        <?php if (!empty($k['last_used_ip'])): ?><span class="text-white/35"> · <?= htmlspecialchars($k['last_used_ip']) ?></span><?php endif; ?>
+                    </div>
+                    <form method="POST" class="block" onsubmit="return confirm('ยืนยันการดำเนินการ?');">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
+                        <input type="hidden" name="id" value="<?= (int)$k['id'] ?>">
+                        <?php if ((int)$k['is_active'] === 1): ?>
+                            <button name="action" value="revoke" type="submit" class="w-full min-h-[44px] rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 text-sm font-semibold touch-manipulation">Revoke</button>
+                        <?php else: ?>
+                            <button name="action" value="activate" type="submit" class="w-full min-h-[44px] rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 text-sm font-semibold touch-manipulation">Activate</button>
+                        <?php endif; ?>
+                    </form>
+                </div>
+            <?php endforeach; ?>
+            <?php if (!$keys): ?>
+                <div class="p-8 text-center text-white/40">ยังไม่มีคีย์</div>
+            <?php endif; ?>
+        </div>
+        <div class="hidden md:block overflow-x-auto">
         <table class="w-full text-sm">
             <thead class="bg-white/5 text-white/60">
                 <tr>
@@ -252,7 +302,24 @@ require_once __DIR__ . '/../templates/header.php';
         <div class="p-4 border-b border-white/10">
             <h2 class="text-lg font-semibold text-white">Request Log (20 ล่าสุด)</h2>
         </div>
-        <div class="overflow-x-auto">
+        <div class="md:hidden p-3 space-y-2">
+            <?php foreach ($recentLogs as $l): ?>
+                <div class="rounded-xl bg-white/5 border border-white/10 p-3 text-xs">
+                    <div class="flex items-start justify-between gap-2">
+                        <span class="text-white/55 shrink-0"><?= htmlspecialchars($l['created_at']) ?></span>
+                        <span class="<?= ((int)$l['status_code'] >= 400) ? 'text-rose-300' : 'text-emerald-300' ?> font-mono font-semibold"><?= (int)$l['status_code'] ?></span>
+                    </div>
+                    <p class="text-white/80 mt-1 font-medium truncate"><?= htmlspecialchars($l['key_name'] ?? '—') ?></p>
+                    <p class="text-white/50 mt-0.5"><span class="font-mono"><?= htmlspecialchars($l['method']) ?></span> · <?= (int)$l['response_ms'] ?> ms · <?= htmlspecialchars($l['ip_address']) ?></p>
+                    <p class="text-white/60 font-mono break-all mt-2 text-[11px]"><?= htmlspecialchars($l['path']) ?></p>
+                    <?php if (!empty($l['error_message'])): ?><p class="text-rose-300 mt-2 break-words"><?= htmlspecialchars($l['error_message']) ?></p><?php endif; ?>
+                </div>
+            <?php endforeach; ?>
+            <?php if (!$recentLogs): ?>
+                <div class="p-6 text-center text-white/40">ยังไม่มี log</div>
+            <?php endif; ?>
+        </div>
+        <div class="hidden md:block overflow-x-auto">
         <table class="w-full text-xs">
             <thead class="bg-white/5 text-white/60">
                 <tr>

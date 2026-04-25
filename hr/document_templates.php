@@ -550,7 +550,65 @@ include dirname(__DIR__) . '/templates/header.php';
         <h2 class="text-white font-semibold"><i class="fas fa-file-alt mr-2 text-violet-400"></i>รายการเอกสารในระบบ</h2>
         <a href="?edit=new" class="px-3 py-1.5 rounded-lg bg-violet-500 hover:bg-violet-600 text-white text-xs font-medium"><i class="fas fa-plus mr-1"></i>เพิ่ม</a>
     </div>
-    <div class="overflow-x-auto">
+    <div class="md:hidden p-3 space-y-3">
+        <?php foreach ($tpls as $t): ?>
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-4 space-y-3">
+            <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                    <p class="text-white/50 text-xs">ลำดับ <?= (int)$t['sort_order']; ?> · <span class="font-mono text-violet-300"><?php echo htmlspecialchars($t['code']); ?></span></p>
+                    <p class="text-white font-semibold mt-1"><?php echo htmlspecialchars($t['name']); ?></p>
+                    <?php if (!empty($t['name_en'])): ?><p class="text-white/40 text-xs mt-0.5"><?php echo htmlspecialchars($t['name_en']); ?></p><?php endif; ?>
+                </div>
+                <?php if (!empty($t['is_active'])): ?>
+                    <span class="shrink-0 inline-flex px-2 py-0.5 rounded-full text-xs bg-green-500/20 text-green-300">เปิด</span>
+                <?php else: ?>
+                    <span class="shrink-0 inline-flex px-2 py-0.5 rounded-full text-xs bg-gray-500/20 text-gray-400">ปิด</span>
+                <?php endif; ?>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                <div class="rounded-lg bg-black/20 border border-white/10 py-2 px-1">
+                    <div class="text-white/45">หมวด</div>
+                    <div class="text-white/85 truncate"><?php echo htmlspecialchars($categories[$t['category']] ?? $t['category']); ?></div>
+                </div>
+                <div class="rounded-lg bg-black/20 border border-white/10 py-2">
+                    <div class="text-white/45">ดำเนินการ</div>
+                    <div class="text-white font-medium"><?php echo (int)$t['processing_days']; ?> วัน</div>
+                </div>
+                <div class="rounded-lg bg-black/20 border border-white/10 py-2">
+                    <div class="text-white/45">ใช้งาน</div>
+                    <div class="text-white/80"><?php echo (int)$t['request_count']; ?></div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <a href="?edit=<?php echo (int)$t['id']; ?>" class="min-h-[44px] flex items-center justify-center rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 text-sm font-semibold touch-manipulation">
+                    <i class="fas fa-edit mr-2"></i>แก้ไข
+                </a>
+                <form method="POST" class="contents">
+                    <input type="hidden" name="_token" value="<?php echo csrfToken(); ?>">
+                    <input type="hidden" name="action" value="toggle_active">
+                    <input type="hidden" name="id" value="<?php echo (int)$t['id']; ?>">
+                    <button type="submit" class="w-full min-h-[44px] rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-sm font-semibold touch-manipulation" title="สลับเปิด/ปิด">
+                        <i class="fas fa-power-off mr-2"></i>เปิด/ปิด
+                    </button>
+                </form>
+            </div>
+            <?php if ((int)$t['request_count'] === 0): ?>
+            <form method="POST" onsubmit="return confirm(<?php echo json_encode('ลบ ' . $t['name'] . ' ?', JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE); ?>);">
+                <input type="hidden" name="_token" value="<?php echo csrfToken(); ?>">
+                <input type="hidden" name="action" value="delete_template">
+                <input type="hidden" name="id" value="<?php echo (int)$t['id']; ?>">
+                <button type="submit" class="w-full min-h-[44px] rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 text-sm font-semibold touch-manipulation">
+                    <i class="fas fa-trash mr-2"></i>ลบ
+                </button>
+            </form>
+            <?php endif; ?>
+        </div>
+        <?php endforeach; ?>
+        <?php if (empty($tpls)): ?>
+        <div class="px-4 py-10 text-center text-white/50">ยังไม่มีเทมเพลตเอกสาร</div>
+        <?php endif; ?>
+    </div>
+    <div class="hidden md:block overflow-x-auto">
         <table class="w-full">
             <thead class="bg-white/5">
                 <tr>
