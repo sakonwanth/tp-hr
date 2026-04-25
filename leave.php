@@ -69,14 +69,13 @@ require_once __DIR__ . '/templates/header.php';
     
     <?php else: ?>
     <!-- Leave Dashboard -->
-    <div class="mb-6">
-        <div class="flex flex-wrap items-center justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-white">การลา</h1>
-                <p class="text-white/60 mt-1">จัดการวันลาและติดตามคำขอลา</p>
+    <div class="mb-6 min-w-0">
+        <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+            <div class="min-w-0 flex-1">
+                <h1 class="text-2xl font-bold text-white tracking-tight">การลา</h1>
+                <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">จัดการวันลา ติดตามคำขอ และดูสิทธิ์คงเหลือของคุณ</p>
             </div>
-            
-            <a href="?action=request" class="btn-primary">
+            <a href="?action=request" class="btn-primary btn-primary-prominent w-full sm:w-auto shrink-0 inline-flex items-center justify-center touch-manipulation">
                 <i class="fas fa-plus mr-2"></i>ยื่นขอลา
             </a>
         </div>
@@ -94,29 +93,29 @@ require_once __DIR__ . '/templates/header.php';
     </div>
     <?php endif; ?>
     
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 min-w-0 max-w-full">
         <!-- Left Column -->
-        <div class="xl:col-span-2 space-y-6">
+        <div class="xl:col-span-2 space-y-6 min-w-0">
             <!-- Leave Balance -->
-            <div class="glass-card rounded-xl p-6">
-                <h2 class="text-lg font-semibold text-white mb-4">
-                    <i class="fas fa-calendar-check text-green-400 mr-2"></i>
+            <div class="glass-card rounded-xl p-6 min-w-0 overflow-hidden">
+                <h2 class="section-title">
+                    <i class="fas fa-calendar-check text-green-400"></i>
                     สิทธิ์วันลาคงเหลือ <?php echo date('Y') + 543; ?>
                 </h2>
                 
                 <?php if ($entitlements): ?>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
                     <?php foreach ($entitlements as $ent): ?>
-                    <div class="p-4 rounded-lg bg-white/5 border border-white/10">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-white font-medium"><?php echo htmlspecialchars($ent['name']); ?></span>
+                    <div class="p-4 rounded-lg bg-white/5 border border-white/10 min-w-0">
+                        <div class="flex items-center justify-between gap-2 mb-2 min-w-0">
+                            <span class="text-white font-medium truncate min-w-0"><?php echo htmlspecialchars($ent['name']); ?></span>
                             <span class="text-xs px-2 py-1 rounded-full" style="background-color: <?php echo $ent['color'] ?? '#6B7280'; ?>20; color: <?php echo $ent['color'] ?? '#6B7280'; ?>">
                                 <?php echo $ent['code']; ?>
                             </span>
                         </div>
                         
-                        <div class="flex items-end justify-between">
-                            <div>
+                        <div class="flex items-end justify-between gap-2 min-w-0">
+                            <div class="min-w-0">
                                 <span class="text-3xl font-bold text-white">
                                     <?php 
                                     $remaining = $ent['entitled_days'] + $ent['carried_over_days'] + ($ent['additional_days'] ?? 0) - $ent['used_days'] - $ent['pending_days'];
@@ -162,13 +161,13 @@ require_once __DIR__ . '/templates/header.php';
             </div>
             
             <!-- Leave History -->
-            <div class="glass-card rounded-xl p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-semibold text-white">
-                        <i class="fas fa-history text-blue-400 mr-2"></i>
+            <div class="glass-card rounded-xl p-6 min-w-0 overflow-hidden">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4 min-w-0">
+                    <h2 class="section-title mb-0">
+                        <i class="fas fa-history text-blue-400"></i>
                         ประวัติการลา
                     </h2>
-                    <a href="leave_history.php" class="inline-flex min-h-[44px] items-center text-violet-400 hover:text-violet-300 text-sm touch-manipulation">
+                    <a href="leave_history.php" class="inline-flex min-h-[44px] items-center justify-center sm:justify-start text-violet-400 hover:text-violet-300 text-sm font-medium touch-manipulation shrink-0">
                         ดูทั้งหมด <i class="fas fa-arrow-right ml-1"></i>
                     </a>
                 </div>
@@ -215,8 +214,8 @@ require_once __DIR__ . '/templates/header.php';
                     <?php endforeach; ?>
                 </div>
 
-                <div class="hidden md:block overflow-x-auto">
-                    <table class="w-full">
+                <div class="hidden md:block overflow-x-auto min-w-0 max-w-full -mx-1 px-1 overscroll-x-contain">
+                    <table class="w-full min-w-0">
                         <thead>
                             <tr class="border-b border-white/10">
                                 <th class="pb-3 text-left text-white/60 text-sm font-medium">ประเภท</th>
@@ -270,7 +269,7 @@ require_once __DIR__ . '/templates/header.php';
         </div>
         
         <!-- Right Column -->
-        <div class="space-y-6">
+        <div class="space-y-6 min-w-0">
             <!-- Quick Request -->
             <div class="glass-card rounded-xl p-6">
                 <h2 class="text-lg font-semibold text-white mb-4">
@@ -287,9 +286,9 @@ require_once __DIR__ . '/templates/header.php';
                             <i class="fas fa-<?php echo $type['icon'] ?? 'calendar'; ?>" 
                                style="color: <?php echo $type['color'] ?? '#6B7280'; ?>"></i>
                         </div>
-                        <div>
-                            <p class="text-white font-medium"><?php echo htmlspecialchars($type['name']); ?></p>
-                            <p class="text-white/50 text-xs"><?php echo htmlspecialchars($type['name_en'] ?? ''); ?></p>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-white font-medium truncate"><?php echo htmlspecialchars($type['name']); ?></p>
+                            <p class="text-white/50 text-xs truncate"><?php echo htmlspecialchars($type['name_en'] ?? ''); ?></p>
                         </div>
                     </a>
                     <?php endforeach; ?>
@@ -298,9 +297,9 @@ require_once __DIR__ . '/templates/header.php';
             
             <!-- Pending Requests -->
             <?php if ($pending_requests): ?>
-            <div class="glass-card rounded-xl p-6">
-                <h2 class="text-lg font-semibold text-white mb-4">
-                    <i class="fas fa-hourglass-half text-orange-400 mr-2"></i>
+            <div class="glass-card rounded-xl p-6 min-w-0 overflow-hidden">
+                <h2 class="section-title">
+                    <i class="fas fa-hourglass-half text-orange-400"></i>
                     รออนุมัติ
                 </h2>
                 
@@ -332,9 +331,9 @@ require_once __DIR__ . '/templates/header.php';
             <?php endif; ?>
             
             <!-- Company Calendar -->
-            <div class="glass-card rounded-xl p-6">
-                <h2 class="text-lg font-semibold text-white mb-4">
-                    <i class="fas fa-calendar text-violet-400 mr-2"></i>
+            <div class="glass-card rounded-xl p-6 min-w-0 overflow-hidden">
+                <h2 class="section-title">
+                    <i class="fas fa-calendar text-violet-400"></i>
                     วันหยุดที่จะถึง
                 </h2>
                 
@@ -385,13 +384,13 @@ async function cancelRequest(id) {
         const result = await response.json();
         
         if (result.success) {
-            showToast('ยกเลิกคำขอลาสำเร็จ', 'success');
+            showToast('success', 'สำเร็จ', 'ยกเลิกคำขอลาเรียบร้อยแล้ว');
             setTimeout(() => location.reload(), 1000);
         } else {
-            showToast(result.error || 'เกิดข้อผิดพลาด', 'error');
+            showToast('error', 'ผิดพลาด', result.error || 'เกิดข้อผิดพลาด');
         }
     } catch (err) {
-        showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+        showToast('error', 'ผิดพลาด', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
     }
 }
 </script>

@@ -23,18 +23,19 @@ $stmt->execute([$user['id']]);
 $leave_types_form = $stmt->fetchAll();
 ?>
 
-<div class="mb-6">
-    <nav class="text-sm text-white/60 mb-1">
-        <a href="leave.php" class="hover:text-white">การลา</a>
+<div class="mb-6 min-w-0">
+    <nav class="text-sm text-white/60 mb-1" aria-label="Breadcrumb">
+        <a href="leave.php" class="hover:text-white touch-manipulation">การลา</a>
         <span class="mx-2">/</span>
         <span class="text-white">ยื่นขอลา</span>
     </nav>
-    <h1 class="text-2xl font-bold text-white">ยื่นขอลา</h1>
+    <h1 class="text-2xl font-bold text-white tracking-tight">ยื่นขอลา</h1>
+    <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">กรอกช่วงวันที่และเหตุผล ระบบจะคำนวณจำนวนวันลาให้</p>
 </div>
 
-<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-    <div class="xl:col-span-2">
-        <form id="leave-form" class="glass-card rounded-xl p-6" method="POST" action="/api/leave.php" enctype="multipart/form-data">
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6 min-w-0 max-w-full">
+    <div class="xl:col-span-2 min-w-0">
+        <form id="leave-form" class="glass-card rounded-xl p-6 min-w-0 overflow-hidden" method="POST" action="/api/leave.php" enctype="multipart/form-data">
             <input type="hidden" name="action" value="create">
             <?php echo csrfField(); ?>
             
@@ -137,7 +138,7 @@ $leave_types_form = $stmt->fetchAll();
                 <a href="leave.php" class="touch-manipulation flex-1 min-h-[48px] inline-flex items-center justify-center py-3 bg-white/10 hover:bg-white/20 text-white text-center rounded-xl transition-colors">
                     ยกเลิก
                 </a>
-                <button type="submit" class="touch-manipulation flex-1 min-h-[48px] inline-flex items-center justify-center gap-2 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors font-semibold">
+                <button type="submit" class="btn-primary touch-manipulation flex-1 min-h-[48px] inline-flex items-center justify-center gap-2 py-3 rounded-xl font-semibold">
                     <i class="fas fa-paper-plane"></i><span>ส่งคำขอลา</span>
                 </button>
             </div>
@@ -145,20 +146,20 @@ $leave_types_form = $stmt->fetchAll();
     </div>
     
     <!-- Right Column: Info -->
-    <div class="space-y-6">
+    <div class="space-y-6 min-w-0">
         <!-- Leave Balance -->
-        <div class="glass-card rounded-xl p-6">
-            <h3 class="text-lg font-semibold text-white mb-4">
-                <i class="fas fa-info-circle text-blue-400 mr-2"></i>
+        <div class="glass-card rounded-xl p-6 min-w-0 overflow-hidden">
+            <h3 class="section-title">
+                <i class="fas fa-info-circle text-blue-400"></i>
                 สิทธิ์วันลาคงเหลือ
             </h3>
             
             <div class="space-y-3" id="leave-balance-list">
                 <?php foreach ($leave_types_form as $type): ?>
                 <?php $remaining = $type['entitled_days'] + $type['carried_over'] - $type['used_days'] - $type['pending_days']; ?>
-                <div class="flex items-center justify-between py-2 border-b border-white/10 last:border-0"
+                <div class="flex items-center justify-between gap-2 py-2 border-b border-white/10 last:border-0 min-w-0"
                      data-type-id="<?php echo $type['id']; ?>">
-                    <span class="text-white/70 text-sm"><?php echo htmlspecialchars($type['name']); ?></span>
+                    <span class="text-white/70 text-sm truncate min-w-0"><?php echo htmlspecialchars($type['name']); ?></span>
                     <span class="text-white font-medium <?php echo $remaining <= 0 ? 'text-red-400' : ''; ?>">
                         <?php echo number_format($remaining, 1); ?> วัน
                     </span>
@@ -168,9 +169,9 @@ $leave_types_form = $stmt->fetchAll();
         </div>
         
         <!-- Leave Policy -->
-        <div class="glass-card rounded-xl p-6">
-            <h3 class="text-lg font-semibold text-white mb-4">
-                <i class="fas fa-clipboard-list text-yellow-400 mr-2"></i>
+        <div class="glass-card rounded-xl p-6 min-w-0 overflow-hidden">
+            <h3 class="section-title">
+                <i class="fas fa-clipboard-list text-yellow-400"></i>
                 ระเบียบการลา
             </h3>
             
