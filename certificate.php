@@ -307,7 +307,7 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
     
     <?php if (empty($myRequests)): ?>
     <div class="p-12 text-center">
-        <i class="fas fa-file-certificate text-4xl text-white/20 mb-4"></i>
+        <i class="fas fa-file-signature text-4xl text-white/20 mb-4" aria-hidden="true"></i>
         <p class="text-white/60">ยังไม่มีประวัติการขอหนังสือรับรอง</p>
         <a href="certificate.php?action=new" class="inline-block mt-4 px-6 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
             ขอหนังสือรับรองใหม่

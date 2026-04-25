@@ -464,11 +464,6 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 12px;
         }
-        @media (min-width: 400px) {
-            .mobile-menu-grid {
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-            }
-        }
         .mobile-menu-section-label {
             font-size: 0.6875rem;
             font-weight: 700;
@@ -839,7 +834,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             </a>
             
             <a href="/certificate.php" class="nav-item <?php echo $current_page === 'certificate' ? 'active' : ''; ?>">
-                <i class="fas fa-file-certificate"></i>
+                <i class="fas fa-file-signature"></i>
                 <span>ขอใบรับรอง</span>
             </a>
             
@@ -970,7 +965,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
                     <span>สลิปเงินเดือน</span>
                 </a>
                 <a href="/certificate.php" class="mobile-menu-tile <?php echo $current_page === 'certificate' ? 'active' : ''; ?>">
-                    <i class="fas fa-file-certificate" aria-hidden="true"></i>
+                    <i class="fas fa-file-signature" aria-hidden="true"></i>
                     <span>ขอใบรับรอง</span>
                 </a>
                 <a href="/dayoff_schedule.php" class="mobile-menu-tile <?php echo $current_page === 'dayoff' ? 'active' : ''; ?>">
