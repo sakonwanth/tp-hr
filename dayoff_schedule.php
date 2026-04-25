@@ -157,15 +157,16 @@ include __DIR__ . '/templates/header.php';
 ?>
 
 <div class="mb-6">
-    <nav class="text-sm text-white/60 mb-1">
-        <a href="checkin.php" class="hover:text-white">ลงเวลา</a>
+    <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
+        <a href="checkin.php" class="hover:text-white touch-manipulation inline-flex min-h-[44px] items-center">ลงเวลา</a>
         <span class="mx-2">/</span>
         <span class="text-white">วันหยุดประจำสัปดาห์</span>
     </nav>
-    <h1 class="text-2xl font-bold text-white">วันหยุดประจำสัปดาห์</h1>
-    <p class="text-white/60 text-sm mt-1">
-        วันหยุดเริ่มต้น: <span class="text-blue-400 font-medium"><?php echo $dayNames[$defaultDayOff]; ?></span>
-        — สามารถขอเปลี่ยนวันหยุดแต่ละสัปดาห์ได้ โดยรอผู้บริหารอนุมัติ
+    <h1 class="text-2xl sm:text-3xl font-bold text-white leading-tight">วันหยุดประจำสัปดาห์</h1>
+    <p class="text-white/60 text-sm mt-2 max-w-3xl">
+        วันหยุดเริ่มต้น: <span class="text-violet-300 font-medium"><?php echo $dayNames[$defaultDayOff]; ?></span>
+        <span class="text-white/40"> — </span>
+        ขอเปลี่ยนวันหยุดรายสัปดาห์ได้ รอผู้บริหารอนุมัติ
     </p>
 </div>
 
@@ -183,9 +184,9 @@ include __DIR__ . '/templates/header.php';
 
 <!-- Month Filter -->
 <div class="glass-card rounded-xl p-4 mb-6">
-    <form method="GET" class="flex items-center gap-4">
-        <label class="text-white/70 text-sm">เดือน:</label>
-        <select name="month" class="input-field w-auto" onchange="this.form.submit()">
+    <form method="GET" class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+        <label for="dayoff-month-select" class="text-white/70 text-sm font-medium shrink-0">เดือน</label>
+        <select id="dayoff-month-select" name="month" class="input-field w-full sm:w-auto sm:min-w-[12rem] touch-manipulation" onchange="this.form.submit()">
             <?php foreach ($monthOptions as $opt): ?>
             <option value="<?php echo $opt['value']; ?>" <?php echo $month === $opt['value'] ? 'selected' : ''; ?>>
                 <?php echo $opt['label']; ?>
@@ -250,7 +251,7 @@ include __DIR__ . '/templates/header.php';
             
             <?php if (!$req || $req['status'] === 'REJECTED'): ?>
             <button type="button" onclick="openChangeModal('<?php echo $week['start']; ?>', '<?php echo $week['end']; ?>', <?php echo $week['num']; ?>)" 
-                    class="shrink-0 min-h-[44px] px-3 py-2 bg-violet-600 hover:bg-violet-700 text-white text-xs sm:text-sm rounded-lg transition-colors touch-manipulation self-start sm:self-auto">
+                    class="btn-primary shrink-0 px-4 text-xs sm:text-sm self-start sm:self-auto touch-manipulation">
                 <i class="fas fa-exchange-alt mr-1"></i>ขอเปลี่ยนวันหยุด
             </button>
             <?php elseif ($req && $req['status'] === 'PENDING'): ?>
@@ -274,13 +275,13 @@ include __DIR__ . '/templates/header.php';
             <?php endforeach; ?>
             
             <?php foreach ($weekDays as $wd): 
-                $cellClass = 'rounded-lg p-2 text-center text-sm ';
+                $cellClass = 'rounded-lg px-1 py-2 sm:p-2 text-center text-sm min-h-[52px] flex flex-col items-center justify-center touch-manipulation ';
                 if (!$wd['in_month']) {
                     $cellClass .= 'opacity-30 bg-white/5 text-white/50';
                 } elseif ($wd['is_holiday']) {
                     $cellClass .= 'bg-orange-500/20 text-orange-400 ring-1 ring-orange-500/30';
                 } elseif ($wd['is_day_off']) {
-                    $cellClass .= 'bg-blue-500/20 text-blue-400 ring-1 ring-blue-500/30';
+                    $cellClass .= 'bg-violet-500/15 text-violet-200 ring-1 ring-violet-500/35';
                 } elseif ($wd['is_pending_day_off']) {
                     $cellClass .= 'bg-yellow-500/20 text-yellow-400 ring-1 ring-yellow-500/30 animate-pulse';
                 } else {
@@ -329,16 +330,17 @@ include __DIR__ . '/templates/header.php';
 
 <!-- Legend -->
 <div class="glass-card rounded-xl p-4 mt-6">
-    <div class="flex flex-wrap gap-4 text-xs text-white/60">
-        <span><span class="inline-block w-3 h-3 rounded bg-blue-500/30 mr-1"></span> วันหยุดประจำสัปดาห์</span>
-        <span><span class="inline-block w-3 h-3 rounded bg-orange-500/30 mr-1"></span> วันหยุดราชการ/เทศกาล</span>
-        <span><span class="inline-block w-3 h-3 rounded bg-yellow-500/30 mr-1 animate-pulse"></span> รออนุมัติเปลี่ยน</span>
-        <span><span class="inline-block w-3 h-3 rounded bg-white/10 mr-1"></span> วันทำงาน</span>
+    <p class="text-white/50 text-xs font-medium mb-3">คำอธิบายสี</p>
+    <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-x-6 sm:gap-y-2 text-xs text-white/65">
+        <span class="inline-flex items-center gap-2 min-h-[44px] sm:min-h-0"><span class="inline-block w-3 h-3 shrink-0 rounded bg-violet-500/35 ring-1 ring-violet-500/40" aria-hidden="true"></span> วันหยุดประจำสัปดาห์</span>
+        <span class="inline-flex items-center gap-2 min-h-[44px] sm:min-h-0"><span class="inline-block w-3 h-3 shrink-0 rounded bg-orange-500/30" aria-hidden="true"></span> วันหยุดราชการ/เทศกาล</span>
+        <span class="inline-flex items-center gap-2 min-h-[44px] sm:min-h-0"><span class="inline-block w-3 h-3 shrink-0 rounded bg-yellow-500/30 animate-pulse" aria-hidden="true"></span> รออนุมัติเปลี่ยน</span>
+        <span class="inline-flex items-center gap-2 min-h-[44px] sm:min-h-0"><span class="inline-block w-3 h-3 shrink-0 rounded bg-white/10" aria-hidden="true"></span> วันทำงาน</span>
     </div>
 </div>
 
 <!-- Change Day-Off Modal -->
-<div id="change-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
+<div id="change-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 overflow-y-auto overscroll-contain bg-black/50 backdrop-blur-sm pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]">
     <div class="glass-card rounded-2xl w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <form method="POST" class="p-6">
             <?php echo csrfField(); ?>
@@ -372,11 +374,11 @@ include __DIR__ . '/templates/header.php';
                 <input type="text" name="reason" class="input-field" placeholder="เช่น ต้องไปธุระวันอาทิตย์">
             </div>
             
-            <div class="flex gap-3">
-                <button type="button" onclick="closeChangeModal()" class="flex-1 min-h-[44px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors touch-manipulation">
+            <div class="flex flex-col-reverse gap-3 sm:flex-row">
+                <button type="button" onclick="closeChangeModal()" class="btn-secondary flex-1 justify-center touch-manipulation">
                     ยกเลิก
                 </button>
-                <button type="submit" class="flex-1 min-h-[44px] py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors touch-manipulation">
+                <button type="submit" class="btn-primary flex-1 justify-center touch-manipulation">
                     <i class="fas fa-paper-plane mr-2"></i>ส่งคำขอ
                 </button>
             </div>
