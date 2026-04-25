@@ -237,8 +237,8 @@ include __DIR__ . '/templates/header.php';
         }
     ?>
     <div class="glass-card rounded-xl p-4">
-        <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-3">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-3">
+            <div class="flex flex-wrap items-center gap-3 min-w-0">
                 <h3 class="text-white font-medium">
                     สัปดาห์ที่ <?php echo $week['num']; ?>
                     <span class="text-white/50 text-sm font-normal ml-2">
@@ -249,16 +249,16 @@ include __DIR__ . '/templates/header.php';
             </div>
             
             <?php if (!$req || $req['status'] === 'REJECTED'): ?>
-            <button onclick="openChangeModal('<?php echo $week['start']; ?>', '<?php echo $week['end']; ?>', <?php echo $week['num']; ?>)" 
-                    class="px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white text-xs rounded-lg transition-colors">
+            <button type="button" onclick="openChangeModal('<?php echo $week['start']; ?>', '<?php echo $week['end']; ?>', <?php echo $week['num']; ?>)" 
+                    class="shrink-0 min-h-[44px] px-3 py-2 bg-violet-600 hover:bg-violet-700 text-white text-xs sm:text-sm rounded-lg transition-colors touch-manipulation self-start sm:self-auto">
                 <i class="fas fa-exchange-alt mr-1"></i>ขอเปลี่ยนวันหยุด
             </button>
             <?php elseif ($req && $req['status'] === 'PENDING'): ?>
-            <form method="POST" class="inline">
+            <form method="POST" class="inline shrink-0 self-start sm:self-auto">
                 <?php echo csrfField(); ?>
                 <input type="hidden" name="action" value="cancel_request">
                 <input type="hidden" name="request_id" value="<?php echo $req['id']; ?>">
-                <button type="submit" class="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs rounded-lg transition-colors"
+                <button type="submit" class="min-h-[44px] px-3 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs sm:text-sm rounded-lg transition-colors touch-manipulation"
                         onclick="return confirm('ยกเลิกคำขอเปลี่ยนวันหยุดสัปดาห์นี้?')">
                     <i class="fas fa-times mr-1"></i>ยกเลิกคำขอ
                 </button>
@@ -266,8 +266,9 @@ include __DIR__ . '/templates/header.php';
             <?php endif; ?>
         </div>
         
-        <!-- Week Calendar Grid -->
-        <div class="grid grid-cols-7 gap-1">
+        <!-- Week Calendar Grid (horizontal scroll on very narrow screens) -->
+        <div class="min-w-0 overflow-x-auto [-webkit-overflow-scrolling:touch] overscroll-x-contain pb-1">
+            <div class="grid grid-cols-7 gap-1 min-w-[20rem] sm:min-w-0">
             <?php foreach ($dayNamesGrid as $dn): ?>
             <div class="text-center text-white/40 text-xs py-1"><?php echo $dn; ?></div>
             <?php endforeach; ?>
@@ -297,6 +298,7 @@ include __DIR__ . '/templates/header.php';
                 <?php endif; ?>
             </div>
             <?php endforeach; ?>
+            </div>
         </div>
         
         <?php if ($req && $req['status'] !== 'PENDING'): ?>
@@ -371,10 +373,10 @@ include __DIR__ . '/templates/header.php';
             </div>
             
             <div class="flex gap-3">
-                <button type="button" onclick="closeChangeModal()" class="flex-1 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">
+                <button type="button" onclick="closeChangeModal()" class="flex-1 min-h-[44px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors touch-manipulation">
                     ยกเลิก
                 </button>
-                <button type="submit" class="flex-1 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
+                <button type="submit" class="flex-1 min-h-[44px] py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors touch-manipulation">
                     <i class="fas fa-paper-plane mr-2"></i>ส่งคำขอ
                 </button>
             </div>

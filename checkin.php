@@ -163,7 +163,7 @@ require_once __DIR__ . '/templates/header.php';
             <div class="glass-card rounded-xl p-6">
                 <!-- Current Time Display -->
                 <div class="text-center mb-8">
-                    <div class="text-6xl font-bold text-white mb-2" id="current-time">--:--:--</div>
+                    <div class="text-5xl sm:text-6xl font-bold text-white mb-2 tabular-nums" id="current-time">--:--:--</div>
                     <p class="text-white/60"><?php echo formatDateThai(date('Y-m-d')); ?></p>
                     
                     <div class="mt-4 flex items-center justify-center gap-2 flex-wrap">
@@ -258,7 +258,7 @@ require_once __DIR__ . '/templates/header.php';
                         <!-- Check-in Button -->
                         <button id="btn-checkin" 
                                 onclick="startCheckin('in')"
-                                class="w-48 h-48 rounded-full bg-gradient-to-br from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white shadow-lg shadow-green-500/30 transition-all hover:scale-105 flex flex-col items-center justify-center">
+                                class="w-48 h-48 rounded-full bg-gradient-to-br from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white shadow-lg shadow-green-500/30 transition-all hover:scale-105 active:scale-[0.98] touch-manipulation flex flex-col items-center justify-center">
                             <i class="fas fa-fingerprint text-5xl mb-2"></i>
                             <span class="text-xl font-bold">ลงเวลาเข้า</span>
                         </button>
@@ -267,7 +267,7 @@ require_once __DIR__ . '/templates/header.php';
                         <!-- Check-out Button -->
                         <button id="btn-checkout"
                                 onclick="startCheckin('out')"
-                                class="w-48 h-48 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white shadow-lg shadow-blue-500/30 transition-all hover:scale-105 flex flex-col items-center justify-center">
+                                class="w-48 h-48 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white shadow-lg shadow-blue-500/30 transition-all hover:scale-105 active:scale-[0.98] touch-manipulation flex flex-col items-center justify-center">
                             <i class="fas fa-sign-out-alt text-5xl mb-2"></i>
                             <span class="text-xl font-bold">ลงเวลาออก</span>
                         </button>
@@ -313,7 +313,7 @@ require_once __DIR__ . '/templates/header.php';
                         <p class="text-white/70 text-xs mt-1 line-clamp-2"><?php echo htmlspecialchars($ls_today_row['planned_reason']); ?></p>
                         <?php endif; ?>
                         <button type="button" onclick="cancelLateStart('<?php echo $ls_today; ?>')"
-                                class="mt-3 w-full py-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-400/30 text-red-300 text-sm font-semibold transition-colors">
+                                class="mt-3 w-full min-h-[44px] py-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-400/30 text-red-300 text-sm font-semibold transition-colors touch-manipulation">
                             <i class="fas fa-times-circle mr-1"></i>ยกเลิกการแจ้ง
                         </button>
                     </div>
@@ -331,14 +331,14 @@ require_once __DIR__ . '/templates/header.php';
                         <p class="text-white/70 text-xs mt-1 line-clamp-2"><?php echo htmlspecialchars($ls_tomorrow_row['planned_reason']); ?></p>
                         <?php endif; ?>
                         <button type="button" onclick="cancelLateStart('<?php echo $ls_tomorrow; ?>')"
-                                class="mt-3 w-full py-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-400/30 text-red-300 text-sm font-semibold transition-colors">
+                                class="mt-3 w-full min-h-[44px] py-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-400/30 text-red-300 text-sm font-semibold transition-colors touch-manipulation">
                             <i class="fas fa-times-circle mr-1"></i>ยกเลิกการแจ้ง
                         </button>
                     </div>
                     <?php endif; ?>
                     <?php if (!($ls_today_row && $ls_tomorrow_row)): ?>
                     <button type="button" onclick="openLateStartModal()"
-                            class="w-full py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-dashed border-white/20 text-white/70 text-sm font-medium transition-colors">
+                            class="w-full min-h-[44px] py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-dashed border-white/20 text-white/70 text-sm font-medium transition-colors touch-manipulation">
                         <i class="fas fa-plus-circle mr-1"></i>เพิ่มการแจ้งอีกวัน
                     </button>
                     <?php endif; ?>
@@ -346,7 +346,7 @@ require_once __DIR__ . '/templates/header.php';
             </div>
             <?php else: ?>
             <button type="button" onclick="openLateStartModal()"
-                    class="group w-full relative overflow-hidden rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/15 hover:from-amber-500/30 hover:to-orange-500/25 active:from-amber-500/40 active:to-orange-500/35 border border-amber-400/30 hover:border-amber-400/60 p-5 text-left transition-all duration-200 shadow-lg shadow-amber-500/5">
+                    class="group w-full min-h-[44px] relative overflow-hidden rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/15 hover:from-amber-500/30 hover:to-orange-500/25 active:from-amber-500/40 active:to-orange-500/35 border border-amber-400/30 hover:border-amber-400/60 p-5 text-left transition-all duration-200 shadow-lg shadow-amber-500/5 touch-manipulation">
                 <span class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-amber-400/10 blur-2xl group-hover:bg-amber-400/20 transition-colors"></span>
                 <div class="relative flex items-center gap-4">
                     <div class="shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:scale-105 transition-transform">
@@ -370,10 +370,10 @@ require_once __DIR__ . '/templates/header.php';
 
             <!-- Quick links -->
             <div class="grid grid-cols-2 gap-3">
-                <a href="attendance_history.php" class="flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-2.5 text-white/80 hover:text-white text-sm transition-colors">
+                <a href="attendance_history.php" class="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-2.5 text-white/80 hover:text-white text-sm transition-colors touch-manipulation">
                     <i class="fas fa-history text-violet-400"></i>ประวัติเข้างาน
                 </a>
-                <a href="leave.php" class="flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-2.5 text-white/80 hover:text-white text-sm transition-colors">
+                <a href="leave.php" class="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-2.5 text-white/80 hover:text-white text-sm transition-colors touch-manipulation">
                     <i class="fas fa-calendar-check text-emerald-400"></i>ขอลา / OT
                 </a>
             </div>
@@ -439,7 +439,7 @@ require_once __DIR__ . '/templates/header.php';
                         $attDate = $att['attendance_date'];
                         $hol = $holidayMap[$attDate] ?? null;
                     ?>
-                    <div class="p-3 rounded-lg bg-white/5 flex items-center justify-between">
+                    <div class="p-3 min-h-[52px] rounded-lg bg-white/5 flex items-center justify-between gap-2">
                         <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-2">
                                 <p class="text-white text-sm truncate">
@@ -490,7 +490,7 @@ require_once __DIR__ . '/templates/header.php';
                 <p class="text-white/50 text-center py-4">ยังไม่มีประวัติ</p>
                 <?php endif; ?>
                 
-                <a href="attendance_history.php" class="block text-center text-violet-400 hover:text-violet-300 text-sm mt-4">
+                <a href="attendance_history.php" class="mt-4 inline-flex min-h-[44px] w-full items-center justify-center gap-1 text-center text-violet-400 hover:text-violet-300 text-sm touch-manipulation">
                     ดูประวัติทั้งหมด <i class="fas fa-arrow-right ml-1"></i>
                 </a>
             </div>
@@ -505,7 +505,7 @@ require_once __DIR__ . '/templates/header.php';
             <h3 class="text-white text-lg font-bold flex items-center gap-2">
                 <i class="fas fa-clock text-amber-400"></i>แจ้งเข้างานสายล่วงหน้า
             </h3>
-            <button onclick="closeLateStartModal()" class="text-white/60 hover:text-white p-1">
+            <button type="button" onclick="closeLateStartModal()" class="min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-white/60 hover:text-white touch-manipulation rounded-lg" aria-label="ปิด">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -514,14 +514,14 @@ require_once __DIR__ . '/templates/header.php';
         <div class="mb-4">
             <label class="text-white/70 text-sm mb-2 block">แจ้งสำหรับวันไหน</label>
             <div class="grid grid-cols-2 gap-2">
-                <label class="flex items-center justify-center p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer has-[:checked]:bg-amber-500/20 has-[:checked]:border-amber-400 transition-colors">
+                <label class="flex min-h-[44px] items-center justify-center p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer has-[:checked]:bg-amber-500/20 has-[:checked]:border-amber-400 transition-colors touch-manipulation">
                     <input type="radio" name="ls-target" value="tomorrow" class="hidden" onchange="updateLateStartDateLabel()" <?php echo $late_start_can_tomorrow_request['ok'] ? 'checked' : ''; ?>>
                     <div class="text-center">
                         <div class="text-white font-medium">พรุ่งนี้</div>
                         <div class="text-white/50 text-xs mt-0.5">แจ้งล่วงหน้า</div>
                     </div>
                 </label>
-                <label class="flex items-center justify-center p-3 rounded-xl bg-white/5 border border-white/10 <?php echo $late_start_can_today_request['ok'] ? 'cursor-pointer has-[:checked]:bg-amber-500/20 has-[:checked]:border-amber-400' : 'opacity-40 cursor-not-allowed'; ?> transition-colors">
+                <label class="flex min-h-[44px] items-center justify-center p-3 rounded-xl bg-white/5 border border-white/10 <?php echo $late_start_can_today_request['ok'] ? 'cursor-pointer has-[:checked]:bg-amber-500/20 has-[:checked]:border-amber-400 touch-manipulation' : 'opacity-40 cursor-not-allowed'; ?> transition-colors">
                     <input type="radio" name="ls-target" value="today" class="hidden" onchange="updateLateStartDateLabel()" <?php echo $late_start_can_today_request['ok'] ? '' : 'disabled'; ?>>
                     <div class="text-center">
                         <div class="text-white font-medium">วันนี้</div>
@@ -562,11 +562,11 @@ require_once __DIR__ . '/templates/header.php';
         <!-- Submit -->
         <div class="flex gap-2">
             <button type="button" onclick="closeLateStartModal()"
-                    class="flex-1 py-3 bg-white/10 hover:bg-white/15 text-white rounded-xl font-medium transition-colors">
+                    class="flex-1 min-h-[44px] py-3 bg-white/10 hover:bg-white/15 text-white rounded-xl font-medium transition-colors touch-manipulation">
                 ยกเลิก
             </button>
             <button type="button" onclick="submitLateStart()"
-                    class="flex-1 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl font-medium transition-colors">
+                    class="flex-1 min-h-[44px] py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl font-medium transition-colors touch-manipulation">
                 <i class="fas fa-paper-plane mr-2"></i>ส่งคำขอ
             </button>
         </div>
@@ -595,10 +595,10 @@ require_once __DIR__ . '/templates/header.php';
         </div>
 
         <div class="flex gap-3">
-            <button type="button" onclick="closeOffsiteModal()" class="flex-1 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-medium transition-colors">
+            <button type="button" onclick="closeOffsiteModal()" class="flex-1 min-h-[44px] py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-medium transition-colors touch-manipulation">
                 ยกเลิก
             </button>
-            <button type="button" onclick="submitOffsite()" class="flex-1 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-medium transition-colors">
+            <button type="button" onclick="submitOffsite()" class="flex-1 min-h-[44px] py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-medium transition-colors touch-manipulation">
                 <i class="fas fa-paper-plane mr-1"></i>ส่งคำขอ
             </button>
         </div>
@@ -642,13 +642,13 @@ require_once __DIR__ . '/templates/header.php';
         
         <!-- Buttons -->
         <div class="flex gap-3">
-            <button type="button" onclick="closeCheckinModal()" class="flex-1 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">
+            <button type="button" onclick="closeCheckinModal()" class="flex-1 min-h-[44px] py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors touch-manipulation">
                 ยกเลิก
             </button>
-            <button type="button" id="btn-capture" onclick="capturePhoto()" class="flex-1 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
+            <button type="button" id="btn-capture" onclick="capturePhoto()" class="flex-1 min-h-[44px] py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors touch-manipulation">
                 <i class="fas fa-camera mr-2"></i>ถ่ายรูป
             </button>
-            <button type="button" id="btn-confirm" onclick="confirmCheckin()" class="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors hidden">
+            <button type="button" id="btn-confirm" onclick="confirmCheckin()" class="flex-1 min-h-[44px] py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors hidden touch-manipulation">
                 <i class="fas fa-check mr-2"></i>ยืนยัน
             </button>
         </div>

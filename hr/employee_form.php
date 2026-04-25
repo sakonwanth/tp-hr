@@ -466,29 +466,29 @@ include dirname(__DIR__) . '/templates/header.php';
     <?php echo csrfField(); ?>
     
     <!-- Tab Navigation -->
-    <div class="glass-card rounded-xl p-1.5 flex flex-nowrap overflow-x-auto gap-1 sticky top-3 z-30">
-        <button type="button" onclick="switchTab('tab-personal')" id="btn-tab-personal" class="tab-btn active shrink-0 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2">
+    <div class="glass-card rounded-xl p-1.5 flex flex-nowrap overflow-x-auto gap-1 sticky top-3 z-30 [-webkit-overflow-scrolling:touch] overscroll-x-contain">
+        <button type="button" onclick="switchTab('tab-personal')" id="btn-tab-personal" class="tab-btn active shrink-0 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 touch-manipulation">
             <i class="fas fa-user"></i>
             <span class="hidden sm:inline">ข้อมูลส่วนตัว</span>
             <span class="sm:hidden">ส่วนตัว</span>
         </button>
-        <button type="button" onclick="switchTab('tab-work')" id="btn-tab-work" class="tab-btn shrink-0 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2">
+        <button type="button" onclick="switchTab('tab-work')" id="btn-tab-work" class="tab-btn shrink-0 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 touch-manipulation">
             <i class="fas fa-briefcase"></i>
             <span class="hidden sm:inline">ข้อมูลการทำงาน</span>
             <span class="sm:hidden">การทำงาน</span>
         </button>
-        <button type="button" onclick="switchTab('tab-welfare')" id="btn-tab-welfare" class="tab-btn shrink-0 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2">
+        <button type="button" onclick="switchTab('tab-welfare')" id="btn-tab-welfare" class="tab-btn shrink-0 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 touch-manipulation">
             <i class="fas fa-shield-alt"></i>
             <span class="hidden sm:inline">สวัสดิการ & การเงิน</span>
             <span class="sm:hidden">สวัสดิการ</span>
         </button>
         <?php if ($action === 'edit' && $employee): ?>
-        <button type="button" onclick="switchTab('tab-history')" id="btn-tab-history" class="tab-btn shrink-0 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2">
+        <button type="button" onclick="switchTab('tab-history')" id="btn-tab-history" class="tab-btn shrink-0 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 touch-manipulation">
             <i class="fas fa-history"></i>
             <span class="hidden sm:inline">ประวัติ & ครอบครัว</span>
             <span class="sm:hidden">ประวัติ</span>
         </button>
-        <button type="button" onclick="switchTab('tab-system')" id="btn-tab-system" class="tab-btn shrink-0 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2">
+        <button type="button" onclick="switchTab('tab-system')" id="btn-tab-system" class="tab-btn shrink-0 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 touch-manipulation">
             <i class="fas fa-cog"></i>
             <span class="hidden sm:inline">ระบบ</span>
         </button>
