@@ -133,42 +133,45 @@ for ($i = 0; $i < 12; $i++) {
 }
 
 require_once __DIR__ . '/templates/header.php';
+
+$dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
 ?>
 
-<div>
+<div class="min-w-0 max-w-full">
     <!-- Page Header -->
-    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div>
-            <nav class="text-sm text-white/60 mb-1">
-                <a href="checkin.php" class="hover:text-white">ลงเวลา</a>
-                <span class="mx-2">/</span>
-                <span class="text-white">ประวัติ</span>
-            </nav>
-            <h1 class="text-2xl font-bold text-white">ประวัติการลงเวลา</h1>
+    <div class="mb-6 min-w-0">
+        <nav class="text-sm text-white/60 mb-1" aria-label="Breadcrumb">
+            <a href="checkin.php" class="hover:text-white touch-manipulation">ลงเวลา</a>
+            <span class="mx-2">/</span>
+            <span class="text-white">ประวัติ</span>
+        </nav>
+        <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+            <div class="min-w-0 flex-1">
+                <h1 class="text-2xl font-bold text-white tracking-tight">ประวัติการลงเวลา</h1>
+                <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">สรุปรายเดือน กรองสถานะ และดูรายวันจนถึงวันนี้</p>
+            </div>
+            <a href="checkin.php" class="btn-primary btn-primary-prominent w-full sm:w-auto shrink-0 inline-flex items-center justify-center touch-manipulation">
+                <i class="fas fa-fingerprint mr-2"></i>ลงเวลา
+            </a>
         </div>
-        
-        <a href="checkin.php" class="btn-primary">
-            <i class="fas fa-fingerprint mr-2"></i>ลงเวลา
-        </a>
     </div>
     
     <!-- Filters -->
-    <div class="glass-card rounded-xl p-4 mb-6">
-        <form method="GET" class="flex flex-wrap items-center gap-4">
-            <div class="flex items-center gap-2 min-h-[44px]">
-                <label class="text-white/70 text-sm shrink-0">เดือน:</label>
-                <select name="month" class="input-field w-auto min-h-[44px]" onchange="this.form.submit()">
+    <div class="glass-card rounded-xl p-4 mb-6 min-w-0 overflow-hidden">
+        <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 gap-4 min-w-0 max-w-full">
+            <div class="min-w-0">
+                <label class="block text-white/60 text-xs mb-1">เดือน</label>
+                <select name="month" class="input-field min-h-[44px] w-full" onchange="this.form.submit()">
                     <?php foreach ($month_options as $opt): ?>
-                    <option value="<?php echo $opt['value']; ?>" <?php echo $month === $opt['value'] ? 'selected' : ''; ?>>
-                        <?php echo $opt['label']; ?>
+                    <option value="<?php echo htmlspecialchars($opt['value']); ?>" <?php echo $month === $opt['value'] ? 'selected' : ''; ?>>
+                        <?php echo htmlspecialchars($opt['label']); ?>
                     </option>
                     <?php endforeach; ?>
                 </select>
             </div>
-            
-            <div class="flex items-center gap-2 min-h-[44px]">
-                <label class="text-white/70 text-sm shrink-0">สถานะ:</label>
-                <select name="status" class="input-field w-auto min-h-[44px]" onchange="this.form.submit()">
+            <div class="min-w-0">
+                <label class="block text-white/60 text-xs mb-1">สถานะ</label>
+                <select name="status" class="input-field min-h-[44px] w-full" onchange="this.form.submit()">
                     <option value="">ทั้งหมด</option>
                     <option value="PRESENT" <?php echo $status_filter === 'PRESENT' ? 'selected' : ''; ?>>มาทำงาน</option>
                     <option value="LATE" <?php echo $status_filter === 'LATE' ? 'selected' : ''; ?>>มาสาย</option>
@@ -181,20 +184,20 @@ require_once __DIR__ . '/templates/header.php';
     </div>
     
     <!-- Summary Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div class="glass-card rounded-xl p-4 text-center">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6 min-w-0 max-w-full">
+        <div class="glass-card rounded-xl p-4 text-center min-w-0 overflow-hidden">
             <p class="text-white/60 text-sm">มาทำงาน</p>
             <p class="text-3xl font-bold text-green-400"><?php echo $summary['present_days'] ?? 0; ?></p>
             <p class="text-white/50 text-xs">วัน</p>
         </div>
         
-        <div class="glass-card rounded-xl p-4 text-center">
+        <div class="glass-card rounded-xl p-4 text-center min-w-0 overflow-hidden">
             <p class="text-white/60 text-sm">มาสาย</p>
             <p class="text-3xl font-bold text-yellow-400"><?php echo $summary['late_days'] ?? 0; ?></p>
             <p class="text-white/50 text-xs">ครั้ง</p>
         </div>
         
-        <div class="glass-card rounded-xl p-4 text-center">
+        <div class="glass-card rounded-xl p-4 text-center min-w-0 overflow-hidden">
             <p class="text-white/60 text-sm">ชั่วโมงทำงาน</p>
             <p class="text-3xl font-bold text-white">
                 <?php echo floor(($summary['total_work_minutes'] ?? 0) / 60); ?>
@@ -202,7 +205,7 @@ require_once __DIR__ . '/templates/header.php';
             <p class="text-white/50 text-xs">ชั่วโมง</p>
         </div>
         
-        <div class="glass-card rounded-xl p-4 text-center">
+        <div class="glass-card rounded-xl p-4 text-center min-w-0 overflow-hidden">
             <p class="text-white/60 text-sm">OT</p>
             <p class="text-3xl font-bold text-emerald-400">
                 <?php echo floor(($summary['total_ot_minutes'] ?? 0) / 60); ?>
@@ -212,15 +215,14 @@ require_once __DIR__ . '/templates/header.php';
     </div>
     
     <!-- Attendance Table -->
-    <div class="glass-card rounded-xl overflow-hidden">
+    <div class="glass-card rounded-xl overflow-hidden min-w-0 max-w-full">
         <?php if ($allDays): ?>
-        <div class="md:hidden p-3 space-y-3">
+        <div class="md:hidden p-3 space-y-3 min-w-0">
             <?php foreach ($allDays as $day): ?>
             <?php
             $att = $day['attendance'];
             $isDayOff = $day['is_day_off'];
             $holiday = $day['holiday'];
-            $dayNames = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
             $statusLabel = 'ขาดงาน';
             $statusClass = 'bg-red-500/15 border border-red-500/30 text-red-200';
             if ($holiday) {
@@ -256,12 +258,12 @@ require_once __DIR__ . '/templates/header.php';
                 ? floor($att['ot_minutes'] / 60) . ':' . str_pad($att['ot_minutes'] % 60, 2, '0', STR_PAD_LEFT)
                 : '-';
             ?>
-            <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
-                <div class="flex items-start justify-between gap-3">
-                    <div>
+            <div class="rounded-2xl bg-white/5 border border-white/10 p-4 min-w-0">
+                <div class="flex items-start justify-between gap-3 min-w-0">
+                    <div class="min-w-0 flex-1">
                         <div class="text-white font-semibold"><?php echo formatDateThai($day['date']); ?></div>
-                        <div class="text-xs <?php echo $holiday ? 'text-orange-300' : ($isDayOff ? 'text-blue-300' : 'text-white/50'); ?>">
-                            <?php echo $dayNames[$day['dow']]; ?>
+                        <div class="text-xs <?php echo $holiday ? 'text-orange-300' : ($isDayOff ? 'text-blue-300' : 'text-white/50'); ?>" style="word-break: break-word;">
+                            <?php echo $dayNamesShort[$day['dow']]; ?>
                             <?php if ($holiday): ?>
                                 · <?php echo htmlspecialchars($holiday['name']); ?>
                             <?php elseif ($isDayOff): ?>
@@ -274,20 +276,20 @@ require_once __DIR__ . '/templates/header.php';
                     </span>
                 </div>
 
-                <div class="grid grid-cols-4 gap-2 mt-4">
-                    <div class="rounded-xl bg-black/20 border border-white/10 px-2 py-2">
+                <div class="grid grid-cols-4 gap-2 mt-4 min-w-0">
+                    <div class="rounded-xl bg-black/20 border border-white/10 px-2 py-2 min-w-0">
                         <div class="text-[11px] text-white/50">เข้า</div>
                         <div class="text-white font-semibold"><?php echo htmlspecialchars($checkIn); ?></div>
                     </div>
-                    <div class="rounded-xl bg-black/20 border border-white/10 px-2 py-2">
+                    <div class="rounded-xl bg-black/20 border border-white/10 px-2 py-2 min-w-0">
                         <div class="text-[11px] text-white/50">ออก</div>
                         <div class="text-white font-semibold"><?php echo htmlspecialchars($checkOut); ?></div>
                     </div>
-                    <div class="rounded-xl bg-black/20 border border-white/10 px-2 py-2">
+                    <div class="rounded-xl bg-black/20 border border-white/10 px-2 py-2 min-w-0">
                         <div class="text-[11px] text-white/50">ชม.</div>
                         <div class="text-white font-semibold"><?php echo htmlspecialchars($work); ?></div>
                     </div>
-                    <div class="rounded-xl bg-black/20 border border-white/10 px-2 py-2">
+                    <div class="rounded-xl bg-black/20 border border-white/10 px-2 py-2 min-w-0">
                         <div class="text-[11px] text-white/50">OT</div>
                         <div class="text-emerald-300 font-semibold"><?php echo htmlspecialchars($ot); ?></div>
                     </div>
@@ -312,8 +314,8 @@ require_once __DIR__ . '/templates/header.php';
         </div>
         <?php endif; ?>
 
-        <div class="hidden md:block overflow-x-auto">
-            <table class="w-full">
+        <div class="hidden md:block overflow-x-auto min-w-0 max-w-full overscroll-x-contain -mx-1 px-1">
+            <table class="w-full" style="min-width:720px">
                 <thead>
                     <tr class="border-b border-white/10">
                         <th class="px-4 py-3 text-left text-white/70 text-sm font-medium">วันที่</th>
@@ -331,7 +333,6 @@ require_once __DIR__ . '/templates/header.php';
                             $att = $day['attendance'];
                             $isDayOff = $day['is_day_off'];
                             $holiday = $day['holiday'];
-                            $dayNames = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
                             
                             // Determine row style
                             $rowClass = 'border-b border-white/5 hover:bg-white/5';
@@ -349,7 +350,7 @@ require_once __DIR__ . '/templates/header.php';
                                             <?php echo formatDateThai($day['date']); ?>
                                         </div>
                                         <div class="text-xs <?php echo $isDayOff ? 'text-blue-400' : ($holiday ? 'text-orange-400' : 'text-white/50'); ?>">
-                                            <?php echo $dayNames[$day['dow']]; ?>
+                                            <?php echo $dayNamesShort[$day['dow']]; ?>
                                             <?php if ($holiday): ?>
                                                 <span class="ml-1 text-orange-400">
                                                     <i class="fas fa-star text-[10px]"></i>
