@@ -272,8 +272,8 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             align-items: center;
             justify-content: space-between;
             gap: 14px;
-            padding: calc(env(safe-area-inset-top, 0px) + 14px) 1.125rem 20px;
-            min-height: calc(env(safe-area-inset-top, 0px) + 58px);
+            padding: calc(env(safe-area-inset-top, 0px) + 12px) 1.125rem 16px;
+            min-height: calc(env(safe-area-inset-top, 0px) + 72px);
         }
         .mobile-app-header-bar .mobile-nav-side {
             flex: 1 1 0;
@@ -286,14 +286,92 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         }
         .mobile-app-header-bar .mobile-nav-brand {
             flex: 0 0 auto;
-            font-size: 0.9375rem;
-            font-weight: 600;
-            letter-spacing: 0.24em;
-            color: #f8fafc;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            max-width: min(52vw, 220px);
             text-decoration: none;
-            padding: 6px 2px 4px;
+            padding: 4px 2px;
+            border-radius: 12px;
             text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
-            font-variant-numeric: tabular-nums;
+        }
+        .mobile-nav-brand:focus-visible {
+            outline: 2px solid rgba(167, 139, 250, 0.65);
+            outline-offset: 3px;
+        }
+        .mobile-nav-brand-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            flex-shrink: 0;
+            object-fit: cover;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+        }
+        .mobile-nav-brand-stack {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 0;
+            line-height: 1.05;
+        }
+        .mobile-nav-brand-line1 {
+            font-size: 1.125rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            white-space: nowrap;
+        }
+        .mobile-nav-brand-tp {
+            color: #f8fafc;
+        }
+        .mobile-nav-brand-hr {
+            color: #ef4444;
+            font-weight: 800;
+            text-shadow: 0 0 20px rgba(239, 68, 68, 0.35);
+        }
+        .mobile-nav-brand-tagline {
+            display: block;
+            margin-top: 3px;
+            font-size: 0.5625rem;
+            font-weight: 600;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: rgba(148, 163, 184, 0.88);
+        }
+
+        /* Desktop / drawer — ชื่อระบบเดียวกับแถบมือถือ */
+        .app-brand-title-row {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            line-height: 1.15;
+            color: #f8fafc;
+            margin: 0;
+        }
+        .app-brand-title-row .app-brand-tp {
+            color: #f8fafc;
+        }
+        .app-brand-title-row .app-brand-hr {
+            color: #ef4444;
+            font-weight: 800;
+        }
+        .app-brand-tagline {
+            margin: 4px 0 0 0;
+            font-size: 0.625rem;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: rgba(100, 116, 139, 0.95);
+        }
+        .app-brand-title-row--compact {
+            font-size: 1rem;
+            letter-spacing: 0.055em;
+        }
+        .app-brand-tagline--compact {
+            font-size: 0.5625rem;
+            margin-top: 2px;
+            letter-spacing: 0.15em;
         }
         .mobile-nav-menu-btn {
             display: inline-flex;
@@ -425,7 +503,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             .content-area {
                 margin-left: 0;
                 /* One safe-area term only: inset + fixed toolbar slack (must match .mobile-app-header height) */
-                padding-top: calc(env(safe-area-inset-top, 0px) + 6rem);
+                padding-top: calc(env(safe-area-inset-top, 0px) + 6.75rem);
                 padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
                 padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
                 padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); /* space for mobile bottom nav */
@@ -579,12 +657,12 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
     <div class="p-6">
         <!-- Logo -->
         <a href="/" class="flex items-center gap-4 mb-8 group">
-            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-lg shadow-primary-500/30 group-hover:scale-105 transition-transform">
-                <i class="fas fa-users text-white text-lg"></i>
+            <div class="w-12 h-12 rounded-2xl overflow-hidden shadow-lg shadow-primary-500/30 ring-1 ring-white/10 group-hover:scale-105 transition-transform flex-shrink-0">
+                <img src="<?php echo htmlspecialchars($appIconPath); ?>" alt="" width="48" height="48" class="w-full h-full object-cover" decoding="async">
             </div>
-            <div>
-                <h1 class="text-xl font-bold text-white">TP-HR</h1>
-                <p class="text-xs text-slate-500">Human Resources</p>
+            <div class="min-w-0">
+                <h1 class="app-brand-title-row"><span class="app-brand-tp">TP-</span><span class="app-brand-hr">HR</span></h1>
+                <p class="app-brand-tagline">Human Resources</p>
             </div>
         </a>
         
@@ -710,7 +788,13 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
                 เมนู
             </button>
         </div>
-        <a href="/" class="mobile-nav-brand touch-manipulation">TP-HR</a>
+        <a href="/" class="mobile-nav-brand touch-manipulation" aria-label="TP-HR Human Resources — หน้าแรก">
+            <img src="<?php echo htmlspecialchars($appIconPath); ?>" alt="" class="mobile-nav-brand-icon" width="34" height="34" decoding="async">
+            <span class="mobile-nav-brand-stack">
+                <span class="mobile-nav-brand-line1" aria-hidden="true"><span class="mobile-nav-brand-tp">TP-</span><span class="mobile-nav-brand-hr">HR</span></span>
+                <span class="mobile-nav-brand-tagline">Human Resources</span>
+            </span>
+        </a>
         <div class="mobile-nav-side mobile-nav-side--end" aria-hidden="true">
             <span class="mobile-nav-spacer"></span>
         </div>
@@ -723,11 +807,14 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
     <aside class="sidebar absolute left-0 top-0 w-[280px] h-full overflow-y-auto overscroll-contain transform transition-transform pt-[env(safe-area-inset-top,0px)]">
         <div class="p-6">
             <div class="flex items-center justify-between mb-6">
-                <a href="/" class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center">
-                        <i class="fas fa-users text-white"></i>
+                <a href="/" class="flex items-center gap-3 min-w-0 touch-manipulation">
+                    <div class="w-10 h-10 rounded-xl overflow-hidden ring-1 ring-white/10 flex-shrink-0 shadow-md">
+                        <img src="<?php echo htmlspecialchars($appIconPath); ?>" alt="" width="40" height="40" class="w-full h-full object-cover" decoding="async">
                     </div>
-                    <span class="text-lg font-bold text-white">TP-HR</span>
+                    <span class="min-w-0">
+                        <span class="block app-brand-title-row app-brand-title-row--compact"><span class="app-brand-tp">TP-</span><span class="app-brand-hr">HR</span></span>
+                        <span class="app-brand-tagline app-brand-tagline--compact block">Human Resources</span>
+                    </span>
                 </a>
                 <button onclick="closeMobileMenu()" class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-white">
                     <i class="fas fa-times"></i>
