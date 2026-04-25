@@ -270,31 +270,37 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         .mobile-app-header-bar {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 14px;
+            justify-content: flex-start;
+            gap: 0;
             padding: calc(env(safe-area-inset-top, 0px) + 12px) 1.125rem 16px;
             min-height: calc(env(safe-area-inset-top, 0px) + 72px);
         }
-        .mobile-app-header-bar .mobile-nav-side {
-            flex: 1 1 0;
-            min-width: 0;
+        /* ปุ่มเมนู + wordmark ชิดกันและชิดซ้าย */
+        .mobile-nav-cluster {
             display: flex;
             align-items: center;
-        }
-        .mobile-app-header-bar .mobile-nav-side--end {
-            justify-content: flex-end;
+            gap: 10px;
+            min-width: 0;
+            flex: 1 1 auto;
         }
         .mobile-app-header-bar .mobile-nav-brand {
-            flex: 0 0 auto;
+            flex: 0 1 auto;
             display: inline-flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             gap: 10px;
-            max-width: min(52vw, 220px);
+            min-width: 0;
+            max-width: none;
             text-decoration: none;
-            padding: 4px 2px;
+            padding: 4px 0;
             border-radius: 12px;
             text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+        }
+        .mobile-app-header .mobile-nav-brand-icon {
+            display: none;
+        }
+        .mobile-app-header .mobile-nav-brand {
+            gap: 0;
         }
         .mobile-nav-brand:focus-visible {
             outline: 2px solid rgba(167, 139, 250, 0.65);
@@ -311,7 +317,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         .mobile-nav-brand-stack {
             display: flex;
             flex-direction: column;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
             min-width: 0;
             line-height: 1.05;
@@ -402,12 +408,6 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             outline: 2px solid rgba(167, 139, 250, 0.65);
             outline-offset: 2px;
         }
-        .mobile-nav-spacer {
-            min-width: 92px;
-            height: 46px;
-            flex-shrink: 0;
-        }
-
         /* Dashboard hero — การ์ดเดียว แถวละ ไอคอน + ข้อความ (แนวนอนชัดเจน) */
         .dashboard-hero {
             margin-top: 0.375rem;
@@ -780,23 +780,20 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
     </div>
 </aside>
 
-<!-- Mobile header: แถบสูงขึ้น ปุ่มเมนูแบบ pill กลางเป็น wordmark -->
+<!-- Mobile header: เมนู + wordmark ชิดซ้าย (ไม่แสดงไอคอนในแถบ) -->
 <header class="mobile-app-header header-glass lg:hidden fixed top-0 left-0 right-0 z-40">
     <div class="mobile-app-header-bar">
-        <div class="mobile-nav-side">
+        <div class="mobile-nav-cluster">
             <button type="button" id="mobileMenuBtn" class="mobile-nav-menu-btn touch-manipulation">
                 เมนู
             </button>
-        </div>
-        <a href="/" class="mobile-nav-brand touch-manipulation" aria-label="TP-HR Human Resources — หน้าแรก">
-            <img src="<?php echo htmlspecialchars($appIconPath); ?>" alt="" class="mobile-nav-brand-icon" width="34" height="34" decoding="async">
-            <span class="mobile-nav-brand-stack">
-                <span class="mobile-nav-brand-line1" aria-hidden="true"><span class="mobile-nav-brand-tp">TP-</span><span class="mobile-nav-brand-hr">HR</span></span>
-                <span class="mobile-nav-brand-tagline">Human Resources</span>
-            </span>
-        </a>
-        <div class="mobile-nav-side mobile-nav-side--end" aria-hidden="true">
-            <span class="mobile-nav-spacer"></span>
+            <a href="/" class="mobile-nav-brand touch-manipulation" aria-label="TP-HR Human Resources — หน้าแรก">
+                <img src="<?php echo htmlspecialchars($appIconPath); ?>" alt="" class="mobile-nav-brand-icon" width="34" height="34" decoding="async" aria-hidden="true">
+                <span class="mobile-nav-brand-stack">
+                    <span class="mobile-nav-brand-line1" aria-hidden="true"><span class="mobile-nav-brand-tp">TP-</span><span class="mobile-nav-brand-hr">HR</span></span>
+                    <span class="mobile-nav-brand-tagline">Human Resources</span>
+                </span>
+            </a>
         </div>
     </div>
 </header>
