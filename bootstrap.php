@@ -73,10 +73,12 @@ if (TP_COMMON_AVAILABLE && class_exists('TpCommon\Session\SharedSession')) {
         $lifetime = defined('SESSION_LIFETIME') ? (int)SESSION_LIFETIME : 7200;
         ini_set('session.gc_maxlifetime', (string)$lifetime);
         session_name('TPHRSESSID');
+        $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https');
         session_set_cookie_params([
             'lifetime' => 0,
             'path' => '/',
-            'secure' => !empty($_SERVER['HTTPS']),
+            'secure' => $https,
             'httponly' => true,
             'samesite' => 'Lax',
         ]);
