@@ -393,6 +393,158 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             outline: 2px solid rgba(167, 139, 250, 0.65);
             outline-offset: 2px;
         }
+
+        /* เมนูมือถือเต็มจอ — ไทล์กริด (ไม่ใช้ utility แบบ arbitrary) */
+        .mobile-menu-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            min-height: 100dvh;
+            background: linear-gradient(165deg, #0f172a 0%, #1e1b4b 42%, #0f172a 100%);
+            -webkit-overflow-scrolling: touch;
+        }
+        .mobile-menu-overlay.hidden {
+            display: none;
+        }
+        .mobile-menu-sheet {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+            padding-left: max(1.125rem, env(safe-area-inset-left, 0px));
+            padding-right: max(1.125rem, env(safe-area-inset-right, 0px));
+            padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+        }
+        .mobile-menu-header {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+            padding-bottom: 14px;
+            margin-bottom: 4px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+        }
+        .mobile-menu-close {
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            background: rgba(30, 41, 59, 0.65);
+            color: #f1f5f9;
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: background 0.2s ease, border-color 0.2s ease;
+        }
+        .mobile-menu-close:hover {
+            background: rgba(51, 65, 85, 0.85);
+            border-color: rgba(167, 139, 250, 0.35);
+        }
+        .mobile-menu-close:focus-visible {
+            outline: 2px solid rgba(167, 139, 250, 0.65);
+            outline-offset: 2px;
+        }
+        .mobile-menu-scroll {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            padding-top: 12px;
+            padding-bottom: 1.25rem;
+        }
+        .mobile-menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+        @media (min-width: 400px) {
+            .mobile-menu-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+        .mobile-menu-section-label {
+            font-size: 0.6875rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: rgba(148, 163, 184, 0.9);
+            margin: 1.35rem 0 10px 0;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(148, 163, 184, 0.12);
+        }
+        .mobile-menu-tile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 10px;
+            min-height: 108px;
+            padding: 14px 8px;
+            border-radius: 16px;
+            background: rgba(30, 41, 59, 0.52);
+            border: 1px solid rgba(148, 163, 184, 0.12);
+            color: #e2e8f0;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            line-height: 1.25;
+            text-decoration: none;
+            transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+            touch-action: manipulation;
+            word-break: break-word;
+        }
+        .mobile-menu-tile:active {
+            transform: scale(0.98);
+        }
+        .mobile-menu-tile i {
+            font-size: 1.65rem;
+            color: #a5b4fc;
+        }
+        .mobile-menu-tile:hover {
+            background: rgba(139, 92, 246, 0.14);
+            border-color: rgba(167, 139, 250, 0.28);
+            color: #fff;
+        }
+        .mobile-menu-tile:hover i {
+            color: #c4b5fd;
+        }
+        .mobile-menu-tile.active {
+            background: linear-gradient(145deg, #7c3aed 0%, #6d28d9 100%);
+            border-color: rgba(255, 255, 255, 0.12);
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(124, 58, 237, 0.38);
+        }
+        .mobile-menu-tile.active i {
+            color: #fff;
+        }
+        .mobile-menu-tile--logout {
+            grid-column: 1 / -1;
+            flex-direction: row;
+            justify-content: center;
+            min-height: 52px;
+            margin-top: 8px;
+            padding: 12px 16px;
+            background: rgba(127, 29, 29, 0.2);
+            border-color: rgba(248, 113, 113, 0.3);
+            color: #fecaca;
+        }
+        .mobile-menu-tile--logout i {
+            font-size: 1.125rem;
+            color: #fca5a5;
+        }
+        .mobile-menu-tile--logout:hover {
+            background: rgba(153, 27, 27, 0.28);
+            border-color: rgba(252, 165, 165, 0.4);
+            color: #fef2f2;
+        }
+
         /* Dashboard hero — การ์ดเดียว แถวละ ไอคอน + ข้อความ (แนวนอนชัดเจน) */
         .dashboard-hero {
             margin-top: 0.375rem;
@@ -782,107 +934,105 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
     </div>
 </header>
 
-<!-- Mobile Sidebar -->
-<div id="mobileSidebar" class="lg:hidden fixed inset-0 z-50 hidden overflow-y-auto overscroll-contain">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm overscroll-contain" onclick="closeMobileMenu()"></div>
-    <aside class="sidebar absolute left-0 top-0 w-[280px] h-full overflow-y-auto overscroll-contain transform transition-transform pt-[env(safe-area-inset-top,0px)]">
-        <div class="p-6">
-            <div class="flex items-center justify-between mb-6">
-                <a href="/" class="flex items-center gap-3 min-w-0 touch-manipulation">
-                    <div class="w-10 h-10 rounded-xl overflow-hidden ring-1 ring-white/10 flex-shrink-0 shadow-md">
-                        <img src="<?php echo htmlspecialchars($appIconPath); ?>" alt="" width="40" height="40" class="w-full h-full object-cover" decoding="async">
-                    </div>
-                    <span class="min-w-0">
-                        <span class="block app-brand-title-row app-brand-title-row--compact"><span class="app-brand-tp">TP-</span><span class="app-brand-hr">HR</span></span>
-                        <span class="app-brand-tagline app-brand-tagline--compact block">Human Resources</span>
-                    </span>
-                </a>
-                <button onclick="closeMobileMenu()" class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-white">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <nav class="space-y-1">
-                <a href="/" class="nav-item <?php echo $current_page === 'dashboard' ? 'active' : ''; ?>">
-                    <i class="fas fa-home"></i>
+<!-- Mobile menu: เต็มจอ + กริดไอคอน -->
+<div id="mobileSidebar" class="mobile-menu-overlay lg:hidden hidden" role="dialog" aria-modal="true" aria-label="เมนูระบบ TP-HR">
+    <div class="mobile-menu-sheet">
+        <header class="mobile-menu-header">
+            <a href="/" class="flex items-center gap-3 min-w-0 touch-manipulation">
+                <div class="w-10 h-10 rounded-xl overflow-hidden ring-1 ring-white/10 flex-shrink-0 shadow-md">
+                    <img src="<?php echo htmlspecialchars($appIconPath); ?>" alt="" width="40" height="40" class="w-full h-full object-cover" decoding="async">
+                </div>
+                <span class="min-w-0">
+                    <span class="block app-brand-title-row app-brand-title-row--compact"><span class="app-brand-tp">TP-</span><span class="app-brand-hr">HR</span></span>
+                    <span class="app-brand-tagline app-brand-tagline--compact block">Human Resources</span>
+                </span>
+            </a>
+            <button type="button" class="mobile-menu-close" onclick="closeMobileMenu()" aria-label="ปิดเมนู">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+        </header>
+        <div class="mobile-menu-scroll">
+            <nav class="mobile-menu-grid" aria-label="เมนูหลัก">
+                <a href="/" class="mobile-menu-tile <?php echo $current_page === 'dashboard' ? 'active' : ''; ?>">
+                    <i class="fas fa-home" aria-hidden="true"></i>
                     <span>หน้าแรก</span>
                 </a>
-                <a href="/checkin.php" class="nav-item <?php echo $current_page === 'checkin' ? 'active' : ''; ?>">
-                    <i class="fas fa-fingerprint"></i>
+                <a href="/checkin.php" class="mobile-menu-tile <?php echo $current_page === 'checkin' ? 'active' : ''; ?>">
+                    <i class="fas fa-fingerprint" aria-hidden="true"></i>
                     <span>ลงเวลาเข้า-ออก</span>
                 </a>
-                <a href="/leave.php" class="nav-item <?php echo $current_page === 'leave' ? 'active' : ''; ?>">
-                    <i class="fas fa-calendar-alt"></i>
+                <a href="/leave.php" class="mobile-menu-tile <?php echo $current_page === 'leave' ? 'active' : ''; ?>">
+                    <i class="fas fa-calendar-alt" aria-hidden="true"></i>
                     <span>การลา</span>
                 </a>
-                <a href="/payslip.php" class="nav-item <?php echo $current_page === 'payslip' ? 'active' : ''; ?>">
-                    <i class="fas fa-file-invoice-dollar"></i>
+                <a href="/payslip.php" class="mobile-menu-tile <?php echo $current_page === 'payslip' ? 'active' : ''; ?>">
+                    <i class="fas fa-file-invoice-dollar" aria-hidden="true"></i>
                     <span>สลิปเงินเดือน</span>
                 </a>
-                <a href="/certificate.php" class="nav-item <?php echo $current_page === 'certificate' ? 'active' : ''; ?>">
-                    <i class="fas fa-file-certificate"></i>
+                <a href="/certificate.php" class="mobile-menu-tile <?php echo $current_page === 'certificate' ? 'active' : ''; ?>">
+                    <i class="fas fa-file-certificate" aria-hidden="true"></i>
                     <span>ขอใบรับรอง</span>
                 </a>
-                <a href="/dayoff_schedule.php" class="nav-item <?php echo $current_page === 'dayoff' ? 'active' : ''; ?>">
-                    <i class="fas fa-calendar-week"></i>
+                <a href="/dayoff_schedule.php" class="mobile-menu-tile <?php echo $current_page === 'dayoff' ? 'active' : ''; ?>">
+                    <i class="fas fa-calendar-week" aria-hidden="true"></i>
                     <span>วันหยุดประจำสัปดาห์</span>
                 </a>
-                <a href="/profile.php" class="nav-item <?php echo $current_page === 'profile' ? 'active' : ''; ?>">
-                    <i class="fas fa-user"></i>
+                <a href="/profile.php" class="mobile-menu-tile <?php echo $current_page === 'profile' ? 'active' : ''; ?>">
+                    <i class="fas fa-user" aria-hidden="true"></i>
                     <span>ข้อมูลส่วนตัว</span>
                 </a>
-                
-                <?php if ($isHR): ?>
-                <div class="mt-4 pt-4 border-t border-slate-700/50">
-                    <p class="text-xs text-slate-500 uppercase tracking-wider mb-2 font-semibold">HR Admin</p>
-                    <a href="/hr/employees.php" class="nav-item <?php echo $current_page === 'hr-employees' ? 'active' : ''; ?>">
-                        <i class="fas fa-users-cog"></i>
-                        <span>จัดการพนักงาน</span>
-                    </a>
-                    <a href="/hr/attendance.php" class="nav-item <?php echo $current_page === 'hr-attendance' ? 'active' : ''; ?>">
-                        <i class="fas fa-user-clock"></i>
-                        <span>จัดการลงเวลา</span>
-                    </a>
-                    <a href="/hr/leaves.php" class="nav-item <?php echo $current_page === 'hr-leaves' ? 'active' : ''; ?>">
-                        <i class="fas fa-calendar-check"></i>
-                        <span>อนุมัติการลา</span>
-                    </a>
-                    <?php if ($isCEO): ?>
-                    <a href="/hr/dayoff_approvals.php" class="nav-item <?php echo $current_page === 'hr-dayoff' ? 'active' : ''; ?>">
-                        <i class="fas fa-calendar-day"></i>
-                        <span>อนุมัติเปลี่ยนวันหยุด</span>
-                    </a>
-                    <?php endif; ?>
-                    <a href="/hr/documents.php" class="nav-item <?php echo $current_page === 'hr-documents' ? 'active' : ''; ?>">
-                        <i class="fas fa-file-alt"></i>
-                        <span>จัดการเอกสาร</span>
-                    </a>
-                    <a href="/hr/document_templates.php" class="nav-item <?php echo $current_page === 'hr-document-templates' ? 'active' : ''; ?>">
-                        <i class="fas fa-file-signature"></i>
-                        <span>ตั้งค่าเอกสารรับรอง</span>
-                    </a>
-                    <?php if ($isCEO): ?>
-                    <a href="/hr/reports.php" class="nav-item <?php echo $current_page === 'hr-reports' ? 'active' : ''; ?>">
-                        <i class="fas fa-chart-bar"></i>
-                        <span>รายงาน</span>
-                    </a>
-                    <a href="/hr/settings.php" class="nav-item <?php echo $current_page === 'hr-settings' ? 'active' : ''; ?>">
-                        <i class="fas fa-cog"></i>
-                        <span>ตั้งค่าระบบ</span>
-                    </a>
-                    <?php endif; ?>
-                </div>
+            </nav>
+
+            <?php if ($isHR): ?>
+            <p class="mobile-menu-section-label">HR Admin</p>
+            <nav class="mobile-menu-grid" aria-label="เมนูผู้ดูแล HR">
+                <a href="/hr/employees.php" class="mobile-menu-tile <?php echo $current_page === 'hr-employees' ? 'active' : ''; ?>">
+                    <i class="fas fa-users-cog" aria-hidden="true"></i>
+                    <span>จัดการพนักงาน</span>
+                </a>
+                <a href="/hr/attendance.php" class="mobile-menu-tile <?php echo $current_page === 'hr-attendance' ? 'active' : ''; ?>">
+                    <i class="fas fa-user-clock" aria-hidden="true"></i>
+                    <span>จัดการลงเวลา</span>
+                </a>
+                <a href="/hr/leaves.php" class="mobile-menu-tile <?php echo $current_page === 'hr-leaves' ? 'active' : ''; ?>">
+                    <i class="fas fa-calendar-check" aria-hidden="true"></i>
+                    <span>อนุมัติการลา</span>
+                </a>
+                <?php if ($isCEO): ?>
+                <a href="/hr/dayoff_approvals.php" class="mobile-menu-tile <?php echo $current_page === 'hr-dayoff' ? 'active' : ''; ?>">
+                    <i class="fas fa-calendar-day" aria-hidden="true"></i>
+                    <span>อนุมัติเปลี่ยนวันหยุด</span>
+                </a>
                 <?php endif; ?>
-                
-                <div class="mt-4 pt-4 border-t border-slate-700/50">
-                    <a href="/logout.php" class="nav-item text-red-400">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>ออกจากระบบ</span>
-                    </a>
-                </div>
+                <a href="/hr/documents.php" class="mobile-menu-tile <?php echo $current_page === 'hr-documents' ? 'active' : ''; ?>">
+                    <i class="fas fa-file-alt" aria-hidden="true"></i>
+                    <span>จัดการเอกสาร</span>
+                </a>
+                <a href="/hr/document_templates.php" class="mobile-menu-tile <?php echo $current_page === 'hr-document-templates' ? 'active' : ''; ?>">
+                    <i class="fas fa-file-signature" aria-hidden="true"></i>
+                    <span>ตั้งค่าเอกสารรับรอง</span>
+                </a>
+                <?php if ($isCEO): ?>
+                <a href="/hr/reports.php" class="mobile-menu-tile <?php echo $current_page === 'hr-reports' ? 'active' : ''; ?>">
+                    <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                    <span>รายงาน</span>
+                </a>
+                <a href="/hr/settings.php" class="mobile-menu-tile <?php echo $current_page === 'hr-settings' ? 'active' : ''; ?>">
+                    <i class="fas fa-cog" aria-hidden="true"></i>
+                    <span>ตั้งค่าระบบ</span>
+                </a>
+                <?php endif; ?>
+            </nav>
+            <?php endif; ?>
+
+            <nav class="mobile-menu-grid" aria-label="ออกจากระบบ">
+                <a href="/logout.php" class="mobile-menu-tile mobile-menu-tile--logout">
+                    <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                    <span>ออกจากระบบ</span>
+                </a>
             </nav>
         </div>
-    </aside>
+    </div>
 </div>
 
 <script>
@@ -899,6 +1049,22 @@ function closeMobileMenu() {
 }
 
 document.getElementById('mobileMenuBtn')?.addEventListener('click', openMobileMenu);
+
+(function () {
+    var sheet = document.getElementById('mobileSidebar');
+    if (!sheet) return;
+    sheet.addEventListener('click', function (ev) {
+        var link = ev.target.closest('a[href]');
+        if (link && link.getAttribute('href') && link.getAttribute('href').indexOf('#') !== 0) {
+            closeMobileMenu();
+        }
+    });
+    document.addEventListener('keydown', function (ev) {
+        if (ev.key !== 'Escape') return;
+        if (sheet.classList.contains('hidden')) return;
+        closeMobileMenu();
+    });
+})();
 </script>
 
 <!-- Main Content -->
