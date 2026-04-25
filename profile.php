@@ -108,7 +108,7 @@ endif; ?>
 
 <?php if (!$action): ?>
 <!-- General Info -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
     <!-- Profile Card -->
     <div class="glass-card rounded-xl p-6">
         <div class="text-center mb-6">
@@ -167,7 +167,7 @@ endif; ?>
     </div>
     
     <!-- Personal Info -->
-    <div class="lg:col-span-2 space-y-6">
+    <div class="xl:col-span-2 space-y-6">
         <div class="glass-card rounded-xl p-6">
             <h3 class="text-lg font-semibold text-white mb-4">ข้อมูลส่วนตัว</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

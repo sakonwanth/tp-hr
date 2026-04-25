@@ -163,7 +163,7 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
     <!-- Pending Leave Requests -->
     <div class="glass-card rounded-xl overflow-hidden">
         <div class="p-4 border-b border-white/10 flex items-center justify-between">

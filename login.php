@@ -154,7 +154,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        @media (min-width: 1024px) {
+        @media (min-width: 1280px) {
             body {
                 padding-top: max(24px, env(safe-area-inset-top, 0px));
                 padding-right: max(24px, env(safe-area-inset-right, 0px));
@@ -268,7 +268,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <!-- Login Card -->
-    <div class="login-card w-full max-w-md p-4 sm:p-6 lg:p-8">
+    <div class="login-card w-full max-w-md p-4 sm:p-6 xl:p-8">
         <!-- Logo -->
         <div class="text-center mb-6 sm:mb-8">
             <img src="<?php echo htmlspecialchars($company_logo); ?>" alt="<?php echo htmlspecialchars($system_name); ?>" width="96" height="96" decoding="async" fetchpriority="high" class="w-24 h-24 mx-auto mb-4 logo-glow object-contain" onerror="this.onerror=null;this.src='<?php echo htmlspecialchars($hr_login_logo_fallback, ENT_QUOTES, 'UTF-8'); ?>';">

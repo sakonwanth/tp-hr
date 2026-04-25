@@ -164,7 +164,7 @@ if (!function_exists('tp_hr_emp_view_row')) {
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
     <!-- Personal -->
     <div class="glass-card p-6">
         <h3 class="text-lg font-bold text-white mb-3"><i class="fas fa-user text-violet-400 mr-2"></i>ข้อมูลส่วนตัว</h3>

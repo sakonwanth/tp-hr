@@ -631,7 +631,8 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             min-height: 100vh;
         }
         
-        @media (max-width: 1024px) {
+        /* แท็บเล็ต (รวม iPad ~1024px) ใช้โครงมือถือ; sidebar เดสก์ท็อปที่ min-width ตรงกับ Tailwind xl */
+        @media (max-width: 1279px) {
             .content-area {
                 margin-left: 0;
                 /* One safe-area term only: inset + fixed toolbar slack (must match .mobile-app-header height) */
@@ -785,7 +786,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
 <body class="text-slate-300">
 
 <!-- Sidebar -->
-<aside class="sidebar fixed left-0 top-0 w-[280px] h-screen overflow-y-auto hidden lg:block z-50">
+<aside class="sidebar fixed left-0 top-0 w-[280px] h-screen overflow-y-auto hidden xl:block z-50">
     <div class="p-6">
         <!-- Logo -->
         <a href="/" class="flex items-center gap-4 mb-8 group">
@@ -913,7 +914,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
 </aside>
 
 <!-- Mobile header: เมนู + wordmark ชิดซ้าย (ไม่แสดงไอคอนในแถบ) -->
-<header class="mobile-app-header header-glass lg:hidden fixed top-0 left-0 right-0 z-40">
+<header class="mobile-app-header header-glass xl:hidden fixed top-0 left-0 right-0 z-40">
     <div class="mobile-app-header-bar">
         <div class="mobile-nav-cluster">
             <button type="button" id="mobileMenuBtn" class="mobile-nav-menu-btn touch-manipulation">
@@ -930,7 +931,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
 </header>
 
 <!-- Mobile menu: เต็มจอ + กริดไอคอน -->
-<div id="mobileSidebar" class="mobile-menu-overlay lg:hidden hidden" role="dialog" aria-modal="true" aria-label="เมนูระบบ TP-HR">
+<div id="mobileSidebar" class="mobile-menu-overlay xl:hidden hidden" role="dialog" aria-modal="true" aria-label="เมนูระบบ TP-HR">
     <div class="mobile-menu-sheet">
         <header class="mobile-menu-header">
             <a href="/" class="flex items-center gap-3 min-w-0 touch-manipulation">

@@ -641,7 +641,7 @@ require_once __DIR__ . '/../templates/header.php';
     </h2>
     
     <?php if ($reportData): ?>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
         <?php foreach ($reportData as $row): ?>
         <div class="bg-slate-800/50 rounded-xl p-4">
             <div class="flex items-center gap-3 mb-3">

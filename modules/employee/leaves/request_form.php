@@ -32,8 +32,8 @@ $leave_types_form = $stmt->fetchAll();
     <h1 class="text-2xl font-bold text-white">ยื่นขอลา</h1>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <div class="lg:col-span-2">
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+    <div class="xl:col-span-2">
         <form id="leave-form" class="glass-card rounded-xl p-6" method="POST" action="/api/leave.php" enctype="multipart/form-data">
             <input type="hidden" name="action" value="create">
             <?php echo csrfField(); ?>

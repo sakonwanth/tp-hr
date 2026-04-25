@@ -283,7 +283,7 @@ foreach ($workShifts as $_ws) {
 
 <?php elseif ($tab === 'holidays'): ?>
 <!-- Holidays -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
     <!-- Add Holiday Form -->
     <div class="glass-card rounded-2xl p-6">
         <h2 class="text-lg font-semibold text-white mb-4">เพิ่มวันหยุด</h2>
@@ -319,7 +319,7 @@ foreach ($workShifts as $_ws) {
     </div>
     
     <!-- Holiday List -->
-    <div class="lg:col-span-2 glass-card rounded-2xl p-6">
+    <div class="xl:col-span-2 glass-card rounded-2xl p-6">
         <h2 class="text-lg font-semibold text-white mb-4">รายการวันหยุด <?php echo date('Y') + 543; ?></h2>
 
         <div class="md:hidden space-y-3">

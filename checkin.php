@@ -157,9 +157,9 @@ require_once __DIR__ . '/templates/header.php';
     </div>
     <?php endif; ?>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <!-- Left Column: Check-in Card -->
-        <div class="lg:col-span-2">
+        <div class="xl:col-span-2">
             <div class="glass-card rounded-xl p-6">
                 <!-- Current Time Display -->
                 <div class="text-center mb-8">

@@ -111,7 +111,7 @@ require_once __DIR__ . '/templates/header.php';
 
 <?php if ($isHR): ?>
 <!-- HR Stats Cards -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
     <div class="stat-card group">
         <div class="flex items-center gap-4">
             <div class="stat-icon bg-gradient-to-br from-blue-500/20 to-blue-600/20 group-hover:from-blue-500/30 group-hover:to-blue-600/30 transition-colors">
@@ -162,9 +162,9 @@ require_once __DIR__ . '/templates/header.php';
 </div>
 <?php endif; ?>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
     <!-- Left Column -->
-    <div class="lg:col-span-2 space-y-6">
+    <div class="xl:col-span-2 space-y-6">
         
         <!-- Quick Actions -->
         <div class="glass-card rounded-2xl p-6">

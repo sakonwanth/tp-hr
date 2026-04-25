@@ -94,9 +94,9 @@ require_once __DIR__ . '/templates/header.php';
     </div>
     <?php endif; ?>
     
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <!-- Left Column -->
-        <div class="lg:col-span-2 space-y-6">
+        <div class="xl:col-span-2 space-y-6">
             <!-- Leave Balance -->
             <div class="glass-card rounded-xl p-6">
                 <h2 class="text-lg font-semibold text-white mb-4">
