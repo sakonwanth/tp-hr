@@ -264,8 +264,8 @@ include dirname(__DIR__) . '/templates/header.php';
         <p class="text-white/60">ไม่พบข้อมูล</p>
     </div>
     <?php else: ?>
-    <!-- Mobile-first: card list (desktop keeps table) -->
-    <div class="lg:hidden p-3 space-y-3">
+    <!-- Mobile-first: card list below md (table from md up — Wave B alignment) -->
+    <div class="md:hidden p-3 space-y-3">
         <?php foreach ($records as $rec): ?>
         <?php
         $hasAttendance = !empty($rec['attendance_id']);
@@ -354,25 +354,25 @@ include dirname(__DIR__) . '/templates/header.php';
             <div class="grid grid-cols-2 gap-2 mt-4">
                 <button type="button"
                         onclick="editAttendance(<?php echo (int)$rec['id']; ?>, '<?php echo $date; ?>', <?php echo $rec['attendance_id'] ?? 'null'; ?>, '<?php echo $rec['check_in_time'] ? date('H:i', strtotime($rec['check_in_time'])) : ''; ?>', '<?php echo $rec['check_out_time'] ? date('H:i', strtotime($rec['check_out_time'])) : ''; ?>')"
-                        class="min-h-[44px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold">
+                        class="min-h-[44px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
                     <i class="fas fa-edit mr-2"></i>แก้ไขเวลา
                 </button>
                 <button type="button"
                         onclick="viewHistory(<?php echo (int)$rec['id']; ?>, '<?php echo $date; ?>', '<?php echo htmlspecialchars(($rec['first_name_th'] ?? '') . ' ' . ($rec['last_name_th'] ?? ''), ENT_QUOTES); ?>')"
-                        class="min-h-[44px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold">
+                        class="min-h-[44px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
                     <i class="fas fa-history mr-2"></i>ประวัติ
                 </button>
                 <?php if ($hasAttendance && $rec['check_in_latitude']): ?>
                 <button type="button"
                         onclick="viewLocation(<?php echo $rec['check_in_latitude']; ?>, <?php echo $rec['check_in_longitude']; ?>)"
-                        class="min-h-[44px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold">
+                        class="min-h-[44px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
                     <i class="fas fa-map-marker-alt mr-2"></i>ตำแหน่ง
                 </button>
                 <?php endif; ?>
                 <?php if ($hasAttendance): ?>
                 <button type="button"
                         onclick="deleteAttendance(<?php echo (int)$rec['id']; ?>, '<?php echo $date; ?>', '<?php echo htmlspecialchars(($rec['first_name_th'] ?? '') . ' ' . ($rec['last_name_th'] ?? ''), ENT_QUOTES); ?>')"
-                        class="min-h-[44px] rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-200 text-sm font-semibold">
+                        class="min-h-[44px] rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-200 text-sm font-semibold touch-manipulation">
                     <i class="fas fa-trash mr-2"></i>ลบข้อมูล
                 </button>
                 <?php endif; ?>
@@ -381,7 +381,7 @@ include dirname(__DIR__) . '/templates/header.php';
         <?php endforeach; ?>
     </div>
 
-    <div class="hidden lg:block overflow-x-auto">
+    <div class="hidden md:block overflow-x-auto">
         <table class="w-full">
             <thead class="bg-white/5">
                 <tr>

@@ -261,7 +261,54 @@ require_once __DIR__ . '/../templates/header.php';
     </h2>
     
     <?php if ($reportData): ?>
-    <div class="overflow-x-auto">
+    <div class="md:hidden space-y-3">
+        <?php foreach ($reportData as $row): ?>
+        <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4">
+            <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                    <p class="text-white font-semibold truncate"><?php echo htmlspecialchars($row['full_name']); ?></p>
+                    <p class="text-slate-500 text-xs truncate"><?php echo htmlspecialchars($row['employee_code'] ?? '-'); ?> · <?php echo htmlspecialchars($row['position'] ?? '-'); ?></p>
+                    <p class="text-slate-400 text-sm mt-1"><?php echo htmlspecialchars($row['department'] ?? '-'); ?></p>
+                </div>
+            </div>
+            <div class="grid grid-cols-3 gap-2 mt-3 text-center text-sm">
+                <div class="rounded-lg bg-slate-900/40 border border-slate-700/40 py-2">
+                    <div class="text-[10px] text-slate-500 uppercase">วันทำงาน</div>
+                    <div class="text-white font-bold"><?php echo (int)$row['work_days']; ?></div>
+                </div>
+                <div class="rounded-lg bg-slate-900/40 border border-slate-700/40 py-2">
+                    <div class="text-[10px] text-emerald-500/80">ตรงเวลา</div>
+                    <div class="text-emerald-400 font-semibold"><?php echo (int)$row['present_days']; ?></div>
+                </div>
+                <div class="rounded-lg bg-slate-900/40 border border-slate-700/40 py-2">
+                    <div class="text-[10px] text-amber-500/80">สาย</div>
+                    <div class="text-amber-400 font-semibold"><?php echo (int)$row['late_days']; ?></div>
+                </div>
+                <div class="rounded-lg bg-slate-900/40 border border-slate-700/40 py-2">
+                    <div class="text-[10px] text-cyan-500/80">WFH</div>
+                    <div class="text-cyan-400 font-semibold"><?php echo (int)$row['wfh_days']; ?></div>
+                </div>
+                <div class="rounded-lg bg-slate-900/40 border border-slate-700/40 py-2">
+                    <div class="text-[10px] text-purple-500/80">ลา</div>
+                    <div class="text-purple-400 font-semibold"><?php echo (int)$row['leave_days']; ?></div>
+                </div>
+                <div class="rounded-lg bg-slate-900/40 border border-slate-700/40 py-2">
+                    <div class="text-[10px] text-red-500/80">ขาด</div>
+                    <div class="text-red-400 font-semibold"><?php echo (int)$row['absent_days']; ?></div>
+                </div>
+            </div>
+            <div class="flex justify-between text-sm mt-3 text-slate-400">
+                <span>เฉลี่ยเข้า <strong class="text-slate-200"><?php echo $row['avg_check_in'] ? substr($row['avg_check_in'], 0, 5) : '-'; ?></strong></span>
+                <span>เฉลี่ยออก <strong class="text-slate-200"><?php echo $row['avg_check_out'] ? substr($row['avg_check_out'], 0, 5) : '-'; ?></strong></span>
+            </div>
+            <a href="/hr/employee_attendance.php?id=<?php echo (int)$row['id']; ?>"
+               class="mt-3 flex min-h-[44px] items-center justify-center rounded-lg bg-violet-500/20 text-violet-300 hover:bg-violet-500/30 text-sm font-semibold touch-manipulation">
+                <i class="fas fa-clock mr-2"></i>ดูประวัติลงเวลา
+            </a>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    <div class="hidden md:block overflow-x-auto">
         <table class="data-table">
             <thead>
                 <tr>
@@ -357,7 +404,57 @@ require_once __DIR__ . '/../templates/header.php';
     </div>
 
     <?php if ($reportData): ?>
-    <div class="overflow-x-auto">
+    <div class="md:hidden space-y-3">
+        <?php foreach ($reportData as $row):
+            $total = (int)$row['total_employees'];
+            $recorded = (int)$row['worked'] + (int)$row['absent'] + (int)$row['on_leave'] + (int)$row['holiday_off'];
+            $no_data = max(0, $total - $recorded);
+            $dow = (int)$row['dow'];
+            $isWeekend = ($dow === 1 || $dow === 7);
+        ?>
+        <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4">
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="text-white font-semibold"><?php echo formatDateThai($row['attendance_date']); ?></span>
+                <?php if ($row['holiday_name']): ?>
+                    <span class="px-2 py-0.5 text-xs rounded bg-rose-900/40 text-rose-300" title="<?php echo htmlspecialchars($row['holiday_name']); ?>">วันหยุด</span>
+                <?php elseif ($isWeekend): ?>
+                    <span class="px-2 py-0.5 text-xs rounded bg-slate-800 text-slate-400">สุดสัปดาห์</span>
+                <?php endif; ?>
+            </div>
+            <div class="grid grid-cols-4 gap-2 mt-3 text-center text-xs">
+                <div class="rounded-lg bg-slate-900/40 border border-slate-700/40 py-2">
+                    <div class="text-slate-500">มาทำงาน</div>
+                    <div class="text-white font-bold"><?php echo (int)$row['worked']; ?></div>
+                </div>
+                <div class="rounded-lg bg-slate-900/40 border border-slate-700/40 py-2">
+                    <div class="text-emerald-500/80">ตรงเวลา</div>
+                    <div class="text-emerald-400 font-semibold"><?php echo (int)$row['on_time']; ?></div>
+                </div>
+                <div class="rounded-lg bg-slate-900/40 border border-slate-700/40 py-2">
+                    <div class="text-amber-500/80">สาย</div>
+                    <div class="text-amber-400 font-semibold"><?php echo (int)$row['late']; ?></div>
+                </div>
+                <div class="rounded-lg bg-slate-900/40 border border-slate-700/40 py-2">
+                    <div class="text-cyan-500/80">WFH</div>
+                    <div class="text-cyan-400 font-semibold"><?php echo (int)$row['wfh']; ?></div>
+                </div>
+                <div class="rounded-lg bg-slate-900/40 border border-slate-700/40 py-2">
+                    <div class="text-purple-500/80">ลา</div>
+                    <div class="text-purple-400 font-semibold"><?php echo (int)$row['on_leave']; ?></div>
+                </div>
+                <div class="rounded-lg bg-slate-900/40 border border-slate-700/40 py-2">
+                    <div class="text-red-500/80">ขาด</div>
+                    <div class="text-red-400 font-semibold"><?php echo (int)$row['absent']; ?></div>
+                </div>
+                <div class="rounded-lg bg-slate-900/40 border border-slate-700/40 py-2 col-span-2">
+                    <div class="text-slate-500">ไม่มีข้อมูล</div>
+                    <div class="text-slate-300 font-semibold"><?php echo $no_data; ?></div>
+                </div>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    <div class="hidden md:block overflow-x-auto">
         <table class="data-table">
             <thead>
                 <tr>
@@ -453,7 +550,38 @@ require_once __DIR__ . '/../templates/header.php';
     </h2>
     
     <?php if ($reportData): ?>
-    <div class="overflow-x-auto">
+    <div class="md:hidden space-y-3">
+        <?php foreach ($reportData as $row): ?>
+        <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4">
+            <p class="text-white font-semibold"><?php echo htmlspecialchars($row['full_name']); ?></p>
+            <p class="text-slate-500 text-xs"><?php echo htmlspecialchars($row['position'] ?? '-'); ?></p>
+            <p class="text-slate-400 text-sm mt-1"><?php echo htmlspecialchars($row['department'] ?? '-'); ?></p>
+            <div class="flex items-center gap-2 mt-2">
+                <div class="w-3 h-3 rounded-full shrink-0" style="background: <?php echo htmlspecialchars($row['color']); ?>"></div>
+                <span class="text-white text-sm"><?php echo htmlspecialchars($row['leave_type']); ?></span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 mt-3 text-center text-sm">
+                <div class="rounded-lg bg-slate-900/40 border border-slate-700/40 py-2">
+                    <div class="text-slate-500 text-xs">รวม</div>
+                    <div class="text-white font-bold"><?php echo htmlspecialchars((string)$row['total_days']); ?></div>
+                </div>
+                <div class="rounded-lg bg-slate-900/40 border border-slate-700/40 py-2">
+                    <div class="text-emerald-500/80 text-xs">อนุมัติ</div>
+                    <div class="text-emerald-400 font-semibold"><?php echo htmlspecialchars((string)$row['approved_days']); ?></div>
+                </div>
+                <div class="rounded-lg bg-slate-900/40 border border-slate-700/40 py-2">
+                    <div class="text-amber-500/80 text-xs">รออนุมัติ</div>
+                    <div class="text-amber-400 font-semibold"><?php echo htmlspecialchars((string)$row['pending_days']); ?></div>
+                </div>
+                <div class="rounded-lg bg-slate-900/40 border border-slate-700/40 py-2">
+                    <div class="text-red-500/80 text-xs">ปฏิเสธ</div>
+                    <div class="text-red-400 font-semibold"><?php echo htmlspecialchars((string)$row['rejected_days']); ?></div>
+                </div>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    <div class="hidden md:block overflow-x-auto">
         <table class="data-table">
             <thead>
                 <tr>
