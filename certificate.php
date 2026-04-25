@@ -288,7 +288,10 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
             <div>
                 <p class="text-white/60 text-sm">ดำเนินการแล้ว</p>
                 <p class="text-2xl font-bold text-white">
-                    <?php echo count(array_filter($myRequests, fn($r) => $r['status'] === 'COMPLETED')); ?> 
+                    <?php
+                    $doneDocStatuses = ['READY', 'DELIVERED', 'COMPLETED'];
+                    echo count(array_filter($myRequests, fn($r) => in_array($r['status'], $doneDocStatuses, true)));
+                    ?>
                     <span class="text-sm font-normal text-white/60">คำขอ</span>
                 </p>
             </div>
@@ -311,34 +314,38 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
         </a>
     </div>
     <?php else: ?>
+    <?php
+    $statusColors = [
+        'PENDING' => 'bg-yellow-500/20 text-yellow-400',
+        'PROCESSING' => 'bg-blue-500/20 text-blue-400',
+        'READY' => 'bg-green-500/20 text-green-400',
+        'DELIVERED' => 'bg-emerald-500/20 text-emerald-300',
+        'COMPLETED' => 'bg-green-500/20 text-green-400',
+        'REJECTED' => 'bg-red-500/20 text-red-400',
+        'CANCELLED' => 'bg-gray-500/20 text-gray-400'
+    ];
+    $statusText = [
+        'PENDING' => 'รอดำเนินการ',
+        'PROCESSING' => 'กำลังดำเนินการ',
+        'READY' => 'จัดทำแล้ว',
+        'DELIVERED' => 'รับแล้ว',
+        'COMPLETED' => 'เสร็จสิ้น',
+        'REJECTED' => 'ไม่อนุมัติ',
+        'CANCELLED' => 'ยกเลิก'
+    ];
+    ?>
     <div class="divide-y divide-white/10">
         <?php foreach ($myRequests as $req): ?>
-        <?php
-        $statusColors = [
-            'PENDING' => 'bg-yellow-500/20 text-yellow-400',
-            'PROCESSING' => 'bg-blue-500/20 text-blue-400',
-            'COMPLETED' => 'bg-green-500/20 text-green-400',
-            'REJECTED' => 'bg-red-500/20 text-red-400',
-            'CANCELLED' => 'bg-gray-500/20 text-gray-400'
-        ];
-        $statusText = [
-            'PENDING' => 'รอดำเนินการ',
-            'PROCESSING' => 'กำลังดำเนินการ',
-            'COMPLETED' => 'เสร็จสิ้น',
-            'REJECTED' => 'ไม่อนุมัติ',
-            'CANCELLED' => 'ยกเลิก'
-        ];
-        ?>
         <div class="p-4 md:p-6 hover:bg-white/5 transition-colors">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-4 min-w-0">
                     <div class="w-12 h-12 rounded-xl bg-violet-600/20 flex items-center justify-center flex-shrink-0">
                         <i class="fas fa-file-alt text-violet-400 text-xl"></i>
                     </div>
-                    <div>
+                    <div class="min-w-0">
                         <h3 class="text-white font-medium"><?php echo htmlspecialchars($req['template_name']); ?></h3>
-                        <p class="text-white/60 text-sm">
-                            เลขที่: <?php echo htmlspecialchars($req['request_number']); ?> | 
+                        <p class="text-white/60 text-sm break-words">
+                            เลขที่: <?php echo htmlspecialchars($req['request_number']); ?> |
                             ขอเมื่อ <?php echo formatDateThai($req['created_at']); ?>
                         </p>
                         <?php if ($req['is_urgent']): ?>
@@ -346,29 +353,30 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
                         <?php endif; ?>
                     </div>
                 </div>
-                <div class="flex items-center gap-4">
-                    <span class="px-3 py-1 rounded-full text-xs <?php echo $statusColors[$req['status']] ?? 'bg-gray-500/20 text-gray-400'; ?>">
-                        <?php echo $statusText[$req['status']] ?? $req['status']; ?>
+                <div class="flex flex-col gap-2 w-full md:w-auto md:items-end md:shrink-0">
+                    <span class="px-3 py-1 rounded-full text-xs self-start <?php echo $statusColors[$req['status']] ?? 'bg-gray-500/20 text-gray-400'; ?>">
+                        <?php echo htmlspecialchars($statusText[$req['status']] ?? $req['status']); ?>
                     </span>
-                    
+                    <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                     <?php if (in_array($req['status'], ['PROCESSING','READY','DELIVERED','COMPLETED'], true)): ?>
-                    <a href="/certificate_print.php?id=<?php echo $req['id']; ?>&preview=1" target="_blank"
-                       class="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors text-sm">
+                    <a href="/certificate_print.php?id=<?php echo (int)$req['id']; ?>&preview=1" target="_blank" rel="noopener noreferrer"
+                       class="min-h-[44px] inline-flex items-center justify-center px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors text-sm font-medium touch-manipulation w-full sm:w-auto">
                         <i class="fas fa-print mr-2"></i>ดู / พิมพ์
                     </a>
                     <?php endif; ?>
 
-                    <?php if ($req['status'] === 'COMPLETED' && $req['file_path']): ?>
-                    <a href="<?php echo htmlspecialchars($req['file_path']); ?>" target="_blank"
-                       class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm">
+                    <?php if (in_array($req['status'], ['COMPLETED', 'READY', 'DELIVERED'], true) && !empty($req['file_path'])): ?>
+                    <a href="<?php echo htmlspecialchars($req['file_path']); ?>" target="_blank" rel="noopener noreferrer"
+                       class="min-h-[44px] inline-flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium touch-manipulation w-full sm:w-auto">
                         <i class="fas fa-download mr-2"></i>ดาวน์โหลด
                     </a>
                     <?php elseif ($req['status'] === 'PENDING'): ?>
-                    <button onclick="cancelRequest(<?php echo $req['id']; ?>)"
-                            class="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors text-sm">
+                    <button type="button" onclick="cancelRequest(<?php echo (int)$req['id']; ?>)"
+                            class="min-h-[44px] inline-flex items-center justify-center px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors text-sm font-medium touch-manipulation w-full sm:w-auto">
                         <i class="fas fa-times mr-2"></i>ยกเลิก
                     </button>
                     <?php endif; ?>
+                    </div>
                 </div>
             </div>
             <?php if ($req['status'] === 'REJECTED' && $req['reject_reason']): ?>
