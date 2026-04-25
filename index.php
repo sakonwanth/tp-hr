@@ -82,31 +82,26 @@ $announcements = $stmt->fetchAll();
 require_once __DIR__ . '/templates/header.php';
 ?>
 
-<!-- Page Header: คอลัมน์ไอคอนคงที่ — กันไอคอนทับตัวอักษร (FA + สระบนไทย) -->
-<div class="mb-8 mt-2 lg:mb-8">
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-        <div class="min-w-0 space-y-4">
-            <h1 class="text-2xl sm:text-3xl font-bold text-white leading-tight">
+<!-- หัวหน้าแรก: การ์ดสรุปวันที่/ตำแหน่ง — layout จาก CSS ใน header (ไม่ใช้ Tailwind arbitrary grid) -->
+<div class="dashboard-hero">
+    <div class="dashboard-hero-inner">
+        <div class="dashboard-hero-main">
+            <h1 class="dashboard-hero-title">
                 สวัสดี, <?php echo htmlspecialchars($user['first_name_th'] ?? $user['username']); ?>
             </h1>
-            <div class="flex flex-col gap-3 text-sm sm:text-base text-slate-300 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-2">
-                <div class="grid grid-cols-[2rem_minmax(0,1fr)] items-start gap-x-3 gap-y-0">
-                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/5 text-violet-300" aria-hidden="true">
-                        <i class="fas fa-calendar-day text-sm"></i>
-                    </span>
-                    <span class="min-w-0 pt-0.5 leading-relaxed"><?php echo formatDateThai(date('Y-m-d')); ?></span>
+            <div class="dashboard-hero-summary">
+                <div class="dashboard-hero-row">
+                    <div class="dashboard-hero-icon" aria-hidden="true"><i class="fas fa-calendar-day"></i></div>
+                    <div class="dashboard-hero-text"><?php echo formatDateThai(date('Y-m-d')); ?></div>
                 </div>
-                <span class="hidden h-5 w-px shrink-0 bg-slate-600 sm:block" aria-hidden="true"></span>
-                <div class="grid grid-cols-[2rem_minmax(0,1fr)] items-start gap-x-3 sm:max-w-xl">
-                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/5 text-violet-300" aria-hidden="true">
-                        <i class="fas fa-briefcase text-sm"></i>
-                    </span>
-                    <span class="min-w-0 pt-0.5 leading-relaxed break-words"><?php echo htmlspecialchars($user['position'] ?? $user['role_name'] ?? 'พนักงาน'); ?></span>
+                <div class="dashboard-hero-row">
+                    <div class="dashboard-hero-icon" aria-hidden="true"><i class="fas fa-briefcase"></i></div>
+                    <div class="dashboard-hero-text"><?php echo htmlspecialchars($user['position'] ?? $user['role_name'] ?? 'พนักงาน'); ?></div>
                 </div>
             </div>
         </div>
-        <div class="flex items-stretch sm:items-center gap-3 shrink-0">
-            <a href="/checkin.php" class="btn-primary btn-primary-prominent w-full sm:w-auto justify-center touch-manipulation">
+        <div class="dashboard-hero-cta">
+            <a href="/checkin.php" class="btn-primary btn-primary-prominent touch-manipulation">
                 <i class="fas fa-fingerprint mr-2 text-lg"></i>
                 ลงเวลา
             </a>

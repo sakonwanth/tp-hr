@@ -256,12 +256,145 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             background-size: 1.1rem 1.1rem;
         }
 
-        /* Solid fallback first (some WebKit builds clip gradient text poorly on toolbars) */
-        .brand-wordmark {
+        .mobile-app-header.header-glass {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        /* Mobile top bar — flex + กลางจริง (ไม่พึ่ง Tailwind arbitrary ที่อาจไม่อยู่ใน app.css) */
+        .mobile-app-header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: calc(env(safe-area-inset-top, 0px) + 12px) 1rem 18px;
+            min-height: calc(env(safe-area-inset-top, 0px) + 56px);
+        }
+        .mobile-app-header-bar .mobile-nav-side {
+            flex: 1 1 0;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+        }
+        .mobile-app-header-bar .mobile-nav-side--end {
+            justify-content: flex-end;
+        }
+        .mobile-app-header-bar .mobile-nav-brand {
+            flex: 0 0 auto;
+            font-size: 1.125rem;
             font-weight: 700;
-            letter-spacing: 0.04em;
-            color: #f5f3ff;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+            letter-spacing: 0.12em;
+            color: #faf5ff;
+            text-decoration: none;
+            padding: 0 4px;
+        }
+        .mobile-nav-menu-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 48px;
+            padding: 0 14px;
+            border-radius: 9999px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.06);
+            color: #e9d5ff;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: background 0.15s ease, border-color 0.15s ease;
+        }
+        .mobile-nav-menu-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+        .mobile-nav-spacer {
+            width: 48px;
+            height: 48px;
+            flex-shrink: 0;
+        }
+
+        /* Dashboard hero — การ์ดเดียว แถวละ ไอคอน + ข้อความ (แนวนอนชัดเจน) */
+        .dashboard-hero {
+            margin-bottom: 2rem;
+        }
+        .dashboard-hero h1.dashboard-hero-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            margin: 0 0 1rem 0;
+            line-height: 1.3;
+            letter-spacing: -0.02em;
+        }
+        @media (min-width: 640px) {
+            .dashboard-hero h1.dashboard-hero-title {
+                font-size: 1.875rem;
+            }
+        }
+        .dashboard-hero-summary {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(30, 41, 59, 0.55);
+            border-radius: 16px;
+            padding: 4px 4px;
+            margin-bottom: 1.25rem;
+        }
+        .dashboard-hero-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 14px;
+            min-height: 48px;
+        }
+        .dashboard-hero-row + .dashboard-hero-row {
+            border-top: 1px solid rgba(255, 255, 255, 0.07);
+        }
+        .dashboard-hero-icon {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(139, 92, 246, 0.2);
+            color: #ddd6fe;
+            font-size: 16px;
+        }
+        .dashboard-hero-text {
+            flex: 1;
+            min-width: 0;
+            font-size: 0.9375rem;
+            line-height: 1.5;
+            color: #e2e8f0;
+            word-break: break-word;
+        }
+        .dashboard-hero-cta .btn-primary-prominent {
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        @media (min-width: 768px) {
+            .dashboard-hero-inner {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 1.5rem;
+            }
+            .dashboard-hero-main {
+                flex: 1;
+                min-width: 0;
+            }
+            .dashboard-hero-summary {
+                max-width: 26rem;
+                margin-bottom: 0;
+            }
+            .dashboard-hero-cta {
+                flex-shrink: 0;
+                align-self: center;
+            }
+            .dashboard-hero-cta .btn-primary-prominent {
+                width: auto;
+                min-width: 13rem;
+            }
         }
         
         .content-area {
@@ -273,7 +406,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             .content-area {
                 margin-left: 0;
                 /* One safe-area term only: inset + fixed toolbar slack (must match .mobile-app-header height) */
-                padding-top: calc(env(safe-area-inset-top, 0px) + 5.25rem);
+                padding-top: calc(env(safe-area-inset-top, 0px) + 5.75rem);
                 padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
                 padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
                 padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); /* space for mobile bottom nav */
@@ -550,17 +683,18 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
     </div>
 </aside>
 
-<!-- Mobile header: safe-area นับครั้งเดียวที่ padding-top — กลางยืดหยุ่น (minmax 0) กัน label ชนกัน -->
+<!-- Mobile header: แถบสูงขึ้น ปุ่มเมนูแบบ pill กลางเป็น wordmark -->
 <header class="mobile-app-header header-glass lg:hidden fixed top-0 left-0 right-0 z-40">
-    <div class="grid items-center gap-x-2 px-4 pb-4 pt-[calc(env(safe-area-inset-top,0px)+14px)]"
-         style="grid-template-columns: minmax(0,auto) minmax(0,1fr) minmax(0,auto);">
-        <button type="button" id="mobileMenuBtn" class="touch-manipulation flex min-h-[52px] min-w-[3.25rem] items-center justify-center rounded-xl px-3 text-sm font-semibold text-violet-100 transition-colors hover:bg-white/10 hover:text-white">
-            เมนู
-        </button>
-        <a href="/" class="touch-manipulation flex min-h-[52px] min-w-0 items-center justify-center px-1 text-center no-underline">
-            <span class="brand-wordmark text-lg leading-none">TP-HR</span>
-        </a>
-        <span class="min-w-[3.25rem]" aria-hidden="true"></span>
+    <div class="mobile-app-header-bar">
+        <div class="mobile-nav-side">
+            <button type="button" id="mobileMenuBtn" class="mobile-nav-menu-btn touch-manipulation">
+                เมนู
+            </button>
+        </div>
+        <a href="/" class="mobile-nav-brand touch-manipulation">TP-HR</a>
+        <div class="mobile-nav-side mobile-nav-side--end" aria-hidden="true">
+            <span class="mobile-nav-spacer"></span>
+        </div>
     </div>
 </header>
 
