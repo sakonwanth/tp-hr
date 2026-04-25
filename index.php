@@ -82,23 +82,21 @@ $announcements = $stmt->fetchAll();
 require_once __DIR__ . '/templates/header.php';
 ?>
 
-<!-- Page Header -->
-<div class="mb-8">
+<!-- Page Header (mobile-first: compact title, full-width primary CTA on narrow screens) -->
+<div class="mb-6 lg:mb-8">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-            <h1 class="text-3xl font-bold text-white mb-2">
+        <div class="min-w-0">
+            <h1 class="text-2xl sm:text-3xl font-bold text-white mb-2 leading-tight">
                 สวัสดี, <?php echo htmlspecialchars($user['first_name_th'] ?? $user['username']); ?>
             </h1>
-            <p class="text-slate-400 flex items-center gap-2">
-                <i class="fas fa-calendar-day"></i>
-                <?php echo formatDateThai(date('Y-m-d')); ?>
-                <span class="text-slate-600">|</span>
-                <i class="fas fa-briefcase"></i>
-                <?php echo htmlspecialchars($user['position'] ?? $user['role_name'] ?? 'พนักงาน'); ?>
+            <p class="text-slate-400 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm sm:text-base">
+                <span class="inline-flex items-center gap-2"><i class="fas fa-calendar-day shrink-0"></i><?php echo formatDateThai(date('Y-m-d')); ?></span>
+                <span class="text-slate-600 hidden sm:inline">|</span>
+                <span class="inline-flex items-center gap-2 min-w-0"><i class="fas fa-briefcase shrink-0"></i><span class="truncate"><?php echo htmlspecialchars($user['position'] ?? $user['role_name'] ?? 'พนักงาน'); ?></span></span>
             </p>
         </div>
-        <div class="flex items-center gap-3">
-            <a href="/checkin.php" class="btn-primary">
+        <div class="flex items-stretch sm:items-center gap-3 shrink-0">
+            <a href="/checkin.php" class="btn-primary w-full sm:w-auto justify-center touch-manipulation">
                 <i class="fas fa-fingerprint mr-2"></i>
                 ลงเวลา
             </a>
@@ -208,11 +206,11 @@ require_once __DIR__ . '/templates/header.php';
             </h2>
             
             <?php if ($myData['today_attendance']): ?>
-                <div class="flex items-center justify-between bg-slate-800/50 rounded-xl p-4">
-                    <div class="flex items-center gap-8">
-                        <div class="text-center px-4">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-slate-800/50 rounded-xl p-4">
+                    <div class="flex items-center justify-center gap-6 sm:gap-8">
+                        <div class="text-center px-2 sm:px-4">
                             <p class="text-slate-400 text-xs mb-1">เข้างาน</p>
-                            <p class="text-2xl font-bold text-emerald-400">
+                            <p class="text-2xl font-bold text-emerald-400 tabular-nums">
                                 <?php echo $myData['today_attendance']['check_in_time'] 
                                     ? date('H:i', strtotime($myData['today_attendance']['check_in_time'])) 
                                     : '-'; ?>
@@ -221,9 +219,9 @@ require_once __DIR__ . '/templates/header.php';
                         <div class="flex items-center text-slate-600">
                             <i class="fas fa-arrow-right"></i>
                         </div>
-                        <div class="text-center px-4">
+                        <div class="text-center px-2 sm:px-4">
                             <p class="text-slate-400 text-xs mb-1">ออกงาน</p>
-                            <p class="text-2xl font-bold <?php echo $myData['today_attendance']['check_out_time'] ? 'text-blue-400' : 'text-slate-600'; ?>">
+                            <p class="text-2xl font-bold tabular-nums <?php echo $myData['today_attendance']['check_out_time'] ? 'text-blue-400' : 'text-slate-600'; ?>">
                                 <?php echo $myData['today_attendance']['check_out_time'] 
                                     ? date('H:i', strtotime($myData['today_attendance']['check_out_time'])) 
                                     : '-'; ?>
@@ -232,12 +230,12 @@ require_once __DIR__ . '/templates/header.php';
                     </div>
                     
                     <?php if (!$myData['today_attendance']['check_out_time']): ?>
-                    <a href="/checkin.php?action=out" class="btn-primary">
+                    <a href="/checkin.php?action=out" class="btn-primary w-full sm:w-auto justify-center shrink-0 touch-manipulation">
                         <i class="fas fa-sign-out-alt mr-2"></i>
                         ลงเวลาออก
                     </a>
                     <?php else: ?>
-                    <span class="badge badge-success">
+                    <span class="badge badge-success self-center sm:self-auto shrink-0">
                         <i class="fas fa-check mr-1"></i>
                         เสร็จสิ้น
                     </span>

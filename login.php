@@ -100,24 +100,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php $appIconPath = '/assets/icons/tphr-app-icon.svg'; ?>
     <?php $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png'; ?>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>เข้าสู่ระบบ | <?php echo htmlspecialchars($system_name); ?></title>
     
-    <!-- PWA Meta -->
+    <!-- PWA Meta (aligned with tp-checkin) -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="<?php echo htmlspecialchars($system_name); ?>">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#8b5cf6">
+    <meta name="theme-color" content="#7c3aed">
     <link rel="manifest" href="/manifest.webmanifest">
     <link rel="icon" type="image/svg+xml" href="<?php echo htmlspecialchars($appIconPath); ?>">
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="<?php echo htmlspecialchars($appTouchIconPath); ?>">
     
-    <!-- Google Kanit Font -->
+    <!-- IBM Plex Sans Thai — same stack as tp-checkin / logged-in TP-HR -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Icons & Tailwind -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
@@ -125,8 +125,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     <style>
         * {
-            font-family: 'Kanit', sans-serif;
+            font-family: 'IBM Plex Sans Thai', sans-serif;
             -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
         }
         
         body {
@@ -134,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             min-height: 100dvh;
             position: relative;
             overflow-x: hidden;
-            background: #0f172a;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -162,52 +163,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        .bg-image {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -2;
-            background: url('https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1920&q=80') center center no-repeat;
-            background-size: cover;
-        }
-
-        .bg-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.92) 0%, rgba(30, 41, 59, 0.88) 50%, rgba(15, 23, 42, 0.95) 100%);
-        }
-
         .login-card {
-            background: rgba(255, 255, 255, 0.06);
-            backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(30, 41, 59, 0.64);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             position: relative;
-        }
-
-        .login-card::before {
-            content: '';
-            position: absolute;
-            top: -1px;
-            left: -1px;
-            right: -1px;
-            bottom: -1px;
-            border-radius: 25px;
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(236, 72, 153, 0.3), rgba(139, 92, 246, 0.3));
-            z-index: -1;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .login-card:hover::before {
-            opacity: 1;
         }
 
         .input-field {
@@ -221,8 +184,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .input-field:focus {
-            border-color: rgba(139, 92, 246, 0.8);
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
             outline: none;
             background: rgba(255, 255, 255, 0.12);
         }
@@ -232,17 +195,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .btn-login {
-            background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #ec4899 100%);
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
             border-radius: 12px;
             transition: all 0.3s ease;
             font-weight: 600;
             min-height: 48px;
             touch-action: manipulation;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
         }
 
         .btn-login:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
         }
 
         .btn-login:active {
@@ -292,10 +256,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .tagline {
-            background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: rgba(196, 181, 253, 0.95);
         }
 
         @media (max-width: 640px) {
@@ -306,12 +267,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 </head>
 <body>
-    <!-- Background Image -->
-    <div class="bg-image"></div>
-    
-    <!-- Dark Overlay -->
-    <div class="bg-overlay"></div>
-    
     <!-- Login Card -->
     <div class="login-card w-full max-w-md p-4 sm:p-6 lg:p-8">
         <!-- Logo -->

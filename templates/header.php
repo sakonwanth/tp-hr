@@ -60,6 +60,15 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             border-right: 1px solid rgba(148, 163, 184, 0.1);
         }
         
+        /* Sticky top bar — aligned with tp-checkin `.header-glass` */
+        .header-glass {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
+        }
+
         .glass-card {
             background: rgba(30, 41, 59, 0.64);
             backdrop-filter: blur(20px);
@@ -505,8 +514,8 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
     </div>
 </aside>
 
-<!-- Mobile Header -->
-<header class="lg:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 bg-slate-900/90 backdrop-blur-xl border-b border-white/10 pt-[env(safe-area-inset-top,0px)] min-h-[calc(4rem+env(safe-area-inset-top,0px))]">
+<!-- Mobile Header (tp-checkin header-glass parity) -->
+<header class="header-glass lg:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 pt-[env(safe-area-inset-top,0px)] min-h-[calc(4rem+env(safe-area-inset-top,0px))]">
     <button type="button" id="mobileMenuBtn" class="touch-manipulation w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-white">
         <i class="fas fa-bars"></i>
     </button>
