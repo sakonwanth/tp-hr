@@ -288,7 +288,6 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             display: inline-flex;
             align-items: center;
             justify-content: flex-start;
-            gap: 10px;
             min-width: 0;
             max-width: none;
             text-decoration: none;
@@ -296,23 +295,9 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             border-radius: 12px;
             text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
         }
-        .mobile-app-header .mobile-nav-brand-icon {
-            display: none;
-        }
-        .mobile-app-header .mobile-nav-brand {
-            gap: 0;
-        }
         .mobile-nav-brand:focus-visible {
             outline: 2px solid rgba(167, 139, 250, 0.65);
             outline-offset: 3px;
-        }
-        .mobile-nav-brand-icon {
-            width: 34px;
-            height: 34px;
-            border-radius: 10px;
-            flex-shrink: 0;
-            object-fit: cover;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
         }
         .mobile-nav-brand-stack {
             display: flex;
@@ -788,7 +773,6 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
                 เมนู
             </button>
             <a href="/" class="mobile-nav-brand touch-manipulation" aria-label="TP-HR Human Resources — หน้าแรก">
-                <img src="<?php echo htmlspecialchars($appIconPath); ?>" alt="" class="mobile-nav-brand-icon" width="34" height="34" decoding="async" aria-hidden="true">
                 <span class="mobile-nav-brand-stack">
                     <span class="mobile-nav-brand-line1" aria-hidden="true"><span class="mobile-nav-brand-tp">TP-</span><span class="mobile-nav-brand-hr">HR</span></span>
                     <span class="mobile-nav-brand-tagline">Human Resources</span>
