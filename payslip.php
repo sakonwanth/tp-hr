@@ -142,11 +142,11 @@ include 'templates/header.php';
         </h1>
         <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
             <a href="payslip.php?action=download&slip_id=<?php echo $slip['id']; ?>"
-               class="w-full sm:w-auto min-h-[44px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors inline-flex items-center justify-center">
+               class="payslip-download-link w-full sm:w-auto min-h-[44px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors inline-flex items-center justify-center">
                 <i class="fas fa-print mr-2"></i>พิมพ์
             </a>
-            <a href="payslip.php?action=download&slip_id=<?php echo $slip['id']; ?>" target="_blank"
-               class="w-full sm:w-auto min-h-[44px] px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors inline-flex items-center justify-center font-semibold">
+            <a href="payslip.php?action=download&slip_id=<?php echo $slip['id']; ?>" target="_blank" rel="noopener noreferrer"
+               class="payslip-download-link w-full sm:w-auto min-h-[44px] px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors inline-flex items-center justify-center font-semibold">
                 <i class="fas fa-download mr-2"></i>ดาวน์โหลด PDF
             </a>
         </div>
@@ -423,8 +423,8 @@ include 'templates/header.php';
                            title="ดูรายละเอียด">
                             <i class="fas fa-eye"></i>
                         </a>
-                        <a href="payslip.php?action=download&slip_id=<?php echo $s['id']; ?>" 
-                           class="min-w-[44px] min-h-[44px] p-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors flex items-center justify-center"
+                        <a href="payslip.php?action=download&slip_id=<?php echo $s['id']; ?>" target="_blank" rel="noopener noreferrer"
+                           class="payslip-download-link min-w-[44px] min-h-[44px] p-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors flex items-center justify-center"
                            title="ดาวน์โหลด PDF">
                             <i class="fas fa-download"></i>
                         </a>
@@ -448,3 +448,14 @@ include 'templates/header.php';
 </style>
 
 <?php include 'templates/footer.php'; ?>
+<script>
+(function () {
+    document.querySelectorAll('a.payslip-download-link').forEach(function (el) {
+        el.addEventListener('click', function () {
+            if (typeof showToast === 'function') {
+                showToast('success', 'เริ่มดาวน์โหลดสลิป', 'หากไม่เห็นไฟล์ ให้ตรวจสอบแท็บใหม่หรือการบล็อกป๊อปอัปของเบราว์เซอร์');
+            }
+        });
+    });
+})();
+</script>
