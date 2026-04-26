@@ -3,7 +3,7 @@
  * Payroll write endpoints (Phase 6.1.2)
  *
  *   POST /api/v1/payroll-runs                scope: payroll.write
- *        body: { "month": "YYYY-MM", "created_by"? } — actor = ผู้ออกคีย์ (CEO+) หรือส่ง created_by (คีย์เก่า)
+ *        body: { "month": "YYYY-MM", "created_by"? } — actor = ผู้ออกคีย์ (HR/Admin/Chairman/CEO) หรือส่ง created_by (คีย์เก่า)
  *
  *   POST /api/v1/payroll-runs/{id}/approve   scope: payroll.approve
  *        body: { "approved_by"? } — ผูกกับผู้ออก API key (CEO+)
@@ -45,7 +45,7 @@ if ($resource === 'payroll-runs') {
             ApiAuth::fail(400, 'Invalid month format (YYYY-MM)');
         }
         try {
-            $createdBy = apiKeyResolveActorForApi($pdo, ApiAuth::currentKey(), $input, 'created_by', CEO_ROLES);
+            $createdBy = apiKeyResolveActorForApi($pdo, ApiAuth::currentKey(), $input, 'created_by', HR_ROLES);
             $result = $service->createRun($month, $createdBy);
             ApiAuth::success(['data' => $result]);
         } catch (\RuntimeException $e) {
