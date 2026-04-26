@@ -68,28 +68,26 @@ function uploadFile(array $file, string $destination, ?array $allowedTypes = nul
         return ['success' => false, 'message' => 'ไฟล์มีขนาดใหญ่เกินไป'];
     }
     
-    // Get file extension
-    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
     $allowedTypes = $allowedTypes['types'] ?? $allowedTypes ?? ALLOWED_FILE_TYPES;
+    $extFromName = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
 
-    if (!in_array($ext, $allowedTypes, true)) {
-        return ['success' => false, 'message' => 'ประเภทไฟล์ไม่ถูกต้อง'];
-    }
-
-    // Best-effort content validation (don't trust extension)
     $mime = '';
     try {
         if (function_exists('finfo_open')) {
             $fi = finfo_open(FILEINFO_MIME_TYPE);
             if ($fi) {
-                $mime = (string)finfo_file($fi, $file['tmp_name']);
+                $mime = strtolower(trim((string) finfo_file($fi, $file['tmp_name'])));
                 finfo_close($fi);
             }
         }
     } catch (Throwable $e) {
-        // ignore
     }
-    $mime = strtolower(trim($mime));
+    if ($mime === 'application/x-zip-compressed') {
+        $mime = 'application/zip';
+    }
+    if (in_array($mime, ['image/pjpeg', 'image/jpg'], true)) {
+        $mime = 'image/jpeg';
+    }
 
     $allowedMimeByExt = [
         'pdf'  => ['application/pdf'],
@@ -104,8 +102,54 @@ function uploadFile(array $file, string $destination, ?array $allowedTypes = nul
         'xlsx' => ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/zip'],
     ];
 
-    if (isset($allowedMimeByExt[$ext]) && $mime !== '' && !in_array($mime, $allowedMimeByExt[$ext], true)) {
-        return ['success' => false, 'message' => 'ไฟล์ไม่ถูกต้อง (ชนิดไฟล์ไม่ตรงกับนามสกุล)'];
+    // นามสกุลที่บันทึก — อิง MIME / โครงสร้างไฟล์ก่อน ไม่เชื่อชื่อไฟล์ล้วนๆ (กันนามสกุลปลอมเช่น .pdf.php)
+    $ext = null;
+    if ($mime === 'application/pdf' && in_array('pdf', $allowedTypes, true)) {
+        $ext = 'pdf';
+    } elseif ($mime === 'image/jpeg') {
+        if (in_array('jpg', $allowedTypes, true)) {
+            $ext = 'jpg';
+        } elseif (in_array('jpeg', $allowedTypes, true)) {
+            $ext = 'jpeg';
+        }
+    } elseif ($mime === 'image/png' && in_array('png', $allowedTypes, true)) {
+        $ext = 'png';
+    } elseif ($mime === 'image/gif' && in_array('gif', $allowedTypes, true)) {
+        $ext = 'gif';
+    } elseif ($mime === 'image/webp' && in_array('webp', $allowedTypes, true)) {
+        $ext = 'webp';
+    } elseif ($mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' && in_array('docx', $allowedTypes, true)) {
+        $ext = 'docx';
+    } elseif ($mime === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' && in_array('xlsx', $allowedTypes, true)) {
+        $ext = 'xlsx';
+    } elseif ($mime === 'application/zip' && (in_array('docx', $allowedTypes, true) || in_array('xlsx', $allowedTypes, true)) && class_exists('ZipArchive')) {
+        $zip = new ZipArchive();
+        if ($zip->open($file['tmp_name']) === true) {
+            $hasWord = $zip->locateName('word/document.xml') !== false;
+            $hasExcel = $zip->locateName('xl/workbook.xml') !== false;
+            $zip->close();
+            if ($hasWord && in_array('docx', $allowedTypes, true)) {
+                $ext = 'docx';
+            } elseif ($hasExcel && in_array('xlsx', $allowedTypes, true)) {
+                $ext = 'xlsx';
+            }
+        }
+    } elseif (in_array($mime, ['application/msword', 'application/vnd.ms-office', 'application/x-ole-storage'], true)) {
+        if ($extFromName === 'doc' && in_array('doc', $allowedTypes, true)) {
+            $ext = 'doc';
+        } elseif ($extFromName === 'xls' && in_array('xls', $allowedTypes, true)) {
+            $ext = 'xls';
+        }
+    }
+
+    if ($ext === null) {
+        $ext = $extFromName;
+        if (!in_array($ext, $allowedTypes, true)) {
+            return ['success' => false, 'message' => 'ประเภทไฟล์ไม่ถูกต้อง'];
+        }
+        if ($mime !== '' && isset($allowedMimeByExt[$ext]) && !in_array($mime, $allowedMimeByExt[$ext], true)) {
+            return ['success' => false, 'message' => 'ไฟล์ไม่ถูกต้อง (ชนิดไฟล์ไม่ตรงกับนามสกุล)'];
+        }
     }
 
     // Extra guard for images
