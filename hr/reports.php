@@ -20,12 +20,36 @@ $user = Auth::user();
 $page_title = 'รายงาน';
 $current_page = 'hr-reports';
 
-// Get report type
-$report = $_GET['report'] ?? 'attendance';
-$startDate = $_GET['start_date'] ?? date('Y-m-01');
-$endDate = $_GET['end_date'] ?? date('Y-m-d');
-$department = $_GET['department'] ?? '';
-$exportFormat = $_GET['export'] ?? '';
+$allowedReports = ['attendance', 'leave', 'leave-summary', 'daily'];
+$isPostExport = ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['export_csv'] ?? '') === '1';
+
+if ($isPostExport) {
+    if (!verifyCsrfToken($_POST['_token'] ?? null)) {
+        flash('error', 'โทเค็นความปลอดภัยไม่ถูกต้อง');
+        redirect('/hr/reports.php', 302);
+    }
+    $report = (string)($_POST['report'] ?? 'attendance');
+    if (!in_array($report, $allowedReports, true)) {
+        $report = 'attendance';
+    }
+    $startDate = $_POST['start_date'] ?? date('Y-m-01');
+    $endDate = $_POST['end_date'] ?? date('Y-m-d');
+    $department = trim((string)($_POST['department'] ?? ''));
+} else {
+    if (($_GET['export'] ?? '') === 'csv') {
+        $q = $_GET;
+        unset($q['export']);
+        flash('error', 'การส่งออกข้อมูล กรุณากดปุ่ม Export CSV เท่านั้น');
+        redirect('/hr/reports.php' . (count($q) ? '?' . http_build_query($q) : ''), 302);
+    }
+    $report = $_GET['report'] ?? 'attendance';
+    if (!in_array($report, $allowedReports, true)) {
+        $report = 'attendance';
+    }
+    $startDate = $_GET['start_date'] ?? date('Y-m-01');
+    $endDate = $_GET['end_date'] ?? date('Y-m-d');
+    $department = $_GET['department'] ?? '';
+}
 
 // Get departments for filter
 $departments = $pdo->query("SELECT DISTINCT department FROM users WHERE department IS NOT NULL AND department != '' ORDER BY department")->fetchAll(PDO::FETCH_COLUMN);
@@ -162,23 +186,35 @@ switch ($report) {
         break;
 }
 
-// Export to CSV
-if ($exportFormat === 'csv' && $reportData) {
+if ($isPostExport) {
+    if (!$reportData) {
+        flash('error', 'ไม่มีข้อมูลสำหรับส่งออก');
+        $q = ['report' => $report, 'start_date' => $startDate, 'end_date' => $endDate];
+        if ($department !== '') {
+            $q['department'] = $department;
+        }
+        redirect('/hr/reports.php?' . http_build_query($q), 302);
+    }
     header('Content-Type: text/csv; charset=utf-8');
     header('Content-Disposition: attachment; filename="report_' . $report . '_' . date('Y-m-d') . '.csv"');
-    
+    header('X-Content-Type-Options: nosniff');
+
     $output = fopen('php://output', 'w');
-    fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF)); // BOM for UTF-8
-    
-    // Add headers
-    if ($reportData) {
+    if ($output !== false) {
+        fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
         fputcsv($output, array_keys($reportData[0]));
         foreach ($reportData as $row) {
             fputcsv($output, $row);
         }
+        fclose($output);
     }
-    
-    fclose($output);
+    Auth::log('hr_report_export_csv', null, null, null, [
+        'report' => $report,
+        'start_date' => $startDate,
+        'end_date' => $endDate,
+        'department' => $department,
+        'row_count' => count($reportData),
+    ]);
     exit;
 }
 
@@ -202,9 +238,17 @@ require_once __DIR__ . '/../templates/header.php';
     </div>
     
     <?php if ($reportData): ?>
-    <a href="?<?php echo http_build_query(array_merge($_GET, ['export' => 'csv'])); ?>" class="btn-secondary">
-        <i class="fas fa-file-csv mr-2"></i>Export CSV
-    </a>
+    <form method="post" action="/hr/reports.php" class="inline-flex">
+        <?php echo csrfField(); ?>
+        <input type="hidden" name="export_csv" value="1">
+        <input type="hidden" name="report" value="<?php echo htmlspecialchars($report); ?>">
+        <input type="hidden" name="start_date" value="<?php echo htmlspecialchars($startDate); ?>">
+        <input type="hidden" name="end_date" value="<?php echo htmlspecialchars($endDate); ?>">
+        <input type="hidden" name="department" value="<?php echo htmlspecialchars($department); ?>">
+        <button type="submit" class="btn-secondary">
+            <i class="fas fa-file-csv mr-2"></i>Export CSV
+        </button>
+    </form>
     <?php endif; ?>
     </div>
 </div>
