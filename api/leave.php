@@ -283,8 +283,11 @@ function getCalendar($pdo, $user) {
     
     $startDate = "$year-" . str_pad($month, 2, '0', STR_PAD_LEFT) . "-01";
     $endDate = date('Y-m-t', strtotime($startDate));
-    
-    $stmt = $pdo->prepare("
+
+    // Company-wide calendar only for HR / managers; everyone else sees own leaves only.
+    $canViewAllLeaves = isHR() || hasRole(MANAGER_ROLES);
+
+    $sql = "
         SELECT lr.id, lr.start_date, lr.end_date, lr.total_days, lr.status,
                lt.name as leave_type_name, lt.color as color_code,
                CONCAT(u.first_name_th, ' ', u.last_name_th) as user_name
@@ -293,9 +296,16 @@ function getCalendar($pdo, $user) {
         JOIN users u ON lr.user_id = u.id
         WHERE lr.status IN ('PENDING', 'APPROVED')
         AND ((lr.start_date BETWEEN ? AND ?) OR (lr.end_date BETWEEN ? AND ?))
-        ORDER BY lr.start_date
-    ");
-    $stmt->execute([$startDate, $endDate, $startDate, $endDate]);
+    ";
+    $params = [$startDate, $endDate, $startDate, $endDate];
+    if (!$canViewAllLeaves) {
+        $sql .= " AND lr.user_id = ?";
+        $params[] = (int) $user['id'];
+    }
+    $sql .= " ORDER BY lr.start_date";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
     $events = $stmt->fetchAll();
     
     // Get holidays
