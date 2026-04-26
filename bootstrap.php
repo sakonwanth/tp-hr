@@ -213,6 +213,13 @@ function userMayApproveLeaveByRole(PDO $pdo, int $userId): bool {
 /**
  * Resolve actor user id for API approve/reject (and similar): bind to API key creator when set, else legacy body field.
  */
+/**
+ * Server-side exception logging — never pass raw $e->getMessage() to HTTP clients in production APIs.
+ */
+function tpHrLogException(Throwable $e, string $context): void {
+    error_log('[' . $context . '] ' . $e->getMessage() . ' @ ' . $e->getFile() . ':' . $e->getLine());
+}
+
 function apiKeyResolveActorForApi(PDO $pdo, ?array $key, array $body, string $bodyField, array $allowedRoleNames): int {
     if (!$key) {
         ApiAuth::fail(500, 'Internal error');

@@ -153,7 +153,8 @@ try {
     $pdo->commit();
 } catch (Throwable $e) {
     if ($pdo->inTransaction()) $pdo->rollBack();
-    ApiAuth::fail(500, 'Failed to process: ' . $e->getMessage());
+    tpHrLogException($e, 'api/v1/adjustments');
+    ApiAuth::fail(500, 'Internal server error');
 }
 
 ApiAuth::success(['data' => ['id' => $id, 'status' => $action === 'approve' ? 'APPROVED' : 'REJECTED']]);

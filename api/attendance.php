@@ -688,8 +688,8 @@ function handleAdjust(PDO $pdo, array $user, array $input): void {
         Auth::log('ATTENDANCE_ADJUST', 'hr_attendances', $recordId, $oldValues, $newValues);
         apiSuccess([], 'บันทึกข้อมูลสำเร็จ');
     } catch (Exception $e) {
-        error_log('handleAdjust exception: ' . $e->getMessage());
-        apiError('เกิดข้อผิดพลาด: ' . $e->getMessage());
+        tpHrLogException($e, 'api/attendance handleAdjust');
+        apiError('เกิดข้อผิดพลาดภายในระบบ กรุณาลองใหม่', 500);
     }
 }
 
@@ -880,8 +880,8 @@ function handleDelete(PDO $pdo, array $user, array $input): void {
         apiSuccess([], 'ลบข้อมูลการลงเวลาสำเร็จ');
     } catch (Exception $e) {
         if ($pdo->inTransaction()) $pdo->rollBack();
-        error_log('handleDelete exception: ' . $e->getMessage());
-        apiError('เกิดข้อผิดพลาด: ' . $e->getMessage());
+        tpHrLogException($e, 'api/attendance handleDelete');
+        apiError('เกิดข้อผิดพลาดภายในระบบ กรุณาลองใหม่', 500);
     }
 }
 
@@ -955,7 +955,8 @@ function handleLateStartRequest(PDO $pdo, array $user, array $input): void {
             $attendanceId = (int)$pdo->lastInsertId();
         }
     } catch (PDOException $e) {
-        apiError('บันทึกคำขอไม่สำเร็จ: ' . $e->getMessage(), 500);
+        tpHrLogException($e, 'api/attendance handleLateStartRequest');
+        apiError('บันทึกคำขอไม่สำเร็จ กรุณาลองใหม่', 500);
     }
 
     if (class_exists('Auth') && method_exists('Auth', 'log')) {
@@ -1028,7 +1029,8 @@ function cancelLateStartRequest(PDO $pdo, array $user, array $input): void {
         ");
         $stmt->execute([$row['id']]);
     } catch (PDOException $e) {
-        apiError('ยกเลิกคำขอไม่สำเร็จ: ' . $e->getMessage(), 500);
+        tpHrLogException($e, 'api/attendance cancelLateStartRequest');
+        apiError('ยกเลิกคำขอไม่สำเร็จ กรุณาลองใหม่', 500);
     }
 
     if (class_exists('Auth') && method_exists('Auth', 'log')) {

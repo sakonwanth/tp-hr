@@ -174,7 +174,8 @@ try {
     $pdo->commit();
 } catch (Throwable $e) {
     if ($pdo->inTransaction()) $pdo->rollBack();
-    ApiAuth::fail(500, 'Failed: ' . $e->getMessage());
+    tpHrLogException($e, 'api/v1/attendance');
+    ApiAuth::fail(500, 'Internal server error');
 }
 
 ApiAuth::success(['data' => ['id' => $newId, 'user_id' => $userId, 'attendance_date' => $date, 'action' => $action, 'time' => $time]], 201);
