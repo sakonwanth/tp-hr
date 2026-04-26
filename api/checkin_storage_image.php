@@ -29,6 +29,20 @@ if ($disk === null) {
     exit;
 }
 
+if (function_exists('finfo_open')) {
+    $fi = finfo_open(FILEINFO_MIME_TYPE);
+    if ($fi) {
+        $detected = finfo_file($fi, $disk);
+        finfo_close($fi);
+        if (hr_finfo_mime_is_blocked_for_static_serve($detected)) {
+            http_response_code(415);
+            header('Content-Type: text/plain; charset=UTF-8');
+            echo 'Unsupported media type';
+            exit;
+        }
+    }
+}
+
 $ext = strtolower(pathinfo($disk, PATHINFO_EXTENSION));
 $types = [
     'jpg'  => 'image/jpeg',

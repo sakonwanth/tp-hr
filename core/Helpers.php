@@ -349,6 +349,41 @@ function checkinStorageResolveDiskPath(string $relativePath): ?string {
 }
 
 /**
+ * Safe filename for Content-Disposition (DB or constructed names; CRLF / path safe).
+ */
+function hr_safe_content_disposition_filename(string $name, string $default = 'download'): string {
+    $firstLine = preg_split('/\r\n|\r|\n/', $name, 2)[0] ?? $name;
+    $base = basename(str_replace(["\0", "\r", "\n", '"', '\\'], '', $firstLine));
+    $base = preg_replace('/[^a-zA-Z0-9._\x{0E00}-\x{0E7F}-]+/u', '_', $base) ?? '';
+    if ($base === '' || $base === '.' || $base === '..') {
+        $base = $default;
+    }
+    if (function_exists('mb_strlen') && mb_strlen($base, 'UTF-8') > 200) {
+        $base = mb_substr($base, 0, 200, 'UTF-8');
+    } elseif (strlen($base) > 200) {
+        $base = substr($base, 0, 200);
+    }
+    return $base;
+}
+
+/**
+ * Block obvious script/HTML MIME when serving user-stored files from disk.
+ */
+function hr_finfo_mime_is_blocked_for_static_serve($mime): bool {
+    if ($mime === false || $mime === null || $mime === '') {
+        return false;
+    }
+    $m = strtolower(trim(explode(';', (string) $mime, 2)[0]));
+    if ($m === 'text/html' || $m === 'application/xhtml+xml') {
+        return true;
+    }
+    if (str_contains($m, 'php')) {
+        return true;
+    }
+    return in_array($m, ['application/javascript', 'text/javascript', 'application/x-javascript', 'text/javascript1.0', 'text/jscript', 'application/x-sh', 'text/x-shellscript'], true);
+}
+
+/**
  * Public URL for attendance check-in/out photos (DB may store tp-checkin paths or tp-hr uploads).
  */
 function attendancePhotoPublicUrl(?string $path): string {

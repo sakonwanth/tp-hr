@@ -195,8 +195,9 @@ if ($isPostExport) {
         }
         redirect('/hr/reports.php?' . http_build_query($q), 302);
     }
+    $exportFilename = hr_safe_content_disposition_filename('report_' . $report . '_' . date('Y-m-d') . '.csv', 'report.csv');
     header('Content-Type: text/csv; charset=utf-8');
-    header('Content-Disposition: attachment; filename="report_' . $report . '_' . date('Y-m-d') . '.csv"');
+    header('Content-Disposition: attachment; filename="' . $exportFilename . '"');
     header('X-Content-Type-Options: nosniff');
 
     $output = fopen('php://output', 'w');

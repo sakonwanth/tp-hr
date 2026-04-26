@@ -112,8 +112,12 @@ function downloadPDF(PDO $pdo, array $user, int $slipId): void {
     $html = generatePayslipHTML($slip, $monthName, $year);
     
     // For now, output as HTML (in production, use a PDF library like TCPDF or DOMPDF)
+    $attachName = hr_safe_content_disposition_filename(
+        'payslip_' . ($slip['employee_code'] ?? '') . '_' . date('Ym', strtotime($slip['payroll_month'])) . '.html',
+        'payslip.html'
+    );
     header('Content-Type: text/html; charset=utf-8');
-    header('Content-Disposition: attachment; filename="payslip_' . $slip['employee_code'] . '_' . date('Ym', strtotime($slip['payroll_month'])) . '.html"');
+    header('Content-Disposition: attachment; filename="' . $attachName . '"');
     header('X-Content-Type-Options: nosniff');
     echo $html;
 }

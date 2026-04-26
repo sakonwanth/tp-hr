@@ -114,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['export_csv'] ?? '') === '1
     $stmt->execute($params);
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $filename = 'employees_export_' . date('Y-m-d_His') . '.csv';
+    $filename = hr_safe_content_disposition_filename('employees_export_' . date('Y-m-d_His') . '.csv', 'employees.csv');
     header('Content-Type: text/csv; charset=UTF-8');
     header('Content-Disposition: attachment; filename="' . $filename . '"');
     header('X-Content-Type-Options: nosniff');
