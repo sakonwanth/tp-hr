@@ -62,9 +62,11 @@ switch ($resource) {
         ApiAuth::success(['data' => $rows]);
     }
     case 'employee-schedules': {
-        if (apiKeyServiceUserId($key) === null && !apiKeyMayAccessFullHrMeta($key)) {
-            ApiAuth::fail(403, 'employee-schedules requires hr.read_all (or *) or a service user bound to the API key');
-        }
+        apiKeyRequireServiceUserOrReadAllScope(
+            $key,
+            'hr.read_all',
+            'employee-schedules requires hr.read_all (or *) or a service user bound to the API key'
+        );
         $userId = apiKeyResolveScopedUserId($key, isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0);
         $sql = "
             SELECT s.id, s.user_id, u.employee_code, u.first_name_th, u.last_name_th,
@@ -92,9 +94,11 @@ switch ($resource) {
         ApiAuth::success(['data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
     }
     case 'leave-entitlements': {
-        if (apiKeyServiceUserId($key) === null && !apiKeyMayAccessFullHrMeta($key)) {
-            ApiAuth::fail(403, 'leave-entitlements requires hr.read_all (or *) or a service user bound to the API key');
-        }
+        apiKeyRequireServiceUserOrReadAllScope(
+            $key,
+            'hr.read_all',
+            'leave-entitlements requires hr.read_all (or *) or a service user bound to the API key'
+        );
         $year = isset($_GET['year']) ? (int)$_GET['year'] : (int)date('Y');
         $userId = apiKeyResolveScopedUserId($key, isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0);
         $sql = "

@@ -2,8 +2,8 @@
 /**
  * Leave requests
  *
- *   GET  /api/v1/leave[?status=&from=&to=&user_id=]   scope: leave.read
- *   GET  /api/v1/leave/{id}                           scope: leave.read
+ *   GET  /api/v1/leave[?status=&from=&to=&user_id=]   scope: leave.read (+ leave.read_all if key has no service_user_id)
+ *   GET  /api/v1/leave/{id}                           scope: เช่นเดียวกันสำหรับคีย์ไม่ผูก user
  *   POST /api/v1/leave                                scope: leave.write
  *        body: { user_id, leave_type_id, start_date, end_date,
  *                start_period?, end_period?, total_days, reason?, contact_number? }
@@ -44,9 +44,19 @@ if ($method === 'GET') {
         $stmt->execute([$id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$row) ApiAuth::fail(404, 'Leave request not found');
-        apiKeyAssertResourceOwnerUserId($key, (int) $row['user_id']);
+        if (apiKeyServiceUserId($key) !== null) {
+            apiKeyAssertResourceOwnerUserId($key, (int) $row['user_id']);
+        } elseif (!apiKeyHasReadAllScope($key, 'leave.read_all')) {
+            ApiAuth::fail(403, 'Reading leave by id requires leave.read_all (or *) or a service user bound to the API key');
+        }
         ApiAuth::success(['data' => $row]);
     }
+
+    apiKeyRequireServiceUserOrReadAllScope(
+        $key,
+        'leave.read_all',
+        'Leave list queries require leave.read_all (or *) or a service user bound to the API key'
+    );
 
     $status = strtoupper(trim($_GET['status'] ?? ''));
     $from   = $_GET['from'] ?? '';

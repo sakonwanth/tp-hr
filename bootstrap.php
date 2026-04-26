@@ -289,10 +289,7 @@ function apiKeyMayAccessFullPayroll(?array $key): bool {
     return in_array('payroll.read_all', $scopes, true);
 }
 
-/**
- * Per-employee rows in /api/v1/hr_meta (schedules, leave entitlements): unscoped keys need hr.read_all (or *).
- */
-function apiKeyMayAccessFullHrMeta(?array $key): bool {
+function apiKeyHasReadAllScope(?array $key, string $readAllScope): bool {
     if (!$key) {
         return false;
     }
@@ -300,7 +297,19 @@ function apiKeyMayAccessFullHrMeta(?array $key): bool {
     if (in_array('*', $scopes, true)) {
         return true;
     }
-    return in_array('hr.read_all', $scopes, true);
+    return in_array($readAllScope, $scopes, true);
+}
+
+/**
+ * List/filter arbitrary users: allowed if key has service_user_id, or read_all scope, or *.
+ */
+function apiKeyRequireServiceUserOrReadAllScope(?array $key, string $readAllScope, string $message): void {
+    if ($key && apiKeyServiceUserId($key) !== null) {
+        return;
+    }
+    if (!apiKeyHasReadAllScope($key, $readAllScope)) {
+        ApiAuth::fail(403, $message);
+    }
 }
 
 /**

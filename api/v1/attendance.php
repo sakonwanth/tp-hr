@@ -2,8 +2,8 @@
 /**
  * Attendance
  *
- *   GET  /api/v1/attendance?date=YYYY-MM-DD[&user_id=]         scope: attendance.read
- *   GET  /api/v1/attendance?from=&to=[&user_id=]               scope: attendance.read
+ *   GET  /api/v1/attendance?date=YYYY-MM-DD[&user_id=]         scope: attendance.read (+ attendance.read_all if key has no service_user_id)
+ *   GET  /api/v1/attendance?from=&to=[&user_id=]               scope: เช่นเดียวกัน
  *   POST /api/v1/attendance/checkin                            scope: attendance.write
  *        body: { user_id, time?, type?, latitude?, longitude?, location_id?, remarks? }
  *   POST /api/v1/attendance/checkout                           scope: attendance.write
@@ -21,6 +21,11 @@ if ($method === 'GET') {
     $from = $_GET['from'] ?? '';
     $to   = $_GET['to'] ?? '';
     $userId = apiKeyResolveScopedUserId($key, isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0);
+    apiKeyRequireServiceUserOrReadAllScope(
+        $key,
+        'attendance.read_all',
+        'Attendance queries require attendance.read_all (or *) or a service user bound to the API key'
+    );
 
     $sqlDate = "";
     $params = [];

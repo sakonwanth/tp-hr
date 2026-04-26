@@ -2,7 +2,7 @@
 /**
  * Outside attendance requests (check-in/out ที่ขอจากนอกสถานที่)
  *
- *   GET  /api/v1/outside-attendance[?status=&from=&to=&user_id=]  scope: outside.read
+ *   GET  /api/v1/outside-attendance[?status=&from=&to=&user_id=]  scope: outside.read (+ outside.read_all if key has no service_user_id)
  *   POST /api/v1/outside-attendance/{id}/approve                  scope: outside.approve
  *        body: { reviewer_id?, remarks? } — reviewer_id ผูกกับผู้ออก API key เมื่อมี created_by
  *   POST /api/v1/outside-attendance/{id}/reject                   scope: outside.approve
@@ -20,6 +20,11 @@ if ($method === 'GET') {
     $from = $_GET['from'] ?? '';
     $to   = $_GET['to'] ?? '';
     $userId = apiKeyResolveScopedUserId($key, isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0);
+    apiKeyRequireServiceUserOrReadAllScope(
+        $key,
+        'outside.read_all',
+        'Outside-attendance list queries require outside.read_all (or *) or a service user bound to the API key'
+    );
 
     $where = ["u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")"];
     $params = [];

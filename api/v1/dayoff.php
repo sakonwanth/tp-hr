@@ -2,7 +2,7 @@
 /**
  * Day-off requests
  *
- *   GET  /api/v1/dayoff-requests[?status=&from=&to=&user_id=]   scope: dayoff.read
+ *   GET  /api/v1/dayoff-requests[?status=&from=&to=&user_id=]   scope: dayoff.read (+ dayoff.read_all if key has no service_user_id)
  *   POST /api/v1/dayoff-requests                                scope: dayoff.write
  *        body: { user_id, week_start, week_end, original_day_off, requested_day_off, reason }
  *   POST /api/v1/dayoff-requests/{id}/approve                   scope: dayoff.approve
@@ -59,7 +59,7 @@ $body = ApiAuth::input();
 if ($id <= 0) {
     // Create new dayoff request
     ApiAuth::require(['dayoff.write']);
-    $userId = (int)($body['user_id'] ?? 0);
+    $userId = apiKeyResolveScopedUserId(ApiAuth::currentKey(), (int)($body['user_id'] ?? 0));
     $wStart = trim($body['week_start'] ?? '');
     $wEnd   = trim($body['week_end'] ?? '');
     $orig   = (int)($body['original_day_off'] ?? 0);

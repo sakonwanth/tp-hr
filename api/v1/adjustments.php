@@ -2,7 +2,7 @@
 /**
  * Attendance adjustment requests
  *
- *   GET  /api/v1/attendance-adjustments[?status=&from=&to=&user_id=]  scope: adjustments.read
+ *   GET  /api/v1/attendance-adjustments[?status=&from=&to=&user_id=]  scope: adjustments.read (+ adjustments.read_all if key has no service_user_id)
  *   POST /api/v1/attendance-adjustments/{id}/approve                  scope: adjustments.approve
  *        body: { reviewer_id?, remarks? } — reviewer_id ผูกกับผู้ออก API key เมื่อมี created_by
  *        On approve: applies requested times to hr_attendances.
@@ -21,6 +21,11 @@ if ($method === 'GET') {
     $from = $_GET['from'] ?? '';
     $to   = $_GET['to'] ?? '';
     $userId = apiKeyResolveScopedUserId($key, isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0);
+    apiKeyRequireServiceUserOrReadAllScope(
+        $key,
+        'adjustments.read_all',
+        'Attendance-adjustment list queries require adjustments.read_all (or *) or a service user bound to the API key'
+    );
 
     $where = ["u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")"];
     $params = [];

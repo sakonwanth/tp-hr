@@ -2,7 +2,7 @@
 /**
  * Overtime (OT) requests
  *
- *   GET  /api/v1/overtime[?status=&from=&to=&user_id=]   scope: overtime.read
+ *   GET  /api/v1/overtime[?status=&from=&to=&user_id=]   scope: overtime.read (+ overtime.read_all if key has no service_user_id)
  *   POST /api/v1/overtime                                scope: overtime.write
  *        body: { user_id, work_date, planned_start, planned_end, ot_type?, rate_multiplier?, reason? }
  *   POST /api/v1/overtime/{id}/approve                   scope: overtime.approve
@@ -22,6 +22,11 @@ if ($method === 'GET') {
     $from = $_GET['from'] ?? '';
     $to   = $_GET['to'] ?? '';
     $userId = apiKeyResolveScopedUserId($key, isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0);
+    apiKeyRequireServiceUserOrReadAllScope(
+        $key,
+        'overtime.read_all',
+        'Overtime list queries require overtime.read_all (or *) or a service user bound to the API key'
+    );
 
     $where = ["u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")"];
     $params = [];
