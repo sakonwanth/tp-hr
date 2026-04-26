@@ -89,6 +89,22 @@ function uploadFile(array $file, string $destination, ?array $allowedTypes = nul
         $mime = 'image/jpeg';
     }
 
+    if ($mime === 'application/octet-stream' || $mime === '') {
+        $h5 = @file_get_contents($file['tmp_name'], false, null, 0, 5);
+        $h12 = @file_get_contents($file['tmp_name'], false, null, 0, 12);
+        if ($h5 === '%PDF-' && in_array('pdf', $allowedTypes, true)) {
+            $mime = 'application/pdf';
+        } elseif ($h12 !== false && strncmp($h12, "\xFF\xD8\xFF", 3) === 0 && (in_array('jpg', $allowedTypes, true) || in_array('jpeg', $allowedTypes, true))) {
+            $mime = 'image/jpeg';
+        } elseif ($h12 !== false && strlen($h12) >= 8 && strncmp($h12, "\x89PNG\r\n\x1a\n", 8) === 0 && in_array('png', $allowedTypes, true)) {
+            $mime = 'image/png';
+        } elseif ($h12 !== false && strncmp($h12, 'GIF8', 4) === 0 && in_array('gif', $allowedTypes, true)) {
+            $mime = 'image/gif';
+        } elseif ($h12 !== false && strlen($h12) >= 12 && strncmp($h12, 'RIFF', 4) === 0 && substr($h12, 8, 4) === 'WEBP' && in_array('webp', $allowedTypes, true)) {
+            $mime = 'image/webp';
+        }
+    }
+
     $allowedMimeByExt = [
         'pdf'  => ['application/pdf'],
         'jpg'  => ['image/jpeg'],
