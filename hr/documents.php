@@ -222,10 +222,15 @@ include dirname(__DIR__) . '/templates/header.php';
                 <p class="text-white/80 text-sm"><?php echo formatDateThai($req['created_at']); ?></p>
             </div>
 
-            <a href="/certificate_print.php?id=<?php echo $reqId; ?>&preview=1" target="_blank" rel="noopener noreferrer"
-               class="flex min-h-[44px] items-center justify-center rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold transition-colors touch-manipulation">
-                <i class="fas fa-print mr-2"></i>ดู / พิมพ์เอกสาร
-            </a>
+            <?php
+            tpHrCertificatePrintForm(
+                $reqId,
+                'flex w-full',
+                'flex min-h-[44px] w-full items-center justify-center rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold transition-colors touch-manipulation',
+                '<i class="fas fa-print mr-2"></i>ดู / พิมพ์เอกสาร',
+                true
+            );
+            ?>
 
             <?php if ($st === 'PENDING'): ?>
             <div class="grid grid-cols-2 gap-2">
@@ -301,10 +306,18 @@ include dirname(__DIR__) . '/templates/header.php';
                         </span>
                     </td>
                     <td class="px-4 py-3 text-center">
-                        <a href="/certificate_print.php?id=<?php echo $req['id']; ?>&preview=1" target="_blank" rel="noopener noreferrer"
-                           class="px-2 py-1 bg-violet-600 hover:bg-violet-700 text-white text-xs rounded transition-colors mr-1" title="ดู / พิมพ์เอกสาร">
-                            <i class="fas fa-print"></i>
-                        </a>
+                        <?php
+                        tpHrCertificatePrintForm(
+                            (int)$req['id'],
+                            'inline-block mr-1 align-middle',
+                            'px-2 py-1 bg-violet-600 hover:bg-violet-700 text-white text-xs rounded transition-colors',
+                            '<i class="fas fa-print"></i>',
+                            true,
+                            true,
+                            null,
+                            'ดู / พิมพ์เอกสาร'
+                        );
+                        ?>
                         <?php if ($req['status'] === 'PENDING'): ?>
                         <button onclick="updateDocStatus(<?php echo $req['id']; ?>, 'PROCESSING')" 
                                 class="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded transition-colors mr-1" title="เริ่มจัดทำ">

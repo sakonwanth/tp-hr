@@ -360,10 +360,15 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
                     </span>
                     <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                     <?php if (in_array($req['status'], ['PROCESSING','READY','DELIVERED','COMPLETED'], true)): ?>
-                    <a href="/certificate_print.php?id=<?php echo (int)$req['id']; ?>&preview=1" target="_blank" rel="noopener noreferrer"
-                       class="min-h-[44px] inline-flex items-center justify-center px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors text-sm font-medium touch-manipulation w-full sm:w-auto">
-                        <i class="fas fa-print mr-2"></i>ดู / พิมพ์
-                    </a>
+                    <?php
+                    tpHrCertificatePrintForm(
+                        (int)$req['id'],
+                        'inline-flex w-full sm:w-auto min-w-0',
+                        'min-h-[44px] inline-flex items-center justify-center px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors text-sm font-medium touch-manipulation w-full sm:w-auto',
+                        '<i class="fas fa-print mr-2"></i>ดู / พิมพ์',
+                        true
+                    );
+                    ?>
                     <?php endif; ?>
 
                     <?php if (in_array($req['status'], ['COMPLETED', 'READY', 'DELIVERED'], true) && !empty($req['file_path'])): ?>

@@ -674,11 +674,28 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <?php else: /* ================= EDIT MODE ================= */ ?>
+<?php
+$certPreviewReqId = 0;
+if (!empty($editRow['id'])) {
+    $prevCertStmt = $pdo->prepare('SELECT id FROM hr_document_requests WHERE template_id=? ORDER BY id DESC LIMIT 1');
+    $prevCertStmt->execute([(int)$editRow['id']]);
+    $certPreviewReqId = (int)($prevCertStmt->fetchColumn() ?: 0);
+}
+?>
 
 <!-- Back link -->
 <div class="mb-4">
     <a href="document_templates.php" class="text-white/60 hover:text-white text-sm"><i class="fas fa-arrow-left mr-1"></i> กลับไปหน้ารายการ</a>
 </div>
+
+<?php if ($certPreviewReqId > 0): ?>
+<form id="hr_doc_tpl_cert_preview" method="post" action="/certificate_print.php" target="_blank" rel="noopener noreferrer" class="hidden" aria-hidden="true">
+    <?php echo csrfField(); ?>
+    <input type="hidden" name="certificate_print" value="1">
+    <input type="hidden" name="id" value="<?php echo $certPreviewReqId; ?>">
+    <input type="hidden" name="preview" value="1">
+</form>
+<?php endif; ?>
 
 <form method="POST" class="space-y-5">
     <input type="hidden" name="_token" value="<?php echo csrfToken(); ?>">
@@ -916,17 +933,10 @@ include dirname(__DIR__) . '/templates/header.php';
         </div>
         <div class="flex gap-2">
             <a href="document_templates.php" class="px-4 py-2 rounded-lg bg-white/10 text-white/80 hover:bg-white/20 text-sm">ยกเลิก</a>
-            <?php if ($editRow): ?>
-                <?php
-                $prev = $pdo->prepare("SELECT id FROM hr_document_requests WHERE template_id=? ORDER BY id DESC LIMIT 1");
-                $prev->execute([$editRow['id']]);
-                $prevId = (int)($prev->fetchColumn() ?: 0);
-                ?>
-                <?php if ($prevId > 0): ?>
-                <a href="/certificate_print.php?id=<?php echo $prevId; ?>&preview=1" target="_blank" class="px-4 py-2 rounded-lg bg-violet-500/20 hover:bg-violet-500/30 text-violet-200 text-sm">
+            <?php if ($editRow && $certPreviewReqId > 0): ?>
+                <button type="submit" form="hr_doc_tpl_cert_preview" class="px-4 py-2 rounded-lg bg-violet-500/20 hover:bg-violet-500/30 text-violet-200 text-sm">
                     <i class="fas fa-print mr-1"></i> ดูตัวอย่าง
-                </a>
-                <?php endif; ?>
+                </button>
             <?php endif; ?>
             <button type="submit" class="px-6 py-2 rounded-lg bg-violet-500 hover:bg-violet-600 text-white text-sm font-medium">
                 <i class="fas fa-save mr-1"></i> บันทึกทั้งหมด

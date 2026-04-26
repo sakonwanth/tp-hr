@@ -389,6 +389,38 @@ function verifyCsrfToken(?string $token = null): bool {
         && hash_equals($_SESSION['csrf_token'] ?? '', $submittedToken);
 }
 
+/**
+ * POST + CSRF — เปิดหน้าพิมพ์/ดูตัวอย่างหนังสือรับรอง (มักใช้ target=_blank)
+ */
+function tpHrCertificatePrintForm(
+    int $requestId,
+    string $formClass,
+    string $buttonClass,
+    string $innerHtml,
+    bool $newTab,
+    bool $preview = true,
+    ?string $lang = null,
+    ?string $buttonTitle = null
+): void {
+    if ($requestId <= 0) {
+        return;
+    }
+    $target = $newTab ? ' target="_blank" rel="noopener noreferrer"' : '';
+    $titleAttr = ($buttonTitle !== null && $buttonTitle !== '')
+        ? (' title="' . htmlspecialchars($buttonTitle, ENT_QUOTES, 'UTF-8') . '"')
+        : '';
+    echo '<form method="post" action="/certificate_print.php" class="' . htmlspecialchars($formClass, ENT_QUOTES, 'UTF-8') . '"' . $target . '>';
+    echo csrfField();
+    echo '<input type="hidden" name="certificate_print" value="1">';
+    echo '<input type="hidden" name="id" value="' . $requestId . '">';
+    echo '<input type="hidden" name="preview" value="' . ($preview ? '1' : '0') . '">';
+    if ($lang !== null && $lang !== '') {
+        echo '<input type="hidden" name="lang" value="' . htmlspecialchars(strtoupper($lang), ENT_QUOTES, 'UTF-8') . '">';
+    }
+    echo '<button type="submit" class="' . htmlspecialchars($buttonClass, ENT_QUOTES, 'UTF-8') . '"' . $titleAttr . '>' . $innerHtml . '</button>';
+    echo '</form>';
+}
+
 // --- Role helpers ---
 
 function hasRole(string|array $roles): bool {

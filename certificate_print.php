@@ -7,7 +7,8 @@
  *   - HR: print any request
  *   - Owner: own request only when status in PROCESSING / READY / DELIVERED
  *
- * Params: ?id= required, ?lang=TH|EN|BOTH optional, ?preview=1 to skip auto-print
+ * Params (POST + CSRF): id required, lang=TH|EN|BOTH optional, preview=1|0
+ * GET ?id= is blocked — use buttons on certificate / HR documents pages.
  */
 
 require_once __DIR__ . '/bootstrap.php';
@@ -15,9 +16,34 @@ Auth::requireLogin();
 $user = Auth::user();
 $pdo = Database::getInstance()->getConnection();
 
-$reqId   = (int)($_GET['id'] ?? 0);
-$langOv  = strtoupper($_GET['lang'] ?? '');
-$preview = !empty($_GET['preview']);
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && (int)($_GET['id'] ?? 0) > 0) {
+    flash('error', 'การพิมพ์หรือดูตัวอย่างเอกสาร กรุณาใช้ปุ่มบนหน้าระบบ');
+    if (hr_can_access_hr_dashboard()) {
+        redirect('/hr/documents.php', 302);
+    }
+    redirect('/certificate.php', 302);
+}
+
+$reqId   = 0;
+$langOv  = '';
+$preview = true;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['certificate_print'] ?? '') === '1') {
+    if (!verifyCsrfToken($_POST['_token'] ?? null)) {
+        http_response_code(403);
+        exit('โทเค็นความปลอดภัยไม่ถูกต้อง');
+    }
+    $reqId = (int)($_POST['id'] ?? 0);
+    $pv = (string)($_POST['preview'] ?? '1');
+    $preview = ($pv === '1');
+    $langOv = strtoupper((string)($_POST['lang'] ?? ''));
+} elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    http_response_code(400);
+    exit('ไม่พบคำขอเอกสาร');
+} else {
+    http_response_code(405);
+    exit('Method Not Allowed');
+}
 
 if (!$reqId) { http_response_code(400); exit('ไม่พบคำขอเอกสาร'); }
 
@@ -43,9 +69,9 @@ if (!$req) { http_response_code(404); exit('ไม่พบคำขอเอก
 
 // Authorization
 $isOwner = ((int)$req['user_id'] === (int)$user['id']);
-$isHR    = isHR();
-if (!$isHR && !$isOwner) { http_response_code(403); exit('ไม่มีสิทธิ์เข้าถึงเอกสารนี้'); }
-if ($isOwner && !$isHR && !in_array($req['status'], ['PROCESSING','READY','DELIVERED'], true)) {
+$isHrDash = hr_can_access_hr_dashboard();
+if (!$isHrDash && !$isOwner) { http_response_code(403); exit('ไม่มีสิทธิ์เข้าถึงเอกสารนี้'); }
+if ($isOwner && !$isHrDash && !in_array($req['status'], ['PROCESSING','READY','DELIVERED','COMPLETED'], true)) {
     http_response_code(403);
     exit('เอกสารยังไม่พร้อมดาวน์โหลด (สถานะ: ' . htmlspecialchars($req['status']) . ')');
 }
