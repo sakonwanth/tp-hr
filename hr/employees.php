@@ -75,22 +75,14 @@ $page = max(1, (int)($_GET['page'] ?? 1));
 $limit = DEFAULT_PER_PAGE;
 $offset = ($page - 1) * $limit;
 
-// Get departments
-$stmtDepts = $pdo->query("SELECT DISTINCT department FROM users WHERE department IS NOT NULL AND department != '' ORDER BY department");
-$departments = $stmtDepts->fetchAll(PDO::FETCH_COLUMN);
+$exportQuery = array_merge($_GET, ['action' => 'export']);
+unset($exportQuery['page']);
 
-// Build query
-$sql = "
-    SELECT u.*, 
-           (SELECT COUNT(*) FROM hr_attendances a WHERE a.user_id = u.id AND a.attendance_date = CURDATE() AND a.check_in_time IS NOT NULL) as checked_in_today,
-           (SELECT SUM(total_days) FROM hr_leave_requests lr WHERE lr.user_id = u.id AND lr.status = 'APPROVED' AND YEAR(lr.start_date) = YEAR(CURDATE())) as total_leave_days
-    FROM users u
-    WHERE u.id > 0 AND u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")
-";
+$employeeWhere = "u.id > 0 AND u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")";
 $params = [];
 
 if ($search) {
-    $sql .= " AND (u.first_name_th LIKE ? OR u.last_name_th LIKE ? OR u.employee_code LIKE ? OR u.email LIKE ?)";
+    $employeeWhere .= " AND (u.first_name_th LIKE ? OR u.last_name_th LIKE ? OR u.employee_code LIKE ? OR u.email LIKE ?)";
     $searchParam = "%{$search}%";
     $params[] = $searchParam;
     $params[] = $searchParam;
@@ -99,18 +91,65 @@ if ($search) {
 }
 
 if ($department) {
-    $sql .= " AND u.department = ?";
+    $employeeWhere .= " AND u.department = ?";
     $params[] = $department;
 }
 
 if ($status === 'ACTIVE') {
-    $sql .= " AND u.is_active = 1";
+    $employeeWhere .= " AND u.is_active = 1";
 } elseif ($status === 'INACTIVE') {
-    $sql .= " AND u.is_active = 0";
+    $employeeWhere .= " AND u.is_active = 0";
 }
 
-// Count
-$countSql = "SELECT COUNT(*) FROM (" . str_replace("u.*, \n           (SELECT COUNT(*) FROM hr_attendances a WHERE a.user_id = u.id AND a.attendance_date = CURDATE() AND a.check_in_time IS NOT NULL) as checked_in_today,\n           (SELECT SUM(total_days) FROM hr_leave_requests lr WHERE lr.user_id = u.id AND lr.status = 'APPROVED' AND YEAR(lr.start_date) = YEAR(CURDATE())) as total_leave_days", "1", $sql) . ") t";
+if ($action === 'export') {
+    $exportCols = canManageUsers()
+        ? "u.id, u.employee_code, u.title, u.first_name_th, u.last_name_th, u.department, u.position, u.email, u.phone, u.hire_date, u.is_active, u.work_mode, u.salary, u.probation_salary"
+        : "u.id, u.employee_code, u.title, u.first_name_th, u.last_name_th, u.department, u.position, u.email, u.phone, u.hire_date, u.is_active, u.work_mode";
+    $exportSql = "SELECT {$exportCols} FROM users u WHERE {$employeeWhere} ORDER BY u.is_active DESC, u.employee_code ASC LIMIT 10000";
+    $stmt = $pdo->prepare($exportSql);
+    $stmt->execute($params);
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $filename = 'employees_export_' . date('Y-m-d_His') . '.csv';
+    header('Content-Type: text/csv; charset=UTF-8');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('X-Content-Type-Options: nosniff');
+    echo "\xEF\xBB\xBF";
+
+    $out = fopen('php://output', 'w');
+    if ($out !== false) {
+        if (!empty($rows)) {
+            fputcsv($out, array_keys($rows[0]));
+            foreach ($rows as $r) {
+                fputcsv($out, $r);
+            }
+        } else {
+            $hdr = canManageUsers()
+                ? ['id', 'employee_code', 'title', 'first_name_th', 'last_name_th', 'department', 'position', 'email', 'phone', 'hire_date', 'is_active', 'work_mode', 'salary', 'probation_salary']
+                : ['id', 'employee_code', 'title', 'first_name_th', 'last_name_th', 'department', 'position', 'email', 'phone', 'hire_date', 'is_active', 'work_mode'];
+            fputcsv($out, $hdr);
+        }
+        fclose($out);
+    }
+    Auth::log('employees_export_csv', 'users', null, null, [
+        'filters' => ['search' => $search, 'department' => $department, 'status' => $status],
+        'row_count' => count($rows),
+    ]);
+    exit;
+}
+
+// Get departments
+$stmtDepts = $pdo->query("SELECT DISTINCT department FROM users WHERE department IS NOT NULL AND department != '' ORDER BY department");
+$departments = $stmtDepts->fetchAll(PDO::FETCH_COLUMN);
+
+$sql = "
+    SELECT u.*, 
+           (SELECT COUNT(*) FROM hr_attendances a WHERE a.user_id = u.id AND a.attendance_date = CURDATE() AND a.check_in_time IS NOT NULL) as checked_in_today,
+           (SELECT SUM(total_days) FROM hr_leave_requests lr WHERE lr.user_id = u.id AND lr.status = 'APPROVED' AND YEAR(lr.start_date) = YEAR(CURDATE())) as total_leave_days
+    FROM users u
+    WHERE " . $employeeWhere;
+
+$countSql = "SELECT COUNT(*) FROM users u WHERE " . $employeeWhere;
 $stmtCount = $pdo->prepare($countSql);
 $stmtCount->execute($params);
 $totalRecords = $stmtCount->fetchColumn();
@@ -218,7 +257,7 @@ $flashError = flash('error');
             <a href="employees.php" class="flex-1 min-h-[44px] py-2.5 bg-white/10 hover:bg-white/20 text-white text-center rounded-xl transition-colors touch-manipulation inline-flex items-center justify-center font-medium">
                 <i class="fas fa-redo mr-2"></i>รีเซ็ต
             </a>
-            <a href="employees.php?action=export" class="flex-1 min-h-[44px] py-2.5 bg-green-600 hover:bg-green-700 text-white text-center rounded-xl transition-colors touch-manipulation inline-flex items-center justify-center font-medium">
+            <a href="?<?php echo http_build_query($exportQuery); ?>" class="flex-1 min-h-[44px] py-2.5 bg-green-600 hover:bg-green-700 text-white text-center rounded-xl transition-colors touch-manipulation inline-flex items-center justify-center font-medium">
                 <i class="fas fa-file-excel mr-2"></i>Export
             </a>
         </div>
