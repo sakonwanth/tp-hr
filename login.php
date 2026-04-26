@@ -8,7 +8,7 @@ require_once __DIR__ . '/bootstrap.php';
 
 // If already logged in, redirect
 if (Auth::check()) {
-    $redirect = safeRedirectTarget($_GET['redirect'] ?? null, '/');
+    $redirect = safeRedirectTarget(loginReturnQueryValue(), '/');
     redirect($redirect);
 }
 
@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = Auth::login($username, $password);
         
         if ($result['success']) {
-            $redirect = safeRedirectTarget($_GET['redirect'] ?? null, '/');
+            $redirect = safeRedirectTarget(loginReturnQueryValue(), '/');
             redirect($redirect);
         } else {
             $error = $result['message'];

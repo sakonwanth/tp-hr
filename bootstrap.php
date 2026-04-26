@@ -440,6 +440,19 @@ function safeRedirectTarget(?string $url, string $default = '/'): string {
     return $url;
 }
 
+/**
+ * ค่า redirect จาก query หลังล็อกอิน: redirect, return หรือ sso_return (อ่านตามลำดับ)
+ */
+function loginReturnQueryValue(): ?string {
+    foreach (['redirect', 'return', 'sso_return'] as $key) {
+        $v = $_GET[$key] ?? null;
+        if (is_string($v) && trim($v) !== '') {
+            return trim($v);
+        }
+    }
+    return null;
+}
+
 // --- CSRF ---
 
 function csrfToken(): string {
