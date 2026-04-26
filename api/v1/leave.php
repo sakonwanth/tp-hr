@@ -144,33 +144,10 @@ if ($action === 'cancel') {
 }
 
 ApiAuth::require(['leave.approve']);
-$key = ApiAuth::currentKey();
-if (!$key) {
-    ApiAuth::fail(500, 'Internal error');
-}
+$approverId = apiKeyResolveActorForApi($pdo, ApiAuth::currentKey(), $body, 'approver_id', MANAGER_ROLES);
 
 $level = (int)($body['approver_level'] ?? 1);
-$bodyApproverId = (int)($body['approver_id'] ?? 0);
 $remarks = trim($body['remarks'] ?? '');
-
-$keyOwner = isset($key['created_by']) ? (int) $key['created_by'] : 0;
-if ($keyOwner > 0) {
-    if (!userMayApproveLeaveByRole($pdo, $keyOwner)) {
-        ApiAuth::fail(403, 'API key issuer is not an active eligible approver; re-issue the key from HR/CEO');
-    }
-    $approverId = $keyOwner;
-    if ($bodyApproverId > 0 && $bodyApproverId !== $approverId) {
-        ApiAuth::fail(400, 'approver_id must match the user who issued this API key');
-    }
-} else {
-    if ($bodyApproverId <= 0) {
-        ApiAuth::fail(400, 'approver_id required (legacy key without creator — set approver to an active manager/HR user)');
-    }
-    if (!userMayApproveLeaveByRole($pdo, $bodyApproverId)) {
-        ApiAuth::fail(403, 'approver_id is not an eligible approver');
-    }
-    $approverId = $bodyApproverId;
-}
 
 if (!in_array($level, [1, 2, 3], true)) ApiAuth::fail(400, 'approver_level must be 1/2/3');
 if ($cur['status'] !== 'PENDING') ApiAuth::fail(409, 'Not in PENDING status');

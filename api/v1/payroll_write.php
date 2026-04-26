@@ -3,9 +3,10 @@
  * Payroll write endpoints (Phase 6.1.2)
  *
  *   POST /api/v1/payroll-runs                scope: payroll.write
- *        body: { "month": "YYYY-MM" }        → create/recalculate run
+ *        body: { "month": "YYYY-MM", "created_by"? } — actor = ผู้ออกคีย์ (CEO+) หรือส่ง created_by (คีย์เก่า)
  *
  *   POST /api/v1/payroll-runs/{id}/approve   scope: payroll.approve
+ *        body: { "approved_by"? } — ผูกกับผู้ออก API key (CEO+)
  *
  *   POST /api/v1/payroll-runs/{id}/paid      scope: payroll.approve
  *
@@ -44,7 +45,8 @@ if ($resource === 'payroll-runs') {
             ApiAuth::fail(400, 'Invalid month format (YYYY-MM)');
         }
         try {
-            $result = $service->createRun($month, (int)($input['created_by'] ?? 0));
+            $createdBy = apiKeyResolveActorForApi($pdo, ApiAuth::currentKey(), $input, 'created_by', CEO_ROLES);
+            $result = $service->createRun($month, $createdBy);
             ApiAuth::success(['data' => $result]);
         } catch (\RuntimeException $e) {
             ApiAuth::fail(409, $e->getMessage());
@@ -55,7 +57,8 @@ if ($resource === 'payroll-runs') {
     if ($method === 'POST' && $id > 0 && $sub === 'approve') {
         ApiAuth::require(['payroll.approve']);
         $input = ApiAuth::input();
-        $service->approveRun($id, (int)($input['approved_by'] ?? 0));
+        $approvedBy = apiKeyResolveActorForApi($pdo, ApiAuth::currentKey(), $input, 'approved_by', CEO_ROLES);
+        $service->approveRun($id, $approvedBy);
         ApiAuth::success(['message' => 'อนุมัติรอบเงินเดือนแล้ว']);
     }
 

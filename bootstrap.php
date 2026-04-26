@@ -188,10 +188,10 @@ function canViewSensitiveData(): bool {
 }
 
 /**
- * For external API: user id must be active and in MANAGER_ROLES (same family as session hasRole / leave approve).
+ * Active user whose role name is in the allow-list (for API actor checks).
  */
-function userMayApproveLeaveByRole(PDO $pdo, int $userId): bool {
-    if ($userId <= 0) {
+function userHasOneOfRoles(PDO $pdo, int $userId, array $allowedRoleNames): bool {
+    if ($userId <= 0 || $allowedRoleNames === []) {
         return false;
     }
     $stmt = $pdo->prepare('SELECT r.name FROM users u LEFT JOIN roles r ON r.id = u.role_id WHERE u.id = ? AND u.is_active = 1 LIMIT 1');
@@ -200,7 +200,41 @@ function userMayApproveLeaveByRole(PDO $pdo, int $userId): bool {
     if ($name === false || $name === null || $name === '') {
         return false;
     }
-    return in_array((string) $name, MANAGER_ROLES, true);
+    return in_array((string) $name, $allowedRoleNames, true);
+}
+
+/**
+ * For external API: user id must be active and in MANAGER_ROLES (same family as session hasRole / leave approve).
+ */
+function userMayApproveLeaveByRole(PDO $pdo, int $userId): bool {
+    return userHasOneOfRoles($pdo, $userId, MANAGER_ROLES);
+}
+
+/**
+ * Resolve actor user id for API approve/reject (and similar): bind to API key creator when set, else legacy body field.
+ */
+function apiKeyResolveActorForApi(PDO $pdo, ?array $key, array $body, string $bodyField, array $allowedRoleNames): int {
+    if (!$key) {
+        ApiAuth::fail(500, 'Internal error');
+    }
+    $bodyVal = (int) ($body[$bodyField] ?? 0);
+    $keyOwner = isset($key['created_by']) ? (int) $key['created_by'] : 0;
+    if ($keyOwner > 0) {
+        if (!userHasOneOfRoles($pdo, $keyOwner, $allowedRoleNames)) {
+            ApiAuth::fail(403, 'API key issuer is not eligible for this action; re-issue the key');
+        }
+        if ($bodyVal > 0 && $bodyVal !== $keyOwner) {
+            ApiAuth::fail(400, $bodyField . ' must match the user who issued this API key');
+        }
+        return $keyOwner;
+    }
+    if ($bodyVal <= 0) {
+        ApiAuth::fail(400, $bodyField . ' required (legacy key without creator)');
+    }
+    if (!userHasOneOfRoles($pdo, $bodyVal, $allowedRoleNames)) {
+        ApiAuth::fail(403, $bodyField . ' is not eligible for this action');
+    }
+    return $bodyVal;
 }
 
 function getEffectiveSalary(array $user): float {

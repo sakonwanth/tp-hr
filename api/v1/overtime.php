@@ -6,9 +6,9 @@
  *   POST /api/v1/overtime                                scope: overtime.write
  *        body: { user_id, work_date, planned_start, planned_end, ot_type?, rate_multiplier?, reason? }
  *   POST /api/v1/overtime/{id}/approve                   scope: overtime.approve
- *        body: { approver_id, actual_hours? }
+ *        body: { approver_id?, actual_hours? } — approver_id ผูกกับผู้ออก API key เมื่อมี created_by
  *   POST /api/v1/overtime/{id}/reject                    scope: overtime.approve
- *        body: { approver_id, reason }
+ *        body: { approver_id?, reason }
  */
 $method = ApiAuth::requireMethod(['GET', 'POST']);
 $pdo = getDB();
@@ -83,8 +83,7 @@ if ($id <= 0) {
 ApiAuth::require(['overtime.approve']);
 if (!in_array($action, ['approve', 'reject'], true)) ApiAuth::fail(404, 'Unknown action');
 
-$approverId = (int)($body['approver_id'] ?? 0);
-if ($approverId <= 0) ApiAuth::fail(400, 'approver_id required');
+$approverId = apiKeyResolveActorForApi($pdo, ApiAuth::currentKey(), $body, 'approver_id', MANAGER_ROLES);
 
 $stmt = $pdo->prepare("SELECT id, status FROM ot_requests WHERE id = ? LIMIT 1");
 $stmt->execute([$id]);

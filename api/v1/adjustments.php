@@ -4,10 +4,10 @@
  *
  *   GET  /api/v1/attendance-adjustments[?status=&from=&to=&user_id=]  scope: adjustments.read
  *   POST /api/v1/attendance-adjustments/{id}/approve                  scope: adjustments.approve
- *        body: { reviewer_id, remarks? }
+ *        body: { reviewer_id?, remarks? } — reviewer_id ผูกกับผู้ออก API key เมื่อมี created_by
  *        On approve: applies requested times to hr_attendances.
  *   POST /api/v1/attendance-adjustments/{id}/reject                   scope: adjustments.approve
- *        body: { reviewer_id, remarks }
+ *        body: { reviewer_id?, remarks }
  */
 $method = ApiAuth::requireMethod(['GET', 'POST']);
 $pdo = getDB();
@@ -59,9 +59,8 @@ if ($method === 'GET') {
 ApiAuth::require(['adjustments.approve']);
 if (!in_array($action, ['approve', 'reject'], true)) ApiAuth::fail(404, 'Unknown action');
 $body = ApiAuth::input();
-$reviewerId = (int)($body['reviewer_id'] ?? 0);
+$reviewerId = apiKeyResolveActorForApi($pdo, ApiAuth::currentKey(), $body, 'reviewer_id', MANAGER_ROLES);
 $remarks = trim($body['remarks'] ?? '');
-if ($reviewerId <= 0) ApiAuth::fail(400, 'reviewer_id required');
 
 $stmt = $pdo->prepare("SELECT * FROM hr_attendance_adjustments WHERE id = ? LIMIT 1");
 $stmt->execute([$id]);

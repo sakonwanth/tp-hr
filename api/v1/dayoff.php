@@ -6,9 +6,9 @@
  *   POST /api/v1/dayoff-requests                                scope: dayoff.write
  *        body: { user_id, week_start, week_end, original_day_off, requested_day_off, reason }
  *   POST /api/v1/dayoff-requests/{id}/approve                   scope: dayoff.approve
- *        body: { reviewer_id, note? }
+ *        body: { reviewer_id?, note? } — reviewer_id ผูกกับผู้ออก API key เมื่อมี created_by
  *   POST /api/v1/dayoff-requests/{id}/reject                    scope: dayoff.approve
- *        body: { reviewer_id, note }
+ *        body: { reviewer_id?, note }
  */
 $method = ApiAuth::requireMethod(['GET', 'POST']);
 $pdo = getDB();
@@ -85,9 +85,8 @@ if ($id <= 0) {
 ApiAuth::require(['dayoff.approve']);
 if (!in_array($action, ['approve', 'reject'], true)) ApiAuth::fail(404, 'Unknown action');
 
-$reviewerId = (int)($body['reviewer_id'] ?? 0);
+$reviewerId = apiKeyResolveActorForApi($pdo, ApiAuth::currentKey(), $body, 'reviewer_id', MANAGER_ROLES);
 $note = trim($body['note'] ?? '');
-if ($reviewerId <= 0) ApiAuth::fail(400, 'reviewer_id required');
 
 $row = $pdo->prepare("SELECT id, status FROM hr_dayoff_requests WHERE id = ? LIMIT 1");
 $row->execute([$id]);

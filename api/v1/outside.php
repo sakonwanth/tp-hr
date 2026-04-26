@@ -4,9 +4,9 @@
  *
  *   GET  /api/v1/outside-attendance[?status=&from=&to=&user_id=]  scope: outside.read
  *   POST /api/v1/outside-attendance/{id}/approve                  scope: outside.approve
- *        body: { reviewer_id, remarks? }
+ *        body: { reviewer_id?, remarks? } — reviewer_id ผูกกับผู้ออก API key เมื่อมี created_by
  *   POST /api/v1/outside-attendance/{id}/reject                   scope: outside.approve
- *        body: { reviewer_id, remarks }
+ *        body: { reviewer_id?, remarks }
  */
 $method = ApiAuth::requireMethod(['GET', 'POST']);
 $pdo = getDB();
@@ -54,9 +54,8 @@ if ($method === 'GET') {
 ApiAuth::require(['outside.approve']);
 if (!in_array($action, ['approve', 'reject'], true)) ApiAuth::fail(404, 'Unknown action');
 $body = ApiAuth::input();
-$reviewerId = (int)($body['reviewer_id'] ?? 0);
+$reviewerId = apiKeyResolveActorForApi($pdo, ApiAuth::currentKey(), $body, 'reviewer_id', MANAGER_ROLES);
 $remarks = trim($body['remarks'] ?? '');
-if ($reviewerId <= 0) ApiAuth::fail(400, 'reviewer_id required');
 
 $stmt = $pdo->prepare("SELECT id, status FROM hr_attendance_outside_requests WHERE id = ? LIMIT 1");
 $stmt->execute([$id]);
