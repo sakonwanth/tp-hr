@@ -213,6 +213,33 @@ function redirect(string $url, int $status = 302): void {
     exit;
 }
 
+/**
+ * Post-login redirect target: same-site path only (mitigate open redirect).
+ * Allows paths like /leave.php or /hr/ — rejects //evil.com, https://..., javascript:, etc.
+ */
+function safeRedirectTarget(?string $url, string $default = '/'): string {
+    $url = trim((string) $url);
+    if ($url === '') {
+        return $default;
+    }
+    if (preg_match('/[\x00-\x1F\x7F]/', $url)) {
+        return $default;
+    }
+    if (preg_match('#^(javascript:|data:|vbscript:)#i', $url)) {
+        return $default;
+    }
+    if (preg_match('#^https?://#i', $url)) {
+        return $default;
+    }
+    if (strlen($url) >= 2 && $url[0] === '/' && $url[1] === '/') {
+        return $default;
+    }
+    if ($url[0] !== '/') {
+        return $default;
+    }
+    return $url;
+}
+
 // --- CSRF ---
 
 function csrfToken(): string {

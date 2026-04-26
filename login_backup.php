@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = Auth::login($username, $password);
         
         if ($result['success']) {
-            $redirect = $_GET['redirect'] ?? '/';
+            $redirect = safeRedirectTarget($_GET['redirect'] ?? null, '/');
             redirect($redirect);
         } else {
             $error = $result['message'];

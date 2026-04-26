@@ -67,7 +67,7 @@ if ($month) {
 }
 
 // Count total
-$countSql = "SELECT COUNT(*) FROM (" . str_replace("lr.*, lt.name as leave_type_name, lt.color_code,\n           u.first_name_th, u.last_name_th, u.employee_code, u.department,\n           approver.first_name_th as approver_first, approver.last_name_th as approver_last", "1", $sql) . ") t";
+$countSql = "SELECT COUNT(*) FROM (" . str_replace("lr.*, lt.name as leave_type_name, lt.color as color_code,\n           u.first_name_th, u.last_name_th, u.employee_code, u.department,\n           approver.first_name_th as approver_first, approver.last_name_th as approver_last", "1", $sql) . ") t";
 $stmtCount = $pdo->prepare($countSql);
 $stmtCount->execute($params);
 $totalRecords = $stmtCount->fetchColumn();
