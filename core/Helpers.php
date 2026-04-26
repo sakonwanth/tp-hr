@@ -222,6 +222,50 @@ function fileUrl(string $path): string {
 }
 
 /**
+ * Allowed relative paths under TP-Checkin storage (anti path-traversal).
+ */
+function checkinStorageRelativePathIsAllowed(string $path): bool {
+    $path = ltrim($path, '/');
+    if (preg_match('#^photos/[a-z0-9_]+/\d{4}/\d{2}/[A-Za-z0-9._-]+$#', $path)) {
+        return true;
+    }
+    if (preg_match('#^storage/adjustments/\d{4}/\d{2}/[A-Za-z0-9._-]+$#', $path)) {
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Resolve a TP-Checkin storage-relative path to an absolute file, or null if not allowed / missing.
+ */
+function checkinStorageResolveDiskPath(string $relativePath): ?string {
+    if (CHECKIN_STORAGE_PATH === '') {
+        return null;
+    }
+    $relativePath = ltrim($relativePath, '/');
+    if (!checkinStorageRelativePathIsAllowed($relativePath)) {
+        return null;
+    }
+    $base = realpath(CHECKIN_STORAGE_PATH);
+    if ($base === false || !is_dir($base)) {
+        return null;
+    }
+    if (strpos($relativePath, 'photos/') === 0) {
+        $candidate = $base . '/' . $relativePath;
+    } else {
+        $candidate = $base . '/' . substr($relativePath, strlen('storage/'));
+    }
+    $resolved = realpath($candidate);
+    if ($resolved === false || !is_file($resolved)) {
+        return null;
+    }
+    if (strpos($resolved, $base) !== 0) {
+        return null;
+    }
+    return $resolved;
+}
+
+/**
  * Public URL for attendance check-in/out photos (DB may store tp-checkin paths or tp-hr uploads).
  */
 function attendancePhotoPublicUrl(?string $path): string {
@@ -233,11 +277,18 @@ function attendancePhotoPublicUrl(?string $path): string {
         return $path;
     }
     $path = ltrim($path, '/');
-    $checkinBase = CHECKIN_APP_URL !== '' ? rtrim(CHECKIN_APP_URL, '/') : rtrim(APP_URL, '/');
     if (strpos($path, 'photos/') === 0) {
+        if (CHECKIN_STORAGE_PATH !== '') {
+            return rtrim(APP_URL, '/') . '/api/checkin_storage_image.php?' . http_build_query(['path' => $path], '', '&', PHP_QUERY_RFC3986);
+        }
+        $checkinBase = CHECKIN_APP_URL !== '' ? rtrim(CHECKIN_APP_URL, '/') : rtrim(APP_URL, '/');
         return $checkinBase . '/storage/' . $path;
     }
     if (strpos($path, 'storage/') === 0) {
+        if (CHECKIN_STORAGE_PATH !== '' && strpos($path, 'storage/adjustments/') === 0) {
+            return rtrim(APP_URL, '/') . '/api/checkin_storage_image.php?' . http_build_query(['path' => $path], '', '&', PHP_QUERY_RFC3986);
+        }
+        $checkinBase = CHECKIN_APP_URL !== '' ? rtrim(CHECKIN_APP_URL, '/') : rtrim(APP_URL, '/');
         return $checkinBase . '/' . $path;
     }
     return fileUrl($path);
