@@ -130,6 +130,28 @@ include 'templates/header.php';
 ?>
 
 <?php if ($slip): ?>
+<?php
+// ชื่อบริษัท — ดึงจาก system_settings (เดียวกับ print_template / CRM)
+$payslipCompanyName = 'บริษัท ทีพี-แอสเสท ดีเวลลอปเม้นท์ จำกัด';
+$payslipCompanyNameEn = 'TP-ASSET DEVELOPMENT CO., LTD.';
+try {
+    $stCo = $pdo->prepare("SELECT setting_key, setting_value FROM system_settings WHERE setting_key IN ('company_name','company_name_en')");
+    $stCo->execute();
+    while ($rowCo = $stCo->fetch(PDO::FETCH_ASSOC)) {
+        $v = trim((string)($rowCo['setting_value'] ?? ''));
+        if ($v === '') {
+            continue;
+        }
+        if ($rowCo['setting_key'] === 'company_name') {
+            $payslipCompanyName = $v;
+        } elseif ($rowCo['setting_key'] === 'company_name_en') {
+            $payslipCompanyNameEn = $v;
+        }
+    }
+} catch (Throwable $e) {
+    /* ใช้ค่าเริ่มต้นด้านบน */
+}
+?>
 <!-- Slip Detail View -->
 <?php $slipYear = (int)date('Y', strtotime($slip['payroll_month'])); ?>
 <div class="mb-6 min-w-0">
@@ -162,9 +184,11 @@ include 'templates/header.php';
 <div class="glass-card rounded-xl p-4 sm:p-6 print:bg-white print:text-black min-w-0 overflow-x-auto" id="payslip-content">
     <!-- Header -->
     <div class="flex items-start justify-between mb-6 pb-6 border-b border-white/10 print:border-gray-200">
-        <div>
-            <h2 class="text-xl font-bold text-white print:text-black">บริษัท ทีพี โฮม จำกัด</h2>
-            <p class="text-white/60 print:text-gray-600 text-sm">TP Home Company Limited</p>
+        <div class="min-w-0 pr-2">
+            <h2 class="text-xl font-bold text-white print:text-black leading-snug"><?php echo htmlspecialchars($payslipCompanyName); ?></h2>
+            <?php if ($payslipCompanyNameEn !== ''): ?>
+            <p class="text-white/60 print:text-gray-600 text-sm mt-0.5"><?php echo htmlspecialchars($payslipCompanyNameEn); ?></p>
+            <?php endif; ?>
         </div>
         <div class="text-right">
             <p class="text-white/60 print:text-gray-600 text-sm">ใบแสดงรายได้</p>

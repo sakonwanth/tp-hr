@@ -87,27 +87,27 @@ endif; ?>
     <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">ดูและแก้ไขข้อมูลส่วนตัว ผู้ติดต่อฉุกเฉิน ครอบครัว การศึกษา และประวัติการทำงาน</p>
 </div>
 
-<!-- Profile Tabs — กริด 3 คอลัมน์ ไอคอนบนข้อความล่าง ตัวอักษรเล็กลง -->
-<nav class="grid grid-cols-3 gap-2 mb-6 min-w-0" aria-label="ส่วนข้อมูลโปรไฟล์">
-    <a href="profile.php" class="profile-tab-tile rounded-xl min-h-[4.25rem] px-1.5 py-2 flex flex-col items-center justify-center gap-1 text-center touch-manipulation leading-tight <?php echo !$action ? 'bg-violet-600 text-white shadow-lg shadow-violet-900/30' : 'bg-white/10 text-white/80 hover:text-white hover:bg-white/15'; ?> transition-colors">
-        <i class="fas fa-user text-sm opacity-90" aria-hidden="true"></i>
-        <span class="text-[0.6875rem] font-semibold">ข้อมูลทั่วไป</span>
+<!-- Profile Tabs — แถวละ 2 ปุ่ม ไอคอนบน ข้อความล่าง (กว้างพอไม่ตกบรรทัด) -->
+<nav class="grid grid-cols-2 gap-2 sm:gap-3 mb-6 min-w-0" aria-label="ส่วนข้อมูลโปรไฟล์">
+    <a href="profile.php" class="profile-tab-tile rounded-xl min-h-[4.5rem] px-2 py-2.5 flex flex-col items-center justify-center gap-1.5 text-center touch-manipulation <?php echo !$action ? 'bg-violet-600 text-white shadow-lg shadow-violet-900/30' : 'bg-white/10 text-white/80 hover:text-white hover:bg-white/15'; ?> transition-colors">
+        <i class="fas fa-user text-base opacity-90" aria-hidden="true"></i>
+        <span class="text-xs font-semibold leading-tight whitespace-nowrap">ข้อมูลทั่วไป</span>
     </a>
-    <a href="profile.php?action=contact" class="profile-tab-tile rounded-xl min-h-[4.25rem] px-1.5 py-2 flex flex-col items-center justify-center gap-1 text-center touch-manipulation leading-tight <?php echo $action === 'contact' ? 'bg-violet-600 text-white shadow-lg shadow-violet-900/30' : 'bg-white/10 text-white/80 hover:text-white hover:bg-white/15'; ?> transition-colors">
-        <i class="fas fa-phone text-sm opacity-90" aria-hidden="true"></i>
-        <span class="text-[0.6875rem] font-semibold">ผู้ติดต่อฉุกเฉิน</span>
+    <a href="profile.php?action=contact" class="profile-tab-tile rounded-xl min-h-[4.5rem] px-2 py-2.5 flex flex-col items-center justify-center gap-1.5 text-center touch-manipulation <?php echo $action === 'contact' ? 'bg-violet-600 text-white shadow-lg shadow-violet-900/30' : 'bg-white/10 text-white/80 hover:text-white hover:bg-white/15'; ?> transition-colors">
+        <i class="fas fa-phone text-base opacity-90" aria-hidden="true"></i>
+        <span class="text-xs font-semibold leading-tight whitespace-nowrap">ผู้ติดต่อฉุกเฉิน</span>
     </a>
-    <a href="profile.php?action=family" class="profile-tab-tile rounded-xl min-h-[4.25rem] px-1.5 py-2 flex flex-col items-center justify-center gap-1 text-center touch-manipulation leading-tight <?php echo $action === 'family' ? 'bg-violet-600 text-white shadow-lg shadow-violet-900/30' : 'bg-white/10 text-white/80 hover:text-white hover:bg-white/15'; ?> transition-colors">
-        <i class="fas fa-users text-sm opacity-90" aria-hidden="true"></i>
-        <span class="text-[0.6875rem] font-semibold">ครอบครัว</span>
+    <a href="profile.php?action=family" class="profile-tab-tile rounded-xl min-h-[4.5rem] px-2 py-2.5 flex flex-col items-center justify-center gap-1.5 text-center touch-manipulation <?php echo $action === 'family' ? 'bg-violet-600 text-white shadow-lg shadow-violet-900/30' : 'bg-white/10 text-white/80 hover:text-white hover:bg-white/15'; ?> transition-colors">
+        <i class="fas fa-users text-base opacity-90" aria-hidden="true"></i>
+        <span class="text-xs font-semibold leading-tight whitespace-nowrap">ครอบครัว</span>
     </a>
-    <a href="profile.php?action=education" class="profile-tab-tile rounded-xl min-h-[4.25rem] px-1.5 py-2 flex flex-col items-center justify-center gap-1 text-center touch-manipulation leading-tight <?php echo $action === 'education' ? 'bg-violet-600 text-white shadow-lg shadow-violet-900/30' : 'bg-white/10 text-white/80 hover:text-white hover:bg-white/15'; ?> transition-colors">
-        <i class="fas fa-graduation-cap text-sm opacity-90" aria-hidden="true"></i>
-        <span class="text-[0.6875rem] font-semibold">การศึกษา</span>
+    <a href="profile.php?action=education" class="profile-tab-tile rounded-xl min-h-[4.5rem] px-2 py-2.5 flex flex-col items-center justify-center gap-1.5 text-center touch-manipulation <?php echo $action === 'education' ? 'bg-violet-600 text-white shadow-lg shadow-violet-900/30' : 'bg-white/10 text-white/80 hover:text-white hover:bg-white/15'; ?> transition-colors">
+        <i class="fas fa-graduation-cap text-base opacity-90" aria-hidden="true"></i>
+        <span class="text-xs font-semibold leading-tight whitespace-nowrap">การศึกษา</span>
     </a>
-    <a href="profile.php?action=work" class="profile-tab-tile rounded-xl min-h-[4.25rem] px-1.5 py-2 flex flex-col items-center justify-center gap-1 text-center touch-manipulation leading-tight <?php echo $action === 'work' ? 'bg-violet-600 text-white shadow-lg shadow-violet-900/30' : 'bg-white/10 text-white/80 hover:text-white hover:bg-white/15'; ?> transition-colors">
-        <i class="fas fa-briefcase text-sm opacity-90" aria-hidden="true"></i>
-        <span class="text-[0.6875rem] font-semibold">ประวัติการทำงาน</span>
+    <a href="profile.php?action=work" class="profile-tab-tile rounded-xl min-h-[4.5rem] px-2 py-2.5 flex flex-col items-center justify-center gap-1.5 text-center touch-manipulation col-span-2 max-w-md mx-auto w-full <?php echo $action === 'work' ? 'bg-violet-600 text-white shadow-lg shadow-violet-900/30' : 'bg-white/10 text-white/80 hover:text-white hover:bg-white/15'; ?> transition-colors">
+        <i class="fas fa-briefcase text-base opacity-90" aria-hidden="true"></i>
+        <span class="text-xs font-semibold leading-tight whitespace-nowrap">ประวัติการทำงาน</span>
     </a>
 </nav>
 
