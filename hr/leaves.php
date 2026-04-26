@@ -109,8 +109,8 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
 </div>
 
-<!-- Stats -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-6 min-w-0 max-w-full">
+<!-- Stats (2×2 บนมือถือ/แท็บเล็ต — แถวเดียวเมื่อจอกว้าง ≥1024px) -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6 min-w-0 max-w-full">
     <a href="?status=PENDING&month=<?php echo $month; ?>" 
        class="glass-card rounded-xl p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'PENDING' ? 'ring-2 ring-yellow-400' : ''; ?>">
         <p class="text-white/50 text-sm truncate">รออนุมัติ</p>
@@ -133,15 +133,15 @@ include dirname(__DIR__) . '/templates/header.php';
     </a>
 </div>
 
-<!-- Filters -->
+<!-- Filters: แถวเดียวตั้งแต่ lg (1024px) — ปุ่ม min-h 44px ให้เสมอกับ .input-field -->
 <div class="glass-card rounded-xl p-4 sm:p-6 mb-6 min-w-0 overflow-hidden">
-    <form method="GET" class="grid grid-cols-2 md:grid-cols-5 gap-4">
+    <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 lg:items-end gap-4">
         <input type="hidden" name="status" value="<?php echo htmlspecialchars($status); ?>">
-        <div>
+        <div class="min-w-0">
             <label class="block text-white/60 text-xs mb-1">เดือน</label>
             <input type="month" name="month" value="<?php echo $month; ?>" class="input-field" onchange="this.form.submit()">
         </div>
-        <div>
+        <div class="min-w-0">
             <label class="block text-white/60 text-xs mb-1">ประเภทการลา</label>
             <select name="type" class="input-field" onchange="this.form.submit()">
                 <option value="">ทั้งหมด</option>
@@ -152,7 +152,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 <?php endforeach; ?>
             </select>
         </div>
-        <div>
+        <div class="min-w-0 sm:col-span-2 lg:col-span-1">
             <label class="block text-white/60 text-xs mb-1">แผนก</label>
             <select name="department" class="input-field" onchange="this.form.submit()">
                 <option value="">ทั้งหมด</option>
@@ -163,12 +163,14 @@ include dirname(__DIR__) . '/templates/header.php';
                 <?php endforeach; ?>
             </select>
         </div>
-        <div class="md:col-span-2 flex items-end gap-2">
-            <a href="leaves.php" class="flex-1 py-2.5 bg-white/10 hover:bg-white/20 text-white text-center rounded-lg transition-colors">
-                <i class="fas fa-redo mr-2"></i>รีเซ็ต
+        <div class="sm:col-span-2 lg:col-span-2 grid grid-cols-2 gap-2 min-w-0">
+            <a href="leaves.php"
+               class="min-h-[44px] px-3 sm:px-4 inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white text-sm font-medium text-center rounded-xl transition-colors touch-manipulation">
+                <i class="fas fa-redo shrink-0" aria-hidden="true"></i><span>รีเซ็ต</span>
             </a>
-            <a href="leaves.php?action=calendar&month=<?php echo $month; ?>" class="flex-1 py-2.5 bg-violet-600 hover:bg-violet-700 text-white text-center rounded-lg transition-colors">
-                <i class="fas fa-calendar-alt mr-2"></i>ปฏิทิน
+            <a href="leaves.php?action=calendar&amp;month=<?php echo urlencode($month); ?>"
+               class="min-h-[44px] px-3 sm:px-4 inline-flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold text-center rounded-xl transition-colors touch-manipulation">
+                <i class="fas fa-calendar-alt shrink-0" aria-hidden="true"></i><span>ปฏิทิน</span>
             </a>
         </div>
     </form>
@@ -182,8 +184,8 @@ include dirname(__DIR__) . '/templates/header.php';
         <p class="text-white/60">ไม่พบคำขอลา</p>
     </div>
     <?php else: ?>
-    <!-- Mobile-first: card list (desktop keeps table) -->
-    <div class="md:hidden p-3 space-y-3">
+    <!-- Card list: จอกว้างต่ำกว่า lg — ตารางเมื่อจอใหญ่พอ -->
+    <div class="lg:hidden p-3 space-y-3">
         <?php
         $statusColors = [
             'PENDING' => 'bg-yellow-500/15 border border-yellow-500/30 text-yellow-200',
@@ -268,7 +270,7 @@ include dirname(__DIR__) . '/templates/header.php';
         <?php endforeach; ?>
     </div>
 
-    <div class="hidden md:block overflow-x-auto">
+    <div class="hidden lg:block overflow-x-auto">
         <table class="w-full">
             <thead class="bg-white/5">
                 <tr>
