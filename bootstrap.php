@@ -290,6 +290,20 @@ function apiKeyMayAccessFullPayroll(?array $key): bool {
 }
 
 /**
+ * Per-employee rows in /api/v1/hr_meta (schedules, leave entitlements): unscoped keys need hr.read_all (or *).
+ */
+function apiKeyMayAccessFullHrMeta(?array $key): bool {
+    if (!$key) {
+        return false;
+    }
+    $scopes = json_decode($key['scopes'] ?? '[]', true) ?: [];
+    if (in_array('*', $scopes, true)) {
+        return true;
+    }
+    return in_array('hr.read_all', $scopes, true);
+}
+
+/**
  * Session profile API — strip secrets/finance fields; mask national id like the web profile UI.
  *
  * @param  array<string,mixed>|false|null $row

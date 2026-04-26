@@ -7,14 +7,15 @@
  *   GET /api/v1/positions
  *   GET /api/v1/holidays?year=YYYY
  *   GET /api/v1/leave-types
- *   GET /api/v1/employee-schedules[?user_id=]
+ *   GET /api/v1/employee-schedules[?user_id=]  — คีย์ไม่ผูก user ต้องมี hr.read_all (หรือ *)
  *   GET /api/v1/announcements
- *   GET /api/v1/leave-entitlements?year=YYYY[&user_id=]
+ *   GET /api/v1/leave-entitlements?year=YYYY[&user_id=] — เช่นเดียวกัน
  */
 ApiAuth::require(['hr.read']);
 ApiAuth::requireMethod(['GET']);
 
 $pdo = getDB();
+$key = ApiAuth::currentKey();
 $resource = $segments[0] ?? '';
 
 switch ($resource) {
@@ -61,7 +62,10 @@ switch ($resource) {
         ApiAuth::success(['data' => $rows]);
     }
     case 'employee-schedules': {
-        $userId = apiKeyResolveScopedUserId(ApiAuth::currentKey(), isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0);
+        if (apiKeyServiceUserId($key) === null && !apiKeyMayAccessFullHrMeta($key)) {
+            ApiAuth::fail(403, 'employee-schedules requires hr.read_all (or *) or a service user bound to the API key');
+        }
+        $userId = apiKeyResolveScopedUserId($key, isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0);
         $sql = "
             SELECT s.id, s.user_id, u.employee_code, u.first_name_th, u.last_name_th,
                    s.day_off, s.effective_date, s.notes, s.updated_at
@@ -88,8 +92,11 @@ switch ($resource) {
         ApiAuth::success(['data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
     }
     case 'leave-entitlements': {
+        if (apiKeyServiceUserId($key) === null && !apiKeyMayAccessFullHrMeta($key)) {
+            ApiAuth::fail(403, 'leave-entitlements requires hr.read_all (or *) or a service user bound to the API key');
+        }
         $year = isset($_GET['year']) ? (int)$_GET['year'] : (int)date('Y');
-        $userId = apiKeyResolveScopedUserId(ApiAuth::currentKey(), isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0);
+        $userId = apiKeyResolveScopedUserId($key, isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0);
         $sql = "
             SELECT e.id, e.user_id, u.employee_code, u.first_name_th, u.last_name_th,
                    e.leave_type_id, lt.code AS leave_code, lt.name AS leave_name,
