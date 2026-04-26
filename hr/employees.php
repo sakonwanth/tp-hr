@@ -401,7 +401,7 @@ $flashError = flash('error');
                         class="min-h-[44px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold">
                     <i class="fas fa-calendar-alt mr-2"></i>สิทธิ์ลา
                 </button>
-                <?php if (canManageUsers() || isHR()): ?>
+                <?php if (canManageUsers() || hr_can_access_hr_dashboard()): ?>
                 <a href="employees.php?action=edit&id=<?php echo (int)$emp['id']; ?>"
                    class="min-h-[44px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold flex items-center justify-center">
                     <i class="fas fa-edit mr-2"></i>แก้ไข
@@ -508,7 +508,7 @@ $flashError = flash('error');
                                 class="px-2 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs rounded transition-colors mr-1" title="ลบ">
                             <i class="fas fa-trash"></i>
                         </button>
-                        <?php elseif (isHR()): ?>
+                        <?php elseif (hr_can_access_hr_dashboard()): ?>
                         <a href="employees.php?action=edit&id=<?php echo $emp['id']; ?>" 
                            class="px-2 py-1 bg-white/10 hover:bg-white/20 text-white text-xs rounded transition-colors mr-1" title="แก้ไข">
                             <i class="fas fa-edit"></i>

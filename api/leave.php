@@ -280,7 +280,7 @@ function getDetail($pdo, $user) {
  */
 function getPending($pdo, $user) {
     // Check permission
-    if (!isHR() && !hasRole(MANAGER_ROLES)) {
+    if (!hr_can_access_hr_dashboard() && !hasRole(MANAGER_ROLES)) {
         http_response_code(403);
         echo json_encode(['success' => false, 'error' => 'ไม่มีสิทธิ์เข้าถึง']);
         return;
