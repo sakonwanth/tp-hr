@@ -59,9 +59,14 @@ if (isset($_GET['token'])) {
         // Mark token as used
         $updateStmt = $pdo->prepare("UPDATE cross_domain_tokens SET used_at = NOW() WHERE token = ?");
         $updateStmt->execute([$token]);
+
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_regenerate_id(true);
+        }
         
         // Create session (same as Auth::login)
         $_SESSION['user_id'] = $result['user_id'];
+        $_SESSION['logged_in'] = true;
         $_SESSION['logged_in_at'] = time();
         $_SESSION['login_method'] = 'line';
         
