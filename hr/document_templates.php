@@ -2,7 +2,7 @@
 /**
  * HR Document Templates & Company Document Settings
  * ตั้งค่าเอกสารรับรอง — ข้อมูลบริษัท / ส่วนหัว / ส่วนกลาง / ส่วนลงนาม / ส่วนท้าย
- * Access: HR + CEO + Chairman + Admin only (isHR gate)
+ * Access: HR dashboard (role or Acl hr.dashboard / hr.*)
  */
 
 $page_title = 'ตั้งค่าเอกสารรับรอง';
@@ -12,7 +12,7 @@ require_once dirname(__DIR__) . '/bootstrap.php';
 Auth::requireLogin();
 $user = Auth::user();
 
-if (!isHR()) {
+if (!hr_can_access_hr_dashboard()) {
     flash('error', 'คุณไม่มีสิทธิ์เข้าถึงหน้านี้');
     redirect('/', 302);
 }

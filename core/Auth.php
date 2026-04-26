@@ -148,16 +148,16 @@ class Auth {
      */
     public static function requireHR(): void {
         self::requireLogin();
-        
-        $user = self::user();
-        if (!in_array($user['role_name'] ?? '', HR_ROLES)) {
-            if (self::isAjax()) {
-                http_response_code(403);
-                echo json_encode(['error' => 'Access denied']);
-                exit;
-            }
-            redirect('/index.php?error=' . urlencode('คุณไม่มีสิทธิ์เข้าถึงส่วนนี้'));
+
+        if (hr_can_access_hr_dashboard()) {
+            return;
         }
+        if (self::isAjax()) {
+            http_response_code(403);
+            echo json_encode(['error' => 'Access denied']);
+            exit;
+        }
+        redirect('/index.php?error=' . urlencode('คุณไม่มีสิทธิ์เข้าถึงส่วนนี้'));
     }
     
     /**

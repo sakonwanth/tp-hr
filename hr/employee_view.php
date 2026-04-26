@@ -8,7 +8,7 @@ require_once dirname(__DIR__) . '/bootstrap.php';
 
 Auth::requireLogin();
 $user = Auth::user();
-if (!isHR()) { redirect('/', 302); }
+if (!hr_can_access_hr_dashboard()) { redirect('/', 302); }
 
 $id = (int)($_GET['id'] ?? 0);
 if ($id <= 0) { redirect('/hr/employees.php', 302); }

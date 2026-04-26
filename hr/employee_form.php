@@ -10,7 +10,7 @@ Auth::requireLogin();
 $user = Auth::user();
 
 // Must be HR
-if (!isHR()) {
+if (!hr_can_access_hr_dashboard()) {
     redirect('/', 302);
 }
 
