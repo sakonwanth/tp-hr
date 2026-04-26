@@ -410,29 +410,57 @@ function validateLocation(PDO $pdo, float $latitude, float $longitude): ?int {
 }
 
 /**
- * Save photo to storage
+ * Save photo to storage (ต้องเป็นภาพที่ GD อ่านได้ — ไม่บันทึก raw ที่ไม่ใช่รูป)
  */
 function savePhoto(string $base64Data, int $userId, string $type): string {
-    // Remove data URL prefix
-    $data = preg_replace('/^data:image\/\w+;base64,/', '', $base64Data);
-    $data = base64_decode($data);
-    
-    if (!$data) {
+    if (preg_match('/^data:image\/(\w+);base64,/i', $base64Data, $matches)) {
+        $declared = strtolower($matches[1]);
+        if (!in_array($declared, ['jpeg', 'jpg', 'png', 'gif', 'webp'], true)) {
+            return '';
+        }
+        $base64Data = preg_replace('/^data:image\/\w+;base64,/i', '', $base64Data, 1);
+    }
+
+    $data = base64_decode($base64Data, true);
+    if ($data === false || $data === '') {
         return '';
     }
-    
-    // Create directory
+    if (strlen($data) > MAX_UPLOAD_SIZE) {
+        return '';
+    }
+
+    $image = @imagecreatefromstring($data);
+    if ($image === false) {
+        return '';
+    }
+
     $dir = STORAGE_PATH . '/uploads/attendance/' . date('Y/m');
     if (!is_dir($dir)) {
         mkdir($dir, 0755, true);
     }
-    
-    // Generate filename
-    $filename = sprintf('%s_%d_%s_%s.jpg', $type, $userId, date('Ymd_His'), substr(md5(uniqid()), 0, 8));
+
+    $type = preg_replace('/[^a-z0-9_]/', '', strtolower($type)) ?: 'checkin';
+    $filename = sprintf('%s_%d_%s_%s.jpg', $type, $userId, date('Ymd_His'), bin2hex(random_bytes(3)));
     $path = $dir . '/' . $filename;
-    
-    file_put_contents($path, $data);
-    
+
+    $maxWidth = 800;
+    $quality = 80;
+    $width = imagesx($image);
+    $height = imagesy($image);
+    if ($width > $maxWidth) {
+        $newWidth = $maxWidth;
+        $newHeight = (int) ($height * ($maxWidth / $width));
+        $resized = imagecreatetruecolor($newWidth, $newHeight);
+        imagecopyresampled($resized, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+        imagedestroy($image);
+        imagejpeg($resized, $path, $quality);
+        imagedestroy($resized);
+    } else {
+        imagejpeg($image, $path, $quality);
+        imagedestroy($image);
+    }
+    @chmod($path, 0644);
+
     return 'uploads/attendance/' . date('Y/m') . '/' . $filename;
 }
 
