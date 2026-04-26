@@ -312,6 +312,9 @@ function checkinStorageRelativePathIsAllowed(string $path): bool {
     if (preg_match('#^storage/adjustments/\d{4}/\d{2}/[A-Za-z0-9._-]+$#', $path)) {
         return true;
     }
+    if (preg_match('#^storage/documents/\d{4}/\d{2}/[A-Za-z0-9._-]+$#', $path)) {
+        return true;
+    }
     return false;
 }
 
