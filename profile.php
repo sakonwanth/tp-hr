@@ -82,35 +82,35 @@ include 'templates/header.php';
 exit;
 endif; ?>
 
-<div class="mb-6">
-    <h1 class="text-2xl font-bold text-white">ข้อมูลส่วนตัว</h1>
-    <p class="text-white/60">ดูและแก้ไขข้อมูลส่วนตัวของคุณ</p>
+<div class="mb-6 min-w-0">
+    <h1 class="text-2xl font-bold text-white tracking-tight">ข้อมูลส่วนตัว</h1>
+    <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">ดูและแก้ไขข้อมูลส่วนตัว ผู้ติดต่อฉุกเฉิน ครอบครัว การศึกษา และประวัติการทำงาน</p>
 </div>
 
 <!-- Profile Tabs -->
-<div class="flex gap-2 mb-6 overflow-x-auto pb-2">
-    <a href="profile.php" class="px-4 py-2 rounded-lg min-h-[44px] flex items-center <?php echo !$action ? 'bg-violet-600 text-white' : 'bg-white/10 text-white/70 hover:text-white'; ?> transition-colors whitespace-nowrap">
+<div class="profile-tabs-rail flex gap-2 mb-6 overflow-x-auto pb-2 min-w-0 max-w-full -mx-1 px-1">
+    <a href="profile.php" class="px-4 py-2 rounded-xl min-h-[44px] flex items-center shrink-0 touch-manipulation <?php echo !$action ? 'bg-violet-600 text-white' : 'bg-white/10 text-white/70 hover:text-white'; ?> transition-colors whitespace-nowrap">
         <i class="fas fa-user mr-2"></i>ข้อมูลทั่วไป
     </a>
-    <a href="profile.php?action=contact" class="px-4 py-2 rounded-lg min-h-[44px] flex items-center <?php echo $action === 'contact' ? 'bg-violet-600 text-white' : 'bg-white/10 text-white/70 hover:text-white'; ?> transition-colors whitespace-nowrap">
+    <a href="profile.php?action=contact" class="px-4 py-2 rounded-xl min-h-[44px] flex items-center shrink-0 touch-manipulation <?php echo $action === 'contact' ? 'bg-violet-600 text-white' : 'bg-white/10 text-white/70 hover:text-white'; ?> transition-colors whitespace-nowrap">
         <i class="fas fa-phone mr-2"></i>ผู้ติดต่อฉุกเฉิน
     </a>
-    <a href="profile.php?action=family" class="px-4 py-2 rounded-lg min-h-[44px] flex items-center <?php echo $action === 'family' ? 'bg-violet-600 text-white' : 'bg-white/10 text-white/70 hover:text-white'; ?> transition-colors whitespace-nowrap">
+    <a href="profile.php?action=family" class="px-4 py-2 rounded-xl min-h-[44px] flex items-center shrink-0 touch-manipulation <?php echo $action === 'family' ? 'bg-violet-600 text-white' : 'bg-white/10 text-white/70 hover:text-white'; ?> transition-colors whitespace-nowrap">
         <i class="fas fa-users mr-2"></i>ครอบครัว
     </a>
-    <a href="profile.php?action=education" class="px-4 py-2 rounded-lg min-h-[44px] flex items-center <?php echo $action === 'education' ? 'bg-violet-600 text-white' : 'bg-white/10 text-white/70 hover:text-white'; ?> transition-colors whitespace-nowrap">
+    <a href="profile.php?action=education" class="px-4 py-2 rounded-xl min-h-[44px] flex items-center shrink-0 touch-manipulation <?php echo $action === 'education' ? 'bg-violet-600 text-white' : 'bg-white/10 text-white/70 hover:text-white'; ?> transition-colors whitespace-nowrap">
         <i class="fas fa-graduation-cap mr-2"></i>การศึกษา
     </a>
-    <a href="profile.php?action=work" class="px-4 py-2 rounded-lg min-h-[44px] flex items-center <?php echo $action === 'work' ? 'bg-violet-600 text-white' : 'bg-white/10 text-white/70 hover:text-white'; ?> transition-colors whitespace-nowrap">
+    <a href="profile.php?action=work" class="px-4 py-2 rounded-xl min-h-[44px] flex items-center shrink-0 touch-manipulation <?php echo $action === 'work' ? 'bg-violet-600 text-white' : 'bg-white/10 text-white/70 hover:text-white'; ?> transition-colors whitespace-nowrap">
         <i class="fas fa-briefcase mr-2"></i>ประวัติการทำงาน
     </a>
 </div>
 
 <?php if (!$action): ?>
 <!-- General Info -->
-<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6 min-w-0 max-w-full">
     <!-- Profile Card -->
-    <div class="glass-card rounded-xl p-6">
+    <div class="glass-card rounded-xl p-4 sm:p-6 min-w-0 overflow-hidden">
         <div class="text-center mb-6">
             <div class="w-24 h-24 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mx-auto mb-4">
                 <?php if (!empty($profile['profile_image'])): ?>
@@ -168,7 +168,7 @@ endif; ?>
     
     <!-- Personal Info -->
     <div class="xl:col-span-2 space-y-6">
-        <div class="glass-card rounded-xl p-6">
+        <div class="glass-card rounded-xl p-4 sm:p-6 min-w-0 overflow-hidden">
             <h3 class="text-lg font-semibold text-white mb-4">ข้อมูลส่วนตัว</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -211,7 +211,7 @@ endif; ?>
             </div>
         </div>
         
-        <div class="glass-card rounded-xl p-6">
+        <div class="glass-card rounded-xl p-4 sm:p-6 min-w-0 overflow-hidden">
             <h3 class="text-lg font-semibold text-white mb-4">ข้อมูลการจ้างงาน</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -250,7 +250,7 @@ endif; ?>
             </div>
         </div>
         
-        <div class="glass-card rounded-xl p-6">
+        <div class="glass-card rounded-xl p-4 sm:p-6 min-w-0 overflow-hidden">
             <h3 class="text-lg font-semibold text-white mb-4">ที่อยู่</h3>
             <div class="space-y-4">
                 <div>
@@ -268,7 +268,7 @@ endif; ?>
 
 <?php elseif ($action === 'contact'): ?>
 <!-- Emergency Contacts -->
-<div class="glass-card rounded-xl p-6">
+<div class="glass-card rounded-xl p-4 sm:p-6 min-w-0 overflow-hidden">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <h3 class="text-lg font-semibold text-white">ผู้ติดต่อฉุกเฉิน</h3>
         <button onclick="openAddModal('emergency')" class="px-4 py-2 min-h-[44px] bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
@@ -317,7 +317,7 @@ endif; ?>
 
 <?php elseif ($action === 'family'): ?>
 <!-- Family Members -->
-<div class="glass-card rounded-xl p-6">
+<div class="glass-card rounded-xl p-4 sm:p-6 min-w-0 overflow-hidden">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <h3 class="text-lg font-semibold text-white">ข้อมูลครอบครัว</h3>
         <button onclick="openAddModal('family')" class="px-4 py-2 min-h-[44px] bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
@@ -404,7 +404,7 @@ endif; ?>
 
 <?php elseif ($action === 'education'): ?>
 <!-- Education -->
-<div class="glass-card rounded-xl p-6">
+<div class="glass-card rounded-xl p-4 sm:p-6 min-w-0 overflow-hidden">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <h3 class="text-lg font-semibold text-white">ประวัติการศึกษา</h3>
         <button onclick="openAddModal('education')" class="px-4 py-2 min-h-[44px] bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
@@ -455,7 +455,7 @@ endif; ?>
 
 <?php elseif ($action === 'work'): ?>
 <!-- Work History -->
-<div class="glass-card rounded-xl p-6">
+<div class="glass-card rounded-xl p-4 sm:p-6 min-w-0 overflow-hidden">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <h3 class="text-lg font-semibold text-white">ประวัติการทำงาน (ก่อนเข้าบริษัท)</h3>
         <button onclick="openAddModal('work')" class="px-4 py-2 min-h-[44px] bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
