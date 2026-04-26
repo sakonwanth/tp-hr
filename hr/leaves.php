@@ -93,44 +93,48 @@ $stmtStats = $pdo->query("
 ");
 $stats = $stmtStats->fetch();
 
+$current_page = 'hr-leaves';
 include dirname(__DIR__) . '/templates/header.php';
 ?>
 
-<div class="mb-6">
-    <nav class="text-sm text-white/60 mb-1">
-        <a href="/hr/" class="hover:text-white">HR</a>
+<div class="mb-6 min-w-0">
+    <nav class="text-sm text-white/60 mb-1" aria-label="Breadcrumb">
+        <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
         <span class="mx-2">/</span>
         <span class="text-white">จัดการการลา</span>
     </nav>
-    <h1 class="text-2xl font-bold text-white">จัดการการลา</h1>
+    <div class="min-w-0">
+        <h1 class="text-2xl font-bold text-white tracking-tight">จัดการการลา</h1>
+        <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">อนุมัติคำขอลา กรองตามเดือน แผนก และประเภท</p>
+    </div>
 </div>
 
 <!-- Stats -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-6 min-w-0 max-w-full">
     <a href="?status=PENDING&month=<?php echo $month; ?>" 
-       class="glass-card rounded-xl p-4 <?php echo $status === 'PENDING' ? 'ring-2 ring-yellow-400' : ''; ?>">
-        <p class="text-white/50 text-sm">รออนุมัติ</p>
-        <p class="text-2xl font-bold text-yellow-400"><?php echo $stats['pending'] ?? 0; ?></p>
+       class="glass-card rounded-xl p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'PENDING' ? 'ring-2 ring-yellow-400' : ''; ?>">
+        <p class="text-white/50 text-sm truncate">รออนุมัติ</p>
+        <p class="text-2xl font-bold text-yellow-400 tabular-nums mt-1"><?php echo $stats['pending'] ?? 0; ?></p>
     </a>
     <a href="?status=APPROVED&month=<?php echo $month; ?>"
-       class="glass-card rounded-xl p-4 <?php echo $status === 'APPROVED' ? 'ring-2 ring-green-400' : ''; ?>">
-        <p class="text-white/50 text-sm">อนุมัติแล้ว</p>
-        <p class="text-2xl font-bold text-green-400"><?php echo $stats['approved'] ?? 0; ?></p>
+       class="glass-card rounded-xl p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'APPROVED' ? 'ring-2 ring-green-400' : ''; ?>">
+        <p class="text-white/50 text-sm truncate">อนุมัติแล้ว</p>
+        <p class="text-2xl font-bold text-green-400 tabular-nums mt-1"><?php echo $stats['approved'] ?? 0; ?></p>
     </a>
     <a href="?status=REJECTED&month=<?php echo $month; ?>"
-       class="glass-card rounded-xl p-4 <?php echo $status === 'REJECTED' ? 'ring-2 ring-red-400' : ''; ?>">
-        <p class="text-white/50 text-sm">ไม่อนุมัติ</p>
-        <p class="text-2xl font-bold text-red-400"><?php echo $stats['rejected'] ?? 0; ?></p>
+       class="glass-card rounded-xl p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'REJECTED' ? 'ring-2 ring-red-400' : ''; ?>">
+        <p class="text-white/50 text-sm truncate">ไม่อนุมัติ</p>
+        <p class="text-2xl font-bold text-red-400 tabular-nums mt-1"><?php echo $stats['rejected'] ?? 0; ?></p>
     </a>
     <a href="?status=ALL&month=<?php echo $month; ?>"
-       class="glass-card rounded-xl p-4 <?php echo $status === 'ALL' ? 'ring-2 ring-violet-400' : ''; ?>">
-        <p class="text-white/50 text-sm">ทั้งหมด</p>
-        <p class="text-2xl font-bold text-violet-400"><?php echo $stats['total'] ?? 0; ?></p>
+       class="glass-card rounded-xl p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'ALL' ? 'ring-2 ring-violet-400' : ''; ?>">
+        <p class="text-white/50 text-sm truncate">ทั้งหมด</p>
+        <p class="text-2xl font-bold text-violet-400 tabular-nums mt-1"><?php echo $stats['total'] ?? 0; ?></p>
     </a>
 </div>
 
 <!-- Filters -->
-<div class="glass-card rounded-xl p-4 mb-6">
+<div class="glass-card rounded-xl p-4 sm:p-6 mb-6 min-w-0 overflow-hidden">
     <form method="GET" class="grid grid-cols-2 md:grid-cols-5 gap-4">
         <input type="hidden" name="status" value="<?php echo htmlspecialchars($status); ?>">
         <div>
@@ -171,7 +175,7 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <!-- Results -->
-<div class="glass-card rounded-xl overflow-hidden">
+<div class="glass-card rounded-xl overflow-hidden min-w-0">
     <?php if (empty($requests)): ?>
     <div class="p-12 text-center">
         <i class="fas fa-calendar-check text-4xl text-white/20 mb-4"></i>

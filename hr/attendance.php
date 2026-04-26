@@ -137,48 +137,52 @@ $stmtDayOff->execute([$weekday]);
 $dayOffStats = $stmtDayOff->fetch();
 $isWeekend = ($dayOffStats['total'] > 0 && (int)$dayOffStats['total'] === (int)$dayOffStats['matches']);
 
+$current_page = 'hr-attendance';
 include dirname(__DIR__) . '/templates/header.php';
 ?>
 
-<div class="mb-6">
-    <nav class="text-sm text-white/60 mb-1">
-        <a href="/hr/" class="hover:text-white">HR</a>
+<div class="mb-6 min-w-0">
+    <nav class="text-sm text-white/60 mb-1" aria-label="Breadcrumb">
+        <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
         <span class="mx-2">/</span>
         <span class="text-white">จัดการเวลาทำงาน</span>
     </nav>
-    <h1 class="text-2xl font-bold text-white">จัดการเวลาทำงาน</h1>
+    <div class="min-w-0">
+        <h1 class="text-2xl font-bold text-white tracking-tight">จัดการเวลาทำงาน</h1>
+        <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">สรุปการเข้างานตามวันที่ กรองแผนกและสถานะ</p>
+    </div>
 </div>
 
 <!-- Stats -->
-<div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+<div class="grid grid-cols-2 md:grid-cols-5 gap-2 sm:gap-4 mb-6 min-w-0 max-w-full">
     <a href="?date=<?php echo $date; ?>&status=" 
-       class="glass-card rounded-xl p-4 <?php echo !$status ? 'ring-2 ring-violet-400' : ''; ?>">
-        <p class="text-white/50 text-sm">พนักงานทั้งหมด</p>
-        <p class="text-2xl font-bold text-violet-400"><?php echo $stats['total_employees']; ?></p>
+       class="glass-card rounded-xl p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo !$status ? 'ring-2 ring-violet-400' : ''; ?>">
+        <p class="text-white/50 text-sm truncate">พนักงานทั้งหมด</p>
+        <p class="text-2xl font-bold text-violet-400 tabular-nums mt-1"><?php echo $stats['total_employees']; ?></p>
     </a>
     <a href="?date=<?php echo $date; ?>&status=PRESENT"
-       class="glass-card rounded-xl p-4 <?php echo $status === 'PRESENT' ? 'ring-2 ring-green-400' : ''; ?>">
-        <p class="text-white/50 text-sm">เข้างาน</p>
-        <p class="text-2xl font-bold text-green-400"><?php echo $stats['checked_in'] ?? 0; ?></p>
+       class="glass-card rounded-xl p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'PRESENT' ? 'ring-2 ring-green-400' : ''; ?>">
+        <p class="text-white/50 text-sm truncate">เข้างาน</p>
+        <p class="text-2xl font-bold text-green-400 tabular-nums mt-1"><?php echo $stats['checked_in'] ?? 0; ?></p>
     </a>
     <a href="?date=<?php echo $date; ?>&status=ABSENT"
-       class="glass-card rounded-xl p-4 <?php echo $status === 'ABSENT' ? 'ring-2 ring-red-400' : ''; ?>">
-        <p class="text-white/50 text-sm">ขาดงาน</p>
-        <p class="text-2xl font-bold text-red-400"><?php echo $absentCount; ?></p>
+       class="glass-card rounded-xl p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'ABSENT' ? 'ring-2 ring-red-400' : ''; ?>">
+        <p class="text-white/50 text-sm truncate">ขาดงาน</p>
+        <p class="text-2xl font-bold text-red-400 tabular-nums mt-1"><?php echo $absentCount; ?></p>
     </a>
     <a href="?date=<?php echo $date; ?>&status=LATE"
-       class="glass-card rounded-xl p-4 <?php echo $status === 'LATE' ? 'ring-2 ring-yellow-400' : ''; ?>">
-        <p class="text-white/50 text-sm">สาย</p>
-        <p class="text-2xl font-bold text-yellow-400"><?php echo $stats['late_count'] ?? 0; ?></p>
+       class="glass-card rounded-xl p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'LATE' ? 'ring-2 ring-yellow-400' : ''; ?>">
+        <p class="text-white/50 text-sm truncate">สาย</p>
+        <p class="text-2xl font-bold text-yellow-400 tabular-nums mt-1"><?php echo $stats['late_count'] ?? 0; ?></p>
     </a>
-    <div class="glass-card rounded-xl p-4">
-        <p class="text-white/50 text-sm">เวลาเข้างานเฉลี่ย</p>
-        <p class="text-2xl font-bold text-white"><?php echo $stats['avg_check_in'] ? substr($stats['avg_check_in'], 0, 5) : '--:--'; ?></p>
+    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden md:col-span-1 col-span-2">
+        <p class="text-white/50 text-sm truncate">เวลาเข้างานเฉลี่ย</p>
+        <p class="text-2xl font-bold text-white tabular-nums mt-1"><?php echo $stats['avg_check_in'] ? substr($stats['avg_check_in'], 0, 5) : '--:--'; ?></p>
     </div>
 </div>
 
 <!-- Filters -->
-<div class="glass-card rounded-xl p-4 mb-6">
+<div class="glass-card rounded-xl p-4 sm:p-6 mb-6 min-w-0 overflow-hidden">
     <form method="GET" class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div>
             <label class="block text-white/60 text-xs mb-1">วันที่</label>
@@ -213,8 +217,8 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <!-- Title -->
-<div class="flex items-center justify-between mb-4">
-    <h2 class="text-lg font-semibold text-white">
+<div class="flex items-center justify-between mb-4 min-w-0">
+    <h2 class="text-lg font-semibold text-white min-w-0">
         <?php echo formatDateThai($date); ?>
         <?php 
         $dayNames = THAI_DAY_NAMES;
@@ -257,7 +261,7 @@ include dirname(__DIR__) . '/templates/header.php';
 <?php endif; ?>
 
 <!-- List -->
-<div class="glass-card rounded-xl overflow-hidden">
+<div class="glass-card rounded-xl overflow-hidden min-w-0">
     <?php if (empty($records)): ?>
     <div class="p-12 text-center">
         <i class="fas fa-users text-4xl text-white/20 mb-4"></i>

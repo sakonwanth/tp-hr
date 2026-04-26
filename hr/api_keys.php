@@ -114,10 +114,15 @@ $availableScopes = [
 
 require_once __DIR__ . '/../templates/header.php';
 ?>
-<div>
-    <div class="mb-6">
-        <h1 class="text-2xl font-bold text-white">External API Keys</h1>
-        <p class="text-white/60 text-sm">จัดการคีย์ API สำหรับระบบภายนอก</p>
+<div class="min-w-0 max-w-full">
+    <div class="mb-6 min-w-0">
+        <nav class="text-sm text-white/60 mb-3" aria-label="Breadcrumb">
+            <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
+            <span class="mx-2">/</span>
+            <span class="text-white">External API Keys</span>
+        </nav>
+        <h1 class="text-2xl font-bold text-white tracking-tight">External API Keys</h1>
+        <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">จัดการคีย์ API สำหรับระบบภายนอก</p>
     </div>
 
     <?php if ($error): ?>

@@ -133,21 +133,26 @@ $stmtStats = $pdo->query("
 ");
 $stats = $stmtStats->fetch();
 
+$current_page = 'hr-employees';
+
 include dirname(__DIR__) . '/templates/header.php';
 $flashSuccess = flash('success');
 $flashError = flash('error');
 ?>
 
-<div class="mb-6">
-    <nav class="text-sm text-white/60 mb-1">
-        <a href="/hr/" class="hover:text-white">HR</a>
+<div class="mb-6 min-w-0">
+    <nav class="text-sm text-white/60 mb-1" aria-label="Breadcrumb">
+        <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
         <span class="mx-2">/</span>
         <span class="text-white">จัดการพนักงาน</span>
     </nav>
-    <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-white">จัดการพนักงาน</h1>
+    <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+        <div class="min-w-0 flex-1">
+            <h1 class="text-2xl font-bold text-white tracking-tight">จัดการพนักงาน</h1>
+            <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">ค้นหา กรองแผนกและสถานะ ดูสรุปและดำเนินการรายคน</p>
+        </div>
         <?php if (canManageUsers()): ?>
-        <a href="employees.php?action=add" class="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
+        <a href="employees.php?action=add" class="w-full sm:w-auto shrink-0 inline-flex items-center justify-center min-h-[44px] px-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors font-semibold touch-manipulation">
             <i class="fas fa-plus mr-2"></i>เพิ่มพนักงาน
         </a>
         <?php endif; ?>
@@ -167,32 +172,33 @@ $flashError = flash('error');
 <?php endif; ?>
 
 <!-- Stats -->
-<div class="grid grid-cols-3 gap-4 mb-6">
-    <a href="?status=" class="glass-card rounded-xl p-4 <?php echo !$status ? 'ring-2 ring-violet-400' : ''; ?>">
-        <p class="text-white/50 text-sm">พนักงานทั้งหมด</p>
-        <p class="text-2xl font-bold text-violet-400"><?php echo $stats['total']; ?></p>
+<div class="grid grid-cols-3 gap-2 sm:gap-4 mb-6 min-w-0 max-w-full">
+    <a href="?status=" class="glass-card rounded-xl p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo !$status ? 'ring-2 ring-violet-400' : ''; ?>">
+        <p class="text-white/50 text-sm truncate">พนักงานทั้งหมด</p>
+        <p class="text-2xl font-bold text-violet-400 tabular-nums mt-1"><?php echo (int)$stats['total']; ?></p>
     </a>
-    <a href="?status=ACTIVE" class="glass-card rounded-xl p-4 <?php echo $status === 'ACTIVE' ? 'ring-2 ring-green-400' : ''; ?>">
-        <p class="text-white/50 text-sm">พนักงานปัจจุบัน</p>
-        <p class="text-2xl font-bold text-green-400"><?php echo $stats['active']; ?></p>
+    <a href="?status=ACTIVE" class="glass-card rounded-xl p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'ACTIVE' ? 'ring-2 ring-green-400' : ''; ?>">
+        <p class="text-white/50 text-sm truncate">พนักงานปัจจุบัน</p>
+        <p class="text-2xl font-bold text-green-400 tabular-nums mt-1"><?php echo (int)$stats['active']; ?></p>
     </a>
-    <a href="?status=INACTIVE" class="glass-card rounded-xl p-4 <?php echo $status === 'INACTIVE' ? 'ring-2 ring-red-400' : ''; ?>">
-        <p class="text-white/50 text-sm">พ้นสภาพ</p>
-        <p class="text-2xl font-bold text-red-400"><?php echo $stats['inactive']; ?></p>
+    <a href="?status=INACTIVE" class="glass-card rounded-xl p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'INACTIVE' ? 'ring-2 ring-red-400' : ''; ?>">
+        <p class="text-white/50 text-sm truncate">พ้นสภาพ</p>
+        <p class="text-2xl font-bold text-red-400 tabular-nums mt-1"><?php echo (int)$stats['inactive']; ?></p>
     </a>
 </div>
 
 <!-- Filters -->
-<div class="glass-card rounded-xl p-4 mb-6">
-    <form method="GET" class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div>
+<div class="glass-card rounded-xl p-4 sm:p-6 mb-6 min-w-0 overflow-hidden">
+    <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 min-w-0">
+        <?php if ($status !== ''): ?><input type="hidden" name="status" value="<?php echo htmlspecialchars($status); ?>"><?php endif; ?>
+        <div class="min-w-0 sm:col-span-2 xl:col-span-1">
             <label class="block text-white/60 text-xs mb-1">ค้นหา</label>
             <div class="relative">
                 <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="ชื่อ, รหัส, อีเมล..." class="input-field pl-10">
                 <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-white/40"></i>
             </div>
         </div>
-        <div>
+        <div class="min-w-0">
             <label class="block text-white/60 text-xs mb-1">แผนก</label>
             <select name="department" class="input-field" onchange="this.form.submit()">
                 <option value="">ทั้งหมด</option>
@@ -203,16 +209,16 @@ $flashError = flash('error');
                 <?php endforeach; ?>
             </select>
         </div>
-        <div class="flex items-end gap-2">
-            <button type="submit" class="flex-1 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
+        <div class="flex items-end gap-2 min-w-0 sm:col-span-2 xl:col-span-1">
+            <button type="submit" class="flex-1 min-h-[44px] py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors touch-manipulation font-medium">
                 <i class="fas fa-search mr-2"></i>ค้นหา
             </button>
         </div>
-        <div class="flex items-end gap-2">
-            <a href="employees.php" class="flex-1 py-2.5 bg-white/10 hover:bg-white/20 text-white text-center rounded-lg transition-colors">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-2 min-w-0 sm:col-span-2 xl:col-span-1">
+            <a href="employees.php" class="flex-1 min-h-[44px] py-2.5 bg-white/10 hover:bg-white/20 text-white text-center rounded-xl transition-colors touch-manipulation inline-flex items-center justify-center font-medium">
                 <i class="fas fa-redo mr-2"></i>รีเซ็ต
             </a>
-            <a href="employees.php?action=export" class="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white text-center rounded-lg transition-colors">
+            <a href="employees.php?action=export" class="flex-1 min-h-[44px] py-2.5 bg-green-600 hover:bg-green-700 text-white text-center rounded-xl transition-colors touch-manipulation inline-flex items-center justify-center font-medium">
                 <i class="fas fa-file-excel mr-2"></i>Export
             </a>
         </div>
@@ -220,7 +226,7 @@ $flashError = flash('error');
 </div>
 
 <!-- Employee List -->
-<div class="glass-card rounded-xl overflow-hidden">
+<div class="glass-card rounded-xl overflow-hidden min-w-0 max-w-full">
     <?php if (empty($employees)): ?>
     <div class="p-12 text-center">
         <i class="fas fa-users text-4xl text-white/20 mb-4"></i>
@@ -335,8 +341,8 @@ $flashError = flash('error');
         <?php endforeach; ?>
     </div>
 
-    <div class="hidden md:block overflow-x-auto">
-        <table class="w-full">
+    <div class="hidden md:block overflow-x-auto min-w-0 -mx-px">
+        <table class="w-full min-w-[720px]">
             <thead class="bg-white/5">
                 <tr>
                     <th class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">พนักงาน</th>
@@ -439,12 +445,12 @@ $flashError = flash('error');
     
     <!-- Pagination -->
     <?php if ($totalPages > 1): ?>
-    <div class="px-6 py-4 border-t border-white/10 flex items-center justify-between">
-        <p class="text-white/60 text-sm">
+    <div class="px-4 sm:px-6 py-4 border-t border-white/10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
+        <p class="text-white/60 text-sm min-w-0">
             แสดง <?php echo $offset + 1; ?> - <?php echo min($offset + $limit, $totalRecords); ?> 
             จาก <?php echo $totalRecords; ?> รายการ
         </p>
-        <div class="flex gap-2">
+        <div class="flex flex-wrap gap-2 shrink-0">
             <?php if ($page > 1): ?>
             <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $page - 1])); ?>" 
                class="px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded transition-colors">

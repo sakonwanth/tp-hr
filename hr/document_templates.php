@@ -337,22 +337,22 @@ $L = [
 include dirname(__DIR__) . '/templates/header.php';
 ?>
 
-<div class="mb-6">
-    <nav class="text-sm text-white/60 mb-1">
-        <a href="/hr/" class="hover:text-white">HR</a>
+<div class="mb-6 min-w-0">
+    <nav class="text-sm text-white/60 mb-1" aria-label="Breadcrumb">
+        <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
         <span class="mx-2">/</span>
-        <a href="/hr/documents.php" class="hover:text-white">จัดการเอกสาร</a>
+        <a href="/hr/documents.php" class="hover:text-white touch-manipulation">จัดการคำขอเอกสาร</a>
         <span class="mx-2">/</span>
         <span class="text-white">ตั้งค่าเอกสารรับรอง</span>
     </nav>
-    <div class="flex items-end justify-between flex-wrap gap-3">
-        <div>
-            <h1 class="text-2xl font-bold text-white">ตั้งค่าเอกสารรับรอง</h1>
-            <p class="text-white/50 text-sm mt-1">จัดการข้อมูลบริษัท โลโก้ ตราประทับ ลายเซ็นอิเล็กทรอนิกส์ และเค้าโครงเอกสารทั้ง 4 ส่วน</p>
+    <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+        <div class="min-w-0 flex-1">
+            <h1 class="text-2xl font-bold text-white tracking-tight">ตั้งค่าเอกสารรับรอง</h1>
+            <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">ข้อมูลบริษัท โลโก้ ตราประทับ ลายเซ็น และเค้าโครงเอกสาร</p>
         </div>
         <?php if (!$editRow && !$isCreating): ?>
-        <div class="flex gap-2">
-            <a href="?edit=new" class="px-4 py-2 rounded-lg bg-violet-500 hover:bg-violet-600 text-white text-sm font-medium">
+        <div class="flex gap-2 shrink-0 w-full sm:w-auto">
+            <a href="?edit=new" class="inline-flex items-center justify-center min-h-[44px] px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold touch-manipulation w-full sm:w-auto">
                 <i class="fas fa-plus mr-1"></i> เพิ่มเอกสารใหม่
             </a>
         </div>

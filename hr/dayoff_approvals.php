@@ -110,22 +110,22 @@ $pendingCount = $pdo->query("SELECT COUNT(*) FROM hr_dayoff_requests WHERE statu
 include dirname(__DIR__) . '/templates/header.php';
 ?>
 
-<div class="mb-6">
-    <nav class="text-sm text-white/60 mb-1">
-        <a href="/hr/" class="hover:text-white">HR</a>
+<div class="mb-6 min-w-0">
+    <nav class="text-sm text-white/60 mb-1" aria-label="Breadcrumb">
+        <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
         <span class="mx-2">/</span>
         <span class="text-white">อนุมัติเปลี่ยนวันหยุด</span>
     </nav>
     <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-white">อนุมัติเปลี่ยนวันหยุดประจำสัปดาห์</h1>
-            <p class="text-white/60 text-sm mt-1">พนักงานขอเปลี่ยนวันหยุดในแต่ละสัปดาห์</p>
+        <div class="min-w-0 flex-1">
+            <h1 class="text-2xl font-bold text-white tracking-tight">อนุมัติเปลี่ยนวันหยุดประจำสัปดาห์</h1>
+            <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">พนักงานขอเปลี่ยนวันหยุดในแต่ละสัปดาห์</p>
         </div>
         <?php if ($pendingCount > 0 && $statusFilter === 'PENDING'): ?>
-        <form method="POST" class="inline" onsubmit="return confirm('อนุมัติคำขอทั้งหมด <?php echo $pendingCount; ?> รายการ?')">
+        <form method="POST" class="inline shrink-0 w-full sm:w-auto" onsubmit="return confirm('อนุมัติคำขอทั้งหมด <?php echo $pendingCount; ?> รายการ?')">
             <?php echo csrfField(); ?>
             <input type="hidden" name="action" value="approve_all">
-            <button type="submit" class="w-full sm:w-auto min-h-[44px] px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors touch-manipulation">
+            <button type="submit" class="w-full sm:w-auto min-h-[44px] px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl transition-colors touch-manipulation font-semibold">
                 <i class="fas fa-check-double mr-2"></i>อนุมัติทั้งหมด (<?php echo $pendingCount; ?>)
             </button>
         </form>
@@ -140,7 +140,7 @@ include dirname(__DIR__) . '/templates/header.php';
 <?php endif; ?>
 
 <!-- Filters -->
-<div class="glass-card rounded-xl p-4 mb-6">
+<div class="glass-card rounded-xl p-4 sm:p-6 mb-6 min-w-0 overflow-hidden">
     <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
             <label class="text-white/70 text-sm">สถานะ:</label>
@@ -161,7 +161,7 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <!-- Requests Table -->
-<div class="glass-card rounded-xl overflow-hidden">
+<div class="glass-card rounded-xl overflow-hidden min-w-0">
     <?php if (empty($allRequests)): ?>
     <div class="p-12 text-center">
         <i class="fas fa-calendar-check text-4xl text-white/20 mb-4"></i>

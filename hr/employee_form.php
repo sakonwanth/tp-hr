@@ -406,28 +406,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'chang
     }
 }
 
+$formSubtitle = '';
+if ($action === 'edit' && is_array($employee)) {
+    $formSubtitle = trim(($employee['title'] ?? '') . ' ' . ($employee['first_name_th'] ?? '') . ' ' . ($employee['last_name_th'] ?? ''));
+}
+
 $current_page = 'hr-employees';
 include dirname(__DIR__) . '/templates/header.php';
 ?>
 
-<div class="mb-6">
-    <nav class="text-sm text-white/60 mb-1">
-        <a href="/hr/" class="hover:text-white">HR</a>
+<div class="mb-6 min-w-0">
+    <nav class="text-sm text-white/60 mb-1" aria-label="Breadcrumb">
+        <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
         <span class="mx-2">/</span>
-        <a href="/hr/employees.php" class="hover:text-white">จัดการพนักงาน</a>
+        <a href="/hr/employees.php" class="hover:text-white touch-manipulation">จัดการพนักงาน</a>
         <span class="mx-2">/</span>
         <span class="text-white"><?php echo $action === 'edit' ? 'แก้ไข' : 'เพิ่ม'; ?></span>
     </nav>
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <h1 class="text-2xl font-bold text-white"><?php echo htmlspecialchars($page_title); ?></h1>
-        <a href="/hr/employees.php" class="px-4 py-2 min-h-[44px] inline-flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">
+    <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+        <div class="min-w-0 flex-1">
+            <h1 class="text-2xl font-bold text-white tracking-tight"><?php echo htmlspecialchars($page_title); ?></h1>
+            <?php if ($formSubtitle !== ''): ?>
+            <p class="text-slate-300 text-sm mt-1.5 leading-relaxed"><?php echo htmlspecialchars($formSubtitle); ?></p>
+            <?php endif; ?>
+        </div>
+        <a href="/hr/employees.php" class="w-full sm:w-auto shrink-0 inline-flex items-center justify-center min-h-[44px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors font-medium touch-manipulation">
             <i class="fas fa-arrow-left mr-2"></i>กลับ
         </a>
     </div>
 </div>
 
 <!-- Info Box: Shared with CRM -->
-<div class="glass-card rounded-xl p-4 mb-6 border-l-4 border-blue-500">
+<div class="glass-card rounded-xl p-4 mb-6 min-w-0 border-l-4 border-blue-500">
     <div class="flex items-start gap-3">
         <i class="fas fa-info-circle text-blue-400 mt-0.5"></i>
         <div>
@@ -438,7 +448,7 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <?php if (!empty($errors)): ?>
-<div class="glass-card rounded-xl p-4 mb-6 border-l-4 border-red-500">
+<div class="glass-card rounded-xl p-4 mb-6 min-w-0 border-l-4 border-red-500">
     <div class="flex items-start gap-3">
         <i class="fas fa-exclamation-circle text-red-400 mt-0.5"></i>
         <div>
@@ -454,7 +464,7 @@ include dirname(__DIR__) . '/templates/header.php';
 <?php endif; ?>
 
 <?php if ($success): ?>
-<div class="glass-card rounded-xl p-4 mb-6 border-l-4 border-green-500">
+<div class="glass-card rounded-xl p-4 mb-6 min-w-0 border-l-4 border-green-500">
     <div class="flex items-start gap-3">
         <i class="fas fa-check-circle text-green-400 mt-0.5"></i>
         <p class="text-green-400"><?php echo htmlspecialchars($success); ?></p>
@@ -462,11 +472,11 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 <?php endif; ?>
 
-<form method="POST" class="space-y-6">
+<form method="POST" class="space-y-6 min-w-0 max-w-full">
     <?php echo csrfField(); ?>
     
     <!-- Tab Navigation -->
-    <div class="glass-card rounded-xl p-1.5 flex flex-nowrap overflow-x-auto gap-1 sticky top-3 z-30 [-webkit-overflow-scrolling:touch] overscroll-x-contain">
+    <div class="glass-card rounded-xl p-1.5 min-w-0 flex flex-nowrap overflow-x-auto gap-1 sticky top-3 z-30 [-webkit-overflow-scrolling:touch] overscroll-x-contain">
         <button type="button" onclick="switchTab('tab-personal')" id="btn-tab-personal" class="tab-btn active shrink-0 min-h-[44px] px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 touch-manipulation">
             <i class="fas fa-user"></i>
             <span class="hidden sm:inline">ข้อมูลส่วนตัว</span>
@@ -499,7 +509,7 @@ include dirname(__DIR__) . '/templates/header.php';
     <div id="tab-personal" class="tab-panel space-y-6">
     
     <!-- Basic Info -->
-    <div class="glass-card rounded-xl p-6">
+    <div class="glass-card rounded-xl p-6 min-w-0">
         <h3 class="text-lg font-bold text-white mb-4 flex items-center">
             <i class="fas fa-user text-violet-400 mr-2"></i>
             ข้อมูลพื้นฐาน
@@ -541,7 +551,7 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
     
     <!-- Personal Info -->
-    <div class="glass-card rounded-xl p-6">
+    <div class="glass-card rounded-xl p-6 min-w-0">
         <h3 class="text-lg font-bold text-white mb-4 flex items-center">
             <i class="fas fa-id-card text-violet-400 mr-2"></i>
             ข้อมูลส่วนตัว
@@ -725,7 +735,7 @@ include dirname(__DIR__) . '/templates/header.php';
     <div id="tab-work" class="tab-panel space-y-6" style="display:none">
     
     <!-- Work Info -->
-    <div class="glass-card rounded-xl p-6">
+    <div class="glass-card rounded-xl p-6 min-w-0">
         <h3 class="text-lg font-bold text-white mb-4 flex items-center">
             <i class="fas fa-briefcase text-violet-400 mr-2"></i>
             ข้อมูลการทำงาน
@@ -884,7 +894,7 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
     
     <!-- Probation Section -->
-    <div class="glass-card rounded-xl p-6" id="probation-section">
+    <div class="glass-card rounded-xl p-6 min-w-0" id="probation-section">
         <h3 class="text-lg font-bold text-white mb-4 flex items-center">
             <i class="fas fa-user-clock text-amber-400 mr-2"></i>
             ระยะทดลองงาน (Probation)
@@ -957,7 +967,7 @@ include dirname(__DIR__) . '/templates/header.php';
     <div id="tab-welfare" class="tab-panel space-y-6" style="display:none">
     
     <!-- Social Security & Banking -->
-    <div class="glass-card rounded-xl p-6">
+    <div class="glass-card rounded-xl p-6 min-w-0">
         <h3 class="text-lg font-bold text-white mb-4 flex items-center">
             <i class="fas fa-shield-alt text-cyan-400 mr-2"></i>
             ประกันสังคม & บัญชีธนาคาร
@@ -1012,7 +1022,7 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
     
     <!-- Emergency Contact -->
-    <div class="glass-card rounded-xl p-6">
+    <div class="glass-card rounded-xl p-6 min-w-0">
         <h3 class="text-lg font-bold text-white mb-4 flex items-center">
             <i class="fas fa-phone-alt text-rose-400 mr-2"></i>
             ผู้ติดต่อกรณีฉุกเฉิน
@@ -1054,7 +1064,7 @@ include dirname(__DIR__) . '/templates/header.php';
     <div id="tab-history" class="tab-panel space-y-6" style="display:none">
     
     <!-- Education History -->
-    <div class="glass-card rounded-xl p-6">
+    <div class="glass-card rounded-xl p-6 min-w-0">
         <h3 class="text-lg font-bold text-white mb-4 flex items-center justify-between">
             <span class="flex items-center">
                 <i class="fas fa-graduation-cap text-indigo-400 mr-2"></i>
@@ -1122,7 +1132,7 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
     
     <!-- Work History -->
-    <div class="glass-card rounded-xl p-6">
+    <div class="glass-card rounded-xl p-6 min-w-0">
         <h3 class="text-lg font-bold text-white mb-4 flex items-center justify-between">
             <span class="flex items-center">
                 <i class="fas fa-history text-orange-400 mr-2"></i>
@@ -1186,7 +1196,7 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
     
     <!-- Family Info -->
-    <div class="glass-card rounded-xl p-6">
+    <div class="glass-card rounded-xl p-6 min-w-0">
         <h3 class="text-lg font-bold text-white mb-4 flex items-center justify-between">
             <span class="flex items-center">
                 <i class="fas fa-users text-pink-400 mr-2"></i>
@@ -1267,7 +1277,7 @@ include dirname(__DIR__) . '/templates/header.php';
     <div id="tab-system" class="tab-panel space-y-6" style="display:none">
     
     <!-- LINE Info (Read-only) -->
-    <div class="glass-card rounded-xl p-6">
+    <div class="glass-card rounded-xl p-6 min-w-0">
         <h3 class="text-lg font-bold text-white mb-4 flex items-center">
             <i class="fab fa-line text-green-400 mr-2"></i>
             ข้อมูล LINE (เชื่อมต่อจาก CRM)
@@ -1298,7 +1308,7 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
     
     <!-- System Info -->
-    <div class="glass-card rounded-xl p-6">
+    <div class="glass-card rounded-xl p-6 min-w-0">
         <h3 class="text-lg font-bold text-white mb-4 flex items-center">
             <i class="fas fa-server text-violet-400 mr-2"></i>
             ข้อมูลระบบ
@@ -1332,11 +1342,11 @@ include dirname(__DIR__) . '/templates/header.php';
     <?php endif; ?>
     
     <!-- Submit Buttons -->
-    <div class="glass-card rounded-xl p-3 sticky bottom-[calc(72px+env(safe-area-inset-bottom))] md:bottom-4 z-30 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3">
-        <a href="/hr/employees.php" class="w-full sm:w-auto min-h-[44px] px-6 py-3 inline-flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">
+    <div class="glass-card rounded-xl p-3 min-w-0 sticky bottom-[calc(72px+env(safe-area-inset-bottom))] md:bottom-4 z-30 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3">
+        <a href="/hr/employees.php" class="w-full sm:w-auto min-h-[44px] px-6 py-3 inline-flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors font-medium touch-manipulation">
             ยกเลิก
         </a>
-        <button type="submit" class="w-full sm:w-auto min-h-[44px] px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
+        <button type="submit" class="w-full sm:w-auto min-h-[44px] px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors font-semibold touch-manipulation">
             <i class="fas fa-save mr-2"></i>
             <?php echo $action === 'edit' ? 'บันทึกการแก้ไข' : 'เพิ่มพนักงาน'; ?>
         </button>
@@ -1345,7 +1355,7 @@ include dirname(__DIR__) . '/templates/header.php';
 
 <?php if ($action === 'edit' && $employee): ?>
 <!-- Change Password Section -->
-<div class="glass-card rounded-xl p-6 mt-6">
+<div class="glass-card rounded-xl p-6 mt-6 min-w-0">
     <h3 class="text-lg font-bold text-white mb-4 flex items-center">
         <i class="fas fa-key text-yellow-400 mr-2"></i>
         เปลี่ยนรหัสผ่าน

@@ -160,12 +160,17 @@ require_once __DIR__ . '/../templates/header.php';
 ?>
 
 <!-- Page Header -->
-<div class="mb-6">
-    <h1 class="text-2xl font-bold text-white mb-2">
+<div class="mb-6 min-w-0">
+    <nav class="text-sm text-white/60 mb-3" aria-label="Breadcrumb">
+        <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
+        <span class="mx-2">/</span>
+        <span class="text-white">ตั้งค่าระบบ</span>
+    </nav>
+    <h1 class="text-2xl font-bold text-white tracking-tight mb-2">
         <i class="fas fa-cog text-primary-400 mr-2"></i>
         ตั้งค่าระบบ
     </h1>
-    <p class="text-slate-400">จัดการการตั้งค่าระบบ HR</p>
+    <p class="text-slate-300 text-sm leading-relaxed">จัดการการตั้งค่าระบบ HR</p>
 </div>
 
 <?php if (isset($success)): ?>

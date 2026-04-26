@@ -140,28 +140,38 @@ for ($i = 0; $i < 12; $i++) {
     $monthOptions[] = ['value' => $d, 'label' => formatDateThai($d . '-01')];
 }
 
-$current_page = 'hr-employees';
+$empFullNameTh = trim(($employee['title'] ?? '') . ' ' . ($employee['first_name_th'] ?? '') . ' ' . ($employee['last_name_th'] ?? ''));
+
+$current_page = 'hr-attendance';
 include dirname(__DIR__) . '/templates/header.php';
 ?>
 
-<div class="mb-6">
-    <nav class="text-sm text-white/60 mb-1">
-        <a href="/hr/" class="hover:text-white">HR</a>
+<div class="mb-6 min-w-0">
+    <nav class="text-sm text-white/60 mb-1" aria-label="Breadcrumb">
+        <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
         <span class="mx-2">/</span>
-        <a href="/hr/reports.php?report=attendance" class="hover:text-white">รายงาน</a>
+        <a href="/hr/attendance.php" class="hover:text-white touch-manipulation">จัดการเวลาทำงาน</a>
         <span class="mx-2">/</span>
-        <span class="text-white">ประวัติลงเวลารายบุคคล</span>
+        <span class="text-white">ประวัติลงเวลา</span>
     </nav>
-    <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-white">ประวัติลงเวลารายบุคคล</h1>
-        <a href="javascript:history.back()" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">
-            <i class="fas fa-arrow-left mr-2"></i>กลับ
-        </a>
+    <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+        <div class="min-w-0 flex-1">
+            <h1 class="text-2xl font-bold text-white tracking-tight">ประวัติลงเวลารายบุคคล</h1>
+            <p class="text-slate-300 text-sm mt-1.5 leading-relaxed"><?php echo htmlspecialchars($empFullNameTh); ?></p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto shrink-0">
+            <a href="/hr/employee_view.php?id=<?php echo (int)$employeeId; ?>" class="inline-flex items-center justify-center min-h-[44px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors font-medium touch-manipulation">
+                <i class="fas fa-user mr-2"></i>โปรไฟล์
+            </a>
+            <a href="/hr/attendance.php" class="inline-flex items-center justify-center min-h-[44px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors font-medium touch-manipulation">
+                <i class="fas fa-arrow-left mr-2"></i>กลับ
+            </a>
+        </div>
     </div>
 </div>
 
 <!-- Employee Info Card -->
-<div class="glass-card rounded-xl p-6 mb-6">
+<div class="glass-card rounded-xl p-4 sm:p-6 mb-6 min-w-0 overflow-hidden">
     <div class="flex items-center gap-4">
         <div class="w-16 h-16 rounded-full bg-violet-500/20 flex items-center justify-center">
             <i class="fas fa-user text-violet-400 text-2xl"></i>
@@ -190,7 +200,7 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <!-- Month Filter -->
-<div class="glass-card rounded-xl p-4 mb-6">
+<div class="glass-card rounded-xl p-4 sm:p-6 mb-6 min-w-0 overflow-hidden">
     <form method="GET" class="flex flex-wrap items-center gap-4">
         <input type="hidden" name="id" value="<?php echo $employeeId; ?>">
         <div class="flex items-center gap-2">
@@ -207,36 +217,36 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <!-- Summary Cards -->
-<div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-    <div class="glass-card rounded-xl p-4 text-center">
-        <p class="text-white/60 text-sm">มาทำงาน</p>
-        <p class="text-3xl font-bold text-green-400"><?php echo (int)($summary['present_days'] ?? 0); ?></p>
+<div class="grid grid-cols-2 md:grid-cols-5 gap-2 sm:gap-4 mb-6 min-w-0 max-w-full">
+    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden text-center">
+        <p class="text-white/60 text-sm truncate">มาทำงาน</p>
+        <p class="text-3xl font-bold text-green-400 tabular-nums mt-1"><?php echo (int)($summary['present_days'] ?? 0); ?></p>
         <p class="text-white/50 text-xs">วัน</p>
     </div>
-    <div class="glass-card rounded-xl p-4 text-center">
-        <p class="text-white/60 text-sm">มาสาย</p>
-        <p class="text-3xl font-bold text-yellow-400"><?php echo (int)($summary['late_days'] ?? 0); ?></p>
+    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden text-center">
+        <p class="text-white/60 text-sm truncate">มาสาย</p>
+        <p class="text-3xl font-bold text-yellow-400 tabular-nums mt-1"><?php echo (int)($summary['late_days'] ?? 0); ?></p>
         <p class="text-white/50 text-xs">ครั้ง</p>
     </div>
-    <div class="glass-card rounded-xl p-4 text-center">
-        <p class="text-white/60 text-sm">ขาดงาน</p>
-        <p class="text-3xl font-bold text-red-400"><?php echo (int)($summary['absent_days'] ?? 0); ?></p>
+    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden text-center">
+        <p class="text-white/60 text-sm truncate">ขาดงาน</p>
+        <p class="text-3xl font-bold text-red-400 tabular-nums mt-1"><?php echo (int)($summary['absent_days'] ?? 0); ?></p>
         <p class="text-white/50 text-xs">วัน</p>
     </div>
-    <div class="glass-card rounded-xl p-4 text-center">
-        <p class="text-white/60 text-sm">ลา</p>
-        <p class="text-3xl font-bold text-blue-400"><?php echo (int)($summary['leave_days'] ?? 0); ?></p>
+    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden text-center">
+        <p class="text-white/60 text-sm truncate">ลา</p>
+        <p class="text-3xl font-bold text-blue-400 tabular-nums mt-1"><?php echo (int)($summary['leave_days'] ?? 0); ?></p>
         <p class="text-white/50 text-xs">วัน</p>
     </div>
-    <div class="glass-card rounded-xl p-4 text-center">
-        <p class="text-white/60 text-sm">ชั่วโมงทำงาน</p>
-        <p class="text-3xl font-bold text-white"><?php echo floor(($summary['total_work_minutes'] ?? 0) / 60); ?></p>
+    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden text-center md:col-span-1 col-span-2">
+        <p class="text-white/60 text-sm truncate">ชั่วโมงทำงาน</p>
+        <p class="text-3xl font-bold text-white tabular-nums mt-1"><?php echo floor(($summary['total_work_minutes'] ?? 0) / 60); ?></p>
         <p class="text-white/50 text-xs">ชั่วโมง</p>
     </div>
 </div>
 
 <!-- Attendance Table -->
-<div class="glass-card rounded-xl overflow-hidden">
+<div class="glass-card rounded-xl overflow-hidden min-w-0">
     <?php if ($allDays): ?>
     <div class="md:hidden p-3 space-y-3">
         <?php foreach ($allDays as $day): ?>

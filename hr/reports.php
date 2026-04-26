@@ -186,13 +186,19 @@ require_once __DIR__ . '/../templates/header.php';
 ?>
 
 <!-- Page Header -->
-<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-    <div>
-        <h1 class="text-2xl font-bold text-white mb-2">
+<div class="mb-6 min-w-0">
+    <nav class="text-sm text-white/60 mb-3" aria-label="Breadcrumb">
+        <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
+        <span class="mx-2">/</span>
+        <span class="text-white">รายงาน</span>
+    </nav>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div class="min-w-0">
+        <h1 class="text-2xl font-bold text-white tracking-tight mb-2">
             <i class="fas fa-chart-bar text-primary-400 mr-2"></i>
             รายงาน
         </h1>
-        <p class="text-slate-400">ดูรายงานการลงเวลาและการลา</p>
+        <p class="text-slate-300 text-sm leading-relaxed">ดูรายงานการลงเวลาและการลา</p>
     </div>
     
     <?php if ($reportData): ?>
@@ -200,10 +206,11 @@ require_once __DIR__ . '/../templates/header.php';
         <i class="fas fa-file-csv mr-2"></i>Export CSV
     </a>
     <?php endif; ?>
+    </div>
 </div>
 
 <!-- Report Type Tabs -->
-<div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+<div class="flex gap-2 mb-6 overflow-x-auto pb-2 min-w-0">
     <a href="?report=attendance" class="px-4 py-2 rounded-lg whitespace-nowrap <?php echo $report === 'attendance' ? 'bg-primary-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'; ?>">
         <i class="fas fa-user-clock mr-2"></i>รายงานการลงเวลา
     </a>
