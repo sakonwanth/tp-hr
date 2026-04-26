@@ -222,6 +222,26 @@ function fileUrl(string $path): string {
 }
 
 /**
+ * Public base URL for TP-Checkin (static files e.g. {base}/storage/photos/...).
+ * - CHECKIN_APP_URL ถ้าตั้งใน .env
+ * - ถ้า APP_URL เป็นโฮสต์แบบ hr.* ให้ใช้ checkin.* (scheme/port เดิม) — เช่น hr.tp-asset.com → checkin.tp-asset.com
+ * - นอกนั้น fallback เป็น APP_URL (โฟลเดอร์ storage ร่วมบนโดเมนเดียวกัน)
+ */
+function checkinPublicBaseUrl(): string {
+    if (CHECKIN_APP_URL !== '') {
+        return rtrim(CHECKIN_APP_URL, '/');
+    }
+    $parts = parse_url(APP_URL);
+    if (!empty($parts['host']) && preg_match('/^hr\./i', $parts['host'])) {
+        $scheme = $parts['scheme'] ?? 'https';
+        $host = preg_replace('/^hr\./i', 'checkin.', $parts['host'], 1);
+        $port = isset($parts['port']) ? ':' . $parts['port'] : '';
+        return rtrim($scheme . '://' . $host . $port, '/');
+    }
+    return rtrim(APP_URL, '/');
+}
+
+/**
  * Allowed relative paths under TP-Checkin storage (anti path-traversal).
  */
 function checkinStorageRelativePathIsAllowed(string $path): bool {
@@ -281,15 +301,13 @@ function attendancePhotoPublicUrl(?string $path): string {
         if (CHECKIN_STORAGE_PATH !== '') {
             return rtrim(APP_URL, '/') . '/api/checkin_storage_image.php?' . http_build_query(['path' => $path], '', '&', PHP_QUERY_RFC3986);
         }
-        $checkinBase = CHECKIN_APP_URL !== '' ? rtrim(CHECKIN_APP_URL, '/') : rtrim(APP_URL, '/');
-        return $checkinBase . '/storage/' . $path;
+        return checkinPublicBaseUrl() . '/storage/' . $path;
     }
     if (strpos($path, 'storage/') === 0) {
         if (CHECKIN_STORAGE_PATH !== '' && strpos($path, 'storage/adjustments/') === 0) {
             return rtrim(APP_URL, '/') . '/api/checkin_storage_image.php?' . http_build_query(['path' => $path], '', '&', PHP_QUERY_RFC3986);
         }
-        $checkinBase = CHECKIN_APP_URL !== '' ? rtrim(CHECKIN_APP_URL, '/') : rtrim(APP_URL, '/');
-        return $checkinBase . '/' . $path;
+        return checkinPublicBaseUrl() . '/' . $path;
     }
     return fileUrl($path);
 }
