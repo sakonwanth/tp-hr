@@ -10,6 +10,10 @@ require_once dirname(__DIR__) . '/bootstrap.php';
 Auth::requireLogin();
 $user = Auth::user();
 
+if (!hr_can_access_hr_dashboard()) {
+    redirect('/', 302);
+}
+
 if (!isCEOOrAbove()) {
     flash('error', 'ต้องเป็นระดับ CEO ขึ้นไปเท่านั้น');
     redirect('/hr/', 302);
