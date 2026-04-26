@@ -17,6 +17,13 @@ if (!hr_can_access_hr_dashboard()) {
 // Check for CEO-level actions (add, edit, delete)
 $action = $_POST['action'] ?? ($_GET['action'] ?? '');
 
+if (($_GET['action'] ?? '') === 'export') {
+    $q = $_GET;
+    unset($q['action']);
+    flash('error', 'การส่งออกข้อมูล กรุณากดปุ่ม Export ในหน้านี้เท่านั้น');
+    redirect('/hr/employees.php' . (count($q) ? '?' . http_build_query($q) : ''), 302);
+}
+
 // Redirect add/edit to employee_form.php
 if ($action === 'add') {
     if (!canManageUsers()) {
@@ -67,41 +74,38 @@ if ($action === 'delete') {
     redirect('/hr/employees.php', 302);
 }
 
-// Filters
-$search = $_GET['search'] ?? '';
-$department = $_GET['department'] ?? '';
-$status = $_GET['status'] ?? '';
-$page = max(1, (int)($_GET['page'] ?? 1));
-$limit = DEFAULT_PER_PAGE;
-$offset = ($page - 1) * $limit;
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['export_csv'] ?? '') === '1') {
+    if (!verifyCsrfToken($_POST['_token'] ?? null)) {
+        flash('error', 'โทเค็นความปลอดภัยไม่ถูกต้อง');
+        redirect('/hr/employees.php', 302);
+    }
+    $search = trim((string)($_POST['search'] ?? ''));
+    $department = trim((string)($_POST['department'] ?? ''));
+    $status = (string)($_POST['status'] ?? '');
 
-$exportQuery = array_merge($_GET, ['action' => 'export']);
-unset($exportQuery['page']);
+    $employeeWhere = "u.id > 0 AND u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")";
+    $params = [];
 
-$employeeWhere = "u.id > 0 AND u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")";
-$params = [];
+    if ($search !== '') {
+        $employeeWhere .= " AND (u.first_name_th LIKE ? OR u.last_name_th LIKE ? OR u.employee_code LIKE ? OR u.email LIKE ?)";
+        $searchParam = "%{$search}%";
+        $params[] = $searchParam;
+        $params[] = $searchParam;
+        $params[] = $searchParam;
+        $params[] = $searchParam;
+    }
 
-if ($search) {
-    $employeeWhere .= " AND (u.first_name_th LIKE ? OR u.last_name_th LIKE ? OR u.employee_code LIKE ? OR u.email LIKE ?)";
-    $searchParam = "%{$search}%";
-    $params[] = $searchParam;
-    $params[] = $searchParam;
-    $params[] = $searchParam;
-    $params[] = $searchParam;
-}
+    if ($department !== '') {
+        $employeeWhere .= " AND u.department = ?";
+        $params[] = $department;
+    }
 
-if ($department) {
-    $employeeWhere .= " AND u.department = ?";
-    $params[] = $department;
-}
+    if ($status === 'ACTIVE') {
+        $employeeWhere .= " AND u.is_active = 1";
+    } elseif ($status === 'INACTIVE') {
+        $employeeWhere .= " AND u.is_active = 0";
+    }
 
-if ($status === 'ACTIVE') {
-    $employeeWhere .= " AND u.is_active = 1";
-} elseif ($status === 'INACTIVE') {
-    $employeeWhere .= " AND u.is_active = 0";
-}
-
-if ($action === 'export') {
     $exportCols = canManageUsers()
         ? "u.id, u.employee_code, u.title, u.first_name_th, u.last_name_th, u.department, u.position, u.email, u.phone, u.hire_date, u.is_active, u.work_mode, u.salary, u.probation_salary"
         : "u.id, u.employee_code, u.title, u.first_name_th, u.last_name_th, u.department, u.position, u.email, u.phone, u.hire_date, u.is_active, u.work_mode";
@@ -136,6 +140,37 @@ if ($action === 'export') {
         'row_count' => count($rows),
     ]);
     exit;
+}
+
+// Filters
+$search = $_GET['search'] ?? '';
+$department = $_GET['department'] ?? '';
+$status = $_GET['status'] ?? '';
+$page = max(1, (int)($_GET['page'] ?? 1));
+$limit = DEFAULT_PER_PAGE;
+$offset = ($page - 1) * $limit;
+
+$employeeWhere = "u.id > 0 AND u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")";
+$params = [];
+
+if ($search) {
+    $employeeWhere .= " AND (u.first_name_th LIKE ? OR u.last_name_th LIKE ? OR u.employee_code LIKE ? OR u.email LIKE ?)";
+    $searchParam = "%{$search}%";
+    $params[] = $searchParam;
+    $params[] = $searchParam;
+    $params[] = $searchParam;
+    $params[] = $searchParam;
+}
+
+if ($department) {
+    $employeeWhere .= " AND u.department = ?";
+    $params[] = $department;
+}
+
+if ($status === 'ACTIVE') {
+    $employeeWhere .= " AND u.is_active = 1";
+} elseif ($status === 'INACTIVE') {
+    $employeeWhere .= " AND u.is_active = 0";
 }
 
 // Get departments
@@ -253,15 +288,22 @@ $flashError = flash('error');
                 <i class="fas fa-search mr-2"></i>ค้นหา
             </button>
         </div>
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-2 min-w-0 sm:col-span-2 xl:col-span-1">
-            <a href="employees.php" class="flex-1 min-h-[44px] py-2.5 bg-white/10 hover:bg-white/20 text-white text-center rounded-xl transition-colors touch-manipulation inline-flex items-center justify-center font-medium">
-                <i class="fas fa-redo mr-2"></i>รีเซ็ต
-            </a>
-            <a href="?<?php echo http_build_query($exportQuery); ?>" class="flex-1 min-h-[44px] py-2.5 bg-green-600 hover:bg-green-700 text-white text-center rounded-xl transition-colors touch-manipulation inline-flex items-center justify-center font-medium">
-                <i class="fas fa-file-excel mr-2"></i>Export
-            </a>
-        </div>
     </form>
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-2 min-w-0 mt-4 pt-4 border-t border-white/10">
+        <a href="employees.php" class="flex-1 min-h-[44px] py-2.5 bg-white/10 hover:bg-white/20 text-white text-center rounded-xl transition-colors touch-manipulation inline-flex items-center justify-center font-medium">
+            <i class="fas fa-redo mr-2"></i>รีเซ็ต
+        </a>
+        <form method="post" class="flex-1 min-w-0">
+            <?php echo csrfField(); ?>
+            <input type="hidden" name="export_csv" value="1">
+            <input type="hidden" name="search" value="<?php echo htmlspecialchars($search); ?>">
+            <input type="hidden" name="department" value="<?php echo htmlspecialchars($department); ?>">
+            <input type="hidden" name="status" value="<?php echo htmlspecialchars($status); ?>">
+            <button type="submit" class="w-full min-h-[44px] py-2.5 bg-green-600 hover:bg-green-700 text-white text-center rounded-xl transition-colors touch-manipulation inline-flex items-center justify-center font-medium gap-2">
+                <i class="fas fa-file-excel"></i>Export
+            </button>
+        </form>
+    </div>
 </div>
 
 <!-- Employee List -->
