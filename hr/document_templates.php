@@ -689,7 +689,7 @@ if (!empty($editRow['id'])) {
 </div>
 
 <?php if ($certPreviewReqId > 0): ?>
-<form id="hr_doc_tpl_cert_preview" method="post" action="/certificate_print.php" target="_blank" rel="noopener noreferrer" class="hidden" aria-hidden="true">
+<form id="hr_doc_tpl_cert_preview" method="post" action="/certificate_print.php" target="_blank" class="hidden" aria-hidden="true">
     <?php echo csrfField(); ?>
     <input type="hidden" name="certificate_print" value="1">
     <input type="hidden" name="id" value="<?php echo $certPreviewReqId; ?>">
