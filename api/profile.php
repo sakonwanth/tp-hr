@@ -93,11 +93,14 @@ try {
 function getProfile($pdo, $user) {
     $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
     $stmt->execute([$user['id']]);
-    $profile = $stmt->fetch();
-    
-    // Remove sensitive data
-    unset($profile['password']);
-    
+    $profile = tpHrSanitizeUserRowForSelfProfileApi($stmt->fetch(PDO::FETCH_ASSOC));
+
+    if ($profile === null) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'error' => 'ไม่พบข้อมูล']);
+        return;
+    }
+
     echo json_encode(['success' => true, 'profile' => $profile]);
 }
 

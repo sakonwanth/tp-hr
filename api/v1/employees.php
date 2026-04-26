@@ -2,7 +2,7 @@
 /**
  * GET /api/v1/employees
  * GET /api/v1/employees/{id}
- * Scope: employees.read
+ * Scope: employees.read; directory list also needs employees.read_all (or *) unless key has service_user_id
  */
 ApiAuth::require(['employees.read']);
 $key = ApiAuth::currentKey();
@@ -48,6 +48,10 @@ if ($svc !== null) {
             'total_pages' => 1,
         ],
     ]);
+}
+
+if (!apiKeyMayListAllEmployees($key)) {
+    ApiAuth::fail(403, 'Listing employees requires employees.read_all (or *) or a service user bound to the API key');
 }
 
 // List (paginated)

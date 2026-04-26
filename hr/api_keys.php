@@ -118,7 +118,8 @@ $recentLogs = $pdo->query("
 ")->fetchAll(PDO::FETCH_ASSOC);
 
 $availableScopes = [
-    'employees.read'       => 'อ่านข้อมูลพนักงาน',
+    'employees.read'       => 'อ่านข้อมูลพนักงาน (รายคน / คีย์ผูกพนักงาน)',
+    'employees.read_all'   => 'อ่านรายชื่อพนักงานทั้งหมด (GET /employees แบบลิสต์)',
     'attendance.read'      => 'อ่านข้อมูลลงเวลา',
     'attendance.write'     => 'เช็คอิน/เช็คเอาต์ผ่าน API',
     'leave.read'           => 'อ่านข้อมูลการลา',

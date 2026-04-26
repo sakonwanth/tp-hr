@@ -261,6 +261,64 @@ function apiKeyAssertResourceOwnerUserId(?array $key, int $resourceOwnerUserId):
     }
 }
 
+/**
+ * GET /api/v1/employees without service_user_id: list-all requires explicit scope (or *).
+ */
+function apiKeyMayListAllEmployees(?array $key): bool {
+    if (!$key) {
+        return false;
+    }
+    $scopes = json_decode($key['scopes'] ?? '[]', true) ?: [];
+    if (in_array('*', $scopes, true)) {
+        return true;
+    }
+    return in_array('employees.read_all', $scopes, true);
+}
+
+/**
+ * Session profile API — strip secrets/finance fields; mask national id like the web profile UI.
+ *
+ * @param  array<string,mixed>|false|null $row
+ * @return array<string,mixed>|null
+ */
+function tpHrSanitizeUserRowForSelfProfileApi(array|false|null $row): ?array {
+    if (!is_array($row) || $row === []) {
+        return null;
+    }
+    $out = $row;
+    $removeExact = [
+        'password',
+        'salary',
+        'probation_salary',
+        'bank_name',
+        'bank_account',
+        'social_security_id',
+        'tax_id',
+        'remember_token',
+        'reset_password_token',
+        'password_reset_token',
+        'email_verification_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'api_token',
+        'line_user_id',
+        'google_id',
+        'facebook_id',
+    ];
+    foreach ($removeExact as $k) {
+        unset($out[$k]);
+    }
+    foreach (array_keys($out) as $k) {
+        if (preg_match('/(password|_token|_secret|_salt)$/i', (string) $k)) {
+            unset($out[$k]);
+        }
+    }
+    if (!empty($out['id_card']) && is_string($out['id_card'])) {
+        $out['id_card'] = mb_substr($out['id_card'], 0, 4) . '-XXXX-XXXXX-XX-X';
+    }
+    return $out;
+}
+
 /** Block manager-only approve/reject flows for keys restricted to one employee. */
 function apiKeyForbidServiceScoped(string $message = 'This action is not allowed for employee-scoped API keys'): void {
     if (apiKeyServiceUserId(ApiAuth::currentKey()) !== null) {
