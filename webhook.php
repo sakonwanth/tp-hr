@@ -2,21 +2,34 @@
 /**
  * GitHub Webhook for Auto-Deploy
  * Triggers git pull when code is pushed to GitHub
+ *
+ * Requires WEBHOOK_SECRET in .env / server env (same value as GitHub webhook "Secret").
+ * Every request must send a valid X-Hub-Signature-256 (sha256 HMAC of raw body).
  */
 
-// Webhook secret (change this to a secure random string)
-$secret = getenv('WEBHOOK_SECRET') ?: 'tp-hr-deploy-2024';
+require_once __DIR__ . '/bootstrap.php';
 
-// Verify GitHub signature
 $payload = file_get_contents('php://input');
-$signature = $_SERVER['HTTP_X_HUB_SIGNATURE_256'] ?? '';
+$signature = (string)($_SERVER['HTTP_X_HUB_SIGNATURE_256'] ?? '');
 
-if ($signature) {
-    $expected = 'sha256=' . hash_hmac('sha256', $payload, $secret);
-    if (!hash_equals($expected, $signature)) {
-        http_response_code(403);
-        die('Invalid signature');
-    }
+$secret = trim((string)($_ENV['WEBHOOK_SECRET'] ?? (getenv('WEBHOOK_SECRET') !== false ? getenv('WEBHOOK_SECRET') : '')));
+if ($secret === '') {
+    http_response_code(503);
+    header('Content-Type: text/plain; charset=UTF-8');
+    die('Webhook not configured: set WEBHOOK_SECRET');
+}
+
+if ($signature === '' || !str_starts_with($signature, 'sha256=')) {
+    http_response_code(401);
+    header('Content-Type: text/plain; charset=UTF-8');
+    die('Missing signature');
+}
+
+$expected = 'sha256=' . hash_hmac('sha256', $payload, $secret);
+if (!hash_equals($expected, $signature)) {
+    http_response_code(403);
+    header('Content-Type: text/plain; charset=UTF-8');
+    die('Invalid signature');
 }
 
 // Only process push events
