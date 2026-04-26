@@ -100,17 +100,19 @@ $stmtMonthly = $pdo->prepare("
 $stmtMonthly->execute([$currentMonth]);
 $monthlyStats = $stmtMonthly->fetch();
 
+$current_page = 'hr-dashboard';
+
 include dirname(__DIR__) . '/templates/header.php';
 ?>
 
-<div class="mb-6">
-    <h1 class="text-2xl font-bold text-white">HR Dashboard</h1>
-    <p class="text-white/60">ภาพรวมระบบ HR วันที่ <?php echo formatDateThai($today); ?></p>
+<div class="mb-6 min-w-0">
+    <h1 class="text-2xl font-bold text-white tracking-tight">แดชบอร์ด HR</h1>
+    <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">ภาพรวมการเข้างาน การลา และคำขอเอกสาร ณ วันที่ <?php echo formatDateThai($today); ?></p>
 </div>
 
 <!-- Quick Stats -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-    <div class="glass-card rounded-xl p-4">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 min-w-0 max-w-full">
+    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-white/50 text-sm">เข้างานวันนี้</p>
@@ -124,7 +126,7 @@ include dirname(__DIR__) . '/templates/header.php';
         </div>
     </div>
     
-    <div class="glass-card rounded-xl p-4">
+    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-white/50 text-sm">มาสาย</p>
@@ -136,7 +138,7 @@ include dirname(__DIR__) . '/templates/header.php';
         </div>
     </div>
     
-    <div class="glass-card rounded-xl p-4">
+    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-white/50 text-sm">รอลาอนุมัติ</p>
@@ -146,10 +148,10 @@ include dirname(__DIR__) . '/templates/header.php';
                 <i class="fas fa-calendar-check text-violet-400 text-xl"></i>
             </div>
         </div>
-        <a href="leaves.php" class="text-violet-400 text-sm hover:underline mt-2 block">ดูทั้งหมด →</a>
+        <a href="leaves.php" class="text-violet-400 text-sm hover:underline mt-2 block touch-manipulation">ดูทั้งหมด →</a>
     </div>
     
-    <div class="glass-card rounded-xl p-4">
+    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-white/50 text-sm">รอออกเอกสาร</p>
@@ -159,18 +161,18 @@ include dirname(__DIR__) . '/templates/header.php';
                 <i class="fas fa-file-alt text-blue-400 text-xl"></i>
             </div>
         </div>
-        <a href="documents.php" class="text-blue-400 text-sm hover:underline mt-2 block">ดูทั้งหมด →</a>
+        <a href="documents.php" class="text-blue-400 text-sm hover:underline mt-2 block touch-manipulation">ดูทั้งหมด →</a>
     </div>
 </div>
 
-<div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 mb-6 min-w-0 max-w-full">
     <!-- Pending Leave Requests -->
-    <div class="glass-card rounded-xl overflow-hidden">
-        <div class="p-4 border-b border-white/10 flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-white">
+    <div class="glass-card rounded-xl overflow-hidden min-w-0">
+        <div class="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between gap-3 min-w-0">
+            <h2 class="text-lg font-semibold text-white tracking-tight min-w-0">
                 <i class="fas fa-calendar-alt text-violet-400 mr-2"></i>คำขอลารออนุมัติ
             </h2>
-            <a href="leaves.php" class="text-violet-400 text-sm hover:underline">ดูทั้งหมด</a>
+            <a href="leaves.php" class="text-violet-400 text-sm hover:underline shrink-0 touch-manipulation">ดูทั้งหมด</a>
         </div>
         
         <?php if (empty($recentLeaves)): ?>
@@ -181,9 +183,9 @@ include dirname(__DIR__) . '/templates/header.php';
         <?php else: ?>
         <div class="divide-y divide-white/10">
             <?php foreach ($recentLeaves as $leave): ?>
-            <div class="p-4 hover:bg-white/5 transition-colors">
-                <div class="flex items-start justify-between gap-4">
-                    <div class="flex-1">
+            <div class="p-4 hover:bg-white/5 transition-colors min-w-0">
+                <div class="flex items-start justify-between gap-4 min-w-0">
+                    <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-1">
                             <span class="w-2 h-2 rounded-full" style="background-color: <?php echo $leave['color_code']; ?>"></span>
                             <span class="text-white font-medium"><?php echo htmlspecialchars($leave['first_name_th'] . ' ' . $leave['last_name_th']); ?></span>
@@ -215,9 +217,9 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
     
     <!-- On Leave Today -->
-    <div class="glass-card rounded-xl overflow-hidden">
-        <div class="p-4 border-b border-white/10">
-            <h2 class="text-lg font-semibold text-white">
+    <div class="glass-card rounded-xl overflow-hidden min-w-0">
+        <div class="p-4 sm:p-5 border-b border-white/10">
+            <h2 class="text-lg font-semibold text-white tracking-tight">
                 <i class="fas fa-user-minus text-orange-400 mr-2"></i>ลาวันนี้ (<?php echo count($onLeaveToday); ?> คน)
             </h2>
         </div>
@@ -245,8 +247,8 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <!-- Quick Actions -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-    <a href="leaves.php" class="glass-card rounded-xl p-4 flex min-h-[44px] items-center hover:bg-white/10 transition-colors group touch-manipulation">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 min-w-0 max-w-full">
+    <a href="leaves.php" class="glass-card rounded-xl p-4 flex min-h-[44px] items-center min-w-0 hover:bg-white/10 transition-colors group touch-manipulation">
         <div class="flex items-center gap-4">
             <div class="w-10 h-10 rounded-lg bg-violet-600/20 flex items-center justify-center group-hover:bg-violet-600/30">
                 <i class="fas fa-calendar-check text-violet-400"></i>
@@ -255,7 +257,7 @@ include dirname(__DIR__) . '/templates/header.php';
         </div>
     </a>
     
-    <a href="attendance.php" class="glass-card rounded-xl p-4 flex min-h-[44px] items-center hover:bg-white/10 transition-colors group touch-manipulation">
+    <a href="attendance.php" class="glass-card rounded-xl p-4 flex min-h-[44px] items-center min-w-0 hover:bg-white/10 transition-colors group touch-manipulation">
         <div class="flex items-center gap-4">
             <div class="w-10 h-10 rounded-lg bg-green-600/20 flex items-center justify-center group-hover:bg-green-600/30">
                 <i class="fas fa-user-clock text-green-400"></i>
@@ -264,7 +266,7 @@ include dirname(__DIR__) . '/templates/header.php';
         </div>
     </a>
     
-    <a href="documents.php" class="glass-card rounded-xl p-4 flex min-h-[44px] items-center hover:bg-white/10 transition-colors group touch-manipulation">
+    <a href="documents.php" class="glass-card rounded-xl p-4 flex min-h-[44px] items-center min-w-0 hover:bg-white/10 transition-colors group touch-manipulation">
         <div class="flex items-center gap-4">
             <div class="w-10 h-10 rounded-lg bg-blue-600/20 flex items-center justify-center group-hover:bg-blue-600/30">
                 <i class="fas fa-file-alt text-blue-400"></i>
@@ -273,7 +275,7 @@ include dirname(__DIR__) . '/templates/header.php';
         </div>
     </a>
     
-    <a href="employees.php" class="glass-card rounded-xl p-4 flex min-h-[44px] items-center hover:bg-white/10 transition-colors group touch-manipulation">
+    <a href="employees.php" class="glass-card rounded-xl p-4 flex min-h-[44px] items-center min-w-0 hover:bg-white/10 transition-colors group touch-manipulation">
         <div class="flex items-center gap-4">
             <div class="w-10 h-10 rounded-lg bg-yellow-600/20 flex items-center justify-center group-hover:bg-yellow-600/30">
                 <i class="fas fa-users text-yellow-400"></i>
@@ -285,12 +287,12 @@ include dirname(__DIR__) . '/templates/header.php';
 
 <!-- Pending Documents -->
 <?php if (!empty($recentDocs)): ?>
-<div class="glass-card rounded-xl overflow-hidden">
-    <div class="p-4 border-b border-white/10 flex items-center justify-between">
-        <h2 class="text-lg font-semibold text-white">
+<div class="glass-card rounded-xl overflow-hidden min-w-0 max-w-full">
+    <div class="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between gap-3 min-w-0">
+        <h2 class="text-lg font-semibold text-white tracking-tight min-w-0">
             <i class="fas fa-file-signature text-blue-400 mr-2"></i>คำขอเอกสารรอดำเนินการ
         </h2>
-        <a href="documents.php" class="text-blue-400 text-sm hover:underline">ดูทั้งหมด</a>
+        <a href="documents.php" class="text-blue-400 text-sm hover:underline shrink-0 touch-manipulation">ดูทั้งหมด</a>
     </div>
     
     <div class="md:hidden p-3 space-y-3">
@@ -476,5 +478,17 @@ document.getElementById('reject-modal').addEventListener('click', function(e) {
     if (e.target === this) closeRejectModal();
 });
 </script>
+
+<style>
+.hr-dash-scroll {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.hr-dash-scroll::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+}
+</style>
 
 <?php include dirname(__DIR__) . '/templates/footer.php'; ?>

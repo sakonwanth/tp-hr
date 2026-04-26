@@ -938,6 +938,10 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             <p class="text-xs text-slate-500 uppercase tracking-wider mb-3 px-2 font-semibold">HR Admin</p>
             
             <nav class="space-y-1">
+                <a href="/hr/index.php" class="nav-item <?php echo $current_page === 'hr-dashboard' ? 'active' : ''; ?>">
+                    <i class="fas fa-th-large"></i>
+                    <span>แดชบอร์ด HR</span>
+                </a>
                 <a href="/hr/employees.php" class="nav-item <?php echo $current_page === 'hr-employees' ? 'active' : ''; ?>">
                     <i class="fas fa-users-cog"></i>
                     <span>จัดการพนักงาน</span>
@@ -1064,6 +1068,10 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             <?php if ($isHR): ?>
             <p class="mobile-menu-section-label">HR Admin</p>
             <nav class="mobile-menu-grid" aria-label="เมนูผู้ดูแล HR">
+                <a href="/hr/index.php" class="mobile-menu-tile <?php echo $current_page === 'hr-dashboard' ? 'active' : ''; ?>">
+                    <i class="fas fa-th-large" aria-hidden="true"></i>
+                    <span>แดชบอร์ด HR</span>
+                </a>
                 <a href="/hr/employees.php" class="mobile-menu-tile <?php echo $current_page === 'hr-employees' ? 'active' : ''; ?>">
                     <i class="fas fa-users-cog" aria-hidden="true"></i>
                     <span>จัดการพนักงาน</span>
