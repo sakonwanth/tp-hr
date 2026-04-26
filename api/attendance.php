@@ -698,11 +698,12 @@ function handleAdjust(PDO $pdo, array $user, array $input): void {
 }
 
 /**
- * Get adjustment history for a specific attendance (HR/Manager only)
+ * Get adjustment history for a specific attendance (HR dashboard only — same gate as hr/attendance.php, handleAdjust, handleDelete).
+ * Broad MANAGER_ROLES without hr.dashboard must not read cross-employee audit payloads (IP, before/after times).
  * GET params: user_id, date  (identify the attendance row)
  */
 function getAdjustmentHistory(PDO $pdo, array $user): void {
-    if (!hr_can_access_hr_dashboard() && !hasRole(MANAGER_ROLES)) {
+    if (!hr_can_access_hr_dashboard()) {
         apiError('ไม่มีสิทธิ์ดำเนินการ', 403);
     }
 
