@@ -101,25 +101,37 @@ function handlePost($pdo, $user, $action) {
 }
 
 /**
+ * Resolve subject user for leave read APIs: self, or HR/manager ?user_id= (validated).
+ *
+ * @return int Subject users.id, or -1 if HR/manager requested an unknown/system user.
+ */
+function leaveApiResolveSubjectUserId(PDO $pdo, array $user): int {
+    $self = (int) $user['id'];
+    if (!isset($_GET['user_id']) || (!isHR() && !hasRole(MANAGER_ROLES))) {
+        return $self;
+    }
+    $req = (int) $_GET['user_id'];
+    if ($req <= 0) {
+        return $self;
+    }
+    $chk = $pdo->prepare('SELECT id FROM users WHERE id = ? AND id NOT IN (' . SYSTEM_USER_IDS_SQL . ') LIMIT 1');
+    $chk->execute([$req]);
+    if (!$chk->fetchColumn()) {
+        return -1;
+    }
+    return $req;
+}
+
+/**
  * Get leave entitlements
  */
 function getEntitlements($pdo, $user) {
     $year = (int)($_GET['year'] ?? date('Y'));
-    $userId = (int) $user['id'];
-    
-    // Allow HR / managers to view another user's entitlements (role names are case-sensitive; use MANAGER_ROLES).
-    if (isset($_GET['user_id']) && (isHR() || hasRole(MANAGER_ROLES))) {
-        $reqUid = (int) $_GET['user_id'];
-        if ($reqUid > 0) {
-            $chk = $pdo->prepare('SELECT id FROM users WHERE id = ? AND id NOT IN (' . SYSTEM_USER_IDS_SQL . ') LIMIT 1');
-            $chk->execute([$reqUid]);
-            if (!$chk->fetchColumn()) {
-                http_response_code(404);
-                echo json_encode(['success' => false, 'error' => 'ไม่พบพนักงาน']);
-                return;
-            }
-            $userId = $reqUid;
-        }
+    $userId = leaveApiResolveSubjectUserId($pdo, $user);
+    if ($userId < 0) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'error' => 'ไม่พบพนักงาน']);
+        return;
     }
     
     $stmt = $pdo->prepare("
@@ -147,16 +159,24 @@ function getEntitlements($pdo, $user) {
     
     echo json_encode([
         'success' => true,
+        'subject_user_id' => $userId,
         'year' => $year,
         'entitlements' => $entitlements
     ]);
 }
 
 /**
- * Get leave history
+ * Get leave history (self; HR/manager may pass ?user_id=)
  */
 function getHistory($pdo, $user) {
     $year = (int)($_GET['year'] ?? date('Y'));
+    $userId = leaveApiResolveSubjectUserId($pdo, $user);
+    if ($userId < 0) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'error' => 'ไม่พบพนักงาน']);
+        return;
+    }
+
     $type = $_GET['type'] ?? '';
     $status = $_GET['status'] ?? '';
     $page = (int)($_GET['page'] ?? 1);
@@ -171,7 +191,7 @@ function getHistory($pdo, $user) {
         LEFT JOIN users approver ON lr.final_approved_by = approver.id
         WHERE lr.user_id = ? AND YEAR(lr.start_date) = ?
     ";
-    $params = [$user['id'], $year];
+    $params = [$userId, $year];
     
     if ($type) {
         $sql .= " AND lr.leave_type_id = ?";
@@ -194,7 +214,7 @@ function getHistory($pdo, $user) {
         SELECT COUNT(*) FROM hr_leave_requests lr
         WHERE lr.user_id = ? AND YEAR(lr.start_date) = ?
     ";
-    $countParams = [$user['id'], $year];
+    $countParams = [$userId, $year];
     if ($type) {
         $countSql .= " AND lr.leave_type_id = ?";
         $countParams[] = (int)$type;
@@ -210,6 +230,7 @@ function getHistory($pdo, $user) {
     
     echo json_encode([
         'success' => true,
+        'subject_user_id' => $userId,
         'requests' => $requests,
         'pagination' => [
             'page' => $page,
