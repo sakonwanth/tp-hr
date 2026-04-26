@@ -34,6 +34,12 @@ RewriteRule ^([^/]+)/?$ $1.php [L]
     Deny from all
 </FilesMatch>
 
+# Editor / SQL dump artifacts (if ever left in docroot)
+<FilesMatch "(\.(bak|old|orig|tmp|swp|save|dist|sql))$|~$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
 # Protect directories
 <IfModule mod_autoindex.c>
     Options -Indexes
