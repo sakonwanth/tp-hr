@@ -83,22 +83,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'chang
     if (!verifyCsrf()) {
         $errors[] = 'CSRF token ไม่ถูกต้อง';
     } else {
-        $newPassword = $_POST['new_password'] ?? '';
-        $confirmPassword = $_POST['confirm_password'] ?? '';
-        
-        if (strlen($newPassword) < MIN_PASSWORD_LENGTH) {
-            $errors[] = 'รหัสผ่านต้องมีอย่างน้อย ' . MIN_PASSWORD_LENGTH . ' ตัวอักษร';
-        } elseif ($newPassword !== $confirmPassword) {
-            $errors[] = 'รหัสผ่านไม่ตรงกัน';
+        $pwUserId = (int)($_POST['employee_id'] ?? 0);
+        if ($pwUserId <= 0 || $pwUserId !== $id || $action !== 'edit') {
+            $errors[] = 'ข้อมูลผู้ใช้ไม่ถูกต้อง';
+        } elseif (in_array($pwUserId, SYSTEM_USER_IDS, true)) {
+            $errors[] = 'ไม่สามารถเปลี่ยนรหัสผ่านบัญชีระบบได้';
         } else {
-            try {
-                $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-                $stmt = $pdo->prepare("UPDATE users SET password = ?, updated_at = NOW() WHERE id = ?");
-                $stmt->execute([$hashedPassword, $id]);
-                $success = 'เปลี่ยนรหัสผ่านเรียบร้อยแล้ว';
-            } catch (Throwable $e) {
-                tpHrLogException($e, 'hr/employee_form change_password');
-                $errors[] = 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้งหรือติดต่อผู้ดูแลระบบ';
+            $newPassword = $_POST['new_password'] ?? '';
+            $confirmPassword = $_POST['confirm_password'] ?? '';
+
+            if (strlen($newPassword) < MIN_PASSWORD_LENGTH) {
+                $errors[] = 'รหัสผ่านต้องมีอย่างน้อย ' . MIN_PASSWORD_LENGTH . ' ตัวอักษร';
+            } elseif ($newPassword !== $confirmPassword) {
+                $errors[] = 'รหัสผ่านไม่ตรงกัน';
+            } else {
+                try {
+                    $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+                    $stmt = $pdo->prepare("UPDATE users SET password = ?, updated_at = NOW() WHERE id = ? AND id NOT IN (" . SYSTEM_USER_IDS_SQL . ")");
+                    $stmt->execute([$hashedPassword, $pwUserId]);
+                    if ($stmt->rowCount() < 1) {
+                        $errors[] = 'ไม่พบพนักงาน หรือไม่สามารถเปลี่ยนรหัสผ่านได้';
+                    } else {
+                        Auth::log('employee_password_change', 'users', $pwUserId);
+                        $success = 'เปลี่ยนรหัสผ่านเรียบร้อยแล้ว';
+                    }
+                } catch (Throwable $e) {
+                    tpHrLogException($e, 'hr/employee_form change_password');
+                    $errors[] = 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้งหรือติดต่อผู้ดูแลระบบ';
+                }
             }
         }
     }
@@ -1363,9 +1375,10 @@ include dirname(__DIR__) . '/templates/header.php';
         เปลี่ยนรหัสผ่าน
     </h3>
     
-    <form method="POST" action="/hr/employee_form.php?action=change_password&id=<?php echo $id; ?>" class="space-y-4">
+    <form method="POST" action="/hr/employee_form.php?action=edit&amp;id=<?php echo (int)$id; ?>" class="space-y-4">
         <?php echo csrfField(); ?>
         <input type="hidden" name="action" value="change_password">
+        <input type="hidden" name="employee_id" value="<?php echo (int)$id; ?>">
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
