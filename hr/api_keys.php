@@ -117,41 +117,62 @@ $recentLogs = $pdo->query("
     ORDER BY l.id DESC LIMIT 20
 ")->fetchAll(PDO::FETCH_ASSOC);
 
-$availableScopes = [
-    'employees.read'       => 'อ่านข้อมูลพนักงาน (รายคน / คีย์ผูกพนักงาน)',
-    'employees.read_all'   => 'อ่านรายชื่อพนักงานทั้งหมด (GET /employees แบบลิสต์)',
-    'attendance.read'      => 'อ่านลงเวลา (คีย์ผูกพนักงาน หรือร่วม attendance.read_all)',
-    'attendance.read_all'  => 'อ่านลงเวลาทุกคน/กรอง user_id (คีย์ไม่ผูกพนักงาน)',
-    'attendance.write'     => 'เช็คอิน/เช็คเอาต์ผ่าน API (คีย์ผูกพนักงาน หรือร่วม attendance.write_all)',
-    'attendance.write_all'   => 'เช็คอิน/เช็คเอาต์แทนผู้อื่นผ่าน API (คีย์ไม่ผูกพนักงาน)',
-    'leave.read'           => 'อ่านใบลา (คีย์ผูกพนักงาน หรือร่วม leave.read_all)',
-    'leave.read_all'       => 'อ่านใบลาทุกคน / ตาม id (คีย์ไม่ผูกพนักงาน)',
-    'leave.write'          => 'สร้าง/ยกเลิกใบลา (คีย์ผูกพนักงาน หรือร่วม leave.write_all)',
-    'leave.write_all'      => 'สร้าง/ยกเลิกใบลาแทนผู้อื่นผ่าน API (คีย์ไม่ผูกพนักงาน)',
-    'leave.approve'        => 'อนุมัติ/ปฏิเสธใบลา',
-    'dayoff.read'          => 'อ่านคำขอเปลี่ยนวันหยุด (คีย์ผูกพนักงาน หรือร่วม dayoff.read_all)',
-    'dayoff.read_all'      => 'อ่านคำขอเปลี่ยนวันหยุดทุกคน (คีย์ไม่ผูกพนักงาน)',
-    'dayoff.write'         => 'สร้างคำขอเปลี่ยนวันหยุด (คีย์ผูกพนักงาน หรือร่วม dayoff.write_all)',
-    'dayoff.write_all'     => 'สร้างคำขอเปลี่ยนวันหยุดแทนผู้อื่นผ่าน API (คีย์ไม่ผูกพนักงาน)',
-    'dayoff.approve'       => 'อนุมัติ/ปฏิเสธเปลี่ยนวันหยุด',
-    'overtime.read'        => 'อ่านคำขอ OT (คีย์ผูกพนักงาน หรือร่วม overtime.read_all)',
-    'overtime.read_all'    => 'อ่านคำขอ OT ทุกคน (คีย์ไม่ผูกพนักงาน)',
-    'overtime.write'       => 'สร้างคำขอ OT (คีย์ผูกพนักงาน หรือร่วม overtime.write_all)',
-    'overtime.write_all'   => 'สร้างคำขอ OT แทนผู้อื่นผ่าน API (คีย์ไม่ผูกพนักงาน)',
-    'overtime.approve'     => 'อนุมัติ/ปฏิเสธ OT',
-    'outside.read'         => 'อ่านคำขอลงเวลานอกสถานที่ (คีย์ผูกพนักงาน หรือร่วม outside.read_all)',
-    'outside.read_all'     => 'อ่านคำขอนอกสถานที่ทุกคน (คีย์ไม่ผูกพนักงาน)',
-    'outside.approve'      => 'อนุมัติ/ปฏิเสธลงเวลานอกสถานที่',
-    'adjustments.read'     => 'อ่านคำขอปรับปรุงเวลา (คีย์ผูกพนักงาน หรือร่วม adjustments.read_all)',
-    'adjustments.read_all' => 'อ่านคำขอปรับเวลาทุกคน (คีย์ไม่ผูกพนักงาน)',
-    'adjustments.approve'  => 'อนุมัติ/ปฏิเสธปรับปรุงเวลา',
-    'payroll.read'         => 'อ่านสลิป/รอบเงินเดือนของตน (คีย์ผูกพนักงาน) หรือร่วมกับ payroll.read_all',
-    'payroll.read_all'     => 'อ่านสลิปและรอบเงินเดือนทั้งหมด (คีย์ไม่ผูกพนักงาน)',
-    'payroll.write'        => 'สร้างรอบเงินเดือน คำนวณใหม่รายสลิป ตั้งค่าเงินเดือน (POST /api/v1 — ไม่ผูกพนักงาน)',
-    'payroll.approve'      => 'อนุมัติรอบเงินเดือน / บันทึกจ่าย (POST /api/v1)',
-    'hr.read'              => 'อ่าน metadata ทั่วไป (แผนก/ตำแหน่ง/วันหยุด/ประเภทลา/ประกาศ)',
-    'hr.read_all'          => 'อ่านกะรายคนและสิทธิ์ลา (employee-schedules, leave-entitlements) เมื่อคีย์ไม่ผูกพนักงาน',
-    '*'                    => 'เข้าถึงทั้งหมด (ระวัง)',
+/** @var array<string, array<string, string>> */
+$scopeGroups = [
+    'พนักงาน' => [
+        'employees.read'       => 'อ่านข้อมูลพนักงาน (รายคน / คีย์ผูกพนักงาน)',
+        'employees.read_all'   => 'อ่านรายชื่อพนักงานทั้งหมด (ลิสต์ — คีย์ไม่ผูก)',
+    ],
+    'ลงเวลา' => [
+        'attendance.read'      => 'อ่านลงเวลา (ผูกพนักงาน หรือ + read_all)',
+        'attendance.read_all'  => 'อ่านลงเวลาทุกคน / กรอง user_id',
+        'attendance.write'     => 'เช็คอิน/เอาต์ (ผูกพนักงาน หรือ + write_all)',
+        'attendance.write_all' => 'เช็คอิน/เอาต์แทนผู้อื่น',
+    ],
+    'การลา' => [
+        'leave.read'      => 'อ่านใบลา (ผูกพนักงาน หรือ + read_all)',
+        'leave.read_all'  => 'อ่านใบลาทุกคน / ตาม id',
+        'leave.write'     => 'สร้าง/ยกเลิกใบลา (ผูกพนักงาน หรือ + write_all)',
+        'leave.write_all' => 'สร้าง/ยกเลิกแทนผู้อื่น',
+        'leave.approve'   => 'อนุมัติ/ปฏิเสธใบลา',
+    ],
+    'เปลี่ยนวันหยุดประจำสัปดาห์' => [
+        'dayoff.read'      => 'อ่านคำขอ (ผูกพนักงาน หรือ + read_all)',
+        'dayoff.read_all'  => 'อ่านคำขอทุกคน',
+        'dayoff.write'     => 'สร้างคำขอ (ผูกพนักงาน หรือ + write_all)',
+        'dayoff.write_all' => 'สร้างคำขอแทนผู้อื่น',
+        'dayoff.approve'   => 'อนุมัติ/ปฏิเสธ',
+    ],
+    'OT' => [
+        'overtime.read'      => 'อ่านคำขอ OT (ผูกพนักงาน หรือ + read_all)',
+        'overtime.read_all'  => 'อ่านทุกคน',
+        'overtime.write'     => 'สร้างคำขอ (ผูกพนักงาน หรือ + write_all)',
+        'overtime.write_all' => 'สร้างแทนผู้อื่น',
+        'overtime.approve'   => 'อนุมัติ/ปฏิเสธ',
+    ],
+    'ลงเวลานอกสถานที่' => [
+        'outside.read'     => 'อ่านคำขอ (ผูกพนักงาน หรือ + read_all)',
+        'outside.read_all' => 'อ่านทุกคน',
+        'outside.approve'  => 'อนุมัติ/ปฏิเสธ',
+    ],
+    'ปรับเวลา' => [
+        'adjustments.read'     => 'อ่านคำขอปรับเวลา (ผูกพนักงาน หรือ + read_all)',
+        'adjustments.read_all' => 'อ่านทุกคน',
+        'adjustments.approve'  => 'อนุมัติ/ปฏิเสธ',
+    ],
+    'เงินเดือน' => [
+        'payroll.read'     => 'อ่านสลิป/รอบ (ผูกพนักงาน หรือ + read_all)',
+        'payroll.read_all' => 'อ่านสลิปและรอบทั้งหมด',
+        'payroll.write'    => 'สร้างรอบ คำนวณสลิป ตั้งเงินเดือน (POST)',
+        'payroll.approve'  => 'อนุมัติรอบ / บันทึกจ่าย',
+    ],
+    'Metadata (แผนก วันหยุด ประเภทลา ฯลฯ)' => [
+        'hr.read'     => 'อ่านข้อมูลทั่วไป',
+        'hr.read_all' => 'กะรายคน + สิทธิ์ลา (คีย์ไม่ผูก)',
+    ],
+    'พิเศษ' => [
+        '*' => 'เข้าถึงทุก scope (ระวัง — ใช้เฉพาะระบบที่ไว้ใจ)',
+    ],
 ];
 
 require_once __DIR__ . '/../templates/header.php';
@@ -199,13 +220,24 @@ require_once __DIR__ . '/../templates/header.php';
             </div>
 
             <div class="md:col-span-2">
-                <label class="text-white/70 text-sm block mb-2">Scopes</label>
-                <div class="flex flex-wrap gap-3">
-                    <?php foreach ($availableScopes as $sv => $sl): ?>
-                    <label class="inline-flex items-center gap-2 text-white/80 text-sm bg-white/5 px-3 py-2 rounded-lg">
-                        <input type="checkbox" name="scopes[]" value="<?= htmlspecialchars($sv) ?>">
-                        <span><?= htmlspecialchars($sl) ?> <code class="text-white/50">(<?= htmlspecialchars($sv) ?>)</code></span>
-                    </label>
+                <label class="text-white/70 text-sm block mb-1">Scopes</label>
+                <p class="text-white/50 text-xs mb-3 leading-relaxed">
+                    คีย์ที่<strong class="text-white/70">ผูกพนักงาน</strong>มักเลือกเฉพาะ <code class="text-violet-300/90">*.read</code> / <code class="text-violet-300/90">*.write</code> ตามฟีเจอร์
+                    — คีย์<strong class="text-white/70">ไม่ผูก</strong> (ระบบภายนอก/HR) ต้องเพิ่ม <code class="text-amber-200/90">*.read_all</code> / <code class="text-amber-200/90">*.write_all</code> หากดึงหรือสร้างแทนหลายคน
+                </p>
+                <div class="space-y-4">
+                    <?php foreach ($scopeGroups as $groupTitle => $scopes): ?>
+                    <div class="rounded-xl border border-white/10 bg-white/[0.04] p-4">
+                        <div class="text-white/90 text-sm font-semibold mb-3 pb-2 border-b border-white/10"><?= htmlspecialchars($groupTitle) ?></div>
+                        <div class="flex flex-wrap gap-2.5">
+                            <?php foreach ($scopes as $sv => $sl): ?>
+                            <label class="inline-flex items-center gap-2 text-white/80 text-sm bg-white/5 px-3 py-2 rounded-lg border border-transparent hover:border-violet-500/30 cursor-pointer touch-manipulation">
+                                <input type="checkbox" name="scopes[]" value="<?= htmlspecialchars($sv) ?>" class="rounded border-white/20 text-violet-600 focus:ring-violet-500">
+                                <span><?= htmlspecialchars($sl) ?> <code class="text-white/45 text-xs">(<?= htmlspecialchars($sv) ?>)</code></span>
+                            </label>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
                     <?php endforeach; ?>
                 </div>
             </div>
