@@ -403,37 +403,36 @@ include 'templates/header.php';
         ];
         ?>
         <div class="p-4 md:p-6 hover:bg-white/5 transition-colors min-w-0">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 min-w-0">
-                <div class="flex items-center gap-4 min-w-0 flex-1">
+            <div class="flex flex-col gap-4 min-w-0">
+                <div class="flex items-start gap-4 min-w-0">
                     <div class="w-12 h-12 rounded-xl bg-violet-600/20 flex items-center justify-center flex-shrink-0">
                         <i class="fas fa-file-invoice-dollar text-violet-400 text-xl"></i>
                     </div>
-                    <div class="min-w-0">
-                        <h3 class="text-white font-medium truncate"><?php echo htmlspecialchars($monthName); ?> <?php echo (int)$yearBE; ?></h3>
-                        <p class="text-white/60 text-sm break-words">
-                            รายได้ <?php echo number_format($s['total_income'], 2); ?> |
-                            หัก <?php echo number_format($s['total_deductions'], 2); ?>
+                    <div class="min-w-0 flex-1 pt-0.5">
+                        <h3 class="text-white font-medium text-base leading-snug"><?php echo htmlspecialchars($monthName); ?> <?php echo (int)$yearBE; ?></h3>
+                        <p class="text-white/60 text-sm mt-1.5 leading-relaxed">
+                            รายได้ <?php echo number_format($s['total_income'], 2); ?> · หัก <?php echo number_format($s['total_deductions'], 2); ?>
                         </p>
                     </div>
                 </div>
-                <div class="flex flex-wrap items-center gap-3 md:gap-4 shrink-0 min-w-0">
-                    <div class="text-left md:text-right min-w-0">
-                        <p class="text-white/50 text-sm">เงินได้สุทธิ</p>
-                        <p class="text-xl font-bold text-green-400 tabular-nums"><?php echo number_format($s['net_salary'], 2); ?></p>
-                    </div>
-                    <span class="px-3 py-1 rounded-full text-xs shrink-0 <?php echo $statusColors[$s['run_status']] ?? 'bg-gray-500/20 text-gray-400'; ?>">
+                <div class="rounded-xl bg-white/5 border border-white/10 px-4 py-3 min-w-0">
+                    <p class="text-white/50 text-xs uppercase tracking-wide">เงินได้สุทธิ</p>
+                    <p class="text-2xl font-bold text-green-400 tabular-nums mt-1"><?php echo number_format($s['net_salary'], 2); ?> <span class="text-sm font-normal text-white/50">บาท</span></p>
+                </div>
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 min-w-0">
+                    <span class="inline-flex self-start px-3 py-1.5 rounded-full text-xs font-medium <?php echo $statusColors[$s['run_status']] ?? 'bg-gray-500/20 text-gray-400'; ?>">
                         <?php echo $statusText[$s['run_status']] ?? htmlspecialchars($s['run_status']); ?>
                     </span>
-                    <div class="flex gap-2">
+                    <div class="flex items-center gap-3 sm:justify-end shrink-0">
                         <a href="payslip.php?slip_id=<?php echo (int)$s['id']; ?>"
-                           class="min-w-[44px] min-h-[44px] p-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors flex items-center justify-center touch-manipulation"
+                           class="flex-1 sm:flex-none min-h-[48px] min-w-[48px] px-4 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors inline-flex items-center justify-center gap-2 touch-manipulation"
                            title="ดูรายละเอียด">
-                            <i class="fas fa-eye"></i>
+                            <i class="fas fa-eye"></i><span class="text-sm sm:hidden">ดู</span>
                         </a>
                         <a href="payslip.php?action=download&slip_id=<?php echo (int)$s['id']; ?>" target="_blank" rel="noopener noreferrer"
-                           class="payslip-download-link min-w-[44px] min-h-[44px] p-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors flex items-center justify-center touch-manipulation"
+                           class="payslip-download-link flex-1 sm:flex-none min-h-[48px] min-w-[48px] px-4 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors inline-flex items-center justify-center gap-2 touch-manipulation font-medium text-sm"
                            title="ดาวน์โหลด PDF">
-                            <i class="fas fa-download"></i>
+                            <i class="fas fa-download"></i><span class="sm:hidden">ดาวน์โหลด</span><span class="hidden sm:inline">PDF</span>
                         </a>
                     </div>
                 </div>
