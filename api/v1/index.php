@@ -66,6 +66,6 @@ try {
             }
     }
 } catch (Throwable $e) {
-    error_log('API v1 fatal: ' . $e->getMessage() . ' @ ' . $e->getFile() . ':' . $e->getLine());
+    tpHrLogException($e, 'api/v1/index');
     ApiAuth::fail(500, 'Internal server error');
 }

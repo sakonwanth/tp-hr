@@ -27,8 +27,8 @@ try {
             http_response_code(405);
             echo json_encode(['success' => false, 'error' => 'Method not allowed']);
     }
-} catch (Exception $e) {
-    error_log("Certificate API Error: " . $e->getMessage());
+} catch (Throwable $e) {
+    tpHrLogException($e, 'api/certificate');
     http_response_code(500);
     echo json_encode(['success' => false, 'error' => 'เกิดข้อผิดพลาด']);
 }

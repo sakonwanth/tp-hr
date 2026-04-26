@@ -52,6 +52,9 @@ if ($resource === 'payroll-runs') {
         } catch (\RuntimeException $e) {
             tpHrLogException($e, 'payroll_write createRun');
             ApiAuth::fail(409, $e->getMessage());
+        } catch (\Throwable $e) {
+            tpHrLogException($e, 'payroll_write createRun');
+            ApiAuth::fail(500, 'Internal server error');
         }
     }
 
@@ -74,6 +77,9 @@ if ($resource === 'payroll-runs') {
         } catch (\RuntimeException $e) {
             tpHrLogException($e, 'payroll_write markPaid');
             ApiAuth::fail(409, $e->getMessage());
+        } catch (\Throwable $e) {
+            tpHrLogException($e, 'payroll_write markPaid');
+            ApiAuth::fail(500, 'Internal server error');
         }
     }
 

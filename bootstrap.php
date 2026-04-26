@@ -217,7 +217,11 @@ function userMayApproveLeaveByRole(PDO $pdo, int $userId): bool {
  * Server-side exception logging — never pass raw $e->getMessage() to HTTP clients in production APIs.
  */
 function tpHrLogException(Throwable $e, string $context): void {
-    error_log('[' . $context . '] ' . $e->getMessage() . ' @ ' . $e->getFile() . ':' . $e->getLine());
+    $line = '[' . $context . '] ' . $e->getMessage() . ' @ ' . $e->getFile() . ':' . $e->getLine();
+    error_log($line);
+    if (defined('APP_DEBUG') && APP_DEBUG) {
+        error_log('[' . $context . '] trace: ' . $e->getTraceAsString());
+    }
 }
 
 /**

@@ -81,8 +81,8 @@ try {
             http_response_code(400);
             echo json_encode(['success' => false, 'error' => 'Invalid action']);
     }
-} catch (Exception $e) {
-    error_log("Profile API Error: " . $e->getMessage());
+} catch (Throwable $e) {
+    tpHrLogException($e, 'api/profile');
     http_response_code(500);
     echo json_encode(['success' => false, 'error' => 'เกิดข้อผิดพลาด']);
 }
