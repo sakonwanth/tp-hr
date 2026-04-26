@@ -141,8 +141,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $success = 'อัพเดทกะทำงานเรียบร้อยแล้ว';
                 break;
         }
-    } catch (Exception $e) {
-        $error = 'เกิดข้อผิดพลาด: ' . $e->getMessage();
+    } catch (Throwable $e) {
+        tpHrLogException($e, 'hr/settings POST');
+        $error = 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้งหรือติดต่อผู้ดูแลระบบ';
     }
 }
 

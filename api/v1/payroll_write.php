@@ -49,6 +49,7 @@ if ($resource === 'payroll-runs') {
             $result = $service->createRun($month, $createdBy);
             ApiAuth::success(['data' => $result]);
         } catch (\RuntimeException $e) {
+            tpHrLogException($e, 'payroll_write createRun');
             ApiAuth::fail(409, $e->getMessage());
         }
     }
@@ -69,6 +70,7 @@ if ($resource === 'payroll-runs') {
             $service->markPaid($id);
             ApiAuth::success(['message' => 'บันทึกจ่ายเงินแล้ว']);
         } catch (\RuntimeException $e) {
+            tpHrLogException($e, 'payroll_write markPaid');
             ApiAuth::fail(409, $e->getMessage());
         }
     }
