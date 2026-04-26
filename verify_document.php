@@ -17,6 +17,26 @@ $doc  = trim($_GET['doc']  ?? '');
 $result = null;
 $error  = null;
 
+// Light rate limit per session (discourage verification-code brute force)
+if ($code !== '' || $doc !== '') {
+    $now = time();
+    if (!isset($_SESSION['_verify_doc_rl'])) {
+        $_SESSION['_verify_doc_rl'] = ['window' => $now, 'count' => 0];
+    }
+    $rl = &$_SESSION['_verify_doc_rl'];
+    if ($now - (int)($rl['window'] ?? 0) > 60) {
+        $rl['window'] = $now;
+        $rl['count'] = 0;
+    }
+    $rl['count'] = (int)($rl['count'] ?? 0) + 1;
+    if ($rl['count'] > 45) {
+        http_response_code(429);
+        header('Content-Type: text/plain; charset=UTF-8');
+        echo 'คำขอถี่เกินไป กรุณารอสักครู่แล้วลองใหม่';
+        exit;
+    }
+}
+
 if ($code || $doc) {
     $sql = "
         SELECT dr.document_number, dr.document_date, dr.qr_verification_code, dr.status,
