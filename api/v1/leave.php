@@ -8,9 +8,10 @@
  *        body: { user_id, leave_type_id, start_date, end_date,
  *                start_period?, end_period?, total_days, reason?, contact_number? }
  *   POST /api/v1/leave/{id}/approve                   scope: leave.approve
- *        body: { approver_level (1|2|3), approver_id, remarks? }
+ *        body: { approver_level (1|2|3), approver_id?, remarks? }
+ *        approver_id: ถ้าคีย์มี created_by ต้องตรงกับผู้ออกคีย์เท่านั้น (หรือไม่ส่ง — ระบบใช้ created_by)
  *   POST /api/v1/leave/{id}/reject                    scope: leave.approve
- *        body: { approver_level (1|2|3), approver_id, remarks }
+ *        body: { approver_level (1|2|3), approver_id?, remarks }
  *   POST /api/v1/leave/{id}/cancel                    scope: leave.write
  *        body: { user_id } (must match request owner)
  */
@@ -143,10 +144,34 @@ if ($action === 'cancel') {
 }
 
 ApiAuth::require(['leave.approve']);
+$key = ApiAuth::currentKey();
+if (!$key) {
+    ApiAuth::fail(500, 'Internal error');
+}
+
 $level = (int)($body['approver_level'] ?? 1);
-$approverId = (int)($body['approver_id'] ?? 0);
+$bodyApproverId = (int)($body['approver_id'] ?? 0);
 $remarks = trim($body['remarks'] ?? '');
-if ($approverId <= 0) ApiAuth::fail(400, 'approver_id required');
+
+$keyOwner = isset($key['created_by']) ? (int) $key['created_by'] : 0;
+if ($keyOwner > 0) {
+    if (!userMayApproveLeaveByRole($pdo, $keyOwner)) {
+        ApiAuth::fail(403, 'API key issuer is not an active eligible approver; re-issue the key from HR/CEO');
+    }
+    $approverId = $keyOwner;
+    if ($bodyApproverId > 0 && $bodyApproverId !== $approverId) {
+        ApiAuth::fail(400, 'approver_id must match the user who issued this API key');
+    }
+} else {
+    if ($bodyApproverId <= 0) {
+        ApiAuth::fail(400, 'approver_id required (legacy key without creator — set approver to an active manager/HR user)');
+    }
+    if (!userMayApproveLeaveByRole($pdo, $bodyApproverId)) {
+        ApiAuth::fail(403, 'approver_id is not an eligible approver');
+    }
+    $approverId = $bodyApproverId;
+}
+
 if (!in_array($level, [1, 2, 3], true)) ApiAuth::fail(400, 'approver_level must be 1/2/3');
 if ($cur['status'] !== 'PENDING') ApiAuth::fail(409, 'Not in PENDING status');
 if ($action === 'reject' && $remarks === '') ApiAuth::fail(400, 'remarks required for reject');

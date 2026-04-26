@@ -187,6 +187,22 @@ function canViewSensitiveData(): bool {
     return isCEOOrAbove();
 }
 
+/**
+ * For external API: user id must be active and in MANAGER_ROLES (same family as session hasRole / leave approve).
+ */
+function userMayApproveLeaveByRole(PDO $pdo, int $userId): bool {
+    if ($userId <= 0) {
+        return false;
+    }
+    $stmt = $pdo->prepare('SELECT r.name FROM users u LEFT JOIN roles r ON r.id = u.role_id WHERE u.id = ? AND u.is_active = 1 LIMIT 1');
+    $stmt->execute([$userId]);
+    $name = $stmt->fetchColumn();
+    if ($name === false || $name === null || $name === '') {
+        return false;
+    }
+    return in_array((string) $name, MANAGER_ROLES, true);
+}
+
 function getEffectiveSalary(array $user): float {
     $passed = !empty($user['probation_passed_date']);
     $probSalary = isset($user['probation_salary']) && $user['probation_salary'] !== null && $user['probation_salary'] !== ''
