@@ -276,6 +276,20 @@ function apiKeyMayListAllEmployees(?array $key): bool {
 }
 
 /**
+ * Unscoped API key: bulk payroll / arbitrary payslip access needs explicit scope (or *).
+ */
+function apiKeyMayAccessFullPayroll(?array $key): bool {
+    if (!$key) {
+        return false;
+    }
+    $scopes = json_decode($key['scopes'] ?? '[]', true) ?: [];
+    if (in_array('*', $scopes, true)) {
+        return true;
+    }
+    return in_array('payroll.read_all', $scopes, true);
+}
+
+/**
  * Session profile API — strip secrets/finance fields; mask national id like the web profile UI.
  *
  * @param  array<string,mixed>|false|null $row

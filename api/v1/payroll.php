@@ -9,6 +9,8 @@
  *   GET /api/v1/payslips/{id}                     scope: payroll.read
  *
  * Only returns runs/slips with status IN ('approved', 'paid').
+ *
+ * Keys without service_user_id need payroll.read_all (or *) for any bulk or by-id access.
  */
 ApiAuth::require(['payroll.read']);
 ApiAuth::requireMethod(['GET']);
@@ -16,6 +18,7 @@ ApiAuth::requireMethod(['GET']);
 $pdo = getDB();
 $key = ApiAuth::currentKey();
 $svc = apiKeyServiceUserId($key);
+$payrollUnscopedForbidden = ($svc === null && !apiKeyMayAccessFullPayroll($key));
 $resource = $segments[0] ?? '';
 $id = isset($segments[1]) ? (int)$segments[1] : 0;
 $sub = $segments[2] ?? '';
@@ -37,6 +40,9 @@ $slipSelect = "
 
 if ($resource === 'payroll-runs') {
     if ($id > 0 && $sub === 'slips') {
+        if ($payrollUnscopedForbidden) {
+            ApiAuth::fail(403, 'Payroll run slips require payroll.read_all (or *) or a service user bound to the API key');
+        }
         $sql = $slipSelect . " AND r.id = ?";
         $params = [$id];
         if ($svc !== null) {
@@ -48,6 +54,9 @@ if ($resource === 'payroll-runs') {
         ApiAuth::success(['data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
     }
     if ($id > 0) {
+        if ($payrollUnscopedForbidden) {
+            ApiAuth::fail(403, 'Payroll run detail requires payroll.read_all (or *) or a service user bound to the API key');
+        }
         if ($svc !== null) {
             $stmt = $pdo->prepare("
                 SELECT id, payroll_month, pay_day, status, total_gross, total_tax, total_net,
@@ -85,6 +94,9 @@ if ($resource === 'payroll-runs') {
         $stmt->execute([$svc]);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } else {
+        if ($payrollUnscopedForbidden) {
+            ApiAuth::fail(403, 'Listing payroll runs requires payroll.read_all (or *) or a service user bound to the API key');
+        }
         $rows = $pdo->query("
             SELECT id, payroll_month, pay_day, status, total_gross, total_tax, total_net,
                    employee_count, approved_at, created_at
@@ -103,8 +115,15 @@ if ($resource === 'payslips') {
         $stmt->execute([$id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$row) ApiAuth::fail(404, 'Payslip not found');
-        apiKeyAssertResourceOwnerUserId($key, (int) $row['user_id']);
+        if ($svc !== null) {
+            apiKeyAssertResourceOwnerUserId($key, (int) $row['user_id']);
+        } elseif ($payrollUnscopedForbidden) {
+            ApiAuth::fail(403, 'Reading payslips by id requires payroll.read_all (or *) or a service user bound to the API key');
+        }
         ApiAuth::success(['data' => $row]);
+    }
+    if ($payrollUnscopedForbidden) {
+        ApiAuth::fail(403, 'Listing payslips requires payroll.read_all (or *) or a service user bound to the API key');
     }
     $month  = trim($_GET['month'] ?? '');
     $userId = apiKeyResolveScopedUserId($key, isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0);

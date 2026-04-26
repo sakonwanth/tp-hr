@@ -2,7 +2,7 @@
 /**
  * GET /api/v1/employees
  * GET /api/v1/employees/{id}
- * Scope: employees.read; directory list also needs employees.read_all (or *) unless key has service_user_id
+ * Scope: employees.read; list or GET by id without service_user_id needs employees.read_all (or *)
  */
 ApiAuth::require(['employees.read']);
 $key = ApiAuth::currentKey();
@@ -31,7 +31,11 @@ if ($id > 0) {
     $stmt->execute([$id]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$row) ApiAuth::fail(404, 'Employee not found');
-    apiKeyAssertResourceOwnerUserId($key, (int) $row['id']);
+    if (apiKeyServiceUserId($key) !== null) {
+        apiKeyAssertResourceOwnerUserId($key, (int) $row['id']);
+    } elseif (!apiKeyMayListAllEmployees($key)) {
+        ApiAuth::fail(403, 'Reading employees by id requires employees.read_all (or *) or a service user bound to the API key');
+    }
     ApiAuth::success(['data' => $row]);
 }
 
