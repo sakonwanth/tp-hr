@@ -4,7 +4,7 @@
  *
  *   GET  /api/v1/leave[?status=&from=&to=&user_id=]   scope: leave.read (+ leave.read_all if key has no service_user_id)
  *   GET  /api/v1/leave/{id}                           scope: เช่นเดียวกันสำหรับคีย์ไม่ผูก user
- *   POST /api/v1/leave                                scope: leave.write
+ *   POST /api/v1/leave                                scope: leave.write (+ leave.write_all if key has no service_user_id)
  *        body: { user_id, leave_type_id, start_date, end_date,
  *                start_period?, end_period?, total_days, reason?, contact_number? }
  *   POST /api/v1/leave/{id}/approve                   scope: leave.approve
@@ -12,7 +12,7 @@
  *        approver_id: ถ้าคีย์มี created_by ต้องตรงกับผู้ออกคีย์เท่านั้น (หรือไม่ส่ง — ระบบใช้ created_by)
  *   POST /api/v1/leave/{id}/reject                    scope: leave.approve
  *        body: { approver_level (1|2|3), approver_id?, remarks }
- *   POST /api/v1/leave/{id}/cancel                    scope: leave.write
+ *   POST /api/v1/leave/{id}/cancel                    scope: เช่นเดียวกัน
  *        body: { user_id } (must match request owner)
  */
 require_once BASE_PATH . '/core/CrmLineNotifierBridge.php';
@@ -92,7 +92,13 @@ $body = ApiAuth::input();
 
 if ($id <= 0) {
     ApiAuth::require(['leave.write']);
-    $userId = apiKeyResolveScopedUserId(ApiAuth::currentKey(), (int)($body['user_id'] ?? 0));
+    $key = ApiAuth::currentKey();
+    apiKeyRequireServiceUserOrReadAllScope(
+        $key,
+        'leave.write_all',
+        'Creating leave for users via API requires leave.write_all (or *) or a service user bound to the API key'
+    );
+    $userId = apiKeyResolveScopedUserId($key, (int)($body['user_id'] ?? 0));
     $typeId = (int)($body['leave_type_id'] ?? 0);
     $start = trim($body['start_date'] ?? '');
     $end   = trim($body['end_date'] ?? '');
@@ -148,7 +154,13 @@ if (!$cur) ApiAuth::fail(404, 'Not found');
 
 if ($action === 'cancel') {
     ApiAuth::require(['leave.write']);
-    $userId = apiKeyResolveScopedUserId(ApiAuth::currentKey(), (int)($body['user_id'] ?? 0));
+    $key = ApiAuth::currentKey();
+    apiKeyRequireServiceUserOrReadAllScope(
+        $key,
+        'leave.write_all',
+        'Cancelling leave via API requires leave.write_all (or *) or a service user bound to the API key'
+    );
+    $userId = apiKeyResolveScopedUserId($key, (int)($body['user_id'] ?? 0));
     if ($userId <= 0 || (int)$cur['user_id'] !== $userId) ApiAuth::fail(403, 'user_id mismatch');
     if (!in_array($cur['status'], ['PENDING','DRAFT'], true)) ApiAuth::fail(409, 'Cannot cancel in status ' . $cur['status']);
     $pdo->prepare("UPDATE hr_leave_requests SET status='CANCELLED' WHERE id=?")->execute([$id]);

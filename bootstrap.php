@@ -301,13 +301,13 @@ function apiKeyHasReadAllScope(?array $key, string $readAllScope): bool {
 }
 
 /**
- * List/filter arbitrary users: allowed if key has service_user_id, or read_all scope, or *.
+ * Arbitrary user / bulk: allowed if key has service_user_id, or the given scope (e.g. *.read_all / *.write_all), or *.
  */
-function apiKeyRequireServiceUserOrReadAllScope(?array $key, string $readAllScope, string $message): void {
+function apiKeyRequireServiceUserOrReadAllScope(?array $key, string $scope, string $message): void {
     if ($key && apiKeyServiceUserId($key) !== null) {
         return;
     }
-    if (!apiKeyHasReadAllScope($key, $readAllScope)) {
+    if (!apiKeyHasReadAllScope($key, $scope)) {
         ApiAuth::fail(403, $message);
     }
 }

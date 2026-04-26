@@ -3,7 +3,7 @@
  * Overtime (OT) requests
  *
  *   GET  /api/v1/overtime[?status=&from=&to=&user_id=]   scope: overtime.read (+ overtime.read_all if key has no service_user_id)
- *   POST /api/v1/overtime                                scope: overtime.write
+ *   POST /api/v1/overtime                                scope: overtime.write (+ overtime.write_all if key has no service_user_id)
  *        body: { user_id, work_date, planned_start, planned_end, ot_type?, rate_multiplier?, reason? }
  *   POST /api/v1/overtime/{id}/approve                   scope: overtime.approve
  *        body: { approver_id?, actual_hours? } — approver_id ผูกกับผู้ออก API key เมื่อมี created_by
@@ -63,7 +63,13 @@ $body = ApiAuth::input();
 
 if ($id <= 0) {
     ApiAuth::require(['overtime.write']);
-    $userId = apiKeyResolveScopedUserId(ApiAuth::currentKey(), (int)($body['user_id'] ?? 0));
+    $key = ApiAuth::currentKey();
+    apiKeyRequireServiceUserOrReadAllScope(
+        $key,
+        'overtime.write_all',
+        'Creating OT requests via API requires overtime.write_all (or *) or a service user bound to the API key'
+    );
+    $userId = apiKeyResolveScopedUserId($key, (int)($body['user_id'] ?? 0));
     $date = trim($body['work_date'] ?? '');
     $ps = trim($body['planned_start'] ?? '');
     $pe = trim($body['planned_end'] ?? '');

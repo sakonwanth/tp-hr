@@ -3,7 +3,7 @@
  * Day-off requests
  *
  *   GET  /api/v1/dayoff-requests[?status=&from=&to=&user_id=]   scope: dayoff.read (+ dayoff.read_all if key has no service_user_id)
- *   POST /api/v1/dayoff-requests                                scope: dayoff.write
+ *   POST /api/v1/dayoff-requests                                scope: dayoff.write (+ dayoff.write_all if key has no service_user_id)
  *        body: { user_id, week_start, week_end, original_day_off, requested_day_off, reason }
  *   POST /api/v1/dayoff-requests/{id}/approve                   scope: dayoff.approve
  *        body: { reviewer_id?, note? } — reviewer_id ผูกกับผู้ออก API key เมื่อมี created_by
@@ -59,7 +59,13 @@ $body = ApiAuth::input();
 if ($id <= 0) {
     // Create new dayoff request
     ApiAuth::require(['dayoff.write']);
-    $userId = apiKeyResolveScopedUserId(ApiAuth::currentKey(), (int)($body['user_id'] ?? 0));
+    $key = ApiAuth::currentKey();
+    apiKeyRequireServiceUserOrReadAllScope(
+        $key,
+        'dayoff.write_all',
+        'Creating day-off requests via API requires dayoff.write_all (or *) or a service user bound to the API key'
+    );
+    $userId = apiKeyResolveScopedUserId($key, (int)($body['user_id'] ?? 0));
     $wStart = trim($body['week_start'] ?? '');
     $wEnd   = trim($body['week_end'] ?? '');
     $orig   = (int)($body['original_day_off'] ?? 0);

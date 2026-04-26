@@ -4,9 +4,9 @@
  *
  *   GET  /api/v1/attendance?date=YYYY-MM-DD[&user_id=]         scope: attendance.read (+ attendance.read_all if key has no service_user_id)
  *   GET  /api/v1/attendance?from=&to=[&user_id=]               scope: เช่นเดียวกัน
- *   POST /api/v1/attendance/checkin                            scope: attendance.write
+ *   POST /api/v1/attendance/checkin                            scope: attendance.write (+ attendance.write_all if key has no service_user_id)
  *        body: { user_id, time?, type?, latitude?, longitude?, location_id?, remarks? }
- *   POST /api/v1/attendance/checkout                           scope: attendance.write
+ *   POST /api/v1/attendance/checkout                           scope: เช่นเดียวกัน
  *        body: { user_id, time?, type?, latitude?, longitude?, location_id?, remarks? }
  */
 $method = ApiAuth::requireMethod(['GET', 'POST']);
@@ -78,7 +78,13 @@ ApiAuth::require(['attendance.write']);
 if (!in_array($action, ['checkin', 'checkout'], true)) ApiAuth::fail(404, 'Unknown action');
 
 $body = ApiAuth::input();
-$userId = apiKeyResolveScopedUserId(ApiAuth::currentKey(), (int)($body['user_id'] ?? 0));
+$key = ApiAuth::currentKey();
+apiKeyRequireServiceUserOrReadAllScope(
+    $key,
+    'attendance.write_all',
+    'Check-in/out for users via API requires attendance.write_all (or *) or a service user bound to the API key'
+);
+$userId = apiKeyResolveScopedUserId($key, (int)($body['user_id'] ?? 0));
 $time   = trim($body['time'] ?? '');
 $type   = strtoupper(trim($body['type'] ?? 'MANUAL'));
 $lat    = isset($body['latitude']) ? (float)$body['latitude'] : null;

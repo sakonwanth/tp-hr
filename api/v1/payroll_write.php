@@ -13,13 +13,13 @@
  *   POST /api/v1/payroll-runs/{id}/recalculate-slip   scope: payroll.write
  *        body: { "user_id": 5 }
  *
- *   GET  /api/v1/payroll-runs/{id}/calculate-preview  scope: payroll.read
+ *   GET  /api/v1/payroll-runs/{id}/calculate-preview  scope: payroll.read (+ payroll.read_all if key has no service_user_id)
  *        ?user_id=5&month=YYYY-MM
  *
  *   POST /api/v1/salary-setup                scope: payroll.write
  *        body: { "user_id": 5, "effective_from": "2026-05-01", ... }
  *
- *   GET  /api/v1/salary-setup/{user_id}      scope: payroll.read
+ *   GET  /api/v1/salary-setup/{user_id}      scope: payroll.read (+ payroll.read_all if key has no service_user_id)
  *        ?month=YYYY-MM
  */
 
@@ -100,7 +100,13 @@ if ($resource === 'payroll-runs') {
     // GET /payroll-runs/{id}/calculate-preview
     if ($method === 'GET' && $id > 0 && $sub === 'calculate-preview') {
         ApiAuth::require(['payroll.read']);
-        $userId = apiKeyResolveScopedUserId(ApiAuth::currentKey(), (int)($_GET['user_id'] ?? 0));
+        $key = ApiAuth::currentKey();
+        apiKeyRequireServiceUserOrReadAllScope(
+            $key,
+            'payroll.read_all',
+            'calculate-preview requires payroll.read_all (or *) or a service user bound to the API key'
+        );
+        $userId = apiKeyResolveScopedUserId($key, (int)($_GET['user_id'] ?? 0));
         $month = $_GET['month'] ?? '';
         if (!$userId || !preg_match('/^\d{4}-\d{2}$/', $month)) {
             ApiAuth::fail(400, 'user_id and month (YYYY-MM) required');
@@ -138,7 +144,12 @@ if ($resource === 'salary-setup') {
     // GET /salary-setup/{user_id}
     if ($method === 'GET' && $id > 0) {
         ApiAuth::require(['payroll.read']);
-        apiKeyAssertResourceOwnerUserId(ApiAuth::currentKey(), $id);
+        $key = ApiAuth::currentKey();
+        if (apiKeyServiceUserId($key) !== null) {
+            apiKeyAssertResourceOwnerUserId($key, $id);
+        } elseif (!apiKeyHasReadAllScope($key, 'payroll.read_all')) {
+            ApiAuth::fail(403, 'Salary setup requires payroll.read_all (or *) or a service user bound to the API key');
+        }
         $month = ($_GET['month'] ?? date('Y-m')) . '-01';
         $setup = $service->getSalarySetup($id, $month);
         ApiAuth::success(['data' => $setup]);
