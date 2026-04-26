@@ -346,23 +346,25 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             line-height: 1.05;
         }
         .mobile-nav-brand-line1 {
-            font-size: 1.125rem;
-            font-weight: 800;
-            letter-spacing: 0.06em;
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: 0.04em;
             white-space: nowrap;
+            line-height: 1;
         }
         .mobile-nav-brand-tp {
             color: #f8fafc;
+            font-weight: 900;
         }
         .mobile-nav-brand-hr {
             color: #ef4444;
-            font-weight: 800;
+            font-weight: 900;
             text-shadow: 0 0 20px rgba(239, 68, 68, 0.35);
         }
         .mobile-nav-brand-tagline {
             display: block;
-            margin-top: 3px;
-            font-size: 0.5625rem;
+            margin-top: 4px;
+            font-size: 0.625rem;
             font-weight: 600;
             letter-spacing: 0.16em;
             text-transform: uppercase;
@@ -372,7 +374,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         /* Desktop / drawer — ชื่อระบบเดียวกับแถบมือถือ */
         .app-brand-title-row {
             font-size: 1.25rem;
-            font-weight: 800;
+            font-weight: 900;
             letter-spacing: 0.05em;
             line-height: 1.15;
             color: #f8fafc;
@@ -380,10 +382,11 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         }
         .app-brand-title-row .app-brand-tp {
             color: #f8fafc;
+            font-weight: 900;
         }
         .app-brand-title-row .app-brand-hr {
             color: #ef4444;
-            font-weight: 800;
+            font-weight: 900;
         }
         .app-brand-tagline {
             margin: 4px 0 0 0;
@@ -394,8 +397,9 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             color: rgba(100, 116, 139, 0.95);
         }
         .app-brand-title-row--compact {
-            font-size: 1rem;
-            letter-spacing: 0.055em;
+            font-size: 1.25rem;
+            font-weight: 900;
+            letter-spacing: 0.045em;
         }
         .app-brand-tagline--compact {
             font-size: 0.5625rem;
