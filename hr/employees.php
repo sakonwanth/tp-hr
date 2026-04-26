@@ -315,6 +315,7 @@ $flashError = flash('error');
                     <i class="fas fa-clock mr-2"></i>ลงเวลา
                 </a>
                 <button type="button"
+                        title="สิทธิ์การลาและประวัติ"
                         onclick="viewLeaveBalance(<?php echo (int)$emp['id']; ?>)"
                         class="min-h-[44px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold">
                     <i class="fas fa-calendar-alt mr-2"></i>สิทธิ์ลา
@@ -433,7 +434,7 @@ $flashError = flash('error');
                         </a>
                         <?php endif; ?>
                         <button onclick="viewLeaveBalance(<?php echo $emp['id']; ?>)" 
-                                class="px-2 py-1 bg-white/10 hover:bg-white/20 text-white text-xs rounded transition-colors" title="สิทธิ์การลา">
+                                class="px-2 py-1 bg-white/10 hover:bg-white/20 text-white text-xs rounded transition-colors" title="สิทธิ์การลาและประวัติ">
                             <i class="fas fa-calendar-alt"></i>
                         </button>
                     </td>
@@ -482,7 +483,7 @@ $flashError = flash('error');
     <div class="glass-card rounded-2xl w-full max-w-lg my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <div class="p-6">
             <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-bold text-white">สิทธิ์การลา</h3>
+                <h3 class="text-xl font-bold text-white">สิทธิ์การลาและประวัติ</h3>
                 <button onclick="closeLeaveModal()" class="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg">
                     <i class="fas fa-times"></i>
                 </button>
@@ -499,36 +500,66 @@ async function viewLeaveBalance(userId) {
     if (typeof uiOpenModal === 'function') uiOpenModal('leave-modal');
     else document.getElementById('leave-modal').classList.remove('hidden');
     document.getElementById('leave-content').innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-white/30"></i></div>';
-    
+
+    const year = <?php echo (int)date('Y'); ?>;
+    const stLabel = { PENDING: 'รออนุมัติ', APPROVED: 'อนุมัติ', REJECTED: 'ไม่อนุมัติ', CANCELLED: 'ยกเลิก', DRAFT: 'ร่าง' };
+
     try {
-        const response = await fetch(`/api/leave.php?action=entitlements&user_id=${userId}&year=<?php echo date('Y'); ?>`);
-        const result = await response.json();
-        
-        if (result.success && result.entitlements) {
-            let html = '<div class="space-y-4">';
-            for (const e of result.entitlements) {
-                const usedPercent = ((e.used_days / e.entitled_days) * 100).toFixed(0);
-                html += `
-                    <div class="glass-card rounded-lg p-4">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-white font-medium">${e.leave_type_name}</span>
-                            <div class="flex items-center">
-                                <span style="background-color:${e.color_code}" class="w-2 h-2 rounded-full mr-2"></span>
-                                <span class="text-white/60 text-sm">${e.used_days}/${e.entitled_days} วัน</span>
-                            </div>
-                        </div>
-                        <div class="w-full bg-white/10 rounded-full h-2">
-                            <div class="h-2 rounded-full" style="width: ${usedPercent}%; background-color:${e.color_code}"></div>
-                        </div>
-                        <p class="text-right text-white/50 text-xs mt-1">คงเหลือ ${e.remaining_days} วัน</p>
-                    </div>
-                `;
-            }
-            html += '</div>';
-            document.getElementById('leave-content').innerHTML = html;
-        } else {
-            document.getElementById('leave-content').innerHTML = '<p class="text-center text-white/60">ไม่พบข้อมูล</p>';
+        const [entRes, histRes] = await Promise.all([
+            fetch(`/api/leave.php?action=entitlements&user_id=${userId}&year=${year}`),
+            fetch(`/api/leave.php?action=history&user_id=${userId}&year=${year}&limit=10`),
+        ]);
+        const result = await entRes.json();
+        const hist = await histRes.json();
+
+        if (!result.success || !result.entitlements) {
+            document.getElementById('leave-content').innerHTML = '<p class="text-center text-white/60">ไม่พบข้อมูลสิทธิ์ลา</p>';
+            return;
         }
+
+        let html = '<div class="space-y-4">';
+        for (const e of result.entitlements) {
+            const denom = Number(e.entitled_days) || 0;
+            const used = Number(e.used_days) || 0;
+            const usedPercent = denom > 0 ? Math.min(100, Math.round((used / denom) * 100)) : 0;
+            html += `
+                <div class="glass-card rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-white font-medium">${e.leave_type_name}</span>
+                        <div class="flex items-center">
+                            <span style="background-color:${e.color_code || '#6B7280'}" class="w-2 h-2 rounded-full mr-2"></span>
+                            <span class="text-white/60 text-sm">${used}/${denom} วัน</span>
+                        </div>
+                    </div>
+                    <div class="w-full bg-white/10 rounded-full h-2">
+                        <div class="h-2 rounded-full" style="width: ${usedPercent}%; background-color:${e.color_code || '#a78bfa'}"></div>
+                    </div>
+                    <p class="text-right text-white/50 text-xs mt-1">คงเหลือ ${e.remaining_days} วัน</p>
+                </div>
+            `;
+        }
+        html += '</div>';
+
+        if (hist.success && Array.isArray(hist.requests) && hist.requests.length > 0) {
+            html += '<div class="mt-6 pt-4 border-t border-white/10">';
+            html += '<h4 class="text-white font-semibold text-sm mb-3">ประวัติลาปี ' + year + ' (ล่าสุด)</h4>';
+            html += '<ul class="space-y-2 text-sm">';
+            for (const r of hist.requests) {
+                const st = stLabel[r.status] || r.status;
+                const d0 = r.start_date || '';
+                const d1 = r.end_date || '';
+                const range = d0 === d1 ? d0 : (d0 + ' – ' + d1);
+                html += `<li class="rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-white/85">
+                    <span class="font-medium text-white">${r.leave_type_name || 'ลา'}</span>
+                    <span class="text-white/50 mx-1">·</span>${range}
+                    <span class="text-white/50 mx-1">·</span>${Number(r.total_days).toFixed(1)} วัน
+                    <span class="block text-xs text-white/45 mt-0.5">${st}</span>
+                </li>`;
+            }
+            html += '</ul></div>';
+        }
+
+        document.getElementById('leave-content').innerHTML = html;
     } catch (err) {
         document.getElementById('leave-content').innerHTML = '<p class="text-center text-red-400">เกิดข้อผิดพลาด</p>';
     }
