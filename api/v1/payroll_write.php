@@ -39,6 +39,7 @@ if ($resource === 'payroll-runs') {
     // POST /payroll-runs → create/recalculate run
     if ($method === 'POST' && $id === 0) {
         ApiAuth::require(['payroll.write']);
+        apiKeyForbidServiceScoped('Employee-scoped keys cannot create or modify payroll runs');
         $input = ApiAuth::input();
         $month = $input['month'] ?? '';
         if (!preg_match('/^\d{4}-\d{2}$/', $month)) {
@@ -57,6 +58,7 @@ if ($resource === 'payroll-runs') {
     // POST /payroll-runs/{id}/approve
     if ($method === 'POST' && $id > 0 && $sub === 'approve') {
         ApiAuth::require(['payroll.approve']);
+        apiKeyForbidServiceScoped();
         $input = ApiAuth::input();
         $approvedBy = apiKeyResolveActorForApi($pdo, ApiAuth::currentKey(), $input, 'approved_by', CEO_ROLES);
         $service->approveRun($id, $approvedBy);
@@ -78,6 +80,7 @@ if ($resource === 'payroll-runs') {
     // POST /payroll-runs/{id}/recalculate-slip
     if ($method === 'POST' && $id > 0 && $sub === 'recalculate-slip') {
         ApiAuth::require(['payroll.write']);
+        apiKeyForbidServiceScoped();
         $input = ApiAuth::input();
         $userId = (int)($input['user_id'] ?? 0);
         $run = $service->getRun($id);
@@ -91,7 +94,7 @@ if ($resource === 'payroll-runs') {
     // GET /payroll-runs/{id}/calculate-preview
     if ($method === 'GET' && $id > 0 && $sub === 'calculate-preview') {
         ApiAuth::require(['payroll.read']);
-        $userId = (int)($_GET['user_id'] ?? 0);
+        $userId = apiKeyResolveScopedUserId(ApiAuth::currentKey(), (int)($_GET['user_id'] ?? 0));
         $month = $_GET['month'] ?? '';
         if (!$userId || !preg_match('/^\d{4}-\d{2}$/', $month)) {
             ApiAuth::fail(400, 'user_id and month (YYYY-MM) required');
@@ -107,6 +110,7 @@ if ($resource === 'salary-setup') {
     // POST /salary-setup
     if ($method === 'POST') {
         ApiAuth::require(['payroll.write']);
+        apiKeyForbidServiceScoped();
         $input = ApiAuth::input();
         $userId = (int)($input['user_id'] ?? 0);
         if ($userId <= 0) ApiAuth::fail(400, 'user_id required');
@@ -128,6 +132,7 @@ if ($resource === 'salary-setup') {
     // GET /salary-setup/{user_id}
     if ($method === 'GET' && $id > 0) {
         ApiAuth::require(['payroll.read']);
+        apiKeyAssertResourceOwnerUserId(ApiAuth::currentKey(), $id);
         $month = ($_GET['month'] ?? date('Y-m')) . '-01';
         $setup = $service->getSalarySetup($id, $month);
         ApiAuth::success(['data' => $setup]);

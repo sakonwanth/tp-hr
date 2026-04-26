@@ -14,6 +14,8 @@ ApiAuth::require(['payroll.read']);
 ApiAuth::requireMethod(['GET']);
 
 $pdo = getDB();
+$key = ApiAuth::currentKey();
+$svc = apiKeyServiceUserId($key);
 $resource = $segments[0] ?? '';
 $id = isset($segments[1]) ? (int)$segments[1] : 0;
 $sub = $segments[2] ?? '';
@@ -35,31 +37,63 @@ $slipSelect = "
 
 if ($resource === 'payroll-runs') {
     if ($id > 0 && $sub === 'slips') {
-        $stmt = $pdo->prepare($slipSelect . " AND r.id = ? ORDER BY u.employee_code ASC");
-        $stmt->execute([$id]);
+        $sql = $slipSelect . " AND r.id = ?";
+        $params = [$id];
+        if ($svc !== null) {
+            $sql .= " AND s.user_id = ?";
+            $params[] = $svc;
+        }
+        $stmt = $pdo->prepare($sql . " ORDER BY u.employee_code ASC");
+        $stmt->execute($params);
         ApiAuth::success(['data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
     }
     if ($id > 0) {
-        $stmt = $pdo->prepare("
-            SELECT id, payroll_month, pay_day, status, total_gross, total_tax, total_net,
-                   employee_count, approved_at, created_at
-            FROM payroll_runs
-            WHERE id = ? AND status IN ('approved','paid')
-            LIMIT 1
-        ");
-        $stmt->execute([$id]);
+        if ($svc !== null) {
+            $stmt = $pdo->prepare("
+                SELECT id, payroll_month, pay_day, status, total_gross, total_tax, total_net,
+                       employee_count, approved_at, created_at
+                FROM payroll_runs
+                WHERE id = ? AND status IN ('approved','paid')
+                  AND EXISTS (SELECT 1 FROM payroll_slips s WHERE s.payroll_run_id = payroll_runs.id AND s.user_id = ?)
+                LIMIT 1
+            ");
+            $stmt->execute([$id, $svc]);
+        } else {
+            $stmt = $pdo->prepare("
+                SELECT id, payroll_month, pay_day, status, total_gross, total_tax, total_net,
+                       employee_count, approved_at, created_at
+                FROM payroll_runs
+                WHERE id = ? AND status IN ('approved','paid')
+                LIMIT 1
+            ");
+            $stmt->execute([$id]);
+        }
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$row) ApiAuth::fail(404, 'Payroll run not found');
         ApiAuth::success(['data' => $row]);
     }
-    $rows = $pdo->query("
-        SELECT id, payroll_month, pay_day, status, total_gross, total_tax, total_net,
-               employee_count, approved_at, created_at
-        FROM payroll_runs
-        WHERE status IN ('approved','paid')
-        ORDER BY payroll_month DESC
-        LIMIT 120
-    ")->fetchAll(PDO::FETCH_ASSOC);
+    if ($svc !== null) {
+        $stmt = $pdo->prepare("
+            SELECT DISTINCT r.id, r.payroll_month, r.pay_day, r.status, r.total_gross, r.total_tax, r.total_net,
+                   r.employee_count, r.approved_at, r.created_at
+            FROM payroll_runs r
+            INNER JOIN payroll_slips s ON s.payroll_run_id = r.id AND s.user_id = ?
+            WHERE r.status IN ('approved','paid')
+            ORDER BY r.payroll_month DESC
+            LIMIT 120
+        ");
+        $stmt->execute([$svc]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } else {
+        $rows = $pdo->query("
+            SELECT id, payroll_month, pay_day, status, total_gross, total_tax, total_net,
+                   employee_count, approved_at, created_at
+            FROM payroll_runs
+            WHERE status IN ('approved','paid')
+            ORDER BY payroll_month DESC
+            LIMIT 120
+        ")->fetchAll(PDO::FETCH_ASSOC);
+    }
     ApiAuth::success(['data' => $rows]);
 }
 
@@ -69,10 +103,11 @@ if ($resource === 'payslips') {
         $stmt->execute([$id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$row) ApiAuth::fail(404, 'Payslip not found');
+        apiKeyAssertResourceOwnerUserId($key, (int) $row['user_id']);
         ApiAuth::success(['data' => $row]);
     }
     $month  = trim($_GET['month'] ?? '');
-    $userId = isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0;
+    $userId = apiKeyResolveScopedUserId($key, isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0);
 
     $extra = '';
     $params = [];

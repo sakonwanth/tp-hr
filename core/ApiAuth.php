@@ -275,10 +275,12 @@ class ApiAuth {
         $prefix = substr($raw, 0, 12);
         $hash = hash('sha256', $raw);
         $pdo = getDB();
+        $serviceUserId = isset($opts['service_user_id']) ? (int) $opts['service_user_id'] : 0;
+        $serviceUserId = $serviceUserId > 0 ? $serviceUserId : null;
         $stmt = $pdo->prepare("
             INSERT INTO hr_api_keys (name, key_prefix, key_hash, scopes, allowed_ips, allowed_origins,
-                                     rate_limit_per_min, is_active, expires_at, created_by, notes)
-            VALUES (?,?,?,?,?,?,?,1,?,?,?)
+                                     rate_limit_per_min, is_active, expires_at, created_by, notes, service_user_id)
+            VALUES (?,?,?,?,?,?,?,1,?,?,?,?)
         ");
         $stmt->execute([
             $opts['name'],
@@ -291,6 +293,7 @@ class ApiAuth {
             $opts['expires_at'] ?? null,
             $opts['created_by'] ?? null,
             $opts['notes'] ?? null,
+            $serviceUserId,
         ]);
         return ['id' => (int)$pdo->lastInsertId(), 'key' => $raw, 'prefix' => $prefix];
     }

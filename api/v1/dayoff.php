@@ -17,10 +17,11 @@ $action = $segments[2] ?? '';
 
 if ($method === 'GET') {
     ApiAuth::require(['dayoff.read']);
+    $key = ApiAuth::currentKey();
     $status = strtoupper(trim($_GET['status'] ?? ''));
     $from = $_GET['from'] ?? '';
     $to   = $_GET['to'] ?? '';
-    $userId = isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0;
+    $userId = apiKeyResolveScopedUserId($key, isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0);
 
     $where = ["u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")"];
     $params = [];
@@ -83,6 +84,7 @@ if ($id <= 0) {
 
 // Actions: approve/reject
 ApiAuth::require(['dayoff.approve']);
+apiKeyForbidServiceScoped();
 if (!in_array($action, ['approve', 'reject'], true)) ApiAuth::fail(404, 'Unknown action');
 
 $reviewerId = apiKeyResolveActorForApi($pdo, ApiAuth::currentKey(), $body, 'reviewer_id', MANAGER_ROLES);

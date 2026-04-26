@@ -5,6 +5,7 @@
  * Scope: employees.read
  */
 ApiAuth::require(['employees.read']);
+$key = ApiAuth::currentKey();
 
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
     ApiAuth::fail(405, 'Method not allowed');
@@ -13,6 +14,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
 $pdo = getDB();
 $segments = $segments ?? [];
 $id = isset($segments[1]) ? (int)$segments[1] : 0;
+$svc = apiKeyServiceUserId($key);
 
 $baseSelect = "
     SELECT u.id, u.employee_code, u.title, u.first_name_th, u.last_name_th,
@@ -29,7 +31,23 @@ if ($id > 0) {
     $stmt->execute([$id]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$row) ApiAuth::fail(404, 'Employee not found');
+    apiKeyAssertResourceOwnerUserId($key, (int) $row['id']);
     ApiAuth::success(['data' => $row]);
+}
+
+if ($svc !== null) {
+    $stmt = $pdo->prepare($baseSelect . " AND u.id = ? LIMIT 1");
+    $stmt->execute([$svc]);
+    $one = $stmt->fetch(PDO::FETCH_ASSOC);
+    ApiAuth::success([
+        'data' => $one ? [$one] : [],
+        'meta' => [
+            'page' => 1,
+            'per_page' => 1,
+            'total' => $one ? 1 : 0,
+            'total_pages' => 1,
+        ],
+    ]);
 }
 
 // List (paginated)

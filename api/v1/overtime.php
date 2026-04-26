@@ -17,10 +17,11 @@ $action = $segments[2] ?? '';
 
 if ($method === 'GET') {
     ApiAuth::require(['overtime.read']);
+    $key = ApiAuth::currentKey();
     $status = strtolower(trim($_GET['status'] ?? ''));
     $from = $_GET['from'] ?? '';
     $to   = $_GET['to'] ?? '';
-    $userId = isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0;
+    $userId = apiKeyResolveScopedUserId($key, isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0);
 
     $where = ["u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")"];
     $params = [];
@@ -57,7 +58,7 @@ $body = ApiAuth::input();
 
 if ($id <= 0) {
     ApiAuth::require(['overtime.write']);
-    $userId = (int)($body['user_id'] ?? 0);
+    $userId = apiKeyResolveScopedUserId(ApiAuth::currentKey(), (int)($body['user_id'] ?? 0));
     $date = trim($body['work_date'] ?? '');
     $ps = trim($body['planned_start'] ?? '');
     $pe = trim($body['planned_end'] ?? '');
@@ -81,6 +82,7 @@ if ($id <= 0) {
 }
 
 ApiAuth::require(['overtime.approve']);
+apiKeyForbidServiceScoped();
 if (!in_array($action, ['approve', 'reject'], true)) ApiAuth::fail(404, 'Unknown action');
 
 $approverId = apiKeyResolveActorForApi($pdo, ApiAuth::currentKey(), $body, 'approver_id', MANAGER_ROLES);

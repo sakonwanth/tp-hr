@@ -15,11 +15,12 @@ $action = $segments[1] ?? '';
 
 if ($method === 'GET') {
     ApiAuth::require(['attendance.read']);
+    $key = ApiAuth::currentKey();
 
     $date = $_GET['date'] ?? '';
     $from = $_GET['from'] ?? '';
     $to   = $_GET['to'] ?? '';
-    $userId = isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0;
+    $userId = apiKeyResolveScopedUserId($key, isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0);
 
     $sqlDate = "";
     $params = [];
@@ -72,7 +73,7 @@ ApiAuth::require(['attendance.write']);
 if (!in_array($action, ['checkin', 'checkout'], true)) ApiAuth::fail(404, 'Unknown action');
 
 $body = ApiAuth::input();
-$userId = (int)($body['user_id'] ?? 0);
+$userId = apiKeyResolveScopedUserId(ApiAuth::currentKey(), (int)($body['user_id'] ?? 0));
 $time   = trim($body['time'] ?? '');
 $type   = strtoupper(trim($body['type'] ?? 'MANUAL'));
 $lat    = isset($body['latitude']) ? (float)$body['latitude'] : null;

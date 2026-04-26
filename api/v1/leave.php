@@ -38,18 +38,20 @@ $selectBase = "
 
 if ($method === 'GET') {
     ApiAuth::require(['leave.read']);
+    $key = ApiAuth::currentKey();
     if ($id > 0) {
         $stmt = $pdo->prepare($selectBase . " WHERE lr.id = ? LIMIT 1");
         $stmt->execute([$id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$row) ApiAuth::fail(404, 'Leave request not found');
+        apiKeyAssertResourceOwnerUserId($key, (int) $row['user_id']);
         ApiAuth::success(['data' => $row]);
     }
 
     $status = strtoupper(trim($_GET['status'] ?? ''));
     $from   = $_GET['from'] ?? '';
     $to     = $_GET['to'] ?? '';
-    $userId = isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0;
+    $userId = apiKeyResolveScopedUserId($key, isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0);
 
     $validStatus = ['DRAFT', 'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'];
     $where = ["u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")"];
@@ -80,7 +82,7 @@ $body = ApiAuth::input();
 
 if ($id <= 0) {
     ApiAuth::require(['leave.write']);
-    $userId = (int)($body['user_id'] ?? 0);
+    $userId = apiKeyResolveScopedUserId(ApiAuth::currentKey(), (int)($body['user_id'] ?? 0));
     $typeId = (int)($body['leave_type_id'] ?? 0);
     $start = trim($body['start_date'] ?? '');
     $end   = trim($body['end_date'] ?? '');
@@ -136,7 +138,7 @@ if (!$cur) ApiAuth::fail(404, 'Not found');
 
 if ($action === 'cancel') {
     ApiAuth::require(['leave.write']);
-    $userId = (int)($body['user_id'] ?? 0);
+    $userId = apiKeyResolveScopedUserId(ApiAuth::currentKey(), (int)($body['user_id'] ?? 0));
     if ($userId <= 0 || (int)$cur['user_id'] !== $userId) ApiAuth::fail(403, 'user_id mismatch');
     if (!in_array($cur['status'], ['PENDING','DRAFT'], true)) ApiAuth::fail(409, 'Cannot cancel in status ' . $cur['status']);
     $pdo->prepare("UPDATE hr_leave_requests SET status='CANCELLED' WHERE id=?")->execute([$id]);
@@ -144,6 +146,7 @@ if ($action === 'cancel') {
 }
 
 ApiAuth::require(['leave.approve']);
+apiKeyForbidServiceScoped();
 $approverId = apiKeyResolveActorForApi($pdo, ApiAuth::currentKey(), $body, 'approver_id', MANAGER_ROLES);
 
 $level = (int)($body['approver_level'] ?? 1);

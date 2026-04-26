@@ -13,6 +13,12 @@ if (!isCEOOrAbove()) {
 
 $pdo = getDB();
 $user = Auth::user();
+$employeeOptions = $pdo->query("
+    SELECT u.id, u.employee_code, u.first_name_th, u.last_name_th
+    FROM users u
+    WHERE u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ") AND u.is_active = 1
+    ORDER BY u.employee_code ASC
+")->fetchAll(PDO::FETCH_ASSOC);
 $page_title = 'External API Keys';
 $current_page = 'hr-api-keys';
 
@@ -44,6 +50,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $expires = $expires !== '' ? $expires . ' 23:59:59' : null;
             $notes = trim($_POST['notes'] ?? '') ?: null;
 
+            $serviceUserId = (int) ($_POST['service_user_id'] ?? 0);
+            if ($serviceUserId > 0) {
+                $chk = $pdo->prepare('SELECT id FROM users WHERE id = ? AND id NOT IN (' . SYSTEM_USER_IDS_SQL . ') AND is_active = 1 LIMIT 1');
+                $chk->execute([$serviceUserId]);
+                if (!$chk->fetchColumn()) {
+                    throw new Exception('พนักงานสำหรับผูกคีย์ไม่ถูกต้องหรือไม่ active');
+                }
+            } else {
+                $serviceUserId = 0;
+            }
+
             $issued = ApiAuth::issue([
                 'name' => $name,
                 'scopes' => $scopes,
@@ -53,9 +70,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'expires_at' => $expires,
                 'created_by' => (int)$user['id'],
                 'notes' => $notes,
+                'service_user_id' => $serviceUserId > 0 ? $serviceUserId : null,
             ]);
             $plainKey = $issued['key'];
-            Auth::log('api_key_create', 'hr_api_keys', $issued['id'], null, ['name' => $name, 'scopes' => $scopes]);
+            Auth::log('api_key_create', 'hr_api_keys', $issued['id'], null, ['name' => $name, 'scopes' => $scopes, 'service_user_id' => $serviceUserId > 0 ? $serviceUserId : null]);
             $success = 'สร้างคีย์สำเร็จ — บันทึกคีย์ด้านล่างทันที ระบบจะไม่แสดงอีก';
         } elseif ($action === 'revoke') {
             $id = (int)($_POST['id'] ?? 0);
@@ -84,9 +102,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $keys = $pdo->query("
-    SELECT k.*, c.first_name_th AS c_first, c.last_name_th AS c_last
+    SELECT k.*, c.first_name_th AS c_first, c.last_name_th AS c_last,
+           su.employee_code AS su_code, su.first_name_th AS su_first, su.last_name_th AS su_last
     FROM hr_api_keys k
     LEFT JOIN users c ON k.created_by = c.id
+    LEFT JOIN users su ON k.service_user_id = su.id
     ORDER BY k.id DESC
 ")->fetchAll(PDO::FETCH_ASSOC);
 
@@ -192,6 +212,15 @@ require_once __DIR__ . '/../templates/header.php';
                 <label class="text-white/70 text-sm block mb-1">หมายเหตุ</label>
                 <input name="notes" class="input-field w-full">
             </div>
+            <div class="md:col-span-2">
+                <label class="text-white/70 text-sm block mb-1">ผูกกับพนักงาน (ถ้าเลือก คีย์จะเข้าถึงได้เฉพาะข้อมูลของพนักงานนี้ — ไม่สามารถอนุมัติ/แก้ payroll แอดมิน)</label>
+                <select name="service_user_id" class="input-field w-full">
+                    <option value="0">— ไม่จำกัด (คีย์ระบบทั่วไป) —</option>
+                    <?php foreach ($employeeOptions as $eo): ?>
+                    <option value="<?= (int)$eo['id'] ?>"><?= htmlspecialchars(trim(($eo['employee_code'] ?? '') . ' ' . ($eo['first_name_th'] ?? '') . ' ' . ($eo['last_name_th'] ?? ''))) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
 
             <div class="md:col-span-2">
                 <button type="submit" class="px-5 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg">
@@ -227,6 +256,13 @@ require_once __DIR__ . '/../templates/header.php';
                         <p class="text-white/45 text-[10px] uppercase tracking-wide">Scopes</p>
                         <p class="text-white/75 text-xs break-words line-clamp-4"><?= htmlspecialchars(implode(', ', $scopes) ?: '—') ?></p>
                     </div>
+                    <?php if (!empty($k['service_user_id'])): ?>
+                    <div class="rounded-lg bg-amber-500/10 border border-amber-400/30 px-2 py-2 text-xs text-amber-100">
+                        <span class="text-white/45">ผูกพนักงาน:</span>
+                        <?= htmlspecialchars(trim(($k['su_code'] ?? '') . ' ' . ($k['su_first'] ?? '') . ' ' . ($k['su_last'] ?? ''))) ?>
+                        <span class="text-white/40">(id <?= (int)$k['service_user_id'] ?>)</span>
+                    </div>
+                    <?php endif; ?>
                     <div class="grid grid-cols-2 gap-2 text-xs">
                         <div class="rounded-lg bg-black/20 border border-white/10 px-2 py-2">
                             <span class="text-white/45">Rate</span>
@@ -263,6 +299,7 @@ require_once __DIR__ . '/../templates/header.php';
                     <th class="p-3 text-left">ชื่อ</th>
                     <th class="p-3 text-left">Prefix</th>
                     <th class="p-3 text-left">Scopes</th>
+                    <th class="p-3 text-left">ผูกพนักงาน</th>
                     <th class="p-3 text-left">Rate</th>
                     <th class="p-3 text-left">ล่าสุด</th>
                     <th class="p-3 text-left">หมดอายุ</th>
@@ -276,6 +313,7 @@ require_once __DIR__ . '/../templates/header.php';
                     <td class="p-3"><?= htmlspecialchars($k['name']) ?><div class="text-xs text-white/40"><?= htmlspecialchars($k['notes'] ?? '') ?></div></td>
                     <td class="p-3 font-mono text-xs"><?= htmlspecialchars($k['key_prefix']) ?>…</td>
                     <td class="p-3 text-xs"><?= htmlspecialchars(implode(', ', $scopes) ?: '—') ?></td>
+                    <td class="p-3 text-xs"><?php if (!empty($k['service_user_id'])): ?><?= htmlspecialchars(trim(($k['su_code'] ?? '') . ' ' . ($k['su_first'] ?? '') . ' ' . ($k['su_last'] ?? ''))) ?><div class="text-white/40">#<?= (int)$k['service_user_id'] ?></div><?php else: ?><span class="text-white/35">—</span><?php endif; ?></td>
                     <td class="p-3"><?= (int)$k['rate_limit_per_min'] ?>/min</td>
                     <td class="p-3 text-xs"><?= htmlspecialchars($k['last_used_at'] ?? '—') ?><div class="text-white/40"><?= htmlspecialchars($k['last_used_ip'] ?? '') ?></div></td>
                     <td class="p-3 text-xs"><?= htmlspecialchars($k['expires_at'] ?? '—') ?></td>
@@ -302,7 +340,7 @@ require_once __DIR__ . '/../templates/header.php';
                 </tr>
             <?php endforeach; ?>
             <?php if (!$keys): ?>
-                <tr><td colspan="8" class="p-6 text-center text-white/40">ยังไม่มีคีย์</td></tr>
+                <tr><td colspan="9" class="p-6 text-center text-white/40">ยังไม่มีคีย์</td></tr>
             <?php endif; ?>
             </tbody>
         </table>

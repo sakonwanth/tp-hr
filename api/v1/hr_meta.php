@@ -61,7 +61,7 @@ switch ($resource) {
         ApiAuth::success(['data' => $rows]);
     }
     case 'employee-schedules': {
-        $userId = isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0;
+        $userId = apiKeyResolveScopedUserId(ApiAuth::currentKey(), isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0);
         $sql = "
             SELECT s.id, s.user_id, u.employee_code, u.first_name_th, u.last_name_th,
                    s.day_off, s.effective_date, s.notes, s.updated_at
@@ -89,7 +89,7 @@ switch ($resource) {
     }
     case 'leave-entitlements': {
         $year = isset($_GET['year']) ? (int)$_GET['year'] : (int)date('Y');
-        $userId = isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0;
+        $userId = apiKeyResolveScopedUserId(ApiAuth::currentKey(), isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0);
         $sql = "
             SELECT e.id, e.user_id, u.employee_code, u.first_name_th, u.last_name_th,
                    e.leave_type_id, lt.code AS leave_code, lt.name AS leave_name,

@@ -220,6 +220,50 @@ function tpHrLogException(Throwable $e, string $context): void {
     error_log('[' . $context . '] ' . $e->getMessage() . ' @ ' . $e->getFile() . ':' . $e->getLine());
 }
 
+/**
+ * If the API key is restricted to one employee (hr_api_keys.service_user_id), return that users.id; else null.
+ */
+function apiKeyServiceUserId(?array $key): ?int {
+    if (!$key) {
+        return null;
+    }
+    $id = isset($key['service_user_id']) ? (int) $key['service_user_id'] : 0;
+    return $id > 0 ? $id : null;
+}
+
+/**
+ * For ?user_id= / body user_id on list or write: HR keys use client value; employee-scoped keys force own id.
+ *
+ * @return int 0 = no user filter (all rows), >0 = restrict to this user
+ */
+function apiKeyResolveScopedUserId(?array $key, int $clientUserId): int {
+    $svc = apiKeyServiceUserId($key);
+    if ($svc === null) {
+        return max(0, $clientUserId);
+    }
+    if ($clientUserId > 0 && $clientUserId !== $svc) {
+        ApiAuth::fail(403, 'user_id not allowed for this API key');
+    }
+    return $svc;
+}
+
+/**
+ * For GET-by-id: ensure the resource belongs to the scoped employee when the key is restricted.
+ */
+function apiKeyAssertResourceOwnerUserId(?array $key, int $resourceOwnerUserId): void {
+    $svc = apiKeyServiceUserId($key);
+    if ($svc !== null && $resourceOwnerUserId !== $svc) {
+        ApiAuth::fail(403, 'Forbidden');
+    }
+}
+
+/** Block manager-only approve/reject flows for keys restricted to one employee. */
+function apiKeyForbidServiceScoped(string $message = 'This action is not allowed for employee-scoped API keys'): void {
+    if (apiKeyServiceUserId(ApiAuth::currentKey()) !== null) {
+        ApiAuth::fail(403, $message);
+    }
+}
+
 function apiKeyResolveActorForApi(PDO $pdo, ?array $key, array $body, string $bodyField, array $allowedRoleNames): int {
     if (!$key) {
         ApiAuth::fail(500, 'Internal error');
