@@ -72,7 +72,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $success = 'เปิดใช้งานคีย์แล้ว';
         }
     } catch (Throwable $e) {
-        $error = $e->getMessage();
+        tpHrLogException($e, 'hr/api_keys POST');
+        if ($e instanceof PDOException) {
+            $error = 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้งหรือติดต่อผู้ดูแลระบบ';
+        } elseif ($e instanceof Exception) {
+            $error = $e->getMessage();
+        } else {
+            $error = 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้งหรือติดต่อผู้ดูแลระบบ';
+        }
     }
 }
 

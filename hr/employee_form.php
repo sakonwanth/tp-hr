@@ -96,8 +96,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'chang
                 $stmt = $pdo->prepare("UPDATE users SET password = ?, updated_at = NOW() WHERE id = ?");
                 $stmt->execute([$hashedPassword, $id]);
                 $success = 'เปลี่ยนรหัสผ่านเรียบร้อยแล้ว';
-            } catch (Exception $e) {
-                $errors[] = 'เกิดข้อผิดพลาด: ' . $e->getMessage();
+            } catch (Throwable $e) {
+                tpHrLogException($e, 'hr/employee_form change_password');
+                $errors[] = 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้งหรือติดต่อผู้ดูแลระบบ';
             }
         }
     }
@@ -394,8 +395,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'chang
                         redirect("/hr/employee_form.php?action=edit&id={$newId}", 302);
                     }
                 }
-            } catch (Exception $e) {
-                $errors[] = 'เกิดข้อผิดพลาด: ' . $e->getMessage();
+            } catch (Throwable $e) {
+                tpHrLogException($e, 'hr/employee_form save');
+                $errors[] = 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้งหรือติดต่อผู้ดูแลระบบ';
             }
         }
         

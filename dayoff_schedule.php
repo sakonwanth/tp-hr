@@ -128,8 +128,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Reload requests
                     header("Location: dayoff_schedule.php?month={$month}&success=1");
                     exit;
-                } catch (Exception $e) {
-                    $error = 'เกิดข้อผิดพลาด: ' . $e->getMessage();
+                } catch (Throwable $e) {
+                    tpHrLogException($e, 'dayoff_schedule request_change');
+                    $error = 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้งหรือติดต่อผู้ดูแลระบบ';
                 }
             }
         } elseif ($action === 'cancel_request') {

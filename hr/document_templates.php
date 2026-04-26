@@ -259,8 +259,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $pdo->prepare("DELETE FROM hr_document_templates WHERE id=?")->execute([$id]);
                 $success = 'ลบเอกสารเรียบร้อย';
             }
-        } catch (Exception $e) {
-            $error = $e->getMessage();
+        } catch (Throwable $e) {
+            tpHrLogException($e, 'hr/document_templates POST');
+            if ($e instanceof PDOException) {
+                $error = 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้งหรือติดต่อผู้ดูแลระบบ';
+            } elseif ($e instanceof Exception) {
+                $error = $e->getMessage();
+            } else {
+                $error = 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้งหรือติดต่อผู้ดูแลระบบ';
+            }
         }
     }
 }
