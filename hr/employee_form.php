@@ -15,7 +15,7 @@ if (!hr_can_access_hr_dashboard()) {
 }
 
 // Permission flags
-$canEditSensitive = canManageUsers(); // CEO+ can edit salary, role, is_active
+$canEditSensitive = canManageUsers(); // CEO+: salary, role, is_active, login ids, national id, SSO, bank (edit)
 
 // Only CEO+ can add new employees
 if (!$canEditSensitive && ($_GET['action'] ?? 'add') === 'add') {
@@ -171,6 +171,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'chang
             $formData['employee_code'] = (string)($employee['employee_code'] ?? '');
             $formData['username'] = (string)($employee['username'] ?? '');
             $formData['email'] = (string)($employee['email'] ?? '');
+            $formData['id_card'] = trim((string)($employee['id_card'] ?? ''));
+            $formData['id_card_expiry'] = $employee['id_card_expiry'] ?? null;
+            $formData['social_security_id'] = trim((string)($employee['social_security_id'] ?? ''));
+            $formData['social_security_start_date'] = $employee['social_security_start_date'] ?? null;
+            $formData['social_security_hospital'] = trim((string)($employee['social_security_hospital'] ?? ''));
+            $formData['bank_name'] = trim((string)($employee['bank_name'] ?? ''));
+            $formData['bank_account'] = trim((string)($employee['bank_account'] ?? ''));
             $formData['salary'] = $employee['salary'];
             $formData['probation_salary'] = $employee['probation_salary'] ?? null;
             $formData['role_id'] = (int)$employee['role_id'];
@@ -658,15 +665,29 @@ include dirname(__DIR__) . '/templates/header.php';
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
             <div>
                 <label class="block text-white/70 text-sm mb-1">เลขบัตรประชาชน</label>
+                <?php if ($action === 'edit' && !$canEditSensitive): ?>
+                <input type="hidden" name="id_card" value="<?php echo htmlspecialchars($employee['id_card'] ?? ''); ?>">
+                <input type="text" value="<?php echo htmlspecialchars($employee['id_card'] ?? ''); ?>"
+                       class="input-field bg-white/5 cursor-not-allowed" readonly maxlength="13">
+                <p class="text-white/40 text-xs mt-1"><i class="fas fa-lock mr-1"></i>เฉพาะ CEO+ เท่านั้นที่แก้ไขได้</p>
+                <?php else: ?>
                 <input type="text" name="id_card" maxlength="13"
                        value="<?php echo htmlspecialchars($employee['id_card'] ?? ''); ?>"
                        class="input-field" placeholder="1234567890123">
+                <?php endif; ?>
             </div>
             <div>
                 <label class="block text-white/70 text-sm mb-1">วันบัตรหมดอายุ</label>
+                <?php if ($action === 'edit' && !$canEditSensitive): ?>
+                <input type="hidden" name="id_card_expiry" value="<?php echo htmlspecialchars($employee['id_card_expiry'] ?? ''); ?>">
+                <input type="date" value="<?php echo htmlspecialchars($employee['id_card_expiry'] ?? ''); ?>"
+                       class="input-field bg-white/5 cursor-not-allowed" readonly>
+                <p class="text-white/40 text-xs mt-1"><i class="fas fa-lock mr-1"></i>CEO+</p>
+                <?php else: ?>
                 <input type="date" name="id_card_expiry"
                        value="<?php echo htmlspecialchars($employee['id_card_expiry'] ?? ''); ?>"
                        class="input-field">
+                <?php endif; ?>
             </div>
             <div>
                 <label class="block text-white/70 text-sm mb-1">วันเกิด</label>
@@ -1013,50 +1034,89 @@ include dirname(__DIR__) . '/templates/header.php';
             ประกันสังคม & บัญชีธนาคาร
         </h3>
         
+        <?php
+        $banks = ['กสิกรไทย', 'ไทยพาณิชย์', 'กรุงเทพ', 'กรุงไทย', 'ทหารไทยธนชาต', 'กรุงศรีอยุธยา', 'ออมสิน', 'ธ.ก.ส.', 'ซีไอเอ็มบี', 'ยูโอบี', 'แลนด์ แอนด์ เฮ้าส์', 'เกียรตินาคินภัทร', 'ทิสโก้', 'อื่นๆ'];
+        $lockWelfare = ($action === 'edit' && !$canEditSensitive);
+        ?>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <label class="block text-white/70 text-sm mb-1">เลขทะเบียนประกันสังคม</label>
+                <?php if ($lockWelfare): ?>
+                <input type="hidden" name="social_security_id" value="<?php echo htmlspecialchars($employee['social_security_id'] ?? ''); ?>">
+                <input type="text" value="<?php echo htmlspecialchars($employee['social_security_id'] ?? ''); ?>"
+                       class="input-field bg-white/5 cursor-not-allowed" readonly>
+                <p class="text-white/40 text-xs mt-1"><i class="fas fa-lock mr-1"></i>CEO+</p>
+                <?php else: ?>
                 <input type="text" name="social_security_id"
                        value="<?php echo htmlspecialchars($employee['social_security_id'] ?? ''); ?>"
                        class="input-field" placeholder="เลขที่ประกันสังคม">
+                <?php endif; ?>
             </div>
             <div>
                 <label class="block text-white/70 text-sm mb-1">วันเริ่มหักประกันสังคม</label>
+                <?php if ($lockWelfare): ?>
+                <input type="hidden" name="social_security_start_date" value="<?php echo htmlspecialchars($employee['social_security_start_date'] ?? ''); ?>">
+                <input type="date" value="<?php echo htmlspecialchars($employee['social_security_start_date'] ?? ''); ?>"
+                       class="input-field bg-white/5 cursor-not-allowed" readonly>
+                <p class="text-white/40 text-xs mt-1">CEO+</p>
+                <?php else: ?>
                 <input type="date" name="social_security_start_date"
                        value="<?php echo htmlspecialchars($employee['social_security_start_date'] ?? ''); ?>"
                        class="input-field">
+                <?php endif; ?>
+                <?php if (!$lockWelfare): ?>
                 <p class="text-white/40 text-xs mt-1">ปกติจะเริ่มหักหลังผ่านโปร</p>
+                <?php endif; ?>
             </div>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             <div>
                 <label class="block text-white/70 text-sm mb-1">โรงพยาบาลประกันสังคม</label>
+                <?php if ($lockWelfare): ?>
+                <input type="hidden" name="social_security_hospital" value="<?php echo htmlspecialchars($employee['social_security_hospital'] ?? ''); ?>">
+                <input type="text" value="<?php echo htmlspecialchars($employee['social_security_hospital'] ?? ''); ?>"
+                       class="input-field bg-white/5 cursor-not-allowed" readonly>
+                <p class="text-white/40 text-xs mt-1"><i class="fas fa-lock mr-1"></i>CEO+</p>
+                <?php else: ?>
                 <input type="text" name="social_security_hospital"
                        value="<?php echo htmlspecialchars($employee['social_security_hospital'] ?? ''); ?>"
                        class="input-field" placeholder="ชื่อโรงพยาบาล">
+                <?php endif; ?>
             </div>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             <div>
                 <label class="block text-white/70 text-sm mb-1">ธนาคาร</label>
+                <?php if ($lockWelfare): ?>
+                <input type="hidden" name="bank_name" value="<?php echo htmlspecialchars($employee['bank_name'] ?? ''); ?>">
+                <input type="text" value="<?php echo htmlspecialchars($employee['bank_name'] ?? ''); ?>"
+                       class="input-field bg-white/5 cursor-not-allowed" readonly>
+                <p class="text-white/40 text-xs mt-1"><i class="fas fa-lock mr-1"></i>CEO+</p>
+                <?php else: ?>
                 <select name="bank_name" class="input-field">
                     <option value="">-- เลือกธนาคาร --</option>
-                    <?php 
-                    $banks = ['กสิกรไทย', 'ไทยพาณิชย์', 'กรุงเทพ', 'กรุงไทย', 'ทหารไทยธนชาต', 'กรุงศรีอยุธยา', 'ออมสิน', 'ธ.ก.ส.', 'ซีไอเอ็มบี', 'ยูโอบี', 'แลนด์ แอนด์ เฮ้าส์', 'เกียรตินาคินภัทร', 'ทิสโก้', 'อื่นๆ'];
-                    foreach ($banks as $bank): ?>
+                    <?php foreach ($banks as $bank): ?>
                     <option value="<?php echo $bank; ?>" <?php echo ($employee['bank_name'] ?? '') === $bank ? 'selected' : ''; ?>>
                         <?php echo $bank; ?>
                     </option>
                     <?php endforeach; ?>
                 </select>
+                <?php endif; ?>
             </div>
             <div>
                 <label class="block text-white/70 text-sm mb-1">เลขบัญชีธนาคาร</label>
+                <?php if ($lockWelfare): ?>
+                <input type="hidden" name="bank_account" value="<?php echo htmlspecialchars($employee['bank_account'] ?? ''); ?>">
+                <input type="text" value="<?php echo htmlspecialchars($employee['bank_account'] ?? ''); ?>"
+                       class="input-field bg-white/5 cursor-not-allowed" readonly>
+                <p class="text-white/40 text-xs mt-1"><i class="fas fa-lock mr-1"></i>CEO+</p>
+                <?php else: ?>
                 <input type="text" name="bank_account"
                        value="<?php echo htmlspecialchars($employee['bank_account'] ?? ''); ?>"
                        class="input-field" placeholder="xxx-x-xxxxx-x">
+                <?php endif; ?>
             </div>
         </div>
     </div>
