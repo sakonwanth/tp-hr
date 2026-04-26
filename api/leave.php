@@ -107,8 +107,8 @@ function getEntitlements($pdo, $user) {
     $year = (int)($_GET['year'] ?? date('Y'));
     $userId = $user['id'];
     
-    // Allow HR to view other user's entitlements
-    if (isset($_GET['user_id']) && (isHR() || hasRole('manager'))) {
+    // Allow HR / managers to view another user's entitlements (role names are case-sensitive; use MANAGER_ROLES).
+    if (isset($_GET['user_id']) && (isHR() || hasRole(MANAGER_ROLES))) {
         $userId = (int)$_GET['user_id'];
     }
     
@@ -216,8 +216,8 @@ function getHistory($pdo, $user) {
 function getDetail($pdo, $user) {
     $id = (int)($_GET['id'] ?? 0);
     
-    $isHR = isHR() || hasRole('manager');
-    
+    $canViewOthers = isHR() || hasRole(MANAGER_ROLES);
+
     $stmt = $pdo->prepare("
         SELECT lr.*, lt.name as leave_type_name, lt.color as color_code,
                CONCAT(approver.first_name_th, ' ', approver.last_name_th) as approved_by_name,
@@ -228,8 +228,8 @@ function getDetail($pdo, $user) {
         LEFT JOIN users approver ON lr.final_approved_by = approver.id
         WHERE lr.id = ? AND (lr.user_id = ? OR ? = 1)
     ");
-    
-    $stmt->execute([$id, $user['id'], $isHR ? 1 : 0]);
+
+    $stmt->execute([$id, $user['id'], $canViewOthers ? 1 : 0]);
     $request = $stmt->fetch();
     
     if (!$request) {
