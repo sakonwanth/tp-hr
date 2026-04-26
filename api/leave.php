@@ -101,13 +101,14 @@ function handlePost($pdo, $user, $action) {
 }
 
 /**
- * Resolve subject user for leave read APIs: self, or HR/manager ?user_id= (validated).
+ * Resolve subject user for leave read APIs: self, or HR dashboard ?user_id= (validated).
+ * Cross-user reads require hr_can_access_hr_dashboard() — same gate as /hr/employees.php (not broad MANAGER_ROLES).
  *
- * @return int Subject users.id, or -1 if HR/manager requested an unknown/system user.
+ * @return int Subject users.id, or -1 if HR requested an unknown/system user.
  */
 function leaveApiResolveSubjectUserId(PDO $pdo, array $user): int {
     $self = (int) $user['id'];
-    if (!isset($_GET['user_id']) || (!hr_can_access_hr_dashboard() && !hasRole(MANAGER_ROLES))) {
+    if (!isset($_GET['user_id']) || !hr_can_access_hr_dashboard()) {
         return $self;
     }
     $req = (int) $_GET['user_id'];
@@ -166,7 +167,7 @@ function getEntitlements($pdo, $user) {
 }
 
 /**
- * Get leave history (self; HR/manager may pass ?user_id=)
+ * Get leave history (self; HR dashboard may pass ?user_id=)
  */
 function getHistory($pdo, $user) {
     $year = (int)($_GET['year'] ?? date('Y'));
@@ -247,7 +248,7 @@ function getHistory($pdo, $user) {
 function getDetail($pdo, $user) {
     $id = (int)($_GET['id'] ?? 0);
     
-    $canViewOthers = hr_can_access_hr_dashboard() || hasRole(MANAGER_ROLES);
+    $canViewOthers = hr_can_access_hr_dashboard();
 
     $stmt = $pdo->prepare("
         SELECT lr.*, lt.name as leave_type_name, lt.color as color_code,
@@ -276,11 +277,10 @@ function getDetail($pdo, $user) {
 }
 
 /**
- * Get pending requests (for HR/Manager)
+ * Get pending requests (HR dashboard — same as /hr/leaves.php)
  */
 function getPending($pdo, $user) {
-    // Check permission
-    if (!hr_can_access_hr_dashboard() && !hasRole(MANAGER_ROLES)) {
+    if (!hr_can_access_hr_dashboard()) {
         http_response_code(403);
         echo json_encode(['success' => false, 'error' => 'ไม่มีสิทธิ์เข้าถึง']);
         return;
@@ -315,8 +315,8 @@ function getCalendar($pdo, $user) {
     $startDate = "$year-" . str_pad($month, 2, '0', STR_PAD_LEFT) . "-01";
     $endDate = date('Y-m-t', strtotime($startDate));
 
-    // Company-wide calendar only for HR / managers; everyone else sees own leaves only.
-    $canViewAllLeaves = hr_can_access_hr_dashboard() || hasRole(MANAGER_ROLES);
+    // Company-wide calendar only for HR dashboard; everyone else sees own leaves only.
+    $canViewAllLeaves = hr_can_access_hr_dashboard();
 
     $sql = "
         SELECT lr.id, lr.start_date, lr.end_date, lr.total_days, lr.status,
@@ -595,11 +595,10 @@ function cancelLeaveRequest($pdo, $user) {
 }
 
 /**
- * Approve leave request (HR/Manager only)
+ * Approve leave request (HR dashboard — same gate as /hr/leaves.php)
  */
 function approveLeaveRequest($pdo, $user) {
-    // Check permission
-    if (!hr_can_access_hr_dashboard() && !hasRole(MANAGER_ROLES)) {
+    if (!hr_can_access_hr_dashboard()) {
         http_response_code(403);
         echo json_encode(['success' => false, 'error' => 'ไม่มีสิทธิ์ดำเนินการ']);
         return;
@@ -668,11 +667,10 @@ function approveLeaveRequest($pdo, $user) {
 }
 
 /**
- * Reject leave request (HR/Manager only)
+ * Reject leave request (HR dashboard — same gate as /hr/leaves.php)
  */
 function rejectLeaveRequest($pdo, $user) {
-    // Check permission
-    if (!hr_can_access_hr_dashboard() && !hasRole(MANAGER_ROLES)) {
+    if (!hr_can_access_hr_dashboard()) {
         http_response_code(403);
         echo json_encode(['success' => false, 'error' => 'ไม่มีสิทธิ์ดำเนินการ']);
         return;
