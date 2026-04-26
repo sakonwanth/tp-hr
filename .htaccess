@@ -14,6 +14,10 @@ RewriteRule ^docs/?$ docs/index.html [L]
 RewriteRule ^api/v1/?$          api/v1/index.php [L]
 RewriteRule ^api/v1/(.+)$       api/v1/index.php [L,QSA]
 
+# Cron & maintenance scripts — CLI-only in code; deny direct HTTP (defense in depth)
+RewriteRule ^cron/ - [F,L]
+RewriteRule ^scripts/ - [F,L]
+
 # Redirect to HTTPS (uncomment in production)
 # RewriteCond %{HTTPS} off
 # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]

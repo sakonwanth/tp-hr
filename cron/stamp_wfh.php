@@ -6,6 +6,12 @@
  * Usage (Plesk cron):
  *   /opt/plesk/php/8.4/bin/php /var/www/vhosts/tp-asset.com/hr.tp-asset.com/cron/stamp_wfh.php
  */
+if (PHP_SAPI !== 'cli') {
+    http_response_code(403);
+    header('Content-Type: text/plain; charset=UTF-8');
+    exit('CLI only');
+}
+
 require_once dirname(__DIR__) . '/bootstrap.php';
 
 $date = $argv[1] ?? date('Y-m-d');
