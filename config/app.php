@@ -7,7 +7,14 @@
 define('APP_NAME', 'TP-HR');
 define('APP_VERSION', '1.0.0');
 define('APP_ENV', $_ENV['APP_ENV'] ?? 'development');
-define('APP_DEBUG', filter_var($_ENV['APP_DEBUG'] ?? true, FILTER_VALIDATE_BOOLEAN));
+// Default: debug on in non-production; production must set APP_DEBUG=true explicitly to enable.
+$__appEnv = strtolower((string) APP_ENV);
+if (isset($_ENV['APP_DEBUG'])) {
+    define('APP_DEBUG', filter_var($_ENV['APP_DEBUG'], FILTER_VALIDATE_BOOLEAN));
+} else {
+    define('APP_DEBUG', $__appEnv !== 'production');
+}
+unset($__appEnv);
 define('APP_URL', $_ENV['APP_URL'] ?? 'http://localhost/tp-hr');
 
 // Session
