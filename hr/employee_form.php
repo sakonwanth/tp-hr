@@ -82,6 +82,8 @@ if ($action === 'edit' && $id > 0) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'change_password') {
     if (!verifyCsrf()) {
         $errors[] = 'CSRF token ไม่ถูกต้อง';
+    } elseif (!canManageUsers()) {
+        $errors[] = 'เฉพาะผู้บริหารระดับ CEO ขึ้นไปเท่านั้นที่สามารถเปลี่ยนรหัสผ่านพนักงานคนอื่นได้';
     } else {
         $pwUserId = (int)($_POST['employee_id'] ?? 0);
         if ($pwUserId <= 0 || $pwUserId !== $id || $action !== 'edit') {
@@ -1367,8 +1369,8 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
 </form>
 
-<?php if ($action === 'edit' && $employee): ?>
-<!-- Change Password Section -->
+<?php if ($action === 'edit' && $employee && $canEditSensitive): ?>
+<!-- Change Password Section (CEO+ only — same gate as server-side handler) -->
 <div class="glass-card rounded-xl p-6 mt-6 min-w-0">
     <h3 class="text-lg font-bold text-white mb-4 flex items-center">
         <i class="fas fa-key text-yellow-400 mr-2"></i>
