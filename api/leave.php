@@ -105,11 +105,21 @@ function handlePost($pdo, $user, $action) {
  */
 function getEntitlements($pdo, $user) {
     $year = (int)($_GET['year'] ?? date('Y'));
-    $userId = $user['id'];
+    $userId = (int) $user['id'];
     
     // Allow HR / managers to view another user's entitlements (role names are case-sensitive; use MANAGER_ROLES).
     if (isset($_GET['user_id']) && (isHR() || hasRole(MANAGER_ROLES))) {
-        $userId = (int)$_GET['user_id'];
+        $reqUid = (int) $_GET['user_id'];
+        if ($reqUid > 0) {
+            $chk = $pdo->prepare('SELECT id FROM users WHERE id = ? AND id NOT IN (' . SYSTEM_USER_IDS_SQL . ') LIMIT 1');
+            $chk->execute([$reqUid]);
+            if (!$chk->fetchColumn()) {
+                http_response_code(404);
+                echo json_encode(['success' => false, 'error' => 'ไม่พบพนักงาน']);
+                return;
+            }
+            $userId = $reqUid;
+        }
     }
     
     $stmt = $pdo->prepare("
