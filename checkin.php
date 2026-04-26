@@ -656,6 +656,8 @@ require_once __DIR__ . '/templates/header.php';
 </div>
 
 <script>
+const CSRF_TOKEN = <?php echo json_encode(csrfToken(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+
 // Current time display
 function updateClock() {
     const now = new Date();
@@ -818,6 +820,7 @@ async function confirmCheckin(outsideReason = null) {
             latitude: userLatitude,
             longitude: userLongitude,
             photo: photoData,
+            _token: CSRF_TOKEN,
         };
         if (outsideReason) body.outside_reason = outsideReason;
 
@@ -936,6 +939,7 @@ async function submitLateStart() {
                 target_date: targetDate,
                 planned_start_time: planned_time,
                 reason: reason,
+                _token: CSRF_TOKEN,
             }),
         });
         const data = await resp.json();
@@ -957,7 +961,7 @@ async function cancelLateStart(targetDate) {
         const resp = await fetch('/api/attendance.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'cancel_late_start', target_date: targetDate }),
+            body: JSON.stringify({ action: 'cancel_late_start', target_date: targetDate, _token: CSRF_TOKEN }),
         });
         const data = await resp.json();
         if (data.success) {

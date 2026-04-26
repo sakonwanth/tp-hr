@@ -24,15 +24,24 @@ if (function_exists('ensurePlannedStartTimeColumns')) {
 
 // Handle requests
 if ($method === 'POST') {
-    $input = json_decode(file_get_contents('php://input'), true);
-    
-    // Check for FormData input
-    if (!$input && !empty($_POST)) {
+    $input = json_decode(file_get_contents('php://input') ?: '', true);
+    if (!is_array($input)) {
+        $input = [];
+    }
+    if (empty($input) && !empty($_POST)) {
         $input = $_POST;
     }
-    
+
+    $csrfVal = trim((string)($input['_token'] ?? $input['csrf_token'] ?? ''));
+    if ($csrfVal === '') {
+        $csrfVal = trim((string)($_SERVER['HTTP_X_CSRF_TOKEN'] ?? ''));
+    }
+    if (!verifyCsrfToken($csrfVal !== '' ? $csrfVal : null)) {
+        apiError('Invalid token', 403);
+    }
+
     $action = $input['action'] ?? '';
-    
+
     switch ($action) {
         case 'check_in':
             handleCheckIn($pdo, $user, $input);
@@ -525,12 +534,7 @@ function handleAdjust(PDO $pdo, array $user, array $input): void {
     if (!isHR()) {
         apiError('ไม่มีสิทธิ์ดำเนินการ', 403);
     }
-    
-    // Verify CSRF
-    if (!verifyCsrfToken($input['_token'] ?? '')) {
-        apiError('Invalid token', 403);
-    }
-    
+
     $userId = (int)($input['user_id'] ?? 0);
     $date = $input['attendance_date'] ?? '';
     $attendanceId = $input['attendance_id'] ?? '';
@@ -780,9 +784,6 @@ function getAdjustmentHistory(PDO $pdo, array $user): void {
 function handleDelete(PDO $pdo, array $user, array $input): void {
     if (!isHR()) {
         apiError('ไม่มีสิทธิ์ดำเนินการ', 403);
-    }
-    if (!verifyCsrfToken($input['_token'] ?? '')) {
-        apiError('Invalid token', 403);
     }
 
     $userId = (int)($input['user_id'] ?? 0);
