@@ -13,12 +13,24 @@ $current_page = 'payslip';
 
 $pdo = Database::getInstance()->getConnection();
 
-// Handle download/print action - use CRM-style print template
-$action = $_GET['action'] ?? '';
-$downloadSlipId = (int)($_GET['slip_id'] ?? 0);
+if (($_GET['action'] ?? '') === 'download' && (int)($_GET['slip_id'] ?? 0) > 0) {
+    $q = $_GET;
+    unset($q['action']);
+    flash('error', 'การดาวน์โหลดหรือพิมพ์สลิป กรุณาใช้ปุ่มบนหน้านี้');
+    redirect('/payslip.php' . (count($q) ? '?' . http_build_query($q) : ''), 302);
+}
 
-if ($action === 'download' && $downloadSlipId > 0) {
-    // Get slip data for print template
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['download_payslip'] ?? '') === '1') {
+    if (!verifyCsrfToken($_POST['_token'] ?? null)) {
+        flash('error', 'โทเค็นความปลอดภัยไม่ถูกต้อง');
+        redirect('/payslip.php', 302);
+    }
+    $downloadSlipId = (int)($_POST['slip_id'] ?? 0);
+    if ($downloadSlipId <= 0) {
+        flash('error', 'ไม่พบสลิป');
+        redirect('/payslip.php', 302);
+    }
+
     $stmt = $pdo->prepare("
         SELECT ps.*, pr.payroll_month, pr.pay_day, pr.status as run_status,
                emp.title as emp_title, emp.first_name_th, emp.last_name_th, emp.employee_code, emp.department, emp.position
@@ -29,9 +41,8 @@ if ($action === 'download' && $downloadSlipId > 0) {
     ");
     $stmt->execute([$downloadSlipId, $user['id']]);
     $slip = $stmt->fetch();
-    
+
     if ($slip) {
-        // Get YTD for print template
         $ytd_year = (int)date('Y', strtotime($slip['payroll_month']));
         $stmt_ytd = $pdo->prepare("
             SELECT 
@@ -47,10 +58,29 @@ if ($action === 'download' && $downloadSlipId > 0) {
         ");
         $stmt_ytd->execute([$slip['user_id'], $ytd_year, $slip['payroll_month']]);
         $ytd = $stmt_ytd->fetch(PDO::FETCH_ASSOC);
-        
-        // Include print template and exit
+
         include __DIR__ . '/modules/employee/payslip/print_template.php';
         exit;
+    }
+
+    flash('error', 'ไม่พบสลิปหรือยังไม่พร้อม');
+    redirect('/payslip.php', 302);
+}
+
+if (!function_exists('tp_hr_payslip_download_form')) {
+    /**
+     * POST + CSRF — opens print template (same tab or target=_blank).
+     */
+    function tp_hr_payslip_download_form(int $slipId, string $buttonClass, string $innerHtml, bool $newTab, ?string $buttonTitle = null): void {
+        $target = $newTab ? ' target="_blank" rel="noopener noreferrer"' : '';
+        $titleAttr = ($buttonTitle !== null && $buttonTitle !== '')
+            ? (' title="' . htmlspecialchars($buttonTitle, ENT_QUOTES, 'UTF-8') . '"')
+            : '';
+        echo '<form method="post" action="payslip.php" class="payslip-download-form inline-flex w-full sm:w-auto min-w-0"' . $target . '>';
+        echo csrfField();
+        echo '<input type="hidden" name="download_payslip" value="1">';
+        echo '<input type="hidden" name="slip_id" value="' . $slipId . '">';
+        echo '<button type="submit" class="' . htmlspecialchars($buttonClass, ENT_QUOTES, 'UTF-8') . '"' . $titleAttr . '>' . $innerHtml . '</button></form>';
     }
 }
 
@@ -168,14 +198,8 @@ try {
             <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">ดูรายละเอียดรายได้ รายการหัก และเงินได้สุทธิ พิมพ์หรือดาวน์โหลดได้จากปุ่มด้านขวา</p>
         </div>
         <div class="flex flex-col sm:flex-row gap-2 sm:items-center shrink-0 w-full sm:w-auto">
-            <a href="payslip.php?action=download&slip_id=<?php echo (int)$slip['id']; ?>"
-               class="payslip-download-link w-full sm:w-auto min-h-[44px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors inline-flex items-center justify-center touch-manipulation">
-                <i class="fas fa-print mr-2"></i>พิมพ์
-            </a>
-            <a href="payslip.php?action=download&slip_id=<?php echo (int)$slip['id']; ?>" target="_blank" rel="noopener noreferrer"
-               class="payslip-download-link w-full sm:w-auto min-h-[44px] px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors inline-flex items-center justify-center font-semibold touch-manipulation">
-                <i class="fas fa-download mr-2"></i>ดาวน์โหลด PDF
-            </a>
+            <?php tp_hr_payslip_download_form((int)$slip['id'], 'w-full sm:w-auto min-h-[44px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors inline-flex items-center justify-center touch-manipulation', '<i class="fas fa-print mr-2"></i>พิมพ์', false); ?>
+            <?php tp_hr_payslip_download_form((int)$slip['id'], 'w-full sm:w-auto min-h-[44px] px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors inline-flex items-center justify-center font-semibold touch-manipulation', '<i class="fas fa-download mr-2"></i>ดาวน์โหลด PDF', true); ?>
         </div>
     </div>
 </div>
@@ -453,11 +477,7 @@ try {
                            title="ดูรายละเอียด">
                             <i class="fas fa-eye"></i><span class="text-sm sm:hidden">ดู</span>
                         </a>
-                        <a href="payslip.php?action=download&slip_id=<?php echo (int)$s['id']; ?>" target="_blank" rel="noopener noreferrer"
-                           class="payslip-download-link flex-1 sm:flex-none min-h-[48px] min-w-[48px] px-4 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors inline-flex items-center justify-center gap-2 touch-manipulation font-medium text-sm"
-                           title="ดาวน์โหลด PDF">
-                            <i class="fas fa-download"></i><span class="sm:hidden">ดาวน์โหลด</span><span class="hidden sm:inline">PDF</span>
-                        </a>
+                        <?php tp_hr_payslip_download_form((int)$s['id'], 'flex-1 sm:flex-none min-h-[48px] min-w-[48px] px-4 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors inline-flex items-center justify-center gap-2 touch-manipulation font-medium text-sm', '<i class="fas fa-download"></i><span class="sm:hidden">ดาวน์โหลด</span><span class="hidden sm:inline">PDF</span>', true, 'ดาวน์โหลด PDF'); ?>
                     </div>
                 </div>
             </div>
@@ -480,8 +500,8 @@ try {
 <?php include 'templates/footer.php'; ?>
 <script>
 (function () {
-    document.querySelectorAll('a.payslip-download-link').forEach(function (el) {
-        el.addEventListener('click', function () {
+    document.querySelectorAll('form.payslip-download-form').forEach(function (el) {
+        el.addEventListener('submit', function () {
             if (typeof showToast === 'function') {
                 showToast('success', 'เริ่มดาวน์โหลดสลิป', 'หากไม่เห็นไฟล์ ให้ตรวจสอบแท็บใหม่หรือการบล็อกป๊อปอัปของเบราว์เซอร์');
             }
