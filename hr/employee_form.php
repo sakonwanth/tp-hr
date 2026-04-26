@@ -168,6 +168,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'chang
         
         // Enforce backend permission: HR cannot change salary, role, is_active
         if (!$canEditSensitive && $action === 'edit' && $employee) {
+            $formData['employee_code'] = (string)($employee['employee_code'] ?? '');
+            $formData['username'] = (string)($employee['username'] ?? '');
+            $formData['email'] = (string)($employee['email'] ?? '');
             $formData['salary'] = $employee['salary'];
             $formData['probation_salary'] = $employee['probation_salary'] ?? null;
             $formData['role_id'] = (int)$employee['role_id'];
@@ -534,21 +537,42 @@ include dirname(__DIR__) . '/templates/header.php';
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
                 <label class="block text-white/70 text-sm mb-1">รหัสพนักงาน <span class="text-red-400">*</span></label>
-                <input type="text" name="employee_code" 
+                <?php if ($action === 'edit' && !$canEditSensitive): ?>
+                <input type="hidden" name="employee_code" value="<?php echo htmlspecialchars($employee['employee_code'] ?? ''); ?>">
+                <input type="text" value="<?php echo htmlspecialchars($employee['employee_code'] ?? ''); ?>"
+                       class="input-field bg-white/5 cursor-not-allowed" readonly required>
+                <p class="text-white/40 text-xs mt-1"><i class="fas fa-lock mr-1"></i>เฉพาะ CEO+ เท่านั้นที่แก้ไขได้</p>
+                <?php else: ?>
+                <input type="text" name="employee_code"
                        value="<?php echo htmlspecialchars($employee['employee_code'] ?? ''); ?>"
                        class="input-field" required placeholder="เช่น TPE01001">
+                <?php endif; ?>
             </div>
             <div>
                 <label class="block text-white/70 text-sm mb-1">Username <span class="text-red-400">*</span></label>
-                <input type="text" name="username" 
+                <?php if ($action === 'edit' && !$canEditSensitive): ?>
+                <input type="hidden" name="username" value="<?php echo htmlspecialchars($employee['username'] ?? ''); ?>">
+                <input type="text" value="<?php echo htmlspecialchars($employee['username'] ?? ''); ?>"
+                       class="input-field bg-white/5 cursor-not-allowed" readonly required>
+                <p class="text-white/40 text-xs mt-1"><i class="fas fa-lock mr-1"></i>เฉพาะ CEO+ เท่านั้นที่แก้ไขได้</p>
+                <?php else: ?>
+                <input type="text" name="username"
                        value="<?php echo htmlspecialchars($employee['username'] ?? ''); ?>"
                        class="input-field" required placeholder="ใช้สำหรับล็อกอิน">
+                <?php endif; ?>
             </div>
             <div>
                 <label class="block text-white/70 text-sm mb-1">อีเมล <span class="text-red-400">*</span></label>
-                <input type="email" name="email" 
+                <?php if ($action === 'edit' && !$canEditSensitive): ?>
+                <input type="hidden" name="email" value="<?php echo htmlspecialchars($employee['email'] ?? ''); ?>">
+                <input type="email" value="<?php echo htmlspecialchars($employee['email'] ?? ''); ?>"
+                       class="input-field bg-white/5 cursor-not-allowed" readonly required>
+                <p class="text-white/40 text-xs mt-1"><i class="fas fa-lock mr-1"></i>เฉพาะ CEO+ เท่านั้นที่แก้ไขได้</p>
+                <?php else: ?>
+                <input type="email" name="email"
                        value="<?php echo htmlspecialchars($employee['email'] ?? ''); ?>"
                        class="input-field" required placeholder="email@tp-asset.com">
+                <?php endif; ?>
             </div>
         </div>
         
