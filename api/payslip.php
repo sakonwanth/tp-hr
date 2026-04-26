@@ -17,7 +17,38 @@ $action = $_GET['action'] ?? $_POST['action'] ?? '';
 try {
     switch ($action) {
         case 'download':
-            downloadPDF($pdo, $user);
+            if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+                http_response_code(405);
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode(['success' => false, 'error' => 'Use POST with slip_id and CSRF token']);
+                exit;
+            }
+            $slipId = 0;
+            $ct = $_SERVER['CONTENT_TYPE'] ?? '';
+            if (stripos($ct, 'application/json') !== false) {
+                $raw = file_get_contents('php://input') ?: '';
+                $data = json_decode($raw, true);
+                if (!is_array($data)) {
+                    $data = [];
+                }
+                $slipId = (int)($data['slip_id'] ?? 0);
+                $tok = trim((string)($data['_token'] ?? $data['csrf_token'] ?? ''));
+                if (!verifyCsrfToken($tok !== '' ? $tok : null)) {
+                    http_response_code(403);
+                    header('Content-Type: application/json; charset=utf-8');
+                    echo json_encode(['success' => false, 'error' => 'Invalid token']);
+                    exit;
+                }
+            } else {
+                if (!verifyCsrfToken($_POST['_token'] ?? null)) {
+                    http_response_code(403);
+                    header('Content-Type: application/json; charset=utf-8');
+                    echo json_encode(['success' => false, 'error' => 'Invalid token']);
+                    exit;
+                }
+                $slipId = (int)($_POST['slip_id'] ?? 0);
+            }
+            downloadPDF($pdo, $user, $slipId);
             break;
             
         case 'list':
@@ -45,26 +76,31 @@ try {
 }
 
 /**
- * Download payslip as PDF
+ * Download payslip as HTML attachment (same visibility as payslip.php: approved/paid only).
  */
-function downloadPDF($pdo, $user) {
-    $slipId = (int)($_GET['slip_id'] ?? 0);
-    
-    // Get slip data
+function downloadPDF(PDO $pdo, array $user, int $slipId): void {
+    if ($slipId <= 0) {
+        http_response_code(400);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['success' => false, 'error' => 'slip_id required']);
+        exit;
+    }
+
     $stmt = $pdo->prepare("
         SELECT ps.*, pr.payroll_month, pr.status as run_status, pr.paid_date,
                emp.first_name_th, emp.last_name_th, emp.employee_code, emp.department, emp.position
         FROM payroll_slips ps
         JOIN payroll_runs pr ON ps.payroll_run_id = pr.id
         JOIN users emp ON ps.user_id = emp.id
-        WHERE ps.id = ? AND ps.user_id = ?
+        WHERE ps.id = ? AND ps.user_id = ? AND pr.status IN ('approved', 'paid')
     ");
     $stmt->execute([$slipId, $user['id']]);
     $slip = $stmt->fetch();
-    
+
     if (!$slip) {
-        header('HTTP/1.1 404 Not Found');
-        echo 'ไม่พบข้อมูลสลิป';
+        http_response_code(404);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['success' => false, 'error' => 'ไม่พบข้อมูลสลิป']);
         exit;
     }
     
@@ -78,6 +114,7 @@ function downloadPDF($pdo, $user) {
     // For now, output as HTML (in production, use a PDF library like TCPDF or DOMPDF)
     header('Content-Type: text/html; charset=utf-8');
     header('Content-Disposition: attachment; filename="payslip_' . $slip['employee_code'] . '_' . date('Ym', strtotime($slip['payroll_month'])) . '.html"');
+    header('X-Content-Type-Options: nosniff');
     echo $html;
 }
 
