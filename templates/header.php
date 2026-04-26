@@ -496,6 +496,13 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             overscroll-behavior: contain;
             padding-top: 12px;
             padding-bottom: 1.25rem;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .mobile-menu-scroll::-webkit-scrollbar {
+            display: none;
+            width: 0;
+            height: 0;
         }
         .mobile-menu-grid {
             display: grid;
@@ -557,12 +564,16 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         .mobile-menu-tile.active i {
             color: #fff;
         }
+        .mobile-menu-grid--logout {
+            margin-top: 1.75rem;
+            padding-top: 1.25rem;
+        }
         .mobile-menu-tile--logout {
             grid-column: 1 / -1;
             flex-direction: row;
             justify-content: center;
             min-height: 52px;
-            margin-top: 8px;
+            margin-top: 0;
             padding: 12px 16px;
             background: rgba(127, 29, 29, 0.2);
             border-color: rgba(248, 113, 113, 0.3);
@@ -1092,7 +1103,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             </nav>
             <?php endif; ?>
 
-            <nav class="mobile-menu-grid" aria-label="ออกจากระบบ">
+            <nav class="mobile-menu-grid mobile-menu-grid--logout" aria-label="ออกจากระบบ">
                 <a href="/logout.php" class="mobile-menu-tile mobile-menu-tile--logout">
                     <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
                     <span>ออกจากระบบ</span>
