@@ -3,7 +3,7 @@
  * TP-HR Header Template - Modern Design
  */
 $current_user = Auth::user();
-$isHR = isHR();
+$isHR = hr_can_access_hr_dashboard();
 $isCEO = isCEOOrAbove();
 $current_page = $current_page ?? '';
 $appIconPath = '/assets/icons/tphr-app-icon.svg';

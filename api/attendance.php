@@ -531,7 +531,7 @@ function getMonthlyReport(PDO $pdo, array $user): void {
  */
 function handleAdjust(PDO $pdo, array $user, array $input): void {
     // Check HR permission
-    if (!isHR()) {
+    if (!hr_can_access_hr_dashboard()) {
         apiError('ไม่มีสิทธิ์ดำเนินการ', 403);
     }
 
@@ -702,7 +702,7 @@ function handleAdjust(PDO $pdo, array $user, array $input): void {
  * GET params: user_id, date  (identify the attendance row)
  */
 function getAdjustmentHistory(PDO $pdo, array $user): void {
-    if (!isHR() && !hasRole(MANAGER_ROLES)) {
+    if (!hr_can_access_hr_dashboard() && !hasRole(MANAGER_ROLES)) {
         apiError('ไม่มีสิทธิ์ดำเนินการ', 403);
     }
 
@@ -782,7 +782,7 @@ function getAdjustmentHistory(PDO $pdo, array $user): void {
  * Status will naturally fall back to holiday/leave/day-off/absent on display.
  */
 function handleDelete(PDO $pdo, array $user, array $input): void {
-    if (!isHR()) {
+    if (!hr_can_access_hr_dashboard()) {
         apiError('ไม่มีสิทธิ์ดำเนินการ', 403);
     }
 

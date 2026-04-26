@@ -149,8 +149,8 @@ function getDetail($pdo, $user) {
         WHERE dr.id = ? AND (dr.user_id = ? OR ? = 1)
     ");
     
-    $isHR = isHR() ? 1 : 0;
-    $stmt->execute([$id, $user['id'], $isHR]);
+    $canHrDash = hr_can_access_hr_dashboard() ? 1 : 0;
+    $stmt->execute([$id, $user['id'], $canHrDash]);
     $request = $stmt->fetch();
     
     if (!$request) {
@@ -280,7 +280,7 @@ function cancelRequest($pdo, $user) {
  * Process request (HR)
  */
 function processRequest($pdo, $user) {
-    if (!isHR()) {
+    if (!hr_can_access_hr_dashboard()) {
         http_response_code(403);
         echo json_encode(['success' => false, 'error' => 'ไม่มีสิทธิ์ดำเนินการ']);
         return;
@@ -309,7 +309,7 @@ function processRequest($pdo, $user) {
  * Update request status (HR)
  */
 function updateStatus($pdo, $user) {
-    if (!isHR()) {
+    if (!hr_can_access_hr_dashboard()) {
         http_response_code(403);
         echo json_encode(['success' => false, 'error' => 'ไม่มีสิทธิ์ดำเนินการ']);
         return;
@@ -352,7 +352,7 @@ function updateStatus($pdo, $user) {
  * Complete request (HR)
  */
 function completeRequest($pdo, $user) {
-    if (!isHR()) {
+    if (!hr_can_access_hr_dashboard()) {
         http_response_code(403);
         echo json_encode(['success' => false, 'error' => 'ไม่มีสิทธิ์ดำเนินการ']);
         return;
@@ -416,7 +416,7 @@ function completeRequest($pdo, $user) {
  * Reject request (HR)
  */
 function rejectRequest($pdo, $user) {
-    if (!isHR()) {
+    if (!hr_can_access_hr_dashboard()) {
         http_response_code(403);
         echo json_encode(['success' => false, 'error' => 'ไม่มีสิทธิ์ดำเนินการ']);
         return;

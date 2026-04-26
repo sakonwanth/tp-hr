@@ -107,7 +107,7 @@ function handlePost($pdo, $user, $action) {
  */
 function leaveApiResolveSubjectUserId(PDO $pdo, array $user): int {
     $self = (int) $user['id'];
-    if (!isset($_GET['user_id']) || (!isHR() && !hasRole(MANAGER_ROLES))) {
+    if (!isset($_GET['user_id']) || (!hr_can_access_hr_dashboard() && !hasRole(MANAGER_ROLES))) {
         return $self;
     }
     $req = (int) $_GET['user_id'];
@@ -247,7 +247,7 @@ function getHistory($pdo, $user) {
 function getDetail($pdo, $user) {
     $id = (int)($_GET['id'] ?? 0);
     
-    $canViewOthers = isHR() || hasRole(MANAGER_ROLES);
+    $canViewOthers = hr_can_access_hr_dashboard() || hasRole(MANAGER_ROLES);
 
     $stmt = $pdo->prepare("
         SELECT lr.*, lt.name as leave_type_name, lt.color as color_code,
@@ -316,7 +316,7 @@ function getCalendar($pdo, $user) {
     $endDate = date('Y-m-t', strtotime($startDate));
 
     // Company-wide calendar only for HR / managers; everyone else sees own leaves only.
-    $canViewAllLeaves = isHR() || hasRole(MANAGER_ROLES);
+    $canViewAllLeaves = hr_can_access_hr_dashboard() || hasRole(MANAGER_ROLES);
 
     $sql = "
         SELECT lr.id, lr.start_date, lr.end_date, lr.total_days, lr.status,
@@ -599,7 +599,7 @@ function cancelLeaveRequest($pdo, $user) {
  */
 function approveLeaveRequest($pdo, $user) {
     // Check permission
-    if (!isHR() && !hasRole(MANAGER_ROLES)) {
+    if (!hr_can_access_hr_dashboard() && !hasRole(MANAGER_ROLES)) {
         http_response_code(403);
         echo json_encode(['success' => false, 'error' => 'ไม่มีสิทธิ์ดำเนินการ']);
         return;
@@ -672,7 +672,7 @@ function approveLeaveRequest($pdo, $user) {
  */
 function rejectLeaveRequest($pdo, $user) {
     // Check permission
-    if (!isHR() && !hasRole(MANAGER_ROLES)) {
+    if (!hr_can_access_hr_dashboard() && !hasRole(MANAGER_ROLES)) {
         http_response_code(403);
         echo json_encode(['success' => false, 'error' => 'ไม่มีสิทธิ์ดำเนินการ']);
         return;

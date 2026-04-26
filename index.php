@@ -8,7 +8,7 @@ Auth::requireLogin();
 
 $pdo = getDB();
 $user = Auth::user();
-$isHR = isHR();
+$isHR = hr_can_access_hr_dashboard();
 
 $page_title = 'หน้าแรก';
 $current_page = 'dashboard';
