@@ -40,29 +40,33 @@ function dt_handleUpload(array $file, string $subdir, array $allowed = ['png','j
     if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) return '';
     if ($file['error'] !== UPLOAD_ERR_OK) throw new Exception('อัปโหลดล้มเหลว (error: ' . $file['error'] . ')');
     if ($file['size'] > 5 * 1024 * 1024) throw new Exception('ไฟล์เกิน 5MB');
-    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-    if (!in_array($ext, $allowed, true)) throw new Exception('อนุญาตเฉพาะ: ' . implode(', ', $allowed));
 
-    // Validate content-type + ensure it's a real image (don't trust extension)
     $mime = '';
-    try {
-        if (function_exists('finfo_open')) {
-            $fi = finfo_open(FILEINFO_MIME_TYPE);
-            if ($fi) {
-                $mime = (string)finfo_file($fi, $file['tmp_name']);
-                finfo_close($fi);
-            }
+    if (function_exists('finfo_open')) {
+        $fi = finfo_open(FILEINFO_MIME_TYPE);
+        if ($fi) {
+            $mime = strtolower(trim((string)finfo_file($fi, $file['tmp_name'])));
+            finfo_close($fi);
         }
-    } catch (Throwable $e) { /* ignore */ }
-    $mime = strtolower(trim($mime));
-    $allowedMimeByExt = [
-        'jpg'  => ['image/jpeg'],
-        'jpeg' => ['image/jpeg'],
-        'png'  => ['image/png'],
-        'webp' => ['image/webp'],
+    }
+    if (in_array($mime, ['image/jpg', 'image/pjpeg'], true)) {
+        $mime = 'image/jpeg';
+    }
+    $mimeToExt = [
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+        'image/webp' => 'webp',
     ];
-    if (isset($allowedMimeByExt[$ext]) && $mime !== '' && !in_array($mime, $allowedMimeByExt[$ext], true)) {
-        throw new Exception('ไฟล์ไม่ถูกต้อง (ชนิดไฟล์ไม่ตรงกับนามสกุล)');
+    $ext = $mimeToExt[$mime] ?? '';
+    if ($ext === '') {
+        throw new Exception('อนุญาตเฉพาะรูป PNG, JPG, WEBP');
+    }
+    $allowedNorm = array_map(static function ($e) {
+        $e = strtolower((string)$e);
+        return $e === 'jpeg' ? 'jpg' : $e;
+    }, $allowed);
+    if (!in_array($ext, $allowedNorm, true)) {
+        throw new Exception('อนุญาตเฉพาะ: ' . implode(', ', $allowed));
     }
     if (@getimagesize($file['tmp_name']) === false) {
         throw new Exception('ไฟล์รูปภาพไม่ถูกต้อง');
