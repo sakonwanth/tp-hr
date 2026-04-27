@@ -995,10 +995,13 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         
         <!-- Logout -->
         <div class="mt-6 pt-6 border-t border-slate-700/50">
-            <a href="/logout.php" class="nav-item text-red-400 hover:bg-red-500/10 hover:text-red-300">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>ออกจากระบบ</span>
-            </a>
+            <form method="post" action="/logout.php" class="m-0">
+                <?php echo csrfField(); ?>
+                <button type="submit" class="nav-item text-red-400 hover:bg-red-500/10 hover:text-red-300 w-full text-left border-0 bg-transparent cursor-pointer font-inherit text-base">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>ออกจากระบบ</span>
+                </button>
+            </form>
         </div>
     </div>
 </aside>
@@ -1116,10 +1119,13 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             <?php endif; ?>
 
             <nav class="mobile-menu-grid mobile-menu-grid--logout" aria-label="ออกจากระบบ">
-                <a href="/logout.php" class="mobile-menu-tile mobile-menu-tile--logout">
-                    <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
-                    <span>ออกจากระบบ</span>
-                </a>
+                <form method="post" action="/logout.php" class="contents m-0">
+                    <?php echo csrfField(); ?>
+                    <button type="submit" class="mobile-menu-tile mobile-menu-tile--logout font-inherit border-0 cursor-pointer">
+                        <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                        <span>ออกจากระบบ</span>
+                    </button>
+                </form>
             </nav>
         </div>
     </div>

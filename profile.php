@@ -76,7 +76,10 @@ include 'templates/header.php';
     </div>
     <p class="text-white font-medium mb-2">ไม่พบข้อมูลบัญชีในฐานข้อมูล</p>
     <p class="text-white/60 text-sm mb-6">กรุณาออกจากระบบแล้วเข้าใหม่ หรือติดต่อฝ่าย HR หากยังเห็นข้อความนี้</p>
-    <a href="/logout.php" class="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-violet-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-violet-700 touch-manipulation">ออกจากระบบ</a>
+    <form method="post" action="/logout.php" class="inline m-0">
+        <?php echo csrfField(); ?>
+        <button type="submit" class="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-violet-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-violet-700 touch-manipulation border-0 cursor-pointer">ออกจากระบบ</button>
+    </form>
 </div>
 <?php include 'templates/footer.php';
 exit;
