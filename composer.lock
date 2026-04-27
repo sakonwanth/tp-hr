@@ -4,15 +4,15 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c8bff504ad75c66126c48e18b17d9522",
+    "content-hash": "57fd42dd48288d82804ed54c6f70fad0",
     "packages": [
         {
             "name": "tpasset/tp-common",
-            "version": "dev-main",
+            "version": "1.6.0",
             "dist": {
                 "type": "path",
                 "url": "../tp-common",
-                "reference": "4305adb4354b50d22e3203d2429558ebc8a8148e"
+                "reference": "9bb915e3869fa6167195a766600f4a3ca8743bd2"
             },
             "require": {
                 "php": ">=8.1"
@@ -44,9 +44,7 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "tpasset/tp-common": 20
-    },
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
