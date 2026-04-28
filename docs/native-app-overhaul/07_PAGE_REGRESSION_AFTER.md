@@ -52,6 +52,7 @@
 | Documents HR `/hr/documents.php` | **REGRESSION_PASS** (static QA: filters + SQL + stats month unchanged; `/api/certificate.php` POST flows + print form unchanged; UI/modals only) |
 | Document templates `/hr/document_templates.php` | **REGRESSION_PASS** (static QA: POST `save_company`/upload/signatures/`save_template`/toggle/delete unchanged; UI + confirm modals only) |
 | Reports (CEO) `/hr/reports.php` | **REGRESSION_PASS** (static QA: GET filters + four report SQL branches + POST CSV export + CSRF unchanged; UI only) |
+| Settings (CEO) `/hr/settings.php` | **REGRESSION_PASS** (static QA: POST actions + SettingsService keys + hr_holidays / hr_leave_types / hr_work_shifts + sync blocks unchanged; UI + holiday delete modal only) |
 | Other pages in 01 §A | **REGRESSION_PENDING** |
 
 ### Dashboard — `/` (`index.php`)
@@ -243,3 +244,12 @@
 | GET `report` / dates / `department`; four `switch` queries + `allowedReports` | PASS (unchanged) |
 | POST `export_csv` + CSRF → CSV download + `Auth::log` | PASS (unchanged) |
 | UI: tabs, filter card, table shells, mobile cards, empty states, export button title | PASS |
+
+### Settings (CEO) — `/hr/settings.php`
+
+| Check | Result |
+|-------|--------|
+| `isCEOOrAbove()` + flash gate | PASS (unchanged) |
+| POST `update_settings` / `add_holiday` / `delete_holiday` / `update_leave_type` / `update_shift` + `csrf_token` | PASS (unchanged; delete via modal still POST same fields) |
+| `SettingsService` + shift sync helpers | PASS (unchanged) |
+| UI: tabs, modal edit leave type, holidays list/table | PASS |

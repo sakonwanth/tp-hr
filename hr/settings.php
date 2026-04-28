@@ -168,44 +168,42 @@ require_once __DIR__ . '/../templates/header.php';
         <span class="text-white">ตั้งค่าระบบ</span>
     </nav>
     <h1 class="text-2xl font-bold text-white tracking-tight mb-2">
-        <i class="fas fa-cog text-primary-400 mr-2"></i>
+        <i class="fas fa-cog text-violet-400 mr-2" aria-hidden="true"></i>
         ตั้งค่าระบบ
     </h1>
     <p class="text-slate-300 text-sm leading-relaxed">จัดการการตั้งค่าระบบ HR</p>
 </div>
 
 <?php if (isset($success)): ?>
-<div class="mb-4 p-4 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400">
-    <i class="fas fa-check-circle mr-2"></i>
-    <?php echo htmlspecialchars($success); ?>
+<div class="mb-4 rounded-[20px] border border-emerald-500/30 bg-emerald-500/15 px-4 py-3 text-emerald-200 text-sm" role="status">
+    <i class="fas fa-check-circle mr-2" aria-hidden="true"></i><?php echo htmlspecialchars($success); ?>
 </div>
 <?php endif; ?>
 
 <?php if (isset($error)): ?>
-<div class="mb-4 p-4 rounded-xl bg-red-500/20 border border-red-500/30 text-red-400">
-    <i class="fas fa-exclamation-circle mr-2"></i>
-    <?php echo htmlspecialchars($error); ?>
+<div class="mb-4 rounded-[20px] border border-red-500/30 bg-red-500/15 px-4 py-3 text-red-200 text-sm" role="alert">
+    <i class="fas fa-exclamation-circle mr-2" aria-hidden="true"></i><?php echo htmlspecialchars($error); ?>
 </div>
 <?php endif; ?>
 
 <!-- Tabs -->
-<div class="mb-6 border-b border-slate-700 pb-4">
-    <div class="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
-        <a href="?tab=general"
-           class="shrink-0 px-4 py-2 rounded-xl whitespace-nowrap min-h-[48px] flex items-center gap-2 <?php echo $tab === 'general' ? 'bg-primary-600 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'; ?>">
-            <i class="fas fa-sliders-h"></i><span>ทั่วไป</span>
+<div class="mb-6 border-b border-white/10 pb-4">
+    <div class="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 min-w-0" role="tablist" aria-label="หมวดตั้งค่า">
+        <a href="?tab=general" role="tab" aria-selected="<?php echo $tab === 'general' ? 'true' : 'false'; ?>"
+           class="shrink-0 inline-flex min-h-[48px] items-center gap-2 rounded-[20px] px-4 py-2 whitespace-nowrap transition-colors touch-manipulation <?php echo $tab === 'general' ? 'bg-violet-600 text-white shadow-sm' : 'bg-white/10 text-white/70 hover:bg-white/15 hover:text-white'; ?>">
+            <i class="fas fa-sliders-h" aria-hidden="true"></i><span>ทั่วไป</span>
         </a>
-        <a href="?tab=holidays"
-           class="shrink-0 px-4 py-2 rounded-xl whitespace-nowrap min-h-[48px] flex items-center gap-2 <?php echo $tab === 'holidays' ? 'bg-primary-600 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'; ?>">
-            <i class="fas fa-calendar-day"></i><span>วันหยุด</span>
+        <a href="?tab=holidays" role="tab" aria-selected="<?php echo $tab === 'holidays' ? 'true' : 'false'; ?>"
+           class="shrink-0 inline-flex min-h-[48px] items-center gap-2 rounded-[20px] px-4 py-2 whitespace-nowrap transition-colors touch-manipulation <?php echo $tab === 'holidays' ? 'bg-violet-600 text-white shadow-sm' : 'bg-white/10 text-white/70 hover:bg-white/15 hover:text-white'; ?>">
+            <i class="fas fa-calendar-day" aria-hidden="true"></i><span>วันหยุด</span>
         </a>
-        <a href="?tab=leave-types"
-           class="shrink-0 px-4 py-2 rounded-xl whitespace-nowrap min-h-[48px] flex items-center gap-2 <?php echo $tab === 'leave-types' ? 'bg-primary-600 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'; ?>">
-            <i class="fas fa-umbrella-beach"></i><span>ประเภทการลา</span>
+        <a href="?tab=leave-types" role="tab" aria-selected="<?php echo $tab === 'leave-types' ? 'true' : 'false'; ?>"
+           class="shrink-0 inline-flex min-h-[48px] items-center gap-2 rounded-[20px] px-4 py-2 whitespace-nowrap transition-colors touch-manipulation <?php echo $tab === 'leave-types' ? 'bg-violet-600 text-white shadow-sm' : 'bg-white/10 text-white/70 hover:bg-white/15 hover:text-white'; ?>">
+            <i class="fas fa-umbrella-beach" aria-hidden="true"></i><span>ประเภทการลา</span>
         </a>
-        <a href="?tab=shifts"
-           class="shrink-0 px-4 py-2 rounded-xl whitespace-nowrap min-h-[48px] flex items-center gap-2 <?php echo $tab === 'shifts' ? 'bg-primary-600 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'; ?>">
-            <i class="fas fa-clock"></i><span>กะทำงาน</span>
+        <a href="?tab=shifts" role="tab" aria-selected="<?php echo $tab === 'shifts' ? 'true' : 'false'; ?>"
+           class="shrink-0 inline-flex min-h-[48px] items-center gap-2 rounded-[20px] px-4 py-2 whitespace-nowrap transition-colors touch-manipulation <?php echo $tab === 'shifts' ? 'bg-violet-600 text-white shadow-sm' : 'bg-white/10 text-white/70 hover:bg-white/15 hover:text-white'; ?>">
+            <i class="fas fa-clock" aria-hidden="true"></i><span>กะทำงาน</span>
         </a>
     </div>
 </div>
@@ -219,11 +217,11 @@ foreach ($workShifts as $_ws) {
 }
 ?>
 <!-- General Settings -->
-<div class="glass-card rounded-2xl p-6">
+<div class="native-card tp-native-card tp-native-data-card overflow-hidden rounded-[20px] p-5 sm:p-6 min-w-0 border border-white/10">
     <h2 class="text-lg font-semibold text-white mb-2">ตั้งค่าทั่วไป</h2>
     <?php if ($defaultShiftForBanner): ?>
-    <p class="text-slate-400 text-sm mb-6">
-        <i class="fas fa-info-circle text-primary-400 mr-1"></i>
+    <p class="text-white/55 text-sm mb-6">
+        <i class="fas fa-info-circle text-violet-400 mr-1" aria-hidden="true"></i>
         ค่าต่อไปนี้จะ sync กับกะเริ่มต้น
         <strong class="text-white">(<?php echo htmlspecialchars(function_exists('shift_display_label') ? shift_display_label($defaultShiftForBanner) : $defaultShiftForBanner['name']); ?>)</strong>
         ทุกครั้งที่บันทึก
@@ -235,41 +233,41 @@ foreach ($workShifts as $_ws) {
         <input type="hidden" name="action" value="update_settings">
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-            <div>
-                <label class="block text-slate-400 text-sm mb-2">ชื่อบริษัท</label>
-                <input type="text" name="settings[company_name]" class="input-field" 
+            <div class="tp-native-form-group mb-0">
+                <label class="block text-white/70 text-sm mb-2" for="settings-company-name">ชื่อบริษัท</label>
+                <input id="settings-company-name" type="text" name="settings[company_name]" class="input-field tp-native-input w-full min-h-[48px]"
                        value="<?php echo htmlspecialchars($settings['company_name'] ?? 'TP Asset Development Co., Ltd.'); ?>">
             </div>
             
-            <div>
-                <label class="block text-slate-400 text-sm mb-2">เวลาเริ่มงานมาตรฐาน</label>
-                <select data-ios-time-select-for="settings-default-work-start" class="hidden w-full input-field"></select>
-                <input type="time" name="settings[default_work_start]" id="settings-default-work-start" class="input-field"
+            <div class="tp-native-form-group mb-0">
+                <label class="block text-white/70 text-sm mb-2" for="settings-default-work-start">เวลาเริ่มงานมาตรฐาน</label>
+                <select data-ios-time-select-for="settings-default-work-start" class="hidden w-full input-field tp-native-select"></select>
+                <input type="time" name="settings[default_work_start]" id="settings-default-work-start" class="input-field tp-native-input w-full min-h-[48px]"
                        value="<?php echo htmlspecialchars($settings['default_work_start'] ?? '08:30'); ?>">
             </div>
             
-            <div>
-                <label class="block text-slate-400 text-sm mb-2">เวลาเลิกงานมาตรฐาน</label>
-                <select data-ios-time-select-for="settings-default-work-end" class="hidden w-full input-field"></select>
-                <input type="time" name="settings[default_work_end]" id="settings-default-work-end" class="input-field"
+            <div class="tp-native-form-group mb-0">
+                <label class="block text-white/70 text-sm mb-2" for="settings-default-work-end">เวลาเลิกงานมาตรฐาน</label>
+                <select data-ios-time-select-for="settings-default-work-end" class="hidden w-full input-field tp-native-select"></select>
+                <input type="time" name="settings[default_work_end]" id="settings-default-work-end" class="input-field tp-native-input w-full min-h-[48px]"
                        value="<?php echo htmlspecialchars($settings['default_work_end'] ?? '17:30'); ?>">
             </div>
             
-            <div>
-                <label class="block text-slate-400 text-sm mb-2">เวลาผ่อนผัน (นาที)</label>
-                <input type="number" name="settings[grace_period_minutes]" class="input-field" min="0" max="60"
+            <div class="tp-native-form-group mb-0">
+                <label class="block text-white/70 text-sm mb-2" for="settings-grace">เวลาผ่อนผัน (นาที)</label>
+                <input id="settings-grace" type="number" name="settings[grace_period_minutes]" class="input-field tp-native-input w-full min-h-[48px]" min="0" max="60"
                        value="<?php echo htmlspecialchars($settings['grace_period_minutes'] ?? '15'); ?>">
             </div>
             
-            <div>
-                <label class="block text-slate-400 text-sm mb-2">ชั่วโมงทำงานต่อวัน</label>
-                <input type="number" name="settings[work_hours_per_day]" class="input-field" min="1" max="24" step="0.5"
+            <div class="tp-native-form-group mb-0">
+                <label class="block text-white/70 text-sm mb-2" for="settings-wh-day">ชั่วโมงทำงานต่อวัน</label>
+                <input id="settings-wh-day" type="number" name="settings[work_hours_per_day]" class="input-field tp-native-input w-full min-h-[48px]" min="1" max="24" step="0.5"
                        value="<?php echo htmlspecialchars($settings['work_hours_per_day'] ?? '8'); ?>">
             </div>
             
-            <div>
-                <label class="block text-slate-400 text-sm mb-2">วันทำงานต่อสัปดาห์</label>
-                <select name="settings[work_days_per_week]" class="input-field">
+            <div class="tp-native-form-group mb-0">
+                <label class="block text-white/70 text-sm mb-2" for="settings-work-days-week">วันทำงานต่อสัปดาห์</label>
+                <select id="settings-work-days-week" name="settings[work_days_per_week]" class="input-field tp-native-select w-full min-h-[48px]">
                     <?php for ($i = 5; $i <= 7; $i++): ?>
                     <option value="<?php echo $i; ?>" <?php echo ($settings['work_days_per_week'] ?? '5') == $i ? 'selected' : ''; ?>>
                         <?php echo $i; ?> วัน
@@ -280,8 +278,8 @@ foreach ($workShifts as $_ws) {
         </div>
         
         <div class="flex flex-col md:flex-row md:justify-end gap-3">
-            <button type="submit" class="btn-primary w-full md:w-auto min-h-[48px]">
-                <i class="fas fa-save mr-2"></i>บันทึกการตั้งค่า
+            <button type="submit" class="inline-flex min-h-[48px] w-full md:w-auto items-center justify-center rounded-[20px] bg-violet-600 hover:bg-violet-700 px-6 text-sm font-semibold text-white touch-manipulation gap-2">
+                <i class="fas fa-save" aria-hidden="true"></i>บันทึกการตั้งค่า
             </button>
         </div>
     </form>
@@ -291,112 +289,124 @@ foreach ($workShifts as $_ws) {
 <!-- Holidays -->
 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
     <!-- Add Holiday Form -->
-    <div class="glass-card rounded-2xl p-6">
+    <div class="native-card tp-native-card overflow-hidden rounded-[20px] p-5 sm:p-6 min-w-0 border border-white/10">
         <h2 class="text-lg font-semibold text-white mb-4">เพิ่มวันหยุด</h2>
         
         <form method="POST" class="space-y-4">
             <input type="hidden" name="csrf_token" value="<?php echo csrfToken(); ?>">
             <input type="hidden" name="action" value="add_holiday">
             
-            <div>
-                <label class="block text-slate-400 text-sm mb-2">ชื่อวันหยุด</label>
-                <input type="text" name="name" class="input-field" required>
+            <div class="tp-native-form-group mb-0">
+                <label class="block text-white/70 text-sm mb-2" for="holiday-add-name">ชื่อวันหยุด</label>
+                <input id="holiday-add-name" type="text" name="name" class="input-field tp-native-input w-full min-h-[48px]" required>
             </div>
             
-            <div>
-                <label class="block text-slate-400 text-sm mb-2">วันที่</label>
-                <input type="date" name="holiday_date" class="input-field" required>
+            <div class="tp-native-form-group mb-0">
+                <label class="block text-white/70 text-sm mb-2" for="holiday-add-date">วันที่</label>
+                <input id="holiday-add-date" type="date" name="holiday_date" class="input-field tp-native-input w-full min-h-[48px]" required>
             </div>
             
-            <div>
-                <label class="block text-slate-400 text-sm mb-2">รายละเอียด</label>
-                <input type="text" name="description" class="input-field">
+            <div class="tp-native-form-group mb-0">
+                <label class="block text-white/70 text-sm mb-2" for="holiday-add-desc">รายละเอียด</label>
+                <input id="holiday-add-desc" type="text" name="description" class="input-field tp-native-input w-full min-h-[48px]">
             </div>
             
             <div class="flex items-center gap-2">
-                <input type="checkbox" name="is_recurring" id="is_recurring" class="rounded">
-                <label for="is_recurring" class="text-slate-300">วันหยุดประจำปี (ซ้ำทุกปี)</label>
+                <input type="checkbox" name="is_recurring" id="is_recurring" class="rounded border-white/20 bg-white/5">
+                <label for="is_recurring" class="text-white/80 text-sm">วันหยุดประจำปี (ซ้ำทุกปี)</label>
             </div>
             
-            <button type="submit" class="btn-primary w-full">
-                <i class="fas fa-plus mr-2"></i>เพิ่มวันหยุด
+            <button type="submit" class="inline-flex min-h-[48px] w-full items-center justify-center rounded-[20px] bg-violet-600 hover:bg-violet-700 px-4 text-sm font-semibold text-white touch-manipulation gap-2">
+                <i class="fas fa-plus" aria-hidden="true"></i>เพิ่มวันหยุด
             </button>
         </form>
     </div>
     
     <!-- Holiday List -->
-    <div class="xl:col-span-2 glass-card rounded-2xl p-6">
+    <div class="xl:col-span-2 native-card tp-native-card tp-native-data-card overflow-hidden rounded-[20px] p-5 sm:p-6 min-w-0 border border-white/10">
         <h2 class="text-lg font-semibold text-white mb-4">รายการวันหยุด <?php echo date('Y') + 543; ?></h2>
 
         <div class="md:hidden space-y-3">
             <?php foreach ($holidays as $holiday): ?>
-            <div class="rounded-xl bg-slate-800/50 border border-white/10 p-4">
+            <div class="rounded-[20px] bg-white/5 border border-white/10 p-4">
                 <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
                         <p class="text-white font-medium break-words"><?php echo htmlspecialchars($holiday['name']); ?></p>
-                        <p class="text-slate-400 text-sm mt-1"><?php echo formatDateThai($holiday['date']); ?></p>
+                        <p class="text-white/50 text-sm mt-1"><?php echo formatDateThai($holiday['date']); ?></p>
                     </div>
                     <?php if ($holiday['type'] === 'PUBLIC'): ?>
-                    <span class="badge badge-info shrink-0">ประจำปี</span>
+                    <span class="inline-flex shrink-0 rounded-[20px] border border-sky-500/30 bg-sky-500/15 px-2 py-0.5 text-xs text-sky-200">ประจำปี</span>
                     <?php else: ?>
-                    <span class="badge badge-warning shrink-0">พิเศษ</span>
+                    <span class="inline-flex shrink-0 rounded-[20px] border border-amber-500/30 bg-amber-500/15 px-2 py-0.5 text-xs text-amber-200">พิเศษ</span>
                     <?php endif; ?>
                 </div>
-                <form method="POST" class="mt-4" onsubmit="return confirm('ยืนยันการลบ?')">
-                    <input type="hidden" name="csrf_token" value="<?php echo csrfToken(); ?>">
-                    <input type="hidden" name="action" value="delete_holiday">
-                    <input type="hidden" name="holiday_id" value="<?php echo $holiday['id']; ?>">
-                    <button type="submit" class="btn-secondary w-full min-h-[48px] text-red-300 border-red-500/30">
-                        <i class="fas fa-trash mr-2"></i>ลบวันหยุด
-                    </button>
-                </form>
+                <button type="button"
+                    class="mt-4 inline-flex min-h-[48px] w-full items-center justify-center rounded-[20px] border border-red-500/35 bg-red-500/15 text-red-200 hover:bg-red-500/25 text-sm font-medium touch-manipulation gap-2"
+                    data-h-del-id="<?php echo (int)$holiday['id']; ?>"
+                    data-h-del-name="<?php echo htmlspecialchars($holiday['name'], ENT_QUOTES, 'UTF-8'); ?>"
+                    onclick="hrSettingsOpenDelHoliday(this)">
+                    <i class="fas fa-trash" aria-hidden="true"></i>ลบวันหยุด
+                </button>
             </div>
             <?php endforeach; ?>
+            <?php if (empty($holidays)): ?>
+            <div class="tp-native-empty-state text-center py-10 px-4 rounded-[20px] border border-dashed border-white/15">
+                <i class="fas fa-calendar-times text-slate-500 text-3xl mb-2 block" aria-hidden="true"></i>
+                <p class="text-white/50 text-sm">ยังไม่มีวันหยุดในระบบ</p>
+            </div>
+            <?php endif; ?>
         </div>
 
-        <div class="hidden md:block overflow-x-auto">
-            <table class="data-table">
-                <thead>
+        <div class="hidden md:block tp-native-table-shell overflow-x-auto min-w-0 max-w-full overscroll-x-contain -mx-1 px-1 pb-px">
+            <?php if (empty($holidays)): ?>
+            <div class="tp-native-empty-state text-center py-10 px-4 rounded-[20px] border border-dashed border-white/15">
+                <i class="fas fa-calendar-times text-slate-500 text-3xl mb-2 block" aria-hidden="true"></i>
+                <p class="text-white/50 text-sm">ยังไม่มีวันหยุดในระบบ</p>
+            </div>
+            <?php else: ?>
+            <table class="w-full text-sm">
+                <thead class="bg-white/5">
                     <tr>
-                        <th>วันที่</th>
-                        <th>ชื่อวันหยุด</th>
-                        <th>ประเภท</th>
-                        <th></th>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">วันที่</th>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">ชื่อวันหยุด</th>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">ประเภท</th>
+                        <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white/60 uppercase w-24">จัดการ</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-white/10">
                     <?php foreach ($holidays as $holiday): ?>
-                    <tr>
-                        <td><?php echo formatDateThai($holiday['date']); ?></td>
-                        <td><?php echo htmlspecialchars($holiday['name']); ?></td>
-                        <td>
+                    <tr class="hover:bg-white/[0.04]">
+                        <td class="px-4 py-3 text-white/80"><?php echo formatDateThai($holiday['date']); ?></td>
+                        <td class="px-4 py-3 text-white font-medium"><?php echo htmlspecialchars($holiday['name']); ?></td>
+                        <td class="px-4 py-3">
                             <?php if ($holiday['type'] === 'PUBLIC'): ?>
-                            <span class="badge badge-info">ประจำปี</span>
+                            <span class="inline-flex rounded-[20px] border border-sky-500/30 bg-sky-500/15 px-2 py-0.5 text-xs text-sky-200">ประจำปี</span>
                             <?php else: ?>
-                            <span class="badge badge-warning">พิเศษ</span>
+                            <span class="inline-flex rounded-[20px] border border-amber-500/30 bg-amber-500/15 px-2 py-0.5 text-xs text-amber-200">พิเศษ</span>
                             <?php endif; ?>
                         </td>
-                        <td>
-                            <form method="POST" class="inline" onsubmit="return confirm('ยืนยันการลบ?')">
-                                <input type="hidden" name="csrf_token" value="<?php echo csrfToken(); ?>">
-                                <input type="hidden" name="action" value="delete_holiday">
-                                <input type="hidden" name="holiday_id" value="<?php echo $holiday['id']; ?>">
-                                <button type="submit" class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center text-red-400 hover:text-red-300 touch-manipulation" aria-label="ลบวันหยุด">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
+                        <td class="px-4 py-3 text-center">
+                            <button type="button"
+                                class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center rounded-[20px] text-red-300 hover:bg-red-500/15 touch-manipulation"
+                                aria-label="ลบวันหยุด"
+                                data-h-del-id="<?php echo (int)$holiday['id']; ?>"
+                                data-h-del-name="<?php echo htmlspecialchars($holiday['name'], ENT_QUOTES, 'UTF-8'); ?>"
+                                onclick="hrSettingsOpenDelHoliday(this)">
+                                <i class="fas fa-trash" aria-hidden="true"></i>
+                            </button>
                         </td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            <?php endif; ?>
         </div>
     </div>
 </div>
 
 <?php elseif ($tab === 'leave-types'): ?>
 <!-- Leave Types -->
-<div class="glass-card rounded-2xl p-6">
+<div class="native-card tp-native-card tp-native-data-card overflow-hidden rounded-[20px] p-5 sm:p-6 min-w-0 border border-white/10">
     <h2 class="text-lg font-semibold text-white mb-4">ประเภทการลา</h2>
 
     <div class="md:hidden space-y-3">
@@ -413,7 +423,7 @@ foreach ($workShifts as $_ws) {
             $conditions[] = 'ต้องมีเอกสาร';
         }
         ?>
-        <div class="rounded-xl bg-slate-800/50 border border-white/10 p-4">
+        <div class="rounded-[20px] bg-white/5 border border-white/10 p-4">
             <div class="flex items-start justify-between gap-3">
                 <div class="flex items-start gap-3 min-w-0">
                     <div class="w-3 h-3 rounded-full mt-1.5 shrink-0" style="background: <?php echo $lt['color']; ?>"></div>
@@ -423,9 +433,9 @@ foreach ($workShifts as $_ws) {
                     </div>
                 </div>
                 <?php if ($lt['is_active']): ?>
-                <span class="badge badge-success shrink-0">เปิด</span>
+                <span class="inline-flex shrink-0 rounded-[20px] border border-emerald-500/30 bg-emerald-500/15 px-2 py-0.5 text-xs text-emerald-200">เปิด</span>
                 <?php else: ?>
-                <span class="badge badge-danger shrink-0">ปิด</span>
+                <span class="inline-flex shrink-0 rounded-[20px] border border-red-500/35 bg-red-500/15 px-2 py-0.5 text-xs text-red-200">ปิด</span>
                 <?php endif; ?>
             </div>
             <div class="grid grid-cols-2 gap-3 mt-4 text-sm">
@@ -443,50 +453,50 @@ foreach ($workShifts as $_ws) {
                 </div>
             </div>
             <p class="text-slate-400 text-sm mt-3"><?php echo $conditions ? htmlspecialchars(implode(', ', $conditions)) : '-'; ?></p>
-            <button onclick="editLeaveType(<?php echo htmlspecialchars(json_encode($lt)); ?>)"
-                    class="btn-secondary w-full min-h-[48px] mt-4">
-                <i class="fas fa-edit mr-2"></i>แก้ไข
+            <button type="button" onclick="editLeaveType(<?php echo htmlspecialchars(json_encode($lt)); ?>)"
+                    class="inline-flex min-h-[48px] w-full items-center justify-center rounded-[20px] border border-white/15 bg-white/10 text-white hover:bg-white/20 text-sm font-medium touch-manipulation gap-2 mt-4">
+                <i class="fas fa-edit mr-2" aria-hidden="true"></i>แก้ไข
             </button>
         </div>
         <?php endforeach; ?>
     </div>
 
-    <div class="hidden md:block overflow-x-auto">
-        <table class="data-table">
-            <thead>
+    <div class="hidden md:block tp-native-table-shell overflow-x-auto min-w-0 max-w-full overscroll-x-contain -mx-1 px-1 pb-px">
+        <table class="w-full text-sm" style="min-width:840px">
+            <thead class="bg-white/5">
                 <tr>
-                    <th>ประเภท</th>
-                    <th>วันต่อปี</th>
-                    <th>ได้รับค่าจ้าง</th>
-                    <th>เงื่อนไขพิเศษ</th>
-                    <th>สถานะ</th>
-                    <th></th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">ประเภท</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">วันต่อปี</th>
+                    <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white/60 uppercase">ได้รับค่าจ้าง</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">เงื่อนไขพิเศษ</th>
+                    <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white/60 uppercase">สถานะ</th>
+                    <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white/60 uppercase w-20"></th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-white/10">
                 <?php foreach ($leaveTypes as $lt): ?>
-                <tr>
-                    <td>
+                <tr class="hover:bg-white/[0.04]">
+                    <td class="px-4 py-3">
                         <div class="flex items-center gap-3">
-                            <div class="w-3 h-3 rounded-full" style="background: <?php echo $lt['color']; ?>"></div>
+                            <div class="w-3 h-3 rounded-full shrink-0 ring-2 ring-white/10" style="background: <?php echo htmlspecialchars((string)$lt['color']); ?>"></div>
                             <div>
                                 <p class="text-white font-medium"><?php echo htmlspecialchars($lt['name']); ?></p>
-                                <p class="text-slate-500 text-xs"><?php echo htmlspecialchars($lt['name_en']); ?></p>
+                                <p class="text-white/50 text-xs"><?php echo htmlspecialchars($lt['name_en']); ?></p>
                             </div>
                         </div>
                     </td>
-                    <td>
+                    <td class="px-4 py-3">
                         <span class="text-white font-medium"><?php echo number_format($lt['default_days_per_year'], 1); ?></span>
-                        <span class="text-slate-500">วัน</span>
+                        <span class="text-white/45">วัน</span>
                     </td>
-                    <td>
+                    <td class="px-4 py-3 text-center">
                         <?php if ($lt['is_paid']): ?>
-                        <span class="badge badge-success">ได้รับ</span>
+                        <span class="inline-flex rounded-[20px] border border-emerald-500/30 bg-emerald-500/15 px-2 py-0.5 text-xs text-emerald-200">ได้รับ</span>
                         <?php else: ?>
-                        <span class="badge badge-danger">ไม่ได้รับ</span>
+                        <span class="inline-flex rounded-[20px] border border-red-500/35 bg-red-500/15 px-2 py-0.5 text-xs text-red-200">ไม่ได้รับ</span>
                         <?php endif; ?>
                     </td>
-                    <td class="text-slate-400 text-sm">
+                    <td class="px-4 py-3 text-white/55 text-sm">
                         <?php 
                         $conditions = [];
                         if ($lt['gender_restriction'] !== 'ALL') {
@@ -501,17 +511,18 @@ foreach ($workShifts as $_ws) {
                         echo $conditions ? implode(', ', $conditions) : '-';
                         ?>
                     </td>
-                    <td>
+                    <td class="px-4 py-3 text-center">
                         <?php if ($lt['is_active']): ?>
-                        <span class="badge badge-success">เปิดใช้งาน</span>
+                        <span class="inline-flex rounded-[20px] border border-emerald-500/30 bg-emerald-500/15 px-2 py-0.5 text-xs text-emerald-200">เปิดใช้งาน</span>
                         <?php else: ?>
-                        <span class="badge badge-danger">ปิดใช้งาน</span>
+                        <span class="inline-flex rounded-[20px] border border-red-500/35 bg-red-500/15 px-2 py-0.5 text-xs text-red-200">ปิดใช้งาน</span>
                         <?php endif; ?>
                     </td>
-                    <td>
-                        <button onclick="editLeaveType(<?php echo htmlspecialchars(json_encode($lt)); ?>)" 
-                                class="text-primary-400 hover:text-primary-300">
-                            <i class="fas fa-edit"></i>
+                    <td class="px-4 py-3 text-center">
+                        <button type="button" onclick="editLeaveType(<?php echo htmlspecialchars(json_encode($lt)); ?>)" 
+                                class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-[20px] text-violet-300 hover:bg-violet-500/20 touch-manipulation"
+                                title="แก้ไข">
+                            <i class="fas fa-edit" aria-hidden="true"></i>
                         </button>
                     </td>
                 </tr>
@@ -522,12 +533,12 @@ foreach ($workShifts as $_ws) {
 </div>
 
 <!-- Edit Leave Type Modal -->
-<div id="editLeaveTypeModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
-    <div class="glass-card rounded-2xl p-6 w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
+<div id="editLeaveTypeModal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="editLeaveTypeModalTitle">
+    <div class="native-card tp-native-card w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden rounded-[20px] p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] border border-white/10">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-white">แก้ไขประเภทการลา</h3>
-            <button onclick="closeModal('editLeaveTypeModal')" class="text-slate-400 hover:text-white">
-                <i class="fas fa-times"></i>
+            <h3 id="editLeaveTypeModalTitle" class="text-lg font-semibold text-white">แก้ไขประเภทการลา</h3>
+            <button type="button" onclick="closeModal('editLeaveTypeModal')" class="text-white/50 hover:text-white touch-manipulation min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-[20px]" aria-label="ปิด">
+                <i class="fas fa-times" aria-hidden="true"></i>
             </button>
         </div>
         
@@ -536,34 +547,34 @@ foreach ($workShifts as $_ws) {
             <input type="hidden" name="action" value="update_leave_type">
             <input type="hidden" name="leave_type_id" id="edit_leave_type_id">
             
-            <div>
-                <label class="block text-slate-400 text-sm mb-2">ชื่อประเภท</label>
-                <input type="text" id="edit_leave_name" class="input-field" disabled>
+            <div class="tp-native-form-group mb-0">
+                <label class="block text-white/70 text-sm mb-2" for="edit_leave_name">ชื่อประเภท</label>
+                <input type="text" id="edit_leave_name" class="input-field tp-native-input w-full min-h-[48px] opacity-80" disabled>
             </div>
             
-            <div>
-                <label class="block text-slate-400 text-sm mb-2">จำนวนวันต่อปี</label>
-                <input type="number" name="default_days" id="edit_default_days" class="input-field" min="0" max="365" step="0.5" required>
+            <div class="tp-native-form-group mb-0">
+                <label class="block text-white/70 text-sm mb-2" for="edit_default_days">จำนวนวันต่อปี</label>
+                <input type="number" name="default_days" id="edit_default_days" class="input-field tp-native-input w-full min-h-[48px]" min="0" max="365" step="0.5" required>
             </div>
             
-            <div class="flex items-center gap-4">
-                <label class="flex items-center gap-2">
-                    <input type="checkbox" name="is_paid" id="edit_is_paid" class="rounded">
-                    <span class="text-slate-300">ได้รับค่าจ้าง</span>
+            <div class="flex flex-wrap items-center gap-4">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="is_paid" id="edit_is_paid" class="rounded border-white/20 bg-white/5">
+                    <span class="text-white/80 text-sm">ได้รับค่าจ้าง</span>
                 </label>
                 
-                <label class="flex items-center gap-2">
-                    <input type="checkbox" name="is_active" id="edit_is_active" class="rounded">
-                    <span class="text-slate-300">เปิดใช้งาน</span>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="is_active" id="edit_is_active" class="rounded border-white/20 bg-white/5">
+                    <span class="text-white/80 text-sm">เปิดใช้งาน</span>
                 </label>
             </div>
             
-            <div class="flex gap-3">
-                <button type="button" onclick="closeModal('editLeaveTypeModal')" class="btn-secondary flex-1">
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="closeModal('editLeaveTypeModal')" class="inline-flex flex-1 min-h-[48px] items-center justify-center rounded-[20px] border border-white/15 bg-white/10 text-white hover:bg-white/20 text-sm font-medium touch-manipulation">
                     ยกเลิก
                 </button>
-                <button type="submit" class="btn-primary flex-1">
-                    <i class="fas fa-save mr-2"></i>บันทึก
+                <button type="submit" class="inline-flex flex-1 min-h-[48px] items-center justify-center rounded-[20px] bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold touch-manipulation gap-2">
+                    <i class="fas fa-save" aria-hidden="true"></i>บันทึก
                 </button>
             </div>
         </form>
@@ -594,24 +605,30 @@ function closeModal(id) {
         m.classList.remove('flex');
     }
 }
+(function(){
+    var _el = document.getElementById('editLeaveTypeModal');
+    if (_el) _el.addEventListener('click', function(e) {
+        if (e.target === this) closeModal('editLeaveTypeModal');
+    });
+})();
 </script>
 
 <?php elseif ($tab === 'shifts'): ?>
 <!-- Work Shifts -->
-<div class="glass-card rounded-2xl p-6">
+<div class="native-card tp-native-card tp-native-data-card overflow-hidden rounded-[20px] p-5 sm:p-6 min-w-0 border border-white/10">
     <h2 class="text-lg font-semibold text-white mb-4">กะทำงาน</h2>
     
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <?php foreach ($workShifts as $shift): ?>
         <?php $shiftRowId = (int)$shift['id']; ?>
-        <div class="bg-slate-800/50 border border-white/10 rounded-xl p-4">
+        <div class="rounded-[20px] bg-white/5 border border-white/10 p-4">
             <div class="flex items-center justify-between mb-3">
                 <div>
                     <h3 class="text-white font-medium"><?php echo htmlspecialchars(function_exists('shift_display_label') ? shift_display_label($shift) : $shift['name']); ?></h3>
-                    <p class="text-slate-500 text-sm"><?php echo htmlspecialchars($shift['code']); ?></p>
+                    <p class="text-white/50 text-sm"><?php echo htmlspecialchars($shift['code']); ?></p>
                 </div>
                 <?php if ($shift['is_default']): ?>
-                <span class="badge badge-info">ค่าเริ่มต้น</span>
+                <span class="inline-flex rounded-[20px] border border-sky-500/30 bg-sky-500/15 px-2 py-0.5 text-xs text-sky-200">ค่าเริ่มต้น</span>
                 <?php endif; ?>
             </div>
             
@@ -621,34 +638,34 @@ function closeModal(id) {
                 <input type="hidden" name="shift_id" value="<?php echo $shift['id']; ?>">
                 
                 <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-slate-500 text-xs mb-1">เวลาเริ่ม</label>
-                        <select data-ios-time-select-for="shift-<?php echo $shiftRowId; ?>-start" class="hidden w-full input-field text-sm"></select>
-                        <input type="time" name="start_time" id="shift-<?php echo $shiftRowId; ?>-start" class="input-field text-sm"
+                    <div class="tp-native-form-group mb-0">
+                        <label class="block text-white/60 text-xs mb-1" for="shift-<?php echo $shiftRowId; ?>-start">เวลาเริ่ม</label>
+                        <select data-ios-time-select-for="shift-<?php echo $shiftRowId; ?>-start" class="hidden w-full input-field tp-native-select text-sm"></select>
+                        <input type="time" name="start_time" id="shift-<?php echo $shiftRowId; ?>-start" class="input-field tp-native-input w-full min-h-[48px] text-sm"
                                value="<?php echo substr($shift['start_time'], 0, 5); ?>">
                     </div>
-                    <div>
-                        <label class="block text-slate-500 text-xs mb-1">เวลาสิ้นสุด</label>
-                        <select data-ios-time-select-for="shift-<?php echo $shiftRowId; ?>-end" class="hidden w-full input-field text-sm"></select>
-                        <input type="time" name="end_time" id="shift-<?php echo $shiftRowId; ?>-end" class="input-field text-sm"
+                    <div class="tp-native-form-group mb-0">
+                        <label class="block text-white/60 text-xs mb-1" for="shift-<?php echo $shiftRowId; ?>-end">เวลาสิ้นสุด</label>
+                        <select data-ios-time-select-for="shift-<?php echo $shiftRowId; ?>-end" class="hidden w-full input-field tp-native-select text-sm"></select>
+                        <input type="time" name="end_time" id="shift-<?php echo $shiftRowId; ?>-end" class="input-field tp-native-input w-full min-h-[48px] text-sm"
                                value="<?php echo substr($shift['end_time'], 0, 5); ?>">
                     </div>
                 </div>
                 
-                <div>
-                    <label class="block text-slate-500 text-xs mb-1">เวลาผ่อนผัน (นาที)</label>
-                    <input type="number" name="grace_period" class="input-field text-sm" min="0" max="60"
+                <div class="tp-native-form-group mb-0">
+                    <label class="block text-white/60 text-xs mb-1">เวลาผ่อนผัน (นาที)</label>
+                    <input type="number" name="grace_period" class="input-field tp-native-input w-full min-h-[48px] text-sm" min="0" max="60"
                            value="<?php echo $shift['grace_period_minutes']; ?>">
                 </div>
                 
-                <div class="flex items-center justify-between">
-                    <label class="flex items-center gap-2">
-                        <input type="checkbox" name="is_active" class="rounded" <?php echo $shift['is_active'] ? 'checked' : ''; ?>>
-                        <span class="text-slate-300 text-sm">เปิดใช้งาน</span>
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" name="is_active" class="rounded border-white/20 bg-white/5" <?php echo $shift['is_active'] ? 'checked' : ''; ?>>
+                        <span class="text-white/80 text-sm">เปิดใช้งาน</span>
                     </label>
                     
-                    <button type="submit" class="btn-secondary text-sm min-h-[48px] px-4">
-                        <i class="fas fa-save mr-1"></i>บันทึก
+                    <button type="submit" class="inline-flex min-h-[48px] items-center justify-center rounded-[20px] border border-white/15 bg-white/10 px-4 text-sm font-medium text-white hover:bg-white/20 touch-manipulation gap-2">
+                        <i class="fas fa-save mr-1" aria-hidden="true"></i>บันทึก
                     </button>
                 </div>
             </form>
@@ -657,5 +674,48 @@ function closeModal(id) {
     </div>
 </div>
 <?php endif; ?>
+
+<!-- Confirm delete holiday (opened from Holidays tab) -->
+<div id="hr-settings-del-holiday-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="hr-settings-del-holiday-title">
+    <div class="native-card tp-native-card w-full max-w-md my-auto rounded-[20px] p-6 border border-white/10 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
+        <h3 id="hr-settings-del-holiday-title" class="text-xl font-bold text-white mb-2">ลบวันหยุด</h3>
+        <p class="text-white/70 text-sm mb-6">ยืนยันการลบ <strong id="hr-settings-del-holiday-name" class="text-white font-semibold"></strong> หรือไม่?</p>
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?php echo csrfToken(); ?>">
+            <input type="hidden" name="action" value="delete_holiday">
+            <input type="hidden" name="holiday_id" id="hr-settings-del-holiday-id" value="">
+            <div class="flex flex-wrap gap-2 justify-end">
+                <button type="button" class="inline-flex min-h-[48px] items-center justify-center rounded-[20px] border border-white/15 bg-white/10 px-4 text-sm font-medium text-white hover:bg-white/20 touch-manipulation" onclick="hrSettingsCloseDelHoliday()">ยกเลิก</button>
+                <button type="submit" class="inline-flex min-h-[48px] items-center justify-center rounded-[20px] bg-red-600 hover:bg-red-700 px-4 text-sm font-semibold text-white touch-manipulation">ลบวันหยุด</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+(function () {
+    function hrSettingsOpenDelHoliday(btn) {
+        var idEl = document.getElementById('hr-settings-del-holiday-id');
+        var nameEl = document.getElementById('hr-settings-del-holiday-name');
+        if (idEl) idEl.value = btn.getAttribute('data-h-del-id') || '';
+        if (nameEl) nameEl.textContent = btn.getAttribute('data-h-del-name') || '';
+        var m = document.getElementById('hr-settings-del-holiday-modal');
+        if (typeof uiOpenModal === 'function') uiOpenModal('hr-settings-del-holiday-modal');
+        else if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
+    }
+    function hrSettingsCloseDelHoliday() {
+        if (typeof uiCloseModal === 'function') uiCloseModal('hr-settings-del-holiday-modal');
+        else {
+            var m = document.getElementById('hr-settings-del-holiday-modal');
+            if (!m) return;
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }
+    }
+    window.hrSettingsOpenDelHoliday = hrSettingsOpenDelHoliday;
+    window.hrSettingsCloseDelHoliday = hrSettingsCloseDelHoliday;
+    var hm = document.getElementById('hr-settings-del-holiday-modal');
+    if (hm) hm.addEventListener('click', function (e) { if (e.target === hm) hrSettingsCloseDelHoliday(); });
+})();
+</script>
 
 <?php require_once __DIR__ . '/../templates/footer.php'; ?>

@@ -28,7 +28,7 @@ Each task: specific, actionable. Complete in order P0 → P2 unless dependencies
 | HR-UI-022 | Documents | `/hr/documents.php` | `hr/documents.php` | Upload list | List cards | table | Empty | Med | | **Done 2026-04-28** |
 | HR-UI-023 | Doc templates | `/hr/document_templates.php` | `hr/document_templates.php` | Complex | Section cards | mixed | Warn on delete | High | | **Done 2026-04-28** |
 | HR-UI-024 | Reports | `/hr/reports.php` | `hr/reports.php` | Wide tables | Card summary + scroll shell | table | Export feedback | Med | | **Done 2026-04-28** |
-| HR-UI-025 | Settings | `/hr/settings.php` | `hr/settings.php` | Many fields | NativeFormGroup blocks | mixed | Save toast | Med | | |
+| HR-UI-025 | Settings | `/hr/settings.php` | `hr/settings.php` | Many fields | NativeFormGroup blocks | mixed | Save toast | Med | | **Done 2026-04-28** |
 | HR-UI-026 | API keys | `/hr/api_keys.php` | `hr/api_keys.php` | Secrets | Warning blocks + confirm | mixed | Mask/reveal UX | High | | |
 
 **Global shell (applies to all header/footer pages)**
