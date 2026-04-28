@@ -170,7 +170,7 @@ require_once __DIR__ . '/templates/header.php';
                     
                     <div class="mt-4 flex items-center justify-center gap-2 flex-wrap">
                         <?php if ($shift): ?>
-                        <div class="inline-flex items-center gap-2 min-h-[48px] px-4 py-2 rounded-[20px] bg-white/10 border border-white/10">
+                        <div class="inline-flex items-center gap-2 min-h-[48px] px-4 py-2 rounded-[20px] bg-white/[0.09]">
                             <i class="fas fa-clock text-violet-400 text-2xl" aria-hidden="true"></i>
                             <span class="text-white"><?php echo htmlspecialchars(function_exists('shift_base_name') ? shift_base_name($shift['name']) : $shift['name']); ?></span>
                             <span class="text-white/60">
@@ -179,7 +179,7 @@ require_once __DIR__ . '/templates/header.php';
                         </div>
                         <?php endif; ?>
                         <?php if (($user['work_mode'] ?? 'OFFICE') === 'WFH'): ?>
-                        <div class="inline-flex items-center gap-2 min-h-[48px] px-3 py-1.5 rounded-[20px] bg-emerald-500/20 border border-emerald-400/30">
+                        <div class="inline-flex items-center gap-2 min-h-[48px] px-3 py-1.5 rounded-[20px] bg-emerald-500/23">
                             <i class="fas fa-home text-emerald-300 text-2xl" aria-hidden="true"></i>
                             <span class="text-emerald-200 text-sm font-semibold">WFH</span>
                         </div>
@@ -202,7 +202,7 @@ require_once __DIR__ . '/templates/header.php';
                 ?>
                 <!-- Today's Status -->
                 <div class="grid grid-cols-2 gap-4 mb-6 md:mb-8">
-                    <div class="p-4 rounded-[20px] bg-white/5 border border-white/8 text-center">
+                    <div class="p-4 text-center rounded-[var(--tp-radius-card)] tp-native-well">
                         <p class="text-white/60 text-sm mb-1">เวลาเข้างาน</p>
                         <p class="text-2xl font-bold <?php
                             $ciClass = 'text-white/30';
@@ -238,7 +238,7 @@ require_once __DIR__ . '/templates/header.php';
                         <?php endif; ?>
                     </div>
 
-                    <div class="p-4 rounded-[20px] bg-white/5 border border-white/8 text-center">
+                    <div class="p-4 text-center rounded-[var(--tp-radius-card)] tp-native-well">
                         <p class="text-white/60 text-sm mb-1">เวลาออกงาน</p>
                         <p class="text-2xl font-bold <?php echo $today_attendance && $today_attendance['check_out_time'] ? 'text-blue-400' : 'text-white/30'; ?>">
                             <?php
@@ -284,7 +284,7 @@ require_once __DIR__ . '/templates/header.php';
                         
                     <?php else: ?>
                         <!-- All Done -->
-                        <div class="w-48 h-48 max-w-[85vw] max-h-[85vw] aspect-square rounded-full bg-slate-700 border border-white/12 text-white flex flex-col items-center justify-center">
+                        <div class="w-48 h-48 max-w-[85vw] max-h-[85vw] aspect-square rounded-full bg-slate-700/95 text-white flex flex-col items-center justify-center shadow-[0_12px_40px_rgba(0,0,0,0.42)]">
                             <i class="fas fa-check-circle text-5xl mb-2 text-emerald-400 shrink-0" aria-hidden="true"></i>
                             <span class="text-base font-semibold text-center px-2">ลงเวลาครบแล้ว</span>
                         </div>
@@ -311,7 +311,7 @@ require_once __DIR__ . '/templates/header.php';
                 </div>
                 <div class="space-y-3">
                     <?php if ($ls_today_row): ?>
-                    <div class="rounded-[20px] bg-amber-500/10 border border-amber-400/35 p-4">
+                    <div class="rounded-[20px] bg-amber-500/13 p-4 shadow-[var(--tp-surface-well-inset)]">
                         <p class="text-amber-300 text-xs font-semibold uppercase tracking-wide mb-1">
                             <i class="fas fa-sun mr-1"></i>วันนี้ · <?php echo date('d M', strtotime($ls_today)); ?>
                         </p>
@@ -326,13 +326,13 @@ require_once __DIR__ . '/templates/header.php';
                         <p class="text-white/70 text-xs mt-1 line-clamp-2"><?php echo htmlspecialchars($ls_today_row['planned_reason']); ?></p>
                         <?php endif; ?>
                         <button type="button" onclick="cancelLateStart('<?php echo $ls_today; ?>')"
-                                class="mt-3 w-full min-h-[52px] py-2 rounded-[20px] bg-red-500/15 hover:bg-red-500/25 border border-red-400/30 text-red-300 text-sm font-semibold transition-colors touch-manipulation">
+                                class="mt-3 w-full min-h-[52px] py-2 rounded-[20px] bg-red-500/17 hover:bg-red-500/25 text-red-300 text-sm font-semibold transition-colors touch-manipulation shadow-[var(--tp-surface-well-inset)]">
                             <i class="fas fa-times-circle mr-1"></i>ยกเลิกการแจ้ง
                         </button>
                     </div>
                     <?php endif; ?>
                     <?php if ($ls_tomorrow_row): ?>
-                    <div class="rounded-[20px] bg-sky-500/10 border border-sky-400/35 p-4">
+                    <div class="rounded-[20px] bg-sky-500/13 p-4 shadow-[var(--tp-surface-well-inset)]">
                         <p class="text-blue-300 text-xs font-semibold uppercase tracking-wide mb-1">
                             <i class="fas fa-moon mr-1"></i>พรุ่งนี้ · <?php echo date('d M', strtotime($ls_tomorrow)); ?>
                         </p>
@@ -347,14 +347,14 @@ require_once __DIR__ . '/templates/header.php';
                         <p class="text-white/70 text-xs mt-1 line-clamp-2"><?php echo htmlspecialchars($ls_tomorrow_row['planned_reason']); ?></p>
                         <?php endif; ?>
                         <button type="button" onclick="cancelLateStart('<?php echo $ls_tomorrow; ?>')"
-                                class="mt-3 w-full min-h-[52px] py-2 rounded-[20px] bg-red-500/15 hover:bg-red-500/25 border border-red-400/30 text-red-300 text-sm font-semibold transition-colors touch-manipulation">
+                                class="mt-3 w-full min-h-[52px] py-2 rounded-[20px] bg-red-500/17 hover:bg-red-500/25 text-red-300 text-sm font-semibold transition-colors touch-manipulation shadow-[var(--tp-surface-well-inset)]">
                             <i class="fas fa-times-circle mr-1"></i>ยกเลิกการแจ้ง
                         </button>
                     </div>
                     <?php endif; ?>
                     <?php if (!($ls_today_row && $ls_tomorrow_row)): ?>
                     <button type="button" onclick="openLateStartModal()"
-                            class="w-full min-h-[52px] py-2.5 rounded-[20px] bg-white/5 hover:bg-white/10 border border-dashed border-white/20 text-white/70 text-sm font-medium transition-colors touch-manipulation">
+                            class="w-full min-h-[52px] py-2.5 rounded-[20px] bg-white/[0.05] hover:bg-white/[0.09] text-white/70 text-sm font-medium transition-colors touch-manipulation">
                         <i class="fas fa-plus-circle mr-1"></i>เพิ่มการแจ้งอีกวัน
                     </button>
                     <?php endif; ?>
@@ -362,7 +362,7 @@ require_once __DIR__ . '/templates/header.php';
             </div>
             <?php else: ?>
             <button type="button" onclick="openLateStartModal()"
-                    class="w-full min-h-[56px] rounded-[20px] border border-amber-400/40 bg-amber-500/15 hover:bg-amber-500/22 p-4 text-left transition-colors touch-manipulation flex items-center gap-4">
+                    class="w-full min-h-[56px] rounded-[20px] bg-amber-500/23 hover:bg-amber-500/28 p-4 text-left transition-colors touch-manipulation flex items-center gap-4 shadow-[var(--tp-surface-well-inset)]">
                     <div class="shrink-0 w-12 h-12 rounded-[20px] bg-amber-500 flex items-center justify-center">
                         <i class="fas fa-clock text-white text-2xl" aria-hidden="true"></i>
                     </div>
@@ -381,10 +381,10 @@ require_once __DIR__ . '/templates/header.php';
 
             <!-- Quick links -->
             <div class="grid grid-cols-2 gap-4">
-                <a href="attendance_history.php" class="flex min-h-[48px] items-center justify-center gap-2 rounded-[20px] bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-2.5 text-white/80 hover:text-white text-sm font-medium transition-colors touch-manipulation whitespace-nowrap">
+                <a href="attendance_history.php" class="tp-native-well tp-native-well--interactive flex min-h-[48px] items-center justify-center gap-2 rounded-[20px] px-3 py-2.5 text-white/80 hover:text-white text-sm font-medium touch-manipulation whitespace-nowrap">
                     <i class="fas fa-history text-violet-400 text-xl" aria-hidden="true"></i>ประวัติเข้างาน
                 </a>
-                <a href="leave.php" class="flex min-h-[48px] items-center justify-center gap-2 rounded-[20px] bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-2.5 text-white/80 hover:text-white text-sm font-medium transition-colors touch-manipulation whitespace-nowrap">
+                <a href="leave.php" class="tp-native-well tp-native-well--interactive flex min-h-[48px] items-center justify-center gap-2 rounded-[20px] px-3 py-2.5 text-white/80 hover:text-white text-sm font-medium touch-manipulation whitespace-nowrap">
                     <i class="fas fa-calendar-check text-emerald-400 text-xl" aria-hidden="true"></i>ขอลา / OT
                 </a>
             </div>

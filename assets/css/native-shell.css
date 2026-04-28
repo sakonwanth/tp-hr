@@ -5,6 +5,7 @@
  * v5: icon size tokens; table scroll shell; locked aliases for loading/confirmation; header ?v=5.
  * v6: .tp-visually-hidden for screen-reader text with spinners; header ?v=6.
  * v10: Bottom tab bar — iOS-inspired materials (muted tint, SF-like chip; no violet glow halo); header ?v=10.
+ * v11: Surfaces prefer tint + shadow + inset highlight over stacking 1px white borders (reduces “boxed” chrome); header ?v=11.
  * UI UX Pro Max: touch ≥48px, inputs ≥52px, primary CTA ≥56px, card radius 20px,
  * scroll-end buffer ≥120px, bottom slot ≥88px when tab bar present.
  */
@@ -64,6 +65,15 @@ body {
   --tp-ios-tab-label-selected: rgb(237, 233, 255);
   --tp-ios-tab-tint-muted: rgba(235, 235, 245, 0.52);
   --tp-ios-tab-label-muted: rgba(235, 235, 245, 0.58);
+
+  /* Layered surfaces (HIG-ish: luminance separation, not drawn boxes on every inset) */
+  --tp-surface-card-bg: rgba(30, 41, 59, 0.78);
+  --tp-surface-card-blur: 24px;
+  --tp-surface-card-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
+  --tp-surface-well-bg: rgba(15, 23, 42, 0.45);
+  --tp-surface-well-inset: inset 0 1px 0 rgba(255, 255, 255, 0.045);
 
   color-scheme: dark;
 }
@@ -276,12 +286,35 @@ body.tp-native-app.tp-app-shell {
 .tp-native-card,
 .native-card {
   border-radius: var(--tp-radius-card);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(30, 41, 59, 0.85);
+  border: none;
+  background: var(--tp-surface-card-bg);
+  backdrop-filter: blur(var(--tp-surface-card-blur));
+  -webkit-backdrop-filter: blur(var(--tp-surface-card-blur));
+  box-shadow: var(--tp-surface-card-shadow);
 }
 
 .native-card {
   padding: var(--tp-card-pad);
+}
+
+/* Inner regions inside a card: step down luminance instead of adding another stroked rectangle */
+.tp-native-well {
+  border-radius: var(--tp-radius-card);
+  background: var(--tp-surface-well-bg);
+  border: none;
+  box-shadow: var(--tp-surface-well-inset);
+}
+
+.tp-native-well--interactive {
+  transition: background-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.tp-native-well--interactive:hover {
+  background: rgba(255, 255, 255, 0.065);
+}
+
+.tp-native-well--interactive:active {
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .glass-card {
@@ -373,7 +406,7 @@ body.tp-native-app.tp-app-shell {
 
 .tp-native-data-card {
   border-radius: var(--tp-radius-card);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: none;
   overflow: hidden;
 }
 
@@ -410,7 +443,8 @@ body.tp-native-app.tp-app-shell {
   margin-bottom: var(--tp-space-16);
   border-radius: var(--tp-radius-card);
   background: rgba(30, 41, 59, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: none;
+  box-shadow: var(--tp-surface-well-inset);
 }
 
 .tp-native-search-bar {

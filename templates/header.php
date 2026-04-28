@@ -35,7 +35,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
     
     <!-- Tailwind CSS (compiled) -->
     <link rel="stylesheet" href="/assets/css/app.css">
-    <link rel="stylesheet" href="/assets/css/native-shell.css?v=10">
+    <link rel="stylesheet" href="/assets/css/native-shell.css?v=11">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -78,17 +78,20 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         }
 
         .glass-card {
-            background: rgba(30, 41, 59, 0.64);
+            background: rgba(30, 41, 59, 0.72);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
-            transition: all 0.3s ease;
+            border: none;
+            box-shadow:
+                0 10px 36px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            transition: box-shadow 0.25s ease, background-color 0.25s ease;
         }
         
         .glass-card:hover {
-            border-color: rgba(139, 92, 246, 0.3);
-            box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.15);
+            box-shadow:
+                0 14px 40px rgba(0, 0, 0, 0.34),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
         }
         
         .nav-item {
@@ -123,18 +126,23 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         }
         
         .stat-card {
-            background: rgba(30, 41, 59, 0.64);
+            background: rgba(30, 41, 59, 0.72);
             backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: none;
             border-radius: 20px;
             padding: 20px;
-            transition: all 0.3s ease;
+            box-shadow:
+                0 10px 36px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
         
         .stat-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            box-shadow:
+                0 16px 44px rgba(0, 0, 0, 0.36),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
         }
         
         .stat-icon {
@@ -421,20 +429,18 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             min-height: 46px;
             padding: 0 18px;
             border-radius: 11px;
-            border: 1px solid rgba(203, 213, 225, 0.16);
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.04) 100%);
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
             color: #f1f5f9;
             font-size: 0.8125rem;
             font-weight: 500;
             letter-spacing: 0.08em;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
-            transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: none;
+            transition: background 0.2s ease, color 0.2s ease;
         }
         .mobile-nav-menu-btn:hover {
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.07) 100%);
-            border-color: rgba(196, 181, 253, 0.28);
+            background: rgba(255, 255, 255, 0.15);
             color: #fff;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         }
         .mobile-nav-menu-btn:active {
             transform: scale(0.98);
