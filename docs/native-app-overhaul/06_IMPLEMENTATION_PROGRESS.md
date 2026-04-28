@@ -1,6 +1,6 @@
 # 06 — Implementation Progress (TP-HR)
 
-**Last updated:** 2026-04-28
+**Last updated:** 2026-04-28 (Phase 5 close: HR-UI-026 + 08/09 sync)
 
 ## Global shell
 
