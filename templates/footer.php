@@ -14,7 +14,8 @@ $isAdminPage = is_string($cp) && strncmp($cp, 'hr-', 3) === 0;
 
 <?php if (!$isAdminPage): ?>
 <!-- Mobile Bottom Navigation (employee-first, like Checkin) -->
-<nav class="app-shell-mobile-only tp-native-bottom-tab-nav fixed bottom-0 left-0 right-0 z-40 touch-manipulation bg-slate-900/95 backdrop-blur-xl border-t border-white/10 overscroll-contain"
+<nav id="tpHrMobileBottomTab"
+     class="app-shell-mobile-only tp-native-bottom-tab-nav fixed bottom-0 left-0 right-0 z-40 touch-manipulation bg-slate-900/95 backdrop-blur-xl border-t border-white/10 overscroll-contain transition-opacity transition-transform duration-200 ease-out"
      style="padding-bottom: env(safe-area-inset-bottom, 0px);"
      role="navigation"
      aria-label="เมนูหลักมือถือ">

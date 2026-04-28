@@ -448,7 +448,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         .mobile-menu-overlay {
             position: fixed;
             inset: 0;
-            z-index: 50;
+            z-index: 60;
             display: flex;
             flex-direction: column;
             min-height: 100dvh;
@@ -522,7 +522,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             gap: 12px;
         }
         /* Odd tile count leaves an empty hole; span last orphan full-width (employee grid + HR admin grid only). */
-        .mobile-menu-scroll .mobile-menu-grid:not(.mobile-menu-grid--logout) > a.mobile-menu-tile:last-child:nth-child(odd) {
+        .mobile-menu-scroll .mobile-menu-grid > a.mobile-menu-tile:last-child:nth-child(odd) {
             grid-column: 1 / -1;
         }
         .mobile-menu-context-hint {
@@ -629,29 +629,70 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         .mobile-menu-tile.active i {
             color: #fff;
         }
-        .mobile-menu-grid--logout {
-            margin-top: 1.75rem;
-            padding-top: 1.25rem;
+        /* Full-width logout — อยู่นอกสองคอลัมน์กริดเพื่อกันพฤติกรรม display:contents ใน form */
+        .mobile-menu-logout-wrap {
+            margin-top: 2rem;
+            padding-top: 1.35rem;
+            padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+            border-top: 1px solid rgba(148, 163, 184, 0.14);
+            width: 100%;
+            box-sizing: border-box;
         }
-        .mobile-menu-tile--logout {
-            grid-column: 1 / -1;
-            flex-direction: row;
+        .mobile-menu-logout-form {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            display: block;
+        }
+        .mobile-menu-logout-btn {
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
             justify-content: center;
-            min-height: 52px;
-            margin-top: 0;
-            padding: 12px 16px;
-            background: rgba(127, 29, 29, 0.2);
-            border-color: rgba(248, 113, 113, 0.3);
+            gap: 0.6rem;
+            min-height: 56px;
+            padding: 14px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(248, 113, 113, 0.35);
+            background: rgba(127, 29, 29, 0.26);
             color: #fecaca;
+            font: inherit;
+            font-size: 0.9375rem;
+            font-weight: 650;
+            letter-spacing: 0.03em;
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.12s ease;
         }
-        .mobile-menu-tile--logout i {
+        .mobile-menu-logout-btn:hover {
+            background: rgba(153, 27, 27, 0.34);
+            border-color: rgba(252, 165, 165, 0.45);
+            color: #fef2f2;
+        }
+        .mobile-menu-logout-btn:active {
+            transform: scale(0.99);
+        }
+        .mobile-menu-logout-btn i {
             font-size: 1.125rem;
             color: #fca5a5;
+            flex-shrink: 0;
         }
-        .mobile-menu-tile--logout:hover {
-            background: rgba(153, 27, 27, 0.28);
-            border-color: rgba(252, 165, 165, 0.4);
-            color: #fef2f2;
+        /** @deprecated เคยผูกกับ tile ในกริด — คงชื่อว่าเลิกแล้ว ใช้ .mobile-menu-logout-btn */
+
+        /* เมื่อเปิดเมนูเต็มจอ ซ่อนแท็บล่างแอปให้เหลือเพียงชั้นหนึ่ง (ไม่ชน UX ซ้อนโครเมียมด้านล่าง) */
+        body.tp-hr-mobile-menu-open #tpHrMobileBottomTab:not(.always-visible) {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateY(100%);
+        }
+        @media (prefers-reduced-motion: reduce) {
+            #tpHrMobileBottomTab {
+                transition-duration: 0ms !important;
+            }
+            body.tp-hr-mobile-menu-open #tpHrMobileBottomTab:not(.always-visible) {
+                transform: none !important;
+            }
         }
 
         /* Dashboard hero — การ์ดเดียว แถวละ ไอคอน + ข้อความ (แนวนอนชัดเจน) */
@@ -1199,24 +1240,33 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             </details>
             <?php endif; ?>
 
-            <nav class="mobile-menu-grid mobile-menu-grid--logout" aria-label="ออกจากระบบ">
-                <form method="post" action="/logout.php" class="contents m-0">
+            <div class="mobile-menu-logout-wrap">
+                <form method="post" action="/logout.php" class="mobile-menu-logout-form">
                     <?php echo csrfField(); ?>
-                    <button type="submit" class="mobile-menu-tile mobile-menu-tile--logout font-inherit border-0 cursor-pointer">
+                    <button type="submit" class="mobile-menu-logout-btn" aria-label="ออกจากระบบ TP-HR">
                         <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
                         <span>ออกจากระบบ</span>
                     </button>
                 </form>
-            </nav>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
+function tpHrMobileMenuHideBottomTabs(hide) {
+    document.body.classList.toggle('tp-hr-mobile-menu-open', !!hide);
+    var tab = document.getElementById('tpHrMobileBottomTab');
+    if (!tab) return;
+    if (hide) tab.setAttribute('aria-hidden', 'true');
+    else tab.removeAttribute('aria-hidden');
+}
+
 function openMobileMenu() {
     var sheet = document.getElementById('mobileSidebar');
     if (!sheet) return;
     sheet.classList.remove('hidden');
+    tpHrMobileMenuHideBottomTabs(true);
     if (typeof uiLockBodyScroll === 'function') uiLockBodyScroll(true);
     else document.body.style.overflow = 'hidden';
     requestAnimationFrame(function () {
@@ -1228,6 +1278,7 @@ function openMobileMenu() {
 function closeMobileMenu() {
     var sheet = document.getElementById('mobileSidebar');
     if (sheet) sheet.classList.add('hidden');
+    tpHrMobileMenuHideBottomTabs(false);
     if (typeof uiLockBodyScroll === 'function') uiLockBodyScroll(false);
     else document.body.style.overflow = '';
     var menuBtn = document.getElementById('mobileMenuBtn');
