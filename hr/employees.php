@@ -284,13 +284,13 @@ $flashError = flash('error');
             </select>
         </div>
         <div class="flex items-end gap-2 min-w-0 sm:col-span-2 xl:col-span-1">
-            <button type="submit" class="flex-1 min-h-[44px] py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors touch-manipulation font-medium">
+            <button type="submit" class="flex-1 min-h-[56px] py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors touch-manipulation font-medium">
                 <i class="fas fa-search mr-2"></i>ค้นหา
             </button>
         </div>
     </form>
     <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-2 min-w-0 mt-4 pt-4 border-t border-white/10">
-        <a href="employees.php" class="flex-1 min-h-[44px] py-2.5 bg-white/10 hover:bg-white/20 text-white text-center rounded-xl transition-colors touch-manipulation inline-flex items-center justify-center font-medium">
+        <a href="employees.php" class="flex-1 min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white text-center rounded-xl transition-colors touch-manipulation inline-flex items-center justify-center font-medium">
             <i class="fas fa-redo mr-2"></i>รีเซ็ต
         </a>
         <form method="post" class="flex-1 min-w-0">
@@ -299,7 +299,7 @@ $flashError = flash('error');
             <input type="hidden" name="search" value="<?php echo htmlspecialchars($search); ?>">
             <input type="hidden" name="department" value="<?php echo htmlspecialchars($department); ?>">
             <input type="hidden" name="status" value="<?php echo htmlspecialchars($status); ?>">
-            <button type="submit" class="w-full min-h-[44px] py-2.5 bg-green-600 hover:bg-green-700 text-white text-center rounded-xl transition-colors touch-manipulation inline-flex items-center justify-center font-medium gap-2">
+            <button type="submit" class="w-full min-h-[56px] py-2.5 bg-green-600 hover:bg-green-700 text-white text-center rounded-xl transition-colors touch-manipulation inline-flex items-center justify-center font-medium gap-2">
                 <i class="fas fa-file-excel"></i>Export
             </button>
         </form>
@@ -392,29 +392,29 @@ $flashError = flash('error');
 
             <div class="grid grid-cols-2 gap-2 mt-4">
                 <a href="/hr/employee_attendance.php?id=<?php echo (int)$emp['id']; ?>"
-                   class="min-h-[44px] rounded-xl bg-violet-500/15 hover:bg-violet-500/25 border border-violet-500/20 text-violet-200 text-sm font-semibold flex items-center justify-center">
+                   class="min-h-[48px] rounded-xl bg-violet-500/15 hover:bg-violet-500/25 border border-violet-500/20 text-violet-200 text-sm font-semibold flex items-center justify-center">
                     <i class="fas fa-clock mr-2"></i>ลงเวลา
                 </a>
                 <button type="button"
                         title="สิทธิ์การลาและประวัติ"
                         onclick="viewLeaveBalance(<?php echo (int)$emp['id']; ?>)"
-                        class="min-h-[44px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold">
+                        class="min-h-[48px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold">
                     <i class="fas fa-calendar-alt mr-2"></i>สิทธิ์ลา
                 </button>
                 <?php if (canManageUsers() || hr_can_access_hr_dashboard()): ?>
                 <a href="employees.php?action=edit&id=<?php echo (int)$emp['id']; ?>"
-                   class="min-h-[44px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold flex items-center justify-center">
+                   class="min-h-[48px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold flex items-center justify-center">
                     <i class="fas fa-edit mr-2"></i>แก้ไข
                 </a>
                 <?php endif; ?>
                 <a href="employee_view.php?id=<?php echo (int)$emp['id']; ?>"
-                   class="min-h-[44px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold flex items-center justify-center">
+                   class="min-h-[48px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold flex items-center justify-center">
                     <i class="fas fa-eye mr-2"></i>ดูข้อมูล
                 </a>
                 <?php if (canManageUsers()): ?>
                 <button type="button"
                         onclick="confirmDelete(<?php echo (int)$emp['id']; ?>, '<?php echo htmlspecialchars($emp['first_name_th'] ?? '', ENT_QUOTES); ?>')"
-                        class="col-span-2 min-h-[44px] rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-200 text-sm font-semibold">
+                        class="col-span-2 min-h-[48px] rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-200 text-sm font-semibold">
                     <i class="fas fa-trash mr-2"></i>ลบพนักงาน
                 </button>
                 <?php endif; ?>

@@ -16,6 +16,12 @@
 | Input height | 52px (logged-in + login) |
 | Bottom navigation | Capped `max-h-[72px]` + safe area padding |
 
+## Touch targets (completed pass)
+
+- Former **`min-h-[44px]`** / **`min-w-[44px]`** utilities → **48px** sitewide (`*.php`, excluding vendor).  
+- **Primary** fills (`bg-violet-600`, solid `bg-green-600`, destructive `bg-red-600`) stepped to **56px** where applicable.  
+- **Selects** with `input-field` no longer use redundant min-height (inherit **52px** from header/base).
+
 ## Known limitations (non-blocking)
 
 - Some pages still use **`rounded-xl`** utility on inner blocks; parent **`.glass-card`** enforces 20px outer radius. Inner radii may remain 12–16px where not updated line-by-line — acceptable for nested UI.  

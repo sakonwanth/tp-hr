@@ -161,7 +161,7 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
         <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 gap-4 min-w-0 max-w-full">
             <div class="min-w-0">
                 <label class="block text-white/60 text-xs mb-1">เดือน</label>
-                <select name="month" class="input-field min-h-[44px] w-full" onchange="this.form.submit()">
+                <select name="month" class="input-field w-full" onchange="this.form.submit()">
                     <?php foreach ($month_options as $opt): ?>
                     <option value="<?php echo htmlspecialchars($opt['value']); ?>" <?php echo $month === $opt['value'] ? 'selected' : ''; ?>>
                         <?php echo htmlspecialchars($opt['label']); ?>
@@ -171,7 +171,7 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
             </div>
             <div class="min-w-0">
                 <label class="block text-white/60 text-xs mb-1">สถานะ</label>
-                <select name="status" class="input-field min-h-[44px] w-full" onchange="this.form.submit()">
+                <select name="status" class="input-field w-full" onchange="this.form.submit()">
                     <option value="">ทั้งหมด</option>
                     <option value="PRESENT" <?php echo $status_filter === 'PRESENT' ? 'selected' : ''; ?>>มาทำงาน</option>
                     <option value="LATE" <?php echo $status_filter === 'LATE' ? 'selected' : ''; ?>>มาสาย</option>

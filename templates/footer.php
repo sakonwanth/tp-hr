@@ -47,7 +47,7 @@ $isAdminPage = is_string($cp) && strncmp($cp, 'hr-', 3) === 0;
             <p id="toastTitle" class="text-white font-medium"></p>
             <p id="toastMessage" class="text-slate-400 text-sm"></p>
         </div>
-        <button type="button" onclick="hideToast()" aria-label="ปิดการแจ้งเตือน" class="touch-manipulation inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-lg text-slate-500 hover:text-white hover:bg-white/10">
+        <button type="button" onclick="hideToast()" aria-label="ปิดการแจ้งเตือน" class="touch-manipulation inline-flex min-h-[48px] min-w-[48px] shrink-0 items-center justify-center rounded-lg text-slate-500 hover:text-white hover:bg-white/10">
             <i class="fas fa-times"></i>
         </button>
     </div>

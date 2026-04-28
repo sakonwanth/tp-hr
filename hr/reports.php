@@ -354,7 +354,7 @@ require_once __DIR__ . '/../templates/header.php';
                 <span>เฉลี่ยออก <strong class="text-slate-200"><?php echo $row['avg_check_out'] ? substr($row['avg_check_out'], 0, 5) : '-'; ?></strong></span>
             </div>
             <a href="/hr/employee_attendance.php?id=<?php echo (int)$row['id']; ?>"
-               class="mt-3 flex min-h-[44px] items-center justify-center rounded-lg bg-violet-500/20 text-violet-300 hover:bg-violet-500/30 text-sm font-semibold touch-manipulation">
+               class="mt-3 flex min-h-[48px] items-center justify-center rounded-lg bg-violet-500/20 text-violet-300 hover:bg-violet-500/30 text-sm font-semibold touch-manipulation">
                 <i class="fas fa-clock mr-2"></i>ดูประวัติลงเวลา
             </a>
         </div>

@@ -192,19 +192,19 @@ require_once __DIR__ . '/../templates/header.php';
 <div class="mb-6 border-b border-slate-700 pb-4">
     <div class="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
         <a href="?tab=general"
-           class="shrink-0 px-4 py-2 rounded-xl whitespace-nowrap min-h-[44px] flex items-center gap-2 <?php echo $tab === 'general' ? 'bg-primary-600 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'; ?>">
+           class="shrink-0 px-4 py-2 rounded-xl whitespace-nowrap min-h-[48px] flex items-center gap-2 <?php echo $tab === 'general' ? 'bg-primary-600 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'; ?>">
             <i class="fas fa-sliders-h"></i><span>ทั่วไป</span>
         </a>
         <a href="?tab=holidays"
-           class="shrink-0 px-4 py-2 rounded-xl whitespace-nowrap min-h-[44px] flex items-center gap-2 <?php echo $tab === 'holidays' ? 'bg-primary-600 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'; ?>">
+           class="shrink-0 px-4 py-2 rounded-xl whitespace-nowrap min-h-[48px] flex items-center gap-2 <?php echo $tab === 'holidays' ? 'bg-primary-600 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'; ?>">
             <i class="fas fa-calendar-day"></i><span>วันหยุด</span>
         </a>
         <a href="?tab=leave-types"
-           class="shrink-0 px-4 py-2 rounded-xl whitespace-nowrap min-h-[44px] flex items-center gap-2 <?php echo $tab === 'leave-types' ? 'bg-primary-600 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'; ?>">
+           class="shrink-0 px-4 py-2 rounded-xl whitespace-nowrap min-h-[48px] flex items-center gap-2 <?php echo $tab === 'leave-types' ? 'bg-primary-600 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'; ?>">
             <i class="fas fa-umbrella-beach"></i><span>ประเภทการลา</span>
         </a>
         <a href="?tab=shifts"
-           class="shrink-0 px-4 py-2 rounded-xl whitespace-nowrap min-h-[44px] flex items-center gap-2 <?php echo $tab === 'shifts' ? 'bg-primary-600 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'; ?>">
+           class="shrink-0 px-4 py-2 rounded-xl whitespace-nowrap min-h-[48px] flex items-center gap-2 <?php echo $tab === 'shifts' ? 'bg-primary-600 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'; ?>">
             <i class="fas fa-clock"></i><span>กะทำงาน</span>
         </a>
     </div>
@@ -280,7 +280,7 @@ foreach ($workShifts as $_ws) {
         </div>
         
         <div class="flex flex-col md:flex-row md:justify-end gap-3">
-            <button type="submit" class="btn-primary w-full md:w-auto min-h-[44px]">
+            <button type="submit" class="btn-primary w-full md:w-auto min-h-[48px]">
                 <i class="fas fa-save mr-2"></i>บันทึกการตั้งค่า
             </button>
         </div>
@@ -346,7 +346,7 @@ foreach ($workShifts as $_ws) {
                     <input type="hidden" name="csrf_token" value="<?php echo csrfToken(); ?>">
                     <input type="hidden" name="action" value="delete_holiday">
                     <input type="hidden" name="holiday_id" value="<?php echo $holiday['id']; ?>">
-                    <button type="submit" class="btn-secondary w-full min-h-[44px] text-red-300 border-red-500/30">
+                    <button type="submit" class="btn-secondary w-full min-h-[48px] text-red-300 border-red-500/30">
                         <i class="fas fa-trash mr-2"></i>ลบวันหยุด
                     </button>
                 </form>
@@ -381,7 +381,7 @@ foreach ($workShifts as $_ws) {
                                 <input type="hidden" name="csrf_token" value="<?php echo csrfToken(); ?>">
                                 <input type="hidden" name="action" value="delete_holiday">
                                 <input type="hidden" name="holiday_id" value="<?php echo $holiday['id']; ?>">
-                                <button type="submit" class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-red-400 hover:text-red-300 touch-manipulation" aria-label="ลบวันหยุด">
+                                <button type="submit" class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center text-red-400 hover:text-red-300 touch-manipulation" aria-label="ลบวันหยุด">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>
@@ -444,7 +444,7 @@ foreach ($workShifts as $_ws) {
             </div>
             <p class="text-slate-400 text-sm mt-3"><?php echo $conditions ? htmlspecialchars(implode(', ', $conditions)) : '-'; ?></p>
             <button onclick="editLeaveType(<?php echo htmlspecialchars(json_encode($lt)); ?>)"
-                    class="btn-secondary w-full min-h-[44px] mt-4">
+                    class="btn-secondary w-full min-h-[48px] mt-4">
                 <i class="fas fa-edit mr-2"></i>แก้ไข
             </button>
         </div>
@@ -647,7 +647,7 @@ function closeModal(id) {
                         <span class="text-slate-300 text-sm">เปิดใช้งาน</span>
                     </label>
                     
-                    <button type="submit" class="btn-secondary text-sm min-h-[44px] px-4">
+                    <button type="submit" class="btn-secondary text-sm min-h-[48px] px-4">
                         <i class="fas fa-save mr-1"></i>บันทึก
                     </button>
                 </div>

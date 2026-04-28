@@ -84,15 +84,15 @@ include 'templates/header.php';
             <div class="mb-6">
                 <label class="block text-white/80 text-sm font-medium mb-2">ภาษา</label>
                 <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4">
-                    <label class="flex items-center min-h-[44px] cursor-pointer touch-manipulation rounded-lg px-2 -mx-2 sm:px-0 sm:mx-0">
+                    <label class="flex items-center min-h-[48px] cursor-pointer touch-manipulation rounded-lg px-2 -mx-2 sm:px-0 sm:mx-0">
                         <input type="radio" name="language" value="TH" checked class="mr-2 accent-violet-500">
                         <span class="text-white">ภาษาไทย</span>
                     </label>
-                    <label class="flex items-center min-h-[44px] cursor-pointer touch-manipulation rounded-lg px-2 -mx-2 sm:px-0 sm:mx-0">
+                    <label class="flex items-center min-h-[48px] cursor-pointer touch-manipulation rounded-lg px-2 -mx-2 sm:px-0 sm:mx-0">
                         <input type="radio" name="language" value="EN" class="mr-2 accent-violet-500">
                         <span class="text-white">ภาษาอังกฤษ</span>
                     </label>
-                    <label class="flex items-center min-h-[44px] cursor-pointer touch-manipulation rounded-lg px-2 -mx-2 sm:px-0 sm:mx-0">
+                    <label class="flex items-center min-h-[48px] cursor-pointer touch-manipulation rounded-lg px-2 -mx-2 sm:px-0 sm:mx-0">
                         <input type="radio" name="language" value="BOTH" class="mr-2 accent-violet-500">
                         <span class="text-white">ทั้งสองภาษา</span>
                     </label>
@@ -133,7 +133,7 @@ include 'templates/header.php';
             
             <!-- Rush Request -->
             <div class="mb-6 p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
-                <label class="flex items-start gap-3 min-h-[44px] cursor-pointer touch-manipulation">
+                <label class="flex items-start gap-3 min-h-[48px] cursor-pointer touch-manipulation">
                     <input type="checkbox" name="is_urgent" value="1" class="mt-1 accent-yellow-500 shrink-0">
                     <div>
                         <span class="text-white font-medium">ขอเร่งด่วน</span>
@@ -147,7 +147,7 @@ include 'templates/header.php';
                 <a href="certificate.php" class="touch-manipulation flex-1 min-h-[48px] inline-flex items-center justify-center py-3 bg-white/10 hover:bg-white/20 text-white text-center rounded-xl transition-colors">
                     ยกเลิก
                 </a>
-                <button type="submit" class="touch-manipulation flex-1 min-h-[48px] inline-flex items-center justify-center gap-2 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors">
+                <button type="submit" class="touch-manipulation flex-1 min-h-[56px] inline-flex items-center justify-center gap-2 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors">
                     <i class="fas fa-paper-plane"></i><span>ส่งคำขอ</span>
                 </button>
             </div>
@@ -310,7 +310,7 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
     <div class="p-12 text-center">
         <i class="fas fa-file-signature text-4xl text-white/20 mb-4" aria-hidden="true"></i>
         <p class="text-white/60">ยังไม่มีประวัติการขอหนังสือรับรอง</p>
-        <a href="certificate.php?action=new" class="inline-flex mt-4 min-h-[44px] items-center justify-center px-6 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors touch-manipulation">
+        <a href="certificate.php?action=new" class="inline-flex mt-4 min-h-[56px] items-center justify-center px-6 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors touch-manipulation">
             ขอหนังสือรับรองใหม่
         </a>
     </div>
@@ -364,7 +364,7 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
                     tpHrCertificatePrintForm(
                         (int)$req['id'],
                         'inline-flex w-full sm:w-auto min-w-0',
-                        'min-h-[44px] inline-flex items-center justify-center px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors text-sm font-medium touch-manipulation w-full sm:w-auto',
+                        'min-h-[56px] inline-flex items-center justify-center px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors text-sm font-medium touch-manipulation w-full sm:w-auto',
                         '<i class="fas fa-print mr-2"></i>ดู / พิมพ์',
                         true
                     );
@@ -373,12 +373,12 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
 
                     <?php if (in_array($req['status'], ['COMPLETED', 'READY', 'DELIVERED'], true) && !empty($req['file_path'])): ?>
                     <a href="<?php echo htmlspecialchars($req['file_path']); ?>" target="_blank" rel="noopener noreferrer"
-                       class="min-h-[44px] inline-flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium touch-manipulation w-full sm:w-auto">
+                       class="min-h-[56px] inline-flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium touch-manipulation w-full sm:w-auto">
                         <i class="fas fa-download mr-2"></i>ดาวน์โหลด
                     </a>
                     <?php elseif ($req['status'] === 'PENDING'): ?>
                     <button type="button" onclick="cancelRequest(<?php echo (int)$req['id']; ?>)"
-                            class="min-h-[44px] inline-flex items-center justify-center px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors text-sm font-medium touch-manipulation w-full sm:w-auto">
+                            class="min-h-[48px] inline-flex items-center justify-center px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors text-sm font-medium touch-manipulation w-full sm:w-auto">
                         <i class="fas fa-times mr-2"></i>ยกเลิก
                     </button>
                     <?php endif; ?>

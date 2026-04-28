@@ -226,7 +226,7 @@ include dirname(__DIR__) . '/templates/header.php';
             tpHrCertificatePrintForm(
                 $reqId,
                 'flex w-full',
-                'flex min-h-[44px] w-full items-center justify-center rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold transition-colors touch-manipulation',
+                'flex min-h-[56px] w-full items-center justify-center rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold transition-colors touch-manipulation',
                 '<i class="fas fa-print mr-2"></i>ดู / พิมพ์เอกสาร',
                 true
             );
@@ -235,27 +235,27 @@ include dirname(__DIR__) . '/templates/header.php';
             <?php if ($st === 'PENDING'): ?>
             <div class="grid grid-cols-2 gap-2">
                 <button type="button" onclick="updateDocStatus(<?php echo $reqId; ?>, 'PROCESSING')"
-                        class="min-h-[44px] rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold touch-manipulation">
+                        class="min-h-[48px] rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold touch-manipulation">
                     <i class="fas fa-play mr-2"></i>เริ่มจัดทำ
                 </button>
                 <button type="button" onclick="rejectDoc(<?php echo $reqId; ?>)"
-                        class="min-h-[44px] rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-200 text-sm font-semibold touch-manipulation">
+                        class="min-h-[48px] rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-200 text-sm font-semibold touch-manipulation">
                     <i class="fas fa-times mr-2"></i>ปฏิเสธ
                 </button>
             </div>
             <?php elseif ($st === 'PROCESSING'): ?>
             <button type="button" onclick="completeDoc(<?php echo $reqId; ?>)"
-                    class="w-full min-h-[44px] rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-semibold touch-manipulation">
+                    class="w-full min-h-[56px] rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-semibold touch-manipulation">
                 <i class="fas fa-check mr-2"></i>จัดทำเสร็จ
             </button>
             <?php elseif (in_array($st, ['COMPLETED', 'READY', 'DELIVERED'], true) && !empty($req['document_url'])): ?>
             <a href="<?php echo htmlspecialchars($req['document_url']); ?>" target="_blank" rel="noopener noreferrer"
-               class="flex min-h-[44px] items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
+               class="flex min-h-[48px] items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
                 <i class="fas fa-download mr-2"></i>ดาวน์โหลดเอกสาร
             </a>
             <?php else: ?>
             <button type="button" onclick="viewDocDetail(<?php echo $reqId; ?>)"
-                    class="w-full min-h-[44px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
+                    class="w-full min-h-[48px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
                 <i class="fas fa-eye mr-2"></i>ดูรายละเอียด
             </button>
             <?php endif; ?>

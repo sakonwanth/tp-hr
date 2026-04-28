@@ -328,9 +328,9 @@ require_once __DIR__ . '/../templates/header.php';
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
                         <input type="hidden" name="id" value="<?= (int)$k['id'] ?>">
                         <?php if ((int)$k['is_active'] === 1): ?>
-                            <button name="action" value="revoke" type="submit" class="w-full min-h-[44px] rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 text-sm font-semibold touch-manipulation">Revoke</button>
+                            <button name="action" value="revoke" type="submit" class="w-full min-h-[48px] rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 text-sm font-semibold touch-manipulation">Revoke</button>
                         <?php else: ?>
-                            <button name="action" value="activate" type="submit" class="w-full min-h-[44px] rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 text-sm font-semibold touch-manipulation">Activate</button>
+                            <button name="action" value="activate" type="submit" class="w-full min-h-[48px] rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 text-sm font-semibold touch-manipulation">Activate</button>
                         <?php endif; ?>
                     </form>
                 </div>

@@ -198,8 +198,8 @@ try {
             <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">ดูรายละเอียดรายได้ รายการหัก และเงินได้สุทธิ พิมพ์หรือดาวน์โหลดได้จากปุ่มด้านขวา</p>
         </div>
         <div class="flex flex-col sm:flex-row gap-2 sm:items-center shrink-0 w-full sm:w-auto">
-            <?php tp_hr_payslip_download_form((int)$slip['id'], 'w-full sm:w-auto min-h-[44px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors inline-flex items-center justify-center touch-manipulation', '<i class="fas fa-print mr-2"></i>พิมพ์', false); ?>
-            <?php tp_hr_payslip_download_form((int)$slip['id'], 'w-full sm:w-auto min-h-[44px] px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors inline-flex items-center justify-center font-semibold touch-manipulation', '<i class="fas fa-download mr-2"></i>ดาวน์โหลด PDF', true); ?>
+            <?php tp_hr_payslip_download_form((int)$slip['id'], 'w-full sm:w-auto min-h-[48px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors inline-flex items-center justify-center touch-manipulation', '<i class="fas fa-print mr-2"></i>พิมพ์', false); ?>
+            <?php tp_hr_payslip_download_form((int)$slip['id'], 'w-full sm:w-auto min-h-[56px] px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors inline-flex items-center justify-center font-semibold touch-manipulation', '<i class="fas fa-download mr-2"></i>ดาวน์โหลด PDF', true); ?>
         </div>
     </div>
 </div>
@@ -374,7 +374,7 @@ try {
 </div>
 
 <div class="mt-6 min-w-0">
-    <a href="payslip.php?year=<?php echo $slipYear; ?>" class="inline-flex items-center text-white/60 hover:text-white touch-manipulation min-h-[44px]">
+    <a href="payslip.php?year=<?php echo $slipYear; ?>" class="inline-flex items-center text-white/60 hover:text-white touch-manipulation min-h-[48px]">
         <i class="fas fa-arrow-left mr-2"></i>กลับไปรายการสลิป
     </a>
 </div>
@@ -477,7 +477,7 @@ try {
                            title="ดูรายละเอียด">
                             <i class="fas fa-eye"></i><span class="text-sm sm:hidden">ดู</span>
                         </a>
-                        <?php tp_hr_payslip_download_form((int)$s['id'], 'flex-1 sm:flex-none min-h-[48px] min-w-[48px] px-4 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors inline-flex items-center justify-center gap-2 touch-manipulation font-medium text-sm', '<i class="fas fa-download"></i><span class="sm:hidden">ดาวน์โหลด</span><span class="hidden sm:inline">PDF</span>', true, 'ดาวน์โหลด PDF'); ?>
+                        <?php tp_hr_payslip_download_form((int)$s['id'], 'flex-1 sm:flex-none min-h-[56px] min-w-[48px] px-4 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors inline-flex items-center justify-center gap-2 touch-manipulation font-medium text-sm', '<i class="fas fa-download"></i><span class="sm:hidden">ดาวน์โหลด</span><span class="hidden sm:inline">PDF</span>', true, 'ดาวน์โหลด PDF'); ?>
                     </div>
                 </div>
             </div>

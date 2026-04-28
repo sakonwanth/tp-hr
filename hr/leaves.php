@@ -165,11 +165,11 @@ include dirname(__DIR__) . '/templates/header.php';
         </div>
         <div class="sm:col-span-2 lg:col-span-2 grid grid-cols-2 gap-2 min-w-0">
             <a href="leaves.php"
-               class="min-h-[44px] px-3 sm:px-4 inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white text-sm font-medium text-center rounded-xl transition-colors touch-manipulation">
+               class="min-h-[48px] px-3 sm:px-4 inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white text-sm font-medium text-center rounded-xl transition-colors touch-manipulation">
                 <i class="fas fa-redo shrink-0" aria-hidden="true"></i><span>รีเซ็ต</span>
             </a>
             <a href="leaves.php?action=calendar&amp;month=<?php echo urlencode($month); ?>"
-               class="min-h-[44px] px-3 sm:px-4 inline-flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold text-center rounded-xl transition-colors touch-manipulation">
+               class="min-h-[56px] px-3 sm:px-4 inline-flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold text-center rounded-xl transition-colors touch-manipulation">
                 <i class="fas fa-calendar-alt shrink-0" aria-hidden="true"></i><span>ปฏิทิน</span>
             </a>
         </div>
@@ -250,18 +250,18 @@ include dirname(__DIR__) . '/templates/header.php';
                 <?php if ($statusKey === 'PENDING'): ?>
                 <button type="button"
                         onclick="approveLeave(<?php echo (int)$req['id']; ?>)"
-                        class="min-h-[44px] rounded-xl bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-100 text-sm font-semibold touch-manipulation">
+                        class="min-h-[56px] rounded-xl bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-100 text-sm font-semibold touch-manipulation">
                     <i class="fas fa-check mr-2"></i>อนุมัติ
                 </button>
                 <button type="button"
                         onclick="rejectLeave(<?php echo (int)$req['id']; ?>)"
-                        class="min-h-[44px] rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-200 text-sm font-semibold touch-manipulation">
+                        class="min-h-[48px] rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-200 text-sm font-semibold touch-manipulation">
                     <i class="fas fa-times mr-2"></i>ไม่อนุมัติ
                 </button>
                 <?php else: ?>
                 <button type="button"
                         onclick="viewDetail(<?php echo (int)$req['id']; ?>)"
-                        class="col-span-2 min-h-[44px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
+                        class="col-span-2 min-h-[48px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
                     <i class="fas fa-eye mr-2"></i>ดูรายละเอียด
                 </button>
                 <?php endif; ?>
@@ -332,15 +332,15 @@ include dirname(__DIR__) . '/templates/header.php';
                     <td class="px-4 py-3 text-center">
                         <?php if ($req['status'] === 'PENDING'): ?>
                         <button type="button" onclick="approveLeave(<?php echo $req['id']; ?>)" 
-                                class="inline-flex items-center justify-center min-h-[44px] min-w-[44px] px-2 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded transition-colors touch-manipulation mr-1">
+                                class="inline-flex items-center justify-center min-h-[56px] min-w-[48px] px-2 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded transition-colors touch-manipulation mr-1">
                             <i class="fas fa-check"></i>
                         </button>
                         <button type="button" onclick="rejectLeave(<?php echo $req['id']; ?>)"
-                                class="inline-flex items-center justify-center min-h-[44px] min-w-[44px] px-2 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs rounded transition-colors touch-manipulation">
+                                class="inline-flex items-center justify-center min-h-[48px] min-w-[48px] px-2 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs rounded transition-colors touch-manipulation">
                             <i class="fas fa-times"></i>
                         </button>
                         <?php else: ?>
-                        <button type="button" onclick="viewDetail(<?php echo $req['id']; ?>)" class="inline-flex items-center justify-center min-h-[44px] min-w-[44px] px-2 py-1 bg-white/10 hover:bg-white/20 text-white text-xs rounded transition-colors touch-manipulation">
+                        <button type="button" onclick="viewDetail(<?php echo $req['id']; ?>)" class="inline-flex items-center justify-center min-h-[48px] min-w-[48px] px-2 py-1 bg-white/10 hover:bg-white/20 text-white text-xs rounded transition-colors touch-manipulation">
                             <i class="fas fa-eye"></i>
                         </button>
                         <?php endif; ?>
@@ -361,21 +361,21 @@ include dirname(__DIR__) . '/templates/header.php';
         <div class="flex flex-wrap gap-2">
             <?php if ($page > 1): ?>
             <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $page - 1])); ?>" 
-               class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center px-3 bg-white/10 hover:bg-white/20 text-white rounded transition-colors touch-manipulation" aria-label="หน้าก่อน">
+               class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center px-3 bg-white/10 hover:bg-white/20 text-white rounded transition-colors touch-manipulation" aria-label="หน้าก่อน">
                 <i class="fas fa-chevron-left"></i>
             </a>
             <?php endif; ?>
             
             <?php for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++): ?>
             <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $i])); ?>" 
-               class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center px-3 <?php echo $i === $page ? 'bg-violet-600 text-white' : 'bg-white/10 hover:bg-white/20 text-white'; ?> rounded transition-colors touch-manipulation">
+               class="inline-flex min-h-[56px] min-w-[48px] items-center justify-center px-3 <?php echo $i === $page ? 'bg-violet-600 text-white' : 'bg-white/10 hover:bg-white/20 text-white'; ?> rounded transition-colors touch-manipulation">
                 <?php echo $i; ?>
             </a>
             <?php endfor; ?>
             
             <?php if ($page < $totalPages): ?>
             <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $page + 1])); ?>" 
-               class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center px-3 bg-white/10 hover:bg-white/20 text-white rounded transition-colors touch-manipulation" aria-label="หน้าถัดไป">
+               class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center px-3 bg-white/10 hover:bg-white/20 text-white rounded transition-colors touch-manipulation" aria-label="หน้าถัดไป">
                 <i class="fas fa-chevron-right"></i>
             </a>
             <?php endif; ?>
@@ -396,8 +396,8 @@ include dirname(__DIR__) . '/templates/header.php';
                 <textarea name="reason" id="reject-reason" required rows="3" class="input-field"></textarea>
             </div>
             <div class="flex gap-4">
-                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[44px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg touch-manipulation">ยกเลิก</button>
-                <button type="submit" class="flex-1 min-h-[44px] py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg touch-manipulation">ไม่อนุมัติ</button>
+                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg touch-manipulation">ยกเลิก</button>
+                <button type="submit" class="flex-1 min-h-[56px] py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg touch-manipulation">ไม่อนุมัติ</button>
             </div>
         </form>
     </div>
@@ -408,7 +408,7 @@ include dirname(__DIR__) . '/templates/header.php';
         <div class="p-6">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="text-xl font-bold text-white">รายละเอียดคำขอลา</h3>
-                <button type="button" onclick="closeDetailModal()" class="min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 rounded-lg touch-manipulation" aria-label="ปิด">
+                <button type="button" onclick="closeDetailModal()" class="min-h-[48px] min-w-[48px] inline-flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 rounded-lg touch-manipulation" aria-label="ปิด">
                     <i class="fas fa-times"></i>
                 </button>
             </div>

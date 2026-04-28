@@ -122,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Icons & Tailwind -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/app.css">
-    <link rel="stylesheet" href="/assets/css/native-shell.css?v=2">
+    <link rel="stylesheet" href="/assets/css/native-shell.css?v=3">
     
     <style>
         * {
@@ -342,12 +342,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             
             <!-- Remember Me -->
-            <div class="mt-3 flex min-h-[44px] items-center justify-between gap-3">
+            <div class="mt-3 flex min-h-[48px] items-center justify-between gap-3">
                 <label class="flex cursor-pointer select-none items-center gap-2 text-sm text-white text-opacity-80">
                     <input type="checkbox" name="remember" class="h-4 w-4 shrink-0 rounded border-white/30 bg-white/10 text-purple-500 focus:ring-purple-500 focus:ring-offset-0">
                     จดจำฉัน
                 </label>
-                <a href="<?php echo htmlspecialchars(CRM_BASE_URL); ?>/login.php" class="inline-flex min-h-[44px] shrink-0 items-center text-purple-400 hover:text-purple-300 text-sm transition-colors touch-manipulation">
+                <a href="<?php echo htmlspecialchars(CRM_BASE_URL); ?>/login.php" class="inline-flex min-h-[48px] shrink-0 items-center text-purple-400 hover:text-purple-300 text-sm transition-colors touch-manipulation">
                     ลืมรหัสผ่าน?
                 </a>
             </div>
@@ -380,7 +380,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <!-- CRM Link -->
         <div class="text-center mt-6">
-            <a href="<?php echo htmlspecialchars(CRM_BASE_URL); ?>/" class="inline-flex min-h-[44px] items-center justify-center text-sm text-white/60 transition-colors hover:text-white/90 touch-manipulation">
+            <a href="<?php echo htmlspecialchars(CRM_BASE_URL); ?>/" class="inline-flex min-h-[48px] items-center justify-center text-sm text-white/60 transition-colors hover:text-white/90 touch-manipulation">
                 <i class="fas fa-arrow-left mr-1"></i>
                 กลับไป TP-CRM
             </a>

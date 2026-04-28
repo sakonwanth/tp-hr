@@ -159,7 +159,7 @@ include __DIR__ . '/templates/header.php';
 
 <div class="mb-8 max-w-3xl">
     <nav class="mb-4 text-sm text-white/60" aria-label="Breadcrumb">
-        <a href="checkin.php" class="inline-flex min-h-[44px] items-center hover:text-white touch-manipulation">ลงเวลา</a>
+        <a href="checkin.php" class="inline-flex min-h-[48px] items-center hover:text-white touch-manipulation">ลงเวลา</a>
         <span class="mx-2">/</span>
         <span class="text-white">วันหยุดประจำสัปดาห์</span>
     </nav>
@@ -261,7 +261,7 @@ include __DIR__ . '/templates/header.php';
                 <?php echo csrfField(); ?>
                 <input type="hidden" name="action" value="cancel_request">
                 <input type="hidden" name="request_id" value="<?php echo $req['id']; ?>">
-                <button type="submit" class="min-h-[44px] px-3 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs sm:text-sm rounded-lg transition-colors touch-manipulation"
+                <button type="submit" class="min-h-[48px] px-3 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs sm:text-sm rounded-lg transition-colors touch-manipulation"
                         onclick="return confirm('ยกเลิกคำขอเปลี่ยนวันหยุดสัปดาห์นี้?')">
                     <i class="fas fa-times mr-1"></i>ยกเลิกคำขอ
                 </button>
@@ -368,10 +368,10 @@ include __DIR__ . '/templates/header.php';
 <div class="glass-card rounded-xl p-4 mt-6">
     <p class="text-white/50 text-xs font-medium mb-3">คำอธิบายสี</p>
     <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-x-6 sm:gap-y-2 text-xs text-white/65">
-        <span class="inline-flex items-center gap-2 min-h-[44px] sm:min-h-0"><span class="inline-block w-3 h-3 shrink-0 rounded bg-violet-500/35 ring-1 ring-violet-500/40" aria-hidden="true"></span> วันหยุดประจำสัปดาห์</span>
-        <span class="inline-flex items-center gap-2 min-h-[44px] sm:min-h-0"><span class="inline-block w-3 h-3 shrink-0 rounded bg-orange-500/30" aria-hidden="true"></span> วันหยุดราชการ/เทศกาล</span>
-        <span class="inline-flex items-center gap-2 min-h-[44px] sm:min-h-0"><span class="inline-block w-3 h-3 shrink-0 rounded bg-yellow-500/30 animate-pulse" aria-hidden="true"></span> รออนุมัติเปลี่ยน</span>
-        <span class="inline-flex items-center gap-2 min-h-[44px] sm:min-h-0"><span class="inline-block w-3 h-3 shrink-0 rounded bg-white/10" aria-hidden="true"></span> วันทำงาน</span>
+        <span class="inline-flex items-center gap-2 min-h-[48px] sm:min-h-0"><span class="inline-block w-3 h-3 shrink-0 rounded bg-violet-500/35 ring-1 ring-violet-500/40" aria-hidden="true"></span> วันหยุดประจำสัปดาห์</span>
+        <span class="inline-flex items-center gap-2 min-h-[48px] sm:min-h-0"><span class="inline-block w-3 h-3 shrink-0 rounded bg-orange-500/30" aria-hidden="true"></span> วันหยุดราชการ/เทศกาล</span>
+        <span class="inline-flex items-center gap-2 min-h-[48px] sm:min-h-0"><span class="inline-block w-3 h-3 shrink-0 rounded bg-yellow-500/30 animate-pulse" aria-hidden="true"></span> รออนุมัติเปลี่ยน</span>
+        <span class="inline-flex items-center gap-2 min-h-[48px] sm:min-h-0"><span class="inline-block w-3 h-3 shrink-0 rounded bg-white/10" aria-hidden="true"></span> วันทำงาน</span>
     </div>
 </div>
 

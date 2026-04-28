@@ -363,7 +363,7 @@ include dirname(__DIR__) . '/templates/header.php';
         </div>
         <?php if (!$editRow && !$isCreating): ?>
         <div class="flex gap-2 shrink-0 w-full sm:w-auto">
-            <a href="?edit=new" class="inline-flex items-center justify-center min-h-[44px] px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold touch-manipulation w-full sm:w-auto">
+            <a href="?edit=new" class="inline-flex items-center justify-center min-h-[56px] px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold touch-manipulation w-full sm:w-auto">
                 <i class="fas fa-plus mr-1"></i> เพิ่มเอกสารใหม่
             </a>
         </div>
@@ -591,14 +591,14 @@ include dirname(__DIR__) . '/templates/header.php';
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-2">
-                <a href="?edit=<?php echo (int)$t['id']; ?>" class="min-h-[44px] flex items-center justify-center rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 text-sm font-semibold touch-manipulation">
+                <a href="?edit=<?php echo (int)$t['id']; ?>" class="min-h-[48px] flex items-center justify-center rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 text-sm font-semibold touch-manipulation">
                     <i class="fas fa-edit mr-2"></i>แก้ไข
                 </a>
                 <form method="POST" class="contents">
                     <input type="hidden" name="_token" value="<?php echo csrfToken(); ?>">
                     <input type="hidden" name="action" value="toggle_active">
                     <input type="hidden" name="id" value="<?php echo (int)$t['id']; ?>">
-                    <button type="submit" class="w-full min-h-[44px] rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-sm font-semibold touch-manipulation" title="สลับเปิด/ปิด">
+                    <button type="submit" class="w-full min-h-[48px] rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-sm font-semibold touch-manipulation" title="สลับเปิด/ปิด">
                         <i class="fas fa-power-off mr-2"></i>เปิด/ปิด
                     </button>
                 </form>
@@ -608,7 +608,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 <input type="hidden" name="_token" value="<?php echo csrfToken(); ?>">
                 <input type="hidden" name="action" value="delete_template">
                 <input type="hidden" name="id" value="<?php echo (int)$t['id']; ?>">
-                <button type="submit" class="w-full min-h-[44px] rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 text-sm font-semibold touch-manipulation">
+                <button type="submit" class="w-full min-h-[48px] rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 text-sm font-semibold touch-manipulation">
                     <i class="fas fa-trash mr-2"></i>ลบ
                 </button>
             </form>

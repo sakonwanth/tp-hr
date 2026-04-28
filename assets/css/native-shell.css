@@ -1,5 +1,6 @@
 /**
- * TP-HR — Native component system (design lock; aligned with tp-checkin v5). v2: shell stack wrapper + section titles.
+ * TP-HR — Native component system (design lock; aligned with tp-checkin v5).
+ * v3: global touch bump (Utilities: min-h/w 44→48; brand primary buttons 56 via markup pass).
  * UI UX Pro Max: touch ≥48px, inputs ≥52px, primary CTA ≥56px, card radius 20px,
  * scroll-end buffer ≥120px, bottom slot ≥88px when tab bar present.
  */

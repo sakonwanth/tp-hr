@@ -165,7 +165,7 @@ include 'templates/header.php';
             </select>
         </div>
         <div class="flex items-end min-w-0">
-            <a href="leave_history.php?year=<?php echo (int)$year; ?>" class="touch-manipulation w-full min-h-[44px] inline-flex items-center justify-center py-2.5 bg-white/10 hover:bg-white/20 text-white text-center rounded-xl transition-colors">
+            <a href="leave_history.php?year=<?php echo (int)$year; ?>" class="touch-manipulation w-full min-h-[48px] inline-flex items-center justify-center py-2.5 bg-white/10 hover:bg-white/20 text-white text-center rounded-xl transition-colors">
                 <i class="fas fa-redo mr-2"></i>รีเซ็ต
             </a>
         </div>
@@ -299,21 +299,21 @@ include 'templates/header.php';
         <div class="flex flex-wrap gap-2 justify-center sm:justify-end">
             <?php if ($page > 1): ?>
             <a href="?year=<?php echo $year; ?>&type=<?php echo $type; ?>&status=<?php echo urlencode($status); ?>&page=<?php echo $page - 1; ?>" 
-               class="touch-manipulation min-h-[44px] min-w-[44px] inline-flex items-center justify-center px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors">
+               class="touch-manipulation min-h-[48px] min-w-[48px] inline-flex items-center justify-center px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors">
                 <i class="fas fa-chevron-left"></i>
             </a>
             <?php endif; ?>
             
             <?php for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++): ?>
             <a href="?year=<?php echo $year; ?>&type=<?php echo $type; ?>&status=<?php echo urlencode($status); ?>&page=<?php echo $i; ?>" 
-               class="touch-manipulation min-h-[44px] min-w-[44px] inline-flex items-center justify-center px-3 py-2 <?php echo $i === $page ? 'bg-violet-600 text-white' : 'bg-white/10 hover:bg-white/20 text-white'; ?> rounded-xl transition-colors">
+               class="touch-manipulation min-h-[56px] min-w-[48px] inline-flex items-center justify-center px-3 py-2 <?php echo $i === $page ? 'bg-violet-600 text-white' : 'bg-white/10 hover:bg-white/20 text-white'; ?> rounded-xl transition-colors">
                 <?php echo $i; ?>
             </a>
             <?php endfor; ?>
             
             <?php if ($page < $totalPages): ?>
             <a href="?year=<?php echo $year; ?>&type=<?php echo $type; ?>&status=<?php echo urlencode($status); ?>&page=<?php echo $page + 1; ?>" 
-               class="touch-manipulation min-h-[44px] min-w-[44px] inline-flex items-center justify-center px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors">
+               class="touch-manipulation min-h-[48px] min-w-[48px] inline-flex items-center justify-center px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors">
                 <i class="fas fa-chevron-right"></i>
             </a>
             <?php endif; ?>

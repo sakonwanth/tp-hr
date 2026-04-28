@@ -78,7 +78,7 @@ include 'templates/header.php';
     <p class="text-white/60 text-sm mb-6">กรุณาออกจากระบบแล้วเข้าใหม่ หรือติดต่อฝ่าย HR หากยังเห็นข้อความนี้</p>
     <form method="post" action="/logout.php" class="inline m-0">
         <?php echo csrfField(); ?>
-        <button type="submit" class="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-violet-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-violet-700 touch-manipulation border-0 cursor-pointer">ออกจากระบบ</button>
+        <button type="submit" class="inline-flex min-h-[56px] items-center justify-center rounded-xl bg-violet-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-violet-700 touch-manipulation border-0 cursor-pointer">ออกจากระบบ</button>
     </form>
 </div>
 <?php include 'templates/footer.php';
@@ -169,7 +169,7 @@ endif; ?>
             </div>
         </div>
         
-        <button onclick="openEditModal('profile')" class="w-full mt-6 min-h-[44px] bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">
+        <button onclick="openEditModal('profile')" class="w-full mt-6 min-h-[48px] bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">
             <i class="fas fa-edit mr-2"></i>แก้ไขข้อมูลติดต่อ
         </button>
     </div>
@@ -279,7 +279,7 @@ endif; ?>
 <div class="glass-card rounded-xl p-4 sm:p-6 min-w-0 overflow-hidden">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <h3 class="text-lg font-semibold text-white">ผู้ติดต่อฉุกเฉิน</h3>
-        <button onclick="openAddModal('emergency')" class="px-4 py-2 min-h-[44px] bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
+        <button onclick="openAddModal('emergency')" class="px-4 py-2 min-h-[56px] bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
             <i class="fas fa-plus mr-2"></i>เพิ่มผู้ติดต่อ
         </button>
     </div>
@@ -310,10 +310,10 @@ endif; ?>
                 </div>
             </div>
             <div class="flex gap-2 sm:justify-end">
-                <button onclick="editEmergency(<?php echo $contact['id']; ?>)" class="min-h-[44px] min-w-[44px] p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg">
+                <button onclick="editEmergency(<?php echo $contact['id']; ?>)" class="min-h-[48px] min-w-[48px] p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button onclick="deleteEmergency(<?php echo $contact['id']; ?>)" class="min-h-[44px] min-w-[44px] p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg">
+                <button onclick="deleteEmergency(<?php echo $contact['id']; ?>)" class="min-h-[48px] min-w-[48px] p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -328,7 +328,7 @@ endif; ?>
 <div class="glass-card rounded-xl p-4 sm:p-6 min-w-0 overflow-hidden">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <h3 class="text-lg font-semibold text-white">ข้อมูลครอบครัว</h3>
-        <button onclick="openAddModal('family')" class="px-4 py-2 min-h-[44px] bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
+        <button onclick="openAddModal('family')" class="px-4 py-2 min-h-[56px] bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
             <i class="fas fa-plus mr-2"></i>เพิ่มสมาชิก
         </button>
     </div>
@@ -358,10 +358,10 @@ endif; ?>
             </div>
             <p class="text-white/70 text-sm mt-3"><?php echo htmlspecialchars($member['occupation'] ?? '-'); ?></p>
             <div class="grid grid-cols-2 gap-2 mt-4">
-                <button type="button" onclick="editFamily(<?php echo $member['id']; ?>)" class="min-h-[44px] rounded-lg bg-white/10 text-white/70 hover:text-white hover:bg-white/20 touch-manipulation">
+                <button type="button" onclick="editFamily(<?php echo $member['id']; ?>)" class="min-h-[48px] rounded-lg bg-white/10 text-white/70 hover:text-white hover:bg-white/20 touch-manipulation">
                     <i class="fas fa-edit mr-2"></i>แก้ไข
                 </button>
-                <button type="button" onclick="deleteFamily(<?php echo $member['id']; ?>)" class="min-h-[44px] rounded-lg bg-red-500/10 text-red-300 hover:bg-red-500/20 touch-manipulation">
+                <button type="button" onclick="deleteFamily(<?php echo $member['id']; ?>)" class="min-h-[48px] rounded-lg bg-red-500/10 text-red-300 hover:bg-red-500/20 touch-manipulation">
                     <i class="fas fa-trash mr-2"></i>ลบ
                 </button>
             </div>
@@ -395,10 +395,10 @@ endif; ?>
                     <td class="px-4 py-3 text-white/70"><?php echo $age; ?> ปี</td>
                     <td class="px-4 py-3 text-white/70"><?php echo htmlspecialchars($member['occupation'] ?? '-'); ?></td>
                     <td class="px-4 py-3 text-center">
-                        <button type="button" onclick="editFamily(<?php echo $member['id']; ?>)" class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg touch-manipulation" aria-label="แก้ไข">
+                        <button type="button" onclick="editFamily(<?php echo $member['id']; ?>)" class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg touch-manipulation" aria-label="แก้ไข">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button type="button" onclick="deleteFamily(<?php echo $member['id']; ?>)" class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg touch-manipulation" aria-label="ลบ">
+                        <button type="button" onclick="deleteFamily(<?php echo $member['id']; ?>)" class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg touch-manipulation" aria-label="ลบ">
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>
@@ -415,7 +415,7 @@ endif; ?>
 <div class="glass-card rounded-xl p-4 sm:p-6 min-w-0 overflow-hidden">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <h3 class="text-lg font-semibold text-white">ประวัติการศึกษา</h3>
-        <button onclick="openAddModal('education')" class="px-4 py-2 min-h-[44px] bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
+        <button onclick="openAddModal('education')" class="px-4 py-2 min-h-[56px] bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
             <i class="fas fa-plus mr-2"></i>เพิ่มประวัติ
         </button>
     </div>
@@ -448,10 +448,10 @@ endif; ?>
                 </div>
             </div>
             <div class="flex gap-2">
-                <button onclick="editEducation(<?php echo $edu['id']; ?>)" class="min-h-[44px] min-w-[44px] p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg">
+                <button onclick="editEducation(<?php echo $edu['id']; ?>)" class="min-h-[48px] min-w-[48px] p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button onclick="deleteEducation(<?php echo $edu['id']; ?>)" class="min-h-[44px] min-w-[44px] p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg">
+                <button onclick="deleteEducation(<?php echo $edu['id']; ?>)" class="min-h-[48px] min-w-[48px] p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -466,7 +466,7 @@ endif; ?>
 <div class="glass-card rounded-xl p-4 sm:p-6 min-w-0 overflow-hidden">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <h3 class="text-lg font-semibold text-white">ประวัติการทำงาน (ก่อนเข้าบริษัท)</h3>
-        <button onclick="openAddModal('work')" class="px-4 py-2 min-h-[44px] bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
+        <button onclick="openAddModal('work')" class="px-4 py-2 min-h-[56px] bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
             <i class="fas fa-plus mr-2"></i>เพิ่มประวัติ
         </button>
     </div>
@@ -497,10 +497,10 @@ endif; ?>
                 </div>
             </div>
             <div class="flex gap-2">
-                <button onclick="editWork(<?php echo $work['id']; ?>)" class="min-h-[44px] min-w-[44px] p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg">
+                <button onclick="editWork(<?php echo $work['id']; ?>)" class="min-h-[48px] min-w-[48px] p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button onclick="deleteWork(<?php echo $work['id']; ?>)" class="min-h-[44px] min-w-[44px] p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg">
+                <button onclick="deleteWork(<?php echo $work['id']; ?>)" class="min-h-[48px] min-w-[48px] p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -517,7 +517,7 @@ endif; ?>
         <form id="edit-form" class="p-6">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="text-xl font-bold text-white" id="modal-title">แก้ไขข้อมูล</h3>
-                <button type="button" onclick="closeModal()" class="min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 rounded-lg touch-manipulation" aria-label="ปิด">
+                <button type="button" onclick="closeModal()" class="min-h-[48px] min-w-[48px] inline-flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 rounded-lg touch-manipulation" aria-label="ปิด">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -525,10 +525,10 @@ endif; ?>
                 <!-- Dynamic content -->
             </div>
             <div class="flex flex-col sm:flex-row gap-3 mt-6">
-                <button type="button" onclick="closeModal()" class="flex-1 min-h-[44px] py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors font-semibold">
+                <button type="button" onclick="closeModal()" class="flex-1 min-h-[48px] py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors font-semibold">
                     ยกเลิก
                 </button>
-                <button type="submit" class="flex-1 min-h-[44px] py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors font-semibold">
+                <button type="submit" class="flex-1 min-h-[56px] py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors font-semibold">
                     บันทึก
                 </button>
             </div>
