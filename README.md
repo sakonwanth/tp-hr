@@ -92,6 +92,7 @@ tp-hr/
 ## 📖 เอกสารเพิ่มเติม
 
 - [HR System Architecture](docs/HR_SYSTEM_ARCHITECTURE.md) - โครงสร้างระบบทั้งหมด
+- [Playwright E2E](docs/E2E_PLAYWRIGHT.md) — สเปก + ตัวแปร env; ดัชนีสเปกใน [`tests/e2e/README.md`](tests/e2e/README.md)
 
 ## 🛠️ Development
 

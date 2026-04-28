@@ -8,7 +8,7 @@ The following **Tier B “automation tranche”** is implemented in-repo (see al
 
 | Area | Implementation |
 |------|------------------|
-| Guest API + UI smoke | `health`, `login`, `protected-routes` on **chromium** + **tablet** (`iPad Mini`) unless skipped |
+| Guest API + UI smoke | `health`, `login`, `public-verify`, `protected-routes` on **chromium** + **tablet** (`iPad Mini`) unless skipped |
 | Authenticated smoke | **`chromium-auth`** + **`tablet-auth`** (reuse `storageState` after `auth.setup`) |
 | Optional HR (dashboard) asserts | **`PLAYWRIGHT_HR_EXPECT_ADMIN=1`** — module list + **`hr/employee_view`**, **`hr/employee_attendance`**, **`hr/employee_form`** (edit) via **`PLAYWRIGHT_HR_SAMPLE_EMPLOYEE_ID`** (default `1`, must exist in **`users`**) |
 | Optional CEO-only HR asserts | **`PLAYWRIGHT_HR_EXPECT_CEO=1`** — **`hr/reports`**, **`hr/settings`**, **`hr/dayoff_approvals`**, **`hr/api_keys`** · same user must pass **`isCEOOrAbove()`**. |
@@ -130,6 +130,7 @@ PLAYWRIGHT_BASE_URL=http://localhost/tp-hr/ npm run test:e2e
 |----------------|----------|
 | `health.spec.cjs` | `GET api/health.php` JSON (`status`, `project` when HTTP 200). |
 | `login.spec.cjs` | `login.php` — submit control visible. |
+| `public-verify.spec.cjs` | **`verify_document.php`** — public title (runs on **chromium** + **tablet**). |
 | `protected-routes.spec.cjs` | Guest redirect to **`login.php`** for employee + HR paths (incl. **`hr/reports`**, **`hr/settings`**, **`hr/dayoff_approvals`**, **`hr/index`**, …). |
 | `authenticated.spec.cjs` | Logged-in **`index`** hero + employee titles + optional HR (**`PLAYWRIGHT_HR_EXPECT_ADMIN`**) + optional CEO (**`PLAYWRIGHT_HR_EXPECT_CEO`**). Projects: **`chromium-auth`**, **`tablet-auth`**. |
 | `visual-login.spec.cjs` | **`.login-card`** on login (guest **chromium** + **tablet** when visual on). |
