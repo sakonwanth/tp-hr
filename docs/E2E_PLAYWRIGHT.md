@@ -34,6 +34,7 @@ npx playwright install chromium
 |--------|-----------|
 | `npm run test:e2e` | Full suite (guest phone + tablet; auth + visuals if env vars enabled). |
 | `npm run test:e2e:ci` | Guest + auth **without** tablet projects (`PLAYWRIGHT_SKIP_TABLET=1`) — quicker for CI. |
+| `npm run test:e2e:api` | **`health`** + **`api-guest`** (`request`-only subset). |
 | `npm run test:e2e:visual` | Same as **`PLAYWRIGHT_VISUAL=1 npm run test:e2e`**. |
 
 ## CI (GitHub Actions)
@@ -129,7 +130,7 @@ PLAYWRIGHT_BASE_URL=http://localhost/tp-hr/ npm run test:e2e
 | Test / project | Coverage |
 |----------------|----------|
 | `health.spec.cjs` | `GET api/health.php` JSON (`status`, `project` when HTTP 200). |
-| `api-guest.spec.cjs` | **`api/attendance.php`** (401); **`api/leave.php`** / **`api/profile.php`** with **`X-Requested-With: XMLHttpRequest`** (401 JSON — legacy `Auth::requireLogin()`). |
+| `api-guest.spec.cjs` | **`api/attendance.php`** (`apiError`, 401); **`api/certificate`**, **`leave`**, **`payslip`**, **`profile`** with **`X-Requested-With`** (legacy **`Auth::requireLogin`** JSON 401). |
 | `login.spec.cjs` | `login.php` — submit control visible. |
 | `public-verify.spec.cjs` | **`verify_document.php`** — public title (runs on **chromium** + **tablet**). |
 | `protected-routes.spec.cjs` | Guest redirect to **`login.php`** for employee + HR paths (incl. **`hr/reports`**, **`hr/settings`**, **`hr/dayoff_approvals`**, **`hr/index`**, …). |

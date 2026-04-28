@@ -2,12 +2,14 @@
 
 รันหลัก: [docs/E2E_PLAYWRIGHT.md](../../docs/E2E_PLAYWRIGHT.md)
 
+รันเฉพาะชุด **HTTP smoke** (`api/health.php` + 401 JSON จาก `api-guest`): `npm run test:e2e:api`
+
 ## สรุปไฟล์
 
 | ไฟล์ | บทบาท |
 |------|--------|
 | `health.spec.cjs` | `GET api/health.php` |
-| `api-guest.spec.cjs` | `api/attendance`, `api/leave`, `api/profile` — 401 โดยไม่ล็อกอิน |
+| `api-guest.spec.cjs` | **`api/attendance`** (ไม่ใช้ XHR) + **`certificate`**, **`leave`**, **`payslip`**, **`profile`** พร้อม **XHR** → 401 JSON |
 | `login.spec.cjs` | หน้า `login.php` |
 | `protected-routes.spec.cjs` | guest → `login.php` |
 | `public-verify.spec.cjs` | `verify_document.php` (public) |

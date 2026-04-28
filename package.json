@@ -9,6 +9,7 @@
   "scripts": {
     "test": "npm run test:e2e",
     "test:e2e": "playwright test",
+    "test:e2e:api": "playwright test tests/e2e/health.spec.cjs tests/e2e/api-guest.spec.cjs",
     "test:e2e:ci": "PLAYWRIGHT_SKIP_TABLET=1 playwright test",
     "test:e2e:visual": "PLAYWRIGHT_VISUAL=1 playwright test"
   },
