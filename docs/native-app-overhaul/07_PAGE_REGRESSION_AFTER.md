@@ -42,6 +42,7 @@
 | Verify document `/verify_document.php` | **REGRESSION_PASS** (static QA: `code`/`doc` GET + SQL branch + rate limit unchanged; form adds optional `doc`) |
 | Certificate print POST `/certificate_print.php` | **REGRESSION_PASS** (static QA: POST+CSRF + auth + SQL unchanged; screen-only chrome; print `@media` unchanged) |
 | HR dashboard `/hr/index.php` | **REGRESSION_PASS** (static QA: queries + `/api/leave.php` approve/reject unchanged; markup/CSS + modal a11y only) |
+| Employees `/hr/employees.php` | **REGRESSION_PASS** (static QA: GET filters + pagination + POST export/delete unchanged; `/api/leave.php` modal data unchanged) |
 | Other pages in 01 §A | **REGRESSION_PENDING** |
 
 ### Dashboard — `/` (`index.php`)
@@ -148,3 +149,12 @@
 | HR gate + attendance/leave/doc queries | PASS (unchanged) |
 | Approve/reject + reject modal → `/api/leave.php` | PASS |
 | Document deep links `documents.php?action=process&id=` | PASS |
+
+### Employees — `/hr/employees.php`
+
+| Check | Result |
+|-------|--------|
+| HR gate; redirect add/edit/delete rules | PASS (unchanged) |
+| GET search/department/status/page + list SQL | PASS |
+| POST CSV export + POST delete + CSRF | PASS |
+| Leave balance modal → `/api/leave.php` entitlements/history | PASS |

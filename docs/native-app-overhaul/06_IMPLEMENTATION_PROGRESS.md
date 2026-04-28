@@ -29,7 +29,8 @@
 | HR-UI-012 Verify document | **COMPLETE** | `verify_document.php` — dark native-style public card, labels, error panel, optional `doc` field |
 | HR-UI-013 Certificate print | **COMPLETE** | `certificate_print.php` — screen shell + pages stack; toolbar POST lang switch; print layout unchanged; `$isHrDash` doc-number gate |
 | HR-UI-014 HR dashboard | **COMPLETE** | `hr/index.php` — `tp-native-summary-card` stats, native data cards, quick-action grid, table shell, reject modal |
-| HR-UI-015 … HR-UI-026 (excl. above) | **NOT_STARTED** | — |
+| HR-UI-015 Employees list | **COMPLETE** | `hr/employees.php` — native filter card, stat links, table shell + 44px actions, leave modal, empty state |
+| HR-UI-016 … HR-UI-026 (excl. above) | **NOT_STARTED** | — |
 | HR-UI-SHELL-01 | **REFACTORED** | — |
 | HR-UI-SHELL-02 | **COMPLETE** | — |
 | HR-UI-SHELL-03 | **COMPLETE** | — |

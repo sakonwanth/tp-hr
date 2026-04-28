@@ -18,7 +18,7 @@ Each task: specific, actionable. Complete in order P0 → P2 unless dependencies
 | HR-UI-012 | Verify doc | `/verify_document.php` | `verify_document.php` | Public clarity | NativeInfoBlock + form | plain | Error empty | §1 a11y | Low | Invalid code | **Done 2026-04-28** |
 | HR-UI-013 | Cert print | `/certificate_print.php` | `certificate_print.php` | Screen preview | Optional `@media screen` card wrapper | print CSS | — | Print safe | Low | Print dialog | **Done 2026-04-28** |
 | HR-UI-014 | HR dashboard | `/hr/index.php` | `hr/index.php` | Widget inconsistency | NativeSummaryCard grid | mixed | — | §2 | Low | HR login | **Done 2026-04-28** |
-| HR-UI-015 | Employees | `/hr/employees.php` | `hr/employees.php` | Table | Shell + mobile cards | data-table | Search/filter touch | §2 | Med | Filter | |
+| HR-UI-015 | Employees | `/hr/employees.php` | `hr/employees.php` | Table | Shell + mobile cards | data-table | Search/filter touch | §2 | Med | Filter | **Done 2026-04-28** |
 | HR-UI-016 | Employee form | `/hr/employee_form.php` | `hr/employee_form.php` | Long form | **NativeProgressStep** or grouped cards | long form | Section save hints | §8 | High | Edit employee | |
 | HR-UI-017 | Employee view | `/hr/employee_view.php` | `hr/employee_view.php` | Detail wall | NativeDataCard sections | mixed | Quick actions | §4 | Med | Links | |
 | HR-UI-018 | Emp attendance | `/hr/employee_attendance.php` | `hr/employee_attendance.php` | Table | Card mobile | table | — | §2 | Med | | |
