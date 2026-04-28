@@ -573,7 +573,7 @@ $flashError = flash('error');
                 </button>
             </div>
             <div id="leave-content">
-                <div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-white/30"></i></div>
+                <div class="tp-native-loading-state py-8" role="status" aria-live="polite" aria-busy="true"><i class="fas fa-spinner fa-spin text-2xl text-white/30" aria-hidden="true"></i><span class="tp-visually-hidden">กำลังโหลด</span></div>
             </div>
         </div>
     </div>
@@ -583,7 +583,9 @@ $flashError = flash('error');
 async function viewLeaveBalance(userId) {
     if (typeof uiOpenModal === 'function') uiOpenModal('leave-modal');
     else document.getElementById('leave-modal').classList.remove('hidden');
-    document.getElementById('leave-content').innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-white/30"></i></div>';
+    document.getElementById('leave-content').innerHTML = typeof tpHrNativeLoadingHtml === 'function'
+        ? tpHrNativeLoadingHtml()
+        : '<div class="tp-native-loading-state py-8" role="status" aria-live="polite" aria-busy="true"><i class="fas fa-spinner fa-spin text-2xl text-white/30" aria-hidden="true"></i><span class="tp-visually-hidden">กำลังโหลด</span></div>';
 
     const year = <?php echo (int)date('Y'); ?>;
     const stLabel = { PENDING: 'รออนุมัติ', APPROVED: 'อนุมัติ', REJECTED: 'ไม่อนุมัติ', CANCELLED: 'ยกเลิก', DRAFT: 'ร่าง' };

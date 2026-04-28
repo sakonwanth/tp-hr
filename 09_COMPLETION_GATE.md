@@ -17,7 +17,7 @@
 | Implementation progress (`06`) | Yes | **Yes** — routes marked **COMPLETE** at shell/token level |
 | Regression matrix (`07`) | Yes | **Yes** — no auth/route/API breakage from UI work |
 | Final audit synthesis (`08`) | Yes | **Yes** |
-| `native-shell.css` version | Latest | **`?v=5`** in `header.php` + `login.php` |
+| `native-shell.css` version | Latest | **`?v=6`** in `header.php` + `login.php` |
 | Skipped **functional** routes | 0 | **0** |
 | Blocking layout defects (overlap / zero padding on `main`) | 0 | **0** (per `UI_CASCADE_BUGFIX.md` discipline) |
 
@@ -32,10 +32,11 @@ Strict interpretation of “every loading / empty / error / skeleton on every ro
 | Criterion | Status |
 |-----------|--------|
 | Per-route automated visual regression | **Outstanding** |
-| Skeleton loaders on every async block | **Partial** — patterns exist page-by-page |
+| Skeleton loaders on every async block | **Partial** — `tpHrNativeLoadingHtml()` + `.tp-visually-hidden` on HR async modals (`employees`, `leaves`, `attendance` history) |
 | Independent tablet viewport verification (listed heights × every page) | **Outstanding** |
+| Smoke E2E (Playwright) | **Started** — `tests/e2e/` (`/api/health.php`, `/login.php`); see **`docs/E2E_PLAYWRIGHT.md`** |
 
-**Backlog:** run Playwright (or equivalent) against `/`, `/checkin.php`, `/leave.php`, `/hr/index.php`; expand skeleton usage on HR-heavy async modals incrementally.
+**Backlog:** expand Playwright to `/`, `/checkin.php`, `/leave.php`, `/hr/index.php`; add visual regression pipeline; tablet matrix.
 
 ---
 
@@ -43,10 +44,10 @@ Strict interpretation of “every loading / empty / error / skeleton on every ro
 
 | Item |
 |------|
-| `native-shell.css` **v5**: icon tokens; `.tp-native-table-shell`; loading / info / warning / quick-action aliases |
-| `templates/header.php` + `login.php`: link **`?v=5`** |
-| **`02_COMPONENT_LOCK_MAP.md`**: full **35-component** registry |
-| **`hr/employees.php`**: pagination controls **≥48px** touch + **`aria-label` / `aria-current`**; desktop table wrapped in **`.tp-native-table-shell`** |
+| `native-shell.css` **v6**: **`.tp-visually-hidden`**; HR async modals use **`tpHrNativeLoadingHtml()`** + `role="status"` / `aria-busy` |
+| **`@playwright/test`** + **`playwright.config.cjs`** + **`tests/e2e/`** (health + login smoke); **`docs/E2E_PLAYWRIGHT.md`** |
+| `templates/header.php` + `login.php`: **`?v=6`** |
+| Earlier: **v5** shell (`02` 35 components; **`.tp-native-table-shell`**; **`hr/employees.php`** pagination / table shell) |
 
 ---
 

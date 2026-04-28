@@ -626,8 +626,9 @@ include dirname(__DIR__) . '/templates/header.php';
             </button>
         </div>
         <div id="history-body" class="p-6 overflow-y-auto flex-1">
-            <div class="text-center text-white/60 py-8">
-                <i class="fas fa-spinner fa-spin text-2xl"></i>
+            <div class="tp-native-loading-state py-8 text-white/60" role="status" aria-live="polite" aria-busy="true">
+                <i class="fas fa-spinner fa-spin text-2xl" aria-hidden="true"></i>
+                <span class="tp-visually-hidden">กำลังโหลด</span>
             </div>
         </div>
     </div>
@@ -837,7 +838,9 @@ function diffRow(label, oldV, newV) {
 
 async function viewHistory(userId, date, empName) {
     document.getElementById('history-subtitle').textContent = empName + ' — ' + date;
-    document.getElementById('history-body').innerHTML = '<div class="text-center text-white/60 py-8"><i class="fas fa-spinner fa-spin text-2xl"></i></div>';
+    document.getElementById('history-body').innerHTML = typeof tpHrNativeLoadingHtml === 'function'
+        ? tpHrNativeLoadingHtml()
+        : '<div class="tp-native-loading-state py-8 text-white/60" role="status" aria-live="polite" aria-busy="true"><i class="fas fa-spinner fa-spin text-2xl" aria-hidden="true"></i><span class="tp-visually-hidden">กำลังโหลด</span></div>';
     if (typeof uiOpenModal === 'function') uiOpenModal('history-modal');
     else {
         const m = document.getElementById('history-modal');

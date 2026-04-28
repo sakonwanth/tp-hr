@@ -3,6 +3,7 @@
  * v3: global touch bump (Utilities: min-h/w 44→48; brand primary buttons 56 via markup pass).
  * v4: main horizontal padding respects safe-area + never zeroed by stray overrides.
  * v5: icon size tokens; table scroll shell; locked aliases for loading/confirmation; header ?v=5.
+ * v6: .tp-visually-hidden for screen-reader text with spinners; header ?v=6.
  * UI UX Pro Max: touch ≥48px, inputs ≥52px, primary CTA ≥56px, card radius 20px,
  * scroll-end buffer ≥120px, bottom slot ≥88px when tab bar present.
  */
@@ -55,6 +56,19 @@ body {
   --tp-theme-bar: #0f172a;
 
   color-scheme: dark;
+}
+
+/* Visually hidden (screen-reader + focusable-safe pattern; complements spinners). */
+.tp-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* ---------- 1. AppShell ---------- */

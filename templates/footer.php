@@ -113,6 +113,11 @@ function getCsrfToken() {
     return meta ? meta.content : '';
 }
 
+/** Accessible loading HTML for HR async modals (spinner + sr-only label). */
+function tpHrNativeLoadingHtml() {
+    return '<div class="tp-native-loading-state py-8" role="status" aria-live="polite" aria-busy="true"><i class="fas fa-spinner fa-spin text-2xl text-white/30" aria-hidden="true"></i><span class="tp-visually-hidden">กำลังโหลด</span></div>';
+}
+
 // API helper
 async function apiCall(url, method, data) {
     method = method || 'GET';

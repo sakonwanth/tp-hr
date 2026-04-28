@@ -413,7 +413,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 </button>
             </div>
             <div id="detail-content">
-                <div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-white/30"></i></div>
+                <div class="tp-native-loading-state py-8" role="status" aria-live="polite" aria-busy="true"><i class="fas fa-spinner fa-spin text-2xl text-white/30" aria-hidden="true"></i><span class="tp-visually-hidden">กำลังโหลด</span></div>
             </div>
         </div>
     </div>
@@ -474,7 +474,9 @@ document.getElementById('reject-form').addEventListener('submit', async function
 async function viewDetail(id) {
     if (typeof uiOpenModal === 'function') uiOpenModal('detail-modal');
     else document.getElementById('detail-modal').classList.remove('hidden');
-    document.getElementById('detail-content').innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-white/30"></i></div>';
+    document.getElementById('detail-content').innerHTML = typeof tpHrNativeLoadingHtml === 'function'
+        ? tpHrNativeLoadingHtml()
+        : '<div class="tp-native-loading-state py-8" role="status" aria-live="polite" aria-busy="true"><i class="fas fa-spinner fa-spin text-2xl text-white/30" aria-hidden="true"></i><span class="tp-visually-hidden">กำลังโหลด</span></div>';
     
     const response = await fetch(`/api/leave.php?action=detail&id=${id}`);
     const result = await response.json();
