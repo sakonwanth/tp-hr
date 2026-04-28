@@ -15,7 +15,9 @@ $isAdminPage = is_string($cp) && strncmp($cp, 'hr-', 3) === 0;
 <?php if (!$isAdminPage): ?>
 <!-- Mobile Bottom Navigation (employee-first, like Checkin) -->
 <nav class="app-shell-mobile-only tp-native-bottom-tab-nav fixed bottom-0 left-0 right-0 z-40 touch-manipulation bg-slate-900/95 backdrop-blur-xl border-t border-white/10 overscroll-contain"
-     style="padding-bottom: env(safe-area-inset-bottom, 0px);">
+     style="padding-bottom: env(safe-area-inset-bottom, 0px);"
+     role="navigation"
+     aria-label="เมนูหลักมือถือ">
     <div class="max-w-lg mx-auto grid grid-cols-5 px-2 py-2">
         <?php
         $items = [
@@ -26,11 +28,13 @@ $isAdminPage = is_string($cp) && strncmp($cp, 'hr-', 3) === 0;
             ['key' => 'profile',   'href' => '/profile.php',  'icon' => 'fa-user',              'label' => 'ฉัน'],
         ];
         foreach ($items as $it):
-            $active = ($cp === $it['key']) ? 'text-violet-300' : 'text-white/60 hover:text-white';
-            $bg = ($cp === $it['key']) ? 'bg-violet-500/15 border border-violet-500/20' : 'bg-transparent';
+            $isHere = ($cp === $it['key']);
+            $active = $isHere ? 'text-violet-300' : 'text-white/60 hover:text-white';
+            $bg = $isHere ? 'bg-violet-500/15 border border-violet-500/20' : 'bg-transparent';
         ?>
         <a href="<?php echo htmlspecialchars($it['href']); ?>"
-           class="touch-manipulation flex flex-col items-center justify-center gap-1 min-h-[56px] py-2 rounded-xl transition-colors <?php echo $active; ?> <?php echo $bg; ?>">
+           class="touch-manipulation flex flex-col items-center justify-center gap-1 min-h-[56px] py-2 rounded-xl transition-colors <?php echo $active; ?> <?php echo $bg; ?>"
+           <?php if ($isHere): ?>aria-current="page"<?php endif; ?>>
             <i class="fas <?php echo htmlspecialchars($it['icon']); ?> text-lg"></i>
             <span class="text-[11px] font-medium leading-none"><?php echo htmlspecialchars($it['label']); ?></span>
         </a>

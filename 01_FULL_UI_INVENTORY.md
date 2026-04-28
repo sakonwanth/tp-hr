@@ -4,7 +4,9 @@
 
 ## Summary
 
-| Area | Count |
+ดูลำดับ audit ครบและจำนวนล่าสุดใน **`PAGE_AUDIT_ORDERED_TP_HR.md`** (รวม **27** route/view UI + พาร์เชียลที่ระบุ)
+
+| Area | Count (โดยประมาณ) |
 |------|------:|
 | Authenticated pages using `templates/header.php` | 23 |
 | Standalone / special UI | 3 |
