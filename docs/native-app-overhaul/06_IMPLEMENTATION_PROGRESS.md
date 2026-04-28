@@ -25,7 +25,8 @@
 | HR-UI-008 Profile | **COMPLETE** | `profile.php` — native cards, tabs radius 20px, list rows, modal shell, table shell |
 | HR-UI-009 Certificate | **COMPLETE** | `certificate.php` — tp-native-form-group, native cards, history card stack, print/download buttons |
 | HR-UI-010 Day-off schedule | **COMPLETE** | `dayoff_schedule.php` — native cards, alerts, week grid radius 20px, legend, tp-native-modal |
-| HR-UI-011 … HR-UI-026 (excl. above) | **NOT_STARTED** | — |
+| HR-UI-011 Attendance history | **COMPLETE** | `attendance_history.php` — native cards, mobile stack, `tp-native-table-shell`, empty states |
+| HR-UI-012 … HR-UI-026 (excl. above) | **NOT_STARTED** | — |
 | HR-UI-SHELL-01 | **REFACTORED** | — |
 | HR-UI-SHELL-02 | **COMPLETE** | — |
 | HR-UI-SHELL-03 | **COMPLETE** | — |

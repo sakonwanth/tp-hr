@@ -38,6 +38,7 @@
 | Profile `/profile.php` | **REGRESSION_PASS** (static QA: tabs/actions/API `edit-form` → `/api/profile.php` unchanged; markup/CSS + modal shell) |
 | Certificate `/certificate.php` | **REGRESSION_PASS** (static QA: `certificate-form` + `/api/certificate.php` + `tpHrCertificatePrintForm` unchanged; markup/CSS only) |
 | Day-off `/dayoff_schedule.php` | **REGRESSION_PASS** (static QA: POST `request_change` / `cancel_request` + modal IDs unchanged; markup/CSS + legend) |
+| Attendance history `/attendance_history.php` | **REGRESSION_PASS** (static QA: GET filters + queries unchanged; markup/CSS only) |
 | Other pages in 01 §A | **REGRESSION_PENDING** |
 
 ### Dashboard — `/` (`index.php`)
@@ -113,3 +114,10 @@
 | Month filter / week grid / holidays query | PASS (unchanged) |
 | POST CSRF + `request_change` / `cancel_request` | PASS |
 | `change-modal` / `openChangeModal` | PASS |
+
+### Attendance history — `/attendance_history.php`
+
+| Check | Result |
+|-------|--------|
+| Month/status filter + attendance queries | PASS (unchanged) |
+| Calendar rows + mobile cards + desktop table | PASS |

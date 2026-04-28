@@ -139,7 +139,7 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
 
 <div class="min-w-0 max-w-full">
     <!-- Page Header -->
-    <div class="mb-6 min-w-0">
+    <div class="mb-4 md:mb-6 min-w-0">
         <nav class="text-sm text-white/60 mb-1" aria-label="Breadcrumb">
             <a href="checkin.php" class="hover:text-white touch-manipulation">ลงเวลา</a>
             <span class="mx-2">/</span>
@@ -150,14 +150,14 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
                 <h1 class="text-2xl font-bold text-white tracking-tight">ประวัติการลงเวลา</h1>
                 <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">สรุปรายเดือน กรองสถานะ และดูรายวันจนถึงวันนี้</p>
             </div>
-            <a href="checkin.php" class="btn-primary btn-primary-prominent w-full sm:w-auto shrink-0 inline-flex items-center justify-center touch-manipulation">
-                <i class="fas fa-fingerprint mr-2"></i>ลงเวลา
+            <a href="checkin.php" class="btn-primary btn-primary-prominent w-full sm:w-auto shrink-0 inline-flex items-center justify-center touch-manipulation rounded-[20px]">
+                <i class="fas fa-fingerprint mr-2 text-xl" aria-hidden="true"></i>ลงเวลา
             </a>
         </div>
     </div>
     
     <!-- Filters -->
-    <div class="glass-card rounded-xl p-4 mb-6 min-w-0 overflow-hidden">
+    <div class="native-card tp-native-card tp-native-data-card p-4 mb-4 md:mb-6 min-w-0">
         <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 gap-4 min-w-0 max-w-full">
             <div class="min-w-0">
                 <label class="block text-white/60 text-xs mb-1">เดือน</label>
@@ -184,20 +184,20 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
     </div>
     
     <!-- Summary Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6 min-w-0 max-w-full">
-        <div class="glass-card rounded-xl p-4 text-center min-w-0 overflow-hidden">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6 mb-4 md:mb-6 min-w-0 max-w-full">
+        <div class="native-card tp-native-card tp-native-data-card p-4 text-center min-w-0">
             <p class="text-white/60 text-sm">มาทำงาน</p>
-            <p class="text-3xl font-bold text-green-400"><?php echo $summary['present_days'] ?? 0; ?></p>
+            <p class="text-3xl font-bold text-emerald-400"><?php echo $summary['present_days'] ?? 0; ?></p>
             <p class="text-white/50 text-xs">วัน</p>
         </div>
         
-        <div class="glass-card rounded-xl p-4 text-center min-w-0 overflow-hidden">
+        <div class="native-card tp-native-card tp-native-data-card p-4 text-center min-w-0">
             <p class="text-white/60 text-sm">มาสาย</p>
-            <p class="text-3xl font-bold text-yellow-400"><?php echo $summary['late_days'] ?? 0; ?></p>
+            <p class="text-3xl font-bold text-amber-400"><?php echo $summary['late_days'] ?? 0; ?></p>
             <p class="text-white/50 text-xs">ครั้ง</p>
         </div>
         
-        <div class="glass-card rounded-xl p-4 text-center min-w-0 overflow-hidden">
+        <div class="native-card tp-native-card tp-native-data-card p-4 text-center min-w-0">
             <p class="text-white/60 text-sm">ชั่วโมงทำงาน</p>
             <p class="text-3xl font-bold text-white">
                 <?php echo floor(($summary['total_work_minutes'] ?? 0) / 60); ?>
@@ -205,7 +205,7 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
             <p class="text-white/50 text-xs">ชั่วโมง</p>
         </div>
         
-        <div class="glass-card rounded-xl p-4 text-center min-w-0 overflow-hidden">
+        <div class="native-card tp-native-card tp-native-data-card p-4 text-center min-w-0">
             <p class="text-white/60 text-sm">OT</p>
             <p class="text-3xl font-bold text-emerald-400">
                 <?php echo floor(($summary['total_ot_minutes'] ?? 0) / 60); ?>
@@ -215,7 +215,7 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
     </div>
     
     <!-- Attendance Table -->
-    <div class="glass-card rounded-xl overflow-hidden min-w-0 max-w-full">
+    <div class="native-card tp-native-card tp-native-data-card min-w-0 max-w-full overflow-hidden">
         <?php if ($allDays): ?>
         <div class="md:hidden p-3 space-y-3 min-w-0">
             <?php foreach ($allDays as $day): ?>
@@ -241,7 +241,7 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
                 $statusLabel = ATTENDANCE_STATUS[$att['status']] ?? $att['status'];
                 $statusClass = match($att['status']) {
                     'PRESENT' => 'bg-green-500/15 border border-green-500/30 text-green-200',
-                    'LATE' => 'bg-yellow-500/15 border border-yellow-500/30 text-yellow-200',
+                    'LATE' => 'bg-amber-500/15 border border-amber-500/30 text-amber-200',
                     'ABSENT' => 'bg-red-500/15 border border-red-500/30 text-red-200',
                     'LEAVE' => 'bg-blue-500/15 border border-blue-500/30 text-blue-200',
                     'HOLIDAY' => 'bg-orange-500/15 border border-orange-500/30 text-orange-200',
@@ -258,7 +258,7 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
                 ? floor($att['ot_minutes'] / 60) . ':' . str_pad($att['ot_minutes'] % 60, 2, '0', STR_PAD_LEFT)
                 : '-';
             ?>
-            <div class="rounded-2xl bg-white/5 border border-white/10 p-4 min-w-0">
+            <div class="rounded-[20px] bg-white/5 border border-white/8 p-4 min-w-0">
                 <div class="flex items-start justify-between gap-3 min-w-0">
                     <div class="min-w-0 flex-1">
                         <div class="text-white font-semibold"><?php echo formatDateThai($day['date']); ?></div>
@@ -271,25 +271,25 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
                             <?php endif; ?>
                         </div>
                     </div>
-                    <span class="shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold <?php echo $statusClass; ?>">
+                    <span class="shrink-0 px-2.5 py-1 rounded-[20px] text-xs font-semibold <?php echo $statusClass; ?>">
                         <?php echo htmlspecialchars($statusLabel); ?>
                     </span>
                 </div>
 
                 <div class="grid grid-cols-4 gap-2 mt-4 min-w-0">
-                    <div class="rounded-xl bg-black/20 border border-white/10 px-2 py-2 min-w-0">
+                    <div class="rounded-[20px] bg-black/20 border border-white/8 px-2 py-2 min-w-0">
                         <div class="text-[11px] text-white/50">เข้า</div>
                         <div class="text-white font-semibold"><?php echo htmlspecialchars($checkIn); ?></div>
                     </div>
-                    <div class="rounded-xl bg-black/20 border border-white/10 px-2 py-2 min-w-0">
+                    <div class="rounded-[20px] bg-black/20 border border-white/8 px-2 py-2 min-w-0">
                         <div class="text-[11px] text-white/50">ออก</div>
                         <div class="text-white font-semibold"><?php echo htmlspecialchars($checkOut); ?></div>
                     </div>
-                    <div class="rounded-xl bg-black/20 border border-white/10 px-2 py-2 min-w-0">
+                    <div class="rounded-[20px] bg-black/20 border border-white/8 px-2 py-2 min-w-0">
                         <div class="text-[11px] text-white/50">ชม.</div>
                         <div class="text-white font-semibold"><?php echo htmlspecialchars($work); ?></div>
                     </div>
-                    <div class="rounded-xl bg-black/20 border border-white/10 px-2 py-2 min-w-0">
+                    <div class="rounded-[20px] bg-black/20 border border-white/8 px-2 py-2 min-w-0">
                         <div class="text-[11px] text-white/50">OT</div>
                         <div class="text-emerald-300 font-semibold"><?php echo htmlspecialchars($ot); ?></div>
                     </div>
@@ -297,7 +297,7 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
 
                 <?php if ($att && !empty($att['shift_name'])): ?>
                 <div class="mt-3 text-xs text-white/50">
-                    <i class="fas fa-clock mr-1"></i>
+                    <i class="fas fa-clock mr-1" aria-hidden="true"></i>
                     <?php echo htmlspecialchars(function_exists('shift_display_label') ? shift_display_label($att) : $att['shift_name']); ?>
                     <?php if (($att['late_minutes'] ?? 0) > 0): ?>
                         <span class="text-red-300 ml-2">สาย <?php echo (int)$att['late_minutes']; ?> นาที</span>
@@ -308,14 +308,16 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
             <?php endforeach; ?>
         </div>
         <?php else: ?>
-        <div class="md:hidden px-4 py-8 text-center text-white/50">
-            <i class="fas fa-calendar-times text-4xl mb-3 block"></i>
-            <p>ไม่พบข้อมูลในเดือนนี้</p>
+        <div class="md:hidden px-4 py-8">
+            <div class="tp-native-empty-state text-center py-8 rounded-[20px] border border-dashed border-white/15 max-w-none mx-0">
+                <i class="fas fa-calendar-times text-slate-500 text-4xl mb-3 block" aria-hidden="true"></i>
+                <p class="text-slate-400 text-sm">ไม่พบข้อมูลในเดือนนี้</p>
+            </div>
         </div>
         <?php endif; ?>
 
-        <div class="hidden md:block overflow-x-auto min-w-0 max-w-full overscroll-x-contain -mx-1 px-1">
-            <table class="w-full" style="min-width:720px">
+        <div class="hidden md:block tp-native-table-shell overflow-x-auto min-w-0 max-w-full overscroll-x-contain -mx-1 px-1">
+            <table class="w-full min-w-[720px]">
                 <thead>
                     <tr class="border-b border-white/10">
                         <th class="px-4 py-3 text-left text-white/70 text-sm font-medium">วันที่</th>
@@ -353,7 +355,7 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
                                             <?php echo $dayNamesShort[$day['dow']]; ?>
                                             <?php if ($holiday): ?>
                                                 <span class="ml-1 text-orange-400">
-                                                    <i class="fas fa-star text-[10px]"></i>
+                                                    <i class="fas fa-star text-[10px]" aria-hidden="true"></i>
                                                     <?php echo htmlspecialchars($holiday['name']); ?>
                                                 </span>
                                             <?php elseif ($isDayOff): ?>
@@ -413,7 +415,7 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
                             </td>
                             <td class="px-4 py-3 text-center">
                                 <?php if ($holiday): ?>
-                                <span class="px-2 py-1 text-xs rounded bg-orange-500/20 text-orange-400">
+                                <span class="px-2 py-1 text-xs rounded-[20px] font-medium border border-white/10 bg-orange-500/20 text-orange-400">
                                     <?php echo match($holiday['type']) {
                                         'PUBLIC' => 'วันหยุดราชการ',
                                         'COMPANY' => 'วันหยุดบริษัท',
@@ -423,12 +425,12 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
                                     }; ?>
                                 </span>
                                 <?php elseif ($isDayOff): ?>
-                                <span class="px-2 py-1 text-xs rounded bg-blue-500/20 text-blue-400">วันหยุด</span>
+                                <span class="px-2 py-1 text-xs rounded-[20px] font-medium border border-white/10 bg-blue-500/20 text-blue-400">วันหยุด</span>
                                 <?php elseif ($att): ?>
-                                <span class="px-2 py-1 text-xs rounded <?php 
+                                <span class="px-2 py-1 text-xs rounded-[20px] font-medium border border-white/10 <?php 
                                     echo match($att['status']) {
                                         'PRESENT' => 'bg-green-500/20 text-green-400',
-                                        'LATE' => 'bg-yellow-500/20 text-yellow-400',
+                                        'LATE' => 'bg-amber-500/20 text-amber-300',
                                         'ABSENT' => 'bg-red-500/20 text-red-400',
                                         'LEAVE' => 'bg-blue-500/20 text-blue-400',
                                         'HOLIDAY' => 'bg-orange-500/20 text-orange-400',
@@ -439,16 +441,18 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
                                     <?php echo ATTENDANCE_STATUS[$att['status']] ?? $att['status']; ?>
                                 </span>
                                 <?php else: ?>
-                                <span class="px-2 py-1 text-xs rounded bg-red-500/20 text-red-400">ขาดงาน</span>
+                                <span class="px-2 py-1 text-xs rounded-[20px] font-medium border border-white/10 bg-red-500/20 text-red-400">ขาดงาน</span>
                                 <?php endif; ?>
                             </td>
                         </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="7" class="px-4 py-8 text-center text-white/50">
-                                <i class="fas fa-calendar-times text-4xl mb-3 block"></i>
-                                <p>ไม่พบข้อมูลในเดือนนี้</p>
+                            <td colspan="7" class="px-4 py-8">
+                                <div class="tp-native-empty-state text-center py-8 rounded-[20px] border border-dashed border-white/15 max-w-md mx-auto">
+                                    <i class="fas fa-calendar-times text-slate-500 text-4xl mb-3 block" aria-hidden="true"></i>
+                                    <p class="text-slate-400 text-sm">ไม่พบข้อมูลในเดือนนี้</p>
+                                </div>
                             </td>
                         </tr>
                     <?php endif; ?>
