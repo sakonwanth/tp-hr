@@ -51,6 +51,7 @@
 | Day-off approvals `/hr/dayoff_approvals.php` | **REGRESSION_PASS** (static QA: CEO gate + GET filters + list SQL unchanged; POST approve/reject/approve_all + CSRF unchanged; markup/modals only) |
 | Documents HR `/hr/documents.php` | **REGRESSION_PASS** (static QA: filters + SQL + stats month unchanged; `/api/certificate.php` POST flows + print form unchanged; UI/modals only) |
 | Document templates `/hr/document_templates.php` | **REGRESSION_PASS** (static QA: POST `save_company`/upload/signatures/`save_template`/toggle/delete unchanged; UI + confirm modals only) |
+| Reports (CEO) `/hr/reports.php` | **REGRESSION_PASS** (static QA: GET filters + four report SQL branches + POST CSV export + CSRF unchanged; UI only) |
 | Other pages in 01 §A | **REGRESSION_PENDING** |
 
 ### Dashboard — `/` (`index.php`)
@@ -233,3 +234,12 @@
 | Load settings via `SettingsService`; templates list + signer SQL | PASS (unchanged) |
 | POST `save_company` / uploads / `upload_signature` / `remove_signature` / `save_template` / `toggle_active` / `delete_template` + CSRF | PASS (same fields; deletes via modal submit) |
 | List + edit layout; `certificate_print.php` preview form | PASS |
+
+### Reports (CEO) — `/hr/reports.php`
+
+| Check | Result |
+|-------|--------|
+| `isCEOOrAbove()` gate + flash on deny | PASS (unchanged) |
+| GET `report` / dates / `department`; four `switch` queries + `allowedReports` | PASS (unchanged) |
+| POST `export_csv` + CSRF → CSV download + `Auth::log` | PASS (unchanged) |
+| UI: tabs, filter card, table shells, mobile cards, empty states, export button title | PASS |
