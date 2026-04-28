@@ -9,7 +9,7 @@
 | ไฟล์ | บทบาท |
 |------|--------|
 | `health.spec.cjs` | `GET api/health.php` |
-| `api-guest.spec.cjs` | **`api/attendance`** (ไม่ใช้ XHR) + **`certificate`**, **`leave`**, **`payslip`**, **`profile`** พร้อม **XHR** → 401 JSON |
+| `api-guest.spec.cjs` | **`api/attendance`** (ไม่ใช้ XHR) + **`certificate`**, **`leave`**, **`payslip`**, **`profile`** พร้อม **XHR** → 401 JSON; **`api/v1/employees`** → 401 (**Bearer** / `ApiAuth`) |
 | `login.spec.cjs` | หน้า `login.php` |
 | `protected-routes.spec.cjs` | guest → `login.php` |
 | `public-verify.spec.cjs` | `verify_document.php` (public) |

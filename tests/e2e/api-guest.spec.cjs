@@ -11,6 +11,11 @@ function assertLegacyUnauthorizedBody(j) {
   ).toBeTruthy();
 }
 
+function assertV1UnauthorizedBody(j) {
+  expect(j).toMatchObject({ success: false });
+  expect(typeof j.error).toBe('string');
+}
+
 test.describe('API — unauthenticated', () => {
   test('GET api/attendance.php returns 401 JSON when not logged in', async ({ request }) => {
     const res = await request.get('api/attendance.php');
@@ -43,5 +48,13 @@ test.describe('API — unauthenticated', () => {
     const res = await request.get('api/profile.php', { headers: xhr });
     expect(res.status()).toBe(401);
     assertLegacyUnauthorizedBody(await res.json());
+  });
+
+  test('GET api/v1/employees returns 401 JSON when no Bearer API key', async ({ request }) => {
+    const res = await request.get('api/v1/employees');
+    expect(res.status()).toBe(401);
+    const ct = (res.headers()['content-type'] || '').toLowerCase();
+    expect(ct).toContain('application/json');
+    assertV1UnauthorizedBody(await res.json());
   });
 });

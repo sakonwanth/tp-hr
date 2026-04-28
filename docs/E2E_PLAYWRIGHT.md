@@ -130,7 +130,7 @@ PLAYWRIGHT_BASE_URL=http://localhost/tp-hr/ npm run test:e2e
 | Test / project | Coverage |
 |----------------|----------|
 | `health.spec.cjs` | `GET api/health.php` JSON (`status`, `project` when HTTP 200). |
-| `api-guest.spec.cjs` | **`api/attendance.php`** (`apiError`, 401); **`api/certificate`**, **`leave`**, **`payslip`**, **`profile`** with **`X-Requested-With`** (legacy **`Auth::requireLogin`** JSON 401). |
+| `api-guest.spec.cjs` | **`api/attendance.php`** (`apiError`, 401); **`api/certificate`**, **`leave`**, **`payslip`**, **`profile`** with **`X-Requested-With`** (legacy **`Auth::requireLogin`** JSON 401); **`api/v1/employees`** (**`ApiAuth`** Bearer, 401 ไม่มี token). |
 | `login.spec.cjs` | `login.php` — submit control visible. |
 | `public-verify.spec.cjs` | **`verify_document.php`** — public title (runs on **chromium** + **tablet**). |
 | `protected-routes.spec.cjs` | Guest redirect to **`login.php`** for employee + HR paths (incl. **`hr/reports`**, **`hr/settings`**, **`hr/dayoff_approvals`**, **`hr/index`**, …). |

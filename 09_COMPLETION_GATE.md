@@ -62,7 +62,7 @@ Strict interpretation — *every* loading / empty / error / skeleton on *every* 
 | **`hr/document_templates`** + **`hr/api_keys`** (**`EXPECT_ADMIN`** / **`EXPECT_CEO`**). |
 | **`hr/employee_*`** guest URLs + **`PLAYWRIGHT_HR_SAMPLE_EMPLOYEE_ID`** auth title checks (`employee_view`, `employee_attendance`, `employee_form` edit). |
 | **`public-verify.spec.cjs`** (`verify_document.php`), **`tests/e2e/README.md`**, root **`README.md`** E2E links. |
-| **`api-guest.spec.cjs`** + **`npm run test:e2e:api`** (`health` + 401 smoke incl. **`certificate`** / **`payslip`**). |
+| **`api-guest.spec.cjs`** + **`npm run test:e2e:api`** (`health` + 401 smoke incl. **`certificate`** / **`payslip`** / **`api/v1/employees`**). |
 
 ---
 
