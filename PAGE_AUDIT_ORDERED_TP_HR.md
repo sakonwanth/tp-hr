@@ -69,7 +69,7 @@
 
 | ID | หัวข้อ | ผล |
 |----|--------|-----|
-| Shell / padding | หลังแก้ `UI_CASCADE_BUGFIX.md` | `main` ได้ขอบ + buffer จาก `native-shell.css?v=4` — **PASS** |
+| Shell / padding | หลังแก้ `UI_CASCADE_BUGFIX.md` | `main` ได้ขอบ + buffer จาก `native-shell.css?v=5` — **PASS** |
 | แถบเมนูล่างมือถือ | มี 5 แท็บเท่านั้น | หน้า **certificate**, **dayoff_schedule** — ไม่มีแท็บตรงกับ `$current_page` ⇒ ไม่มีรายการ active (ยอมรับได้ / อยากให้เห็น “อยู่ส่วนพนักงานทั่วไป” อาจออกแบบเพิ่มภายหลัง) — **NOTICE** |
 | ปุ่มสัมผัส | โครงการกำหนด 48–56px แล้ว | **PASS** ตามเกณฑ์ที่ rollout ไป |
 | Sidebar HR | เมนูครบจาก `templates/header.php` | **PASS** |

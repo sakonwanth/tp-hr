@@ -1,24 +1,65 @@
-# 09 — Completion gate (TP-HR native migration)
+# 09 — Completion gate (TP-HR native UI program)
 
-| Gate | Required | Actual |
-|------|----------|--------|
-| Total pages discovered (`01`) = audited (`03`/`08`) | Yes | Yes |
-| Total needing refactor = refactored (`04`/`06`) | Yes | Yes |
-| Skipped pages | 0 | 0 |
-| Regression fails (`07`) | 0 | 0 |
-| Bottom nav overlap issues (employee) | 0 | **0** (addressed via tokenized `main` padding) |
-| CTA collision issues | 0 | **0** (no new fixed CTAs added) |
-| Spacing inconsistency (shell level) | 0 | **0** (tokens centralized) |
-| Final scroll buffer issues | 0 | **0** (`--tp-scroll-end-buffer: 120px`) |
-| Touch target violations (global inputs/buttons) | 0 | **0** (52/56/48 rules) |
-| Unmapped shell components | 0 | **0** (see `02`) |
+**Program:** Full-system native-like UI for **tp-hr** (UI/UX only; business logic protected).  
+**UI UX Pro Max alignment:** single font stack, tokenized spacing, touch ≥48px, primary CTA ≥56px, inputs ≥52px, scroll buffer ≥120px, bottom slot ≥88px when tab bar present.
 
-**Follow-up completed:** unified **page stack** in shell; **dashboard sticky CTA**; **`tp-native-page--home`** scroll budget; **`native-shell.css` v2** (section titles).
+---
 
-**Verdict:** **PASS** — shell and token migration complete; per-page business logic preserved.
+## Tier A — Operational gate (release baseline) — **PASS**
 
-**Deliverables present:**
+| Criterion | Required | Actual |
+|-----------|----------|--------|
+| Full UI inventory exists (`01`) | Yes | **Yes** — 27 routes + partials; discovery documented |
+| Component lock map complete (`02`) — no unnamed Native* leftovers | Yes | **Yes** — 35 components mapped → CSS/markup (**v5** registry) |
+| Page audit snapshot (`03`) | Yes | **Yes** — shell + representative pages |
+| Page refactor tasks (`04`) tracked | Yes | **Yes** — shell/tasks closed; backlog items marked ✅ |
+| Native system documented (`05`) | Yes | **Yes** — tokens + components |
+| Implementation progress (`06`) | Yes | **Yes** — routes marked **COMPLETE** at shell/token level |
+| Regression matrix (`07`) | Yes | **Yes** — no auth/route/API breakage from UI work |
+| Final audit synthesis (`08`) | Yes | **Yes** |
+| `native-shell.css` version | Latest | **`?v=5`** in `header.php` + `login.php` |
+| Skipped **functional** routes | 0 | **0** |
+| Blocking layout defects (overlap / zero padding on `main`) | 0 | **0** (per `UI_CASCADE_BUGFIX.md` discipline) |
 
-- `01_FULL_UI_INVENTORY.md` … `09_COMPLETION_GATE.md`  
-- `assets/css/native-shell.css`  
-- Updated `templates/header.php`, `templates/footer.php`, `login.php`, `verify_document.php`
+**Verdict Tier A:** **PASS** — production TP-HR can ship with this native shell + token system.
+
+---
+
+## Tier B — Mission-strict exhaustive gate (every state on every route) — **OPEN**
+
+Strict interpretation of “every loading / empty / error / skeleton on every route independently verified”: requires **automated E2E** + manual device matrix. Not claimed **PASS** from repository-only QA.
+
+| Criterion | Status |
+|-----------|--------|
+| Per-route automated visual regression | **Outstanding** |
+| Skeleton loaders on every async block | **Partial** — patterns exist page-by-page |
+| Independent tablet viewport verification (listed heights × every page) | **Outstanding** |
+
+**Backlog:** run Playwright (or equivalent) against `/`, `/checkin.php`, `/leave.php`, `/hr/index.php`; expand skeleton usage on HR-heavy async modals incrementally.
+
+---
+
+## Delta this session (2026-04-28)
+
+| Item |
+|------|
+| `native-shell.css` **v5**: icon tokens; `.tp-native-table-shell`; loading / info / warning / quick-action aliases |
+| `templates/header.php` + `login.php`: link **`?v=5`** |
+| **`02_COMPONENT_LOCK_MAP.md`**: full **35-component** registry |
+| **`hr/employees.php`**: pagination controls **≥48px** touch + **`aria-label` / `aria-current`**; desktop table wrapped in **`.tp-native-table-shell`** |
+
+---
+
+## Deliverables checklist
+
+| File | Status |
+|------|--------|
+| `01_FULL_UI_INVENTORY.md` | Present |
+| `02_COMPONENT_LOCK_MAP.md` | Present |
+| `03_PAGE_AUDIT_BEFORE.md` | Present |
+| `04_PAGE_REFACTOR_TODO.md` | Present |
+| `05_NATIVE_COMPONENT_SYSTEM.md` | Present |
+| `06_IMPLEMENTATION_PROGRESS.md` | Present |
+| `07_PAGE_REGRESSION_AFTER.md` | Present |
+| `08_FINAL_FULL_UI_AUDIT.md` | Present |
+| `09_COMPLETION_GATE.md` | **This file** |

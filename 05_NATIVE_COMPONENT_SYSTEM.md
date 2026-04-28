@@ -2,7 +2,7 @@
 
 ## Source of truth
 
-- **CSS:** `/assets/css/native-shell.css` (cache `?v=4`) — design tokens + layout QA (aligned with tp-checkin v5); see `UI_CASCADE_BUGFIX.md` if layout looks edge-to-edge.
+- **CSS:** `/assets/css/native-shell.css` (cache `?v=5`) — design tokens + layout QA + **icon scale** + **NativeTableToCardPattern** shell (`.tp-native-table-shell`) + loading/info/warning aliases; see `UI_CASCADE_BUGFIX.md` if layout looks edge-to-edge.
 - **Shell:** `templates/header.php` → `body.tp-native-app` (+ `tp-with-tab-nav` for non-`hr-*` routes).  
 - **Main:** `main#tp-hr-main.content-area.tp-native-page` — **full width** (`max-width` override for dashboards).
 - **Page stack:** inner wrapper `<div class="tp-native-stack--page min-w-0">` (header/footer) — vertical section gaps 16px / 24px tablet.

@@ -423,7 +423,7 @@ $flashError = flash('error');
         <?php endforeach; ?>
     </div>
 
-    <div class="hidden md:block overflow-x-auto min-w-0 -mx-px">
+    <div class="hidden md:block tp-native-table-shell overflow-x-auto min-w-0 -mx-px">
         <table class="w-full min-w-[720px]">
             <thead class="bg-white/5">
                 <tr>
@@ -534,23 +534,26 @@ $flashError = flash('error');
         </p>
         <div class="flex flex-wrap gap-2 shrink-0">
             <?php if ($page > 1): ?>
-            <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $page - 1])); ?>" 
-               class="px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded transition-colors">
-                <i class="fas fa-chevron-left"></i>
+            <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $page - 1])); ?>"
+               class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors touch-manipulation"
+               aria-label="หน้าก่อน">
+                <i class="fas fa-chevron-left" aria-hidden="true"></i>
             </a>
             <?php endif; ?>
             
             <?php for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++): ?>
-            <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $i])); ?>" 
-               class="px-3 py-1 <?php echo $i === $page ? 'bg-violet-600 text-white' : 'bg-white/10 hover:bg-white/20 text-white'; ?> rounded transition-colors">
+            <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $i])); ?>"
+               class="inline-flex min-h-[48px] min-w-[44px] items-center justify-center px-3 py-1 <?php echo $i === $page ? 'bg-violet-600 text-white' : 'bg-white/10 hover:bg-white/20 text-white'; ?> rounded-xl transition-colors touch-manipulation"
+               <?php echo $i === $page ? ' aria-current="page"' : ''; ?>>
                 <?php echo $i; ?>
             </a>
             <?php endfor; ?>
             
             <?php if ($page < $totalPages): ?>
-            <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $page + 1])); ?>" 
-               class="px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded transition-colors">
-                <i class="fas fa-chevron-right"></i>
+            <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $page + 1])); ?>"
+               class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors touch-manipulation"
+               aria-label="หน้าถัดไป">
+                <i class="fas fa-chevron-right" aria-hidden="true"></i>
             </a>
             <?php endif; ?>
         </div>

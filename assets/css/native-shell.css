@@ -2,6 +2,7 @@
  * TP-HR — Native component system (design lock; aligned with tp-checkin v5).
  * v3: global touch bump (Utilities: min-h/w 44→48; brand primary buttons 56 via markup pass).
  * v4: main horizontal padding respects safe-area + never zeroed by stray overrides.
+ * v5: icon size tokens; table scroll shell; locked aliases for loading/confirmation; header ?v=5.
  * UI UX Pro Max: touch ≥48px, inputs ≥52px, primary CTA ≥56px, card radius 20px,
  * scroll-end buffer ≥120px, bottom slot ≥88px when tab bar present.
  */
@@ -45,6 +46,10 @@ body {
 
   --tp-bottom-nav-z: 50;
   --tp-modal-z: 60;
+
+  --tp-icon-sm: 24px;
+  --tp-icon-md: 28px;
+  --tp-icon-lg: 32px;
 
   --tp-bg-app: linear-gradient(135deg, #0f172a 0%, #1e1b4b 52%, #0f172a 100%);
   --tp-theme-bar: #0f172a;
@@ -377,5 +382,65 @@ body.tp-native-app .section-title {
   font-weight: 600;
   line-height: 1.35;
   margin-bottom: var(--tp-space-16);
+}
+
+/* ---------- NativeTableToCardPattern (admin): desktop table in scroll shell; mobile uses page-specific card stacks ---------- */
+.tp-native-table-shell {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--tp-radius-card);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(15, 23, 42, 0.35);
+}
+
+/* ---------- Locked aliases — NativeQuickActionCard / Progress / Confirmation (reuse existing patterns) ---------- */
+.tp-native-quick-action-card,
+.tp-native-quick-action {
+  border-radius: var(--tp-radius-card);
+  min-height: var(--tp-native-touch-min);
+}
+
+.tp-native-loading-state,
+.tp-native-app-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tp-space-12);
+  min-height: 8rem;
+  color: rgba(226, 232, 240, 0.75);
+}
+
+.tp-native-confirmation-dialog,
+.tp-native-confirm-shell {
+  z-index: var(--tp-modal-z);
+}
+
+.tp-native-progress-step {
+  display: flex;
+  align-items: center;
+  gap: var(--tp-space-8);
+  min-height: var(--tp-native-touch-min);
+}
+
+.tp-native-info-block {
+  padding: var(--tp-space-12) var(--tp-space-16);
+  border-radius: var(--tp-radius-card);
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.28);
+}
+
+.tp-native-warning-block {
+  padding: var(--tp-space-12) var(--tp-space-16);
+  border-radius: var(--tp-radius-card);
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.tp-native-action-sheet {
+  z-index: var(--tp-modal-z);
 }
 

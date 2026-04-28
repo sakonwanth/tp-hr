@@ -1,10 +1,13 @@
 # 01 — Full UI inventory (TP-HR)
 
-**Generated:** native-app migration scan (IBM Plex Sans Thai + `assets/css/native-shell.css` + shell classes on `templates/header.php` / `templates/footer.php`).
+**Generated / rescanned:** 2026-04-28 — `PROJECT_TARGET = tp-hr`  
+**Evidence:** filesystem glob `**/*.php` (application tree), `grep` for `templates/header.php` entry points, **`PAGE_AUDIT_ORDERED_TP_HR.md`**.
+
+**Stack:** IBM Plex Sans Thai + **`assets/css/native-shell.css?v=5`** + shell classes on `templates/header.php` / `templates/footer.php`.
 
 ## Summary
 
-ดูลำดับ audit ครบและจำนวนล่าสุดใน **`PAGE_AUDIT_ORDERED_TP_HR.md`** (รวม **27** route/view UI + พาร์เชียลที่ระบุ)
+ลำดับ audit ครบและจำนวนล่าสุดใน **`PAGE_AUDIT_ORDERED_TP_HR.md`** — **27** route/view UI ที่มี HTML สำหรับผู้ใช้ + พาร์เชียล (`modules/employee/leaves/request_form.php`, `modules/employee/payslip/print_template.php`)
 
 | Area | Count (โดยประมาณ) |
 |------|------:|

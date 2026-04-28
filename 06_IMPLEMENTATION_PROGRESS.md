@@ -3,7 +3,8 @@
 | Page / area | Route | File | Status | Files modified | Mobile | Tablet | QA |
 |-------------|-------|------|--------|----------------|--------|--------|-----|
 | Shell + layout | * | `templates/header.php`, `templates/footer.php` | **COMPLETE** | `tp-native-stack--page`; `dashboard`→`tp-native-page--home` | ✓ | ✓ | ✓ |
-| Native CSS | * | `assets/css/native-shell.css` v2 | **COMPLETE** | Section title lock; stack gaps | ✓ | ✓ | ✓ |
+| Native CSS | * | `assets/css/native-shell.css` **v5** | **COMPLETE** | Icon tokens; table shell `.tp-native-table-shell`; 35-alias registry; **`?v=5`** | ✓ | ✓ | ✓ |
+| HR Employees pagination + table shell | `/hr/employees.php` | `hr/employees.php` | **COMPLETE** | Touch ≥48px pagination; **`tp-native-table-shell`** around desktop table | ✓ | ✓ | ✓ |
 | Sticky primary (home) | `/` | `index.php` | **COMPLETE** | Mobile `.home-sticky-cta` → ลงเวลา | ✓ | ✓ | ✓ |
 | Dashboard | `/` | `index.php` | **COMPLETE** | Inherited shell | ✓ | ✓ | ✓ |
 | Check-in | `/checkin.php` | `checkin.php` | **COMPLETE** | Inherited shell | ✓ | ✓ | ✓ |

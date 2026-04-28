@@ -1,10 +1,12 @@
 # 08 — Final full UI audit
 
+**Wave:** `native-shell.css` **v5** (2026-04-28) — see **`09_COMPLETION_GATE.md`** for Tier A **PASS** vs Tier B exhaustive **OPEN**.
+
 ## Coverage
 
 - **Inventory pages** (`01_FULL_UI_INVENTORY.md`): all discovered UI entry points listed.  
 - **Shell**: `body.tp-native-app`, conditional `tp-with-tab-nav`, **`main`** landmark, bottom nav class.  
-- **Tokens**: radii 20px; spacing scale 4–32; buffer 120px; bottom slot ≥88px.
+- **Tokens**: radii 20px; spacing scale 4–32; buffer 120px; bottom slot ≥88px; icon 24–32 CSS vars.
 
 ## Consistency
 
@@ -15,6 +17,7 @@
 | Primary CTA height | 56px (`.btn-primary`, login) |
 | Input height | 52px (logged-in + login) |
 | Bottom navigation | Capped `max-h-[72px]` + safe area padding |
+| Component registry | **35/35** Native* aliases in `02_COMPONENT_LOCK_MAP.md` |
 
 ## Touch targets (completed pass)
 
