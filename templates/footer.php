@@ -4,7 +4,7 @@
  */
 ?>
 
-</div><!-- End content-area -->
+</main><!-- End main content-area / tp-native-page -->
 
 <?php
 $cp = $current_page ?? '';
@@ -13,7 +13,7 @@ $isAdminPage = is_string($cp) && strncmp($cp, 'hr-', 3) === 0;
 
 <?php if (!$isAdminPage): ?>
 <!-- Mobile Bottom Navigation (employee-first, like Checkin) -->
-<nav class="app-shell-mobile-only fixed bottom-0 left-0 right-0 z-40 touch-manipulation bg-slate-900/95 backdrop-blur-xl border-t border-white/10 overscroll-contain"
+<nav class="app-shell-mobile-only tp-native-bottom-tab-nav fixed bottom-0 left-0 right-0 z-40 touch-manipulation bg-slate-900/95 backdrop-blur-xl border-t border-white/10 overscroll-contain max-h-[72px]"
      style="padding-bottom: env(safe-area-inset-bottom, 0px);">
     <div class="max-w-lg mx-auto grid grid-cols-5 px-2 py-2">
         <?php

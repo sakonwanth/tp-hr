@@ -122,6 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Icons & Tailwind -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/app.css">
+    <link rel="stylesheet" href="/assets/css/native-shell.css?v=1">
     
     <style>
         * {
@@ -168,7 +169,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 24px;
+            border-radius: 20px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             position: relative;
         }
@@ -181,6 +182,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             transition: all 0.3s ease;
             font-size: 16px !important;
             touch-action: manipulation;
+            min-height: 52px;
+            box-sizing: border-box;
         }
 
         .input-field:focus {
@@ -199,7 +202,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: 12px;
             transition: all 0.3s ease;
             font-weight: 600;
-            min-height: 48px;
+            min-height: 56px;
             touch-action: manipulation;
             box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
         }
@@ -218,7 +221,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: 12px;
             font-weight: 600;
             transition: all 0.3s ease;
-            min-height: 48px;
+            min-height: 56px;
             touch-action: manipulation;
         }
 
@@ -266,7 +269,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </style>
 </head>
-<body>
+<body class="login-page-root tp-native-app">
     <!-- Login Card -->
     <div class="login-card w-full max-w-md p-4 sm:p-6 xl:p-8">
         <!-- Logo -->

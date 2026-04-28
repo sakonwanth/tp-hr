@@ -1,0 +1,378 @@
+/**
+ * TP-HR — Native component system (design lock; aligned with tp-checkin v5)
+ * UI UX Pro Max: touch ≥48px, inputs ≥52px, primary CTA ≥56px, card radius 20px,
+ * scroll-end buffer ≥120px, bottom slot ≥88px when tab bar present.
+ */
+
+html {
+  overflow-x: clip;
+}
+
+body {
+  overflow-x: clip;
+}
+
+/* ---------- Design tokens (spacing lock: 4–32) ---------- */
+:root {
+  --tp-space-4: 4px;
+  --tp-space-8: 8px;
+  --tp-space-12: 12px;
+  --tp-space-16: 16px;
+  --tp-space-20: 20px;
+  --tp-space-24: 24px;
+  --tp-space-32: 32px;
+
+  --tp-page-pad-mobile: var(--tp-space-16);
+  --tp-page-pad-tablet: var(--tp-space-24);
+  --tp-section-gap-mobile: var(--tp-space-16);
+  --tp-section-gap-tablet: var(--tp-space-24);
+
+  --tp-radius-card: 20px;
+  --tp-card-radius: var(--tp-radius-card);
+  --tp-radius-control: 12px;
+  --tp-card-pad: var(--tp-space-16);
+
+  --tp-native-btn-min: 56px;
+  --tp-native-input-min: 52px;
+  --tp-native-touch-min: 48px;
+  --tp-header-min-h: 64px;
+  --tp-bottom-nav-max-h: 72px;
+  --tp-bottom-nav-slot: max(88px, calc(var(--tp-bottom-nav-max-h) + env(safe-area-inset-bottom, 0px)));
+  --tp-scroll-end-buffer: 120px;
+  --tp-cta-gap-above-tabs: var(--tp-space-24);
+
+  --tp-bottom-nav-z: 50;
+  --tp-modal-z: 60;
+
+  --tp-bg-app: linear-gradient(135deg, #0f172a 0%, #1e1b4b 52%, #0f172a 100%);
+  --tp-theme-bar: #0f172a;
+
+  color-scheme: dark;
+}
+
+/* ---------- 1. AppShell ---------- */
+body.tp-native-app,
+body.tp-native-app.tp-app-shell {
+  touch-action: manipulation;
+  margin: 0;
+  background: var(--tp-bg-app);
+  background-attachment: fixed;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  font-family: 'IBM Plex Sans Thai', system-ui, sans-serif;
+}
+
+@supports (-webkit-touch-callout: none) {
+  body.tp-native-app {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+.tp-safe-area-header,
+.safe-area-top {
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+.header-native,
+.header-glass,
+.tp-app-header {
+  background: rgba(15, 23, 42, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tp-native-bottom-tab-nav {
+  z-index: var(--tp-bottom-nav-z);
+  max-height: calc(var(--tp-bottom-nav-max-h) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.home-sticky-cta.tp-sticky-primary-action,
+.home-sticky-cta {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 45;
+  bottom: calc(var(--tp-bottom-nav-slot) + var(--tp-cta-gap-above-tabs));
+  pointer-events: none;
+  padding-left: var(--tp-page-pad-mobile);
+  padding-right: var(--tp-page-pad-mobile);
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .home-sticky-cta {
+    padding-left: var(--tp-page-pad-tablet);
+    padding-right: var(--tp-page-pad-tablet);
+  }
+}
+
+.home-sticky-cta .home-sticky-cta-inner {
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+.tp-native-card,
+.native-card {
+  border-radius: var(--tp-radius-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30, 41, 59, 0.85);
+}
+
+.native-card {
+  padding: var(--tp-card-pad);
+}
+
+.glass-card {
+  border-radius: var(--tp-radius-card);
+}
+
+.tp-native-list-item,
+.tp-native-list-row {
+  min-height: var(--tp-native-touch-min);
+  display: flex;
+  align-items: center;
+  gap: var(--tp-space-12);
+}
+
+.tp-native-form-group {
+  margin-bottom: var(--tp-space-16);
+}
+
+.tp-native-form-group > label:first-child {
+  display: block;
+  margin-bottom: var(--tp-space-8);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.tp-native-input,
+.tp-native-select,
+.tp-native-textarea {
+  min-height: var(--tp-native-input-min);
+  font-size: 1rem;
+  border-radius: var(--tp-radius-card);
+  box-sizing: border-box;
+}
+
+.tp-native-textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.tp-native-btn-primary {
+  min-height: var(--tp-native-btn-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tp-space-8);
+  padding-left: var(--tp-space-16);
+  padding-right: var(--tp-space-16);
+  touch-action: manipulation;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: var(--tp-radius-control);
+  color: #fff;
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  border: none;
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.35);
+}
+
+.tp-native-btn-secondary {
+  width: 100%;
+  min-height: var(--tp-native-touch-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tp-space-8);
+  padding: 0 var(--tp-space-16);
+  border-radius: var(--tp-radius-control);
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(196, 181, 253, 0.98);
+  background: rgba(124, 58, 237, 0.12);
+  border: 1px solid rgba(167, 139, 250, 0.45);
+  touch-action: manipulation;
+}
+
+.tp-native-icon-btn {
+  min-width: var(--tp-native-touch-min);
+  min-height: var(--tp-native-touch-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--tp-radius-card);
+  touch-action: manipulation;
+}
+
+.tp-native-summary-card {
+  border-radius: var(--tp-radius-card);
+}
+
+.tp-native-data-card {
+  border-radius: var(--tp-radius-card);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.tp-native-modal,
+.tp-native-bottom-sheet {
+  z-index: var(--tp-modal-z);
+}
+
+.tp-native-modal {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.tp-native-empty-state,
+.tp-native-error-state,
+.tp-native-success-state {
+  max-width: 24rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tp-native-section-title {
+  font-size: clamp(1.0625rem, 2.8vw, 1.25rem);
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.tp-native-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--tp-space-8);
+  padding: var(--tp-space-12);
+  margin-bottom: var(--tp-space-16);
+  border-radius: var(--tp-radius-card);
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tp-native-search-bar {
+  min-height: var(--tp-native-input-min);
+  border-radius: var(--tp-radius-card);
+}
+
+.tp-native-month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--tp-space-8);
+}
+
+.tp-native-stack-cards > * + * {
+  margin-top: var(--tp-space-12);
+}
+
+.tp-native-page {
+  width: 100%;
+  max-width: 42rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* TP-HR dashboards use wide grids — do not constrain to 42rem */
+body.tp-native-app main.content-area.tp-native-page {
+  max-width: none;
+}
+
+.tp-native-shell-pad {
+  padding-left: var(--tp-page-pad-mobile);
+  padding-right: var(--tp-page-pad-mobile);
+}
+
+@media (min-width: 768px) {
+  .tp-native-shell-pad {
+    padding-left: var(--tp-page-pad-tablet);
+    padding-right: var(--tp-page-pad-tablet);
+  }
+}
+
+.tp-native-hero-num {
+  font-size: min(3rem, 48px);
+  line-height: 1;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.tp-native-nav-label {
+  white-space: nowrap;
+  line-height: 1;
+  font-size: 0.75rem;
+}
+
+/* Employee routes: tab bar present */
+body.tp-with-tab-nav main.tp-native-page:not(.tp-native-page--home) {
+  padding-bottom: max(
+    var(--tp-scroll-end-buffer),
+    calc(var(--tp-bottom-nav-slot) + var(--tp-cta-gap-above-tabs))
+  );
+  padding-left: var(--tp-page-pad-mobile);
+  padding-right: var(--tp-page-pad-mobile);
+}
+
+@media (min-width: 768px) {
+  body.tp-with-tab-nav main.tp-native-page:not(.tp-native-page--home) {
+    padding-left: var(--tp-page-pad-tablet);
+    padding-right: var(--tp-page-pad-tablet);
+  }
+}
+
+body.tp-with-tab-nav main.tp-native-page--home {
+  padding-bottom: calc(
+    var(--tp-bottom-nav-slot) + var(--tp-cta-gap-above-tabs) + var(--tp-native-btn-min) + var(--tp-scroll-end-buffer)
+  );
+  padding-left: var(--tp-page-pad-mobile);
+  padding-right: var(--tp-page-pad-mobile);
+}
+
+@media (min-width: 768px) {
+  body.tp-with-tab-nav main.tp-native-page--home {
+    padding-left: var(--tp-page-pad-tablet);
+    padding-right: var(--tp-page-pad-tablet);
+  }
+}
+
+/* HR / no bottom tabs: scroll buffer only */
+body.tp-native-app:not(.tp-with-tab-nav) main.content-area.tp-native-page {
+  padding-bottom: max(var(--tp-scroll-end-buffer), calc(env(safe-area-inset-bottom, 0px) + var(--tp-space-32)));
+  padding-left: var(--tp-page-pad-mobile);
+  padding-right: var(--tp-page-pad-mobile);
+}
+
+@media (min-width: 768px) {
+  body.tp-native-app:not(.tp-with-tab-nav) main.content-area.tp-native-page {
+    padding-left: var(--tp-page-pad-tablet);
+    padding-right: var(--tp-page-pad-tablet);
+  }
+}
+
+/* Legacy TP-HR: primary buttons meet 56px */
+body.tp-native-app:not(.login-page-root) .btn-primary:not(.btn-primary-prominent) {
+  min-height: var(--tp-native-btn-min);
+  box-sizing: border-box;
+}
+
+body.tp-native-app:not(.login-page-root) .input-field {
+  min-height: var(--tp-native-input-min);
+  box-sizing: border-box;
+}
+
+.tp-native-stack--page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tp-section-gap-mobile);
+}
+
+@media (min-width: 768px) {
+  .tp-native-stack--page {
+    gap: var(--tp-section-gap-tablet);
+  }
+}
+

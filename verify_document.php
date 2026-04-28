@@ -73,11 +73,13 @@ function thaiDate(?string $d): string {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ตรวจสอบความถูกต้องของเอกสาร</title>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body {
-        font-family: 'Sarabun', sans-serif;
+        font-family: 'IBM Plex Sans Thai', sans-serif;
         background: #f1f5f9;
         color: #0f172a;
         min-height: 100vh;
@@ -90,7 +92,7 @@ function thaiDate(?string $d): string {
     }
     .card {
         max-width: 560px; width: 100%;
-        background: #fff; border-radius: 12px;
+        background: #fff; border-radius: 20px;
         box-shadow: 0 4px 24px rgba(15,23,42,.08);
         overflow: hidden;
     }
@@ -106,13 +108,15 @@ function thaiDate(?string $d): string {
     .body { padding: 24px; }
     .form { display: flex; gap: 8px; }
     .form input {
-        flex: 1; padding: 12px; border: 1px solid #cbd5e1;
-        border-radius: 8px; font-family: inherit; font-size: 15px;
+        flex: 1; padding: 12px 14px; border: 1px solid #cbd5e1;
+        border-radius: 12px; font-family: inherit; font-size: 16px;
+        min-height: 52px;
     }
     .form button {
-        min-height: 44px; padding: 12px 20px; background: #1a365d; color: #fff;
-        border: 0; border-radius: 8px; font-family: inherit; font-weight: 600;
+        min-height: 56px; padding: 12px 20px; background: #1a365d; color: #fff;
+        border: 0; border-radius: 12px; font-family: inherit; font-weight: 600;
         cursor: pointer; touch-action: manipulation;
+        flex-shrink: 0;
     }
     .info-table { width: 100%; margin-top: 16px; border-collapse: collapse; }
     .info-table th {

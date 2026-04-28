@@ -6,6 +6,10 @@ $current_user = Auth::user();
 $isHR = hr_can_access_hr_dashboard();
 $isCEO = isCEOOrAbove();
 $current_page = $current_page ?? '';
+$cp_shell = $current_page;
+$tp_hr_is_hr_route = is_string($cp_shell) && strncmp($cp_shell, 'hr-', 3) === 0;
+$tp_hr_employee_tab_shell = !$tp_hr_is_hr_route;
+$tp_hr_main_native_class = 'content-area tp-native-page';
 $appIconPath = '/assets/icons/tphr-app-icon.svg';
 $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
 ?>
@@ -28,6 +32,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
     
     <!-- Tailwind CSS (compiled) -->
     <link rel="stylesheet" href="/assets/css/app.css">
+    <link rel="stylesheet" href="/assets/css/native-shell.css?v=1">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -119,7 +124,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
+            border-radius: 20px;
             padding: 20px;
             transition: all 0.3s ease;
         }
@@ -145,7 +150,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             justify-content: center;
             min-height: 116px;
             padding: 24px 16px;
-            border-radius: 16px;
+            border-radius: 20px;
             background: rgba(30, 41, 59, 0.5);
             border: 1px solid rgba(148, 163, 184, 0.1);
             transition: all 0.3s ease;
@@ -173,7 +178,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-height: 44px;
+            min-height: 56px;
             padding: 10px 20px;
             background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
             color: #fff;
@@ -207,7 +212,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-height: 44px;
+            min-height: 48px;
             padding: 10px 20px;
             background: rgba(148, 163, 184, 0.1);
             color: #fff;
@@ -227,7 +232,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             max-width: 100%;
             min-width: 0;
             padding: 12px 16px;
-            min-height: 44px;
+            min-height: 52px;
             font-size: 16px;
             background: rgba(15, 23, 42, 0.8);
             border: 1px solid rgba(148, 163, 184, 0.2);
@@ -690,11 +695,17 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         }
         @media (max-width: 1279px) {
             .content-area {
-                /* ตรงกับ .mobile-app-header + bottom nav */
+                /* ตรงกับ .mobile-app-header; ขอบล่าง/ซ้ายขวา — native-shell.css (main.tp-native-page) */
                 padding-top: calc(env(safe-area-inset-top, 0px) + 6.75rem);
                 padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
                 padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
                 padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+            }
+            /* ลดการซ้ำ padding — โทเคน native-shell จัดการ main */
+            body.tp-native-app .content-area.tp-native-page {
+                padding-left: 0;
+                padding-right: 0;
+                padding-bottom: 0;
             }
             .overflow-x-auto {
                 overscroll-behavior-x: contain;
@@ -869,7 +880,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         }
     </style>
 </head>
-<body class="text-slate-300">
+<body class="text-slate-300 tp-native-app<?php echo $tp_hr_employee_tab_shell ? ' tp-with-tab-nav' : ''; ?>">
 
 <!-- Sidebar -->
 <aside class="app-sidebar-desktop sidebar fixed left-0 top-0 w-[280px] h-screen overflow-y-auto z-50">
@@ -1164,4 +1175,4 @@ document.getElementById('mobileMenuBtn')?.addEventListener('click', openMobileMe
 </script>
 
 <!-- Main Content -->
-<div class="content-area p-4 sm:p-6">
+<main id="tp-hr-main" class="<?php echo htmlspecialchars($tp_hr_main_native_class, ENT_QUOTES, 'UTF-8'); ?>">
