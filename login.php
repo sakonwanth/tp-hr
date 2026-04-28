@@ -122,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Icons & Tailwind -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/app.css">
-    <link rel="stylesheet" href="/assets/css/native-shell.css?v=3">
+    <link rel="stylesheet" href="/assets/css/native-shell.css?v=4">
     
     <style>
         * {

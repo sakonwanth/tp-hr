@@ -1,6 +1,7 @@
 /**
  * TP-HR — Native component system (design lock; aligned with tp-checkin v5).
  * v3: global touch bump (Utilities: min-h/w 44→48; brand primary buttons 56 via markup pass).
+ * v4: main horizontal padding respects safe-area + never zeroed by stray overrides.
  * UI UX Pro Max: touch ≥48px, inputs ≥52px, primary CTA ≥56px, card radius 20px,
  * scroll-end buffer ≥120px, bottom slot ≥88px when tab bar present.
  */
@@ -314,14 +315,14 @@ body.tp-with-tab-nav main.tp-native-page:not(.tp-native-page--home) {
     var(--tp-scroll-end-buffer),
     calc(var(--tp-bottom-nav-slot) + var(--tp-cta-gap-above-tabs))
   );
-  padding-left: var(--tp-page-pad-mobile);
-  padding-right: var(--tp-page-pad-mobile);
+  padding-left: max(var(--tp-page-pad-mobile), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--tp-page-pad-mobile), env(safe-area-inset-right, 0px));
 }
 
 @media (min-width: 768px) {
   body.tp-with-tab-nav main.tp-native-page:not(.tp-native-page--home) {
-    padding-left: var(--tp-page-pad-tablet);
-    padding-right: var(--tp-page-pad-tablet);
+    padding-left: max(var(--tp-page-pad-tablet), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--tp-page-pad-tablet), env(safe-area-inset-right, 0px));
   }
 }
 
@@ -329,28 +330,28 @@ body.tp-with-tab-nav main.tp-native-page--home {
   padding-bottom: calc(
     var(--tp-bottom-nav-slot) + var(--tp-cta-gap-above-tabs) + var(--tp-native-btn-min) + var(--tp-scroll-end-buffer)
   );
-  padding-left: var(--tp-page-pad-mobile);
-  padding-right: var(--tp-page-pad-mobile);
+  padding-left: max(var(--tp-page-pad-mobile), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--tp-page-pad-mobile), env(safe-area-inset-right, 0px));
 }
 
 @media (min-width: 768px) {
   body.tp-with-tab-nav main.tp-native-page--home {
-    padding-left: var(--tp-page-pad-tablet);
-    padding-right: var(--tp-page-pad-tablet);
+    padding-left: max(var(--tp-page-pad-tablet), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--tp-page-pad-tablet), env(safe-area-inset-right, 0px));
   }
 }
 
 /* HR / no bottom tabs: scroll buffer only */
 body.tp-native-app:not(.tp-with-tab-nav) main.content-area.tp-native-page {
   padding-bottom: max(var(--tp-scroll-end-buffer), calc(env(safe-area-inset-bottom, 0px) + var(--tp-space-32)));
-  padding-left: var(--tp-page-pad-mobile);
-  padding-right: var(--tp-page-pad-mobile);
+  padding-left: max(var(--tp-page-pad-mobile), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--tp-page-pad-mobile), env(safe-area-inset-right, 0px));
 }
 
 @media (min-width: 768px) {
   body.tp-native-app:not(.tp-with-tab-nav) main.content-area.tp-native-page {
-    padding-left: var(--tp-page-pad-tablet);
-    padding-right: var(--tp-page-pad-tablet);
+    padding-left: max(var(--tp-page-pad-tablet), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--tp-page-pad-tablet), env(safe-area-inset-right, 0px));
   }
 }
 
@@ -365,16 +366,9 @@ body.tp-native-app:not(.login-page-root) .input-field {
   box-sizing: border-box;
 }
 
+/* Wrapper รอบเนื้อหา — อย่าใช้ flex+gap เพื่อไม่ให้ซ้ำกับ margin/ grid ในแต่ละไฟล์ */
 .tp-native-stack--page {
-  display: flex;
-  flex-direction: column;
-  gap: var(--tp-section-gap-mobile);
-}
-
-@media (min-width: 768px) {
-  .tp-native-stack--page {
-    gap: var(--tp-section-gap-tablet);
-  }
+  min-width: 0;
 }
 
 /* Locked section headings (pages use .section-title in markup) */

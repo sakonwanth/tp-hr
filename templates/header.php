@@ -35,7 +35,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
     
     <!-- Tailwind CSS (compiled) -->
     <link rel="stylesheet" href="/assets/css/app.css">
-    <link rel="stylesheet" href="/assets/css/native-shell.css?v=3">
+    <link rel="stylesheet" href="/assets/css/native-shell.css?v=4">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -697,18 +697,13 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             min-height: 100vh;
         }
         @media (max-width: 1279px) {
-            .content-area {
-                /* ตรงกับ .mobile-app-header; ขอบล่าง/ซ้ายขวา — native-shell.css (main.tp-native-page) */
+            /*
+             * ความสูงใต้แถบหัวมือถือ — อย่างเดียวที่ต้องมาจาก inline (< main > อยู่ก่อน Tailwind CDN)
+             * padding ซ้าย/ขวา/ล่าง + buffer scroll อยู่ที่ assets/css/native-shell.css — อย่ารีเซ็ตเป็น 0
+             * เดิม body.tp-native-app .content-area.tp-native-page { padding:0 } ชนคัสเคดภายหลัง link แล้วทับ padding จาก native-shell หมด
+             */
+            main.content-area.tp-native-page {
                 padding-top: calc(env(safe-area-inset-top, 0px) + 6.75rem);
-                padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
-                padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
-                padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
-            }
-            /* ลดการซ้ำ padding — โทเคน native-shell จัดการ main */
-            body.tp-native-app .content-area.tp-native-page {
-                padding-left: 0;
-                padding-right: 0;
-                padding-bottom: 0;
             }
             .overflow-x-auto {
                 overscroll-behavior-x: contain;
