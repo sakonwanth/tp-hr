@@ -34,11 +34,9 @@ try {
     // fall back to defaults
 }
 
-// Logo & watermark — use EXACT same files as CRM payroll_print.php
-// Header: LOGO TP-ASSET - 6.png (horizontal brand)
-// Watermark: LOGO TP-ASSET - 5.png (square brand mark)
-$logo_brand_src = CRM_BASE_URL . '/asset/logo/LOGO%20TP-ASSET%20-%206.png';
-$watermark_src  = CRM_BASE_URL . '/asset/logo/LOGO%20TP-ASSET%20-%205.png';
+// Logo & watermark — same image files as CRM; served from TP-HR /asset/logo/ for CSP (same-origin, not http://localhost)
+$logo_brand_src = tp_hr_brand_logo_url('LOGO TP-ASSET - 6.png');
+$watermark_src  = tp_hr_brand_logo_url('LOGO TP-ASSET - 5.png');
 
 $pm = strtotime($slip['payroll_month']);
 $month_label_th = thaiMonth((int)date('n', $pm)) . ' ' . ((int)date('Y', $pm) + 543);

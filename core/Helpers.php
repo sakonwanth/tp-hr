@@ -846,3 +846,13 @@ if (!function_exists('validatePlannedStartTime')) {
         return ['ok' => true, 'message' => ''];
     }
 }
+
+/**
+ * Absolute path URL for TP brand logos under webroot asset/logo/ (same origin).
+ * CSP (img-src 'self' https: ...) blocks CRM_BASE_URL when it is http://localhost — use these in HTML views/printouts.
+ */
+if (!function_exists('tp_hr_brand_logo_url')) {
+    function tp_hr_brand_logo_url(string $filename): string {
+        return '/asset/logo/' . rawurlencode(basename($filename));
+    }
+}

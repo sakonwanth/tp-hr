@@ -21,7 +21,7 @@ $system_tagline_th = 'ระบบบริหารทรัพยากรบ�
 $company_name = 'TP-Asset Development Co., Ltd.';
 // CRM repo ships "LOGO TP-ASSET - 6.png" under asset/logo/ (tp-logo.png does not exist → broken image on login).
 $hr_login_logo_fallback = '/assets/icons/tphr-app-icon.svg';
-$crm_brand_logo_path = rtrim(CRM_BASE_URL, '/') . '/asset/logo/' . rawurlencode('LOGO TP-ASSET - 6.png');
+$crm_brand_logo_path = tp_hr_brand_logo_url('LOGO TP-ASSET - 6.png');
 $company_logo = !empty($_ENV['HR_LOGIN_LOGO']) ? $_ENV['HR_LOGIN_LOGO'] : $crm_brand_logo_path;
 
 $error = '';
