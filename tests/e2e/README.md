@@ -7,6 +7,7 @@
 | ไฟล์ | บทบาท |
 |------|--------|
 | `health.spec.cjs` | `GET api/health.php` |
+| `api-guest.spec.cjs` | `api/attendance`, `api/leave`, `api/profile` — 401 โดยไม่ล็อกอิน |
 | `login.spec.cjs` | หน้า `login.php` |
 | `protected-routes.spec.cjs` | guest → `login.php` |
 | `public-verify.spec.cjs` | `verify_document.php` (public) |
