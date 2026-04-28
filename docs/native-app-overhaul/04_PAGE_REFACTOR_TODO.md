@@ -6,10 +6,10 @@ Each task: specific, actionable. Complete in order P0 → P2 unless dependencies
 |----|------|-------|-----------|-------------|--------------|----------------------|-----------|-------------|------|-----------------|------|
 | HR-UI-001 | Dashboard | `/` | `index.php` | Mixed legacy cards/gradients; hierarchy varies | Rebuild sections with `NativeCard` + `NativeQuickActionCard`; single section gap 16/24 | glass/stat/quick → Native* | Empty state for quick actions if no data | §2 tokens, §4 hierarchy | Low | Load /, 375px, tab overlap | **Done 2026-04-28** |
 | HR-UI-002 | Login | `/login.php` | `login.php` | Standalone layout off shell tokens | Wrap with same typography/spacing tokens; `NativeInput`, `NativeButtonPrimary` | custom → Native* | Error state inline, focus order | §8 forms | Med | Login fail/success | **Done 2026-04-28** |
-| HR-UI-003 | Check-in | `/checkin.php` | `checkin.php` | Flow density | Card sections; sticky CTA if primary action exists | ad-hoc → NativeCard + StickyPrimaryAction | Loading/success | Touch 48px | High | Submit + GPS | |
-| HR-UI-004 | Leave hub | `/leave.php` | `leave.php` | Hub clutter | NativeSectionTitle + list; bottom buffer | mixed → Native* | Back/context | §9 nav | Med | Tab bar | |
+| HR-UI-003 | Check-in | `/checkin.php` | `checkin.php` | Flow density | Card sections; sticky CTA if primary action exists | ad-hoc → NativeCard + StickyPrimaryAction | Loading/success | Touch 48px | High | Submit + GPS | **Done 2026-04-28** |
+| HR-UI-004 | Leave hub | `/leave.php` | `leave.php` | Hub clutter | NativeSectionTitle + list; bottom buffer | mixed → Native* | Back/context | §9 nav | Med | Tab bar | **Done 2026-04-28** |
 | HR-UI-005 | Leave history | `/leave_history.php` | `leave_history.php` | Table on mobile | **NativeTableToCardPattern** card list <768px | table only → + cards | Empty state | §2 no H-scroll | Med | Narrow viewport | |
-| HR-UI-006 | Leave form partial | — | `modules/employee/leaves/request_form.php` | Field grouping | `NativeFormGroup` + helper text | mixed | Required indicators | §8 | Med | Validation | |
+| HR-UI-006 | Leave form partial | — | `modules/employee/leaves/request_form.php` | Field grouping | `NativeFormGroup` + helper text | mixed | Required indicators | §8 | Med | Validation | **Done 2026-04-28** |
 | HR-UI-007 | Payslip | `/payslip.php` | `payslip.php` | List/modal density | NativeListItem + modal shell | mixed | Loading skeleton | §4 states | Med | Open slip | |
 | HR-UI-008 | Profile | `/profile.php` | `profile.php` | Long vertical form | Grouped `NativeCard` | sections | Save feedback | §8 | Low | POST profile | |
 | HR-UI-009 | Certificate | `/certificate.php` | `certificate.php` | Form UX | NativeFormGroup | mixed | Success state | §8 | Low | Submit | |

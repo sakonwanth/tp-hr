@@ -127,26 +127,28 @@ require_once __DIR__ . '/templates/header.php';
 
 <div>
     <!-- Page Header -->
-    <div class="mb-6">
-        <h1 class="text-2xl font-bold text-white">ลงเวลาเข้า-ออกงาน</h1>
-        <p class="text-white/60 mt-1"><?php echo formatDateThai(date('Y-m-d')); ?></p>
+    <div class="mb-4 md:mb-6">
+        <h1 class="text-2xl font-bold text-white tracking-tight">ลงเวลาเข้า-ออกงาน</h1>
+        <p class="text-white/60 text-sm mt-1"><?php echo formatDateThai(date('Y-m-d')); ?></p>
     </div>
     
     <?php if ($error): ?>
-    <div class="bg-red-500/20 border border-red-500/50 text-red-300 px-4 py-3 rounded-lg mb-6">
-        <i class="fas fa-exclamation-circle mr-2"></i><?php echo htmlspecialchars($error); ?>
+    <div class="tp-native-error-state bg-red-500/15 border border-red-400/45 text-red-200 px-4 py-3 rounded-[20px] mb-4 md:mb-6 flex items-start gap-3" role="alert">
+        <i class="fas fa-exclamation-circle text-2xl shrink-0 mt-0.5" aria-hidden="true"></i>
+        <span class="text-base leading-snug"><?php echo htmlspecialchars($error); ?></span>
     </div>
     <?php endif; ?>
     
     <?php if ($message): ?>
-    <div class="bg-green-500/20 border border-green-500/50 text-green-300 px-4 py-3 rounded-lg mb-6">
-        <i class="fas fa-check-circle mr-2"></i><?php echo htmlspecialchars($message); ?>
+    <div class="tp-native-success-state bg-emerald-500/15 border border-emerald-400/40 text-emerald-200 px-4 py-3 rounded-[20px] mb-4 md:mb-6 flex items-start gap-3" role="status">
+        <i class="fas fa-check-circle text-2xl shrink-0 mt-0.5" aria-hidden="true"></i>
+        <span class="text-base leading-snug"><?php echo htmlspecialchars($message); ?></span>
     </div>
     <?php endif; ?>
 
     <?php if ($today_holiday): ?>
-    <div class="mb-6 rounded-xl bg-gradient-to-r from-rose-500/20 to-pink-500/15 border border-rose-400/30 px-4 py-3 flex items-center gap-3">
-        <i class="fas fa-umbrella-beach text-rose-300 text-xl"></i>
+    <div class="mb-4 md:mb-6 rounded-[20px] border border-rose-400/35 bg-rose-500/10 px-4 py-3 flex items-start gap-3">
+        <i class="fas fa-umbrella-beach text-rose-300 text-2xl shrink-0 mt-0.5" aria-hidden="true"></i>
         <div>
             <p class="text-rose-200 font-semibold">วันหยุด: <?php echo htmlspecialchars($today_holiday['name']); ?></p>
             <p class="text-rose-100/70 text-xs">
@@ -157,19 +159,19 @@ require_once __DIR__ . '/templates/header.php';
     </div>
     <?php endif; ?>
 
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6">
         <!-- Left Column: Check-in Card -->
         <div class="xl:col-span-2">
-            <div class="glass-card rounded-xl p-6">
+            <div class="native-card tp-native-card tp-native-data-card">
                 <!-- Current Time Display -->
-                <div class="text-center mb-8">
-                    <div class="text-5xl sm:text-6xl font-bold text-white mb-2 tabular-nums" id="current-time">--:--:--</div>
-                    <p class="text-white/60"><?php echo formatDateThai(date('Y-m-d')); ?></p>
+                <div class="text-center mb-6 md:mb-8">
+                    <div class="text-[48px] leading-none font-bold text-white mb-2 tabular-nums time-display" id="current-time">--:--:--</div>
+                    <p class="text-white/60 text-base"><?php echo formatDateThai(date('Y-m-d')); ?></p>
                     
                     <div class="mt-4 flex items-center justify-center gap-2 flex-wrap">
                         <?php if ($shift): ?>
-                        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10">
-                            <i class="fas fa-clock text-violet-400"></i>
+                        <div class="inline-flex items-center gap-2 min-h-[48px] px-4 py-2 rounded-[20px] bg-white/10 border border-white/10">
+                            <i class="fas fa-clock text-violet-400 text-2xl" aria-hidden="true"></i>
                             <span class="text-white"><?php echo htmlspecialchars(function_exists('shift_base_name') ? shift_base_name($shift['name']) : $shift['name']); ?></span>
                             <span class="text-white/60">
                                 (<?php echo substr($shift['start_time'], 0, 5); ?> - <?php echo substr($shift['end_time'], 0, 5); ?>)
@@ -177,8 +179,8 @@ require_once __DIR__ . '/templates/header.php';
                         </div>
                         <?php endif; ?>
                         <?php if (($user['work_mode'] ?? 'OFFICE') === 'WFH'): ?>
-                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/30">
-                            <i class="fas fa-home text-emerald-300"></i>
+                        <div class="inline-flex items-center gap-2 min-h-[48px] px-3 py-1.5 rounded-[20px] bg-emerald-500/20 border border-emerald-400/30">
+                            <i class="fas fa-home text-emerald-300 text-2xl" aria-hidden="true"></i>
                             <span class="text-emerald-200 text-sm font-semibold">WFH</span>
                         </div>
                         <?php endif; ?>
@@ -199,8 +201,8 @@ require_once __DIR__ . '/templates/header.php';
                 } catch (Throwable $e) { /* table may not exist yet */ }
                 ?>
                 <!-- Today's Status -->
-                <div class="grid grid-cols-2 gap-4 mb-8">
-                    <div class="p-4 rounded-lg bg-white/5 text-center">
+                <div class="grid grid-cols-2 gap-4 mb-6 md:mb-8">
+                    <div class="p-4 rounded-[20px] bg-white/5 border border-white/8 text-center">
                         <p class="text-white/60 text-sm mb-1">เวลาเข้างาน</p>
                         <p class="text-2xl font-bold <?php
                             $ciClass = 'text-white/30';
@@ -236,7 +238,7 @@ require_once __DIR__ . '/templates/header.php';
                         <?php endif; ?>
                     </div>
 
-                    <div class="p-4 rounded-lg bg-white/5 text-center">
+                    <div class="p-4 rounded-[20px] bg-white/5 border border-white/8 text-center">
                         <p class="text-white/60 text-sm mb-1">เวลาออกงาน</p>
                         <p class="text-2xl font-bold <?php echo $today_attendance && $today_attendance['check_out_time'] ? 'text-blue-400' : 'text-white/30'; ?>">
                             <?php
@@ -264,31 +266,31 @@ require_once __DIR__ . '/templates/header.php';
                 <div class="flex flex-col items-center gap-4">
                     <?php if (!$today_attendance || !$today_attendance['check_in_time']): ?>
                         <!-- Check-in Button -->
-                        <button id="btn-checkin" 
+                        <button id="btn-checkin" type="button"
                                 onclick="startCheckin('in')"
-                                class="w-48 h-48 rounded-full bg-gradient-to-br from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white shadow-lg shadow-green-500/30 transition-all hover:scale-105 active:scale-[0.98] touch-manipulation flex flex-col items-center justify-center">
-                            <i class="fas fa-fingerprint text-5xl mb-2"></i>
-                            <span class="text-xl font-bold">ลงเวลาเข้า</span>
+                                class="w-48 h-48 max-w-[85vw] max-h-[85vw] aspect-square rounded-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white shadow-lg transition-colors active:scale-[0.98] touch-manipulation flex flex-col items-center justify-center border-0">
+                            <i class="fas fa-fingerprint text-5xl mb-2 shrink-0" aria-hidden="true"></i>
+                            <span class="text-lg font-bold whitespace-nowrap">ลงเวลาเข้า</span>
                         </button>
                         
                     <?php elseif (!$today_attendance['check_out_time']): ?>
                         <!-- Check-out Button -->
-                        <button id="btn-checkout"
+                        <button id="btn-checkout" type="button"
                                 onclick="startCheckin('out')"
-                                class="w-48 h-48 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white shadow-lg shadow-blue-500/30 transition-all hover:scale-105 active:scale-[0.98] touch-manipulation flex flex-col items-center justify-center">
-                            <i class="fas fa-sign-out-alt text-5xl mb-2"></i>
-                            <span class="text-xl font-bold">ลงเวลาออก</span>
+                                class="w-48 h-48 max-w-[85vw] max-h-[85vw] aspect-square rounded-full bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white shadow-lg transition-colors active:scale-[0.98] touch-manipulation flex flex-col items-center justify-center border-0">
+                            <i class="fas fa-sign-out-alt text-5xl mb-2 shrink-0" aria-hidden="true"></i>
+                            <span class="text-lg font-bold whitespace-nowrap">ลงเวลาออก</span>
                         </button>
                         
                     <?php else: ?>
                         <!-- All Done -->
-                        <div class="w-48 h-48 rounded-full bg-gradient-to-br from-gray-600 to-gray-700 text-white flex flex-col items-center justify-center">
-                            <i class="fas fa-check-circle text-5xl mb-2 text-green-400"></i>
-                            <span class="text-lg font-medium">ลงเวลาครบแล้ว</span>
+                        <div class="w-48 h-48 max-w-[85vw] max-h-[85vw] aspect-square rounded-full bg-slate-700 border border-white/12 text-white flex flex-col items-center justify-center">
+                            <i class="fas fa-check-circle text-5xl mb-2 text-emerald-400 shrink-0" aria-hidden="true"></i>
+                            <span class="text-base font-semibold text-center px-2">ลงเวลาครบแล้ว</span>
                         </div>
                     <?php endif; ?>
                     
-                    <p class="text-white/50 text-sm" id="location-status">
+                    <p class="text-white/50 text-sm text-center max-w-md px-2" id="location-status">
                         <i class="fas fa-location-arrow mr-1"></i>
                         กำลังตรวจสอบตำแหน่ง...
                     </p>
@@ -297,19 +299,19 @@ require_once __DIR__ . '/templates/header.php';
         </div>
         
         <!-- Right Column: Summary & History -->
-        <div class="space-y-6">
+        <div class="space-y-4 md:space-y-6">
             <!-- Planned Late Start (แจ้งเข้างานสายล่วงหน้า) -->
             <?php if ($ls_has_any): ?>
             <div>
-                <div class="flex items-center justify-between mb-3">
-                    <h2 class="text-lg font-semibold text-white">
-                        <i class="fas fa-clock text-amber-400 mr-2"></i>แจ้งเข้างานสาย
+                <div class="flex items-center justify-between mb-3 gap-2">
+                    <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+                        <i class="fas fa-clock text-amber-400 text-2xl" aria-hidden="true"></i>แจ้งเข้างานสาย
                     </h2>
                     <span class="text-white/40 text-xs"><?php echo ($ls_today_row ? 1 : 0) + ($ls_tomorrow_row ? 1 : 0); ?> รายการ</span>
                 </div>
                 <div class="space-y-3">
                     <?php if ($ls_today_row): ?>
-                    <div class="rounded-2xl bg-gradient-to-br from-amber-500/15 to-orange-500/10 border border-amber-400/30 p-4">
+                    <div class="rounded-[20px] bg-amber-500/10 border border-amber-400/35 p-4">
                         <p class="text-amber-300 text-xs font-semibold uppercase tracking-wide mb-1">
                             <i class="fas fa-sun mr-1"></i>วันนี้ · <?php echo date('d M', strtotime($ls_today)); ?>
                         </p>
@@ -324,13 +326,13 @@ require_once __DIR__ . '/templates/header.php';
                         <p class="text-white/70 text-xs mt-1 line-clamp-2"><?php echo htmlspecialchars($ls_today_row['planned_reason']); ?></p>
                         <?php endif; ?>
                         <button type="button" onclick="cancelLateStart('<?php echo $ls_today; ?>')"
-                                class="mt-3 w-full min-h-[48px] py-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-400/30 text-red-300 text-sm font-semibold transition-colors touch-manipulation">
+                                class="mt-3 w-full min-h-[52px] py-2 rounded-[20px] bg-red-500/15 hover:bg-red-500/25 border border-red-400/30 text-red-300 text-sm font-semibold transition-colors touch-manipulation">
                             <i class="fas fa-times-circle mr-1"></i>ยกเลิกการแจ้ง
                         </button>
                     </div>
                     <?php endif; ?>
                     <?php if ($ls_tomorrow_row): ?>
-                    <div class="rounded-2xl bg-gradient-to-br from-blue-500/15 to-indigo-500/10 border border-blue-400/30 p-4">
+                    <div class="rounded-[20px] bg-sky-500/10 border border-sky-400/35 p-4">
                         <p class="text-blue-300 text-xs font-semibold uppercase tracking-wide mb-1">
                             <i class="fas fa-moon mr-1"></i>พรุ่งนี้ · <?php echo date('d M', strtotime($ls_tomorrow)); ?>
                         </p>
@@ -345,14 +347,14 @@ require_once __DIR__ . '/templates/header.php';
                         <p class="text-white/70 text-xs mt-1 line-clamp-2"><?php echo htmlspecialchars($ls_tomorrow_row['planned_reason']); ?></p>
                         <?php endif; ?>
                         <button type="button" onclick="cancelLateStart('<?php echo $ls_tomorrow; ?>')"
-                                class="mt-3 w-full min-h-[48px] py-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-400/30 text-red-300 text-sm font-semibold transition-colors touch-manipulation">
+                                class="mt-3 w-full min-h-[52px] py-2 rounded-[20px] bg-red-500/15 hover:bg-red-500/25 border border-red-400/30 text-red-300 text-sm font-semibold transition-colors touch-manipulation">
                             <i class="fas fa-times-circle mr-1"></i>ยกเลิกการแจ้ง
                         </button>
                     </div>
                     <?php endif; ?>
                     <?php if (!($ls_today_row && $ls_tomorrow_row)): ?>
                     <button type="button" onclick="openLateStartModal()"
-                            class="w-full min-h-[48px] py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-dashed border-white/20 text-white/70 text-sm font-medium transition-colors touch-manipulation">
+                            class="w-full min-h-[52px] py-2.5 rounded-[20px] bg-white/5 hover:bg-white/10 border border-dashed border-white/20 text-white/70 text-sm font-medium transition-colors touch-manipulation">
                         <i class="fas fa-plus-circle mr-1"></i>เพิ่มการแจ้งอีกวัน
                     </button>
                     <?php endif; ?>
@@ -360,42 +362,37 @@ require_once __DIR__ . '/templates/header.php';
             </div>
             <?php else: ?>
             <button type="button" onclick="openLateStartModal()"
-                    class="group w-full min-h-[48px] relative overflow-hidden rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/15 hover:from-amber-500/30 hover:to-orange-500/25 active:from-amber-500/40 active:to-orange-500/35 border border-amber-400/30 hover:border-amber-400/60 p-5 text-left transition-all duration-200 shadow-lg shadow-amber-500/5 touch-manipulation">
-                <span class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-amber-400/10 blur-2xl group-hover:bg-amber-400/20 transition-colors"></span>
-                <div class="relative flex items-center gap-4">
-                    <div class="shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:scale-105 transition-transform">
-                        <i class="fas fa-clock text-white text-xl"></i>
+                    class="w-full min-h-[56px] rounded-[20px] border border-amber-400/40 bg-amber-500/15 hover:bg-amber-500/22 p-4 text-left transition-colors touch-manipulation flex items-center gap-4">
+                    <div class="shrink-0 w-12 h-12 rounded-[20px] bg-amber-500 flex items-center justify-center">
+                        <i class="fas fa-clock text-white text-2xl" aria-hidden="true"></i>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <h2 class="text-white font-bold text-base leading-tight mb-0.5 flex items-center gap-2">
+                        <h2 class="text-white font-bold text-base leading-tight mb-0.5 flex flex-wrap items-center gap-2">
                             แจ้งเข้างานสาย
-                            <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-400/25 text-amber-200">ล่วงหน้า</span>
+                            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-[20px] bg-amber-400/25 text-amber-100">ล่วงหน้า</span>
                         </h2>
-                        <p class="text-white/70 text-xs leading-snug">
+                        <p class="text-white/70 text-sm leading-snug">
                             ทำงานดึก? แจ้งก่อน <?php echo sprintf('%02d:00', $late_start_cutoff_hour); ?> น. ของวันทำงาน
                         </p>
                     </div>
-                    <div class="shrink-0 w-8 h-8 rounded-full bg-white/10 group-hover:bg-white/20 flex items-center justify-center transition-colors">
-                        <i class="fas fa-chevron-right text-white text-xs"></i>
-                    </div>
-                </div>
+                    <i class="fas fa-chevron-right text-white/50 text-xl shrink-0" aria-hidden="true"></i>
             </button>
             <?php endif; ?>
 
             <!-- Quick links -->
-            <div class="grid grid-cols-2 gap-3">
-                <a href="attendance_history.php" class="flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-2.5 text-white/80 hover:text-white text-sm transition-colors touch-manipulation">
-                    <i class="fas fa-history text-violet-400"></i>ประวัติเข้างาน
+            <div class="grid grid-cols-2 gap-4">
+                <a href="attendance_history.php" class="flex min-h-[48px] items-center justify-center gap-2 rounded-[20px] bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-2.5 text-white/80 hover:text-white text-sm font-medium transition-colors touch-manipulation whitespace-nowrap">
+                    <i class="fas fa-history text-violet-400 text-xl" aria-hidden="true"></i>ประวัติเข้างาน
                 </a>
-                <a href="leave.php" class="flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-2.5 text-white/80 hover:text-white text-sm transition-colors touch-manipulation">
-                    <i class="fas fa-calendar-check text-emerald-400"></i>ขอลา / OT
+                <a href="leave.php" class="flex min-h-[48px] items-center justify-center gap-2 rounded-[20px] bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-2.5 text-white/80 hover:text-white text-sm font-medium transition-colors touch-manipulation whitespace-nowrap">
+                    <i class="fas fa-calendar-check text-emerald-400 text-xl" aria-hidden="true"></i>ขอลา / OT
                 </a>
             </div>
 
             <!-- Monthly Summary -->
-            <div class="glass-card rounded-xl p-6">
-                <h2 class="text-lg font-semibold text-white mb-4">
-                    <i class="fas fa-chart-pie text-violet-400 mr-2"></i>
+            <div class="native-card tp-native-card tp-native-data-card">
+                <h2 class="section-title mb-4">
+                    <i class="fas fa-chart-pie text-violet-400 text-2xl" aria-hidden="true"></i>
                     สรุปเดือนนี้
                 </h2>
                 
@@ -441,9 +438,9 @@ require_once __DIR__ . '/templates/header.php';
             </div>
             
             <!-- Recent History -->
-            <div class="glass-card rounded-xl p-6">
-                <h2 class="text-lg font-semibold text-white mb-4">
-                    <i class="fas fa-history text-blue-400 mr-2"></i>
+            <div class="native-card tp-native-card tp-native-data-card">
+                <h2 class="section-title mb-4">
+                    <i class="fas fa-history text-blue-400 text-2xl" aria-hidden="true"></i>
                     ประวัติ 7 วันล่าสุด
                 </h2>
                 
@@ -453,7 +450,7 @@ require_once __DIR__ . '/templates/header.php';
                         $attDate = $att['attendance_date'];
                         $hol = $holidayMap[$attDate] ?? null;
                     ?>
-                    <div class="p-3 min-h-[52px] rounded-lg bg-white/5 flex items-center justify-between gap-2">
+                    <div class="p-3 min-h-[52px] rounded-[20px] bg-white/5 border border-white/8 flex items-center justify-between gap-2">
                         <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-2">
                                 <p class="text-white text-sm truncate">
@@ -501,10 +498,13 @@ require_once __DIR__ . '/templates/header.php';
                     <?php endforeach; ?>
                 </div>
                 <?php else: ?>
-                <p class="text-white/50 text-center py-4">ยังไม่มีประวัติ</p>
+                <div class="tp-native-empty-state text-center py-8 rounded-[20px] border border-dashed border-white/15">
+                    <i class="fas fa-history text-slate-500 text-3xl mb-2" aria-hidden="true"></i>
+                    <p class="text-slate-400 text-sm">ยังไม่มีประวัติ</p>
+                </div>
                 <?php endif; ?>
                 
-                <a href="attendance_history.php" class="mt-4 inline-flex min-h-[48px] w-full items-center justify-center gap-1 text-center text-violet-400 hover:text-violet-300 text-sm touch-manipulation">
+                <a href="attendance_history.php" class="mt-4 inline-flex min-h-[48px] w-full items-center justify-center gap-1 text-center text-violet-400 hover:text-violet-300 text-sm font-medium touch-manipulation whitespace-nowrap">
                     ดูประวัติทั้งหมด <i class="fas fa-arrow-right ml-1"></i>
                 </a>
             </div>
@@ -513,13 +513,13 @@ require_once __DIR__ . '/templates/header.php';
 </div>
 
 <!-- Planned Late Start Modal -->
-<div id="late-start-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4 overflow-y-auto overscroll-contain">
-    <div class="glass-card rounded-2xl p-5 w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
+<div id="late-start-modal" class="tp-native-modal fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4 overflow-y-auto overscroll-contain">
+    <div class="native-card tp-native-card w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-white text-lg font-bold flex items-center gap-2">
                 <i class="fas fa-clock text-amber-400"></i>แจ้งเข้างานสายล่วงหน้า
             </h3>
-            <button type="button" onclick="closeLateStartModal()" class="min-h-[48px] min-w-[48px] inline-flex items-center justify-center text-white/60 hover:text-white touch-manipulation rounded-lg" aria-label="ปิด">
+            <button type="button" onclick="closeLateStartModal()" class="min-h-[48px] min-w-[48px] inline-flex items-center justify-center text-white/60 hover:text-white touch-manipulation rounded-[20px]" aria-label="ปิด">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -528,14 +528,14 @@ require_once __DIR__ . '/templates/header.php';
         <div class="mb-4">
             <label class="text-white/70 text-sm mb-2 block">แจ้งสำหรับวันไหน</label>
             <div class="grid grid-cols-2 gap-2">
-                <label class="flex min-h-[48px] items-center justify-center p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer has-[:checked]:bg-amber-500/20 has-[:checked]:border-amber-400 transition-colors touch-manipulation">
+                <label class="flex min-h-[48px] items-center justify-center p-3 rounded-[20px] bg-white/5 border border-white/10 cursor-pointer has-[:checked]:bg-amber-500/20 has-[:checked]:border-amber-400 transition-colors touch-manipulation">
                     <input type="radio" name="ls-target" value="tomorrow" class="hidden" onchange="updateLateStartDateLabel()" <?php echo $late_start_can_tomorrow_request['ok'] ? 'checked' : ''; ?>>
                     <div class="text-center">
                         <div class="text-white font-medium">พรุ่งนี้</div>
                         <div class="text-white/50 text-xs mt-0.5">แจ้งล่วงหน้า</div>
                     </div>
                 </label>
-                <label class="flex min-h-[48px] items-center justify-center p-3 rounded-xl bg-white/5 border border-white/10 <?php echo $late_start_can_today_request['ok'] ? 'cursor-pointer has-[:checked]:bg-amber-500/20 has-[:checked]:border-amber-400 touch-manipulation' : 'opacity-40 cursor-not-allowed'; ?> transition-colors">
+                <label class="flex min-h-[48px] items-center justify-center p-3 rounded-[20px] bg-white/5 border border-white/10 <?php echo $late_start_can_today_request['ok'] ? 'cursor-pointer has-[:checked]:bg-amber-500/20 has-[:checked]:border-amber-400 touch-manipulation' : 'opacity-40 cursor-not-allowed'; ?> transition-colors">
                     <input type="radio" name="ls-target" value="today" class="hidden" onchange="updateLateStartDateLabel()" <?php echo $late_start_can_today_request['ok'] ? '' : 'disabled'; ?>>
                     <div class="text-center">
                         <div class="text-white font-medium">วันนี้</div>
@@ -553,12 +553,12 @@ require_once __DIR__ . '/templates/header.php';
             <label class="text-white/70 text-sm mb-2 block">เวลาที่จะเข้างาน</label>
             <!-- iOS (Safari/Chrome WKWebView) can overflow native time input. Use select fallback on iOS. -->
             <select id="ls-planned-time-select" data-ios-time-select-for="ls-planned-time"
-                    class="hidden w-full max-w-full min-w-0 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-lg font-medium focus:outline-none focus:border-amber-400">
+                    class="hidden w-full max-w-full min-w-0 bg-white/5 border border-white/10 rounded-[20px] px-4 py-3 text-white text-lg font-medium focus:outline-none focus:border-amber-400">
             </select>
             <input type="time" id="ls-planned-time" step="900"
                    min="<?php echo htmlspecialchars(substr(($shift['start_time'] ?? '08:30'), 0, 5)); ?>"
                    value="<?php echo htmlspecialchars(substr(($shift['start_time'] ?? '08:30'), 0, 5)); ?>"
-                   class="w-full max-w-full min-w-0 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-lg font-medium focus:outline-none focus:border-amber-400">
+                   class="w-full max-w-full min-w-0 bg-white/5 border border-white/10 rounded-[20px] px-4 py-3 text-white text-lg font-medium focus:outline-none focus:border-amber-400">
             <p class="text-white/40 text-xs mt-1">
                 หลังเข้าในเวลาที่แจ้ง ± 30 นาที จะไม่ถูกหัก
             </p>
@@ -569,18 +569,18 @@ require_once __DIR__ . '/templates/header.php';
             <label class="text-white/70 text-sm mb-2 block">เหตุผล <span class="text-red-400">*</span></label>
             <textarea id="ls-reason" rows="3" maxlength="255"
                       placeholder="เช่น ทำงานดึกเมื่อคืน / มีนัดหมอ / ติดธุระส่วนตัว"
-                      class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/30 focus:outline-none focus:border-amber-400 resize-none"></textarea>
+                      class="w-full bg-white/5 border border-white/10 rounded-[20px] px-4 py-3 text-white text-sm placeholder-white/30 focus:outline-none focus:border-amber-400 resize-none"></textarea>
             <p class="text-white/40 text-xs mt-1">อย่างน้อย 5 ตัวอักษร</p>
         </div>
 
         <!-- Submit -->
         <div class="flex gap-2">
             <button type="button" onclick="closeLateStartModal()"
-                    class="flex-1 min-h-[48px] py-3 bg-white/10 hover:bg-white/15 text-white rounded-xl font-medium transition-colors touch-manipulation">
+                    class="flex-1 min-h-[52px] py-3 bg-white/10 hover:bg-white/15 text-white rounded-[20px] font-medium transition-colors touch-manipulation border-0">
                 ยกเลิก
             </button>
             <button type="button" onclick="submitLateStart()"
-                    class="flex-1 min-h-[48px] py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl font-medium transition-colors touch-manipulation">
+                    class="flex-1 min-h-[56px] py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-[20px] font-semibold transition-colors touch-manipulation border-0">
                 <i class="fas fa-paper-plane mr-2"></i>ส่งคำขอ
             </button>
         </div>
@@ -588,8 +588,8 @@ require_once __DIR__ . '/templates/header.php';
 </div>
 
 <!-- Off-site Reason Modal -->
-<div id="offsite-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
-    <div class="glass-card rounded-2xl p-6 w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
+<div id="offsite-modal" class="tp-native-modal fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
+    <div class="native-card tp-native-card w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <div class="text-center mb-4">
             <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-yellow-500/20 flex items-center justify-center">
                 <i class="fas fa-map-marker-alt text-yellow-400 text-3xl"></i>
@@ -604,15 +604,15 @@ require_once __DIR__ . '/templates/header.php';
             </label>
             <textarea id="offsite-reason" rows="3" maxlength="500"
                       placeholder="เช่น ไปพบลูกค้า, ประชุมนอกสำนักงาน, ทำงานนอกสถานที่"
-                      class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white text-sm placeholder-white/40 focus:outline-none focus:border-yellow-400 resize-none"></textarea>
+                      class="w-full bg-white/10 border border-white/20 rounded-[20px] px-4 py-3 text-white text-sm placeholder-white/40 focus:outline-none focus:border-amber-400 resize-none"></textarea>
             <p class="text-white/40 text-xs mt-1">อย่างน้อย 5 ตัวอักษร</p>
         </div>
 
         <div class="flex gap-3">
-            <button type="button" onclick="closeOffsiteModal()" class="flex-1 min-h-[48px] py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-medium transition-colors touch-manipulation">
+            <button type="button" onclick="closeOffsiteModal()" class="flex-1 min-h-[52px] py-3 bg-white/10 hover:bg-white/20 text-white rounded-[20px] font-medium transition-colors touch-manipulation border-0">
                 ยกเลิก
             </button>
-            <button type="button" onclick="submitOffsite()" class="flex-1 min-h-[48px] py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-medium transition-colors touch-manipulation">
+            <button type="button" onclick="submitOffsite()" class="flex-1 min-h-[56px] py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-[20px] font-semibold transition-colors touch-manipulation border-0">
                 <i class="fas fa-paper-plane mr-1"></i>ส่งคำขอ
             </button>
         </div>
@@ -620,8 +620,8 @@ require_once __DIR__ . '/templates/header.php';
 </div>
 
 <!-- Check-in Modal -->
-<div id="checkin-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
-    <div class="glass-card rounded-2xl p-6 w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
+<div id="checkin-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
+    <div class="native-card tp-native-card w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <div class="text-center mb-6">
             <div class="w-20 h-20 rounded-full bg-violet-600/20 flex items-center justify-center mx-auto mb-4">
                 <i class="fas fa-camera text-violet-400 text-3xl" id="modal-icon"></i>
@@ -631,7 +631,7 @@ require_once __DIR__ . '/templates/header.php';
         </div>
         
         <!-- Camera Preview -->
-        <div class="relative mb-6 rounded-xl overflow-hidden bg-black aspect-video" id="camera-container">
+        <div class="relative mb-6 rounded-[20px] overflow-hidden bg-black aspect-video" id="camera-container">
             <video id="camera-preview" class="w-full h-full object-cover" autoplay playsinline></video>
             <canvas id="camera-canvas" class="hidden"></canvas>
             <img id="captured-photo" class="w-full h-full object-cover hidden">
@@ -645,7 +645,7 @@ require_once __DIR__ . '/templates/header.php';
         </div>
         
         <!-- Location Info -->
-        <div class="p-3 rounded-lg bg-white/5 mb-6" id="location-info">
+        <div class="p-3 rounded-[20px] bg-white/5 border border-white/8 mb-6" id="location-info">
             <div class="flex items-center gap-2 text-white/70">
                 <i class="fas fa-map-marker-alt text-red-400"></i>
                 <span id="location-text">กำลังระบุตำแหน่ง...</span>
@@ -656,14 +656,14 @@ require_once __DIR__ . '/templates/header.php';
         
         <!-- Buttons -->
         <div class="flex gap-3">
-            <button type="button" onclick="closeCheckinModal()" class="flex-1 min-h-[48px] py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors touch-manipulation">
+            <button type="button" onclick="closeCheckinModal()" class="flex-1 min-h-[52px] py-3 bg-white/10 hover:bg-white/20 text-white rounded-[20px] transition-colors touch-manipulation border-0">
                 ยกเลิก
             </button>
-            <button type="button" id="btn-capture" onclick="capturePhoto()" class="flex-1 min-h-[56px] py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors touch-manipulation">
-                <i class="fas fa-camera mr-2"></i>ถ่ายรูป
+            <button type="button" id="btn-capture" onclick="capturePhoto()" class="flex-1 min-h-[56px] py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-[20px] transition-colors touch-manipulation border-0">
+                <i class="fas fa-camera mr-2" aria-hidden="true"></i>ถ่ายรูป
             </button>
-            <button type="button" id="btn-confirm" onclick="confirmCheckin()" class="flex-1 min-h-[56px] py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors hidden touch-manipulation">
-                <i class="fas fa-check mr-2"></i>ยืนยัน
+            <button type="button" id="btn-confirm" onclick="confirmCheckin()" class="flex-1 min-h-[56px] py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[20px] transition-colors hidden touch-manipulation border-0">
+                <i class="fas fa-check mr-2" aria-hidden="true"></i>ยืนยัน
             </button>
         </div>
     </div>

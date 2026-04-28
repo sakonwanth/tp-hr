@@ -12,15 +12,15 @@
 | 03_PAGE_AUDIT_BEFORE | Complete — 26 NEEDS_REFACTOR, 1 PASS |
 | 04_PAGE_REFACTOR_TODO | Complete — 26 tasks + shell tasks |
 | 05_NATIVE_COMPONENT_SYSTEM | Complete |
-| 06_IMPLEMENTATION_PROGRESS | **Partial** — shell + **2 pages** (dashboard, login) |
-| 07_PAGE_REGRESSION_AFTER | **Partial** — REGRESSION_PASS for dashboard + login (static) |
+| 06_IMPLEMENTATION_PROGRESS | **Partial** — shell + **5 employee surfaces** (dashboard, login, check-in, leave hub, leave request partial) |
+| 07_PAGE_REGRESSION_AFTER | **Partial** — REGRESSION_PASS for dashboard, login, check-in, leave (+ form partial) (static) |
 
 ## Spec compliance (target vs actual)
 
 | Criterion | Target | Actual (this snapshot) |
 |-----------|--------|-------------------------|
-| Every page refactored | 26 | 0 page-level refactors |
-| Every page regression PASS | 26 | 0 |
+| Every page refactored | 26 | **4** full pages + **1** partial (leave form); remainder pending |
+| Every page regression PASS | 26 | **4** + partial noted static PASS in 07; remainder pending |
 | Locked components only | Yes | Shell uses map; pages still mixed legacy |
 | No bottom nav overlap | 0 issues | Shell CSS designed for it; per-page QA pending |
 | No CTA collision | 0 | Per-page |

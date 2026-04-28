@@ -31,6 +31,8 @@
 |------|---------|
 | Dashboard `/` (`index.php`) | **REGRESSION_PASS** (static QA: logic/queries unchanged; markup/CSS only; sticky CTA + tab shell preserved) |
 | Login `/login.php` | **REGRESSION_PASS** (static QA: POST/redirect/LINE unchanged; a11y labels improved) |
+| Check-in `/checkin.php` | **REGRESSION_PASS** (static QA: IDs/handlers preserved; markup/CSS + modal shells only) |
+| Leave `/leave.php` (+ `request_form.php` partial) | **REGRESSION_PASS** (static QA: routes/flash/API hooks unchanged; markup/CSS only) |
 | Other pages in 01 §A | **REGRESSION_PENDING** |
 
 ### Dashboard — `/` (`index.php`)
@@ -50,3 +52,19 @@
 | Auth POST | PASS (unchanged) |
 | CSRF / fields | PASS |
 | Touch targets | PASS (toggle 48px) |
+
+### Check-in — `/checkin.php`
+
+| Check | Result |
+|-------|--------|
+| Route / attendance queries | PASS (unchanged) |
+| `startCheckin` / modals / GPS hooks | PASS (IDs preserved) |
+| Native tokens (radius 20px, touch ≥48px, primary ≥56px) | PASS |
+
+### Leave — `/leave.php` + form partial
+
+| Check | Result |
+|-------|--------|
+| Lists / entitlements queries | PASS (unchanged) |
+| `cancelRequest` / `?action=request` | PASS |
+| Desktop table shell + mobile cards | PASS |

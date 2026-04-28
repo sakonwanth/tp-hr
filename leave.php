@@ -82,31 +82,33 @@ require_once __DIR__ . '/templates/header.php';
     </div>
     
     <?php if ($message): ?>
-    <div class="bg-green-500/20 border border-green-500/50 text-green-300 px-4 py-3 rounded-lg mb-6">
-        <i class="fas fa-check-circle mr-2"></i><?php echo htmlspecialchars($message); ?>
+    <div class="tp-native-success-state bg-emerald-500/15 border border-emerald-400/40 text-emerald-200 px-4 py-3 rounded-[20px] mb-4 md:mb-6 flex items-start gap-3 max-w-none mx-0 w-full" role="status">
+        <i class="fas fa-check-circle text-2xl shrink-0 mt-0.5" aria-hidden="true"></i>
+        <span class="text-base leading-snug"><?php echo htmlspecialchars($message); ?></span>
     </div>
     <?php endif; ?>
     
     <?php if ($error): ?>
-    <div class="bg-red-500/20 border border-red-500/50 text-red-300 px-4 py-3 rounded-lg mb-6">
-        <i class="fas fa-exclamation-circle mr-2"></i><?php echo htmlspecialchars($error); ?>
+    <div class="tp-native-error-state bg-red-500/15 border border-red-400/45 text-red-200 px-4 py-3 rounded-[20px] mb-4 md:mb-6 flex items-start gap-3 max-w-none mx-0 w-full" role="alert">
+        <i class="fas fa-exclamation-circle text-2xl shrink-0 mt-0.5" aria-hidden="true"></i>
+        <span class="text-base leading-snug"><?php echo htmlspecialchars($error); ?></span>
     </div>
     <?php endif; ?>
     
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 min-w-0 max-w-full">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6 min-w-0 max-w-full">
         <!-- Left Column -->
-        <div class="xl:col-span-2 space-y-6 min-w-0">
+        <div class="xl:col-span-2 space-y-4 md:space-y-6 min-w-0">
             <!-- Leave Balance -->
-            <div class="glass-card rounded-xl p-6 min-w-0 overflow-hidden">
-                <h2 class="section-title">
-                    <i class="fas fa-calendar-check text-green-400"></i>
+            <div class="native-card tp-native-card tp-native-data-card min-w-0">
+                <h2 class="section-title mb-4">
+                    <i class="fas fa-calendar-check text-green-400 text-2xl" aria-hidden="true"></i>
                     สิทธิ์วันลาคงเหลือ <?php echo date('Y') + 543; ?>
                 </h2>
                 
                 <?php if ($entitlements): ?>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
                     <?php foreach ($entitlements as $ent): ?>
-                    <div class="p-4 rounded-lg bg-white/5 border border-white/10 min-w-0">
+                    <div class="p-4 rounded-[20px] bg-white/5 border border-white/8 min-w-0">
                         <div class="flex items-center justify-between gap-2 mb-2 min-w-0">
                             <span class="text-white font-medium truncate min-w-0"><?php echo htmlspecialchars($ent['name']); ?></span>
                             <span class="text-xs px-2 py-1 rounded-full" style="background-color: <?php echo $ent['color'] ?? '#6B7280'; ?>20; color: <?php echo $ent['color'] ?? '#6B7280'; ?>">
@@ -153,18 +155,18 @@ require_once __DIR__ . '/templates/header.php';
                     <?php endforeach; ?>
                 </div>
                 <?php else: ?>
-                <p class="text-white/60 text-center py-8">
-                    <i class="fas fa-info-circle mr-2"></i>
-                    ยังไม่มีข้อมูลสิทธิ์วันลา กรุณาติดต่อฝ่าย HR
-                </p>
+                <div class="tp-native-empty-state text-center py-8 rounded-[20px] border border-dashed border-white/15 max-w-none mx-0">
+                    <i class="fas fa-info-circle text-slate-500 text-3xl mb-2 block" aria-hidden="true"></i>
+                    <p class="text-slate-400 text-sm px-4">ยังไม่มีข้อมูลสิทธิ์วันลา กรุณาติดต่อฝ่าย HR</p>
+                </div>
                 <?php endif; ?>
             </div>
             
             <!-- Leave History -->
-            <div class="glass-card rounded-xl p-6 min-w-0 overflow-hidden">
+            <div class="native-card tp-native-card tp-native-data-card min-w-0">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4 min-w-0">
                     <h2 class="section-title mb-0">
-                        <i class="fas fa-history text-blue-400"></i>
+                        <i class="fas fa-history text-blue-400 text-2xl" aria-hidden="true"></i>
                         ประวัติการลา
                     </h2>
                     <a href="leave_history.php" class="inline-flex min-h-[48px] items-center justify-center sm:justify-start text-violet-400 hover:text-violet-300 text-sm font-medium touch-manipulation shrink-0">
@@ -187,7 +189,7 @@ require_once __DIR__ . '/templates/header.php';
                         default => 'bg-gray-500/20 text-gray-300 border border-gray-500/30'
                     };
                     ?>
-                    <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                    <div class="rounded-[20px] bg-white/5 border border-white/8 p-4">
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0">
                                 <span class="inline-flex px-2.5 py-1 text-xs rounded-full"
@@ -201,20 +203,20 @@ require_once __DIR__ . '/templates/header.php';
                             </span>
                         </div>
                         <div class="mt-3 grid grid-cols-2 gap-2">
-                            <div class="rounded-xl bg-black/20 border border-white/10 px-3 py-2">
+                            <div class="rounded-[20px] bg-black/20 border border-white/8 px-3 py-2">
                                 <div class="text-[11px] text-white/50">จำนวนวัน</div>
                                 <div class="text-white font-semibold"><?php echo number_format($leave['total_days'], 1); ?> วัน</div>
                             </div>
                             <a href="leave_history.php"
-                               class="min-h-[48px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold flex items-center justify-center touch-manipulation">
-                                <i class="fas fa-eye mr-2"></i>รายละเอียด
+                               class="min-h-[48px] rounded-[20px] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold flex items-center justify-center touch-manipulation">
+                                <i class="fas fa-eye mr-2" aria-hidden="true"></i>รายละเอียด
                             </a>
                         </div>
                     </div>
                     <?php endforeach; ?>
                 </div>
 
-                <div class="hidden md:block overflow-x-auto min-w-0 max-w-full -mx-1 px-1 overscroll-x-contain">
+                <div class="hidden md:block tp-native-table-shell overflow-x-auto min-w-0 max-w-full -mx-1 px-1 overscroll-x-contain">
                     <table class="w-full min-w-0">
                         <thead>
                             <tr class="border-b border-white/10">
@@ -263,27 +265,30 @@ require_once __DIR__ . '/templates/header.php';
                     </table>
                 </div>
                 <?php else: ?>
-                <p class="text-white/50 text-center py-8">ยังไม่มีประวัติการลา</p>
+                <div class="tp-native-empty-state text-center py-8 rounded-[20px] border border-dashed border-white/15 max-w-none mx-0">
+                    <i class="fas fa-calendar-times text-slate-500 text-3xl mb-2 block" aria-hidden="true"></i>
+                    <p class="text-slate-400 text-sm">ยังไม่มีประวัติการลา</p>
+                </div>
                 <?php endif; ?>
             </div>
         </div>
         
         <!-- Right Column -->
-        <div class="space-y-6 min-w-0">
+        <div class="space-y-4 md:space-y-6 min-w-0">
             <!-- Quick Request -->
-            <div class="glass-card rounded-xl p-6">
-                <h2 class="text-lg font-semibold text-white mb-4">
-                    <i class="fas fa-bolt text-yellow-400 mr-2"></i>
+            <div class="native-card tp-native-card tp-native-data-card min-w-0">
+                <h2 class="section-title mb-4">
+                    <i class="fas fa-bolt text-yellow-400 text-2xl" aria-hidden="true"></i>
                     ขอลาด่วน
                 </h2>
                 
                 <div class="space-y-3">
                     <?php foreach (array_slice($leave_types, 0, 4) as $type): ?>
                     <a href="?action=request&type=<?php echo $type['id']; ?>" 
-                       class="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
-                        <div class="w-10 h-10 rounded-lg flex items-center justify-center" 
+                       class="flex min-h-[48px] items-center gap-3 p-3 rounded-[20px] bg-white/5 hover:bg-white/10 border border-white/8 transition-colors touch-manipulation">
+                        <div class="w-10 h-10 rounded-[20px] flex items-center justify-center shrink-0" 
                              style="background-color: <?php echo $type['color'] ?? '#6B7280'; ?>20">
-                            <i class="fas fa-<?php echo $type['icon'] ?? 'calendar'; ?>" 
+                            <i class="fas fa-<?php echo $type['icon'] ?? 'calendar'; ?> text-xl" aria-hidden="true"
                                style="color: <?php echo $type['color'] ?? '#6B7280'; ?>"></i>
                         </div>
                         <div class="min-w-0 flex-1">
@@ -297,15 +302,15 @@ require_once __DIR__ . '/templates/header.php';
             
             <!-- Pending Requests -->
             <?php if ($pending_requests): ?>
-            <div class="glass-card rounded-xl p-6 min-w-0 overflow-hidden">
-                <h2 class="section-title">
-                    <i class="fas fa-hourglass-half text-orange-400"></i>
+            <div class="native-card tp-native-card tp-native-data-card min-w-0">
+                <h2 class="section-title mb-4">
+                    <i class="fas fa-hourglass-half text-orange-400 text-2xl" aria-hidden="true"></i>
                     รออนุมัติ
                 </h2>
                 
                 <div class="space-y-3">
                     <?php foreach ($pending_requests as $req): ?>
-                    <div class="p-3 rounded-lg bg-white/5">
+                    <div class="p-3 rounded-[20px] bg-white/5 border border-white/8">
                         <div class="flex items-center justify-between mb-2">
                             <span class="px-2 py-1 text-xs rounded" style="background-color: <?php echo $req['color'] ?? '#6B7280'; ?>20; color: <?php echo $req['color'] ?? '#6B7280'; ?>">
                                 <?php echo htmlspecialchars($req['leave_type_name']); ?>
@@ -319,9 +324,9 @@ require_once __DIR__ . '/templates/header.php';
                             <?php endif; ?>
                         </p>
                         <div class="mt-3 flex">
-                            <button onclick="cancelRequest(<?php echo $req['id']; ?>)"
-                                    class="w-full md:w-auto md:ml-auto min-h-[48px] px-4 py-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-200 text-sm font-semibold transition-colors">
-                                <i class="fas fa-times mr-2"></i>ยกเลิกคำขอ
+                            <button type="button" onclick="cancelRequest(<?php echo $req['id']; ?>)"
+                                    class="w-full md:w-auto md:ml-auto min-h-[48px] px-4 py-2 rounded-[20px] bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-200 text-sm font-semibold transition-colors touch-manipulation">
+                                <i class="fas fa-times mr-2" aria-hidden="true"></i>ยกเลิกคำขอ
                             </button>
                         </div>
                     </div>
@@ -331,9 +336,9 @@ require_once __DIR__ . '/templates/header.php';
             <?php endif; ?>
             
             <!-- Company Calendar -->
-            <div class="glass-card rounded-xl p-6 min-w-0 overflow-hidden">
-                <h2 class="section-title">
-                    <i class="fas fa-calendar text-violet-400"></i>
+            <div class="native-card tp-native-card tp-native-data-card min-w-0">
+                <h2 class="section-title mb-4">
+                    <i class="fas fa-calendar text-violet-400 text-2xl" aria-hidden="true"></i>
                     วันหยุดที่จะถึง
                 </h2>
                 
@@ -349,8 +354,8 @@ require_once __DIR__ . '/templates/header.php';
                 <?php if ($holidays): ?>
                 <div class="space-y-2">
                     <?php foreach ($holidays as $h): ?>
-                    <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5">
-                        <div class="w-12 h-12 rounded-lg bg-red-500/20 flex flex-col items-center justify-center">
+                    <div class="flex items-center gap-3 p-2 rounded-[20px] hover:bg-white/5 border border-transparent hover:border-white/8">
+                        <div class="w-12 h-12 rounded-[20px] bg-red-500/20 flex flex-col items-center justify-center shrink-0">
                             <span class="text-red-400 text-xs"><?php echo date('M', strtotime($h['date'])); ?></span>
                             <span class="text-white font-bold"><?php echo date('j', strtotime($h['date'])); ?></span>
                         </div>
@@ -362,7 +367,9 @@ require_once __DIR__ . '/templates/header.php';
                     <?php endforeach; ?>
                 </div>
                 <?php else: ?>
-                <p class="text-white/50 text-center py-4">ไม่มีวันหยุดที่จะถึง</p>
+                <div class="tp-native-empty-state text-center py-6 rounded-[20px] border border-dashed border-white/15 max-w-none mx-0">
+                    <p class="text-slate-400 text-sm">ไม่มีวันหยุดที่จะถึง</p>
+                </div>
                 <?php endif; ?>
             </div>
         </div>

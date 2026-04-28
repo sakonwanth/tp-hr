@@ -13,14 +13,17 @@
 
 ## Per-page (from 04_PAGE_REFACTOR_TODO)
 
-| Task ID | Status |
-|---------|--------|
+| Task ID | Status | Notes |
+|---------|--------|-------|
 | HR-UI-001 Dashboard | **COMPLETE** | `index.php` — NativeCard, solid stat icons, quick actions, empty states, spacing 16/24 |
 | HR-UI-002 Login | **COMPLETE** | `login.php` — solid canvas, native card shell, form labels/for, success/error blocks, 48px toggle |
-| HR-UI-003 … HR-UI-026 | **NOT_STARTED** |
-| HR-UI-SHELL-01 | **REFACTORED** |
-| HR-UI-SHELL-02 | **COMPLETE** |
-| HR-UI-SHELL-03 | **COMPLETE** |
+| HR-UI-003 Check-in | **COMPLETE** | `checkin.php` — native cards, banners, modals `tp-native-modal`, solid CTAs, radius 20px |
+| HR-UI-004 Leave hub | **COMPLETE** | `leave.php` — native cards, alerts, `tp-native-table-shell`, quick links, empty states |
+| HR-UI-006 Leave form | **COMPLETE** | `request_form.php` — `tp-native-form-group`, native card form, upload/actions |
+| HR-UI-005 … HR-UI-026 (excl. above) | **NOT_STARTED** | — |
+| HR-UI-SHELL-01 | **REFACTORED** | — |
+| HR-UI-SHELL-02 | **COMPLETE** | — |
+| HR-UI-SHELL-03 | **COMPLETE** | — |
 
 **Allowed status:** NOT_STARTED | IN_PROGRESS | REFACTORED | REGRESSION_FAIL | FIXED | COMPLETE  
 

@@ -33,14 +33,14 @@ $leave_types_form = $stmt->fetchAll();
     <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">กรอกช่วงวันที่และเหตุผล ระบบจะคำนวณจำนวนวันลาให้</p>
 </div>
 
-<div class="grid grid-cols-1 xl:grid-cols-3 gap-6 min-w-0 max-w-full">
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6 min-w-0 max-w-full">
     <div class="xl:col-span-2 min-w-0">
-        <form id="leave-form" class="glass-card rounded-xl p-4 sm:p-6 min-w-0 max-w-full overflow-x-clip" method="POST" action="/api/leave.php" enctype="multipart/form-data">
+        <form id="leave-form" class="native-card tp-native-card tp-native-data-card min-w-0 max-w-full overflow-x-clip p-4 sm:p-6" method="POST" action="/api/leave.php" enctype="multipart/form-data">
             <input type="hidden" name="action" value="create">
             <?php echo csrfField(); ?>
             
             <!-- Leave Type -->
-            <div class="mb-6 min-w-0 max-w-full">
+            <div class="tp-native-form-group min-w-0 max-w-full">
                 <label class="block text-white/80 text-sm font-medium mb-2">ประเภทการลา <span class="text-red-400">*</span></label>
                 <select name="leave_type_id" id="leave_type_id" required class="input-field" onchange="updateLeaveInfo()">
                     <option value="">-- เลือกประเภทการลา --</option>
@@ -61,7 +61,7 @@ $leave_types_form = $stmt->fetchAll();
             </div>
             
             <!-- Date Range -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 min-w-0 max-w-full">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 tp-native-form-group min-w-0 max-w-full">
                 <div class="min-w-0 max-w-full">
                     <label class="block text-white/80 text-sm font-medium mb-2">วันที่เริ่มต้น <span class="text-red-400">*</span></label>
                     <div class="input-date-shell">
@@ -79,7 +79,7 @@ $leave_types_form = $stmt->fetchAll();
                 </div>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 min-w-0">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 tp-native-form-group min-w-0">
                 <div class="min-w-0 max-w-full">
                     <label class="block text-white/80 text-sm font-medium mb-2">วันที่สิ้นสุด <span class="text-red-400">*</span></label>
                     <div class="input-date-shell">
@@ -98,7 +98,7 @@ $leave_types_form = $stmt->fetchAll();
             </div>
             
             <!-- Days Summary -->
-            <div class="p-4 rounded-lg bg-violet-500/10 border border-violet-500/30 mb-6">
+            <div class="p-4 rounded-[20px] bg-violet-500/10 border border-violet-400/35 tp-native-form-group">
                 <div class="flex items-center justify-between">
                     <span class="text-white/70">จำนวนวันลา:</span>
                     <span class="text-2xl font-bold text-violet-400" id="total-days">0</span>
@@ -107,29 +107,29 @@ $leave_types_form = $stmt->fetchAll();
             </div>
             
             <!-- Reason -->
-            <div class="mb-6">
+            <div class="tp-native-form-group">
                 <label class="block text-white/80 text-sm font-medium mb-2">เหตุผลการลา <span class="text-red-400">*</span></label>
                 <textarea name="reason" id="reason" required rows="3" class="input-field" 
                           placeholder="ระบุเหตุผลการลา..."></textarea>
             </div>
             
             <!-- Contact Number -->
-            <div class="mb-6">
+            <div class="tp-native-form-group">
                 <label class="block text-white/80 text-sm font-medium mb-2">เบอร์ติดต่อระหว่างลา</label>
                 <input type="tel" name="contact_number" class="input-field" 
                        placeholder="เบอร์โทรที่สามารถติดต่อได้" value="<?php echo htmlspecialchars($user['phone'] ?? ''); ?>">
             </div>
             
             <!-- Document Upload -->
-            <div class="mb-6" id="document-section">
+            <div class="tp-native-form-group" id="document-section">
                 <label class="block text-white/80 text-sm font-medium mb-2">
                     เอกสารประกอบ
                     <span class="text-white/50 text-xs" id="doc-required-label">(ถ้ามี)</span>
                 </label>
-                <div class="border-2 border-dashed border-white/20 rounded-lg p-4 sm:p-6 text-center hover:border-violet-500/50 transition-colors">
+                <div class="border-2 border-dashed border-white/20 rounded-[20px] p-4 sm:p-6 text-center hover:border-violet-500/50 transition-colors bg-white/[0.03]">
                     <input type="file" name="document" id="document" class="hidden" accept=".pdf,.jpg,.jpeg,.png">
                     <label for="document" class="touch-manipulation cursor-pointer flex flex-col items-center justify-center min-h-[52px] py-2">
-                        <i class="fas fa-cloud-upload-alt text-3xl text-white/30 mb-2"></i>
+                        <i class="fas fa-cloud-upload-alt text-3xl text-white/30 mb-2" aria-hidden="true"></i>
                         <p class="text-white/60 text-sm">คลิกเพื่ออัปโหลดเอกสาร</p>
                         <p class="text-white/40 text-xs mt-1">PDF, JPG, PNG (ไม่เกิน 5MB)</p>
                     </label>
@@ -138,23 +138,23 @@ $leave_types_form = $stmt->fetchAll();
             </div>
             
             <!-- Buttons -->
-            <div class="flex flex-col-reverse md:flex-row gap-3">
-                <a href="leave.php" class="touch-manipulation flex-1 min-h-[48px] inline-flex items-center justify-center py-3 bg-white/10 hover:bg-white/20 text-white text-center rounded-xl transition-colors">
+            <div class="flex flex-col-reverse md:flex-row gap-3 pt-2">
+                <a href="leave.php" class="touch-manipulation flex-1 min-h-[52px] inline-flex items-center justify-center py-3 bg-white/10 hover:bg-white/20 text-white text-center rounded-[20px] transition-colors font-medium border-0">
                     ยกเลิก
                 </a>
-                <button type="submit" class="btn-primary touch-manipulation flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-xl font-semibold">
-                    <i class="fas fa-paper-plane"></i><span>ส่งคำขอลา</span>
+                <button type="submit" class="btn-primary touch-manipulation flex-1 inline-flex items-center justify-center gap-2 min-h-[56px] py-3 rounded-[20px] font-semibold border-0">
+                    <i class="fas fa-paper-plane" aria-hidden="true"></i><span>ส่งคำขอลา</span>
                 </button>
             </div>
         </form>
     </div>
     
     <!-- Right Column: Info -->
-    <div class="space-y-6 min-w-0">
+    <div class="space-y-4 md:space-y-6 min-w-0">
         <!-- Leave Balance -->
-        <div class="glass-card rounded-xl p-6 min-w-0 overflow-hidden">
-            <h3 class="section-title">
-                <i class="fas fa-info-circle text-blue-400"></i>
+        <div class="native-card tp-native-card tp-native-data-card min-w-0">
+            <h3 class="section-title mb-4">
+                <i class="fas fa-info-circle text-blue-400 text-2xl" aria-hidden="true"></i>
                 สิทธิ์วันลาคงเหลือ
             </h3>
             
@@ -173,17 +173,17 @@ $leave_types_form = $stmt->fetchAll();
         </div>
         
         <!-- Leave Policy -->
-        <div class="glass-card rounded-xl p-6 min-w-0 overflow-hidden">
-            <h3 class="section-title">
-                <i class="fas fa-clipboard-list text-yellow-400"></i>
+        <div class="native-card tp-native-card tp-native-data-card min-w-0">
+            <h3 class="section-title mb-4">
+                <i class="fas fa-clipboard-list text-yellow-400 text-2xl" aria-hidden="true"></i>
                 ระเบียบการลา
             </h3>
             
             <div class="space-y-3 text-sm text-white/70">
-                <p><i class="fas fa-check text-green-400 mr-2"></i>ลาป่วยเกิน 3 วันต้องมีใบรับรองแพทย์</p>
-                <p><i class="fas fa-check text-green-400 mr-2"></i>ลากิจต้องขอล่วงหน้าอย่างน้อย 3 วัน</p>
-                <p><i class="fas fa-check text-green-400 mr-2"></i>ลาพักร้อนต้องขอล่วงหน้าอย่างน้อย 7 วัน</p>
-                <p><i class="fas fa-check text-green-400 mr-2"></i>คำขอลาต้องได้รับอนุมัติจากหัวหน้างาน</p>
+                <p class="flex gap-2"><i class="fas fa-check text-green-400 shrink-0 mt-0.5" aria-hidden="true"></i><span>ลาป่วยเกิน 3 วันต้องมีใบรับรองแพทย์</span></p>
+                <p class="flex gap-2"><i class="fas fa-check text-green-400 shrink-0 mt-0.5" aria-hidden="true"></i><span>ลากิจต้องขอล่วงหน้าอย่างน้อย 3 วัน</span></p>
+                <p class="flex gap-2"><i class="fas fa-check text-green-400 shrink-0 mt-0.5" aria-hidden="true"></i><span>ลาพักร้อนต้องขอล่วงหน้าอย่างน้อย 7 วัน</span></p>
+                <p class="flex gap-2"><i class="fas fa-check text-green-400 shrink-0 mt-0.5" aria-hidden="true"></i><span>คำขอลาต้องได้รับอนุมัติจากหัวหน้างาน</span></p>
             </div>
         </div>
     </div>
