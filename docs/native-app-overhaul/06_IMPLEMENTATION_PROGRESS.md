@@ -37,7 +37,8 @@
 | HR-UI-020 Leaves approval | **COMPLETE** | `hr/leaves.php` — stat/filter native cards; table shell + large approve/reject; approve confirm modal replaces `confirm()` |
 | HR-UI-021 Day-off approvals (CEO) | **COMPLETE** | `hr/dayoff_approvals.php` — stat cards + filters; modals แทน `confirm`; POST approve/reject unchanged |
 | HR-UI-022 Documents requests | **COMPLETE** | `hr/documents.php` — stat/filter native cards; table shell + action buttons; stub detail modal แทน `alert()` |
-| HR-UI-023 … HR-UI-026 (excl. above) | **NOT_STARTED** | — |
+| HR-UI-023 Doc templates | **COMPLETE** | `hr/document_templates.php` — `native-card`/`tp-native-card`, filters unchanged; table shell + empty state; modals replace `confirm()` for template delete & signature remove; `tp-native-input`/`select`/`textarea` |
+| HR-UI-024 … HR-UI-026 (excl. above) | **NOT_STARTED** | — |
 | HR-UI-SHELL-01 | **REFACTORED** | — |
 | HR-UI-SHELL-02 | **COMPLETE** | — |
 | HR-UI-SHELL-03 | **COMPLETE** | — |

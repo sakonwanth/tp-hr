@@ -50,6 +50,7 @@
 | Leaves HR `/hr/leaves.php` | **REGRESSION_PASS** (static QA: filters + SQL + `$filterBase` for stat links unchanged; approve uses modal shell + same `/api/leave.php` POST) |
 | Day-off approvals `/hr/dayoff_approvals.php` | **REGRESSION_PASS** (static QA: CEO gate + GET filters + list SQL unchanged; POST approve/reject/approve_all + CSRF unchanged; markup/modals only) |
 | Documents HR `/hr/documents.php` | **REGRESSION_PASS** (static QA: filters + SQL + stats month unchanged; `/api/certificate.php` POST flows + print form unchanged; UI/modals only) |
+| Document templates `/hr/document_templates.php` | **REGRESSION_PASS** (static QA: POST `save_company`/upload/signatures/`save_template`/toggle/delete unchanged; UI + confirm modals only) |
 | Other pages in 01 §A | **REGRESSION_PENDING** |
 
 ### Dashboard — `/` (`index.php`)
@@ -223,3 +224,12 @@
 | HR gate + GET status/type/month/page | PASS (unchanged) |
 | List SQL + stats for selected month | PASS |
 | `fetch('/api/certificate.php', …)` + `tpHrCertificatePrintForm` | PASS |
+
+### Document templates — `/hr/document_templates.php`
+
+| Check | Result |
+|-------|--------|
+| HR gate | PASS (unchanged) |
+| Load settings via `SettingsService`; templates list + signer SQL | PASS (unchanged) |
+| POST `save_company` / uploads / `upload_signature` / `remove_signature` / `save_template` / `toggle_active` / `delete_template` + CSRF | PASS (same fields; deletes via modal submit) |
+| List + edit layout; `certificate_print.php` preview form | PASS |
