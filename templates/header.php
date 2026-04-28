@@ -525,6 +525,20 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         .mobile-menu-scroll .mobile-menu-grid:not(.mobile-menu-grid--logout) > a.mobile-menu-tile:last-child:nth-child(odd) {
             grid-column: 1 / -1;
         }
+        .mobile-menu-context-hint {
+            font-size: 0.6875rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            color: rgba(148, 163, 184, 0.95);
+            margin: -4px 0 14px 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            line-height: 1.35;
+        }
+        .mobile-menu-context-hint span.page-title {
+            color: rgba(241, 245, 249, 0.98);
+            font-weight: 600;
+        }
         .mobile-menu-section-label {
             font-size: 0.6875rem;
             font-weight: 700;
@@ -534,6 +548,41 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             margin: 1.35rem 0 10px 0;
             padding-top: 1rem;
             border-top: 1px solid rgba(148, 163, 184, 0.12);
+        }
+        /* HR block: พับได้ — ไม่ให้เห็นกริด HR เต็มจอเมื่อเปิดจากหน้าพนักงาน (ลงเวลา/ลา ...) */
+        .mobile-menu-hr-details {
+            margin-top: 1rem;
+        }
+        .mobile-menu-hr-summary {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            cursor: pointer;
+            touch-action: manipulation;
+            padding: 12px 10px;
+            margin: 0 0 10px 0;
+            border-radius: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            background: rgba(30, 41, 59, 0.4);
+            color: rgba(226, 232, 240, 0.95);
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .mobile-menu-hr-summary::-webkit-details-marker {
+            display: none;
+        }
+        .mobile-menu-hr-summary .mobile-menu-hr-chevron {
+            font-size: 0.72rem;
+            color: rgba(165, 180, 252, 0.9);
+            transition: transform 0.2s ease;
+        }
+        .mobile-menu-hr-details[open] .mobile-menu-hr-chevron {
+            transform: rotate(180deg);
         }
         .mobile-menu-tile {
             display: flex;
@@ -996,7 +1045,12 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
                     <i class="fas fa-chart-bar"></i>
                     <span>รายงาน</span>
                 </a>
-                
+
+                <a href="/hr/api_keys.php" class="nav-item <?php echo $current_page === 'hr-api-keys' ? 'active' : ''; ?>">
+                    <i class="fas fa-key"></i>
+                    <span>คีย์ API ภายนอก</span>
+                </a>
+
                 <a href="/hr/settings.php" class="nav-item <?php echo $current_page === 'hr-settings' ? 'active' : ''; ?>">
                     <i class="fas fa-cog"></i>
                     <span>ตั้งค่าระบบ</span>
@@ -1054,6 +1108,11 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             </button>
         </header>
         <div class="mobile-menu-scroll">
+            <p class="mobile-menu-context-hint px-1" role="note">
+                <strong class="font-semibold text-slate-300">หน้าปัจจุบัน:</strong>
+                <?php echo htmlspecialchars($page_title ?? 'TP-HR'); ?>
+                <span class="block mt-1.5 text-slate-400 font-normal tracking-normal text-[0.8rem]"><span class="normal-case">แผงเมนูนี้อยู่บนหน้าเดิม — <strong class="text-slate-200">ปิดเมนู (✕)</strong> เพื่อลงมือฟอร์มลงเวลา / ทำงานในเนื้อหาหลักได้</span></span>
+            </p>
             <nav class="mobile-menu-grid" aria-label="เมนูหลัก">
                 <a href="/" class="mobile-menu-tile <?php echo $current_page === 'dashboard' ? 'active' : ''; ?>">
                     <i class="fas fa-home" aria-hidden="true"></i>
@@ -1086,49 +1145,58 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             </nav>
 
             <?php if ($isHR): ?>
-            <p class="mobile-menu-section-label">HR Admin</p>
-            <nav class="mobile-menu-grid" aria-label="เมนูผู้ดูแล HR">
-                <a href="/hr/index.php" class="mobile-menu-tile <?php echo $current_page === 'hr-dashboard' ? 'active' : ''; ?>">
-                    <i class="fas fa-th-large" aria-hidden="true"></i>
-                    <span>แดชบอร์ด HR</span>
-                </a>
-                <a href="/hr/employees.php" class="mobile-menu-tile <?php echo $current_page === 'hr-employees' ? 'active' : ''; ?>">
-                    <i class="fas fa-users-cog" aria-hidden="true"></i>
-                    <span>จัดการพนักงาน</span>
-                </a>
-                <a href="/hr/attendance.php" class="mobile-menu-tile <?php echo $current_page === 'hr-attendance' ? 'active' : ''; ?>">
-                    <i class="fas fa-user-clock" aria-hidden="true"></i>
-                    <span>จัดการลงเวลา</span>
-                </a>
-                <a href="/hr/leaves.php" class="mobile-menu-tile <?php echo $current_page === 'hr-leaves' ? 'active' : ''; ?>">
-                    <i class="fas fa-calendar-check" aria-hidden="true"></i>
-                    <span>อนุมัติการลา</span>
-                </a>
-                <?php if ($isCEO): ?>
-                <a href="/hr/dayoff_approvals.php" class="mobile-menu-tile <?php echo $current_page === 'hr-dayoff' ? 'active' : ''; ?>">
-                    <i class="fas fa-calendar-day" aria-hidden="true"></i>
-                    <span>อนุมัติเปลี่ยนวันหยุด</span>
-                </a>
-                <?php endif; ?>
-                <a href="/hr/documents.php" class="mobile-menu-tile <?php echo $current_page === 'hr-documents' ? 'active' : ''; ?>">
-                    <i class="fas fa-file-alt" aria-hidden="true"></i>
-                    <span>จัดการเอกสาร</span>
-                </a>
-                <a href="/hr/document_templates.php" class="mobile-menu-tile <?php echo $current_page === 'hr-document-templates' ? 'active' : ''; ?>">
-                    <i class="fas fa-file-signature" aria-hidden="true"></i>
-                    <span>ตั้งค่าเอกสารรับรอง</span>
-                </a>
-                <?php if ($isCEO): ?>
-                <a href="/hr/reports.php" class="mobile-menu-tile <?php echo $current_page === 'hr-reports' ? 'active' : ''; ?>">
-                    <i class="fas fa-chart-bar" aria-hidden="true"></i>
-                    <span>รายงาน</span>
-                </a>
-                <a href="/hr/settings.php" class="mobile-menu-tile <?php echo $current_page === 'hr-settings' ? 'active' : ''; ?>">
-                    <i class="fas fa-cog" aria-hidden="true"></i>
-                    <span>ตั้งค่าระบบ</span>
-                </a>
-                <?php endif; ?>
-            </nav>
+            <details class="mobile-menu-hr-details" <?php echo $tp_hr_is_hr_route ? 'open' : ''; ?>>
+                <summary class="mobile-menu-hr-summary">
+                    <span>เมนู HR Admin</span>
+                    <i class="fas fa-chevron-down mobile-menu-hr-chevron" aria-hidden="true"></i>
+                </summary>
+                <nav class="mobile-menu-grid" aria-label="เมนูผู้ดูแล HR">
+                    <a href="/hr/index.php" class="mobile-menu-tile <?php echo $current_page === 'hr-dashboard' ? 'active' : ''; ?>">
+                        <i class="fas fa-th-large" aria-hidden="true"></i>
+                        <span>แดชบอร์ด HR</span>
+                    </a>
+                    <a href="/hr/employees.php" class="mobile-menu-tile <?php echo $current_page === 'hr-employees' ? 'active' : ''; ?>">
+                        <i class="fas fa-users-cog" aria-hidden="true"></i>
+                        <span>จัดการพนักงาน</span>
+                    </a>
+                    <a href="/hr/attendance.php" class="mobile-menu-tile <?php echo $current_page === 'hr-attendance' ? 'active' : ''; ?>">
+                        <i class="fas fa-user-clock" aria-hidden="true"></i>
+                        <span>จัดการลงเวลา</span>
+                    </a>
+                    <a href="/hr/leaves.php" class="mobile-menu-tile <?php echo $current_page === 'hr-leaves' ? 'active' : ''; ?>">
+                        <i class="fas fa-calendar-check" aria-hidden="true"></i>
+                        <span>อนุมัติการลา</span>
+                    </a>
+                    <?php if ($isCEO): ?>
+                    <a href="/hr/dayoff_approvals.php" class="mobile-menu-tile <?php echo $current_page === 'hr-dayoff' ? 'active' : ''; ?>">
+                        <i class="fas fa-calendar-day" aria-hidden="true"></i>
+                        <span>อนุมัติเปลี่ยนวันหยุด</span>
+                    </a>
+                    <?php endif; ?>
+                    <a href="/hr/documents.php" class="mobile-menu-tile <?php echo $current_page === 'hr-documents' ? 'active' : ''; ?>">
+                        <i class="fas fa-file-alt" aria-hidden="true"></i>
+                        <span>จัดการเอกสาร</span>
+                    </a>
+                    <a href="/hr/document_templates.php" class="mobile-menu-tile <?php echo $current_page === 'hr-document-templates' ? 'active' : ''; ?>">
+                        <i class="fas fa-file-signature" aria-hidden="true"></i>
+                        <span>ตั้งค่าเอกสารรับรอง</span>
+                    </a>
+                    <?php if ($isCEO): ?>
+                    <a href="/hr/reports.php" class="mobile-menu-tile <?php echo $current_page === 'hr-reports' ? 'active' : ''; ?>">
+                        <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                        <span>รายงาน</span>
+                    </a>
+                    <a href="/hr/api_keys.php" class="mobile-menu-tile <?php echo $current_page === 'hr-api-keys' ? 'active' : ''; ?>">
+                        <i class="fas fa-key" aria-hidden="true"></i>
+                        <span>คีย์ API ภายนอก</span>
+                    </a>
+                    <a href="/hr/settings.php" class="mobile-menu-tile <?php echo $current_page === 'hr-settings' ? 'active' : ''; ?>">
+                        <i class="fas fa-cog" aria-hidden="true"></i>
+                        <span>ตั้งค่าระบบ</span>
+                    </a>
+                    <?php endif; ?>
+                </nav>
+            </details>
             <?php endif; ?>
 
             <nav class="mobile-menu-grid mobile-menu-grid--logout" aria-label="ออกจากระบบ">
@@ -1183,6 +1251,11 @@ document.getElementById('mobileMenuBtn')?.addEventListener('click', openMobileMe
         closeMobileMenu();
     });
 })();
+
+window.addEventListener('pageshow', function (ev) {
+    if (!ev.persisted) return;
+    if (typeof closeMobileMenu === 'function') closeMobileMenu();
+});
 </script>
 
 <!-- Main Content -->
