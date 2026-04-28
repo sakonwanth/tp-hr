@@ -4,7 +4,7 @@
  * v4: main horizontal padding respects safe-area + never zeroed by stray overrides.
  * v5: icon size tokens; table scroll shell; locked aliases for loading/confirmation; header ?v=5.
  * v6: .tp-visually-hidden for screen-reader text with spinners; header ?v=6.
- * v8: bottom tab inner grid max-h 72px enforced in footer markup; header ?v=8.
+ * v9: Bottom tab strip — symmetric safe-area gutters; centered tab “chips”; label weight; cohesive FA solids.
  * UI UX Pro Max: touch ≥48px, inputs ≥52px, primary CTA ≥56px, card radius 20px,
  * scroll-end buffer ≥120px, bottom slot ≥88px when tab bar present.
  */
@@ -109,6 +109,122 @@ body.tp-native-app.tp-app-shell {
   z-index: var(--tp-bottom-nav-z);
   max-height: calc(var(--tp-bottom-nav-max-h) + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-sizing: border-box;
+  background: rgba(15, 23, 42, 0.96);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 -1px 0 rgba(0, 0, 0, 0.2),
+    0 -8px 36px rgba(0, 0, 0, 0.45);
+}
+
+/* --- Mobile primary tab strip (≤1279 employee shell — footer markup) --- */
+.tp-native-bottom-tab-strip {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: max(6px, 0.4vw);
+  align-items: stretch;
+  width: 100%;
+  max-width: min(38rem, 100%);
+  margin: 0 auto;
+  padding: 10px max(14px, env(safe-area-inset-left, 0px)) 10px max(14px, env(safe-area-inset-right, 0px));
+  box-sizing: border-box;
+  min-height: var(--tp-bottom-nav-max-h);
+}
+
+.tp-native-bottom-tab-link {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: max(48px, var(--tp-native-touch-min));
+  min-width: 0;
+  max-width: 4.5rem;
+  width: max-content;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 9px 8px;
+  border-radius: var(--tp-radius-card);
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.62);
+  border: 1px solid transparent;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    color 0.16s ease,
+    background-color 0.16s ease,
+    box-shadow 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.1s ease;
+}
+
+.tp-native-bottom-tab-link[aria-current="page"] {
+  color: rgba(221, 214, 254, 0.98);
+  font-weight: 600;
+  background: radial-gradient(
+    120% 160% at 50% -20%,
+    rgba(124, 58, 237, 0.52) 0%,
+    rgba(124, 58, 237, 0.16) 45%,
+    rgba(124, 58, 237, 0.12) 100%
+  );
+  border: 1px solid rgba(167, 139, 250, 0.38);
+  box-shadow:
+    0 0 0 1px rgba(124, 58, 237, 0.12),
+    0 6px 20px rgba(124, 58, 237, 0.2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tp-native-bottom-tab-link {
+    transition-duration: 0ms;
+  }
+}
+
+.tp-native-bottom-tab-link:not([aria-current="page"]):hover,
+.tp-native-bottom-tab-link:not([aria-current="page"]):focus-visible {
+  color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.tp-native-bottom-tab-link:focus-visible {
+  outline: 2px solid rgba(167, 139, 250, 0.85);
+  outline-offset: 2px;
+}
+
+.tp-native-bottom-tab-link:active:not([aria-current="page"]) {
+  transform: scale(0.98);
+}
+
+.tp-native-bottom-tab-link:not([aria-current="page"]) .tp-native-bottom-tab-ic {
+  color: rgba(203, 213, 225, 0.9);
+}
+
+.tp-native-bottom-tab-ic {
+  font-size: 1.375rem;
+  line-height: 1;
+}
+
+/* Fingerprint glyph บางกว่าไอคอน solid — ดึงขนาดใกล้เคียงน้ำหนักภาพ */
+.tp-native-bottom-tab-link .tp-native-bottom-tab-ic.fa-fingerprint {
+  font-size: 1.4rem;
+}
+
+.tp-native-bottom-tab-label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: 0.02em;
+  max-width: 100%;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tp-native-bottom-tab-link[aria-current="page"] .tp-native-bottom-tab-ic {
+  color: rgb(216, 180, 254);
 }
 
 .home-sticky-cta.tp-sticky-primary-action,

@@ -13,33 +13,31 @@ $isAdminPage = is_string($cp) && strncmp($cp, 'hr-', 3) === 0;
 ?>
 
 <?php if (!$isAdminPage): ?>
-<!-- Mobile Bottom Navigation (employee-first, like Checkin) -->
+<!-- Mobile Bottom Navigation (employee-first) — visuals locked in assets/css/native-shell.css v9 -->
 <nav id="tpHrMobileBottomTab"
-     class="app-shell-mobile-only tp-native-bottom-tab-nav fixed bottom-0 left-0 right-0 z-40 touch-manipulation bg-slate-900/95 backdrop-blur-xl border-t border-white/10 overscroll-contain transition-opacity transition-transform duration-200 ease-out"
-     style="padding-bottom: env(safe-area-inset-bottom, 0px);"
+     class="app-shell-mobile-only tp-native-bottom-tab-nav fixed bottom-0 left-0 right-0 touch-manipulation overscroll-contain transition-opacity transition-transform duration-200 ease-out"
      role="navigation"
      aria-label="เมนูหลักมือถือ">
-    <!-- Locked: bar chrome max 72px (tokens); icons 24px; labels 14px; hit area ≥48px -->
-    <div class="max-w-lg mx-auto grid grid-cols-5 gap-1 px-2 box-border max-h-[72px] h-[72px] items-center">
-        <?php
-        $items = [
-            ['key' => 'dashboard', 'href' => '/',            'icon' => 'fa-home',               'label' => 'หน้าแรก', 'aria' => 'หน้าแรก'],
-            ['key' => 'checkin',   'href' => '/checkin.php',  'icon' => 'fa-fingerprint',       'label' => 'ลงเวลา', 'aria' => 'ลงเวลาเข้า-ออกงาน'],
-            ['key' => 'leave',     'href' => '/leave.php',    'icon' => 'fa-calendar-alt',      'label' => 'ลา', 'aria' => 'การลา'],
-            ['key' => 'payslip',   'href' => '/payslip.php',  'icon' => 'fa-file-invoice-dollar','label' => 'สลิป', 'aria' => 'สลิปเงินเดือน'],
-            ['key' => 'profile',   'href' => '/profile.php',  'icon' => 'fa-user',              'label' => 'ฉัน', 'aria' => 'โปรไฟล์และตั้งค่า'],
-        ];
-        foreach ($items as $it):
+    <?php
+    /* Solid FA icons with similar silhouette weight — mobile readability first */
+    $items = [
+        ['key' => 'dashboard', 'href' => '/',               'icon' => 'fa-house',                 'label' => 'หน้าแรก', 'aria' => 'หน้าแรก'],
+        ['key' => 'checkin',   'href' => '/checkin.php',   'icon' => 'fa-fingerprint',          'label' => 'ลงเวลา', 'aria' => 'ลงเวลาเข้า-ออกงาน'],
+        ['key' => 'leave',     'href' => '/leave.php',     'icon' => 'fa-calendar-days',         'label' => 'ลา', 'aria' => 'การลา'],
+        ['key' => 'payslip',   'href' => '/payslip.php',   'icon' => 'fa-file-invoice-dollar',   'label' => 'สลิป', 'aria' => 'สลิปเงินเดือน'],
+        ['key' => 'profile',   'href' => '/profile.php',   'icon' => 'fa-circle-user',          'label' => 'ฉัน', 'aria' => 'โปรไฟล์และตั้งค่า'],
+    ];
+    ?>
+    <div class="tp-native-bottom-tab-strip">
+        <?php foreach ($items as $it):
             $isHere = ($cp === $it['key']);
-            $active = $isHere ? 'text-violet-300' : 'text-white/60 hover:text-white';
-            $bg = $isHere ? 'bg-violet-500/15 border border-violet-500/20' : 'bg-transparent';
-        ?>
+            ?>
         <a href="<?php echo htmlspecialchars($it['href']); ?>"
-           class="touch-manipulation flex flex-col items-center justify-center gap-0.5 min-w-[48px] min-h-[48px] py-1 rounded-[20px] transition-colors <?php echo $active; ?> <?php echo $bg; ?>"
+           class="tp-native-bottom-tab-link"
            aria-label="<?php echo htmlspecialchars($it['aria']); ?>"
            <?php if ($isHere): ?>aria-current="page"<?php endif; ?>>
-            <i class="fas <?php echo htmlspecialchars($it['icon']); ?> text-2xl leading-none shrink-0" aria-hidden="true"></i>
-            <span class="text-sm font-medium leading-none whitespace-nowrap"><?php echo htmlspecialchars($it['label']); ?></span>
+            <i class="fas <?php echo htmlspecialchars($it['icon']); ?> fa-fw tp-native-bottom-tab-ic" aria-hidden="true"></i>
+            <span class="tp-native-bottom-tab-label"><?php echo htmlspecialchars($it['label']); ?></span>
         </a>
         <?php endforeach; ?>
     </div>
