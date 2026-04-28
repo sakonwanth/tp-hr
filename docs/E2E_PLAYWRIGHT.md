@@ -44,7 +44,7 @@ npx playwright install chromium
 When **`PLAYWRIGHT_HR_USER`** and **`PLAYWRIGHT_HR_PASSWORD`** are set (aliases: **`E2E_HR_USERNAME`** / **`E2E_HR_PASSWORD`**):
 
 1. **`tests/e2e/auth.setup.cjs`** — POST login on **`login.php`**, assert **`h1.dashboard-hero-title`**, save **`playwright/.auth/hr-user.json`** (gitignored).
-2. **`tests/e2e/authenticated.spec.cjs`** — **`chromium-auth`** + **`tablet-auth`** (unless **`PLAYWRIGHT_SKIP_TABLET=1`**) use that session — dashboard hero, **`checkin`**, **`leave`**, **`profile`**, **`payslip`**, **`attendance_history`** titles, optional **`hr/index.php`** when **`PLAYWRIGHT_HR_EXPECT_ADMIN=1`**.
+2. **`tests/e2e/authenticated.spec.cjs`** — **`chromium-auth`** + **`tablet-auth`** (unless **`PLAYWRIGHT_SKIP_TABLET=1`**) use that session — dashboard hero plus employee-route title checks (**`checkin`**, **`leave`**, **`profile`**, **`payslip`**, **`attendance_history`**, **`leave_history`**, **`certificate`**, **`dayoff_schedule`**), optional **`hr/index.php`** when **`PLAYWRIGHT_HR_EXPECT_ADMIN=1`**.
 
 Uses **password login on tp-hr** (same-origin). If SSO forces CRM before dashboard, setup times out — use a DB user that can finish login on **`tp-hr`** or omit auth env for guest-only runs.
 
@@ -114,6 +114,6 @@ PLAYWRIGHT_BASE_URL=http://localhost/tp-hr/ npm run test:e2e
 | `health.spec.cjs` | `GET api/health.php` JSON (`status`, `project` when HTTP 200). |
 | `login.spec.cjs` | `login.php` — submit control visible. |
 | `protected-routes.spec.cjs` | Guest redirect to **`login.php`** for `index`, `checkin`, `leave`, `hr/index`. |
-| `authenticated.spec.cjs` | Logged-in checks on **`index`**, **`checkin`**, **`leave`**, **`profile.php`**, **`payslip.php`**, **`attendance_history.php`**; HR index when **`PLAYWRIGHT_HR_EXPECT_ADMIN=1`**. Projects: **`chromium-auth`**, **`tablet-auth`**. |
+| `authenticated.spec.cjs` | Logged-in **`index`** hero + **`checkin`**, **`leave`**, **`profile`**, **`payslip`**, **`attendance_history`**, **`leave_history`**, **`certificate`**, **`dayoff_schedule`** titles; HR index when **`PLAYWRIGHT_HR_EXPECT_ADMIN=1`**. Projects: **`chromium-auth`**, **`tablet-auth`**. |
 | `visual-login.spec.cjs` | **`.login-card`** on login (guest **chromium** + **tablet** when visual on). |
 | `visual-dashboard.spec.cjs` | **`.dashboard-hero`** after login — **`visual-auth`**, **`visual-auth-tablet`**. |

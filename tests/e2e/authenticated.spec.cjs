@@ -32,6 +32,21 @@ test.describe('Authenticated session', () => {
     await expect(page).toHaveTitle(/ประวัติการลงเวลา/);
   });
 
+  test('leave history page title', async ({ page }) => {
+    await page.goto('leave_history.php', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveTitle(/ประวัติการลา/);
+  });
+
+  test('certificate request page title', async ({ page }) => {
+    await page.goto('certificate.php', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveTitle(/ขอหนังสือรับรอง/);
+  });
+
+  test('day-off schedule page title', async ({ page }) => {
+    await page.goto('dayoff_schedule.php', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveTitle(/วันหยุดประจำสัปดาห์/);
+  });
+
   test('hr admin index (requires HR-capable account)', async ({ page }) => {
     test.skip(
       process.env.PLAYWRIGHT_HR_EXPECT_ADMIN !== '1',
