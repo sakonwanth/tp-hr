@@ -59,7 +59,8 @@ Strict interpretation — *every* loading / empty / error / skeleton on *every* 
 
 | Item |
 |------|
-| **`hr/document_templates`** (**`PLAYWRIGHT_HR_EXPECT_ADMIN`**) + **`hr/api_keys`** (**`PLAYWRIGHT_HR_EXPECT_CEO`**) — guest **`protected-routes`** + **`authenticated.spec`** titles. |
+| **`hr/document_templates`** + **`hr/api_keys`** (**`EXPECT_ADMIN`** / **`EXPECT_CEO`**). |
+| **`hr/employee_*`** guest URLs + **`PLAYWRIGHT_HR_SAMPLE_EMPLOYEE_ID`** auth title checks (`employee_view`, `employee_attendance`, `employee_form` edit). |
 
 ---
 

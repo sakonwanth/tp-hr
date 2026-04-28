@@ -10,7 +10,7 @@ The following **Tier B “automation tranche”** is implemented in-repo (see al
 |------|------------------|
 | Guest API + UI smoke | `health`, `login`, `protected-routes` on **chromium** + **tablet** (`iPad Mini`) unless skipped |
 | Authenticated smoke | **`chromium-auth`** + **`tablet-auth`** (reuse `storageState` after `auth.setup`) |
-| Optional HR (dashboard) asserts | **`PLAYWRIGHT_HR_EXPECT_ADMIN=1`** — **`hr/index`**, **`hr/employees`**, **`hr/leaves`**, **`hr/attendance`**, **`hr/documents`**, **`hr/document_templates`** (`authenticated.spec.cjs`) |
+| Optional HR (dashboard) asserts | **`PLAYWRIGHT_HR_EXPECT_ADMIN=1`** — module list + **`hr/employee_view`**, **`hr/employee_attendance`**, **`hr/employee_form`** (edit) via **`PLAYWRIGHT_HR_SAMPLE_EMPLOYEE_ID`** (default `1`, must exist in **`users`**) |
 | Optional CEO-only HR asserts | **`PLAYWRIGHT_HR_EXPECT_CEO=1`** — **`hr/reports`**, **`hr/settings`**, **`hr/dayoff_approvals`**, **`hr/api_keys`** · same user must pass **`isCEOOrAbove()`**. |
 | Opt-in snapshots (guest login + auth dashboard) | **`PLAYWRIGHT_VISUAL=1`** — **`visual-login.spec.cjs`** (`.login-card`) + **`visual-dashboard.spec.cjs`** (`.dashboard-hero`) |
 
@@ -57,10 +57,16 @@ npm run test:e2e
 
 ### HR routes (same user — non-CEO HR module)
 
-Assert titles on pages that require **`hr_can_access_hr_dashboard()`** (see **`hr/index`**, **`hr/employees`**, **`hr/leaves`**, **`hr/attendance`**, **`hr/documents`**, **`hr/document_templates`**).
+Assert titles on pages that require **`hr_can_access_hr_dashboard()`** (see **`hr/index`**, **`hr/employees`**, **`hr/leaves`**, **`hr/attendance`**, **`hr/documents`**, **`hr/document_templates`**, และหน้า **`?id=`** ด้านล่าง).
 
 ```bash
 export PLAYWRIGHT_HR_EXPECT_ADMIN=1
+```
+
+**Employee-specific HR screens** (**`hr/employee_view.php`**, **`hr/employee_attendance.php`**, **`hr/employee_form.php?action=edit`**) use **`PLAYWRIGHT_HR_SAMPLE_EMPLOYEE_ID`** (defaults to **`1`**) — ตั้งเป็นค่า **`users.id`** ที่มีในฐานข้อมูลของคุณ มิฉะนั้นแอปจะ redirect และเทสล้ม
+
+```bash
+export PLAYWRIGHT_HR_SAMPLE_EMPLOYEE_ID=42
 ```
 
 ### CEO-only HR routes (same credentials — elevated user)

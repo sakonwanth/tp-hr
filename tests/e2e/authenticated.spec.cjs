@@ -1,5 +1,10 @@
 const { test, expect } = require('@playwright/test');
 
+/** `?id=` for HR-only employee pages — must exist in DB for assertions to pass (default `"1"`). */
+const HR_SAMPLE_EMPLOYEE_ID = (
+  process.env.PLAYWRIGHT_HR_SAMPLE_EMPLOYEE_ID || '1'
+).trim();
+
 test.describe('Authenticated session', () => {
   test('dashboard shows greeting hero', async ({ page }) => {
     await page.goto('index.php', { waitUntil: 'domcontentloaded' });
@@ -99,6 +104,42 @@ test.describe('Authenticated session', () => {
     );
     await page.goto('hr/document_templates.php', { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveTitle(/ตั้งค่าเอกสารรับรอง/);
+  });
+
+  test('hr employee view — by id (requires HR + PLAYWRIGHT_HR_SAMPLE_EMPLOYEE_ID in DB)', async ({ page }) => {
+    test.skip(
+      process.env.PLAYWRIGHT_HR_EXPECT_ADMIN !== '1',
+      'Set PLAYWRIGHT_HR_EXPECT_ADMIN=1 and PLAYWRIGHT_HR_SAMPLE_EMPLOYEE_ID to a real users.id.',
+    );
+    await page.goto(
+      `hr/employee_view.php?id=${encodeURIComponent(HR_SAMPLE_EMPLOYEE_ID)}`,
+      { waitUntil: 'domcontentloaded' },
+    );
+    await expect(page).toHaveTitle(/ดูข้อมูลพนักงาน/);
+  });
+
+  test('hr employee attendance — by id (requires HR + valid employee row)', async ({ page }) => {
+    test.skip(
+      process.env.PLAYWRIGHT_HR_EXPECT_ADMIN !== '1',
+      'Set PLAYWRIGHT_HR_EXPECT_ADMIN=1 and PLAYWRIGHT_HR_SAMPLE_EMPLOYEE_ID to a real users.id.',
+    );
+    await page.goto(
+      `hr/employee_attendance.php?id=${encodeURIComponent(HR_SAMPLE_EMPLOYEE_ID)}`,
+      { waitUntil: 'domcontentloaded' },
+    );
+    await expect(page).toHaveTitle(/ประวัติลงเวลา/);
+  });
+
+  test('hr employee form — edit shell (requires HR + valid employee row)', async ({ page }) => {
+    test.skip(
+      process.env.PLAYWRIGHT_HR_EXPECT_ADMIN !== '1',
+      'Set PLAYWRIGHT_HR_EXPECT_ADMIN=1 and PLAYWRIGHT_HR_SAMPLE_EMPLOYEE_ID to a real users.id.',
+    );
+    await page.goto(
+      `hr/employee_form.php?action=edit&id=${encodeURIComponent(HR_SAMPLE_EMPLOYEE_ID)}`,
+      { waitUntil: 'domcontentloaded' },
+    );
+    await expect(page).toHaveTitle(/แก้ไขข้อมูลพนักงาน/);
   });
 
   test('hr reports (requires CEO-level account)', async ({ page }) => {
