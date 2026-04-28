@@ -64,4 +64,31 @@ test.describe('Authenticated session', () => {
     await page.goto('hr/employees.php', { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveTitle(/จัดการพนักงาน/);
   });
+
+  test('hr leaves management (requires HR-capable account)', async ({ page }) => {
+    test.skip(
+      process.env.PLAYWRIGHT_HR_EXPECT_ADMIN !== '1',
+      'Set PLAYWRIGHT_HR_EXPECT_ADMIN=1 and use PLAYWRIGHT_HR_USER with hr dashboard access.',
+    );
+    await page.goto('hr/leaves.php', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveTitle(/จัดการการลา/);
+  });
+
+  test('hr attendance management (requires HR-capable account)', async ({ page }) => {
+    test.skip(
+      process.env.PLAYWRIGHT_HR_EXPECT_ADMIN !== '1',
+      'Set PLAYWRIGHT_HR_EXPECT_ADMIN=1 and use PLAYWRIGHT_HR_USER with hr dashboard access.',
+    );
+    await page.goto('hr/attendance.php', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveTitle(/จัดการเวลาทำงาน/);
+  });
+
+  test('hr document requests (requires HR-capable account)', async ({ page }) => {
+    test.skip(
+      process.env.PLAYWRIGHT_HR_EXPECT_ADMIN !== '1',
+      'Set PLAYWRIGHT_HR_EXPECT_ADMIN=1 and use PLAYWRIGHT_HR_USER with hr dashboard access.',
+    );
+    await page.goto('hr/documents.php', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveTitle(/จัดการคำขอเอกสาร/);
+  });
 });

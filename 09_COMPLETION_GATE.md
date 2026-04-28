@@ -59,7 +59,7 @@ Strict interpretation — *every* loading / empty / error / skeleton on *every* 
 
 | Item |
 |------|
-| **`authenticated.spec.cjs`**: **`hr/employees`** when **`PLAYWRIGHT_HR_EXPECT_ADMIN`**; **`protected-routes`**: guest redirects incl. **`profile`**, **`payslip`**, **`attendance_history`**, **`leave_history`**, **`certificate`**, **`dayoff_schedule`**. CI still runs **`npm ci`** + **`playwright test --list`**. |
+| **`authenticated.spec.cjs`** + **`protected-routes`**: **`hr/leaves`**, **`hr/attendance`**, **`hr/documents`** (guest → login / auth → title when **`PLAYWRIGHT_HR_EXPECT_ADMIN`**). CI unchanged. |
 
 ---
 
