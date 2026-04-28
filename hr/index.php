@@ -111,101 +111,102 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <!-- Quick Stats -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 min-w-0 max-w-full">
-    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-white/50 text-sm">เข้างานวันนี้</p>
-                <p class="text-2xl font-bold text-green-400">
-                    <?php echo $attendanceStats['checked_in'] ?? 0; ?>/<?php echo $attendanceStats['total_employees'] ?? 0; ?>
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6 md:mb-8 min-w-0 max-w-full">
+    <div class="stat-card tp-native-summary-card group min-w-0">
+        <div class="flex items-center gap-4">
+            <div class="stat-icon bg-emerald-500/15 border border-emerald-400/25 transition-colors">
+                <i class="fas fa-user-check text-emerald-400 text-2xl" aria-hidden="true"></i>
+            </div>
+            <div class="min-w-0 flex-1">
+                <p class="text-slate-300 text-sm">เข้างานวันนี้</p>
+                <p class="text-2xl font-bold text-white tabular-nums">
+                    <?php echo (int)($attendanceStats['checked_in'] ?? 0); ?>/<span class="text-white/80"><?php echo (int)($attendanceStats['total_employees'] ?? 0); ?></span>
                 </p>
             </div>
-            <div class="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
-                <i class="fas fa-user-check text-green-400 text-xl"></i>
+        </div>
+    </div>
+
+    <div class="stat-card tp-native-summary-card group min-w-0">
+        <div class="flex items-center gap-4">
+            <div class="stat-icon bg-amber-500/15 border border-amber-400/25 transition-colors">
+                <i class="fas fa-clock text-amber-400 text-2xl" aria-hidden="true"></i>
+            </div>
+            <div class="min-w-0 flex-1">
+                <p class="text-slate-300 text-sm">มาสาย</p>
+                <p class="text-2xl font-bold text-white tabular-nums"><?php echo (int)($attendanceStats['late_count'] ?? 0); ?></p>
             </div>
         </div>
     </div>
-    
-    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-white/50 text-sm">มาสาย</p>
-                <p class="text-2xl font-bold text-yellow-400"><?php echo $attendanceStats['late_count'] ?? 0; ?></p>
+
+    <div class="stat-card tp-native-summary-card group min-w-0">
+        <div class="flex items-center gap-4">
+            <div class="stat-icon bg-violet-500/15 border border-violet-400/25 transition-colors">
+                <i class="fas fa-calendar-check text-violet-400 text-2xl" aria-hidden="true"></i>
             </div>
-            <div class="w-12 h-12 rounded-xl bg-yellow-500/20 flex items-center justify-center">
-                <i class="fas fa-clock text-yellow-400 text-xl"></i>
+            <div class="min-w-0 flex-1">
+                <p class="text-slate-300 text-sm">รอลาอนุมัติ</p>
+                <p class="text-2xl font-bold text-white tabular-nums"><?php echo (int)$pendingLeaves; ?></p>
             </div>
         </div>
+        <a href="leaves.php" class="text-violet-400 text-sm hover:underline mt-3 inline-block touch-manipulation font-medium">ดูทั้งหมด →</a>
     </div>
-    
-    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-white/50 text-sm">รอลาอนุมัติ</p>
-                <p class="text-2xl font-bold text-violet-400"><?php echo $pendingLeaves; ?></p>
+
+    <div class="stat-card tp-native-summary-card group min-w-0">
+        <div class="flex items-center gap-4">
+            <div class="stat-icon bg-blue-500/15 border border-blue-400/25 transition-colors">
+                <i class="fas fa-file-alt text-blue-400 text-2xl" aria-hidden="true"></i>
             </div>
-            <div class="w-12 h-12 rounded-xl bg-violet-500/20 flex items-center justify-center">
-                <i class="fas fa-calendar-check text-violet-400 text-xl"></i>
-            </div>
-        </div>
-        <a href="leaves.php" class="text-violet-400 text-sm hover:underline mt-2 block touch-manipulation">ดูทั้งหมด →</a>
-    </div>
-    
-    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-white/50 text-sm">รอออกเอกสาร</p>
-                <p class="text-2xl font-bold text-blue-400"><?php echo $pendingDocs; ?></p>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
-                <i class="fas fa-file-alt text-blue-400 text-xl"></i>
+            <div class="min-w-0 flex-1">
+                <p class="text-slate-300 text-sm">รอออกเอกสาร</p>
+                <p class="text-2xl font-bold text-white tabular-nums"><?php echo (int)$pendingDocs; ?></p>
             </div>
         </div>
-        <a href="documents.php" class="text-blue-400 text-sm hover:underline mt-2 block touch-manipulation">ดูทั้งหมด →</a>
+        <a href="documents.php" class="text-blue-400 text-sm hover:underline mt-3 inline-block touch-manipulation font-medium">ดูทั้งหมด →</a>
     </div>
 </div>
 
-<div class="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 mb-6 min-w-0 max-w-full">
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6 mb-6 min-w-0 max-w-full">
     <!-- Pending Leave Requests -->
-    <div class="glass-card rounded-xl overflow-hidden min-w-0">
+    <div class="native-card tp-native-card tp-native-data-card min-w-0 max-w-full overflow-hidden">
         <div class="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between gap-3 min-w-0">
-            <h2 class="text-lg font-semibold text-white tracking-tight min-w-0">
-                <i class="fas fa-calendar-alt text-violet-400 mr-2"></i>คำขอลารออนุมัติ
+            <h2 class="section-title mb-0 flex flex-wrap items-center gap-2 text-white min-w-0">
+                <i class="fas fa-calendar-alt text-violet-400 text-2xl shrink-0" aria-hidden="true"></i>
+                <span class="min-w-0">คำขอลารออนุมัติ</span>
             </h2>
-            <a href="leaves.php" class="text-violet-400 text-sm hover:underline shrink-0 touch-manipulation">ดูทั้งหมด</a>
+            <a href="leaves.php" class="text-violet-400 text-sm hover:underline shrink-0 touch-manipulation font-medium">ดูทั้งหมด</a>
         </div>
-        
+
         <?php if (empty($recentLeaves)): ?>
-        <div class="p-8 text-center">
-            <i class="fas fa-check-circle text-3xl text-green-400 mb-2"></i>
-            <p class="text-white/60">ไม่มีคำขอลารออนุมัติ</p>
+        <div class="tp-native-empty-state text-center py-12 px-4 rounded-[20px] border border-dashed border-white/15 max-w-none mx-4 my-4">
+            <i class="fas fa-check-circle text-emerald-400/90 text-4xl mb-3 block" aria-hidden="true"></i>
+            <p class="text-slate-400 text-sm">ไม่มีคำขอลารออนุมัติ</p>
         </div>
         <?php else: ?>
         <div class="divide-y divide-white/10">
             <?php foreach ($recentLeaves as $leave): ?>
-            <div class="p-4 hover:bg-white/5 transition-colors min-w-0">
-                <div class="flex items-start justify-between gap-4 min-w-0">
+            <div class="p-4 hover:bg-white/[0.04] transition-colors min-w-0">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between min-w-0">
                     <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="w-2 h-2 rounded-full" style="background-color: <?php echo $leave['color_code']; ?>"></span>
-                            <span class="text-white font-medium"><?php echo htmlspecialchars($leave['first_name_th'] . ' ' . $leave['last_name_th']); ?></span>
+                        <div class="flex items-center gap-2 mb-1 min-w-0">
+                            <span class="w-2 h-2 rounded-full shrink-0" style="background-color: <?php echo htmlspecialchars($leave['color_code'] ?? '#6366f1', ENT_QUOTES, 'UTF-8'); ?>"></span>
+                            <span class="text-white font-medium truncate"><?php echo htmlspecialchars($leave['first_name_th'] . ' ' . $leave['last_name_th']); ?></span>
                         </div>
                         <p class="text-white/70 text-sm"><?php echo htmlspecialchars($leave['leave_type_name']); ?></p>
                         <p class="text-white/50 text-sm">
-                            <?php echo formatDateThai($leave['start_date']); ?> 
+                            <?php echo formatDateThai($leave['start_date']); ?>
                             <?php if ($leave['start_date'] !== $leave['end_date']): ?>
                             - <?php echo formatDateThai($leave['end_date']); ?>
                             <?php endif; ?>
-                            (<?php echo number_format($leave['total_days'], 1); ?> วัน)
+                            (<?php echo number_format((float)$leave['total_days'], 1); ?> วัน)
                         </p>
                     </div>
                     <div class="flex flex-col sm:flex-row gap-2 shrink-0 w-full sm:w-auto">
-                        <button type="button" onclick="approveLeave(<?php echo $leave['id']; ?>)" 
-                                class="min-h-[56px] px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors touch-manipulation">
+                        <button type="button" onclick="approveLeave(<?php echo (int)$leave['id']; ?>)"
+                                class="min-h-[56px] px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-[20px] transition-colors touch-manipulation font-semibold">
                             อนุมัติ
                         </button>
-                        <button type="button" onclick="rejectLeave(<?php echo $leave['id']; ?>)"
-                                class="min-h-[48px] px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-sm rounded-lg transition-colors touch-manipulation">
+                        <button type="button" onclick="rejectLeave(<?php echo (int)$leave['id']; ?>)"
+                                class="min-h-[48px] px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/25 text-red-300 text-sm rounded-[20px] transition-colors touch-manipulation font-medium">
                             ไม่อนุมัติ
                         </button>
                     </div>
@@ -215,30 +216,31 @@ include dirname(__DIR__) . '/templates/header.php';
         </div>
         <?php endif; ?>
     </div>
-    
+
     <!-- On Leave Today -->
-    <div class="glass-card rounded-xl overflow-hidden min-w-0">
+    <div class="native-card tp-native-card tp-native-data-card min-w-0 max-w-full overflow-hidden">
         <div class="p-4 sm:p-5 border-b border-white/10">
-            <h2 class="text-lg font-semibold text-white tracking-tight">
-                <i class="fas fa-user-minus text-orange-400 mr-2"></i>ลาวันนี้ (<?php echo count($onLeaveToday); ?> คน)
+            <h2 class="section-title mb-0 flex flex-wrap items-center gap-2 text-white">
+                <i class="fas fa-user-minus text-orange-400 text-2xl" aria-hidden="true"></i>
+                ลาวันนี้ (<?php echo count($onLeaveToday); ?> คน)
             </h2>
         </div>
-        
+
         <?php if (empty($onLeaveToday)): ?>
-        <div class="p-8 text-center">
-            <i class="fas fa-users text-3xl text-green-400 mb-2"></i>
-            <p class="text-white/60">ไม่มีพนักงานลาวันนี้</p>
+        <div class="tp-native-empty-state text-center py-12 px-4 rounded-[20px] border border-dashed border-white/15 max-w-none mx-4 my-4">
+            <i class="fas fa-users text-emerald-400/90 text-4xl mb-3 block" aria-hidden="true"></i>
+            <p class="text-slate-400 text-sm">ไม่มีพนักงานลาวันนี้</p>
         </div>
         <?php else: ?>
-        <div class="divide-y divide-white/10 max-h-80 overflow-y-auto">
+        <div class="divide-y divide-white/10 max-h-80 overflow-y-auto overscroll-contain">
             <?php foreach ($onLeaveToday as $emp): ?>
-            <div class="p-3 flex items-center gap-3">
-                <div class="w-2 h-2 rounded-full" style="background-color: <?php echo $emp['color_code']; ?>"></div>
-                <div class="flex-1">
-                    <p class="text-white text-sm"><?php echo htmlspecialchars($emp['first_name_th'] . ' ' . $emp['last_name_th']); ?></p>
-                    <p class="text-white/50 text-xs"><?php echo htmlspecialchars($emp['department'] ?? '-'); ?></p>
+            <div class="p-3 flex items-center gap-3 min-w-0">
+                <span class="w-2 h-2 rounded-full shrink-0" style="background-color: <?php echo htmlspecialchars($emp['color_code'] ?? '#6366f1', ENT_QUOTES, 'UTF-8'); ?>"></span>
+                <div class="flex-1 min-w-0">
+                    <p class="text-white text-sm truncate"><?php echo htmlspecialchars($emp['first_name_th'] . ' ' . $emp['last_name_th']); ?></p>
+                    <p class="text-white/50 text-xs truncate"><?php echo htmlspecialchars($emp['department'] ?? '-'); ?></p>
                 </div>
-                <span class="text-white/60 text-xs"><?php echo htmlspecialchars($emp['leave_type_name']); ?></span>
+                <span class="text-white/60 text-xs shrink-0 text-right max-w-[40%]"><?php echo htmlspecialchars($emp['leave_type_name']); ?></span>
             </div>
             <?php endforeach; ?>
         </div>
@@ -247,66 +249,69 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <!-- Quick Actions -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 min-w-0 max-w-full">
-    <a href="leaves.php" class="glass-card rounded-xl p-4 flex min-h-[48px] items-center min-w-0 hover:bg-white/10 transition-colors group touch-manipulation">
-        <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-lg bg-violet-600/20 flex items-center justify-center group-hover:bg-violet-600/30">
-                <i class="fas fa-calendar-check text-violet-400"></i>
-            </div>
-            <span class="text-white">จัดการการลา</span>
+<div class="native-card tp-native-card tp-native-data-card mb-6 min-w-0 max-w-full overflow-hidden">
+    <div class="p-4 sm:p-5 border-b border-white/10">
+        <h2 class="section-title mb-0 flex flex-wrap items-center gap-2 text-white">
+            <i class="fas fa-bolt text-amber-400 text-2xl" aria-hidden="true"></i>
+            ทางลัด HR
+        </h2>
+    </div>
+    <div class="p-4 sm:p-5">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 min-w-0">
+            <a href="leaves.php" class="quick-action tp-native-quick-action-card group relative min-h-[96px] sm:min-h-[116px] touch-manipulation border-violet-500/20">
+                <div class="quick-action-icon bg-violet-500/15 border border-violet-400/25 group-hover:bg-violet-500/25">
+                    <i class="fas fa-calendar-check text-violet-400 text-2xl" aria-hidden="true"></i>
+                </div>
+                <span class="text-white font-semibold text-center text-sm sm:text-base leading-snug">จัดการการลา</span>
+            </a>
+
+            <a href="attendance.php" class="quick-action tp-native-quick-action-card group relative min-h-[96px] sm:min-h-[116px] touch-manipulation border-emerald-500/20">
+                <div class="quick-action-icon bg-emerald-500/15 border border-emerald-400/25 group-hover:bg-emerald-500/25">
+                    <i class="fas fa-user-clock text-emerald-400 text-2xl" aria-hidden="true"></i>
+                </div>
+                <span class="text-white font-semibold text-center text-sm sm:text-base leading-snug">ตรวจสอบการเข้างาน</span>
+            </a>
+
+            <a href="documents.php" class="quick-action tp-native-quick-action-card group relative min-h-[96px] sm:min-h-[116px] touch-manipulation border-blue-500/20">
+                <div class="quick-action-icon bg-blue-500/15 border border-blue-400/25 group-hover:bg-blue-500/25">
+                    <i class="fas fa-file-alt text-blue-400 text-2xl" aria-hidden="true"></i>
+                </div>
+                <span class="text-white font-semibold text-center text-sm sm:text-base leading-snug">ออกเอกสาร</span>
+            </a>
+
+            <a href="employees.php" class="quick-action tp-native-quick-action-card group relative min-h-[96px] sm:min-h-[116px] touch-manipulation border-amber-500/20">
+                <div class="quick-action-icon bg-amber-500/15 border border-amber-400/25 group-hover:bg-amber-500/25">
+                    <i class="fas fa-users text-amber-400 text-2xl" aria-hidden="true"></i>
+                </div>
+                <span class="text-white font-semibold text-center text-sm sm:text-base leading-snug">พนักงาน</span>
+            </a>
         </div>
-    </a>
-    
-    <a href="attendance.php" class="glass-card rounded-xl p-4 flex min-h-[48px] items-center min-w-0 hover:bg-white/10 transition-colors group touch-manipulation">
-        <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-lg bg-green-600/20 flex items-center justify-center group-hover:bg-green-600/30">
-                <i class="fas fa-user-clock text-green-400"></i>
-            </div>
-            <span class="text-white">ตรวจสอบการเข้างาน</span>
-        </div>
-    </a>
-    
-    <a href="documents.php" class="glass-card rounded-xl p-4 flex min-h-[48px] items-center min-w-0 hover:bg-white/10 transition-colors group touch-manipulation">
-        <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-lg bg-blue-600/20 flex items-center justify-center group-hover:bg-blue-600/30">
-                <i class="fas fa-file-alt text-blue-400"></i>
-            </div>
-            <span class="text-white">ออกเอกสาร</span>
-        </div>
-    </a>
-    
-    <a href="employees.php" class="glass-card rounded-xl p-4 flex min-h-[48px] items-center min-w-0 hover:bg-white/10 transition-colors group touch-manipulation">
-        <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-lg bg-yellow-600/20 flex items-center justify-center group-hover:bg-yellow-600/30">
-                <i class="fas fa-users text-yellow-400"></i>
-            </div>
-            <span class="text-white">พนักงาน</span>
-        </div>
-    </a>
+    </div>
 </div>
 
 <!-- Pending Documents -->
 <?php if (!empty($recentDocs)): ?>
-<div class="glass-card rounded-xl overflow-hidden min-w-0 max-w-full">
+<div class="native-card tp-native-card tp-native-data-card min-w-0 max-w-full overflow-hidden">
     <div class="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between gap-3 min-w-0">
-        <h2 class="text-lg font-semibold text-white tracking-tight min-w-0">
-            <i class="fas fa-file-signature text-blue-400 mr-2"></i>คำขอเอกสารรอดำเนินการ
+        <h2 class="section-title mb-0 flex flex-wrap items-center gap-2 text-white min-w-0">
+            <i class="fas fa-file-signature text-blue-400 text-2xl shrink-0" aria-hidden="true"></i>
+            <span class="min-w-0">คำขอเอกสารรอดำเนินการ</span>
         </h2>
-        <a href="documents.php" class="text-blue-400 text-sm hover:underline shrink-0 touch-manipulation">ดูทั้งหมด</a>
+        <a href="documents.php" class="text-blue-400 text-sm hover:underline shrink-0 touch-manipulation font-medium">ดูทั้งหมด</a>
     </div>
-    
+
     <div class="md:hidden p-3 space-y-3">
         <?php foreach ($recentDocs as $doc): ?>
-        <div class="rounded-2xl bg-white/5 border border-white/10 p-4 space-y-3">
+        <div class="rounded-[20px] bg-white/5 border border-white/10 p-4 space-y-3 min-w-0">
             <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
                     <p class="text-white/50 text-xs uppercase tracking-wide">เลขที่</p>
                     <p class="text-white font-mono text-sm"><?php echo htmlspecialchars($doc['request_number']); ?></p>
                 </div>
                 <?php if ($doc['status'] === 'PENDING'): ?>
-                <span class="shrink-0 px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs rounded">รอดำเนินการ</span>
+                <span class="shrink-0 px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs rounded-[20px]">รอดำเนินการ</span>
                 <?php else: ?>
-                <span class="shrink-0 px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded">กำลังดำเนินการ</span>
+                <span class="shrink-0 px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-[20px]">กำลังดำเนินการ</span>
                 <?php endif; ?>
             </div>
             <div>
@@ -323,42 +328,42 @@ include dirname(__DIR__) . '/templates/header.php';
                 <p class="text-white/80 text-sm"><?php echo formatDateThai($doc['created_at']); ?></p>
             </div>
             <a href="documents.php?action=process&id=<?php echo (int)$doc['id']; ?>"
-               class="flex min-h-[56px] items-center justify-center rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold transition-colors touch-manipulation">
+               class="flex min-h-[56px] items-center justify-center rounded-[20px] bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold transition-colors touch-manipulation">
                 ดำเนินการ
             </a>
         </div>
         <?php endforeach; ?>
     </div>
 
-    <div class="hidden md:block overflow-x-auto">
-        <table class="w-full">
+    <div class="hidden md:block tp-native-table-shell overflow-x-auto min-w-0 max-w-full overscroll-x-contain -mx-1 px-1">
+        <table class="w-full" style="min-width:640px">
             <thead class="bg-white/5">
                 <tr>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">เลขที่</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">พนักงาน</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">ประเภทเอกสาร</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">วันที่ขอ</th>
-                    <th class="px-4 py-3 text-center text-xs font-medium text-white/60 uppercase">สถานะ</th>
-                    <th class="px-4 py-3 text-center text-xs font-medium text-white/60 uppercase">การดำเนินการ</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">เลขที่</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">พนักงาน</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">ประเภทเอกสาร</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">วันที่ขอ</th>
+                    <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white/60 uppercase">สถานะ</th>
+                    <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white/60 uppercase">การดำเนินการ</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-white/10">
                 <?php foreach ($recentDocs as $doc): ?>
-                <tr class="hover:bg-white/5">
-                    <td class="px-4 py-3 text-white/70 text-sm"><?php echo htmlspecialchars($doc['request_number']); ?></td>
+                <tr class="hover:bg-white/[0.04]">
+                    <td class="px-4 py-3 text-white/70 text-sm font-mono"><?php echo htmlspecialchars($doc['request_number']); ?></td>
                     <td class="px-4 py-3 text-white"><?php echo htmlspecialchars($doc['first_name_th'] . ' ' . $doc['last_name_th']); ?></td>
                     <td class="px-4 py-3 text-white"><?php echo htmlspecialchars($doc['template_name']); ?></td>
                     <td class="px-4 py-3 text-white/70 text-sm"><?php echo formatDateThai($doc['created_at']); ?></td>
                     <td class="px-4 py-3 text-center">
                         <?php if ($doc['status'] === 'PENDING'): ?>
-                        <span class="px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs rounded">รอดำเนินการ</span>
+                        <span class="px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs rounded-[20px]">รอดำเนินการ</span>
                         <?php else: ?>
-                        <span class="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded">กำลังดำเนินการ</span>
+                        <span class="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-[20px]">กำลังดำเนินการ</span>
                         <?php endif; ?>
                     </td>
                     <td class="px-4 py-3 text-center">
-                        <a href="documents.php?action=process&id=<?php echo $doc['id']; ?>" 
-                           class="inline-flex min-h-[56px] items-center justify-center px-4 bg-violet-600 hover:bg-violet-700 text-white text-sm rounded transition-colors touch-manipulation">
+                        <a href="documents.php?action=process&id=<?php echo (int)$doc['id']; ?>"
+                           class="inline-flex min-h-[56px] items-center justify-center px-4 bg-violet-600 hover:bg-violet-700 text-white text-sm rounded-[20px] transition-colors touch-manipulation font-semibold">
                             ดำเนินการ
                         </a>
                     </td>
@@ -371,21 +376,21 @@ include dirname(__DIR__) . '/templates/header.php';
 <?php endif; ?>
 
 <!-- Reject Modal -->
-<div id="reject-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
-    <div class="glass-card rounded-2xl w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
-        <form id="reject-form" class="p-6">
-            <h3 class="text-xl font-bold text-white mb-4">ไม่อนุมัติคำขอลา</h3>
+<div id="reject-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="reject-modal-title">
+    <div class="native-card tp-native-card w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
+        <form id="reject-form" class="space-y-4">
+            <h3 id="reject-modal-title" class="text-xl font-bold text-white">ไม่อนุมัติคำขอลา</h3>
             <input type="hidden" name="request_id" id="reject-request-id">
-            <div class="mb-4">
-                <label class="block text-white/80 text-sm mb-2">เหตุผล <span class="text-red-400">*</span></label>
-                <textarea name="reason" id="reject-reason" required rows="3" class="input-field" 
+            <div class="tp-native-form-group mb-0">
+                <label for="reject-reason" class="text-white/80 text-sm">เหตุผล <span class="text-red-400" aria-hidden="true">*</span></label>
+                <textarea name="reason" id="reject-reason" required rows="3" class="input-field tp-native-textarea w-full"
                           placeholder="ระบุเหตุผลที่ไม่อนุมัติ..."></textarea>
             </div>
-            <div class="flex gap-4">
-                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg touch-manipulation">
+            <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[20px] touch-manipulation font-medium">
                     ยกเลิก
                 </button>
-                <button type="submit" class="flex-1 min-h-[56px] py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg touch-manipulation">
+                <button type="submit" class="flex-1 min-h-[56px] py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-[20px] touch-manipulation font-semibold">
                     ไม่อนุมัติ
                 </button>
             </div>
@@ -478,17 +483,5 @@ document.getElementById('reject-modal').addEventListener('click', function(e) {
     if (e.target === this) closeRejectModal();
 });
 </script>
-
-<style>
-.hr-dash-scroll {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-.hr-dash-scroll::-webkit-scrollbar {
-    display: none;
-    width: 0;
-    height: 0;
-}
-</style>
 
 <?php include dirname(__DIR__) . '/templates/footer.php'; ?>

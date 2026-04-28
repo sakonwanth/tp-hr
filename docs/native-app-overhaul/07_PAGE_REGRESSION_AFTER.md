@@ -41,6 +41,7 @@
 | Attendance history `/attendance_history.php` | **REGRESSION_PASS** (static QA: GET filters + queries unchanged; markup/CSS only) |
 | Verify document `/verify_document.php` | **REGRESSION_PASS** (static QA: `code`/`doc` GET + SQL branch + rate limit unchanged; form adds optional `doc`) |
 | Certificate print POST `/certificate_print.php` | **REGRESSION_PASS** (static QA: POST+CSRF + auth + SQL unchanged; screen-only chrome; print `@media` unchanged) |
+| HR dashboard `/hr/index.php` | **REGRESSION_PASS** (static QA: queries + `/api/leave.php` approve/reject unchanged; markup/CSS + modal a11y only) |
 | Other pages in 01 §A | **REGRESSION_PENDING** |
 
 ### Dashboard — `/` (`index.php`)
@@ -139,3 +140,11 @@
 | Fetch + HR/owner auth + template render | PASS (unchanged) |
 | Bilingual toolbar uses POST (not broken GET links) | PASS |
 | `@media print` — A4 pages, toolbar hidden | PASS |
+
+### HR dashboard — `/hr/index.php`
+
+| Check | Result |
+|-------|--------|
+| HR gate + attendance/leave/doc queries | PASS (unchanged) |
+| Approve/reject + reject modal → `/api/leave.php` | PASS |
+| Document deep links `documents.php?action=process&id=` | PASS |
