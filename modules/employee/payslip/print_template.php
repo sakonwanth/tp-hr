@@ -288,7 +288,7 @@ header('Content-Type: text/html; charset=utf-8');
         .no-print { margin-bottom: 16px; }
         .btn-print {
             padding: 10px 20px;
-            min-height: 44px;
+            min-height: 48px;
             background: #1a365d;
             color: #fff;
             border: none;
