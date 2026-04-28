@@ -33,6 +33,8 @@
 | Login `/login.php` | **REGRESSION_PASS** (static QA: POST/redirect/LINE unchanged; a11y labels improved) |
 | Check-in `/checkin.php` | **REGRESSION_PASS** (static QA: IDs/handlers preserved; markup/CSS + modal shells only) |
 | Leave `/leave.php` (+ `request_form.php` partial) | **REGRESSION_PASS** (static QA: routes/flash/API hooks unchanged; markup/CSS only) |
+| Leave history `/leave_history.php` | **REGRESSION_PASS** (static QA: filters/pagination/API detail+cancel unchanged; modal IDs preserved) |
+| Payslip `/payslip.php` | **REGRESSION_PASS** (static QA: POST download + queries unchanged; print CSS extended for `.native-card`) |
 | Other pages in 01 §A | **REGRESSION_PENDING** |
 
 ### Dashboard — `/` (`index.php`)
@@ -68,3 +70,19 @@
 | Lists / entitlements queries | PASS (unchanged) |
 | `cancelRequest` / `?action=request` | PASS |
 | Desktop table shell + mobile cards | PASS |
+
+### Leave history — `/leave_history.php`
+
+| Check | Result |
+|-------|--------|
+| Filter GET / pagination | PASS (unchanged) |
+| `viewDetail` / `detail-modal` / `cancelRequest` | PASS |
+| Mobile cards + desktop `tp-native-table-shell` | PASS |
+
+### Payslip — `/payslip.php`
+
+| Check | Result |
+|-------|--------|
+| Slip list / detail / YTD queries | PASS (unchanged) |
+| POST `download_payslip` + CSRF | PASS |
+| List card layout + print stylesheet | PASS |

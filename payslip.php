@@ -198,14 +198,14 @@ try {
             <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">ดูรายละเอียดรายได้ รายการหัก และเงินได้สุทธิ พิมพ์หรือดาวน์โหลดได้จากปุ่มด้านขวา</p>
         </div>
         <div class="flex flex-col sm:flex-row gap-2 sm:items-center shrink-0 w-full sm:w-auto">
-            <?php tp_hr_payslip_download_form((int)$slip['id'], 'w-full sm:w-auto min-h-[48px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors inline-flex items-center justify-center touch-manipulation', '<i class="fas fa-print mr-2"></i>พิมพ์', false); ?>
-            <?php tp_hr_payslip_download_form((int)$slip['id'], 'w-full sm:w-auto min-h-[56px] px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors inline-flex items-center justify-center font-semibold touch-manipulation', '<i class="fas fa-download mr-2"></i>ดาวน์โหลด PDF', true); ?>
+            <?php tp_hr_payslip_download_form((int)$slip['id'], 'w-full sm:w-auto min-h-[48px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-[20px] transition-colors inline-flex items-center justify-center touch-manipulation font-medium border-0', '<i class="fas fa-print mr-2" aria-hidden="true"></i>พิมพ์', false); ?>
+            <?php tp_hr_payslip_download_form((int)$slip['id'], 'w-full sm:w-auto min-h-[56px] px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-[20px] transition-colors inline-flex items-center justify-center font-semibold touch-manipulation border-0', '<i class="fas fa-download mr-2" aria-hidden="true"></i>ดาวน์โหลด PDF', true); ?>
         </div>
     </div>
 </div>
 
 <!-- Payslip Card -->
-<div class="glass-card rounded-xl p-4 sm:p-6 print:bg-white print:text-black min-w-0 overflow-x-auto" id="payslip-content">
+<div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 print:bg-white print:text-black min-w-0 overflow-x-auto" id="payslip-content">
     <!-- Header -->
     <div class="flex items-start justify-between mb-6 pb-6 border-b border-white/10 print:border-gray-200">
         <div class="min-w-0 pr-2">
@@ -347,7 +347,7 @@ try {
     </div>
     
     <!-- Net Salary -->
-    <div class="p-6 rounded-xl bg-gradient-to-r from-violet-600/20 to-purple-600/20 border border-violet-500/30 print:bg-gray-100 print:border-gray-300">
+    <div class="p-6 rounded-[20px] bg-violet-600/15 border border-violet-500/35 print:bg-gray-100 print:border-gray-300">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-white/70 print:text-gray-600">เงินได้สุทธิ</p>
@@ -387,31 +387,31 @@ try {
 </div>
 
 <!-- YTD Summary -->
-<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 min-w-0 max-w-full">
-    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden">
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6 mb-4 md:mb-6 min-w-0 max-w-full">
+    <div class="native-card tp-native-card tp-native-data-card min-w-0">
         <p class="text-white/50 text-sm truncate">รายได้สะสม <?php echo $year + 543; ?></p>
         <p class="text-lg sm:text-xl font-bold text-green-400 mt-1 tabular-nums"><?php echo number_format($ytd['ytd_income'] ?? 0, 2); ?></p>
     </div>
-    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden">
+    <div class="native-card tp-native-card tp-native-data-card min-w-0">
         <p class="text-white/50 text-sm truncate">ภาษีสะสม</p>
         <p class="text-lg sm:text-xl font-bold text-red-400 mt-1 tabular-nums"><?php echo number_format($ytd['ytd_tax'] ?? 0, 2); ?></p>
     </div>
-    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden">
+    <div class="native-card tp-native-card tp-native-data-card min-w-0">
         <p class="text-white/50 text-sm truncate">ประกันสังคมสะสม</p>
         <p class="text-lg sm:text-xl font-bold text-yellow-400 mt-1 tabular-nums"><?php echo number_format($ytd['ytd_ss'] ?? 0, 2); ?></p>
     </div>
-    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden">
+    <div class="native-card tp-native-card tp-native-data-card min-w-0">
         <p class="text-white/50 text-sm truncate">กองทุนสำรองฯ สะสม</p>
         <p class="text-lg sm:text-xl font-bold text-blue-400 mt-1 tabular-nums"><?php echo number_format($ytd['ytd_pf'] ?? 0, 2); ?></p>
     </div>
-    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden sm:col-span-2 lg:col-span-1">
+    <div class="native-card tp-native-card tp-native-data-card min-w-0 sm:col-span-2 lg:col-span-1">
         <p class="text-white/50 text-sm truncate">รายได้สุทธิสะสม</p>
         <p class="text-lg sm:text-xl font-bold text-violet-400 mt-1 tabular-nums"><?php echo number_format($ytd['ytd_net'] ?? 0, 2); ?></p>
     </div>
 </div>
 
 <!-- Year Filter -->
-<div class="glass-card rounded-xl p-4 sm:p-6 mb-6 min-w-0 overflow-hidden">
+<div class="native-card tp-native-card tp-native-data-card mb-4 md:mb-6 min-w-0">
     <form method="GET" class="flex flex-wrap items-end gap-4 min-w-0">
         <div class="min-w-0">
             <label class="block text-white/60 text-xs mb-1" for="payslip-year">ปี (พ.ศ.)</label>
@@ -425,14 +425,14 @@ try {
 </div>
 
 <!-- Slip List -->
-<div class="glass-card rounded-xl overflow-hidden min-w-0 max-w-full">
+<div class="native-card tp-native-card tp-native-data-card min-w-0 max-w-full overflow-hidden">
     <?php if (empty($slips)): ?>
-    <div class="p-12 text-center">
-        <i class="fas fa-file-invoice-dollar text-4xl text-white/20 mb-4"></i>
-        <p class="text-white/60">ไม่พบสลิปเงินเดือนในปี <?php echo $year + 543; ?></p>
+    <div class="tp-native-empty-state text-center py-12 px-4 rounded-[20px] border border-dashed border-white/15 max-w-none mx-4 my-4">
+        <i class="fas fa-file-invoice-dollar text-slate-500 text-4xl mb-3 block" aria-hidden="true"></i>
+        <p class="text-slate-400 text-sm">ไม่พบสลิปเงินเดือนในปี <?php echo $year + 543; ?></p>
     </div>
     <?php else: ?>
-    <div class="divide-y divide-white/10">
+    <div class="space-y-3 p-3 md:p-4 min-w-0">
         <?php foreach ($slips as $s): ?>
         <?php
         $monthName = thaiMonth(date('n', strtotime($s['payroll_month'])));
@@ -450,11 +450,11 @@ try {
             'paid' => 'จ่ายแล้ว'
         ];
         ?>
-        <div class="p-4 md:p-6 hover:bg-white/5 transition-colors min-w-0">
+        <div class="rounded-[20px] bg-white/5 border border-white/8 p-4 md:p-5 min-w-0 transition-colors hover:bg-white/[0.07]">
             <div class="flex flex-col gap-4 min-w-0">
                 <div class="flex items-start gap-4 min-w-0">
-                    <div class="w-12 h-12 rounded-xl bg-violet-600/20 flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-file-invoice-dollar text-violet-400 text-xl"></i>
+                    <div class="w-12 h-12 rounded-[20px] bg-violet-600/20 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-file-invoice-dollar text-violet-400 text-xl" aria-hidden="true"></i>
                     </div>
                     <div class="min-w-0 flex-1 pt-0.5">
                         <h3 class="text-white font-medium text-base leading-snug"><?php echo htmlspecialchars($monthName); ?> <?php echo (int)$yearBE; ?></h3>
@@ -463,7 +463,7 @@ try {
                         </p>
                     </div>
                 </div>
-                <div class="rounded-xl bg-white/5 border border-white/10 px-4 py-3 min-w-0">
+                <div class="rounded-[20px] bg-black/20 border border-white/8 px-4 py-3 min-w-0">
                     <p class="text-white/50 text-xs uppercase tracking-wide">เงินได้สุทธิ</p>
                     <p class="text-2xl font-bold text-green-400 tabular-nums mt-1"><?php echo number_format($s['net_salary'], 2); ?> <span class="text-sm font-normal text-white/50">บาท</span></p>
                 </div>
@@ -473,11 +473,11 @@ try {
                     </span>
                     <div class="flex items-center gap-3 sm:justify-end shrink-0">
                         <a href="payslip.php?slip_id=<?php echo (int)$s['id']; ?>"
-                           class="flex-1 sm:flex-none min-h-[48px] min-w-[48px] px-4 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors inline-flex items-center justify-center gap-2 touch-manipulation"
+                           class="flex-1 sm:flex-none min-h-[48px] min-w-[48px] px-4 bg-white/10 hover:bg-white/20 text-white rounded-[20px] transition-colors inline-flex items-center justify-center gap-2 touch-manipulation font-medium"
                            title="ดูรายละเอียด">
-                            <i class="fas fa-eye"></i><span class="text-sm sm:hidden">ดู</span>
+                            <i class="fas fa-eye" aria-hidden="true"></i><span class="text-sm sm:hidden">ดู</span>
                         </a>
-                        <?php tp_hr_payslip_download_form((int)$s['id'], 'flex-1 sm:flex-none min-h-[56px] min-w-[48px] px-4 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors inline-flex items-center justify-center gap-2 touch-manipulation font-medium text-sm', '<i class="fas fa-download"></i><span class="sm:hidden">ดาวน์โหลด</span><span class="hidden sm:inline">PDF</span>', true, 'ดาวน์โหลด PDF'); ?>
+                        <?php tp_hr_payslip_download_form((int)$s['id'], 'flex-1 sm:flex-none min-h-[56px] min-w-[48px] px-4 bg-violet-600 hover:bg-violet-700 text-white rounded-[20px] transition-colors inline-flex items-center justify-center gap-2 touch-manipulation font-medium text-sm border-0', '<i class="fas fa-download" aria-hidden="true"></i><span class="sm:hidden">ดาวน์โหลด</span><span class="hidden sm:inline">PDF</span>', true, 'ดาวน์โหลด PDF'); ?>
                     </div>
                 </div>
             </div>
@@ -491,7 +491,8 @@ try {
 <style>
 @media print {
     body { background: white !important; }
-    .glass-card { background: white !important; border: 1px solid #e5e7eb !important; box-shadow: none !important; }
+    .glass-card,
+    .native-card { background: white !important; border: 1px solid #e5e7eb !important; box-shadow: none !important; }
     nav, .no-print { display: none !important; }
     main { padding: 0 !important; }
 }
