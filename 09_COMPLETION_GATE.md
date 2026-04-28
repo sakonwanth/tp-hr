@@ -59,7 +59,7 @@ Strict interpretation — *every* loading / empty / error / skeleton on *every* 
 
 | Item |
 |------|
-| CEO E2E: **`PLAYWRIGHT_HR_EXPECT_CEO`** + guest **`hr/reports`**, **`hr/settings`**, **`hr/dayoff_approvals`**. CI unchanged. |
+| **`hr/document_templates`** (**`PLAYWRIGHT_HR_EXPECT_ADMIN`**) + **`hr/api_keys`** (**`PLAYWRIGHT_HR_EXPECT_CEO`**) — guest **`protected-routes`** + **`authenticated.spec`** titles. |
 
 ---
 

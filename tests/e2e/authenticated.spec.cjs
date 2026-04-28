@@ -92,6 +92,15 @@ test.describe('Authenticated session', () => {
     await expect(page).toHaveTitle(/จัดการคำขอเอกสาร/);
   });
 
+  test('hr document templates (requires HR-capable account)', async ({ page }) => {
+    test.skip(
+      process.env.PLAYWRIGHT_HR_EXPECT_ADMIN !== '1',
+      'Set PLAYWRIGHT_HR_EXPECT_ADMIN=1 and use PLAYWRIGHT_HR_USER with hr dashboard access.',
+    );
+    await page.goto('hr/document_templates.php', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveTitle(/ตั้งค่าเอกสารรับรอง/);
+  });
+
   test('hr reports (requires CEO-level account)', async ({ page }) => {
     test.skip(
       process.env.PLAYWRIGHT_HR_EXPECT_CEO !== '1',
@@ -117,5 +126,14 @@ test.describe('Authenticated session', () => {
     );
     await page.goto('hr/dayoff_approvals.php', { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveTitle(/อนุมัติวันหยุด/);
+  });
+
+  test('hr api keys (requires CEO-level account)', async ({ page }) => {
+    test.skip(
+      process.env.PLAYWRIGHT_HR_EXPECT_CEO !== '1',
+      'Set PLAYWRIGHT_HR_EXPECT_CEO=1 and use PLAYWRIGHT_HR_USER that passes isCEOOrAbove() (see hr/api_keys.php).',
+    );
+    await page.goto('hr/api_keys.php', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveTitle(/External API Keys/);
   });
 });
