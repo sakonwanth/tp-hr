@@ -4,7 +4,7 @@
  * v4: main horizontal padding respects safe-area + never zeroed by stray overrides.
  * v5: icon size tokens; table scroll shell; locked aliases for loading/confirmation; header ?v=5.
  * v6: .tp-visually-hidden for screen-reader text with spinners; header ?v=6.
- * v9: Bottom tab strip — symmetric safe-area gutters; centered tab “chips”; label weight; cohesive FA solids.
+ * v10: Bottom tab bar — iOS-inspired materials (muted tint, SF-like chip; no violet glow halo); header ?v=10.
  * UI UX Pro Max: touch ≥48px, inputs ≥52px, primary CTA ≥56px, card radius 20px,
  * scroll-end buffer ≥120px, bottom slot ≥88px when tab bar present.
  */
@@ -55,6 +55,15 @@ body {
 
   --tp-bg-app: linear-gradient(135deg, #0f172a 0%, #1e1b4b 52%, #0f172a 100%);
   --tp-theme-bar: #0f172a;
+
+  /* iOS-like tab semantics (adapted for dark branded shell — not literal UIKit clones) */
+  --tp-ios-tab-chip-radius: 14px;
+  --tp-ios-tab-fill-selected: rgba(255, 255, 255, 0.1);
+  --tp-ios-tab-border-selected: rgba(255, 255, 255, 0.1);
+  --tp-ios-tab-tint-selected: rgb(217, 210, 255);
+  --tp-ios-tab-label-selected: rgb(237, 233, 255);
+  --tp-ios-tab-tint-muted: rgba(235, 235, 245, 0.52);
+  --tp-ios-tab-label-muted: rgba(235, 235, 245, 0.58);
 
   color-scheme: dark;
 }
@@ -110,13 +119,12 @@ body.tp-native-app.tp-app-shell {
   max-height: calc(var(--tp-bottom-nav-max-h) + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
   box-sizing: border-box;
-  background: rgba(15, 23, 42, 0.96);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow:
-    0 -1px 0 rgba(0, 0, 0, 0.2),
-    0 -8px 36px rgba(0, 0, 0, 0.45);
+  /* Hairline separator + frosted slab — analogous to blurred tab bar chrome (no stacked “web glow”) */
+  background: rgba(9, 12, 26, 0.88);
+  backdrop-filter: saturate(170%) blur(22px);
+  -webkit-backdrop-filter: saturate(170%) blur(22px);
+  border-top: 0.33px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.35);
 }
 
 /* --- Mobile primary tab strip (≤1279 employee shell — footer markup) --- */
@@ -139,19 +147,22 @@ body.tp-native-app.tp-app-shell {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 4px;
   min-height: max(48px, var(--tp-native-touch-min));
   min-width: 0;
-  max-width: 4.5rem;
+  max-width: 4.25rem;
   width: max-content;
   margin-left: auto;
   margin-right: auto;
-  padding: 9px 8px;
-  border-radius: var(--tp-radius-card);
+  padding: 8px 7px;
+  border-radius: var(--tp-ios-tab-chip-radius);
   text-decoration: none;
-  color: rgba(255, 255, 255, 0.62);
+  color: var(--tp-ios-tab-label-muted);
   border: 1px solid transparent;
+  font-weight: 500;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
   -webkit-tap-highlight-color: transparent;
   transition:
     color 0.16s ease,
@@ -162,18 +173,15 @@ body.tp-native-app.tp-app-shell {
 }
 
 .tp-native-bottom-tab-link[aria-current="page"] {
-  color: rgba(221, 214, 254, 0.98);
+  color: var(--tp-ios-tab-label-selected);
+  font-weight: 500;
+  background: var(--tp-ios-tab-fill-selected);
+  border: 1px solid var(--tp-ios-tab-border-selected);
+  box-shadow: none;
+}
+
+.tp-native-bottom-tab-link[aria-current="page"] .tp-native-bottom-tab-label {
   font-weight: 600;
-  background: radial-gradient(
-    120% 160% at 50% -20%,
-    rgba(124, 58, 237, 0.52) 0%,
-    rgba(124, 58, 237, 0.16) 45%,
-    rgba(124, 58, 237, 0.12) 100%
-  );
-  border: 1px solid rgba(167, 139, 250, 0.38);
-  box-shadow:
-    0 0 0 1px rgba(124, 58, 237, 0.12),
-    0 6px 20px rgba(124, 58, 237, 0.2);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -198,25 +206,26 @@ body.tp-native-app.tp-app-shell {
 }
 
 .tp-native-bottom-tab-link:not([aria-current="page"]) .tp-native-bottom-tab-ic {
-  color: rgba(203, 213, 225, 0.9);
+  color: var(--tp-ios-tab-tint-muted);
 }
 
 .tp-native-bottom-tab-ic {
-  font-size: 1.375rem;
+  font-size: 1.28rem;
   line-height: 1;
+  opacity: 0.98;
 }
 
 /* Fingerprint glyph บางกว่าไอคอน solid — ดึงขนาดใกล้เคียงน้ำหนักภาพ */
 .tp-native-bottom-tab-link .tp-native-bottom-tab-ic.fa-fingerprint {
-  font-size: 1.4rem;
+  font-size: 1.36rem;
 }
 
 .tp-native-bottom-tab-label {
   display: block;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  line-height: 1.08;
-  letter-spacing: 0.02em;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.06;
+  letter-spacing: -0.01em;
   max-width: 100%;
   text-align: center;
   overflow: hidden;
@@ -224,7 +233,19 @@ body.tp-native-app.tp-app-shell {
 }
 
 .tp-native-bottom-tab-link[aria-current="page"] .tp-native-bottom-tab-ic {
-  color: rgb(216, 180, 254);
+  color: var(--tp-ios-tab-tint-selected);
+}
+
+@media (max-width: 380px) {
+  .tp-native-bottom-tab-label {
+    font-size: 0.63rem;
+  }
+}
+
+@media (-webkit-min-device-pixel-ratio: 2) {
+  .tp-native-bottom-tab-label {
+    letter-spacing: 0;
+  }
 }
 
 .home-sticky-cta.tp-sticky-primary-action,
