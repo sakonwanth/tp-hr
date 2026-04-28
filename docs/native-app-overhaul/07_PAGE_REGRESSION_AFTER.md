@@ -49,6 +49,7 @@
 | HR attendance `/hr/attendance.php` | **REGRESSION_PASS** (static QA: GET date/dept/status/page + SQL blocks + stats/excused unchanged; markup/API hooks preserved) |
 | Leaves HR `/hr/leaves.php` | **REGRESSION_PASS** (static QA: filters + SQL + `$filterBase` for stat links unchanged; approve uses modal shell + same `/api/leave.php` POST) |
 | Day-off approvals `/hr/dayoff_approvals.php` | **REGRESSION_PASS** (static QA: CEO gate + GET filters + list SQL unchanged; POST approve/reject/approve_all + CSRF unchanged; markup/modals only) |
+| Documents HR `/hr/documents.php` | **REGRESSION_PASS** (static QA: filters + SQL + stats month unchanged; `/api/certificate.php` POST flows + print form unchanged; UI/modals only) |
 | Other pages in 01 §A | **REGRESSION_PENDING** |
 
 ### Dashboard — `/` (`index.php`)
@@ -214,3 +215,11 @@
 | `isCEOOrAbove()` + HR gate | PASS (unchanged) |
 | GET status + month + list SQL | PASS |
 | POST approve / reject / approve_all + CSRF | PASS |
+
+### Documents (HR requests) — `/hr/documents.php`
+
+| Check | Result |
+|-------|--------|
+| HR gate + GET status/type/month/page | PASS (unchanged) |
+| List SQL + stats for selected month | PASS |
+| `fetch('/api/certificate.php', …)` + `tpHrCertificatePrintForm` | PASS |

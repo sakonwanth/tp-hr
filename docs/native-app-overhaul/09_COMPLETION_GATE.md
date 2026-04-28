@@ -1,7 +1,7 @@
 # 09 — Completion Gate (TP-HR)
 
-**Assessment date:** 2026-04-28 (updated after Phase 5: incl. HR day-off CEO approvals)  
-**Result:** **FAIL — program incomplete** (26 pages total; **20** refactored surfaces + **1** partial + regression noted in 07).
+**Assessment date:** 2026-04-28 (updated after Phase 5: incl. HR document request queue)  
+**Result:** **FAIL — program incomplete** (26 pages total; **21** refactored surfaces + **1** partial + regression noted in 07).
 
 ## Metrics
 
@@ -9,8 +9,8 @@
 |------|----------|--------|-------|
 | Total pages discovered | N | 26 UI pages | ✓ |
 | Total pages audited (before) | = N | 26 | ✓ |
-| Total pages refactored | = need count | **20** + partial (+ `hr/dayoff_approvals.php` among prior list) | ✗ |
-| Total pages regression tested | = refactored | **20** + partial REGRESSION_PASS (static, see 07) | ✗ |
+| Total pages refactored | = need count | **21** + partial (+ `hr/documents.php` among prior list) | ✗ |
+| Total pages regression tested | = refactored | **21** + partial REGRESSION_PASS (static, see 07) | ✗ |
 | Pages skipped | 0 | 0 | ✓ |
 | Unmapped components | 0 | 0 | ✓ |
 | Bottom nav overlap issues | 0 | Not fully QA’d all pages | **pending** |
