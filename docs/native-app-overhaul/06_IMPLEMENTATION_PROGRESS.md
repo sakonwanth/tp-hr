@@ -40,7 +40,7 @@
 | HR-UI-023 Doc templates | **COMPLETE** | `hr/document_templates.php` — `native-card`/`tp-native-card`, filters unchanged; table shell + empty state; modals replace `confirm()` for template delete & signature remove; `tp-native-input`/`select`/`textarea` |
 | HR-UI-024 Reports (CEO) | **COMPLETE** | `hr/reports.php` — native cards, filters `tp-native-input`/`select`, tabs/touch targets; `tp-native-table-shell` desktop; mobile cards + `tp-native-empty-state`; flash + Export CSV hint; queries/POST CSV export unchanged |
 | HR-UI-025 Settings (CEO) | **COMPLETE** | `hr/settings.php` — native cards/tabs/forms; `tp-native-table-shell` + empty holidays; modal ลบวันหยุด แทน `confirm()`; leave-type modal `tp-native-modal`; POST/CSRF/actions unchanged |
-| HR-UI-026 (excl. above) | **NOT_STARTED** | — |
+| HR-UI-026 API keys | **COMPLETE** | `hr/api_keys.php` — native cards + `tp-native-table-shell`; revoke/activate confirm `tp-native-modal` + POST `action`/`id`/`csrf_token` unchanged; one-time key mask/reveal + copy + toast; request log shell + empty state |
 | HR-UI-SHELL-01 | **REFACTORED** | — |
 | HR-UI-SHELL-02 | **COMPLETE** | — |
 | HR-UI-SHELL-03 | **COMPLETE** | — |

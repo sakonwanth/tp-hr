@@ -184,55 +184,81 @@ require_once __DIR__ . '/../templates/header.php';
             <span class="mx-2">/</span>
             <span class="text-white">External API Keys</span>
         </nav>
-        <h1 class="text-2xl font-bold text-white tracking-tight">External API Keys</h1>
+        <h1 class="text-2xl font-bold text-white tracking-tight">
+            <i class="fas fa-key text-violet-400 mr-2" aria-hidden="true"></i>External API Keys
+        </h1>
         <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">จัดการคีย์ API สำหรับระบบภายนอก</p>
     </div>
 
     <?php if ($error): ?>
-    <div class="mb-4 p-4 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-200"><?= htmlspecialchars($error) ?></div>
+    <div class="mb-4 rounded-[20px] border border-red-500/30 bg-red-500/15 px-4 py-3 text-red-200 text-sm" role="alert">
+        <i class="fas fa-exclamation-circle mr-2" aria-hidden="true"></i><?= htmlspecialchars($error) ?>
+    </div>
     <?php endif; ?>
     <?php if ($success): ?>
-    <div class="mb-4 p-4 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-200"><?= htmlspecialchars($success) ?></div>
-    <?php endif; ?>
-
-    <?php if ($plainKey): ?>
-    <div class="mb-6 p-5 rounded-xl bg-amber-500/15 border-2 border-amber-400/50">
-        <div class="text-amber-200 font-semibold mb-2"><i class="fas fa-key mr-2"></i>API Key ใหม่ — แสดงครั้งเดียว</div>
-        <div class="bg-black/40 p-3 rounded-lg font-mono text-amber-100 text-sm break-all select-all"><?= htmlspecialchars($plainKey) ?></div>
-        <p class="text-amber-200/80 text-xs mt-2">คัดลอกและเก็บไว้ในที่ปลอดภัย — ระบบเก็บเฉพาะ hash ไม่สามารถแสดงได้อีก</p>
+    <div class="mb-4 rounded-[20px] border border-emerald-500/30 bg-emerald-500/15 px-4 py-3 text-emerald-200 text-sm" role="status">
+        <i class="fas fa-check-circle mr-2" aria-hidden="true"></i><?= htmlspecialchars($success) ?>
     </div>
     <?php endif; ?>
 
+    <?php if ($plainKey): ?>
+    <div class="mb-6 rounded-[20px] border-2 border-amber-400/40 bg-amber-500/10 p-5" role="region" aria-label="คีย์ที่ออกใหม่">
+        <div class="text-amber-200 font-semibold mb-3 flex flex-wrap items-center gap-2">
+            <i class="fas fa-key" aria-hidden="true"></i>
+            <span>API Key ใหม่ — แสดงครั้งเดียว</span>
+        </div>
+        <div class="flex flex-col sm:flex-row sm:items-stretch gap-2">
+            <div id="hr-api-plain-key"
+                class="flex-1 bg-black/40 p-3 rounded-[20px] font-mono text-amber-100 text-sm break-all border border-amber-500/20 select-none tracking-wider"
+                data-revealed="0"
+                aria-label="ค่าคีย์ถูกซ่อน กดแสดงเพื่อดู"><?php $__pl = function_exists('mb_strlen') ? mb_strlen($plainKey, 'UTF-8') : strlen($plainKey); echo htmlspecialchars(str_repeat('●', max(12, min(64, $__pl)))); ?></div>
+            <div class="flex flex-col sm:flex-row gap-2 shrink-0">
+                <button type="button" id="hr-api-toggle-key-btn" class="inline-flex min-h-[48px] items-center justify-center rounded-[20px] border border-amber-400/40 bg-amber-500/15 px-4 text-sm font-semibold text-amber-100 hover:bg-amber-500/25 touch-manipulation gap-2">
+                    <i class="fas fa-eye" aria-hidden="true"></i><span id="hr-api-toggle-key-label">แสดงคีย์</span>
+                </button>
+                <button type="button" id="hr-api-copy-key-btn" class="inline-flex min-h-[48px] items-center justify-center rounded-[20px] border border-amber-400/40 bg-amber-500/20 px-4 text-sm font-semibold text-amber-100 hover:bg-amber-500/30 touch-manipulation gap-2">
+                    <i class="fas fa-copy" aria-hidden="true"></i>คัดลอก
+                </button>
+            </div>
+        </div>
+        <p id="hr-api-copy-feedback" class="text-emerald-300/90 text-xs mt-2 min-h-[1.25rem]" role="status" aria-live="polite"></p>
+        <p class="text-amber-200/80 text-xs mt-1">คัดลอกและเก็บไว้ในที่ปลอดภัย — ระบบเก็บเฉพาะ hash ไม่สามารถแสดงได้อีก</p>
+    </div>
+    <script>
+    window.__HR_API_ISSUED_KEY = <?= json_encode($plainKey, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) ?>;
+    </script>
+    <?php endif; ?>
+
     <!-- Create form -->
-    <div class="glass-card rounded-xl p-6 mb-6">
+    <div class="native-card tp-native-card tp-native-data-card overflow-hidden rounded-[20px] p-5 sm:p-6 mb-6 min-w-0 border border-white/10">
         <h2 class="text-lg font-semibold text-white mb-4">ออกคีย์ใหม่</h2>
         <form method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
             <input type="hidden" name="action" value="create">
 
-            <div>
-                <label class="text-white/70 text-sm block mb-1">ชื่อระบบ/ผู้ใช้ *</label>
-                <input name="name" required class="input-field w-full" placeholder="เช่น Accounting Sync">
+            <div class="tp-native-form-group mb-0">
+                <label class="text-white/70 text-sm block mb-2" for="api-key-name">ชื่อระบบ/ผู้ใช้ *</label>
+                <input id="api-key-name" name="name" required class="input-field tp-native-input w-full min-h-[48px]" placeholder="เช่น Accounting Sync">
             </div>
-            <div>
-                <label class="text-white/70 text-sm block mb-1">Rate limit (req/min)</label>
-                <input name="rate_limit_per_min" type="number" value="60" min="1" max="1000" class="input-field w-full">
+            <div class="tp-native-form-group mb-0">
+                <label class="text-white/70 text-sm block mb-2" for="api-key-rate">Rate limit (req/min)</label>
+                <input id="api-key-rate" name="rate_limit_per_min" type="number" value="60" min="1" max="1000" class="input-field tp-native-input w-full min-h-[48px]">
             </div>
 
             <div class="md:col-span-2">
-                <label class="text-white/70 text-sm block mb-1">Scopes</label>
+                <span class="block text-white/70 text-sm mb-1">Scopes</span>
                 <p class="text-white/50 text-xs mb-3 leading-relaxed">
                     คีย์ที่<strong class="text-white/70">ผูกพนักงาน</strong>มักเลือกเฉพาะ <code class="text-violet-300/90">*.read</code> / <code class="text-violet-300/90">*.write</code> ตามฟีเจอร์
                     — คีย์<strong class="text-white/70">ไม่ผูก</strong> (ระบบภายนอก/HR) ต้องเพิ่ม <code class="text-amber-200/90">*.read_all</code> / <code class="text-amber-200/90">*.write_all</code> หากดึงหรือสร้างแทนหลายคน
                 </p>
                 <div class="space-y-4">
                     <?php foreach ($scopeGroups as $groupTitle => $scopes): ?>
-                    <div class="rounded-xl border border-white/10 bg-white/[0.04] p-4">
+                    <div class="rounded-[20px] border border-white/10 bg-white/[0.04] p-4">
                         <div class="text-white/90 text-sm font-semibold mb-3 pb-2 border-b border-white/10"><?= htmlspecialchars($groupTitle) ?></div>
                         <div class="flex flex-wrap gap-2.5">
                             <?php foreach ($scopes as $sv => $sl): ?>
-                            <label class="inline-flex items-center gap-2 text-white/80 text-sm bg-white/5 px-3 py-2 rounded-lg border border-transparent hover:border-violet-500/30 cursor-pointer touch-manipulation">
-                                <input type="checkbox" name="scopes[]" value="<?= htmlspecialchars($sv) ?>" class="rounded border-white/20 text-violet-600 focus:ring-violet-500">
+                            <label class="inline-flex items-center gap-2 text-white/80 text-sm bg-white/5 px-3 py-2 rounded-[20px] border border-transparent hover:border-violet-500/30 cursor-pointer touch-manipulation min-h-[44px]">
+                                <input type="checkbox" name="scopes[]" value="<?= htmlspecialchars($sv) ?>" class="rounded border-white/20 text-violet-600 focus:ring-violet-500 shrink-0">
                                 <span><?= htmlspecialchars($sl) ?> <code class="text-white/45 text-xs">(<?= htmlspecialchars($sv) ?>)</code></span>
                             </label>
                             <?php endforeach; ?>
@@ -242,26 +268,26 @@ require_once __DIR__ . '/../templates/header.php';
                 </div>
             </div>
 
-            <div>
-                <label class="text-white/70 text-sm block mb-1">Allowed IPs (คั่นด้วย comma/space, CIDR ได้)</label>
-                <input name="allowed_ips" class="input-field w-full" placeholder="เช่น 203.0.113.10, 198.51.100.0/24">
+            <div class="tp-native-form-group mb-0">
+                <label class="text-white/70 text-sm block mb-2" for="api-key-ips">Allowed IPs (คั่นด้วย comma/space, CIDR ได้)</label>
+                <input id="api-key-ips" name="allowed_ips" class="input-field tp-native-input w-full min-h-[48px]" placeholder="เช่น 203.0.113.10, 198.51.100.0/24">
             </div>
-            <div>
-                <label class="text-white/70 text-sm block mb-1">Allowed CORS Origins</label>
-                <input name="allowed_origins" class="input-field w-full" placeholder="https://app.example.com">
+            <div class="tp-native-form-group mb-0">
+                <label class="text-white/70 text-sm block mb-2" for="api-key-origins">Allowed CORS Origins</label>
+                <input id="api-key-origins" name="allowed_origins" class="input-field tp-native-input w-full min-h-[48px]" placeholder="https://app.example.com">
             </div>
 
-            <div>
-                <label class="text-white/70 text-sm block mb-1">วันหมดอายุ</label>
-                <input name="expires_at" type="date" class="input-field w-full">
+            <div class="tp-native-form-group mb-0">
+                <label class="text-white/70 text-sm block mb-2" for="api-key-exp">วันหมดอายุ</label>
+                <input id="api-key-exp" name="expires_at" type="date" class="input-field tp-native-input w-full min-h-[48px]">
             </div>
-            <div>
-                <label class="text-white/70 text-sm block mb-1">หมายเหตุ</label>
-                <input name="notes" class="input-field w-full">
+            <div class="tp-native-form-group mb-0">
+                <label class="text-white/70 text-sm block mb-2" for="api-key-notes">หมายเหตุ</label>
+                <input id="api-key-notes" name="notes" class="input-field tp-native-input w-full min-h-[48px]">
             </div>
-            <div class="md:col-span-2">
-                <label class="text-white/70 text-sm block mb-1">ผูกกับพนักงาน (ถ้าเลือก คีย์จะเข้าถึงได้เฉพาะข้อมูลของพนักงานนี้ — ไม่สามารถอนุมัติ/แก้ payroll แอดมิน)</label>
-                <select name="service_user_id" class="input-field w-full">
+            <div class="md:col-span-2 tp-native-form-group mb-0">
+                <label class="text-white/70 text-sm block mb-2" for="api-key-service-user">ผูกกับพนักงาน (ถ้าเลือก คีย์จะเข้าถึงได้เฉพาะข้อมูลของพนักงานนี้ — ไม่สามารถอนุมัติ/แก้ payroll แอดมิน)</label>
+                <select id="api-key-service-user" name="service_user_id" class="input-field tp-native-select w-full min-h-[48px]">
                     <option value="0">— ไม่จำกัด (คีย์ระบบทั่วไป) —</option>
                     <?php foreach ($employeeOptions as $eo): ?>
                     <option value="<?= (int)$eo['id'] ?>"><?= htmlspecialchars(trim(($eo['employee_code'] ?? '') . ' ' . ($eo['first_name_th'] ?? '') . ' ' . ($eo['last_name_th'] ?? ''))) ?></option>
@@ -270,21 +296,21 @@ require_once __DIR__ . '/../templates/header.php';
             </div>
 
             <div class="md:col-span-2">
-                <button type="submit" class="px-5 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg">
-                    <i class="fas fa-plus mr-2"></i>ออกคีย์
+                <button type="submit" class="inline-flex min-h-[48px] items-center justify-center rounded-[20px] bg-violet-600 hover:bg-violet-700 px-6 text-sm font-semibold text-white touch-manipulation gap-2">
+                    <i class="fas fa-plus" aria-hidden="true"></i>ออกคีย์
                 </button>
             </div>
         </form>
     </div>
 
     <!-- Keys list -->
-    <div class="glass-card rounded-xl overflow-hidden mb-6">
+    <div class="native-card tp-native-card tp-native-data-card overflow-hidden rounded-[20px] mb-6 min-w-0 border border-white/10">
         <div class="p-4 border-b border-white/10">
-            <h2 class="text-lg font-semibold text-white">คีย์ทั้งหมด (<?= count($keys) ?>)</h2>
+            <h2 class="text-lg font-semibold text-white">คีย์ทั้งหมด (<span role="status"><?= count($keys) ?></span>)</h2>
         </div>
         <div class="md:hidden p-3 space-y-3">
             <?php foreach ($keys as $k): $scopes = json_decode($k['scopes'] ?? '[]', true) ?: []; ?>
-                <div class="rounded-2xl bg-white/5 border border-white/10 p-4 space-y-3">
+                <div class="rounded-[20px] bg-white/5 border border-white/10 p-4 space-y-3">
                     <div class="flex items-start justify-between gap-2">
                         <div class="min-w-0">
                             <p class="text-white font-semibold break-words"><?= htmlspecialchars($k['name']) ?></p>
@@ -292,11 +318,11 @@ require_once __DIR__ . '/../templates/header.php';
                             <p class="text-white/50 text-xs font-mono mt-1"><?= htmlspecialchars($k['key_prefix']) ?>…</p>
                         </div>
                         <?php if ((int)$k['is_active'] === 1 && (empty($k['expires_at']) || strtotime($k['expires_at']) > time())): ?>
-                            <span class="shrink-0 px-2 py-1 rounded-full text-xs bg-emerald-500/20 text-emerald-300">Active</span>
+                            <span class="shrink-0 px-2 py-1 rounded-[20px] text-xs bg-emerald-500/20 text-emerald-300">Active</span>
                         <?php elseif (!empty($k['revoked_at'])): ?>
-                            <span class="shrink-0 px-2 py-1 rounded-full text-xs bg-rose-500/20 text-rose-300">Revoked</span>
+                            <span class="shrink-0 px-2 py-1 rounded-[20px] text-xs bg-rose-500/20 text-rose-300">Revoked</span>
                         <?php else: ?>
-                            <span class="shrink-0 px-2 py-1 rounded-full text-xs bg-yellow-500/20 text-yellow-300">Expired</span>
+                            <span class="shrink-0 px-2 py-1 rounded-[20px] text-xs bg-yellow-500/20 text-yellow-300">Expired</span>
                         <?php endif; ?>
                     </div>
                     <div>
@@ -304,18 +330,18 @@ require_once __DIR__ . '/../templates/header.php';
                         <p class="text-white/75 text-xs break-words line-clamp-4"><?= htmlspecialchars(implode(', ', $scopes) ?: '—') ?></p>
                     </div>
                     <?php if (!empty($k['service_user_id'])): ?>
-                    <div class="rounded-lg bg-amber-500/10 border border-amber-400/30 px-2 py-2 text-xs text-amber-100">
+                    <div class="rounded-[20px] bg-amber-500/10 border border-amber-400/30 px-2 py-2 text-xs text-amber-100">
                         <span class="text-white/45">ผูกพนักงาน:</span>
                         <?= htmlspecialchars(trim(($k['su_code'] ?? '') . ' ' . ($k['su_first'] ?? '') . ' ' . ($k['su_last'] ?? ''))) ?>
                         <span class="text-white/40">(id <?= (int)$k['service_user_id'] ?>)</span>
                     </div>
                     <?php endif; ?>
                     <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div class="rounded-lg bg-black/20 border border-white/10 px-2 py-2">
+                        <div class="rounded-[20px] bg-black/20 border border-white/10 px-2 py-2">
                             <span class="text-white/45">Rate</span>
                             <p class="text-white font-medium"><?= (int)$k['rate_limit_per_min'] ?>/min</p>
                         </div>
-                        <div class="rounded-lg bg-black/20 border border-white/10 px-2 py-2">
+                        <div class="rounded-[20px] bg-black/20 border border-white/10 px-2 py-2">
                             <span class="text-white/45">หมดอายุ</span>
                             <p class="text-white/80"><?= htmlspecialchars($k['expires_at'] ?? '—') ?></p>
                         </div>
@@ -324,70 +350,87 @@ require_once __DIR__ . '/../templates/header.php';
                         <span class="text-white/45">ล่าสุด:</span> <?= htmlspecialchars($k['last_used_at'] ?? '—') ?>
                         <?php if (!empty($k['last_used_ip'])): ?><span class="text-white/35"> · <?= htmlspecialchars($k['last_used_ip']) ?></span><?php endif; ?>
                     </div>
-                    <form method="POST" class="block" onsubmit="return confirm('ยืนยันการดำเนินการ?');">
-                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
-                        <input type="hidden" name="id" value="<?= (int)$k['id'] ?>">
-                        <?php if ((int)$k['is_active'] === 1): ?>
-                            <button name="action" value="revoke" type="submit" class="w-full min-h-[48px] rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 text-sm font-semibold touch-manipulation">Revoke</button>
-                        <?php else: ?>
-                            <button name="action" value="activate" type="submit" class="w-full min-h-[48px] rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 text-sm font-semibold touch-manipulation">Activate</button>
-                        <?php endif; ?>
-                    </form>
+                    <?php if ((int)$k['is_active'] === 1): ?>
+                    <button type="button"
+                        class="w-full min-h-[48px] rounded-[20px] bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 text-sm font-semibold touch-manipulation"
+                        data-ak-act="revoke"
+                        data-ak-id="<?= (int)$k['id'] ?>"
+                        data-ak-name="<?= htmlspecialchars($k['name'], ENT_QUOTES, 'UTF-8') ?>"
+                        onclick="hrApiKeysOpenActionModal(this)">
+                        Revoke</button>
+                    <?php else: ?>
+                    <button type="button"
+                        class="w-full min-h-[48px] rounded-[20px] bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 text-sm font-semibold touch-manipulation"
+                        data-ak-act="activate"
+                        data-ak-id="<?= (int)$k['id'] ?>"
+                        data-ak-name="<?= htmlspecialchars($k['name'], ENT_QUOTES, 'UTF-8') ?>"
+                        onclick="hrApiKeysOpenActionModal(this)">
+                        Activate</button>
+                    <?php endif; ?>
                 </div>
             <?php endforeach; ?>
             <?php if (!$keys): ?>
-                <div class="p-8 text-center text-white/40">ยังไม่มีคีย์</div>
+                <div class="tp-native-empty-state text-center py-10 px-4 rounded-[20px] border border-dashed border-white/15">
+                    <i class="fas fa-key text-slate-500 text-3xl mb-2 block" aria-hidden="true"></i>
+                    <p class="text-white/50 text-sm">ยังไม่มีคีย์</p>
+                </div>
             <?php endif; ?>
         </div>
-        <div class="hidden md:block overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead class="bg-white/5 text-white/60">
+        <div class="hidden md:block tp-native-table-shell overflow-x-auto min-w-0 max-w-full overscroll-x-contain -mx-1 px-1 pb-px">
+            <table class="w-full text-sm" style="min-width:1100px">
+            <thead class="bg-white/5">
                 <tr>
-                    <th class="p-3 text-left">ชื่อ</th>
-                    <th class="p-3 text-left">Prefix</th>
-                    <th class="p-3 text-left">Scopes</th>
-                    <th class="p-3 text-left">ผูกพนักงาน</th>
-                    <th class="p-3 text-left">Rate</th>
-                    <th class="p-3 text-left">ล่าสุด</th>
-                    <th class="p-3 text-left">หมดอายุ</th>
-                    <th class="p-3 text-left">สถานะ</th>
-                    <th class="p-3 text-left"></th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">ชื่อ</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">Prefix</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">Scopes</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">ผูกพนักงาน</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">Rate</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">ล่าสุด</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">หมดอายุ</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">สถานะ</th>
+                    <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white/60 uppercase">จัดการ</th>
                 </tr>
             </thead>
-            <tbody class="text-white/80">
+            <tbody class="divide-y divide-white/10 text-white/80">
             <?php foreach ($keys as $k): $scopes = json_decode($k['scopes'] ?? '[]', true) ?: []; ?>
-                <tr class="border-t border-white/5">
-                    <td class="p-3"><?= htmlspecialchars($k['name']) ?><div class="text-xs text-white/40"><?= htmlspecialchars($k['notes'] ?? '') ?></div></td>
-                    <td class="p-3 font-mono text-xs"><?= htmlspecialchars($k['key_prefix']) ?>…</td>
-                    <td class="p-3 text-xs"><?= htmlspecialchars(implode(', ', $scopes) ?: '—') ?></td>
-                    <td class="p-3 text-xs"><?php if (!empty($k['service_user_id'])): ?><?= htmlspecialchars(trim(($k['su_code'] ?? '') . ' ' . ($k['su_first'] ?? '') . ' ' . ($k['su_last'] ?? ''))) ?><div class="text-white/40">#<?= (int)$k['service_user_id'] ?></div><?php else: ?><span class="text-white/35">—</span><?php endif; ?></td>
-                    <td class="p-3"><?= (int)$k['rate_limit_per_min'] ?>/min</td>
-                    <td class="p-3 text-xs"><?= htmlspecialchars($k['last_used_at'] ?? '—') ?><div class="text-white/40"><?= htmlspecialchars($k['last_used_ip'] ?? '') ?></div></td>
-                    <td class="p-3 text-xs"><?= htmlspecialchars($k['expires_at'] ?? '—') ?></td>
-                    <td class="p-3">
+                <tr class="hover:bg-white/[0.04]">
+                    <td class="px-4 py-3"><?= htmlspecialchars($k['name']) ?><div class="text-xs text-white/40"><?= htmlspecialchars($k['notes'] ?? '') ?></div></td>
+                    <td class="px-4 py-3 font-mono text-xs"><?= htmlspecialchars($k['key_prefix']) ?>…</td>
+                    <td class="px-4 py-3 text-xs max-w-xs"><?= htmlspecialchars(implode(', ', $scopes) ?: '—') ?></td>
+                    <td class="px-4 py-3 text-xs"><?php if (!empty($k['service_user_id'])): ?><?= htmlspecialchars(trim(($k['su_code'] ?? '') . ' ' . ($k['su_first'] ?? '') . ' ' . ($k['su_last'] ?? ''))) ?><div class="text-white/40">#<?= (int)$k['service_user_id'] ?></div><?php else: ?><span class="text-white/35">—</span><?php endif; ?></td>
+                    <td class="px-4 py-3"><?= (int)$k['rate_limit_per_min'] ?>/min</td>
+                    <td class="px-4 py-3 text-xs"><?= htmlspecialchars($k['last_used_at'] ?? '—') ?><div class="text-white/40"><?= htmlspecialchars($k['last_used_ip'] ?? '') ?></div></td>
+                    <td class="px-4 py-3 text-xs"><?= htmlspecialchars($k['expires_at'] ?? '—') ?></td>
+                    <td class="px-4 py-3">
                         <?php if ((int)$k['is_active'] === 1 && (empty($k['expires_at']) || strtotime($k['expires_at']) > time())): ?>
-                            <span class="px-2 py-1 rounded-full text-xs bg-emerald-500/20 text-emerald-300">Active</span>
+                            <span class="inline-flex px-2 py-1 rounded-[20px] text-xs bg-emerald-500/20 text-emerald-300">Active</span>
                         <?php elseif (!empty($k['revoked_at'])): ?>
-                            <span class="px-2 py-1 rounded-full text-xs bg-rose-500/20 text-rose-300">Revoked</span>
+                            <span class="inline-flex px-2 py-1 rounded-[20px] text-xs bg-rose-500/20 text-rose-300">Revoked</span>
                         <?php else: ?>
-                            <span class="px-2 py-1 rounded-full text-xs bg-yellow-500/20 text-yellow-300">Expired</span>
+                            <span class="inline-flex px-2 py-1 rounded-[20px] text-xs bg-yellow-500/20 text-yellow-300">Expired</span>
                         <?php endif; ?>
                     </td>
-                    <td class="p-3">
-                        <form method="POST" class="inline" onsubmit="return confirm('ยืนยันการดำเนินการ?');">
-                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
-                            <input type="hidden" name="id" value="<?= (int)$k['id'] ?>">
-                            <?php if ((int)$k['is_active'] === 1): ?>
-                                <button name="action" value="revoke" class="text-rose-300 hover:text-rose-100 text-xs">Revoke</button>
-                            <?php else: ?>
-                                <button name="action" value="activate" class="text-emerald-300 hover:text-emerald-100 text-xs">Activate</button>
-                            <?php endif; ?>
-                        </form>
+                    <td class="px-4 py-3 text-center whitespace-nowrap">
+                        <?php if ((int)$k['is_active'] === 1): ?>
+                        <button type="button"
+                            class="inline-flex min-h-[44px] min-w-[72px] items-center justify-center rounded-[20px] text-rose-300 hover:bg-rose-500/15 text-xs font-medium touch-manipulation"
+                            data-ak-act="revoke"
+                            data-ak-id="<?= (int)$k['id'] ?>"
+                            data-ak-name="<?= htmlspecialchars($k['name'], ENT_QUOTES, 'UTF-8') ?>"
+                            onclick="hrApiKeysOpenActionModal(this)">Revoke</button>
+                        <?php else: ?>
+                        <button type="button"
+                            class="inline-flex min-h-[44px] min-w-[72px] items-center justify-center rounded-[20px] text-emerald-300 hover:bg-emerald-500/15 text-xs font-medium touch-manipulation"
+                            data-ak-act="activate"
+                            data-ak-id="<?= (int)$k['id'] ?>"
+                            data-ak-name="<?= htmlspecialchars($k['name'], ENT_QUOTES, 'UTF-8') ?>"
+                            onclick="hrApiKeysOpenActionModal(this)">Activate</button>
+                        <?php endif; ?>
                     </td>
                 </tr>
             <?php endforeach; ?>
             <?php if (!$keys): ?>
-                <tr><td colspan="9" class="p-6 text-center text-white/40">ยังไม่มีคีย์</td></tr>
+                <tr><td colspan="9" class="px-4 py-10 text-center text-white/45">ยังไม่มีคีย์</td></tr>
             <?php endif; ?>
             </tbody>
         </table>
@@ -395,13 +438,13 @@ require_once __DIR__ . '/../templates/header.php';
     </div>
 
     <!-- Recent logs -->
-    <div class="glass-card rounded-xl overflow-hidden">
+    <div class="native-card tp-native-card tp-native-data-card overflow-hidden rounded-[20px] min-w-0 border border-white/10">
         <div class="p-4 border-b border-white/10">
             <h2 class="text-lg font-semibold text-white">Request Log (20 ล่าสุด)</h2>
         </div>
         <div class="md:hidden p-3 space-y-2">
             <?php foreach ($recentLogs as $l): ?>
-                <div class="rounded-xl bg-white/5 border border-white/10 p-3 text-xs">
+                <div class="rounded-[20px] bg-white/5 border border-white/10 p-3 text-xs">
                     <div class="flex items-start justify-between gap-2">
                         <span class="text-white/55 shrink-0"><?= htmlspecialchars($l['created_at']) ?></span>
                         <span class="<?= ((int)$l['status_code'] >= 400) ? 'text-rose-300' : 'text-emerald-300' ?> font-mono font-semibold"><?= (int)$l['status_code'] ?></span>
@@ -413,39 +456,221 @@ require_once __DIR__ . '/../templates/header.php';
                 </div>
             <?php endforeach; ?>
             <?php if (!$recentLogs): ?>
-                <div class="p-6 text-center text-white/40">ยังไม่มี log</div>
+                <div class="tp-native-empty-state text-center py-10 px-4 rounded-[20px] border border-dashed border-white/15">
+                    <i class="fas fa-scroll text-slate-500 text-3xl mb-2 block" aria-hidden="true"></i>
+                    <p class="text-white/50 text-sm">ยังไม่มี log</p>
+                </div>
             <?php endif; ?>
         </div>
-        <div class="hidden md:block overflow-x-auto">
-        <table class="w-full text-xs">
-            <thead class="bg-white/5 text-white/60">
+        <div class="hidden md:block tp-native-table-shell overflow-x-auto min-w-0 max-w-full overscroll-x-contain -mx-1 px-1 pb-px">
+        <table class="w-full text-xs" style="min-width:900px">
+            <thead class="bg-white/5">
                 <tr>
-                    <th class="p-3 text-left">เวลา</th>
-                    <th class="p-3 text-left">คีย์</th>
-                    <th class="p-3 text-left">Method</th>
-                    <th class="p-3 text-left">Path</th>
-                    <th class="p-3 text-left">Status</th>
-                    <th class="p-3 text-left">IP</th>
-                    <th class="p-3 text-left">ms</th>
-                    <th class="p-3 text-left">Error</th>
+                    <th scope="col" class="px-4 py-3 text-left font-medium text-white/60 uppercase">เวลา</th>
+                    <th scope="col" class="px-4 py-3 text-left font-medium text-white/60 uppercase">คีย์</th>
+                    <th scope="col" class="px-4 py-3 text-left font-medium text-white/60 uppercase">Method</th>
+                    <th scope="col" class="px-4 py-3 text-left font-medium text-white/60 uppercase">Path</th>
+                    <th scope="col" class="px-4 py-3 text-left font-medium text-white/60 uppercase">Status</th>
+                    <th scope="col" class="px-4 py-3 text-left font-medium text-white/60 uppercase">IP</th>
+                    <th scope="col" class="px-4 py-3 text-left font-medium text-white/60 uppercase">ms</th>
+                    <th scope="col" class="px-4 py-3 text-left font-medium text-white/60 uppercase">Error</th>
                 </tr>
             </thead>
-            <tbody class="text-white/80">
+            <tbody class="divide-y divide-white/10 text-white/80">
             <?php foreach ($recentLogs as $l): ?>
-                <tr class="border-t border-white/5">
-                    <td class="p-2"><?= htmlspecialchars($l['created_at']) ?></td>
-                    <td class="p-2"><?= htmlspecialchars($l['key_name'] ?? '—') ?></td>
-                    <td class="p-2"><?= htmlspecialchars($l['method']) ?></td>
-                    <td class="p-2 font-mono break-all"><?= htmlspecialchars($l['path']) ?></td>
-                    <td class="p-2 <?= ((int)$l['status_code'] >= 400) ? 'text-rose-300' : 'text-emerald-300' ?>"><?= (int)$l['status_code'] ?></td>
-                    <td class="p-2"><?= htmlspecialchars($l['ip_address']) ?></td>
-                    <td class="p-2"><?= (int)$l['response_ms'] ?></td>
-                    <td class="p-2 text-rose-300"><?= htmlspecialchars($l['error_message'] ?? '') ?></td>
+                <tr class="hover:bg-white/[0.04]">
+                    <td class="px-4 py-2"><?= htmlspecialchars($l['created_at']) ?></td>
+                    <td class="px-4 py-2"><?= htmlspecialchars($l['key_name'] ?? '—') ?></td>
+                    <td class="px-4 py-2"><?= htmlspecialchars($l['method']) ?></td>
+                    <td class="px-4 py-2 font-mono break-all"><?= htmlspecialchars($l['path']) ?></td>
+                    <td class="px-4 py-2 <?= ((int)$l['status_code'] >= 400) ? 'text-rose-300' : 'text-emerald-300' ?>"><?= (int)$l['status_code'] ?></td>
+                    <td class="px-4 py-2"><?= htmlspecialchars($l['ip_address']) ?></td>
+                    <td class="px-4 py-2"><?= (int)$l['response_ms'] ?></td>
+                    <td class="px-4 py-2 text-rose-300"><?= htmlspecialchars($l['error_message'] ?? '') ?></td>
                 </tr>
             <?php endforeach; ?>
+            <?php if (!$recentLogs): ?>
+                <tr><td colspan="8" class="px-4 py-10 text-center text-white/45">ยังไม่มี log</td></tr>
+            <?php endif; ?>
             </tbody>
         </table>
         </div>
     </div>
 </div>
+
+<!-- Revoke / Activate confirmation (replaces window.confirm) -->
+<div id="hr-ak-action-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="hr-ak-action-modal-title">
+    <form id="hr-ak-action-form" method="POST" class="native-card tp-native-card w-full max-w-md my-auto rounded-[20px] p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)] border border-white/10">
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
+        <input type="hidden" name="action" id="hr-ak-modal-action" value="">
+        <input type="hidden" name="id" id="hr-ak-modal-id" value="">
+        <div class="flex items-start gap-3 mb-4">
+            <div id="hr-ak-modal-icon-wrap" class="w-12 h-12 rounded-full bg-rose-500/20 flex items-center justify-center text-rose-400 shrink-0">
+                <i id="hr-ak-modal-icon" class="fas fa-ban text-xl" aria-hidden="true"></i>
+            </div>
+            <div class="min-w-0">
+                <h3 id="hr-ak-action-modal-title" class="text-xl font-bold text-white leading-tight">ยืนยันการดำเนินการ</h3>
+                <div id="hr-ak-modal-desc" class="text-white/65 text-sm mt-1 break-words"></div>
+            </div>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-3 pt-2">
+            <button type="button" id="hr-ak-modal-cancel" class="flex-1 min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[20px] touch-manipulation font-medium">ยกเลิก</button>
+            <button type="submit" id="hr-ak-modal-confirm" class="flex-1 min-h-[56px] py-2.5 rounded-[20px] touch-manipulation font-semibold text-white bg-rose-600 hover:bg-rose-700">ยืนยัน</button>
+        </div>
+    </form>
+</div>
+
+<script>
+(function () {
+    var k = typeof window.__HR_API_ISSUED_KEY === 'string' ? window.__HR_API_ISSUED_KEY : '';
+    var displayEl = document.getElementById('hr-api-plain-key');
+    var toggleBtn = document.getElementById('hr-api-toggle-key-btn');
+    var toggleLabel = document.getElementById('hr-api-toggle-key-label');
+    var copyBtn = document.getElementById('hr-api-copy-key-btn');
+    var feedbackEl = document.getElementById('hr-api-copy-feedback');
+
+    function setFeedback(msg) {
+        if (feedbackEl) feedbackEl.textContent = msg || '';
+    }
+
+    if (k && displayEl && toggleBtn) {
+        masked = new Array(Math.min(64, Math.max(12, k.length)) + 1).join('●');
+        var masked = new Array(Math.min(64, Math.max(12, k.length)) + 1).join('●');
+        function applyView() {
+            var revealed = displayEl.getAttribute('data-revealed') === '1';
+            displayEl.textContent = revealed ? k : masked;
+            displayEl.classList.toggle('select-all', revealed);
+            displayEl.classList.toggle('select-none', !revealed);
+            displayEl.classList.toggle('tracking-wider', !revealed);
+            displayEl.setAttribute('aria-label', revealed ? 'ค่าคีย์แบบเต็ม' : 'ค่าคีย์ถูกซ่อน กดแสดงเพื่อดู');
+            if (toggleLabel) toggleLabel.textContent = revealed ? 'ซ่อนคีย์' : 'แสดงคีย์';
+            var ic = toggleBtn.querySelector('i');
+            if (ic) {
+                ic.className = revealed ? 'fas fa-eye-slash' : 'fas fa-eye';
+                ic.setAttribute('aria-hidden', 'true');
+            }
+        }
+        toggleBtn.addEventListener('click', function () {
+            var cur = displayEl.getAttribute('data-revealed') === '1';
+            displayEl.setAttribute('data-revealed', cur ? '0' : '1');
+            applyView();
+        });
+        applyView();
+    }
+
+    async function copyPlain() {
+        var text = typeof window.__HR_API_ISSUED_KEY === 'string' ? window.__HR_API_ISSUED_KEY : '';
+        if (!text && displayEl) text = displayEl.textContent.trim();
+        if (!text) return;
+        try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(text);
+            } else {
+                var ta = document.createElement('textarea');
+                ta.value = text;
+                ta.setAttribute('readonly', '');
+                ta.style.position = 'fixed';
+                ta.style.left = '-9999px';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+            }
+            setFeedback('คัดลอกแล้ว');
+            if (typeof showToast === 'function') showToast('success', 'คัดลอกแล้ว', 'นำไปเก็บในที่ปลอดภัย');
+            setTimeout(function () { setFeedback(''); }, 4000);
+        } catch (e) {
+            setFeedback('คัดลอกไม่สำเร็จ — ลองเลือกข้อความแล้วคัดลอกด้วยมือ');
+        }
+    }
+
+    if (copyBtn) copyBtn.addEventListener('click', copyPlain);
+})();
+
+function hrApiKeysOpenActionModal(btn) {
+    if (!btn) return;
+    var act = btn.getAttribute('data-ak-act') || '';
+    var id = btn.getAttribute('data-ak-id') || '';
+    var name = btn.getAttribute('data-ak-name') || '';
+    var form = document.getElementById('hr-ak-action-form');
+    var inpAct = document.getElementById('hr-ak-modal-action');
+    var inpId = document.getElementById('hr-ak-modal-id');
+    var titleEl = document.getElementById('hr-ak-action-modal-title');
+    var descEl = document.getElementById('hr-ak-modal-desc');
+    var iconWrap = document.getElementById('hr-ak-modal-icon-wrap');
+    var iconEl = document.getElementById('hr-ak-modal-icon');
+    var confirmBtn = document.getElementById('hr-ak-modal-confirm');
+
+    if (!form || !inpAct || !inpId) return;
+    inpAct.value = act;
+    inpId.value = id;
+
+    if (act === 'revoke') {
+        titleEl.textContent = 'ยกเลิกคีย์';
+        descEl.textContent = '';
+        var lineRv = document.createElement('p');
+        lineRv.className = 'text-white/65 text-sm mt-1 break-words';
+        lineRv.appendChild(document.createTextNode('ยืนยันการ revoke คีย์ '));
+        var boldRv = document.createElement('strong');
+        boldRv.className = 'text-white/90';
+        boldRv.textContent = name || ('#' + id);
+        lineRv.appendChild(boldRv);
+        lineRv.appendChild(document.createTextNode('? ผู้เรียก API จะใช้คีย์นี้ไม่ได้อีก'));
+        descEl.appendChild(lineRv);
+        if (iconWrap) {
+            iconWrap.className = 'w-12 h-12 rounded-full bg-rose-500/20 flex items-center justify-center text-rose-400 shrink-0';
+        }
+        if (iconEl) iconEl.className = 'fas fa-ban text-xl';
+        if (confirmBtn) {
+            confirmBtn.className = 'flex-1 min-h-[56px] py-2.5 rounded-[20px] touch-manipulation font-semibold text-white bg-rose-600 hover:bg-rose-700';
+            confirmBtn.textContent = 'ยืนยัน revoke';
+        }
+    } else {
+        titleEl.textContent = 'เปิดใช้งานคีย์';
+        descEl.textContent = '';
+        var lineAct = document.createElement('p');
+        lineAct.className = 'text-white/65 text-sm mt-1 break-words';
+        lineAct.appendChild(document.createTextNode('เปิดการใช้งานใหม่คีย์ '));
+        var boldAct = document.createElement('strong');
+        boldAct.className = 'text-white/90';
+        boldAct.textContent = name || ('#' + id);
+        lineAct.appendChild(boldAct);
+        lineAct.appendChild(document.createTextNode(' ?'));
+        descEl.appendChild(lineAct);
+        if (iconWrap) {
+            iconWrap.className = 'w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0';
+        }
+        if (iconEl) iconEl.className = 'fas fa-play text-xl';
+        if (confirmBtn) {
+            confirmBtn.className = 'flex-1 min-h-[56px] py-2.5 rounded-[20px] touch-manipulation font-semibold text-white bg-emerald-600 hover:bg-emerald-700';
+            confirmBtn.textContent = 'ยืนยัน activate';
+        }
+    }
+
+    if (typeof uiOpenModal === 'function') uiOpenModal('hr-ak-action-modal');
+    else {
+        var m = document.getElementById('hr-ak-action-modal');
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+    }
+}
+
+(function () {
+    var modal = document.getElementById('hr-ak-action-modal');
+    var cancel = document.getElementById('hr-ak-modal-cancel');
+    function close() {
+        if (typeof uiCloseModal === 'function') uiCloseModal('hr-ak-action-modal');
+        else if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    }
+    if (cancel) cancel.addEventListener('click', close);
+    if (modal) {
+        modal.addEventListener('click', function (e) {
+            if (e.target === modal) close();
+        });
+    }
+})();
+</script>
 <?php require_once __DIR__ . '/../templates/footer.php'; ?>

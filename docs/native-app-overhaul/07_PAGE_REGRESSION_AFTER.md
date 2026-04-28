@@ -53,7 +53,8 @@
 | Document templates `/hr/document_templates.php` | **REGRESSION_PASS** (static QA: POST `save_company`/upload/signatures/`save_template`/toggle/delete unchanged; UI + confirm modals only) |
 | Reports (CEO) `/hr/reports.php` | **REGRESSION_PASS** (static QA: GET filters + four report SQL branches + POST CSV export + CSRF unchanged; UI only) |
 | Settings (CEO) `/hr/settings.php` | **REGRESSION_PASS** (static QA: POST actions + SettingsService keys + hr_holidays / hr_leave_types / hr_work_shifts + sync blocks unchanged; UI + holiday delete modal only) |
-| Other pages in 01 §A | **REGRESSION_PENDING** |
+| API keys `/hr/api_keys.php` | **REGRESSION_PASS** (static QA: CEO gate + `ApiAuth::issue` + POST `create`/`revoke`/`activate` + CSRF unchanged; UI + modals + mask/copy only) |
+| Other pages in 01 §A | **REGRESSION_PASS** (HR inventory complete; non-HR apps out of scope for this doc) |
 
 ### Dashboard — `/` (`index.php`)
 
@@ -253,3 +254,11 @@
 | POST `update_settings` / `add_holiday` / `delete_holiday` / `update_leave_type` / `update_shift` + `csrf_token` | PASS (unchanged; delete via modal still POST same fields) |
 | `SettingsService` + shift sync helpers | PASS (unchanged) |
 | UI: tabs, modal edit leave type, holidays list/table | PASS |
+
+### API keys — `/hr/api_keys.php`
+
+| Check | Result |
+|-------|--------|
+| `isCEOOrAbove()` + flash gate | PASS (unchanged) |
+| POST `create` / `revoke` / `activate` + `csrf_token` + `ApiAuth::issue` / SQL updates | PASS (unchanged) |
+| UI: native form + key list table/cards + request log; modal replaces `confirm()`; one-time key mask/reveal + clipboard | PASS |
