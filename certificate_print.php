@@ -159,7 +159,7 @@ $signer2['position_en'] = $posEnMap[$signer2['position']] ?? 'Authorized Signato
 // ------------------------------------------------------------------
 $docNumber = $req['document_number'];
 $verifyCode = $req['qr_verification_code'];
-if (!$docNumber && $isHR) {
+if (!$docNumber && $isHrDash) {
     $year = (int)date('Y') + 543;
     $seqStmt = $pdo->prepare("SELECT COUNT(*)+1 FROM hr_document_requests WHERE document_number LIKE ?");
     $seqStmt->execute(["HR-{$year}-%"]);
@@ -267,6 +267,9 @@ $V = [
 
 $page_title = 'หนังสือรับรอง - ' . $V['fullName_th'];
 
+$verifyHostPath = (string)(parse_url((string)APP_URL, PHP_URL_HOST) ?: '');
+$verifyPathHint = $verifyHostPath !== '' ? ($verifyHostPath . '/verify_document.php') : 'verify_document.php';
+
 $verifyUrl = rtrim(APP_URL, '/') . '/verify_document.php?code=' . urlencode($verifyCode ?: $docNumber);
 $qrImg     = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=0&ecc=M&data=' . urlencode($verifyUrl);
 
@@ -305,10 +308,24 @@ body {
 }
 @media screen {
     body {
-        padding-top: max(20px, env(safe-area-inset-top, 0px));
-        padding-bottom: max(20px, env(safe-area-inset-bottom, 0px));
-        padding-left: env(safe-area-inset-left, 0px);
-        padding-right: env(safe-area-inset-right, 0px);
+        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 52%, #0f172a 100%);
+        background-attachment: fixed;
+        color: #e2e8f0;
+        padding-top: max(16px, env(safe-area-inset-top, 0px));
+        padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+        padding-left: max(12px, env(safe-area-inset-left, 0px));
+        padding-right: max(12px, env(safe-area-inset-right, 0px));
+    }
+    .screen-shell {
+        max-width: calc(210mm + 40px);
+        margin: 0 auto;
+    }
+    .pages-stack {
+        border-radius: 20px;
+        border: 1px solid rgba(255,255,255,0.1);
+        background: rgba(30, 41, 59, 0.45);
+        padding: 16px 12px 20px;
+        margin-top: 4px;
     }
 }
 
@@ -337,29 +354,41 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 4px;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 14px;
     font-family: system-ui, -apple-system, sans-serif;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(30, 41, 59, 0.85);
 }
-.toolbar-left { display: flex; gap: 6px; }
-.toolbar a, .toolbar button {
+.toolbar-left { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.toolbar a, .toolbar button, .toolbar .tb-btn {
     padding: 10px 16px;
     min-height: 44px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 6px;
-    border: 1px solid #cbd5e1;
-    background: #fff;
-    color: #0f172a;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(15, 23, 42, 0.6);
+    color: #e2e8f0;
     text-decoration: none;
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
 }
-.toolbar .btn-print {
-    background: #1a365d; color: #fff; border-color: #1a365d; font-weight: 600;
+.toolbar a:hover, .toolbar button:hover, .toolbar .tb-btn:hover {
+    background: rgba(51, 65, 85, 0.75);
 }
-.toolbar .btn-print:hover { background: #2d4a7c; }
+.toolbar form { display: inline; margin: 0; }
+.toolbar .btn-print {
+    background: #4f46e5;
+    color: #fff;
+    border-color: rgba(255,255,255,0.2);
+    font-weight: 600;
+}
+.toolbar .btn-print:hover { background: #6366f1; }
 
 /* ---------- Watermark ---------- */
 .watermark {
@@ -651,7 +680,9 @@ body {
 
 /* ---------- Print ---------- */
 @media print {
-    body { background: #fff; padding: 0; }
+    body { background: #fff; padding: 0; color: #1a1a1a; }
+    .screen-shell { max-width: none; margin: 0; }
+    .pages-stack { border: none; background: transparent; padding: 0; margin: 0; border-radius: 0; }
     .toolbar { display: none !important; }
     .page {
         width: 210mm; height: 297mm; min-height: 297mm; max-height: 297mm;
@@ -669,18 +700,41 @@ body {
 </head>
 <body>
 
-<div class="toolbar">
+<div class="screen-shell">
+<div class="toolbar" role="toolbar" aria-label="ตัวเลือกพิมพ์หนังสือรับรอง">
     <div class="toolbar-left">
-        <?php if (count($renderLangs) === 2 || $req['language'] === 'BOTH'): ?>
-            <a href="?id=<?= $reqId ?>&lang=TH&preview=1">ไทย</a>
-            <a href="?id=<?= $reqId ?>&lang=EN&preview=1">English</a>
-            <a href="?id=<?= $reqId ?>&lang=BOTH&preview=1">ทั้งสองภาษา</a>
+        <?php if (count($renderLangs) === 2 || ($req['language'] ?? '') === 'BOTH'): ?>
+            <form method="post" action="/certificate_print.php">
+                <?= csrfField() ?>
+                <input type="hidden" name="certificate_print" value="1">
+                <input type="hidden" name="id" value="<?= (int)$reqId ?>">
+                <input type="hidden" name="preview" value="<?= $preview ? '1' : '0' ?>">
+                <input type="hidden" name="lang" value="TH">
+                <button type="submit" class="tb-btn">ไทย</button>
+            </form>
+            <form method="post" action="/certificate_print.php">
+                <?= csrfField() ?>
+                <input type="hidden" name="certificate_print" value="1">
+                <input type="hidden" name="id" value="<?= (int)$reqId ?>">
+                <input type="hidden" name="preview" value="<?= $preview ? '1' : '0' ?>">
+                <input type="hidden" name="lang" value="EN">
+                <button type="submit" class="tb-btn">English</button>
+            </form>
+            <form method="post" action="/certificate_print.php">
+                <?= csrfField() ?>
+                <input type="hidden" name="certificate_print" value="1">
+                <input type="hidden" name="id" value="<?= (int)$reqId ?>">
+                <input type="hidden" name="preview" value="<?= $preview ? '1' : '0' ?>">
+                <input type="hidden" name="lang" value="BOTH">
+                <button type="submit" class="tb-btn">ทั้งสองภาษา</button>
+            </form>
         <?php endif; ?>
-        <a href="javascript:history.back()">← กลับ</a>
+        <button type="button" class="tb-btn" onclick="history.back()">← กลับ</button>
     </div>
-    <button onclick="window.print()" class="btn-print">พิมพ์ / บันทึกเป็น PDF</button>
+    <button type="button" onclick="window.print()" class="btn-print">พิมพ์ / บันทึกเป็น PDF</button>
 </div>
 
+<div class="pages-stack">
 <?php foreach ($renderLangs as $idx => $lang):
     $isEn = ($lang === 'EN');
     $pageNo = $idx + 1; $pageTotal = count($renderLangs);
@@ -1023,7 +1077,7 @@ body {
             <h4><?php echo $isEn?'Document Verification':'การตรวจสอบความถูกต้องของเอกสาร'; ?></h4>
             <div class="vf-row"><?php echo $isEn?'Document No.':'เลขที่เอกสาร'; ?>: <span class="mono"><?php echo htmlspecialchars($docNumber); ?></span></div>
             <div class="vf-row"><?php echo $isEn?'Verification Code':'รหัสยืนยัน'; ?>: <span class="mono"><?php echo htmlspecialchars($verifyCode ?: '-'); ?></span></div>
-            <div class="vf-row"><?php echo $isEn?'Verify at':'ตรวจสอบออนไลน์ที่'; ?>: <span class="mono">hr.tp-asset.com/verify_document.php</span></div>
+            <div class="vf-row"><?php echo $isEn?'Verify at':'ตรวจสอบออนไลน์ที่'; ?>: <span class="mono"><?php echo htmlspecialchars($verifyPathHint); ?></span></div>
         </div>
         <div class="qr-box">
             <img src="<?php echo htmlspecialchars($qrImg); ?>" alt="QR Verify">
@@ -1039,6 +1093,8 @@ body {
     </div>
 </div>
 <?php endforeach; ?>
+</div>
+</div>
 
 <?php if (!$preview): ?>
 <script>window.addEventListener('load', () => setTimeout(() => window.print(), 500));</script>

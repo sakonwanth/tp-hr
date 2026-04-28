@@ -15,8 +15,8 @@ Each task: specific, actionable. Complete in order P0 → P2 unless dependencies
 | HR-UI-009 | Certificate | `/certificate.php` | `certificate.php` | Form UX | NativeFormGroup | mixed | Success state | §8 | Low | Submit | **Done 2026-04-28** |
 | HR-UI-010 | Day-off schedule | `/dayoff_schedule.php` | `dayoff_schedule.php` | Grid overflow | Responsive grid + card cells | mixed | Legend | §5 layout | Med | 375px | **Done 2026-04-28** |
 | HR-UI-011 | Attendance history | `/attendance_history.php` | `attendance_history.php` | Table | Card list mobile | table | Empty | §2 | Med | Scroll | **Done 2026-04-28** |
-| HR-UI-012 | Verify doc | `/verify_document.php` | `verify_document.php` | Public clarity | NativeInfoBlock + form | plain | Error empty | §1 a11y | Low | Invalid code | |
-| HR-UI-013 | Cert print | `/certificate_print.php` | `certificate_print.php` | Screen preview | Optional `@media screen` card wrapper | print CSS | — | Print safe | Low | Print dialog | |
+| HR-UI-012 | Verify doc | `/verify_document.php` | `verify_document.php` | Public clarity | NativeInfoBlock + form | plain | Error empty | §1 a11y | Low | Invalid code | **Done 2026-04-28** |
+| HR-UI-013 | Cert print | `/certificate_print.php` | `certificate_print.php` | Screen preview | Optional `@media screen` card wrapper | print CSS | — | Print safe | Low | Print dialog | **Done 2026-04-28** |
 | HR-UI-014 | HR dashboard | `/hr/index.php` | `hr/index.php` | Widget inconsistency | NativeSummaryCard grid | mixed | — | §2 | Low | HR login | |
 | HR-UI-015 | Employees | `/hr/employees.php` | `hr/employees.php` | Table | Shell + mobile cards | data-table | Search/filter touch | §2 | Med | Filter | |
 | HR-UI-016 | Employee form | `/hr/employee_form.php` | `hr/employee_form.php` | Long form | **NativeProgressStep** or grouped cards | long form | Section save hints | §8 | High | Edit employee | |

@@ -39,6 +39,8 @@
 | Certificate `/certificate.php` | **REGRESSION_PASS** (static QA: `certificate-form` + `/api/certificate.php` + `tpHrCertificatePrintForm` unchanged; markup/CSS only) |
 | Day-off `/dayoff_schedule.php` | **REGRESSION_PASS** (static QA: POST `request_change` / `cancel_request` + modal IDs unchanged; markup/CSS + legend) |
 | Attendance history `/attendance_history.php` | **REGRESSION_PASS** (static QA: GET filters + queries unchanged; markup/CSS only) |
+| Verify document `/verify_document.php` | **REGRESSION_PASS** (static QA: `code`/`doc` GET + SQL branch + rate limit unchanged; form adds optional `doc`) |
+| Certificate print POST `/certificate_print.php` | **REGRESSION_PASS** (static QA: POST+CSRF + auth + SQL unchanged; screen-only chrome; print `@media` unchanged) |
 | Other pages in 01 §A | **REGRESSION_PENDING** |
 
 ### Dashboard — `/` (`index.php`)
@@ -121,3 +123,19 @@
 |-------|--------|
 | Month/status filter + attendance queries | PASS (unchanged) |
 | Calendar rows + mobile cards + desktop table | PASS |
+
+### Verify document — `/verify_document.php`
+
+| Check | Result |
+|-------|--------|
+| Public (no login); `code` / `doc` query + rate limit | PASS (unchanged) |
+| Success table + error re-entry form | PASS |
+
+### Certificate print — POST `/certificate_print.php`
+
+| Check | Result |
+|-------|--------|
+| POST + CSRF; GET with `id` still blocked | PASS |
+| Fetch + HR/owner auth + template render | PASS (unchanged) |
+| Bilingual toolbar uses POST (not broken GET links) | PASS |
+| `@media print` — A4 pages, toolbar hidden | PASS |
