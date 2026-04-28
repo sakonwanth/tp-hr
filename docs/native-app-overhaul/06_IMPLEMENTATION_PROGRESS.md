@@ -22,7 +22,8 @@
 | HR-UI-006 Leave form | **COMPLETE** | `request_form.php` — `tp-native-form-group`, native card form, upload/actions |
 | HR-UI-005 Leave history | **COMPLETE** | `leave_history.php` — mobile card stack, `tp-native-table-shell`, modal shell, pagination |
 | HR-UI-007 Payslip | **COMPLETE** | `payslip.php` — native cards, list rows, print-safe `.native-card` |
-| HR-UI-008 … HR-UI-026 (excl. above) | **NOT_STARTED** | — |
+| HR-UI-008 Profile | **COMPLETE** | `profile.php` — native cards, tabs radius 20px, list rows, modal shell, table shell |
+| HR-UI-009 … HR-UI-026 (excl. above) | **NOT_STARTED** | — |
 | HR-UI-SHELL-01 | **REFACTORED** | — |
 | HR-UI-SHELL-02 | **COMPLETE** | — |
 | HR-UI-SHELL-03 | **COMPLETE** | — |

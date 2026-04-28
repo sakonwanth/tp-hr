@@ -35,6 +35,7 @@
 | Leave `/leave.php` (+ `request_form.php` partial) | **REGRESSION_PASS** (static QA: routes/flash/API hooks unchanged; markup/CSS only) |
 | Leave history `/leave_history.php` | **REGRESSION_PASS** (static QA: filters/pagination/API detail+cancel unchanged; modal IDs preserved) |
 | Payslip `/payslip.php` | **REGRESSION_PASS** (static QA: POST download + queries unchanged; print CSS extended for `.native-card`) |
+| Profile `/profile.php` | **REGRESSION_PASS** (static QA: tabs/actions/API `edit-form` → `/api/profile.php` unchanged; markup/CSS + modal shell) |
 | Other pages in 01 §A | **REGRESSION_PENDING** |
 
 ### Dashboard — `/` (`index.php`)
@@ -86,3 +87,11 @@
 | Slip list / detail / YTD queries | PASS (unchanged) |
 | POST `download_payslip` + CSRF | PASS |
 | List card layout + print stylesheet | PASS |
+
+### Profile — `/profile.php`
+
+| Check | Result |
+|-------|--------|
+| User / related tables load | PASS (unchanged) |
+| `edit-modal`, `openEditModal`, form POST to `/api/profile.php` | PASS |
+| Tab nav + native cards + `tp-native-table-shell` (family) | PASS |
