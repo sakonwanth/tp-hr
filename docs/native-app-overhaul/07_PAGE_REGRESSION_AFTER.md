@@ -45,6 +45,7 @@
 | Employees `/hr/employees.php` | **REGRESSION_PASS** (static QA: GET filters + pagination + POST export/delete unchanged; `/api/leave.php` modal data unchanged) |
 | Employee form `/hr/employee_form.php` | **REGRESSION_PASS** (static QA: POST main form + change_password + permission strips unchanged; markup/CSS + tab a11y only) |
 | Employee view `/hr/employee_view.php` | **REGRESSION_PASS** (static QA: GET id + queries + CEO salary gate unchanged; display labels + UI only) |
+| Employee attendance `/hr/employee_attendance.php` | **REGRESSION_PASS** (static QA: GET id/month + attendance/holiday/swap queries unchanged; markup/CSS only) |
 | Other pages in 01 §A | **REGRESSION_PENDING** |
 
 ### Dashboard — `/` (`index.php`)
@@ -177,3 +178,11 @@
 | HR gate + load user + stats + today attendance | PASS (unchanged) |
 | `isCEOOrAbove()` salary block | PASS |
 | Links to edit / employees / employee_attendance | PASS |
+
+### Employee attendance — `/hr/employee_attendance.php`
+
+| Check | Result |
+|-------|--------|
+| HR gate + GET id + month + employee row | PASS (unchanged) |
+| Attendance list + holidays + swaps + `$allDays` build | PASS |
+| Monthly summary aggregates | PASS |

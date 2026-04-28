@@ -12,15 +12,15 @@
 | 03_PAGE_AUDIT_BEFORE | Complete — 26 NEEDS_REFACTOR, 1 PASS |
 | 04_PAGE_REFACTOR_TODO | Complete — 26 tasks + shell tasks |
 | 05_NATIVE_COMPONENT_SYSTEM | Complete |
-| 06_IMPLEMENTATION_PROGRESS | **Partial** — shell + **16** refactored surfaces (incl. HR employee view) + leave request partial |
-| 07_PAGE_REGRESSION_AFTER | **Partial** — REGRESSION_PASS through HR employee view (+ form partial) (static) |
+| 06_IMPLEMENTATION_PROGRESS | **Partial** — shell + **17** refactored surfaces (incl. HR emp attendance) + leave request partial |
+| 07_PAGE_REGRESSION_AFTER | **Partial** — REGRESSION_PASS through HR emp attendance (+ form partial) (static) |
 
 ## Spec compliance (target vs actual)
 
 | Criterion | Target | Actual (this snapshot) |
 |-----------|--------|-------------------------|
-| Every page refactored | 26 | **16** surfaces (10 employee + verify + cert print + HR dash + employees + employee form/view) + **1** partial (leave form); remainder pending |
-| Every page regression PASS | 26 | **16** + partial noted static PASS in 07; remainder pending |
+| Every page refactored | 26 | **17** surfaces (employee app + HR cluster through emp attendance incl. verify/cert) + **1** partial (leave form); remainder pending |
+| Every page regression PASS | 26 | **17** + partial noted static PASS in 07; remainder pending |
 | Locked components only | Yes | Shell uses map; pages still mixed legacy |
 | No bottom nav overlap | 0 issues | Shell CSS designed for it; per-page QA pending |
 | No CTA collision | 0 | Per-page |

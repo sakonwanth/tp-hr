@@ -160,30 +160,30 @@ include dirname(__DIR__) . '/templates/header.php';
             <p class="text-slate-300 text-sm mt-1.5 leading-relaxed"><?php echo htmlspecialchars($empFullNameTh); ?></p>
         </div>
         <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto shrink-0">
-            <a href="/hr/employee_view.php?id=<?php echo (int)$employeeId; ?>" class="inline-flex items-center justify-center min-h-[48px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors font-medium touch-manipulation">
-                <i class="fas fa-user mr-2"></i>โปรไฟล์
+            <a href="/hr/employee_view.php?id=<?php echo (int)$employeeId; ?>" class="inline-flex items-center justify-center min-h-[48px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-[20px] transition-colors font-medium touch-manipulation">
+                <i class="fas fa-user mr-2" aria-hidden="true"></i>โปรไฟล์
             </a>
-            <a href="/hr/attendance.php" class="inline-flex items-center justify-center min-h-[48px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors font-medium touch-manipulation">
-                <i class="fas fa-arrow-left mr-2"></i>กลับ
+            <a href="/hr/attendance.php" class="inline-flex items-center justify-center min-h-[48px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-[20px] transition-colors font-medium touch-manipulation">
+                <i class="fas fa-arrow-left mr-2" aria-hidden="true"></i>กลับ
             </a>
         </div>
     </div>
 </div>
 
 <!-- Employee Info Card -->
-<div class="glass-card rounded-xl p-4 sm:p-6 mb-6 min-w-0 overflow-hidden">
-    <div class="flex items-center gap-4">
-        <div class="w-16 h-16 rounded-full bg-violet-500/20 flex items-center justify-center">
+<div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 mb-6 min-w-0 max-w-full overflow-hidden">
+    <div class="flex items-center gap-4 min-w-0">
+        <div class="w-16 h-16 rounded-full bg-violet-500/20 flex items-center justify-center shrink-0" aria-hidden="true">
             <i class="fas fa-user text-violet-400 text-2xl"></i>
         </div>
-        <div class="flex-1">
-            <h2 class="text-xl font-bold text-white">
+        <div class="flex-1 min-w-0">
+            <h2 class="section-title mb-2 text-white text-lg sm:text-xl">
                 <?php echo htmlspecialchars($employee['first_name_th'] . ' ' . $employee['last_name_th']); ?>
             </h2>
-            <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-white/60 mt-1">
-                <span><i class="fas fa-id-badge mr-1"></i><?php echo htmlspecialchars($employee['employee_code'] ?? '-'); ?></span>
-                <span><i class="fas fa-building mr-1"></i><?php echo htmlspecialchars($employee['department'] ?? '-'); ?></span>
-                <span><i class="fas fa-user-tag mr-1"></i><?php echo htmlspecialchars($employee['position'] ?? '-'); ?></span>
+            <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-white/65 mt-1">
+                <span class="break-words"><i class="fas fa-id-badge mr-1 shrink-0" aria-hidden="true"></i><?php echo htmlspecialchars($employee['employee_code'] ?? '-'); ?></span>
+                <span class="break-words"><i class="fas fa-building mr-1 shrink-0" aria-hidden="true"></i><?php echo htmlspecialchars($employee['department'] ?? '-'); ?></span>
+                <span class="break-words"><i class="fas fa-user-tag mr-1 shrink-0" aria-hidden="true"></i><?php echo htmlspecialchars($employee['position'] ?? '-'); ?></span>
                 <?php 
                 $dayNames = THAI_DAY_NAMES;
                 $daysOff = [$defaultDayOff];
@@ -193,22 +193,22 @@ include dirname(__DIR__) . '/templates/header.php';
                 }
                 $dayOffNames = array_map(fn($d) => $dayNames[$d] ?? '', $daysOff);
                 ?>
-                <span><i class="fas fa-calendar-minus mr-1"></i>วันหยุด: <?php echo implode(', ', $dayOffNames); ?></span>
+                <span class="break-words"><i class="fas fa-calendar-minus mr-1 shrink-0" aria-hidden="true"></i>วันหยุด: <?php echo htmlspecialchars(implode(', ', $dayOffNames)); ?></span>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Month Filter -->
-<div class="glass-card rounded-xl p-4 sm:p-6 mb-6 min-w-0 overflow-hidden">
-    <form method="GET" class="flex flex-wrap items-center gap-4">
-        <input type="hidden" name="id" value="<?php echo $employeeId; ?>">
-        <div class="flex items-center gap-2">
-            <label class="text-white/70 text-sm">เดือน:</label>
-            <select name="month" class="input-field w-auto" onchange="this.form.submit()">
+<div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 mb-6 min-w-0 max-w-full overflow-hidden">
+    <form method="GET" class="flex flex-wrap items-end gap-4" id="emp-att-month-form">
+        <input type="hidden" name="id" value="<?php echo (int)$employeeId; ?>">
+        <div class="tp-native-form-group mb-0 min-w-[200px]">
+            <label for="emp-att-month" class="text-white/70 text-sm font-medium">เดือน</label>
+            <select id="emp-att-month" name="month" class="input-field tp-native-select w-full max-w-xs" onchange="this.form.submit()">
                 <?php foreach ($monthOptions as $opt): ?>
-                <option value="<?php echo $opt['value']; ?>" <?php echo $month === $opt['value'] ? 'selected' : ''; ?>>
-                    <?php echo $opt['label']; ?>
+                <option value="<?php echo htmlspecialchars($opt['value']); ?>" <?php echo $month === $opt['value'] ? 'selected' : ''; ?>>
+                    <?php echo htmlspecialchars($opt['label']); ?>
                 </option>
                 <?php endforeach; ?>
             </select>
@@ -217,36 +217,36 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <!-- Summary Cards -->
-<div class="grid grid-cols-2 md:grid-cols-5 gap-2 sm:gap-4 mb-6 min-w-0 max-w-full">
-    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden text-center">
-        <p class="text-white/60 text-sm truncate">มาทำงาน</p>
-        <p class="text-3xl font-bold text-green-400 tabular-nums mt-1"><?php echo (int)($summary['present_days'] ?? 0); ?></p>
-        <p class="text-white/50 text-xs">วัน</p>
+<div class="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4 mb-6 min-w-0 max-w-full">
+    <div class="stat-card tp-native-summary-card group text-center min-w-0 py-5">
+        <p class="text-slate-300 text-xs sm:text-sm">มาทำงาน</p>
+        <p class="text-2xl sm:text-3xl font-bold text-emerald-400 tabular-nums mt-1"><?php echo (int)($summary['present_days'] ?? 0); ?></p>
+        <p class="text-white/45 text-xs mt-0.5">วัน</p>
     </div>
-    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden text-center">
-        <p class="text-white/60 text-sm truncate">มาสาย</p>
-        <p class="text-3xl font-bold text-yellow-400 tabular-nums mt-1"><?php echo (int)($summary['late_days'] ?? 0); ?></p>
-        <p class="text-white/50 text-xs">ครั้ง</p>
+    <div class="stat-card tp-native-summary-card group text-center min-w-0 py-5">
+        <p class="text-slate-300 text-xs sm:text-sm">มาสาย</p>
+        <p class="text-2xl sm:text-3xl font-bold text-amber-400 tabular-nums mt-1"><?php echo (int)($summary['late_days'] ?? 0); ?></p>
+        <p class="text-white/45 text-xs mt-0.5">ครั้ง</p>
     </div>
-    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden text-center">
-        <p class="text-white/60 text-sm truncate">ขาดงาน</p>
-        <p class="text-3xl font-bold text-red-400 tabular-nums mt-1"><?php echo (int)($summary['absent_days'] ?? 0); ?></p>
-        <p class="text-white/50 text-xs">วัน</p>
+    <div class="stat-card tp-native-summary-card group text-center min-w-0 py-5">
+        <p class="text-slate-300 text-xs sm:text-sm">ขาดงาน</p>
+        <p class="text-2xl sm:text-3xl font-bold text-red-400 tabular-nums mt-1"><?php echo (int)($summary['absent_days'] ?? 0); ?></p>
+        <p class="text-white/45 text-xs mt-0.5">วัน</p>
     </div>
-    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden text-center">
-        <p class="text-white/60 text-sm truncate">ลา</p>
-        <p class="text-3xl font-bold text-blue-400 tabular-nums mt-1"><?php echo (int)($summary['leave_days'] ?? 0); ?></p>
-        <p class="text-white/50 text-xs">วัน</p>
+    <div class="stat-card tp-native-summary-card group text-center min-w-0 py-5">
+        <p class="text-slate-300 text-xs sm:text-sm">ลา</p>
+        <p class="text-2xl sm:text-3xl font-bold text-blue-400 tabular-nums mt-1"><?php echo (int)($summary['leave_days'] ?? 0); ?></p>
+        <p class="text-white/45 text-xs mt-0.5">วัน</p>
     </div>
-    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden text-center md:col-span-1 col-span-2">
-        <p class="text-white/60 text-sm truncate">ชั่วโมงทำงาน</p>
-        <p class="text-3xl font-bold text-white tabular-nums mt-1"><?php echo floor(($summary['total_work_minutes'] ?? 0) / 60); ?></p>
-        <p class="text-white/50 text-xs">ชั่วโมง</p>
+    <div class="stat-card tp-native-summary-card group text-center min-w-0 py-5 md:col-span-1 col-span-2">
+        <p class="text-slate-300 text-xs sm:text-sm">ชั่วโมงทำงาน</p>
+        <p class="text-2xl sm:text-3xl font-bold text-white tabular-nums mt-1"><?php echo (int)floor((int)($summary['total_work_minutes'] ?? 0) / 60); ?></p>
+        <p class="text-white/45 text-xs mt-0.5">ชั่วโมง</p>
     </div>
 </div>
 
 <!-- Attendance Table -->
-<div class="glass-card rounded-xl overflow-hidden min-w-0">
+<div class="native-card tp-native-card tp-native-data-card min-w-0 max-w-full overflow-hidden">
     <?php if ($allDays): ?>
     <div class="md:hidden p-3 space-y-3">
         <?php foreach ($allDays as $day): ?>
@@ -287,7 +287,7 @@ include dirname(__DIR__) . '/templates/header.php';
             ? floor($att['work_minutes'] / 60) . ':' . str_pad((string)($att['work_minutes'] % 60), 2, '0', STR_PAD_LEFT)
             : '-';
         ?>
-        <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+        <div class="rounded-[20px] bg-white/5 border border-white/10 p-4 min-w-0">
             <div class="flex items-start justify-between gap-3">
                 <div>
                     <div class="text-white font-semibold"><?php echo formatDateThai($day['date']); ?></div>
@@ -300,21 +300,21 @@ include dirname(__DIR__) . '/templates/header.php';
                         <?php endif; ?>
                     </div>
                 </div>
-                <span class="shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold <?php echo $statusClass; ?>">
+                <span class="shrink-0 px-2.5 py-1 rounded-[20px] text-xs font-semibold <?php echo $statusClass; ?>">
                     <?php echo htmlspecialchars($statusLabel); ?>
                 </span>
             </div>
 
             <div class="grid grid-cols-3 gap-2 mt-4">
-                <div class="rounded-xl bg-black/20 border border-white/10 px-2 py-2">
+                <div class="rounded-[20px] bg-black/20 border border-white/10 px-2 py-2">
                     <div class="text-[11px] text-white/50">เข้า</div>
                     <div class="text-white font-semibold"><?php echo htmlspecialchars($checkIn); ?></div>
                 </div>
-                <div class="rounded-xl bg-black/20 border border-white/10 px-2 py-2">
+                <div class="rounded-[20px] bg-black/20 border border-white/10 px-2 py-2">
                     <div class="text-[11px] text-white/50">ออก</div>
                     <div class="text-white font-semibold"><?php echo htmlspecialchars($checkOut); ?></div>
                 </div>
-                <div class="rounded-xl bg-black/20 border border-white/10 px-2 py-2">
+                <div class="rounded-[20px] bg-black/20 border border-white/10 px-2 py-2">
                     <div class="text-[11px] text-white/50">ชม.</div>
                     <div class="text-white font-semibold"><?php echo htmlspecialchars($work); ?></div>
                 </div>
@@ -333,22 +333,22 @@ include dirname(__DIR__) . '/templates/header.php';
         <?php endforeach; ?>
     </div>
     <?php else: ?>
-    <div class="md:hidden px-4 py-8 text-center text-white/50">
-        <i class="fas fa-calendar-times text-4xl mb-3 block"></i>
-        <p>ไม่พบข้อมูลในเดือนนี้</p>
+    <div class="md:hidden tp-native-empty-state text-center py-10 px-4 text-white/55">
+        <i class="fas fa-calendar-times text-4xl mb-3 block text-slate-500" aria-hidden="true"></i>
+        <p class="text-sm">ไม่พบข้อมูลในเดือนนี้</p>
     </div>
     <?php endif; ?>
 
-    <div class="hidden md:block overflow-x-auto">
-        <table class="w-full">
-            <thead>
+    <div class="hidden md:block tp-native-table-shell overflow-x-auto min-w-0 max-w-full overscroll-x-contain -mx-1 px-1 pb-px">
+        <table class="w-full" style="min-width:680px">
+            <thead class="bg-white/5">
                 <tr class="border-b border-white/10">
-                    <th class="px-4 py-3 text-left text-white/70 text-sm font-medium">วันที่</th>
-                    <th class="px-4 py-3 text-center text-white/70 text-sm font-medium">กะ</th>
-                    <th class="px-4 py-3 text-center text-white/70 text-sm font-medium">เข้างาน</th>
-                    <th class="px-4 py-3 text-center text-white/70 text-sm font-medium">ออกงาน</th>
-                    <th class="px-4 py-3 text-center text-white/70 text-sm font-medium">ชม.ทำงาน</th>
-                    <th class="px-4 py-3 text-center text-white/70 text-sm font-medium">สถานะ</th>
+                    <th scope="col" class="px-4 py-3 text-left text-white/65 text-xs sm:text-sm font-medium uppercase tracking-wide">วันที่</th>
+                    <th scope="col" class="px-4 py-3 text-center text-white/65 text-xs sm:text-sm font-medium uppercase tracking-wide">กะ</th>
+                    <th scope="col" class="px-4 py-3 text-center text-white/65 text-xs sm:text-sm font-medium uppercase tracking-wide">เข้างาน</th>
+                    <th scope="col" class="px-4 py-3 text-center text-white/65 text-xs sm:text-sm font-medium uppercase tracking-wide">ออกงาน</th>
+                    <th scope="col" class="px-4 py-3 text-center text-white/65 text-xs sm:text-sm font-medium uppercase tracking-wide">ชม.ทำงาน</th>
+                    <th scope="col" class="px-4 py-3 text-center text-white/65 text-xs sm:text-sm font-medium uppercase tracking-wide">สถานะ</th>
                 </tr>
             </thead>
             <tbody>
@@ -366,7 +366,7 @@ include dirname(__DIR__) . '/templates/header.php';
                             $rowClass = 'border-b border-white/5 bg-blue-500/5';
                         }
                     ?>
-                    <tr class="<?php echo $rowClass; ?>">
+                    <tr class="<?php echo $rowClass; ?> hover:bg-white/[0.04]">
                         <td class="px-4 py-3">
                             <div class="flex items-center gap-2">
                                 <div>
@@ -399,8 +399,8 @@ include dirname(__DIR__) . '/templates/header.php';
                         <td class="px-4 py-3 text-center">
                             <?php if ($att && $att['check_in_time']): ?>
                                 <span class="text-green-400 font-medium"><?php echo date('H:i', strtotime($att['check_in_time'])); ?></span>
-                                <?php if ($att['late_minutes'] > 0): ?>
-                                <span class="text-red-400 text-xs ml-1">(+<?php echo $att['late_minutes']; ?>น.)</span>
+                                <?php if ((int)($att['late_minutes'] ?? 0) > 0): ?>
+                                <span class="text-red-400 text-xs ml-1">(+<?php echo (int)$att['late_minutes']; ?>น.)</span>
                                 <?php endif; ?>
                             <?php else: ?>
                                 <span class="text-white/30">--:--</span>
@@ -424,7 +424,7 @@ include dirname(__DIR__) . '/templates/header.php';
                         </td>
                         <td class="px-4 py-3 text-center">
                             <?php if ($holiday): ?>
-                            <span class="px-2 py-1 text-xs rounded bg-orange-500/20 text-orange-400">
+                            <span class="px-2 py-1 text-xs rounded-[20px] bg-orange-500/20 text-orange-300 border border-orange-500/25">
                                 <?php echo match($holiday['type']) {
                                     'PUBLIC' => 'วันหยุดราชการ',
                                     'COMPANY' => 'วันหยุดบริษัท',
@@ -434,32 +434,32 @@ include dirname(__DIR__) . '/templates/header.php';
                                 }; ?>
                             </span>
                             <?php elseif ($isDayOff): ?>
-                            <span class="px-2 py-1 text-xs rounded bg-blue-500/20 text-blue-400">วันหยุด</span>
+                            <span class="px-2 py-1 text-xs rounded-[20px] bg-blue-500/20 text-blue-300 border border-blue-500/25">วันหยุด</span>
                             <?php elseif ($att): ?>
-                            <span class="px-2 py-1 text-xs rounded <?php 
+                            <span class="px-2 py-1 text-xs rounded-[20px] border border-white/10 <?php 
                                 echo match($att['status']) {
-                                    'PRESENT' => 'bg-green-500/20 text-green-400',
-                                    'LATE' => 'bg-yellow-500/20 text-yellow-400',
-                                    'ABSENT' => 'bg-red-500/20 text-red-400',
-                                    'LEAVE' => 'bg-blue-500/20 text-blue-400',
-                                    'HOLIDAY' => 'bg-orange-500/20 text-orange-400',
-                                    'WFH' => 'bg-purple-500/20 text-purple-400',
-                                    default => 'bg-gray-500/20 text-gray-400'
+                                    'PRESENT' => 'bg-emerald-500/15 text-emerald-300 border-emerald-500/25',
+                                    'LATE' => 'bg-amber-500/15 text-amber-300 border-amber-500/25',
+                                    'ABSENT' => 'bg-red-500/15 text-red-300 border-red-500/25',
+                                    'LEAVE' => 'bg-blue-500/15 text-blue-300 border-blue-500/25',
+                                    'HOLIDAY' => 'bg-orange-500/15 text-orange-300 border-orange-500/25',
+                                    'WFH' => 'bg-violet-500/15 text-violet-300 border-violet-500/25',
+                                    default => 'bg-slate-500/15 text-slate-300 border-white/10'
                                 };
                             ?>">
                                 <?php echo ATTENDANCE_STATUS[$att['status']] ?? $att['status']; ?>
                             </span>
                             <?php else: ?>
-                            <span class="px-2 py-1 text-xs rounded bg-red-500/20 text-red-400">ขาดงาน</span>
+                            <span class="px-2 py-1 text-xs rounded-[20px] bg-red-500/15 text-red-300 border border-red-500/25">ขาดงาน</span>
                             <?php endif; ?>
                         </td>
                     </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="6" class="px-4 py-8 text-center text-white/50">
-                            <i class="fas fa-calendar-times text-4xl mb-3 block"></i>
-                            <p>ไม่พบข้อมูลในเดือนนี้</p>
+                        <td colspan="6" class="px-4 py-10 text-center text-white/50">
+                            <i class="fas fa-calendar-times text-4xl mb-3 block text-slate-500" aria-hidden="true"></i>
+                            <p class="text-sm">ไม่พบข้อมูลในเดือนนี้</p>
                         </td>
                     </tr>
                 <?php endif; ?>

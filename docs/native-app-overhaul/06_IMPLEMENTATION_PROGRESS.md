@@ -32,7 +32,8 @@
 | HR-UI-015 Employees list | **COMPLETE** | `hr/employees.php` — native filter card, stat links, table shell + 44px actions, leave modal, empty state |
 | HR-UI-016 Employee form | **COMPLETE** | `hr/employee_form.php` — native section cards, tabs a11y, tp-native inputs, sticky actions, password card |
 | HR-UI-017 Employee view | **COMPLETE** | `hr/employee_view.php` — native header + stat cards + data sections; attendance link; gender/marital labels + status colors |
-| HR-UI-018 … HR-UI-026 (excl. above) | **NOT_STARTED** | — |
+| HR-UI-018 Employee attendance | **COMPLETE** | `hr/employee_attendance.php` — native filters, stat cards, mobile cards 20px, tp-native-table-shell desktop |
+| HR-UI-019 … HR-UI-026 (excl. above) | **NOT_STARTED** | — |
 | HR-UI-SHELL-01 | **REFACTORED** | — |
 | HR-UI-SHELL-02 | **COMPLETE** | — |
 | HR-UI-SHELL-03 | **COMPLETE** | — |
