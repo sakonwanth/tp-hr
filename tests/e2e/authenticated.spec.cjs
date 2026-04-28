@@ -17,6 +17,21 @@ test.describe('Authenticated session', () => {
     await expect(page).toHaveTitle(/การลา/);
   });
 
+  test('profile page title', async ({ page }) => {
+    await page.goto('profile.php', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveTitle(/ข้อมูลส่วนตัว/);
+  });
+
+  test('payslip page title', async ({ page }) => {
+    await page.goto('payslip.php', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveTitle(/สลิปเงินเดือน/);
+  });
+
+  test('attendance history page title', async ({ page }) => {
+    await page.goto('attendance_history.php', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveTitle(/ประวัติการลงเวลา/);
+  });
+
   test('hr admin index (requires HR-capable account)', async ({ page }) => {
     test.skip(
       process.env.PLAYWRIGHT_HR_EXPECT_ADMIN !== '1',

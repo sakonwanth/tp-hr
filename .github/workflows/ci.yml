@@ -28,3 +28,15 @@ jobs:
           echo "Checking for exposed credentials..."
           ! grep -rn "DB_PASS\s*=" . --include="*.php" | grep -v "getenv\|ENV\|\$_ENV\|env(" || true
           ! grep -rn "\.env" .gitignore || echo "WARNING: .env not in .gitignore"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Playwright — install & list tests (no server — validates config & imports)
+        run: |
+          npm ci
+          npx playwright install chromium
+          npx playwright test --list

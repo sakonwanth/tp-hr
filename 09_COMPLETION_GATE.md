@@ -55,6 +55,14 @@ Strict interpretation — *every* loading / empty / error / skeleton on *every* 
 
 ---
 
+## Delta (E2E follow-up)
+
+| Item |
+|------|
+| **`authenticated.spec.cjs`**: titles for **`profile`**, **`payslip`**, **`attendance_history`**; CI runs **`npm ci`** + **`playwright install chromium`** + **`playwright test --list`** (config smoke, no PHP server). |
+
+---
+
 ## Delta (E2E completion tranche)
 
 | Item |
