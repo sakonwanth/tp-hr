@@ -35,7 +35,8 @@
 | HR-UI-018 Employee attendance | **COMPLETE** | `hr/employee_attendance.php` — native filters, stat cards, mobile cards 20px, tp-native-table-shell desktop |
 | HR-UI-019 HR attendance mgmt | **COMPLETE** | `hr/attendance.php` — stat cards + filter card + native table/list; dept preserved on stats/nav; modals tp-native-modal |
 | HR-UI-020 Leaves approval | **COMPLETE** | `hr/leaves.php` — stat/filter native cards; table shell + large approve/reject; approve confirm modal replaces `confirm()` |
-| HR-UI-021 … HR-UI-026 (excl. above) | **NOT_STARTED** | — |
+| HR-UI-021 Day-off approvals (CEO) | **COMPLETE** | `hr/dayoff_approvals.php` — stat cards + filters; modals แทน `confirm`; POST approve/reject unchanged |
+| HR-UI-022 … HR-UI-026 (excl. above) | **NOT_STARTED** | — |
 | HR-UI-SHELL-01 | **REFACTORED** | — |
 | HR-UI-SHELL-02 | **COMPLETE** | — |
 | HR-UI-SHELL-03 | **COMPLETE** | — |

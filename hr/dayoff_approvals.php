@@ -108,8 +108,32 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $allRequests = $stmt->fetchAll();
 
-// Count pending
+// Count pending (ทั้งระบบ — ใช้ปุ่มอนุมัติทั้งหมด)
 $pendingCount = $pdo->query("SELECT COUNT(*) FROM hr_dayoff_requests WHERE status = 'PENDING'")->fetchColumn();
+
+// สถิติตามตัวกรองเดือน (เดือนว่าง = นับทั้งหมด)
+$statsWhere = '';
+$statsParams = [];
+if ($month !== '') {
+    $statsWhere = " WHERE DATE_FORMAT(week_start, '%Y-%m') = ?";
+    $statsParams[] = $month;
+}
+$stmtStats = $pdo->prepare("
+    SELECT 
+        SUM(CASE WHEN status = 'PENDING' THEN 1 ELSE 0 END) AS pending,
+        SUM(CASE WHEN status = 'APPROVED' THEN 1 ELSE 0 END) AS approved,
+        SUM(CASE WHEN status = 'REJECTED' THEN 1 ELSE 0 END) AS rejected,
+        COUNT(*) AS total
+    FROM hr_dayoff_requests
+    $statsWhere
+");
+$stmtStats->execute($statsParams);
+$doStats = $stmtStats->fetch(PDO::FETCH_ASSOC) ?: ['pending' => 0, 'approved' => 0, 'rejected' => 0, 'total' => 0];
+
+$filterBase = [];
+if ($month !== '') {
+    $filterBase['month'] = $month;
+}
 
 include dirname(__DIR__) . '/templates/header.php';
 ?>
@@ -126,86 +150,122 @@ include dirname(__DIR__) . '/templates/header.php';
             <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">พนักงานขอเปลี่ยนวันหยุดในแต่ละสัปดาห์</p>
         </div>
         <?php if ($pendingCount > 0 && $statusFilter === 'PENDING'): ?>
-        <form method="POST" class="inline shrink-0 w-full sm:w-auto" onsubmit="return confirm('อนุมัติคำขอทั้งหมด <?php echo $pendingCount; ?> รายการ?')">
-            <?php echo csrfField(); ?>
-            <input type="hidden" name="action" value="approve_all">
-            <button type="submit" class="w-full sm:w-auto min-h-[56px] px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl transition-colors touch-manipulation font-semibold">
-                <i class="fas fa-check-double mr-2"></i>อนุมัติทั้งหมด (<?php echo $pendingCount; ?>)
-            </button>
-        </form>
+        <button type="button"
+                onclick="openApproveAllModal()"
+                class="w-full sm:w-auto min-h-[56px] px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[20px] transition-colors touch-manipulation font-semibold shadow-sm shadow-emerald-900/30">
+            <i class="fas fa-check-double mr-2" aria-hidden="true"></i>อนุมัติทั้งหมด (<?php echo (int)$pendingCount; ?>)
+        </button>
         <?php endif; ?>
     </div>
 </div>
 
-<?php if ($flash = flash('success')): ?>
-<div class="glass-card rounded-xl p-4 mb-4 border-l-4 border-green-500">
-    <p class="text-green-400"><i class="fas fa-check-circle mr-2"></i><?php echo htmlspecialchars($flash); ?></p>
+<?php if ($flashOk = flash('success')): ?>
+<div class="mb-4 rounded-[20px] border border-emerald-500/30 bg-emerald-500/15 px-4 py-3 text-emerald-200" role="status">
+    <p><i class="fas fa-check-circle mr-2" aria-hidden="true"></i><?php echo htmlspecialchars($flashOk); ?></p>
 </div>
 <?php endif; ?>
 
+<?php if ($flashErr = flash('error')): ?>
+<div class="mb-4 rounded-[20px] border border-red-500/30 bg-red-500/15 px-4 py-3 text-red-200" role="alert">
+    <p><i class="fas fa-exclamation-circle mr-2" aria-hidden="true"></i><?php echo htmlspecialchars($flashErr); ?></p>
+</div>
+<?php endif; ?>
+
+<!-- Stats -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6 min-w-0 max-w-full">
+    <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['status' => 'PENDING']))); ?>"
+       class="stat-card tp-native-summary-card rounded-[20px] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $statusFilter === 'PENDING' ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
+        <p class="text-slate-300 text-sm truncate">รออนุมัติ</p>
+        <p class="text-2xl font-bold text-amber-400 tabular-nums mt-1"><?php echo (int)($doStats['pending'] ?? 0); ?></p>
+    </a>
+    <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['status' => 'APPROVED']))); ?>"
+       class="stat-card tp-native-summary-card rounded-[20px] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $statusFilter === 'APPROVED' ? 'ring-2 ring-emerald-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
+        <p class="text-slate-300 text-sm truncate">อนุมัติแล้ว</p>
+        <p class="text-2xl font-bold text-emerald-400 tabular-nums mt-1"><?php echo (int)($doStats['approved'] ?? 0); ?></p>
+    </a>
+    <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['status' => 'REJECTED']))); ?>"
+       class="stat-card tp-native-summary-card rounded-[20px] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $statusFilter === 'REJECTED' ? 'ring-2 ring-red-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
+        <p class="text-slate-300 text-sm truncate">ไม่อนุมัติ</p>
+        <p class="text-2xl font-bold text-red-400 tabular-nums mt-1"><?php echo (int)($doStats['rejected'] ?? 0); ?></p>
+    </a>
+    <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['status' => '']))); ?>"
+       class="stat-card tp-native-summary-card rounded-[20px] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $statusFilter === '' ? 'ring-2 ring-violet-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
+        <p class="text-slate-300 text-sm truncate">ทั้งหมด</p>
+        <p class="text-2xl font-bold text-violet-400 tabular-nums mt-1"><?php echo (int)($doStats['total'] ?? 0); ?></p>
+    </a>
+</div>
+
 <!-- Filters -->
-<div class="glass-card rounded-xl p-4 sm:p-6 mb-6 min-w-0 overflow-hidden">
+<div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 mb-6 min-w-0 overflow-hidden rounded-[20px]">
+    <h2 class="section-title mb-4 text-white text-lg">
+        <i class="fas fa-filter text-violet-400 text-xl mr-2" aria-hidden="true"></i>
+        กรองคำขอ
+    </h2>
     <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-            <label class="text-white/70 text-sm">สถานะ:</label>
-            <select name="status" class="input-field mt-1" onchange="this.form.submit()">
+        <div class="tp-native-form-group mb-0">
+            <label for="hr-dayoff-status" class="text-white/70 text-sm font-medium">สถานะ</label>
+            <select id="hr-dayoff-status" name="status" class="input-field tp-native-select w-full" onchange="this.form.submit()">
                 <option value="PENDING" <?php echo $statusFilter === 'PENDING' ? 'selected' : ''; ?>>
-                    รออนุมัติ<?php echo $pendingCount > 0 ? " ($pendingCount)" : ''; ?>
+                    รออนุมัติ<?php echo (int)$pendingCount > 0 ? ' (' . (int)$pendingCount . ')' : ''; ?>
                 </option>
                 <option value="APPROVED" <?php echo $statusFilter === 'APPROVED' ? 'selected' : ''; ?>>อนุมัติแล้ว</option>
                 <option value="REJECTED" <?php echo $statusFilter === 'REJECTED' ? 'selected' : ''; ?>>ไม่อนุมัติ</option>
                 <option value="" <?php echo $statusFilter === '' ? 'selected' : ''; ?>>ทั้งหมด</option>
             </select>
         </div>
-        <div>
-            <label class="text-white/70 text-sm">เดือน:</label>
-            <input type="month" name="month" class="input-field mt-1" value="<?php echo $month; ?>" onchange="this.form.submit()">
+        <div class="tp-native-form-group mb-0">
+            <label for="hr-dayoff-month" class="text-white/70 text-sm font-medium">เดือน</label>
+            <input type="month" id="hr-dayoff-month" name="month" class="input-field tp-native-input w-full" value="<?php echo htmlspecialchars($month); ?>" onchange="this.form.submit()">
         </div>
     </form>
 </div>
 
 <!-- Requests Table -->
-<div class="glass-card rounded-xl overflow-hidden min-w-0">
+<div class="native-card tp-native-card tp-native-data-card overflow-hidden min-w-0 rounded-[20px]">
     <?php if (empty($allRequests)): ?>
-    <div class="p-12 text-center">
-        <i class="fas fa-calendar-check text-4xl text-white/20 mb-4"></i>
-        <p class="text-white/60">ไม่มีคำขอ</p>
+    <div class="tp-native-empty-state text-center py-12 px-4 rounded-[20px] border border-dashed border-white/15 max-w-none mx-4 my-4">
+        <i class="fas fa-calendar-check text-slate-500 text-4xl mb-3 block" aria-hidden="true"></i>
+        <p class="text-slate-400 text-sm">ไม่มีคำขอ</p>
     </div>
     <?php else: ?>
     <div class="md:hidden p-4 space-y-3">
         <?php foreach ($allRequests as $req): ?>
-        <div class="rounded-xl bg-white/5 border border-white/10 p-4">
+        <div class="rounded-[20px] bg-white/5 border border-white/10 p-4">
             <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
                     <p class="text-white font-medium break-words"><?php echo htmlspecialchars($req['first_name_th'] . ' ' . $req['last_name_th']); ?></p>
                     <p class="text-white/50 text-xs break-words"><?php echo htmlspecialchars($req['employee_code'] ?? ''); ?> | <?php echo htmlspecialchars($req['department'] ?? '-'); ?></p>
                 </div>
-                <span class="px-2 py-1 text-xs rounded-full shrink-0 <?php 
-                echo match($req['status']) {
-                    'PENDING' => 'bg-yellow-500/20 text-yellow-400',
-                    'APPROVED' => 'bg-green-500/20 text-green-400',
-                    'REJECTED' => 'bg-red-500/20 text-red-400',
-                    default => 'bg-gray-500/20 text-gray-400'
-                }; ?>">
-                    <?php echo match($req['status']) {
-                        'PENDING' => 'รออนุมัติ',
-                        'APPROVED' => 'อนุมัติ',
-                        'REJECTED' => 'ไม่อนุมัติ',
-                        default => $req['status']
-                    }; ?>
+                <?php
+                $st = (string)$req['status'];
+                $stChip = match ($st) {
+                    'PENDING' => 'border border-amber-500/35 bg-amber-500/15 text-amber-200',
+                    'APPROVED' => 'border border-emerald-500/35 bg-emerald-500/15 text-emerald-200',
+                    'REJECTED' => 'border border-red-500/35 bg-red-500/15 text-red-200',
+                    default => 'border border-slate-500/35 bg-slate-500/15 text-slate-200'
+                };
+                $stLabel = match ($st) {
+                    'PENDING' => 'รออนุมัติ',
+                    'APPROVED' => 'อนุมัติ',
+                    'REJECTED' => 'ไม่อนุมัติ',
+                    default => $st
+                };
+                ?>
+                <span class="px-2.5 py-1 text-xs rounded-[20px] shrink-0 font-semibold <?php echo $stChip; ?>">
+                    <?php echo htmlspecialchars($stLabel); ?>
                 </span>
             </div>
 
             <div class="grid grid-cols-2 gap-3 mt-4 text-sm">
-                <div>
-                    <p class="text-white/50">สัปดาห์</p>
-                    <p class="text-white"><?php echo formatDateThai($req['week_start']); ?></p>
+                <div class="rounded-[20px] bg-black/20 border border-white/10 px-3 py-2">
+                    <p class="text-white/50 text-[11px]">สัปดาห์</p>
+                    <p class="text-white font-semibold"><?php echo formatDateThai($req['week_start']); ?></p>
                     <p class="text-white/50 text-xs">ถึง <?php echo formatDateThai($req['week_end']); ?></p>
                 </div>
-                <div>
-                    <p class="text-white/50">เปลี่ยนวันหยุด</p>
-                    <p><span class="text-blue-400"><?php echo $dayNames[(int)$req['original_day_off']]; ?></span>
-                        <i class="fas fa-arrow-right text-white/30 mx-1"></i>
+                <div class="rounded-[20px] bg-black/20 border border-white/10 px-3 py-2">
+                    <p class="text-white/50 text-[11px]">เปลี่ยนวันหยุด</p>
+                    <p><span class="text-sky-400"><?php echo $dayNames[(int)$req['original_day_off']]; ?></span>
+                        <i class="fas fa-arrow-right text-white/30 mx-1" aria-hidden="true"></i>
                         <span class="text-violet-400 font-medium"><?php echo $dayNames[(int)$req['requested_day_off']]; ?></span>
                     </p>
                 </div>
@@ -218,17 +278,16 @@ include dirname(__DIR__) . '/templates/header.php';
 
             <?php if ($req['status'] === 'PENDING'): ?>
             <div class="grid grid-cols-2 gap-2 mt-4">
-                <form method="POST">
-                    <?php echo csrfField(); ?>
-                    <input type="hidden" name="action" value="approve">
-                    <input type="hidden" name="request_id" value="<?php echo $req['id']; ?>">
-                    <button type="submit" class="w-full min-h-[56px] rounded-lg bg-green-500/20 hover:bg-green-500/30 text-green-300 transition-colors touch-manipulation">
-                        <i class="fas fa-check mr-2"></i>อนุมัติ
-                    </button>
-                </form>
-                <button type="button" onclick="openRejectModal(<?php echo $req['id']; ?>, '<?php echo htmlspecialchars($req['first_name_th']); ?>')"
-                        class="min-h-[48px] rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 transition-colors touch-manipulation">
-                    <i class="fas fa-times mr-2"></i>ไม่อนุมัติ
+                <button type="button"
+                        onclick="openApproveOneModal(<?php echo (int)$req['id']; ?>)"
+                        class="min-h-[56px] rounded-[20px] bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-colors touch-manipulation shadow-sm shadow-emerald-900/30">
+                    <i class="fas fa-check mr-2" aria-hidden="true"></i>อนุมัติ
+                </button>
+                <button type="button"
+                        data-emp-label="<?php echo htmlspecialchars(trim(($req['first_name_th'] ?? '') . ' ' . ($req['last_name_th'] ?? '')), ENT_QUOTES); ?>"
+                        onclick="openRejectModal(event, <?php echo (int)$req['id']; ?>)"
+                        class="min-h-[56px] rounded-[20px] bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 font-semibold transition-colors touch-manipulation">
+                    <i class="fas fa-times mr-2" aria-hidden="true"></i>ไม่อนุมัติ
                 </button>
             </div>
             <?php endif; ?>
@@ -236,22 +295,23 @@ include dirname(__DIR__) . '/templates/header.php';
         <?php endforeach; ?>
     </div>
 
-    <div class="hidden md:block overflow-x-auto">
-        <table class="w-full">
+    <div class="hidden md:block tp-native-table-shell overflow-x-auto min-w-0 max-w-full overscroll-x-contain -mx-1 px-1 pb-px">
+        <table class="w-full" style="min-width:920px">
             <thead class="bg-white/5">
                 <tr>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">พนักงาน</th>
-                    <th class="px-4 py-3 text-center text-xs font-medium text-white/60 uppercase">สัปดาห์</th>
-                    <th class="px-4 py-3 text-center text-xs font-medium text-white/60 uppercase">วันหยุดเดิม</th>
-                    <th class="px-4 py-3 text-center text-xs font-medium text-white/60 uppercase">ขอเปลี่ยนเป็น</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">เหตุผล</th>
-                    <th class="px-4 py-3 text-center text-xs font-medium text-white/60 uppercase">สถานะ</th>
-                    <th class="px-4 py-3 text-center text-xs font-medium text-white/60 uppercase">ดำเนินการ</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">พนักงาน</th>
+                    <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white/60 uppercase">สัปดาห์</th>
+                    <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white/60 uppercase">วันหยุดเดิม</th>
+                    <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white/60 uppercase">ขอเปลี่ยนเป็น</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">เหตุผล</th>
+                    <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white/60 uppercase">สถานะ</th>
+                    <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white/60 uppercase">ดำเนินการ</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-white/10">
                 <?php foreach ($allRequests as $req): ?>
-                <tr class="hover:bg-white/5">
+                <?php $stRow = (string)$req['status']; ?>
+                <tr class="hover:bg-white/[0.04]">
                     <td class="px-4 py-3">
                         <p class="text-white font-medium"><?php echo htmlspecialchars($req['first_name_th'] . ' ' . $req['last_name_th']); ?></p>
                         <p class="text-white/50 text-xs"><?php echo htmlspecialchars($req['employee_code'] ?? ''); ?> | <?php echo htmlspecialchars($req['department'] ?? '-'); ?></p>
@@ -261,7 +321,7 @@ include dirname(__DIR__) . '/templates/header.php';
                         <div class="text-white/50 text-xs">ถึง <?php echo formatDateThai($req['week_end']); ?></div>
                     </td>
                     <td class="px-4 py-3 text-center">
-                        <span class="text-blue-400"><?php echo $dayNames[(int)$req['original_day_off']]; ?></span>
+                        <span class="text-sky-400"><?php echo $dayNames[(int)$req['original_day_off']]; ?></span>
                     </td>
                     <td class="px-4 py-3 text-center">
                         <span class="text-violet-400 font-medium"><?php echo $dayNames[(int)$req['requested_day_off']]; ?></span>
@@ -270,19 +330,22 @@ include dirname(__DIR__) . '/templates/header.php';
                         <?php echo htmlspecialchars($req['reason'] ?? '-'); ?>
                     </td>
                     <td class="px-4 py-3 text-center">
-                        <span class="px-2 py-1 text-xs rounded-full <?php 
-                        echo match($req['status']) {
-                            'PENDING' => 'bg-yellow-500/20 text-yellow-400',
-                            'APPROVED' => 'bg-green-500/20 text-green-400',
-                            'REJECTED' => 'bg-red-500/20 text-red-400',
-                            default => 'bg-gray-500/20 text-gray-400'
-                        }; ?>">
-                        <?php echo match($req['status']) {
+                        <?php
+                        $stChip = match ($stRow) {
+                            'PENDING' => 'border border-amber-500/30 bg-amber-500/15 text-amber-300',
+                            'APPROVED' => 'border border-emerald-500/30 bg-emerald-500/15 text-emerald-300',
+                            'REJECTED' => 'border border-red-500/30 bg-red-500/15 text-red-300',
+                            default => 'border border-slate-500/30 bg-slate-500/15 text-slate-300'
+                        };
+                        $stLabel = match ($stRow) {
                             'PENDING' => 'รออนุมัติ',
                             'APPROVED' => 'อนุมัติ',
                             'REJECTED' => 'ไม่อนุมัติ',
-                            default => $req['status']
-                        }; ?>
+                            default => $stRow
+                        };
+                        ?>
+                        <span class="inline-flex items-center px-3 py-1 text-xs rounded-[20px] <?php echo $stChip; ?>">
+                            <?php echo htmlspecialchars($stLabel); ?>
                         </span>
                         <?php if ($req['status'] !== 'PENDING' && $req['reviewer_name_first']): ?>
                         <div class="text-white/40 text-xs mt-1">
@@ -292,22 +355,21 @@ include dirname(__DIR__) . '/templates/header.php';
                     </td>
                     <td class="px-4 py-3 text-center">
                         <?php if ($req['status'] === 'PENDING'): ?>
-                        <div class="flex items-center justify-center gap-1">
-                            <form method="POST" class="inline">
-                                <?php echo csrfField(); ?>
-                                <input type="hidden" name="action" value="approve">
-                                <input type="hidden" name="request_id" value="<?php echo $req['id']; ?>">
-                                <button type="submit" class="inline-flex items-center justify-center min-h-[56px] min-w-[48px] px-2 py-1 bg-green-500/20 hover:bg-green-500/30 text-green-400 text-xs rounded transition-colors touch-manipulation" title="อนุมัติ">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                            </form>
-                            <button type="button" onclick="openRejectModal(<?php echo $req['id']; ?>, '<?php echo htmlspecialchars($req['first_name_th']); ?>')"
-                                    class="inline-flex items-center justify-center min-h-[48px] min-w-[48px] px-2 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs rounded transition-colors touch-manipulation" title="ไม่อนุมัติ">
-                                <i class="fas fa-times"></i>
+                        <div class="flex flex-wrap items-center justify-center gap-2">
+                            <button type="button"
+                                    onclick="openApproveOneModal(<?php echo (int)$req['id']; ?>)"
+                                    class="inline-flex items-center gap-1.5 min-h-[56px] px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-[20px] transition-colors touch-manipulation">
+                                <i class="fas fa-check" aria-hidden="true"></i><span>อนุมัติ</span>
+                            </button>
+                            <button type="button"
+                                    data-emp-label="<?php echo htmlspecialchars(trim(($req['first_name_th'] ?? '') . ' ' . ($req['last_name_th'] ?? '')), ENT_QUOTES); ?>"
+                                    onclick="openRejectModal(event, <?php echo (int)$req['id']; ?>)"
+                                    class="inline-flex items-center gap-1.5 min-h-[48px] px-3 py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 text-sm font-medium rounded-[20px] transition-colors touch-manipulation">
+                                <i class="fas fa-times" aria-hidden="true"></i><span>ปฏิเสธ</span>
                             </button>
                         </div>
                         <?php else: ?>
-                        <span class="text-white/30 text-xs">-</span>
+                        <span class="text-white/30 text-xs">—</span>
                         <?php endif; ?>
                     </td>
                 </tr>
@@ -318,26 +380,60 @@ include dirname(__DIR__) . '/templates/header.php';
     <?php endif; ?>
 </div>
 
+<!-- Hidden POST: อนุมัติรายการเดียว (ยืนยันผ่านโมดัล) -->
+<form id="approve-one-form" method="POST" class="hidden" aria-hidden="true"><?php echo csrfField(); ?>
+    <input type="hidden" name="action" value="approve">
+    <input type="hidden" name="request_id" id="approve-one-request-id" value="">
+</form>
+
+<!-- ยืนยันอนุมัติ 1 รายการ -->
+<div id="approve-one-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="approve-one-title">
+    <div class="native-card tp-native-card w-full max-w-md my-auto rounded-[20px] p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
+        <h3 id="approve-one-title" class="text-xl font-bold text-white mb-1">อนุมัติคำขอนี้?</h3>
+        <p class="text-white/65 text-sm mb-6">ระบบจะบันทึกสถานะเป็นอนุมัติ และแจ้งในประวัติตามเดิม</p>
+        <div class="flex flex-col sm:flex-row gap-3">
+            <button type="button" onclick="closeApproveOneModal()" class="flex-1 min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[20px] touch-manipulation font-medium">ยกเลิก</button>
+            <button type="button" onclick="submitApproveOne()" class="flex-1 min-h-[56px] py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[20px] touch-manipulation font-semibold">อนุมัติ</button>
+        </div>
+    </div>
+</div>
+
+<!-- ยืนยันอนุมัติทั้งหมด (CEO) -->
+<div id="approve-all-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="approve-all-title">
+    <div class="native-card tp-native-card w-full max-w-md my-auto rounded-[20px] p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
+        <h3 id="approve-all-title" class="text-xl font-bold text-white mb-1">อนุมัติคำขอที่รอทั้งหมด?</h3>
+        <p class="text-white/65 text-sm mb-6">มีคำขอสถานะ &quot;รออนุมัติ&quot; ทั้งหมด <strong class="text-white"><?php echo (int)$pendingCount; ?></strong> รายการ (ทุกช่วงเวลาในระบบ) — ยืนยันดำเนินการ?</p>
+        <form method="POST" id="approve-all-form-el">
+            <?php echo csrfField(); ?>
+            <input type="hidden" name="action" value="approve_all">
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button type="button" onclick="closeApproveAllModal()" class="flex-1 min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[20px] touch-manipulation font-medium">ยกเลิก</button>
+                <button type="submit" class="flex-1 min-h-[56px] py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[20px] touch-manipulation font-semibold">อนุมัติทั้งหมด</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Reject Modal -->
-<div id="reject-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
-    <div class="glass-card rounded-2xl w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
+<div id="reject-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="reject-modal-title">
+    <div class="native-card tp-native-card w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden rounded-[20px] pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <form method="POST" class="p-6">
             <?php echo csrfField(); ?>
             <input type="hidden" name="action" value="reject">
             <input type="hidden" name="request_id" id="reject-request-id">
             
-            <h3 class="text-xl font-bold text-white mb-1">ไม่อนุมัติคำขอ</h3>
+            <h3 id="reject-modal-title" class="text-xl font-bold text-white mb-1">ไม่อนุมัติคำขอ</h3>
             <p class="text-white/50 text-sm mb-4" id="reject-label"></p>
             
-            <div class="mb-4">
-                <label class="block text-white/70 text-sm mb-1">หมายเหตุ (ถ้ามี)</label>
-                <input type="text" name="review_note" class="input-field" placeholder="เหตุผลที่ไม่อนุมัติ">
+            <div class="tp-native-form-group mb-4">
+                <label for="reject-review-note" class="block text-white/70 text-sm">หมายเหตุ (ถ้ามี)</label>
+                <input type="text" name="review_note" id="reject-review-note" class="input-field tp-native-input w-full" placeholder="เหตุผลที่ไม่อนุมัติ" autocomplete="off">
             </div>
             
             <div class="flex flex-col-reverse sm:flex-row gap-3">
-                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[48px] bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors touch-manipulation">ยกเลิก</button>
-                <button type="submit" class="flex-1 min-h-[56px] bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors touch-manipulation">
-                    <i class="fas fa-times mr-2"></i>ไม่อนุมัติ
+                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[48px] bg-white/10 hover:bg-white/20 text-white rounded-[20px] transition-colors touch-manipulation font-medium">ยกเลิก</button>
+                <button type="submit" class="flex-1 min-h-[56px] bg-red-600 hover:bg-red-700 text-white rounded-[20px] transition-colors touch-manipulation font-semibold">
+                    <i class="fas fa-times mr-2" aria-hidden="true"></i>ไม่อนุมัติ
                 </button>
             </div>
         </form>
@@ -345,16 +441,73 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <script>
-function openRejectModal(id, name) {
-    document.getElementById('reject-request-id').value = id;
-    document.getElementById('reject-label').textContent = 'คำขอของ ' + name;
+function openApproveOneModal(id) {
+    document.getElementById('approve-one-request-id').value = String(id);
+    if (typeof uiOpenModal === 'function') uiOpenModal('approve-one-modal');
+    else {
+        const m = document.getElementById('approve-one-modal');
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+    }
+}
+function closeApproveOneModal() {
+    if (typeof uiCloseModal === 'function') uiCloseModal('approve-one-modal');
+    else {
+        const m = document.getElementById('approve-one-modal');
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+    }
+}
+function submitApproveOne() {
+    document.getElementById('approve-one-form').submit();
+}
+
+function openApproveAllModal() {
+    if (typeof uiOpenModal === 'function') uiOpenModal('approve-all-modal');
+    else {
+        const m = document.getElementById('approve-all-modal');
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+    }
+}
+function closeApproveAllModal() {
+    if (typeof uiCloseModal === 'function') uiCloseModal('approve-all-modal');
+    else {
+        const m = document.getElementById('approve-all-modal');
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+    }
+}
+
+function openRejectModal(e, id) {
+    var label = '';
+    if (e && e.currentTarget && e.currentTarget.getAttribute) {
+        label = e.currentTarget.getAttribute('data-emp-label') || '';
+    }
+    document.getElementById('reject-request-id').value = String(id);
+    document.getElementById('reject-review-note').value = '';
+    document.getElementById('reject-label').textContent = label ? ('คำขอของ ' + label) : ('คำขอ #' + id);
     if (typeof uiOpenModal === 'function') uiOpenModal('reject-modal');
-    else document.getElementById('reject-modal').classList.remove('hidden');
+    else {
+        const m = document.getElementById('reject-modal');
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+    }
 }
 function closeRejectModal() {
     if (typeof uiCloseModal === 'function') uiCloseModal('reject-modal');
-    else document.getElementById('reject-modal').classList.add('hidden');
+    else {
+        const m = document.getElementById('reject-modal');
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+    }
 }
+document.getElementById('approve-one-modal').addEventListener('click', function(ev) {
+    if (ev.target === this) closeApproveOneModal();
+});
+document.getElementById('approve-all-modal').addEventListener('click', function(ev) {
+    if (ev.target === this) closeApproveAllModal();
+});
 document.getElementById('reject-modal').addEventListener('click', function(e) {
     if (e.target === this) closeRejectModal();
 });

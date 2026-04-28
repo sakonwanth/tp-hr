@@ -48,6 +48,7 @@
 | Employee attendance `/hr/employee_attendance.php` | **REGRESSION_PASS** (static QA: GET id/month + attendance/holiday/swap queries unchanged; markup/CSS only) |
 | HR attendance `/hr/attendance.php` | **REGRESSION_PASS** (static QA: GET date/dept/status/page + SQL blocks + stats/excused unchanged; markup/API hooks preserved) |
 | Leaves HR `/hr/leaves.php` | **REGRESSION_PASS** (static QA: filters + SQL + `$filterBase` for stat links unchanged; approve uses modal shell + same `/api/leave.php` POST) |
+| Day-off approvals `/hr/dayoff_approvals.php` | **REGRESSION_PASS** (static QA: CEO gate + GET filters + list SQL unchanged; POST approve/reject/approve_all + CSRF unchanged; markup/modals only) |
 | Other pages in 01 §A | **REGRESSION_PENDING** |
 
 ### Dashboard — `/` (`index.php`)
@@ -205,3 +206,11 @@
 | List SQL + ORDER BY pending vs rest | PASS |
 | Stats query for selected month | PASS |
 | Approve/reject/detail → `/api/leave.php` (POST/GET detail) | PASS |
+
+### Day-off approvals — `/hr/dayoff_approvals.php`
+
+| Check | Result |
+|-------|--------|
+| `isCEOOrAbove()` + HR gate | PASS (unchanged) |
+| GET status + month + list SQL | PASS |
+| POST approve / reject / approve_all + CSRF | PASS |
