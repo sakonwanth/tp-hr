@@ -142,7 +142,7 @@ $leave_types_form = $stmt->fetchAll();
                 <a href="leave.php" class="touch-manipulation flex-1 min-h-[48px] inline-flex items-center justify-center py-3 bg-white/10 hover:bg-white/20 text-white text-center rounded-xl transition-colors">
                     ยกเลิก
                 </a>
-                <button type="submit" class="btn-primary touch-manipulation flex-1 min-h-[48px] inline-flex items-center justify-center gap-2 py-3 rounded-xl font-semibold">
+                <button type="submit" class="btn-primary touch-manipulation flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-xl font-semibold">
                     <i class="fas fa-paper-plane"></i><span>ส่งคำขอลา</span>
                 </button>
             </div>
