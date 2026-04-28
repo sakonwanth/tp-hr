@@ -122,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Icons & Tailwind -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/app.css">
-    <link rel="stylesheet" href="/assets/css/native-shell.css?v=6">
+    <link rel="stylesheet" href="/assets/css/native-shell.css?v=8">
     
     <style>
         * {
@@ -136,42 +136,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             min-height: 100dvh;
             position: relative;
             overflow-x: hidden;
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            background-color: #0f172a;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding-top: max(12px, env(safe-area-inset-top, 0px));
-            padding-right: max(12px, env(safe-area-inset-right, 0px));
-            padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
-            padding-left: max(12px, env(safe-area-inset-left, 0px));
+            padding-top: max(16px, env(safe-area-inset-top, 0px));
+            padding-right: max(16px, env(safe-area-inset-right, 0px));
+            padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+            padding-left: max(16px, env(safe-area-inset-left, 0px));
         }
 
-        @media (min-width: 640px) {
-            body {
-                padding-top: max(16px, env(safe-area-inset-top, 0px));
-                padding-right: max(16px, env(safe-area-inset-right, 0px));
-                padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
-                padding-left: max(16px, env(safe-area-inset-left, 0px));
-            }
-        }
-
-        @media (min-width: 1280px) {
+        @media (min-width: 768px) {
             body {
                 padding-top: max(24px, env(safe-area-inset-top, 0px));
                 padding-right: max(24px, env(safe-area-inset-right, 0px));
                 padding-bottom: max(24px, env(safe-area-inset-bottom, 0px));
                 padding-left: max(24px, env(safe-area-inset-left, 0px));
             }
-        }
-
-        .login-card {
-            background: rgba(30, 41, 59, 0.64);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            position: relative;
         }
 
         .input-field {
@@ -198,9 +179,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .btn-login {
-            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+            background: #7c3aed;
             border-radius: 12px;
-            transition: all 0.3s ease;
+            transition: background 0.2s ease, box-shadow 0.2s ease;
             font-weight: 600;
             min-height: 56px;
             touch-action: manipulation;
@@ -208,12 +189,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+            background: #6d28d9;
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
         }
 
         .btn-login:active {
-            transform: translateY(0);
+            background: #5b21b6;
         }
 
         .btn-line {
@@ -227,8 +208,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .login-password-toggle {
             touch-action: manipulation;
-            min-width: 44px;
-            min-height: 44px;
+            min-width: 48px;
+            min-height: 48px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -262,16 +243,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: rgba(196, 181, 253, 0.95);
         }
 
-        @media (max-width: 640px) {
-            .login-card {
-                border-radius: 1.25rem;
-            }
-        }
     </style>
 </head>
 <body class="login-page-root tp-native-app">
     <!-- Login Card -->
-    <div class="login-card w-full max-w-md p-4 sm:p-6 xl:p-8">
+    <div class="native-card tp-native-card w-full max-w-md p-4 sm:p-6 xl:p-8 shadow-xl">
         <!-- Logo -->
         <div class="text-center mb-6 sm:mb-8">
             <img src="<?php echo htmlspecialchars($company_logo); ?>" alt="<?php echo htmlspecialchars($system_name); ?>" width="96" height="96" decoding="async" fetchpriority="high" class="w-24 h-24 mx-auto mb-4 logo-glow object-contain" onerror="this.onerror=null;this.src='<?php echo htmlspecialchars($hr_login_logo_fallback, ENT_QUOTES, 'UTF-8'); ?>';">
@@ -282,17 +258,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <!-- Success Message -->
         <?php if ($success): ?>
-        <div class="bg-green-500 bg-opacity-20 border border-green-500 text-green-300 px-4 py-3 rounded-xl mb-6 flex items-center">
-            <i class="fas fa-check-circle mr-3"></i>
-            <span><?php echo htmlspecialchars($success); ?></span>
+        <div class="tp-native-success-state bg-emerald-500/15 border border-emerald-400/40 text-emerald-200 px-4 py-3 rounded-[20px] mb-6 flex items-start gap-3" role="status">
+            <i class="fas fa-check-circle text-2xl shrink-0 mt-0.5" aria-hidden="true"></i>
+            <span class="text-base leading-snug"><?php echo htmlspecialchars($success); ?></span>
         </div>
         <?php endif; ?>
         
         <!-- Error Message -->
         <?php if ($error): ?>
-        <div class="bg-red-500 bg-opacity-20 border border-red-500 text-red-300 px-4 py-3 rounded-xl mb-6 flex items-center">
-            <i class="fas fa-exclamation-circle mr-3"></i>
-            <span><?php echo htmlspecialchars($error); ?></span>
+        <div class="tp-native-error-state bg-red-500/15 border border-red-400/45 text-red-200 px-4 py-3 rounded-[20px] mb-6 flex items-start gap-3" role="alert">
+            <i class="fas fa-exclamation-circle text-2xl shrink-0 mt-0.5" aria-hidden="true"></i>
+            <span class="text-base leading-snug"><?php echo htmlspecialchars($error); ?></span>
         </div>
         <?php endif; ?>
         
@@ -300,14 +276,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form method="POST" action="">
             <div class="space-y-4">
             <!-- Username -->
-            <div>
-                <label class="block text-white text-opacity-80 text-sm font-medium mb-2">
-                    <i class="fas fa-user mr-2"></i>ชื่อผู้ใช้หรืออีเมล
+            <div class="tp-native-form-group">
+                <label class="block text-white text-opacity-80 text-sm font-medium mb-2" for="login-username">
+                    <i class="fas fa-user mr-2" aria-hidden="true"></i>ชื่อผู้ใช้หรืออีเมล
                 </label>
                 <input 
                     type="text" 
                     name="username" 
-                    class="input-field w-full px-4 py-3"
+                    id="login-username"
+                    class="input-field tp-native-input w-full px-4 py-3"
                     placeholder="กรอกชื่อผู้ใช้หรืออีเมล"
                     value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>"
                     required
@@ -316,16 +293,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             
             <!-- Password -->
-            <div>
-                <label class="block text-white text-opacity-80 text-sm font-medium mb-2">
-                    <i class="fas fa-lock mr-2"></i>รหัสผ่าน
+            <div class="tp-native-form-group">
+                <label class="block text-white text-opacity-80 text-sm font-medium mb-2" for="password">
+                    <i class="fas fa-lock mr-2" aria-hidden="true"></i>รหัสผ่าน
                 </label>
                 <div class="relative">
                     <input 
                         type="password" 
                         name="password" 
                         id="password"
-                        class="input-field w-full px-4 py-3 pr-14"
+                        class="input-field tp-native-input w-full px-4 py-3 pr-14"
                         placeholder="กรอกรหัสผ่าน"
                         required
                     >

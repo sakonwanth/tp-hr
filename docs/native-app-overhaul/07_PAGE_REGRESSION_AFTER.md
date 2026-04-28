@@ -29,4 +29,24 @@
 
 | Page | Verdict |
 |------|---------|
-| All listed in 01 §A | **REGRESSION_PENDING** |
+| Dashboard `/` (`index.php`) | **REGRESSION_PASS** (static QA: logic/queries unchanged; markup/CSS only; sticky CTA + tab shell preserved) |
+| Login `/login.php` | **REGRESSION_PASS** (static QA: POST/redirect/LINE unchanged; a11y labels improved) |
+| Other pages in 01 §A | **REGRESSION_PENDING** |
+
+### Dashboard — `/` (`index.php`)
+
+| Check | Result |
+|-------|--------|
+| Route / data queries | PASS (unchanged) |
+| HR conditional stats | PASS |
+| Links / CTAs | PASS |
+| Bottom tab / sticky CTA | PASS |
+| Token alignment (radius 20px, icons 24px+, section gap) | PASS |
+
+### Login — `/login.php`
+
+| Check | Result |
+|-------|--------|
+| Auth POST | PASS (unchanged) |
+| CSRF / fields | PASS |
+| Touch targets | PASS (toggle 48px) |

@@ -15,7 +15,9 @@
 
 | Task ID | Status |
 |---------|--------|
-| HR-UI-001 … HR-UI-026 | **NOT_STARTED** |
+| HR-UI-001 Dashboard | **COMPLETE** | `index.php` — NativeCard, solid stat icons, quick actions, empty states, spacing 16/24 |
+| HR-UI-002 Login | **COMPLETE** | `login.php` — solid canvas, native card shell, form labels/for, success/error blocks, 48px toggle |
+| HR-UI-003 … HR-UI-026 | **NOT_STARTED** |
 | HR-UI-SHELL-01 | **REFACTORED** |
 | HR-UI-SHELL-02 | **COMPLETE** |
 | HR-UI-SHELL-03 | **COMPLETE** |

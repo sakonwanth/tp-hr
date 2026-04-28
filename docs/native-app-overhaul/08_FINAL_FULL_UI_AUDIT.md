@@ -12,8 +12,8 @@
 | 03_PAGE_AUDIT_BEFORE | Complete — 26 NEEDS_REFACTOR, 1 PASS |
 | 04_PAGE_REFACTOR_TODO | Complete — 26 tasks + shell tasks |
 | 05_NATIVE_COMPONENT_SYSTEM | Complete |
-| 06_IMPLEMENTATION_PROGRESS | **Partial** — shell only started |
-| 07_PAGE_REGRESSION_AFTER | **Pending** — no REGRESSION_PASS rows yet |
+| 06_IMPLEMENTATION_PROGRESS | **Partial** — shell + **2 pages** (dashboard, login) |
+| 07_PAGE_REGRESSION_AFTER | **Partial** — REGRESSION_PASS for dashboard + login (static) |
 
 ## Spec compliance (target vs actual)
 
