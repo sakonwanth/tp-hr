@@ -17,6 +17,9 @@ const PROTECTED_ROUTES = [
   { name: 'hr leaves mgmt', path: 'hr/leaves.php' },
   { name: 'hr attendance mgmt', path: 'hr/attendance.php' },
   { name: 'hr documents', path: 'hr/documents.php' },
+  { name: 'hr reports', path: 'hr/reports.php' },
+  { name: 'hr settings', path: 'hr/settings.php' },
+  { name: 'hr day-off approvals', path: 'hr/dayoff_approvals.php' },
   { name: 'hr admin', path: 'hr/index.php' },
 ];
 

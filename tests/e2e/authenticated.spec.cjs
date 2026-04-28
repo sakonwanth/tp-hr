@@ -91,4 +91,31 @@ test.describe('Authenticated session', () => {
     await page.goto('hr/documents.php', { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveTitle(/จัดการคำขอเอกสาร/);
   });
+
+  test('hr reports (requires CEO-level account)', async ({ page }) => {
+    test.skip(
+      process.env.PLAYWRIGHT_HR_EXPECT_CEO !== '1',
+      'Set PLAYWRIGHT_HR_EXPECT_CEO=1 and use PLAYWRIGHT_HR_USER that passes isCEOOrAbove() (see hr/reports.php).',
+    );
+    await page.goto('hr/reports.php', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveTitle(/รายงาน/);
+  });
+
+  test('hr settings (requires CEO-level account)', async ({ page }) => {
+    test.skip(
+      process.env.PLAYWRIGHT_HR_EXPECT_CEO !== '1',
+      'Set PLAYWRIGHT_HR_EXPECT_CEO=1 and use PLAYWRIGHT_HR_USER that passes isCEOOrAbove() (see hr/settings.php).',
+    );
+    await page.goto('hr/settings.php', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveTitle(/ตั้งค่าระบบ/);
+  });
+
+  test('hr day-off approvals (requires CEO-level account)', async ({ page }) => {
+    test.skip(
+      process.env.PLAYWRIGHT_HR_EXPECT_CEO !== '1',
+      'Set PLAYWRIGHT_HR_EXPECT_CEO=1 and use PLAYWRIGHT_HR_USER that passes isCEOOrAbove() (see hr/dayoff_approvals.php).',
+    );
+    await page.goto('hr/dayoff_approvals.php', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveTitle(/อนุมัติวันหยุด/);
+  });
 });

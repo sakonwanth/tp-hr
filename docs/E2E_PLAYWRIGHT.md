@@ -10,7 +10,8 @@ The following **Tier B “automation tranche”** is implemented in-repo (see al
 |------|------------------|
 | Guest API + UI smoke | `health`, `login`, `protected-routes` on **chromium** + **tablet** (`iPad Mini`) unless skipped |
 | Authenticated smoke | **`chromium-auth`** + **`tablet-auth`** (reuse `storageState` after `auth.setup`) |
-| Optional HR asserts | **`PLAYWRIGHT_HR_EXPECT_ADMIN=1`** — **`hr/index`**, **`hr/employees`**, **`hr/leaves`**, **`hr/attendance`**, **`hr/documents`** titles (`authenticated.spec.cjs`, both auth projects) |
+| Optional HR (dashboard) asserts | **`PLAYWRIGHT_HR_EXPECT_ADMIN=1`** — **`hr/index`**, **`hr/employees`**, **`hr/leaves`**, **`hr/attendance`**, **`hr/documents`** titles (`authenticated.spec.cjs`) |
+| Optional CEO-only HR asserts | **`PLAYWRIGHT_HR_EXPECT_CEO=1`** — **`hr/reports`**, **`hr/settings`**, **`hr/dayoff_approvals`** (same **`PLAYWRIGHT_HR_USER`** must pass **`isCEOOrAbove()`** in the app). |
 | Opt-in snapshots (guest login + auth dashboard) | **`PLAYWRIGHT_VISUAL=1`** — **`visual-login.spec.cjs`** (`.login-card`) + **`visual-dashboard.spec.cjs`** (`.dashboard-hero`) |
 
 What remains **outside** this tranche—by definition—is **manual** device QA on every interaction state (“every loading/error on every route”) and discretionary visual breadth beyond login + dashboard. That is tracked as **Tier B strict** in the gate doc, not blocking the automation deliverable above.
@@ -44,7 +45,7 @@ npx playwright install chromium
 When **`PLAYWRIGHT_HR_USER`** and **`PLAYWRIGHT_HR_PASSWORD`** are set (aliases: **`E2E_HR_USERNAME`** / **`E2E_HR_PASSWORD`**):
 
 1. **`tests/e2e/auth.setup.cjs`** — POST login on **`login.php`**, assert **`h1.dashboard-hero-title`**, save **`playwright/.auth/hr-user.json`** (gitignored).
-2. **`tests/e2e/authenticated.spec.cjs`** — **`chromium-auth`** + **`tablet-auth`** (unless **`PLAYWRIGHT_SKIP_TABLET=1`**) use that session — dashboard hero plus employee-route title checks (**`checkin`**, **`leave`**, **`profile`**, **`payslip`**, **`attendance_history`**, **`leave_history`**, **`certificate`**, **`dayoff_schedule`**), optional HR module titles (**`hr/index`**, **`hr/employees`**, **`hr/leaves`**, **`hr/attendance`**, **`hr/documents`**) when **`PLAYWRIGHT_HR_EXPECT_ADMIN=1`**.
+2. **`tests/e2e/authenticated.spec.cjs`** — **`chromium-auth`** + **`tablet-auth`** (unless **`PLAYWRIGHT_SKIP_TABLET=1`**) — dashboard hero, employee-route titles, optional **`PLAYWRIGHT_HR_EXPECT_ADMIN`** HR module titles, optional **`PLAYWRIGHT_HR_EXPECT_CEO`** for **`hr/reports`**, **`hr/settings`**, **`hr/dayoff_approvals`**.
 
 Uses **password login on tp-hr** (same-origin). If SSO forces CRM before dashboard, setup times out — use a DB user that can finish login on **`tp-hr`** or omit auth env for guest-only runs.
 
@@ -54,12 +55,20 @@ export PLAYWRIGHT_HR_PASSWORD='your_password'
 npm run test:e2e
 ```
 
-### HR routes (same user as auth)
+### HR routes (same user — non-CEO HR module)
 
-Sets assertions on HR module pages that require **`hr_can_access_hr_dashboard()`**: **`hr/index`**, **`hr/employees`**, **`hr/leaves`**, **`hr/attendance`**, **`hr/documents`** (titles only).
+Assert titles on pages that require **`hr_can_access_hr_dashboard()`** (see **`hr/index`**, **`hr/employees`**, **`hr/leaves`**, **`hr/attendance`**, **`hr/documents`**).
 
 ```bash
 export PLAYWRIGHT_HR_EXPECT_ADMIN=1
+```
+
+### CEO-only HR routes (same credentials — elevated user)
+
+ **`hr/reports.php`**, **`hr/settings.php`**, และ **`hr/dayoff_approvals.php`** ตรวจเฉพาะเมื่อผู้ใช้ที่ล็อกอินอยู่ผ่าน **`isCEOOrAbove()`** — ให้ **`PLAYWRIGHT_HR_USER`** เป็นบัญชี CEO (หรือระดับที่แอปอนุญาตเทียบเท่าในฟังก์ชันเดียวกัน)
+
+```bash
+export PLAYWRIGHT_HR_EXPECT_CEO=1
 ```
 
 ## Tablet vs phone
@@ -115,7 +124,7 @@ PLAYWRIGHT_BASE_URL=http://localhost/tp-hr/ npm run test:e2e
 |----------------|----------|
 | `health.spec.cjs` | `GET api/health.php` JSON (`status`, `project` when HTTP 200). |
 | `login.spec.cjs` | `login.php` — submit control visible. |
-| `protected-routes.spec.cjs` | Guest redirect to **`login.php`** for above employee paths + **`hr/leaves`**, **`hr/attendance`**, **`hr/documents`**, **`hr/index`**. |
-| `authenticated.spec.cjs` | Logged-in **`index`** hero + employee route titles + optional HR module titles (**`PLAYWRIGHT_HR_EXPECT_ADMIN=1`**). Projects: **`chromium-auth`**, **`tablet-auth`**. |
+| `protected-routes.spec.cjs` | Guest redirect to **`login.php`** for employee + HR paths (incl. **`hr/reports`**, **`hr/settings`**, **`hr/dayoff_approvals`**, **`hr/index`**, …). |
+| `authenticated.spec.cjs` | Logged-in **`index`** hero + employee titles + optional HR (**`PLAYWRIGHT_HR_EXPECT_ADMIN`**) + optional CEO (**`PLAYWRIGHT_HR_EXPECT_CEO`**). Projects: **`chromium-auth`**, **`tablet-auth`**. |
 | `visual-login.spec.cjs` | **`.login-card`** on login (guest **chromium** + **tablet** when visual on). |
 | `visual-dashboard.spec.cjs` | **`.dashboard-hero`** after login — **`visual-auth`**, **`visual-auth-tablet`**. |

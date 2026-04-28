@@ -59,7 +59,7 @@ Strict interpretation — *every* loading / empty / error / skeleton on *every* 
 
 | Item |
 |------|
-| **`authenticated.spec.cjs`** + **`protected-routes`**: **`hr/leaves`**, **`hr/attendance`**, **`hr/documents`** (guest → login / auth → title when **`PLAYWRIGHT_HR_EXPECT_ADMIN`**). CI unchanged. |
+| CEO E2E: **`PLAYWRIGHT_HR_EXPECT_CEO`** + guest **`hr/reports`**, **`hr/settings`**, **`hr/dayoff_approvals`**. CI unchanged. |
 
 ---
 
