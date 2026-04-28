@@ -93,6 +93,14 @@ $stmtStats = $pdo->query("
 ");
 $stats = $stmtStats->fetch();
 
+$filterBase = ['month' => $month];
+if ($type > 0) {
+    $filterBase['type'] = (string)$type;
+}
+if ($department !== '') {
+    $filterBase['department'] = $department;
+}
+
 $current_page = 'hr-leaves';
 include dirname(__DIR__) . '/templates/header.php';
 ?>
@@ -109,52 +117,56 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
 </div>
 
-<!-- Stats (2×2 บนมือถือ/แท็บเล็ต — แถวเดียวเมื่อจอกว้าง ≥1024px) -->
+<!-- Stats -->
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6 min-w-0 max-w-full">
-    <a href="?status=PENDING&month=<?php echo $month; ?>" 
-       class="glass-card rounded-xl p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'PENDING' ? 'ring-2 ring-yellow-400' : ''; ?>">
-        <p class="text-white/50 text-sm truncate">รออนุมัติ</p>
-        <p class="text-2xl font-bold text-yellow-400 tabular-nums mt-1"><?php echo $stats['pending'] ?? 0; ?></p>
+    <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['status' => 'PENDING']))); ?>"
+       class="stat-card tp-native-summary-card rounded-[20px] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'PENDING' ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
+        <p class="text-slate-300 text-sm truncate">รออนุมัติ</p>
+        <p class="text-2xl font-bold text-amber-400 tabular-nums mt-1"><?php echo (int)($stats['pending'] ?? 0); ?></p>
     </a>
-    <a href="?status=APPROVED&month=<?php echo $month; ?>"
-       class="glass-card rounded-xl p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'APPROVED' ? 'ring-2 ring-green-400' : ''; ?>">
-        <p class="text-white/50 text-sm truncate">อนุมัติแล้ว</p>
-        <p class="text-2xl font-bold text-green-400 tabular-nums mt-1"><?php echo $stats['approved'] ?? 0; ?></p>
+    <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['status' => 'APPROVED']))); ?>"
+       class="stat-card tp-native-summary-card rounded-[20px] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'APPROVED' ? 'ring-2 ring-emerald-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
+        <p class="text-slate-300 text-sm truncate">อนุมัติแล้ว</p>
+        <p class="text-2xl font-bold text-emerald-400 tabular-nums mt-1"><?php echo (int)($stats['approved'] ?? 0); ?></p>
     </a>
-    <a href="?status=REJECTED&month=<?php echo $month; ?>"
-       class="glass-card rounded-xl p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'REJECTED' ? 'ring-2 ring-red-400' : ''; ?>">
-        <p class="text-white/50 text-sm truncate">ไม่อนุมัติ</p>
-        <p class="text-2xl font-bold text-red-400 tabular-nums mt-1"><?php echo $stats['rejected'] ?? 0; ?></p>
+    <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['status' => 'REJECTED']))); ?>"
+       class="stat-card tp-native-summary-card rounded-[20px] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'REJECTED' ? 'ring-2 ring-red-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
+        <p class="text-slate-300 text-sm truncate">ไม่อนุมัติ</p>
+        <p class="text-2xl font-bold text-red-400 tabular-nums mt-1"><?php echo (int)($stats['rejected'] ?? 0); ?></p>
     </a>
-    <a href="?status=ALL&month=<?php echo $month; ?>"
-       class="glass-card rounded-xl p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'ALL' ? 'ring-2 ring-violet-400' : ''; ?>">
-        <p class="text-white/50 text-sm truncate">ทั้งหมด</p>
-        <p class="text-2xl font-bold text-violet-400 tabular-nums mt-1"><?php echo $stats['total'] ?? 0; ?></p>
+    <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['status' => 'ALL']))); ?>"
+       class="stat-card tp-native-summary-card rounded-[20px] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'ALL' ? 'ring-2 ring-violet-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
+        <p class="text-slate-300 text-sm truncate">ทั้งหมด</p>
+        <p class="text-2xl font-bold text-violet-400 tabular-nums mt-1"><?php echo (int)($stats['total'] ?? 0); ?></p>
     </a>
 </div>
 
-<!-- Filters: แถวเดียวตั้งแต่ lg (1024px) — ปุ่ม min-h 44px ให้เสมอกับ .input-field -->
-<div class="glass-card rounded-xl p-4 sm:p-6 mb-6 min-w-0 overflow-hidden">
+<!-- Filters -->
+<div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 mb-6 min-w-0 overflow-hidden rounded-[20px]">
+    <h2 class="section-title mb-4 text-white text-lg">
+        <i class="fas fa-filter text-violet-400 text-xl mr-2" aria-hidden="true"></i>
+        กรองคำขอลา
+    </h2>
     <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 lg:items-end gap-4">
         <input type="hidden" name="status" value="<?php echo htmlspecialchars($status); ?>">
-        <div class="min-w-0">
-            <label class="block text-white/60 text-xs mb-1">เดือน</label>
-            <input type="month" name="month" value="<?php echo $month; ?>" class="input-field" onchange="this.form.submit()">
+        <div class="min-w-0 tp-native-form-group mb-0">
+            <label for="hr-leaves-month" class="text-white/70 text-sm font-medium">เดือน</label>
+            <input type="month" id="hr-leaves-month" name="month" value="<?php echo htmlspecialchars($month); ?>" class="input-field tp-native-input w-full" onchange="this.form.submit()">
         </div>
-        <div class="min-w-0">
-            <label class="block text-white/60 text-xs mb-1">ประเภทการลา</label>
-            <select name="type" class="input-field" onchange="this.form.submit()">
+        <div class="min-w-0 tp-native-form-group mb-0">
+            <label for="hr-leaves-type" class="text-white/70 text-sm font-medium">ประเภทการลา</label>
+            <select id="hr-leaves-type" name="type" class="input-field tp-native-select w-full" onchange="this.form.submit()">
                 <option value="">ทั้งหมด</option>
                 <?php foreach ($leaveTypes as $lt): ?>
-                <option value="<?php echo $lt['id']; ?>" <?php echo $type == $lt['id'] ? 'selected' : ''; ?>>
+                <option value="<?php echo (int)$lt['id']; ?>" <?php echo $type === (int)$lt['id'] ? 'selected' : ''; ?>>
                     <?php echo htmlspecialchars($lt['name']); ?>
                 </option>
                 <?php endforeach; ?>
             </select>
         </div>
-        <div class="min-w-0 sm:col-span-2 lg:col-span-1">
-            <label class="block text-white/60 text-xs mb-1">แผนก</label>
-            <select name="department" class="input-field" onchange="this.form.submit()">
+        <div class="min-w-0 sm:col-span-2 lg:col-span-1 tp-native-form-group mb-0">
+            <label for="hr-leaves-dept" class="text-white/70 text-sm font-medium">แผนก</label>
+            <select id="hr-leaves-dept" name="department" class="input-field tp-native-select w-full" onchange="this.form.submit()">
                 <option value="">ทั้งหมด</option>
                 <?php foreach ($departments as $dept): ?>
                 <option value="<?php echo htmlspecialchars($dept); ?>" <?php echo $department === $dept ? 'selected' : ''; ?>>
@@ -165,11 +177,11 @@ include dirname(__DIR__) . '/templates/header.php';
         </div>
         <div class="sm:col-span-2 lg:col-span-2 grid grid-cols-2 gap-2 min-w-0">
             <a href="leaves.php"
-               class="min-h-[48px] px-3 sm:px-4 inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white text-sm font-medium text-center rounded-xl transition-colors touch-manipulation">
+               class="min-h-[48px] px-3 sm:px-4 inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white text-sm font-medium text-center rounded-[20px] transition-colors touch-manipulation">
                 <i class="fas fa-redo shrink-0" aria-hidden="true"></i><span>รีเซ็ต</span>
             </a>
             <a href="leaves.php?action=calendar&amp;month=<?php echo urlencode($month); ?>"
-               class="min-h-[56px] px-3 sm:px-4 inline-flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold text-center rounded-xl transition-colors touch-manipulation">
+               class="min-h-[56px] px-3 sm:px-4 inline-flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold text-center rounded-[20px] transition-colors touch-manipulation">
                 <i class="fas fa-calendar-alt shrink-0" aria-hidden="true"></i><span>ปฏิทิน</span>
             </a>
         </div>
@@ -177,21 +189,21 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <!-- Results -->
-<div class="glass-card rounded-xl overflow-hidden min-w-0">
+<div class="native-card tp-native-card tp-native-data-card overflow-hidden min-w-0 rounded-[20px]">
     <?php if (empty($requests)): ?>
-    <div class="p-12 text-center">
-        <i class="fas fa-calendar-check text-4xl text-white/20 mb-4"></i>
-        <p class="text-white/60">ไม่พบคำขอลา</p>
+    <div class="tp-native-empty-state text-center py-12 px-4 rounded-[20px] border border-dashed border-white/15 max-w-none mx-4 my-4">
+        <i class="fas fa-calendar-check text-slate-500 text-4xl mb-3 block" aria-hidden="true"></i>
+        <p class="text-slate-400 text-sm">ไม่พบคำขอลา</p>
     </div>
     <?php else: ?>
     <!-- Card list: จอกว้างต่ำกว่า lg — ตารางเมื่อจอใหญ่พอ -->
     <div class="lg:hidden p-3 space-y-3">
         <?php
         $statusColors = [
-            'PENDING' => 'bg-yellow-500/15 border border-yellow-500/30 text-yellow-200',
-            'APPROVED' => 'bg-green-500/15 border border-green-500/30 text-green-200',
-            'REJECTED' => 'bg-red-500/15 border border-red-500/30 text-red-200',
-            'CANCELLED' => 'bg-slate-500/15 border border-slate-500/30 text-slate-200'
+            'PENDING' => 'bg-amber-500/15 border border-amber-500/35 text-amber-200',
+            'APPROVED' => 'bg-emerald-500/15 border border-emerald-500/35 text-emerald-200',
+            'REJECTED' => 'bg-red-500/15 border border-red-500/35 text-red-200',
+            'CANCELLED' => 'bg-slate-500/15 border border-slate-500/35 text-slate-200'
         ];
         $statusText = [
             'PENDING' => 'รออนุมัติ',
@@ -217,25 +229,25 @@ include dirname(__DIR__) . '/templates/header.php';
         $chipCls = $statusColors[$statusKey] ?? 'bg-white/5 border border-white/10 text-white/70';
         $chipText = $statusText[$statusKey] ?? $statusKey;
         ?>
-        <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+        <div class="rounded-[20px] bg-white/5 border border-white/10 p-4">
             <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
-                    <div class="text-white font-semibold truncate"><?php echo htmlspecialchars($fullName); ?></div>
+                    <div class="text-white font-semibold truncate break-words"><?php echo htmlspecialchars($fullName); ?></div>
                     <div class="text-white/50 text-xs truncate"><?php echo htmlspecialchars($empCode); ?> · <?php echo htmlspecialchars($dept); ?></div>
                 </div>
-                <span class="shrink-0 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold <?php echo $chipCls; ?>">
+                <span class="shrink-0 inline-flex items-center px-2.5 py-1 rounded-[20px] text-xs font-semibold <?php echo $chipCls; ?>">
                     <?php echo htmlspecialchars($chipText); ?>
                 </span>
             </div>
 
             <div class="mt-3 flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full" style="background-color: <?php echo htmlspecialchars($color); ?>"></span>
+                <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: <?php echo htmlspecialchars($color); ?>"></span>
                 <span class="text-white/90 font-semibold text-sm"><?php echo htmlspecialchars($leaveName); ?></span>
                 <span class="text-white/50 text-xs">·</span>
                 <span class="text-white/70 text-xs"><?php echo htmlspecialchars($days); ?> วัน</span>
             </div>
 
-            <div class="mt-2 rounded-xl bg-black/20 border border-white/10 px-3 py-2">
+            <div class="mt-2 rounded-[20px] bg-black/20 border border-white/10 px-3 py-2">
                 <div class="text-[11px] text-white/50">ช่วงวันที่ลา</div>
                 <div class="text-white font-semibold text-sm"><?php echo htmlspecialchars($dateLabel); ?></div>
             </div>
@@ -249,20 +261,20 @@ include dirname(__DIR__) . '/templates/header.php';
             <div class="grid grid-cols-2 gap-2 mt-4">
                 <?php if ($statusKey === 'PENDING'): ?>
                 <button type="button"
-                        onclick="approveLeave(<?php echo (int)$req['id']; ?>)"
-                        class="min-h-[56px] rounded-xl bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-100 text-sm font-semibold touch-manipulation">
-                    <i class="fas fa-check mr-2"></i>อนุมัติ
+                        onclick="openApproveLeave(<?php echo (int)$req['id']; ?>)"
+                        class="min-h-[56px] rounded-[20px] bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold touch-manipulation shadow-sm shadow-emerald-900/40">
+                    <i class="fas fa-check mr-2" aria-hidden="true"></i>อนุมัติ
                 </button>
                 <button type="button"
                         onclick="rejectLeave(<?php echo (int)$req['id']; ?>)"
-                        class="min-h-[48px] rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-200 text-sm font-semibold touch-manipulation">
-                    <i class="fas fa-times mr-2"></i>ไม่อนุมัติ
+                        class="min-h-[56px] rounded-[20px] bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 text-sm font-semibold touch-manipulation">
+                    <i class="fas fa-times mr-2" aria-hidden="true"></i>ไม่อนุมัติ
                 </button>
                 <?php else: ?>
                 <button type="button"
                         onclick="viewDetail(<?php echo (int)$req['id']; ?>)"
-                        class="col-span-2 min-h-[48px] rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
-                    <i class="fas fa-eye mr-2"></i>ดูรายละเอียด
+                        class="col-span-2 min-h-[48px] rounded-[20px] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
+                    <i class="fas fa-eye mr-2" aria-hidden="true"></i>ดูรายละเอียด
                 </button>
                 <?php endif; ?>
             </div>
@@ -270,27 +282,28 @@ include dirname(__DIR__) . '/templates/header.php';
         <?php endforeach; ?>
     </div>
 
-    <div class="hidden lg:block overflow-x-auto">
-        <table class="w-full">
+    <div class="hidden lg:block tp-native-table-shell overflow-x-auto min-w-0 max-w-full overscroll-x-contain -mx-1 px-1 pb-px">
+        <table class="w-full" style="min-width:960px">
             <thead class="bg-white/5">
                 <tr>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">พนักงาน</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">ประเภท</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">วันที่ลา</th>
-                    <th class="px-4 py-3 text-center text-xs font-medium text-white/60 uppercase">จำนวนวัน</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">เหตุผล</th>
-                    <th class="px-4 py-3 text-center text-xs font-medium text-white/60 uppercase">สถานะ</th>
-                    <th class="px-4 py-3 text-center text-xs font-medium text-white/60 uppercase">การดำเนินการ</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">พนักงาน</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">ประเภท</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">วันที่ลา</th>
+                    <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white/60 uppercase">จำนวนวัน</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white/60 uppercase">เหตุผล</th>
+                    <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white/60 uppercase">สถานะ</th>
+                    <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white/60 uppercase">การดำเนินการ</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-white/10">
                 <?php foreach ($requests as $req): ?>
                 <?php
+                $st = (string)($req['status'] ?? 'PENDING');
                 $statusColors = [
-                    'PENDING' => 'bg-yellow-500/20 text-yellow-400',
-                    'APPROVED' => 'bg-green-500/20 text-green-400',
-                    'REJECTED' => 'bg-red-500/20 text-red-400',
-                    'CANCELLED' => 'bg-gray-500/20 text-gray-400'
+                    'PENDING' => 'border border-amber-500/30 bg-amber-500/15 text-amber-300',
+                    'APPROVED' => 'border border-emerald-500/30 bg-emerald-500/15 text-emerald-300',
+                    'REJECTED' => 'border border-red-500/30 bg-red-500/15 text-red-300',
+                    'CANCELLED' => 'border border-slate-500/30 bg-slate-500/15 text-slate-300'
                 ];
                 $statusText = [
                     'PENDING' => 'รออนุมัติ',
@@ -299,15 +312,15 @@ include dirname(__DIR__) . '/templates/header.php';
                     'CANCELLED' => 'ยกเลิก'
                 ];
                 ?>
-                <tr class="hover:bg-white/5">
+                <tr class="hover:bg-white/[0.04]">
                     <td class="px-4 py-3">
                         <p class="text-white font-medium"><?php echo htmlspecialchars($req['first_name_th'] . ' ' . $req['last_name_th']); ?></p>
                         <p class="text-white/50 text-xs"><?php echo htmlspecialchars($req['employee_code'] ?? ''); ?> | <?php echo htmlspecialchars($req['department'] ?? '-'); ?></p>
                     </td>
                     <td class="px-4 py-3">
-                        <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full" style="background-color: <?php echo $req['color_code']; ?>"></span>
-                            <span class="text-white"><?php echo htmlspecialchars($req['leave_type_name']); ?></span>
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="w-2 h-2 rounded-full shrink-0" style="background-color: <?php echo htmlspecialchars((string)($req['color_code'] ?? '#a78bfa')); ?>"></span>
+                            <span class="text-white truncate"><?php echo htmlspecialchars($req['leave_type_name']); ?></span>
                         </div>
                     </td>
                     <td class="px-4 py-3 text-white/80 text-sm">
@@ -325,25 +338,27 @@ include dirname(__DIR__) . '/templates/header.php';
                         </p>
                     </td>
                     <td class="px-4 py-3 text-center">
-                        <span class="px-3 py-1 rounded-full text-xs <?php echo $statusColors[$req['status']]; ?>">
-                            <?php echo $statusText[$req['status']]; ?>
+                        <span class="inline-flex items-center px-3 py-1 rounded-[20px] text-xs <?php echo $statusColors[$st] ?? 'border border-white/10 bg-white/5 text-white/70'; ?>">
+                            <?php echo htmlspecialchars($statusText[$st] ?? $st); ?>
                         </span>
                     </td>
                     <td class="px-4 py-3 text-center">
+                        <div class="flex flex-wrap items-center justify-center gap-2">
                         <?php if ($req['status'] === 'PENDING'): ?>
-                        <button type="button" onclick="approveLeave(<?php echo $req['id']; ?>)" 
-                                class="inline-flex items-center justify-center min-h-[56px] min-w-[48px] px-2 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded transition-colors touch-manipulation mr-1">
-                            <i class="fas fa-check"></i>
+                        <button type="button" onclick="openApproveLeave(<?php echo (int)$req['id']; ?>)" 
+                                class="inline-flex items-center justify-center gap-1.5 min-h-[56px] px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-[20px] transition-colors touch-manipulation">
+                            <i class="fas fa-check" aria-hidden="true"></i><span>อนุมัติ</span>
                         </button>
-                        <button type="button" onclick="rejectLeave(<?php echo $req['id']; ?>)"
-                                class="inline-flex items-center justify-center min-h-[48px] min-w-[48px] px-2 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs rounded transition-colors touch-manipulation">
-                            <i class="fas fa-times"></i>
+                        <button type="button" onclick="rejectLeave(<?php echo (int)$req['id']; ?>)"
+                                class="inline-flex items-center justify-center gap-1.5 min-h-[48px] px-3 py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 text-sm font-medium rounded-[20px] transition-colors touch-manipulation">
+                            <i class="fas fa-times" aria-hidden="true"></i><span>ปฏิเสธ</span>
                         </button>
                         <?php else: ?>
-                        <button type="button" onclick="viewDetail(<?php echo $req['id']; ?>)" class="inline-flex items-center justify-center min-h-[48px] min-w-[48px] px-2 py-1 bg-white/10 hover:bg-white/20 text-white text-xs rounded transition-colors touch-manipulation">
-                            <i class="fas fa-eye"></i>
+                        <button type="button" onclick="viewDetail(<?php echo (int)$req['id']; ?>)" class="inline-flex items-center justify-center gap-1.5 min-h-[48px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-[20px] transition-colors touch-manipulation">
+                            <i class="fas fa-eye" aria-hidden="true"></i><span>ดู</span>
                         </button>
                         <?php endif; ?>
+                        </div>
                     </td>
                 </tr>
                 <?php endforeach; ?>
@@ -360,23 +375,23 @@ include dirname(__DIR__) . '/templates/header.php';
         </p>
         <div class="flex flex-wrap gap-2">
             <?php if ($page > 1): ?>
-            <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $page - 1])); ?>" 
-               class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center px-3 bg-white/10 hover:bg-white/20 text-white rounded transition-colors touch-manipulation" aria-label="หน้าก่อน">
-                <i class="fas fa-chevron-left"></i>
+            <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($_GET, ['page' => $page - 1]))); ?>" 
+               class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center px-3 bg-white/10 hover:bg-white/20 text-white rounded-[20px] transition-colors touch-manipulation" aria-label="หน้าก่อน">
+                <i class="fas fa-chevron-left" aria-hidden="true"></i>
             </a>
             <?php endif; ?>
             
             <?php for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++): ?>
-            <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $i])); ?>" 
-               class="inline-flex min-h-[56px] min-w-[48px] items-center justify-center px-3 <?php echo $i === $page ? 'bg-violet-600 text-white' : 'bg-white/10 hover:bg-white/20 text-white'; ?> rounded transition-colors touch-manipulation">
-                <?php echo $i; ?>
+            <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($_GET, ['page' => $i]))); ?>" 
+               class="inline-flex min-h-[56px] min-w-[48px] items-center justify-center px-3 <?php echo $i === $page ? 'bg-violet-600 text-white' : 'bg-white/10 hover:bg-white/20 text-white'; ?> rounded-[20px] transition-colors touch-manipulation">
+                <?php echo (int)$i; ?>
             </a>
             <?php endfor; ?>
             
             <?php if ($page < $totalPages): ?>
-            <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $page + 1])); ?>" 
-               class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center px-3 bg-white/10 hover:bg-white/20 text-white rounded transition-colors touch-manipulation" aria-label="หน้าถัดไป">
-                <i class="fas fa-chevron-right"></i>
+            <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($_GET, ['page' => $page + 1]))); ?>" 
+               class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center px-3 bg-white/10 hover:bg-white/20 text-white rounded-[20px] transition-colors touch-manipulation" aria-label="หน้าถัดไป">
+                <i class="fas fa-chevron-right" aria-hidden="true"></i>
             </a>
             <?php endif; ?>
         </div>
@@ -385,31 +400,50 @@ include dirname(__DIR__) . '/templates/header.php';
     <?php endif; ?>
 </div>
 
-<!-- Modals -->
-<div id="reject-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
-    <div class="glass-card rounded-2xl w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
-        <form id="reject-form" class="p-6">
-            <h3 class="text-xl font-bold text-white mb-4">ไม่อนุมัติคำขอลา</h3>
-            <input type="hidden" name="request_id" id="reject-request-id">
-            <div class="mb-4">
-                <label class="block text-white/80 text-sm mb-2">เหตุผล <span class="text-red-400">*</span></label>
-                <textarea name="reason" id="reject-reason" required rows="3" class="input-field"></textarea>
+<!-- Modals: อนุมัติ — ยืนยันใน shell แทน window.confirm -->
+<div id="approve-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="approve-modal-title">
+    <div class="native-card tp-native-card w-full max-w-md my-auto rounded-[20px] p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
+        <div class="flex items-start gap-3 mb-4">
+            <div class="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
+                <i class="fas fa-check text-xl" aria-hidden="true"></i>
             </div>
-            <div class="flex gap-4">
-                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg touch-manipulation">ยกเลิก</button>
-                <button type="submit" class="flex-1 min-h-[56px] py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg touch-manipulation">ไม่อนุมัติ</button>
+            <div class="min-w-0">
+                <h3 id="approve-modal-title" class="text-xl font-bold text-white leading-tight">อนุมัติคำขอลา</h3>
+                <p class="text-white/65 text-sm mt-1">ยืนยันการอนุมัติคำขอลานี้?</p>
+            </div>
+        </div>
+        <input type="hidden" id="approve-request-id" value="">
+        <div class="flex flex-col sm:flex-row gap-3 pt-2">
+            <button type="button" onclick="closeApproveModal()" class="flex-1 min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[20px] touch-manipulation font-medium">ยกเลิก</button>
+            <button type="button" onclick="confirmApproveLeave()" class="flex-1 min-h-[56px] py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[20px] touch-manipulation font-semibold">อนุมัติ</button>
+        </div>
+    </div>
+</div>
+
+<div id="reject-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="reject-modal-title">
+    <div class="native-card tp-native-card w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden rounded-[20px] pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
+        <form id="reject-form" class="p-6">
+            <h3 id="reject-modal-title" class="text-xl font-bold text-white mb-4">ไม่อนุมัติคำขอลา</h3>
+            <input type="hidden" name="request_id" id="reject-request-id">
+            <div class="tp-native-form-group mb-4">
+                <label for="reject-reason" class="text-white/80 text-sm">เหตุผล <span class="text-red-400" aria-hidden="true">*</span></label>
+                <textarea name="reason" id="reject-reason" required rows="3" class="input-field tp-native-textarea"></textarea>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-[20px] touch-manipulation font-medium">ยกเลิก</button>
+                <button type="submit" class="flex-1 min-h-[56px] py-2 bg-red-600 hover:bg-red-700 text-white rounded-[20px] touch-manipulation font-semibold">ไม่อนุมัติ</button>
             </div>
         </form>
     </div>
 </div>
 
-<div id="detail-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
-    <div class="glass-card rounded-2xl w-full max-w-lg my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
+<div id="detail-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="detail-modal-title">
+    <div class="native-card tp-native-card w-full max-w-lg my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden rounded-[20px] pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <div class="p-6">
             <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-bold text-white">รายละเอียดคำขอลา</h3>
-                <button type="button" onclick="closeDetailModal()" class="min-h-[48px] min-w-[48px] inline-flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 rounded-lg touch-manipulation" aria-label="ปิด">
-                    <i class="fas fa-times"></i>
+                <h3 id="detail-modal-title" class="text-xl font-bold text-white">รายละเอียดคำขอลา</h3>
+                <button type="button" onclick="closeDetailModal()" class="min-h-[48px] min-w-[48px] inline-flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 rounded-[20px] touch-manipulation" aria-label="ปิด">
+                    <i class="fas fa-times" aria-hidden="true"></i>
                 </button>
             </div>
             <div id="detail-content">
@@ -420,35 +454,68 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <script>
-async function approveLeave(id) {
-    if (!confirm('อนุมัติคำขอลานี้?')) return;
-    
+function openApproveLeave(id) {
+    document.getElementById('approve-request-id').value = String(id);
+    if (typeof uiOpenModal === 'function') uiOpenModal('approve-modal');
+    else {
+        const m = document.getElementById('approve-modal');
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+    }
+}
+
+function closeApproveModal() {
+    if (typeof uiCloseModal === 'function') uiCloseModal('approve-modal');
+    else {
+        const m = document.getElementById('approve-modal');
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+    }
+}
+
+async function confirmApproveLeave() {
+    const id = document.getElementById('approve-request-id').value;
+    if (!id) return;
+
     const formData = new FormData();
     formData.append('action', 'approve');
     formData.append('request_id', id);
     formData.append('_token', '<?php echo csrfToken(); ?>');
-    
-    const response = await fetch('/api/leave.php', { method: 'POST', body: formData });
-    const result = await response.json();
-    
-    if (result.success) {
-        showToast('อนุมัติสำเร็จ', 'success');
-        setTimeout(() => location.reload(), 1000);
-    } else {
-        showToast(result.error || 'เกิดข้อผิดพลาด', 'error');
+
+    try {
+        const response = await fetch('/api/leave.php', { method: 'POST', body: formData });
+        const result = await response.json();
+        if (result.success) {
+            showToast('อนุมัติสำเร็จ', 'success');
+            closeApproveModal();
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showToast(result.error || 'เกิดข้อผิดพลาด', 'error');
+        }
+    } catch (e) {
+        showToast('เกิดข้อผิดพลาด', 'error');
     }
 }
+
 
 function rejectLeave(id) {
     document.getElementById('reject-request-id').value = id;
     document.getElementById('reject-reason').value = '';
     if (typeof uiOpenModal === 'function') uiOpenModal('reject-modal');
-    else document.getElementById('reject-modal').classList.remove('hidden');
+    else {
+        const m = document.getElementById('reject-modal');
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+    }
 }
 
 function closeRejectModal() {
     if (typeof uiCloseModal === 'function') uiCloseModal('reject-modal');
-    else document.getElementById('reject-modal').classList.add('hidden');
+    else {
+        const m = document.getElementById('reject-modal');
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+    }
 }
 
 document.getElementById('reject-form').addEventListener('submit', async function(e) {
@@ -473,7 +540,11 @@ document.getElementById('reject-form').addEventListener('submit', async function
 
 async function viewDetail(id) {
     if (typeof uiOpenModal === 'function') uiOpenModal('detail-modal');
-    else document.getElementById('detail-modal').classList.remove('hidden');
+    else {
+        const m = document.getElementById('detail-modal');
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+    }
     document.getElementById('detail-content').innerHTML = typeof tpHrNativeLoadingHtml === 'function'
         ? tpHrNativeLoadingHtml()
         : '<div class="tp-native-loading-state py-8" role="status" aria-live="polite" aria-busy="true"><i class="fas fa-spinner fa-spin text-2xl text-white/30" aria-hidden="true"></i><span class="tp-visually-hidden">กำลังโหลด</span></div>';
@@ -498,9 +569,14 @@ async function viewDetail(id) {
 
 function closeDetailModal() {
     if (typeof uiCloseModal === 'function') uiCloseModal('detail-modal');
-    else document.getElementById('detail-modal').classList.add('hidden');
+    else {
+        const m = document.getElementById('detail-modal');
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+    }
 }
 
+document.getElementById('approve-modal').addEventListener('click', e => { if (e.target === document.getElementById('approve-modal')) closeApproveModal(); });
 document.getElementById('reject-modal').addEventListener('click', e => { if (e.target === document.getElementById('reject-modal')) closeRejectModal(); });
 document.getElementById('detail-modal').addEventListener('click', e => { if (e.target === document.getElementById('detail-modal')) closeDetailModal(); });
 </script>

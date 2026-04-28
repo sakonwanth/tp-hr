@@ -47,6 +47,7 @@
 | Employee view `/hr/employee_view.php` | **REGRESSION_PASS** (static QA: GET id + queries + CEO salary gate unchanged; display labels + UI only) |
 | Employee attendance `/hr/employee_attendance.php` | **REGRESSION_PASS** (static QA: GET id/month + attendance/holiday/swap queries unchanged; markup/CSS only) |
 | HR attendance `/hr/attendance.php` | **REGRESSION_PASS** (static QA: GET date/dept/status/page + SQL blocks + stats/excused unchanged; markup/API hooks preserved) |
+| Leaves HR `/hr/leaves.php` | **REGRESSION_PASS** (static QA: filters + SQL + `$filterBase` for stat links unchanged; approve uses modal shell + same `/api/leave.php` POST) |
 | Other pages in 01 §A | **REGRESSION_PENDING** |
 
 ### Dashboard — `/` (`index.php`)
@@ -195,3 +196,12 @@
 | HR gate + GET date / department / status / page | PASS (unchanged) |
 | Main query + daily stats + excused + weekly-day-off banner | PASS |
 | UI modals + `fetch('/api/attendance.php', …)` hooks | PASS |
+
+### Leaves (HR approval) — `/hr/leaves.php`
+
+| Check | Result |
+|-------|--------|
+| HR gate + GET status/type/department/month/page | PASS (unchanged) |
+| List SQL + ORDER BY pending vs rest | PASS |
+| Stats query for selected month | PASS |
+| Approve/reject/detail → `/api/leave.php` (POST/GET detail) | PASS |
