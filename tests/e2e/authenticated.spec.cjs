@@ -16,4 +16,13 @@ test.describe('Authenticated session', () => {
     await page.goto('leave.php', { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveTitle(/การลา/);
   });
+
+  test('hr admin index (requires HR-capable account)', async ({ page }) => {
+    test.skip(
+      process.env.PLAYWRIGHT_HR_EXPECT_ADMIN !== '1',
+      'Set PLAYWRIGHT_HR_EXPECT_ADMIN=1 and use PLAYWRIGHT_HR_USER with hr dashboard access.',
+    );
+    await page.goto('hr/index.php', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveTitle(/HR Dashboard/);
+  });
 });

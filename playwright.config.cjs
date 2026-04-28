@@ -11,6 +11,19 @@ const hasAuthCredentials = Boolean(
 
 const storageStateHR = 'playwright/.auth/hr-user.json';
 
+/** Screenshot snapshots (`visual*.spec.cjs`) — enable with PLAYWRIGHT_VISUAL=1. */
+const runVisualSnapshots = process.env.PLAYWRIGHT_VISUAL === '1';
+
+/** Guest suite on tablet (iPad). Disable with PLAYWRIGHT_SKIP_TABLET=1 to save time locally/CI. */
+const skipTablet = process.env.PLAYWRIGHT_SKIP_TABLET === '1';
+
+/** Shared ignore list for smoke + tablet (auth + optional visual). */
+const guestIgnore = [
+  '**/auth.setup.cjs',
+  '**/authenticated.spec.cjs',
+  ...(runVisualSnapshots ? [] : ['**/visual*.spec.cjs']),
+];
+
 module.exports = defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
@@ -34,9 +47,19 @@ module.exports = defineConfig({
     {
       name: 'chromium',
       testMatch: '**/*.spec.cjs',
-      testIgnore: ['**/auth.setup.cjs', '**/authenticated.spec.cjs'],
+      testIgnore: guestIgnore,
       use: { ...devices['Pixel 5'] },
     },
+    ...(!skipTablet
+      ? [
+          {
+            name: 'tablet',
+            testMatch: '**/*.spec.cjs',
+            testIgnore: guestIgnore,
+            use: { ...devices['iPad Mini'] },
+          },
+        ]
+      : []),
     ...(hasAuthCredentials
       ? [
           {

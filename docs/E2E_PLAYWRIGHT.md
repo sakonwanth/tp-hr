@@ -29,6 +29,44 @@ export PLAYWRIGHT_HR_PASSWORD='your_password'
 npm run test:e2e
 ```
 
+## Tablet viewport (guest smoke)
+
+By default Playwright runs the **same guest `*.spec.cjs`** on **mobile (Pixel 5)** and **tablet (iPad Mini)** — doubling guest coverage for layout regressions.
+
+To run **mobile-only** (faster CI or local):
+
+```bash
+PLAYWRIGHT_SKIP_TABLET=1 npm run test:e2e
+```
+
+## Visual regression (login card, opt-in)
+
+Screenshots compare the **`.login-card`** crop on **`login.php`**. Disabled by default (avoids failing CI without baselines).
+
+1. Start PHP/Apache (`PLAYWRIGHT_BASE_URL` set if needed).
+2. Generate baselines:
+
+```bash
+PLAYWRIGHT_VISUAL=1 npx playwright test tests/e2e/visual-login.spec.cjs --update-snapshots
+```
+
+3. Commit the generated **`tests/e2e/visual-login.spec.cjs-snapshots/`** PNGs under each project folder (e.g. `chromium/`, `tablet/`).
+4. Enable in a run:
+
+```bash
+PLAYWRIGHT_VISUAL=1 npm run test:e2e
+```
+
+## HR admin route (optional)
+
+If the same **`PLAYWRIGHT_HR_USER`** can open **`/hr/index.php`** (HR dashboard permission), opt in so the extra assertion runs instead of staying skipped:
+
+```bash
+export PLAYWRIGHT_HR_EXPECT_ADMIN=1
+```
+
+(Requires auth env vars and `chromium-auth` project.)
+
 ## Run
 
 ```bash
@@ -51,6 +89,8 @@ Use a **trailing slash** so paths like `login.php` resolve under the project fol
 | `health.spec.cjs` | `GET /api/health.php` — JSON shape (`status`, `project` when 200). |
 | `login.spec.cjs` | `login.php` — page visible + primary submit button present. |
 | `protected-routes.spec.cjs` | `index.php`, `checkin.php`, `leave.php`, `hr/index.php` — unauthenticated session ends on a URL containing **`login.php`** (local HR login or CRM SSO). |
-| `auth.setup.cjs` + `authenticated.spec.cjs` | Only when **`PLAYWRIGHT_HR_USER`** + **`PLAYWRIGHT_HR_PASSWORD`** are set — logged-in smoke (dashboard hero, page titles). |
+| `auth.setup.cjs` + `authenticated.spec.cjs` | Only when **`PLAYWRIGHT_HR_USER`** + **`PLAYWRIGHT_HR_PASSWORD`** are set — logged-in smoke (dashboard hero, page titles; optional HR index when **`PLAYWRIGHT_HR_EXPECT_ADMIN=1`**). |
+| `visual-login.spec.cjs` | When **`PLAYWRIGHT_VISUAL=1`** — snapshot of **`.login-card`** (see section above). |
+| Tablet project | **iPad Mini** device — guest suite parallel to **chromium** (disable with **`PLAYWRIGHT_SKIP_TABLET=1`**). |
 
 If **`/api/health.php`** returns **401**, the server may require **`HEALTH_CHECK_TOKEN`** — pass `?token=` / header **`X-Health-Check-Token`** or temporarily relax config for local E2E.

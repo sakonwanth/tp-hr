@@ -31,12 +31,12 @@ Strict interpretation of “every loading / empty / error / skeleton on every ro
 
 | Criterion | Status |
 |-----------|--------|
-| Per-route automated visual regression | **Outstanding** |
+| Per-route automated visual regression | **Partial** — opt-in **`PLAYWRIGHT_VISUAL=1`** + **`visual-login.spec.cjs`** (`.login-card`); baselines live under `tests/e2e/*.spec.cjs-snapshots/` |
 | Skeleton loaders on every async block | **Partial** — `tpHrNativeLoadingHtml()` + `.tp-visually-hidden` on HR async modals (`employees`, `leaves`, `attendance` history) |
-| Independent tablet viewport verification (listed heights × every page) | **Outstanding** |
-| Smoke E2E (Playwright) | **Started** — guest smoke + optional **auth** (`PLAYWRIGHT_HR_USER` / `PLAYWRIGHT_HR_PASSWORD` → `auth.setup` + `authenticated.spec`); see **`docs/E2E_PLAYWRIGHT.md`** |
+| Independent tablet viewport verification (listed heights × every page) | **Partial** — **`tablet`** project (**iPad Mini**) runs guest smoke in parallel; **`PLAYWRIGHT_SKIP_TABLET=1`** to disable |
+| Smoke E2E (Playwright) | **Started** — guest (phone + tablet) + optional auth + optional HR index (`PLAYWRIGHT_HR_EXPECT_ADMIN=1`); see **`docs/E2E_PLAYWRIGHT.md`** |
 
-**Backlog:** visual regression pipeline, tablet viewport matrix, HR-only routes with an HR test account.
+**Backlog:** expand visual baselines beyond login; auth’d pages on tablet + full device matrix; fuller per-route visual diff.
 
 ---
 
@@ -50,6 +50,7 @@ Strict interpretation of “every loading / empty / error / skeleton on every ro
 | Earlier: **v5** shell (`02` 35 components; **`.tp-native-table-shell`**; **`hr/employees.php`** pagination / table shell) |
 | **`tests/e2e/protected-routes.spec.cjs`**: guest redirect smoke for dashboard / check-in / leave / HR index |
 | **Auth E2E** (optional env): **`auth.setup.cjs`**, **`authenticated.spec.cjs`**, **`playwright/.auth/`** gitignored |
+| **`tablet`** project (**iPad Mini**); **`PLAYWRIGHT_SKIP_TABLET`**; **`PLAYWRIGHT_VISUAL`** + **`visual-login.spec.cjs`**; **`PLAYWRIGHT_HR_EXPECT_ADMIN`** for HR dashboard assert |
 
 ---
 
