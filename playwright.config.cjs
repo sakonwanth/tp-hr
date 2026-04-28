@@ -11,16 +11,17 @@ const hasAuthCredentials = Boolean(
 
 const storageStateHR = 'playwright/.auth/hr-user.json';
 
-/** Screenshot snapshots (`visual*.spec.cjs`) — enable with PLAYWRIGHT_VISUAL=1. */
+/** Screenshot snapshots (`PLAYWRIGHT_VISUAL=1`); guest vs auth-specific files separated. */
 const runVisualSnapshots = process.env.PLAYWRIGHT_VISUAL === '1';
 
-/** Guest suite on tablet (iPad). Disable with PLAYWRIGHT_SKIP_TABLET=1 to save time locally/CI. */
+/** Guest suite on tablet (iPad). Disable with PLAYWRIGHT_SKIP_TABLET=1. */
 const skipTablet = process.env.PLAYWRIGHT_SKIP_TABLET === '1';
 
-/** Shared ignore list for smoke + tablet (auth + optional visual). */
+/** Guest projects: never run auth-only visuals here. */
 const guestIgnore = [
   '**/auth.setup.cjs',
   '**/authenticated.spec.cjs',
+  '**/visual-dashboard.spec.cjs',
   ...(runVisualSnapshots ? [] : ['**/visual*.spec.cjs']),
 ];
 
@@ -71,6 +72,45 @@ module.exports = defineConfig({
               storageState: storageStateHR,
             },
           },
+        ]
+      : []),
+    ...(hasAuthCredentials && !skipTablet
+      ? [
+          {
+            name: 'tablet-auth',
+            dependencies: ['setup'],
+            testMatch: /authenticated\.spec\.cjs$/,
+            use: {
+              ...devices['iPad Mini'],
+              storageState: storageStateHR,
+            },
+          },
+        ]
+      : []),
+    ...(runVisualSnapshots && hasAuthCredentials
+      ? [
+          {
+            name: 'visual-auth',
+            dependencies: ['setup'],
+            testMatch: /visual-dashboard\.spec\.cjs$/,
+            use: {
+              ...devices['Pixel 5'],
+              storageState: storageStateHR,
+            },
+          },
+          ...(!skipTablet
+            ? [
+                {
+                  name: 'visual-auth-tablet',
+                  dependencies: ['setup'],
+                  testMatch: /visual-dashboard\.spec\.cjs$/,
+                  use: {
+                    ...devices['iPad Mini'],
+                    storageState: storageStateHR,
+                  },
+                },
+              ]
+            : []),
         ]
       : []),
   ],

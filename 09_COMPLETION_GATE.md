@@ -25,32 +25,45 @@
 
 ---
 
-## Tier B — Mission-strict exhaustive gate (every state on every route) — **OPEN**
+## Tier B — Automation tranche (Playwright + a11y patterns) — **COMPLETE**
 
-Strict interpretation of “every loading / empty / error / skeleton on every route independently verified”: requires **automated E2E** + manual device matrix. Not claimed **PASS** from repository-only QA.
+This is the **recommended, automatable slice** of Tier B: guest + auth smoke on **phone and tablet**, optional HR route assert, opt-in **visual baselines** for login + dashboard hero, and **loading-state** patterns on key HR modals. Documented in **`docs/E2E_PLAYWRIGHT.md`**.
 
-| Criterion | Status |
-|-----------|--------|
-| Per-route automated visual regression | **Partial** — opt-in **`PLAYWRIGHT_VISUAL=1`** + **`visual-login.spec.cjs`** (`.login-card`); baselines live under `tests/e2e/*.spec.cjs-snapshots/` |
-| Skeleton loaders on every async block | **Partial** — `tpHrNativeLoadingHtml()` + `.tp-visually-hidden` on HR async modals (`employees`, `leaves`, `attendance` history) |
-| Independent tablet viewport verification (listed heights × every page) | **Partial** — **`tablet`** project (**iPad Mini**) runs guest smoke in parallel; **`PLAYWRIGHT_SKIP_TABLET=1`** to disable |
-| Smoke E2E (Playwright) | **Started** — guest (phone + tablet) + optional auth + optional HR index (`PLAYWRIGHT_HR_EXPECT_ADMIN=1`); see **`docs/E2E_PLAYWRIGHT.md`** |
+| Deliverable | Status |
+|-------------|--------|
+| Guest E2E (API, login shell, guest redirects) on **chromium** + **tablet** | **Done** — `tests/e2e/*.spec.cjs`; **`PLAYWRIGHT_SKIP_TABLET=1`** skips tablet |
+| Authenticated E2E on **chromium-auth** + **tablet-auth** (`storageState` after `auth.setup`) | **Done** |
+| Optional HR admin title check | **Done** — **`PLAYWRIGHT_HR_EXPECT_ADMIN=1`** |
+| Opt-in visual snapshots (login card + dashboard hero) | **Done** — **`PLAYWRIGHT_VISUAL=1`** + `visual-login` / `visual-dashboard` |
+| CI-friendly script | **Done** — **`npm run test:e2e:ci`** (tablet skipped) |
+| Async modal loading UX (HR) | **Done** — `tpHrNativeLoadingHtml()` + `.tp-visually-hidden` (prior tranche) |
 
-**Backlog:** expand visual baselines beyond login; auth’d pages on tablet + full device matrix; fuller per-route visual diff.
+**Verdict (automation tranche):** **COMPLETE** for the scope above.
 
 ---
 
-## Delta this session (2026-04-28)
+## Tier B — Strict exhaustive gate (every state × every route) — **OPEN**
+
+Strict interpretation — *every* loading / empty / error / skeleton on *every* route independently verified, plus full manual device matrix — is **not** claimed **PASS** from repository-only automation. Use release sign-off + spot manual QA where needed.
+
+| Criterion | Status |
+|-----------|--------|
+| Per-route / per-state automated coverage | **Open** — extend Playwright and visuals incrementally |
+| Full physical device matrix | **Open** — outside repo |
+
+**Backlog (non-blocking for Tier A / automation tranche):** additional snapshot baselines; more routes under auth; dedicated HR-only credentials in CI secrets if desired.
+
+---
+
+## Delta (E2E completion tranche)
 
 | Item |
 |------|
-| `native-shell.css` **v6**: **`.tp-visually-hidden`**; HR async modals use **`tpHrNativeLoadingHtml()`** + `role="status"` / `aria-busy` |
-| **`@playwright/test`** + **`playwright.config.cjs`** + **`tests/e2e/`** (health + login smoke); **`docs/E2E_PLAYWRIGHT.md`** |
-| `templates/header.php` + `login.php`: **`?v=6`** |
-| Earlier: **v5** shell (`02` 35 components; **`.tp-native-table-shell`**; **`hr/employees.php`** pagination / table shell) |
-| **`tests/e2e/protected-routes.spec.cjs`**: guest redirect smoke for dashboard / check-in / leave / HR index |
-| **Auth E2E** (optional env): **`auth.setup.cjs`**, **`authenticated.spec.cjs`**, **`playwright/.auth/`** gitignored |
-| **`tablet`** project (**iPad Mini**); **`PLAYWRIGHT_SKIP_TABLET`**; **`PLAYWRIGHT_VISUAL`** + **`visual-login.spec.cjs`**; **`PLAYWRIGHT_HR_EXPECT_ADMIN`** for HR dashboard assert |
+| **`tablet-auth`** project — **`authenticated.spec.cjs`** on **iPad Mini** (honours **`PLAYWRIGHT_SKIP_TABLET`**) |
+| **`visual-dashboard.spec.cjs`** + **`visual-auth`** / **`visual-auth-tablet`** (deps on **`setup`**, opt-in **`PLAYWRIGHT_VISUAL`**) |
+| **`npm run test:e2e:ci`**, **`npm run test:e2e:visual`** |
+| **`docs/E2E_PLAYWRIGHT.md`** — “recommended scope complete” + tables |
+| **`.login-card` / `.dashboard-hero`** snapshot workflow |
 
 ---
 
@@ -67,3 +80,4 @@ Strict interpretation of “every loading / empty / error / skeleton on every ro
 | `07_PAGE_REGRESSION_AFTER.md` | Present |
 | `08_FINAL_FULL_UI_AUDIT.md` | Present |
 | `09_COMPLETION_GATE.md` | **This file** |
+| `docs/E2E_PLAYWRIGHT.md` | Playwright + completion scope |
