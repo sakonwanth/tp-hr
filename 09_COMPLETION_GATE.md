@@ -13,6 +13,8 @@
 | Touch target violations (global inputs/buttons) | 0 | **0** (52/56/48 rules) |
 | Unmapped shell components | 0 | **0** (see `02`) |
 
+**Follow-up completed:** unified **page stack** in shell; **dashboard sticky CTA**; **`tp-native-page--home`** scroll budget; **`native-shell.css` v2** (section titles).
+
 **Verdict:** **PASS** — shell and token migration complete; per-page business logic preserved.
 
 **Deliverables present:**

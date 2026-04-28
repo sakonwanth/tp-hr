@@ -2,8 +2,9 @@
 
 | Page / area | Route | File | Status | Files modified | Mobile | Tablet | QA |
 |-------------|-------|------|--------|----------------|--------|--------|-----|
-| Shell + layout | * | `templates/header.php`, `templates/footer.php` | **COMPLETE** | Yes | ✓ | ✓ | ✓ |
-| Native CSS | * | `assets/css/native-shell.css` | **COMPLETE** | Yes | ✓ | ✓ | ✓ |
+| Shell + layout | * | `templates/header.php`, `templates/footer.php` | **COMPLETE** | `tp-native-stack--page`; `dashboard`→`tp-native-page--home` | ✓ | ✓ | ✓ |
+| Native CSS | * | `assets/css/native-shell.css` v2 | **COMPLETE** | Section title lock; stack gaps | ✓ | ✓ | ✓ |
+| Sticky primary (home) | `/` | `index.php` | **COMPLETE** | Mobile `.home-sticky-cta` → ลงเวลา | ✓ | ✓ | ✓ |
 | Dashboard | `/` | `index.php` | **COMPLETE** | Inherited shell | ✓ | ✓ | ✓ |
 | Check-in | `/checkin.php` | `checkin.php` | **COMPLETE** | Inherited shell | ✓ | ✓ | ✓ |
 | Leave | `/leave.php` | `leave.php`, `modules/employee/leaves/request_form.php` | **COMPLETE** | Inherited shell | ✓ | ✓ | ✓ |

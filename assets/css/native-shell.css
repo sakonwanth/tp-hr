@@ -1,5 +1,5 @@
 /**
- * TP-HR — Native component system (design lock; aligned with tp-checkin v5)
+ * TP-HR — Native component system (design lock; aligned with tp-checkin v5). v2: shell stack wrapper + section titles.
  * UI UX Pro Max: touch ≥48px, inputs ≥52px, primary CTA ≥56px, card radius 20px,
  * scroll-end buffer ≥120px, bottom slot ≥88px when tab bar present.
  */
@@ -374,5 +374,13 @@ body.tp-native-app:not(.login-page-root) .input-field {
   .tp-native-stack--page {
     gap: var(--tp-section-gap-tablet);
   }
+}
+
+/* Locked section headings (pages use .section-title in markup) */
+body.tp-native-app .section-title {
+  font-size: clamp(1.0625rem, 2.8vw, 1.125rem);
+  font-weight: 600;
+  line-height: 1.35;
+  margin-bottom: var(--tp-space-16);
 }
 

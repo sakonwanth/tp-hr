@@ -416,4 +416,14 @@ require_once __DIR__ . '/templates/header.php';
     </div>
 </div>
 
+<!-- Primary CTA แบบ sticky เหนือแถบแท็บ — เฉพาะมือถือ/แท็บเล็ต (ซ่อนที่ desktop มีแถบข้าง) -->
+<div class="app-shell-mobile-only home-sticky-cta tp-sticky-primary-action print:hidden" role="region" aria-label="ลงเวลาด่วน">
+    <div class="home-sticky-cta-inner max-w-lg mx-auto w-full px-0">
+        <a href="/checkin.php" class="tp-native-btn-primary w-full justify-center shadow-lg no-underline text-white gap-2">
+            <i class="fas fa-fingerprint" aria-hidden="true"></i>
+            <span class="whitespace-nowrap">ลงเวลา</span>
+        </a>
+    </div>
+</div>
+
 <?php require_once __DIR__ . '/templates/footer.php'; ?>

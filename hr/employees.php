@@ -226,7 +226,7 @@ $flashError = flash('error');
             <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">ค้นหา กรองแผนกและสถานะ ดูสรุปและดำเนินการรายคน</p>
         </div>
         <?php if (canManageUsers()): ?>
-        <a href="employees.php?action=add" class="w-full sm:w-auto shrink-0 inline-flex items-center justify-center min-h-[44px] px-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors font-semibold touch-manipulation">
+        <a href="employees.php?action=add" class="w-full sm:w-auto shrink-0 inline-flex items-center justify-center min-h-[56px] px-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors font-semibold touch-manipulation">
             <i class="fas fa-plus mr-2"></i>เพิ่มพนักงาน
         </a>
         <?php endif; ?>

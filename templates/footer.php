@@ -4,6 +4,7 @@
  */
 ?>
 
+</div><!-- End tp-native-stack--page -->
 </main><!-- End main content-area / tp-native-page -->
 
 <?php

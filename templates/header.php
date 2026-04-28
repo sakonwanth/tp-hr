@@ -10,6 +10,9 @@ $cp_shell = $current_page;
 $tp_hr_is_hr_route = is_string($cp_shell) && strncmp($cp_shell, 'hr-', 3) === 0;
 $tp_hr_employee_tab_shell = !$tp_hr_is_hr_route;
 $tp_hr_main_native_class = 'content-area tp-native-page';
+if ($tp_hr_employee_tab_shell && ($cp_shell === 'dashboard')) {
+    $tp_hr_main_native_class .= ' tp-native-page--home';
+}
 $appIconPath = '/assets/icons/tphr-app-icon.svg';
 $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
 ?>
@@ -32,7 +35,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
     
     <!-- Tailwind CSS (compiled) -->
     <link rel="stylesheet" href="/assets/css/app.css">
-    <link rel="stylesheet" href="/assets/css/native-shell.css?v=1">
+    <link rel="stylesheet" href="/assets/css/native-shell.css?v=2">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -1176,3 +1179,4 @@ document.getElementById('mobileMenuBtn')?.addEventListener('click', openMobileMe
 
 <!-- Main Content -->
 <main id="tp-hr-main" class="<?php echo htmlspecialchars($tp_hr_main_native_class, ENT_QUOTES, 'UTF-8'); ?>">
+<div class="tp-native-stack--page min-w-0">
