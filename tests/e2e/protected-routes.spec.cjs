@@ -8,6 +8,12 @@ const PROTECTED_ROUTES = [
   { name: 'dashboard', path: 'index.php' },
   { name: 'check-in', path: 'checkin.php' },
   { name: 'leave', path: 'leave.php' },
+  { name: 'profile', path: 'profile.php' },
+  { name: 'payslip', path: 'payslip.php' },
+  { name: 'attendance history', path: 'attendance_history.php' },
+  { name: 'leave history', path: 'leave_history.php' },
+  { name: 'certificate', path: 'certificate.php' },
+  { name: 'day-off schedule', path: 'dayoff_schedule.php' },
   { name: 'hr admin', path: 'hr/index.php' },
 ];
 

@@ -55,4 +55,13 @@ test.describe('Authenticated session', () => {
     await page.goto('hr/index.php', { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveTitle(/HR Dashboard/);
   });
+
+  test('hr employees (requires HR-capable account)', async ({ page }) => {
+    test.skip(
+      process.env.PLAYWRIGHT_HR_EXPECT_ADMIN !== '1',
+      'Set PLAYWRIGHT_HR_EXPECT_ADMIN=1 and use PLAYWRIGHT_HR_USER with hr dashboard access.',
+    );
+    await page.goto('hr/employees.php', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveTitle(/จัดการพนักงาน/);
+  });
 });
