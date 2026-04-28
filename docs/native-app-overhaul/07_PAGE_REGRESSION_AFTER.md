@@ -46,6 +46,7 @@
 | Employee form `/hr/employee_form.php` | **REGRESSION_PASS** (static QA: POST main form + change_password + permission strips unchanged; markup/CSS + tab a11y only) |
 | Employee view `/hr/employee_view.php` | **REGRESSION_PASS** (static QA: GET id + queries + CEO salary gate unchanged; display labels + UI only) |
 | Employee attendance `/hr/employee_attendance.php` | **REGRESSION_PASS** (static QA: GET id/month + attendance/holiday/swap queries unchanged; markup/CSS only) |
+| HR attendance `/hr/attendance.php` | **REGRESSION_PASS** (static QA: GET date/dept/status/page + SQL blocks + stats/excused unchanged; markup/API hooks preserved) |
 | Other pages in 01 §A | **REGRESSION_PENDING** |
 
 ### Dashboard — `/` (`index.php`)
@@ -186,3 +187,11 @@
 | HR gate + GET id + month + employee row | PASS (unchanged) |
 | Attendance list + holidays + swaps + `$allDays` build | PASS |
 | Monthly summary aggregates | PASS |
+
+### HR attendance management — `/hr/attendance.php`
+
+| Check | Result |
+|-------|--------|
+| HR gate + GET date / department / status / page | PASS (unchanged) |
+| Main query + daily stats + excused + weekly-day-off banner | PASS |
+| UI modals + `fetch('/api/attendance.php', …)` hooks | PASS |

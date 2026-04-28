@@ -22,7 +22,7 @@ Each task: specific, actionable. Complete in order P0 → P2 unless dependencies
 | HR-UI-016 | Employee form | `/hr/employee_form.php` | `hr/employee_form.php` | Long form | **NativeProgressStep** or grouped cards | long form | Section save hints | §8 | High | Edit employee | **Done 2026-04-28** |
 | HR-UI-017 | Employee view | `/hr/employee_view.php` | `hr/employee_view.php` | Detail wall | NativeDataCard sections | mixed | Quick actions | §4 | Med | Links | **Done 2026-04-28** |
 | HR-UI-018 | Emp attendance | `/hr/employee_attendance.php` | `hr/employee_attendance.php` | Table | Card mobile | table | — | §2 | Med | | **Done 2026-04-28** |
-| HR-UI-019 | Attendance mgmt | `/hr/attendance.php` | `hr/attendance.php` | Filters + table | NativeFilterBar + cards | mixed | Loading | §2 | Med | | |
+| HR-UI-019 | Attendance mgmt | `/hr/attendance.php` | `hr/attendance.php` | Filters + table | NativeFilterBar + cards | mixed | Loading | §2 | Med | | **Done 2026-04-28** |
 | HR-UI-020 | Leaves approval | `/hr/leaves.php` | `hr/leaves.php` | Approve buttons | Large `NativeButtonPrimary`; **NativeConfirmationDialog** | small links | Pending count | §4 approval | High | Approve/reject | |
 | HR-UI-021 | Day-off approvals | `/hr/dayoff_approvals.php` | `hr/dayoff_approvals.php` | Same | Same | mixed | Confirm | High | CEO | |
 | HR-UI-022 | Documents | `/hr/documents.php` | `hr/documents.php` | Upload list | List cards | table | Empty | Med | | |
