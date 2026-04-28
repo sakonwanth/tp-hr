@@ -13,7 +13,7 @@ Each task: specific, actionable. Complete in order P0 → P2 unless dependencies
 | HR-UI-007 | Payslip | `/payslip.php` | `payslip.php` | List/modal density | NativeListItem + modal shell | mixed | Loading skeleton | §4 states | Med | Open slip | **Done 2026-04-28** |
 | HR-UI-008 | Profile | `/profile.php` | `profile.php` | Long vertical form | Grouped `NativeCard` | sections | Save feedback | §8 | Low | POST profile | **Done 2026-04-28** |
 | HR-UI-009 | Certificate | `/certificate.php` | `certificate.php` | Form UX | NativeFormGroup | mixed | Success state | §8 | Low | Submit | **Done 2026-04-28** |
-| HR-UI-010 | Day-off schedule | `/dayoff_schedule.php` | `dayoff_schedule.php` | Grid overflow | Responsive grid + card cells | mixed | Legend | §5 layout | Med | 375px | |
+| HR-UI-010 | Day-off schedule | `/dayoff_schedule.php` | `dayoff_schedule.php` | Grid overflow | Responsive grid + card cells | mixed | Legend | §5 layout | Med | 375px | **Done 2026-04-28** |
 | HR-UI-011 | Attendance history | `/attendance_history.php` | `attendance_history.php` | Table | Card list mobile | table | Empty | §2 | Med | Scroll | |
 | HR-UI-012 | Verify doc | `/verify_document.php` | `verify_document.php` | Public clarity | NativeInfoBlock + form | plain | Error empty | §1 a11y | Low | Invalid code | |
 | HR-UI-013 | Cert print | `/certificate_print.php` | `certificate_print.php` | Screen preview | Optional `@media screen` card wrapper | print CSS | — | Print safe | Low | Print dialog | |

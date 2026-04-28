@@ -24,7 +24,8 @@
 | HR-UI-007 Payslip | **COMPLETE** | `payslip.php` — native cards, list rows, print-safe `.native-card` |
 | HR-UI-008 Profile | **COMPLETE** | `profile.php` — native cards, tabs radius 20px, list rows, modal shell, table shell |
 | HR-UI-009 Certificate | **COMPLETE** | `certificate.php` — tp-native-form-group, native cards, history card stack, print/download buttons |
-| HR-UI-010 … HR-UI-026 (excl. above) | **NOT_STARTED** | — |
+| HR-UI-010 Day-off schedule | **COMPLETE** | `dayoff_schedule.php` — native cards, alerts, week grid radius 20px, legend, tp-native-modal |
+| HR-UI-011 … HR-UI-026 (excl. above) | **NOT_STARTED** | — |
 | HR-UI-SHELL-01 | **REFACTORED** | — |
 | HR-UI-SHELL-02 | **COMPLETE** | — |
 | HR-UI-SHELL-03 | **COMPLETE** | — |

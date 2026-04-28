@@ -37,6 +37,7 @@
 | Payslip `/payslip.php` | **REGRESSION_PASS** (static QA: POST download + queries unchanged; print CSS extended for `.native-card`) |
 | Profile `/profile.php` | **REGRESSION_PASS** (static QA: tabs/actions/API `edit-form` → `/api/profile.php` unchanged; markup/CSS + modal shell) |
 | Certificate `/certificate.php` | **REGRESSION_PASS** (static QA: `certificate-form` + `/api/certificate.php` + `tpHrCertificatePrintForm` unchanged; markup/CSS only) |
+| Day-off `/dayoff_schedule.php` | **REGRESSION_PASS** (static QA: POST `request_change` / `cancel_request` + modal IDs unchanged; markup/CSS + legend) |
 | Other pages in 01 §A | **REGRESSION_PENDING** |
 
 ### Dashboard — `/` (`index.php`)
@@ -104,3 +105,11 @@
 | Templates / request list queries | PASS (unchanged) |
 | Form POST + `cancelRequest` → `/api/certificate.php` | PASS |
 | Print form helper + download links | PASS |
+
+### Day-off schedule — `/dayoff_schedule.php`
+
+| Check | Result |
+|-------|--------|
+| Month filter / week grid / holidays query | PASS (unchanged) |
+| POST CSRF + `request_change` / `cancel_request` | PASS |
+| `change-modal` / `openChangeModal` | PASS |
