@@ -36,6 +36,7 @@
 | Leave history `/leave_history.php` | **REGRESSION_PASS** (static QA: filters/pagination/API detail+cancel unchanged; modal IDs preserved) |
 | Payslip `/payslip.php` | **REGRESSION_PASS** (static QA: POST download + queries unchanged; print CSS extended for `.native-card`) |
 | Profile `/profile.php` | **REGRESSION_PASS** (static QA: tabs/actions/API `edit-form` → `/api/profile.php` unchanged; markup/CSS + modal shell) |
+| Certificate `/certificate.php` | **REGRESSION_PASS** (static QA: `certificate-form` + `/api/certificate.php` + `tpHrCertificatePrintForm` unchanged; markup/CSS only) |
 | Other pages in 01 §A | **REGRESSION_PENDING** |
 
 ### Dashboard — `/` (`index.php`)
@@ -95,3 +96,11 @@
 | User / related tables load | PASS (unchanged) |
 | `edit-modal`, `openEditModal`, form POST to `/api/profile.php` | PASS |
 | Tab nav + native cards + `tp-native-table-shell` (family) | PASS |
+
+### Certificate — `/certificate.php`
+
+| Check | Result |
+|-------|--------|
+| Templates / request list queries | PASS (unchanged) |
+| Form POST + `cancelRequest` → `/api/certificate.php` | PASS |
+| Print form helper + download links | PASS |

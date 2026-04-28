@@ -12,7 +12,7 @@ Each task: specific, actionable. Complete in order P0 → P2 unless dependencies
 | HR-UI-006 | Leave form partial | — | `modules/employee/leaves/request_form.php` | Field grouping | `NativeFormGroup` + helper text | mixed | Required indicators | §8 | Med | Validation | **Done 2026-04-28** |
 | HR-UI-007 | Payslip | `/payslip.php` | `payslip.php` | List/modal density | NativeListItem + modal shell | mixed | Loading skeleton | §4 states | Med | Open slip | **Done 2026-04-28** |
 | HR-UI-008 | Profile | `/profile.php` | `profile.php` | Long vertical form | Grouped `NativeCard` | sections | Save feedback | §8 | Low | POST profile | **Done 2026-04-28** |
-| HR-UI-009 | Certificate | `/certificate.php` | `certificate.php` | Form UX | NativeFormGroup | mixed | Success state | §8 | Low | Submit | |
+| HR-UI-009 | Certificate | `/certificate.php` | `certificate.php` | Form UX | NativeFormGroup | mixed | Success state | §8 | Low | Submit | **Done 2026-04-28** |
 | HR-UI-010 | Day-off schedule | `/dayoff_schedule.php` | `dayoff_schedule.php` | Grid overflow | Responsive grid + card cells | mixed | Legend | §5 layout | Med | 375px | |
 | HR-UI-011 | Attendance history | `/attendance_history.php` | `attendance_history.php` | Table | Card list mobile | table | Empty | §2 | Med | Scroll | |
 | HR-UI-012 | Verify doc | `/verify_document.php` | `verify_document.php` | Public clarity | NativeInfoBlock + form | plain | Error empty | §1 a11y | Low | Invalid code | |
