@@ -4,6 +4,7 @@
  * v4: main horizontal padding respects safe-area + never zeroed by stray overrides.
  * v5: icon size tokens; table scroll shell; locked aliases for loading/confirmation; header ?v=5.
  * v6: .tp-visually-hidden for screen-reader text with spinners; header ?v=6.
+ * v8: bottom tab inner grid max-h 72px enforced in footer markup; header ?v=8.
  * UI UX Pro Max: touch ≥48px, inputs ≥52px, primary CTA ≥56px, card radius 20px,
  * scroll-end buffer ≥120px, bottom slot ≥88px when tab bar present.
  */

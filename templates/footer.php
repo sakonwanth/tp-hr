@@ -18,7 +18,8 @@ $isAdminPage = is_string($cp) && strncmp($cp, 'hr-', 3) === 0;
      style="padding-bottom: env(safe-area-inset-bottom, 0px);"
      role="navigation"
      aria-label="เมนูหลักมือถือ">
-    <div class="max-w-lg mx-auto grid grid-cols-5 px-2 py-2">
+    <!-- Locked: bar chrome max 72px (tokens); icons 24px; labels 14px; hit area ≥48px -->
+    <div class="max-w-lg mx-auto grid grid-cols-5 gap-1 px-2 box-border max-h-[72px] h-[72px] items-center">
         <?php
         $items = [
             ['key' => 'dashboard', 'href' => '/',            'icon' => 'fa-home',               'label' => 'หน้าแรก', 'aria' => 'หน้าแรก'],
@@ -33,11 +34,11 @@ $isAdminPage = is_string($cp) && strncmp($cp, 'hr-', 3) === 0;
             $bg = $isHere ? 'bg-violet-500/15 border border-violet-500/20' : 'bg-transparent';
         ?>
         <a href="<?php echo htmlspecialchars($it['href']); ?>"
-           class="touch-manipulation flex flex-col items-center justify-center gap-1 min-h-[56px] py-2 rounded-xl transition-colors <?php echo $active; ?> <?php echo $bg; ?>"
+           class="touch-manipulation flex flex-col items-center justify-center gap-0.5 min-w-[48px] min-h-[48px] py-1 rounded-[20px] transition-colors <?php echo $active; ?> <?php echo $bg; ?>"
            aria-label="<?php echo htmlspecialchars($it['aria']); ?>"
            <?php if ($isHere): ?>aria-current="page"<?php endif; ?>>
-            <i class="fas <?php echo htmlspecialchars($it['icon']); ?> text-lg"></i>
-            <span class="text-[11px] font-medium leading-none"><?php echo htmlspecialchars($it['label']); ?></span>
+            <i class="fas <?php echo htmlspecialchars($it['icon']); ?> text-2xl leading-none shrink-0" aria-hidden="true"></i>
+            <span class="text-sm font-medium leading-none whitespace-nowrap"><?php echo htmlspecialchars($it['label']); ?></span>
         </a>
         <?php endforeach; ?>
     </div>
