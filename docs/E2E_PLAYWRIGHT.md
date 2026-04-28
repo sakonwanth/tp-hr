@@ -34,7 +34,8 @@ Use a **trailing slash** so paths like `login.php` resolve under the project fol
 | Test | Coverage |
 |------|----------|
 | `health.spec.cjs` | `GET /api/health.php` — JSON shape (`status`, `project` when 200). |
-| `login.spec.cjs` | `/login.php` — page visible + primary submit button present. |
+| `login.spec.cjs` | `login.php` — page visible + primary submit button present. |
+| `protected-routes.spec.cjs` | `index.php`, `checkin.php`, `leave.php`, `hr/index.php` — unauthenticated session ends on a URL containing **`login.php`** (local HR login or CRM SSO). |
 
 Auth-protected flows (HR dashboard, POST APIs) require storage state / credentials — not in smoke scope yet.
 
