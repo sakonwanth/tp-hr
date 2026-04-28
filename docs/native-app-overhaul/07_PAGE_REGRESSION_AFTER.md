@@ -43,6 +43,7 @@
 | Certificate print POST `/certificate_print.php` | **REGRESSION_PASS** (static QA: POST+CSRF + auth + SQL unchanged; screen-only chrome; print `@media` unchanged) |
 | HR dashboard `/hr/index.php` | **REGRESSION_PASS** (static QA: queries + `/api/leave.php` approve/reject unchanged; markup/CSS + modal a11y only) |
 | Employees `/hr/employees.php` | **REGRESSION_PASS** (static QA: GET filters + pagination + POST export/delete unchanged; `/api/leave.php` modal data unchanged) |
+| Employee form `/hr/employee_form.php` | **REGRESSION_PASS** (static QA: POST main form + change_password + permission strips unchanged; markup/CSS + tab a11y only) |
 | Other pages in 01 §A | **REGRESSION_PENDING** |
 
 ### Dashboard — `/` (`index.php`)
@@ -158,3 +159,12 @@
 | GET search/department/status/page + list SQL | PASS |
 | POST CSV export + POST delete + CSRF | PASS |
 | Leave balance modal → `/api/leave.php` entitlements/history | PASS |
+
+### Employee form — `/hr/employee_form.php`
+
+| Check | Result |
+|-------|--------|
+| HR/CEO gates + load employee + related tables | PASS (unchanged) |
+| POST save (users + schedules + edu/work/family) + CSRF | PASS |
+| POST `change_password` branch | PASS |
+| Tab switch + dynamic rows (names unchanged) | PASS |

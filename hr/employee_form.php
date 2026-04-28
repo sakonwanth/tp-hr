@@ -456,30 +456,30 @@ include dirname(__DIR__) . '/templates/header.php';
             <p class="text-slate-300 text-sm mt-1.5 leading-relaxed"><?php echo htmlspecialchars($formSubtitle); ?></p>
             <?php endif; ?>
         </div>
-        <a href="/hr/employees.php" class="w-full sm:w-auto shrink-0 inline-flex items-center justify-center min-h-[48px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors font-medium touch-manipulation">
-            <i class="fas fa-arrow-left mr-2"></i>กลับ
+        <a href="/hr/employees.php" class="w-full sm:w-auto shrink-0 inline-flex items-center justify-center min-h-[48px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-[20px] transition-colors font-medium touch-manipulation">
+            <i class="fas fa-arrow-left mr-2" aria-hidden="true"></i>กลับ
         </a>
     </div>
 </div>
 
 <!-- Info Box: Shared with CRM -->
-<div class="glass-card rounded-xl p-4 mb-6 min-w-0 border-l-4 border-blue-500">
+<div class="native-card tp-native-card tp-native-data-card p-4 mb-6 min-w-0 border-l-4 border-blue-500/80 rounded-[20px]" role="status">
     <div class="flex items-start gap-3">
-        <i class="fas fa-info-circle text-blue-400 mt-0.5"></i>
-        <div>
+        <i class="fas fa-info-circle text-blue-400 mt-0.5 shrink-0" aria-hidden="true"></i>
+        <div class="min-w-0">
             <p class="text-white font-medium">ระบบเชื่อมต่อกับ TP-CRM</p>
-            <p class="text-white/60 text-sm">ข้อมูลพนักงานใช้ฐานข้อมูลเดียวกับระบบ CRM การแก้ไขที่นี่จะมีผลกับระบบ CRM ด้วย</p>
+            <p class="text-white/60 text-sm leading-relaxed">ข้อมูลพนักงานใช้ฐานข้อมูลเดียวกับระบบ CRM การแก้ไขที่นี่จะมีผลกับระบบ CRM ด้วย</p>
         </div>
     </div>
 </div>
 
 <?php if (!empty($errors)): ?>
-<div class="glass-card rounded-xl p-4 mb-6 min-w-0 border-l-4 border-red-500">
+<div class="native-card tp-native-card tp-native-data-card p-4 mb-6 min-w-0 border-l-4 border-red-500/80 rounded-[20px]" role="alert">
     <div class="flex items-start gap-3">
-        <i class="fas fa-exclamation-circle text-red-400 mt-0.5"></i>
-        <div>
+        <i class="fas fa-exclamation-circle text-red-400 mt-0.5 shrink-0" aria-hidden="true"></i>
+        <div class="min-w-0">
             <p class="text-white font-medium">เกิดข้อผิดพลาด</p>
-            <ul class="text-red-400 text-sm mt-1 list-disc list-inside">
+            <ul class="text-red-300 text-sm mt-1 list-disc list-inside space-y-0.5">
                 <?php foreach ($errors as $error): ?>
                 <li><?php echo htmlspecialchars($error); ?></li>
                 <?php endforeach; ?>
@@ -490,10 +490,10 @@ include dirname(__DIR__) . '/templates/header.php';
 <?php endif; ?>
 
 <?php if ($success): ?>
-<div class="glass-card rounded-xl p-4 mb-6 min-w-0 border-l-4 border-green-500">
+<div class="native-card tp-native-card tp-native-data-card p-4 mb-6 min-w-0 border-l-4 border-emerald-500/80 rounded-[20px]" role="status">
     <div class="flex items-start gap-3">
-        <i class="fas fa-check-circle text-green-400 mt-0.5"></i>
-        <p class="text-green-400"><?php echo htmlspecialchars($success); ?></p>
+        <i class="fas fa-check-circle text-emerald-400 mt-0.5 shrink-0" aria-hidden="true"></i>
+        <p class="text-emerald-200"><?php echo htmlspecialchars($success); ?></p>
     </div>
 </div>
 <?php endif; ?>
@@ -502,41 +502,41 @@ include dirname(__DIR__) . '/templates/header.php';
     <?php echo csrfField(); ?>
     
     <!-- Tab Navigation -->
-    <div class="glass-card rounded-xl p-1.5 min-w-0 flex flex-nowrap overflow-x-auto gap-1 sticky top-3 z-30 [-webkit-overflow-scrolling:touch] overscroll-x-contain">
-        <button type="button" onclick="switchTab('tab-personal')" id="btn-tab-personal" class="tab-btn active shrink-0 min-h-[48px] px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 touch-manipulation">
-            <i class="fas fa-user"></i>
+    <div class="native-card tp-native-card tp-native-data-card p-1.5 min-w-0 flex flex-nowrap overflow-x-auto gap-1 sticky top-3 z-30 [-webkit-overflow-scrolling:touch] overscroll-x-contain rounded-[20px]" role="tablist" aria-label="ส่วนของแบบฟอร์มพนักงาน">
+        <button type="button" role="tab" aria-selected="true" aria-controls="tab-personal" onclick="switchTab('tab-personal')" id="btn-tab-personal" class="tab-btn active shrink-0 min-h-[48px] px-4 py-2.5 rounded-[20px] text-sm font-medium transition-all flex items-center gap-2 touch-manipulation">
+            <i class="fas fa-user" aria-hidden="true"></i>
             <span class="hidden sm:inline">ข้อมูลส่วนตัว</span>
             <span class="sm:hidden">ส่วนตัว</span>
         </button>
-        <button type="button" onclick="switchTab('tab-work')" id="btn-tab-work" class="tab-btn shrink-0 min-h-[48px] px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 touch-manipulation">
-            <i class="fas fa-briefcase"></i>
+        <button type="button" role="tab" aria-selected="false" aria-controls="tab-work" onclick="switchTab('tab-work')" id="btn-tab-work" class="tab-btn shrink-0 min-h-[48px] px-4 py-2.5 rounded-[20px] text-sm font-medium transition-all flex items-center gap-2 touch-manipulation">
+            <i class="fas fa-briefcase" aria-hidden="true"></i>
             <span class="hidden sm:inline">ข้อมูลการทำงาน</span>
             <span class="sm:hidden">การทำงาน</span>
         </button>
-        <button type="button" onclick="switchTab('tab-welfare')" id="btn-tab-welfare" class="tab-btn shrink-0 min-h-[48px] px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 touch-manipulation">
-            <i class="fas fa-shield-alt"></i>
+        <button type="button" role="tab" aria-selected="false" aria-controls="tab-welfare" onclick="switchTab('tab-welfare')" id="btn-tab-welfare" class="tab-btn shrink-0 min-h-[48px] px-4 py-2.5 rounded-[20px] text-sm font-medium transition-all flex items-center gap-2 touch-manipulation">
+            <i class="fas fa-shield-alt" aria-hidden="true"></i>
             <span class="hidden sm:inline">สวัสดิการ & การเงิน</span>
             <span class="sm:hidden">สวัสดิการ</span>
         </button>
         <?php if ($action === 'edit' && $employee): ?>
-        <button type="button" onclick="switchTab('tab-history')" id="btn-tab-history" class="tab-btn shrink-0 min-h-[48px] px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 touch-manipulation">
-            <i class="fas fa-history"></i>
+        <button type="button" role="tab" aria-selected="false" aria-controls="tab-history" onclick="switchTab('tab-history')" id="btn-tab-history" class="tab-btn shrink-0 min-h-[48px] px-4 py-2.5 rounded-[20px] text-sm font-medium transition-all flex items-center gap-2 touch-manipulation">
+            <i class="fas fa-history" aria-hidden="true"></i>
             <span class="hidden sm:inline">ประวัติ & ครอบครัว</span>
             <span class="sm:hidden">ประวัติ</span>
         </button>
-        <button type="button" onclick="switchTab('tab-system')" id="btn-tab-system" class="tab-btn shrink-0 min-h-[48px] px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 touch-manipulation">
-            <i class="fas fa-cog"></i>
+        <button type="button" role="tab" aria-selected="false" aria-controls="tab-system" onclick="switchTab('tab-system')" id="btn-tab-system" class="tab-btn shrink-0 min-h-[48px] px-4 py-2.5 rounded-[20px] text-sm font-medium transition-all flex items-center gap-2 touch-manipulation">
+            <i class="fas fa-cog" aria-hidden="true"></i>
             <span class="hidden sm:inline">ระบบ</span>
         </button>
         <?php endif; ?>
     </div>
     
     <!-- Tab 1: ข้อมูลส่วนตัว -->
-    <div id="tab-personal" class="tab-panel space-y-6">
+    <div id="tab-personal" class="tab-panel space-y-6" role="tabpanel" aria-labelledby="btn-tab-personal">
     
     <!-- Basic Info -->
-    <div class="glass-card rounded-xl p-6 min-w-0">
-        <h3 class="text-lg font-bold text-white mb-4 flex items-center">
+    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+        <h3 class="section-title mb-4 flex items-center text-white text-base sm:text-lg">
             <i class="fas fa-user text-violet-400 mr-2"></i>
             ข้อมูลพื้นฐาน
         </h3>
@@ -547,12 +547,12 @@ include dirname(__DIR__) . '/templates/header.php';
                 <?php if ($action === 'edit' && !$canEditSensitive): ?>
                 <input type="hidden" name="employee_code" value="<?php echo htmlspecialchars($employee['employee_code'] ?? ''); ?>">
                 <input type="text" value="<?php echo htmlspecialchars($employee['employee_code'] ?? ''); ?>"
-                       class="input-field bg-white/5 cursor-not-allowed" readonly required>
+                       class="input-field tp-native-input bg-white/5 cursor-not-allowed" readonly required>
                 <p class="text-white/40 text-xs mt-1"><i class="fas fa-lock mr-1"></i>เฉพาะ CEO+ เท่านั้นที่แก้ไขได้</p>
                 <?php else: ?>
                 <input type="text" name="employee_code"
                        value="<?php echo htmlspecialchars($employee['employee_code'] ?? ''); ?>"
-                       class="input-field" required placeholder="เช่น TPE01001">
+                       class="input-field tp-native-input" required placeholder="เช่น TPE01001">
                 <?php endif; ?>
             </div>
             <div>
@@ -560,12 +560,12 @@ include dirname(__DIR__) . '/templates/header.php';
                 <?php if ($action === 'edit' && !$canEditSensitive): ?>
                 <input type="hidden" name="username" value="<?php echo htmlspecialchars($employee['username'] ?? ''); ?>">
                 <input type="text" value="<?php echo htmlspecialchars($employee['username'] ?? ''); ?>"
-                       class="input-field bg-white/5 cursor-not-allowed" readonly required>
+                       class="input-field tp-native-input bg-white/5 cursor-not-allowed" readonly required>
                 <p class="text-white/40 text-xs mt-1"><i class="fas fa-lock mr-1"></i>เฉพาะ CEO+ เท่านั้นที่แก้ไขได้</p>
                 <?php else: ?>
                 <input type="text" name="username"
                        value="<?php echo htmlspecialchars($employee['username'] ?? ''); ?>"
-                       class="input-field" required placeholder="ใช้สำหรับล็อกอิน">
+                       class="input-field tp-native-input" required placeholder="ใช้สำหรับล็อกอิน">
                 <?php endif; ?>
             </div>
             <div>
@@ -573,12 +573,12 @@ include dirname(__DIR__) . '/templates/header.php';
                 <?php if ($action === 'edit' && !$canEditSensitive): ?>
                 <input type="hidden" name="email" value="<?php echo htmlspecialchars($employee['email'] ?? ''); ?>">
                 <input type="email" value="<?php echo htmlspecialchars($employee['email'] ?? ''); ?>"
-                       class="input-field bg-white/5 cursor-not-allowed" readonly required>
+                       class="input-field tp-native-input bg-white/5 cursor-not-allowed" readonly required>
                 <p class="text-white/40 text-xs mt-1"><i class="fas fa-lock mr-1"></i>เฉพาะ CEO+ เท่านั้นที่แก้ไขได้</p>
                 <?php else: ?>
                 <input type="email" name="email"
                        value="<?php echo htmlspecialchars($employee['email'] ?? ''); ?>"
-                       class="input-field" required placeholder="email@tp-asset.com">
+                       class="input-field tp-native-input" required placeholder="email@tp-asset.com">
                 <?php endif; ?>
             </div>
         </div>
@@ -587,19 +587,19 @@ include dirname(__DIR__) . '/templates/header.php';
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             <div>
                 <label class="block text-white/70 text-sm mb-1">รหัสผ่าน <span class="text-red-400">*</span></label>
-                <input type="password" name="password" class="input-field" required minlength="<?php echo MIN_PASSWORD_LENGTH; ?>" placeholder="อย่างน้อย <?php echo MIN_PASSWORD_LENGTH; ?> ตัวอักษร">
+                <input type="password" name="password" class="input-field tp-native-input" required minlength="<?php echo MIN_PASSWORD_LENGTH; ?>" placeholder="อย่างน้อย <?php echo MIN_PASSWORD_LENGTH; ?> ตัวอักษร">
             </div>
             <div>
                 <label class="block text-white/70 text-sm mb-1">ยืนยันรหัสผ่าน</label>
-                <input type="password" name="password_confirm" class="input-field" placeholder="กรอกรหัสผ่านอีกครั้ง">
+                <input type="password" name="password_confirm" class="input-field tp-native-input" placeholder="กรอกรหัสผ่านอีกครั้ง">
             </div>
         </div>
         <?php endif; ?>
     </div>
     
     <!-- Personal Info -->
-    <div class="glass-card rounded-xl p-6 min-w-0">
-        <h3 class="text-lg font-bold text-white mb-4 flex items-center">
+    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+        <h3 class="section-title mb-4 flex items-center text-white text-base sm:text-lg">
             <i class="fas fa-id-card text-violet-400 mr-2"></i>
             ข้อมูลส่วนตัว
         </h3>
@@ -607,7 +607,7 @@ include dirname(__DIR__) . '/templates/header.php';
         <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div>
                 <label class="block text-white/70 text-sm mb-1">คำนำหน้า</label>
-                <select name="title" class="input-field">
+                <select name="title" class="input-field tp-native-select">
                     <option value="นาย" <?php echo ($employee['title'] ?? '') === 'นาย' ? 'selected' : ''; ?>>นาย</option>
                     <option value="นาง" <?php echo ($employee['title'] ?? '') === 'นาง' ? 'selected' : ''; ?>>นาง</option>
                     <option value="นางสาว" <?php echo ($employee['title'] ?? '') === 'นางสาว' ? 'selected' : ''; ?>>นางสาว</option>
@@ -617,23 +617,23 @@ include dirname(__DIR__) . '/templates/header.php';
                 <label class="block text-white/70 text-sm mb-1">ชื่อ (ไทย) <span class="text-red-400">*</span></label>
                 <input type="text" name="first_name_th" 
                        value="<?php echo htmlspecialchars($employee['first_name_th'] ?? ''); ?>"
-                       class="input-field" required>
+                       class="input-field tp-native-input" required>
             </div>
             <div>
                 <label class="block text-white/70 text-sm mb-1">นามสกุล (ไทย) <span class="text-red-400">*</span></label>
                 <input type="text" name="last_name_th" 
                        value="<?php echo htmlspecialchars($employee['last_name_th'] ?? ''); ?>"
-                       class="input-field" required>
+                       class="input-field tp-native-input" required>
             </div>
             <div>
                 <label class="block text-white/70 text-sm mb-1">ชื่อเล่น</label>
                 <input type="text" name="nickname" 
                        value="<?php echo htmlspecialchars($employee['nickname'] ?? ''); ?>"
-                       class="input-field" placeholder="เช่น นุ่น">
+                       class="input-field tp-native-input" placeholder="เช่น นุ่น">
             </div>
             <div>
                 <label class="block text-white/70 text-sm mb-1">เพศ</label>
-                <select name="gender" class="input-field">
+                <select name="gender" class="input-field tp-native-select">
                     <option value="">-- เลือก --</option>
                     <option value="M" <?php echo ($employee['gender'] ?? '') === 'M' ? 'selected' : ''; ?>>ชาย</option>
                     <option value="F" <?php echo ($employee['gender'] ?? '') === 'F' ? 'selected' : ''; ?>>หญิง</option>
@@ -646,19 +646,19 @@ include dirname(__DIR__) . '/templates/header.php';
                 <label class="block text-white/70 text-sm mb-1">First Name (English)</label>
                 <input type="text" name="first_name_en" 
                        value="<?php echo htmlspecialchars($employee['first_name_en'] ?? ''); ?>"
-                       class="input-field">
+                       class="input-field tp-native-input">
             </div>
             <div>
                 <label class="block text-white/70 text-sm mb-1">Last Name (English)</label>
                 <input type="text" name="last_name_en" 
                        value="<?php echo htmlspecialchars($employee['last_name_en'] ?? ''); ?>"
-                       class="input-field">
+                       class="input-field tp-native-input">
             </div>
             <div>
                 <label class="block text-white/70 text-sm mb-1">สัญชาติ</label>
                 <input type="text" name="nationality" 
                        value="<?php echo htmlspecialchars($employee['nationality'] ?? 'ไทย'); ?>"
-                       class="input-field">
+                       class="input-field tp-native-input">
             </div>
         </div>
         
@@ -668,12 +668,12 @@ include dirname(__DIR__) . '/templates/header.php';
                 <?php if ($action === 'edit' && !$canEditSensitive): ?>
                 <input type="hidden" name="id_card" value="<?php echo htmlspecialchars($employee['id_card'] ?? ''); ?>">
                 <input type="text" value="<?php echo htmlspecialchars($employee['id_card'] ?? ''); ?>"
-                       class="input-field bg-white/5 cursor-not-allowed" readonly maxlength="13">
+                       class="input-field tp-native-input bg-white/5 cursor-not-allowed" readonly maxlength="13">
                 <p class="text-white/40 text-xs mt-1"><i class="fas fa-lock mr-1"></i>เฉพาะ CEO+ เท่านั้นที่แก้ไขได้</p>
                 <?php else: ?>
                 <input type="text" name="id_card" maxlength="13"
                        value="<?php echo htmlspecialchars($employee['id_card'] ?? ''); ?>"
-                       class="input-field" placeholder="1234567890123">
+                       class="input-field tp-native-input" placeholder="1234567890123">
                 <?php endif; ?>
             </div>
             <div>
@@ -681,19 +681,19 @@ include dirname(__DIR__) . '/templates/header.php';
                 <?php if ($action === 'edit' && !$canEditSensitive): ?>
                 <input type="hidden" name="id_card_expiry" value="<?php echo htmlspecialchars($employee['id_card_expiry'] ?? ''); ?>">
                 <input type="date" value="<?php echo htmlspecialchars($employee['id_card_expiry'] ?? ''); ?>"
-                       class="input-field bg-white/5 cursor-not-allowed" readonly>
+                       class="input-field tp-native-input bg-white/5 cursor-not-allowed" readonly>
                 <p class="text-white/40 text-xs mt-1"><i class="fas fa-lock mr-1"></i>CEO+</p>
                 <?php else: ?>
                 <input type="date" name="id_card_expiry"
                        value="<?php echo htmlspecialchars($employee['id_card_expiry'] ?? ''); ?>"
-                       class="input-field">
+                       class="input-field tp-native-input">
                 <?php endif; ?>
             </div>
             <div>
                 <label class="block text-white/70 text-sm mb-1">วันเกิด</label>
                 <input type="date" name="birth_date" id="birth_date_input"
                        value="<?php echo htmlspecialchars($employee['birth_date'] ?? ''); ?>"
-                       class="input-field" onchange="calcAge()">
+                       class="input-field tp-native-input" onchange="calcAge()">
             </div>
         </div>
         
@@ -702,11 +702,11 @@ include dirname(__DIR__) . '/templates/header.php';
                 <label class="block text-white/70 text-sm mb-1">เบอร์โทรศัพท์</label>
                 <input type="tel" name="phone" 
                        value="<?php echo htmlspecialchars($employee['phone'] ?? ''); ?>"
-                       class="input-field" placeholder="081-234-5678">
+                       class="input-field tp-native-input" placeholder="081-234-5678">
             </div>
             <div>
                 <label class="block text-white/70 text-sm mb-1">สถานะสมรส</label>
-                <select name="marital_status" class="input-field">
+                <select name="marital_status" class="input-field tp-native-select">
                     <option value="">-- เลือก --</option>
                     <?php 
                     $maritalOptions = ['SINGLE' => 'โสด', 'MARRIED' => 'สมรส', 'WIDOWED' => 'หม้าย', 'DIVORCED' => 'หย่า', 'SEPARATED' => 'แยกกันอยู่'];
@@ -719,7 +719,7 @@ include dirname(__DIR__) . '/templates/header.php';
             </div>
             <div>
                 <label class="block text-white/70 text-sm mb-1">กรุ๊ปเลือด</label>
-                <select name="blood_type" class="input-field">
+                <select name="blood_type" class="input-field tp-native-select">
                     <option value="">-- เลือก --</option>
                     <?php foreach (['A', 'B', 'AB', 'O'] as $bt): ?>
                     <option value="<?php echo $bt; ?>" <?php echo ($employee['blood_type'] ?? '') === $bt ? 'selected' : ''; ?>>
@@ -730,7 +730,7 @@ include dirname(__DIR__) . '/templates/header.php';
             </div>
             <div>
                 <label class="block text-white/70 text-sm mb-1">ศาสนา</label>
-                <select name="religion" class="input-field">
+                <select name="religion" class="input-field tp-native-select">
                     <option value="">-- เลือก --</option>
                     <?php 
                     $religions = ['พุทธ', 'อิสลาม', 'คริสต์', 'ฮินดู', 'ซิกข์', 'อื่นๆ'];
@@ -747,7 +747,7 @@ include dirname(__DIR__) . '/templates/header.php';
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
             <div>
                 <label class="block text-white/70 text-sm mb-1">สถานะทางทหาร</label>
-                <select name="military_status" class="input-field">
+                <select name="military_status" class="input-field tp-native-select">
                     <option value="">-- เลือก --</option>
                     <?php 
                     $militaryOptions = ['COMPLETED' => 'ผ่านการเกณฑ์ (สด.43)', 'EXEMPTED' => 'ได้รับการยกเว้น (สด.8/สด.9)', 'NONE' => 'ยังไม่ได้เกณฑ์', 'NOT_APPLICABLE' => 'ไม่เกี่ยวข้อง'];
@@ -781,23 +781,23 @@ include dirname(__DIR__) . '/templates/header.php';
         
         <div class="mt-4">
             <label class="block text-white/70 text-sm mb-1">ที่อยู่ปัจจุบัน</label>
-            <textarea name="address" rows="2" class="input-field" placeholder="บ้านเลขที่ ซอย ถนน แขวง/ตำบล เขต/อำเภอ จังหวัด"><?php echo htmlspecialchars($employee['address'] ?? ''); ?></textarea>
+            <textarea name="address" rows="2" class="input-field tp-native-textarea" placeholder="บ้านเลขที่ ซอย ถนน แขวง/ตำบล เขต/อำเภอ จังหวัด"><?php echo htmlspecialchars($employee['address'] ?? ''); ?></textarea>
         </div>
         
         <div class="mt-4">
             <label class="block text-white/70 text-sm mb-1">ที่อยู่ตามทะเบียนบ้าน</label>
-            <textarea name="registered_address" rows="2" class="input-field" placeholder="หากเหมือนที่อยู่ปัจจุบัน ไม่ต้องกรอก"><?php echo htmlspecialchars($employee['registered_address'] ?? ''); ?></textarea>
+            <textarea name="registered_address" rows="2" class="input-field tp-native-textarea" placeholder="หากเหมือนที่อยู่ปัจจุบัน ไม่ต้องกรอก"><?php echo htmlspecialchars($employee['registered_address'] ?? ''); ?></textarea>
         </div>
     </div>
     
     </div><!-- /tab-personal -->
     
     <!-- Tab 2: ข้อมูลการทำงาน -->
-    <div id="tab-work" class="tab-panel space-y-6" style="display:none">
+    <div id="tab-work" class="tab-panel space-y-6" role="tabpanel" aria-labelledby="btn-tab-work" style="display:none">
     
     <!-- Work Info -->
-    <div class="glass-card rounded-xl p-6 min-w-0">
-        <h3 class="text-lg font-bold text-white mb-4 flex items-center">
+    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+        <h3 class="section-title mb-4 flex items-center text-white text-base sm:text-lg">
             <i class="fas fa-briefcase text-violet-400 mr-2"></i>
             ข้อมูลการทำงาน
         </h3>
@@ -807,7 +807,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 <label class="block text-white/70 text-sm mb-1">แผนก</label>
                 <input type="text" name="department" list="department-list"
                        value="<?php echo htmlspecialchars($employee['department'] ?? ''); ?>"
-                       class="input-field" placeholder="เลือกหรือพิมพ์แผนก">
+                       class="input-field tp-native-input" placeholder="เลือกหรือพิมพ์แผนก">
                 <datalist id="department-list">
                     <?php foreach ($departments as $dept): ?>
                     <option value="<?php echo htmlspecialchars($dept); ?>">
@@ -818,12 +818,12 @@ include dirname(__DIR__) . '/templates/header.php';
                 <label class="block text-white/70 text-sm mb-1">ตำแหน่ง</label>
                 <input type="text" name="position" 
                        value="<?php echo htmlspecialchars($employee['position'] ?? ''); ?>"
-                       class="input-field" placeholder="เช่น โปรแกรมเมอร์">
+                       class="input-field tp-native-input" placeholder="เช่น โปรแกรมเมอร์">
             </div>
             <div>
                 <label class="block text-white/70 text-sm mb-1">บทบาท (Role)</label>
                 <?php if ($canEditSensitive): ?>
-                <select name="role_id" class="input-field">
+                <select name="role_id" class="input-field tp-native-select">
                     <?php foreach ($roles as $role): ?>
                     <option value="<?php echo $role['id']; ?>" 
                             <?php echo ($employee['role_id'] ?? 5) == $role['id'] ? 'selected' : ''; ?>>
@@ -837,7 +837,7 @@ include dirname(__DIR__) . '/templates/header.php';
                     $roleName = '-';
                     foreach ($roles as $r) { if ($r['id'] == ($employee['role_id'] ?? 5)) { $roleName = $r['display_name']; break; } }
                     echo htmlspecialchars($roleName);
-                ?>" class="input-field bg-white/5 cursor-not-allowed" readonly>
+                ?>" class="input-field tp-native-input bg-white/5 cursor-not-allowed" readonly>
                 <p class="text-white/40 text-xs mt-1"><i class="fas fa-lock mr-1"></i>เฉพาะ CEO+ เท่านั้นที่แก้ไขได้</p>
                 <?php endif; ?>
             </div>
@@ -848,7 +848,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 <label class="block text-white/70 text-sm mb-1">วันที่เริ่มงาน</label>
                 <input type="date" name="hire_date" id="hire_date"
                        value="<?php echo htmlspecialchars($employee['hire_date'] ?? ''); ?>"
-                       class="input-field" onchange="calcProbationEnd()">
+                       class="input-field tp-native-input" onchange="calcProbationEnd()">
                 <?php
                 // Calculate work tenure
                 if (!empty($employee['hire_date'])) {
@@ -862,7 +862,7 @@ include dirname(__DIR__) . '/templates/header.php';
             </div>
             <div>
                 <label class="block text-white/70 text-sm mb-1">ประเภทการจ้าง</label>
-                <select name="employment_type" id="employment_type" class="input-field" onchange="toggleProbation()">
+                <select name="employment_type" id="employment_type" class="input-field tp-native-select" onchange="toggleProbation()">
                     <option value="PROBATION" <?php echo ($employee['employment_type'] ?? 'PROBATION') === 'PROBATION' ? 'selected' : ''; ?>>ทดลองงาน (Probation)</option>
                     <option value="PERMANENT" <?php echo ($employee['employment_type'] ?? '') === 'PERMANENT' ? 'selected' : ''; ?>>พนักงานประจำ</option>
                     <option value="CONTRACT" <?php echo ($employee['employment_type'] ?? '') === 'CONTRACT' ? 'selected' : ''; ?>>สัญญาจ้าง</option>
@@ -873,7 +873,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 <label class="block text-white/70 text-sm mb-1">
                     <i class="fas fa-laptop-house text-blue-400 mr-1"></i>รูปแบบการทำงาน
                 </label>
-                <select name="work_mode" class="input-field">
+                <select name="work_mode" class="input-field tp-native-select">
                     <option value="OFFICE" <?php echo (($employee['work_mode'] ?? 'OFFICE') === 'OFFICE') ? 'selected' : ''; ?>>ทำงานที่ออฟฟิศ (Office)</option>
                     <option value="WFH" <?php echo (($employee['work_mode'] ?? '') === 'WFH') ? 'selected' : ''; ?>>ทำงานที่บ้าน (WFH) — ระบบแสตมป์อัตโนมัติ</option>
                 </select>
@@ -912,7 +912,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 <label class="block text-white/70 text-sm mb-1">
                     <i class="fas fa-calendar-minus text-blue-400 mr-1"></i>วันหยุดประจำสัปดาห์ (ค่าเริ่มต้น)
                 </label>
-                <select name="day_off" class="input-field">
+                <select name="day_off" class="input-field tp-native-select">
                     <?php foreach ($dayOptions as $val => $label): ?>
                     <option value="<?php echo $val; ?>" <?php echo (int)$schedDayOff === $val ? 'selected' : ''; ?>>
                         <?php echo $label; ?>
@@ -928,11 +928,11 @@ include dirname(__DIR__) . '/templates/header.php';
                 <?php if ($canEditSensitive): ?>
                 <input type="number" name="salary" step="0.01" min="0"
                        value="<?php echo htmlspecialchars($employee['salary'] ?? ''); ?>"
-                       class="input-field" placeholder="0.00">
+                       class="input-field tp-native-input" placeholder="0.00">
                 <p class="text-white/40 text-xs mt-1">ใช้ตั้งแต่ "วันผ่านโปร (ยืนยันจริง)" เป็นต้นไป</p>
                 <?php else: ?>
                 <input type="text" value="<?php echo ($employee['salary'] ?? '') ? number_format((float)$employee['salary'], 2) : '-'; ?>" 
-                       class="input-field bg-white/5 cursor-not-allowed" readonly>
+                       class="input-field tp-native-input bg-white/5 cursor-not-allowed" readonly>
                 <p class="text-white/40 text-xs mt-1"><i class="fas fa-lock mr-1"></i>เฉพาะ CEO+ เท่านั้นที่แก้ไขได้</p>
                 <?php endif; ?>
             </div>
@@ -943,11 +943,11 @@ include dirname(__DIR__) . '/templates/header.php';
                 <?php if ($canEditSensitive): ?>
                 <input type="number" name="probation_salary" step="0.01" min="0"
                        value="<?php echo htmlspecialchars($employee['probation_salary'] ?? ''); ?>"
-                       class="input-field" placeholder="เว้นว่าง = ใช้เงินเดือนหลักช่วงทดลองงานด้วย">
+                       class="input-field tp-native-input" placeholder="เว้นว่าง = ใช้เงินเดือนหลักช่วงทดลองงานด้วย">
                 <p class="text-white/40 text-xs mt-1">ระบบจะใช้อัตรานี้ตราบที่ยังไม่มี "วันผ่านโปร (ยืนยันจริง)"</p>
                 <?php else: ?>
                 <input type="text" value="<?php echo ($employee['probation_salary'] ?? '') ? number_format((float)$employee['probation_salary'], 2) : '-'; ?>" 
-                       class="input-field bg-white/5 cursor-not-allowed" readonly>
+                       class="input-field tp-native-input bg-white/5 cursor-not-allowed" readonly>
                 <p class="text-white/40 text-xs mt-1"><i class="fas fa-lock mr-1"></i>เฉพาะ CEO+ เท่านั้นที่แก้ไขได้</p>
                 <?php endif; ?>
             </div>
@@ -955,8 +955,8 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
     
     <!-- Probation Section -->
-    <div class="glass-card rounded-xl p-6 min-w-0" id="probation-section">
-        <h3 class="text-lg font-bold text-white mb-4 flex items-center">
+    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0" id="probation-section">
+        <h3 class="section-title mb-4 flex items-center text-white text-base sm:text-lg">
             <i class="fas fa-user-clock text-amber-400 mr-2"></i>
             ระยะทดลองงาน (Probation)
         </h3>
@@ -986,7 +986,7 @@ include dirname(__DIR__) . '/templates/header.php';
         ?>
         
         <?php if ($probationStatus): ?>
-        <div class="rounded-lg p-3 mb-4 border <?php echo $probationStatusClass; ?>">
+        <div class="rounded-[20px] p-3 mb-4 border <?php echo $probationStatusClass; ?>">
             <i class="fas fa-info-circle mr-2"></i><?php echo $probationStatus; ?>
         </div>
         <?php endif; ?>
@@ -996,27 +996,27 @@ include dirname(__DIR__) . '/templates/header.php';
                 <label class="block text-white/70 text-sm mb-1">ระยะทดลองงาน (วัน)</label>
                 <input type="number" name="probation_days" id="probation_days" min="0" max="365"
                        value="<?php echo $probationDays; ?>"
-                       class="input-field" onchange="calcProbationEnd()">
+                       class="input-field tp-native-input" onchange="calcProbationEnd()">
             </div>
             <div>
                 <label class="block text-white/70 text-sm mb-1">วันครบกำหนดโปร</label>
                 <input type="date" name="probation_end_date" id="probation_end_date"
                        value="<?php echo htmlspecialchars($probationEndDate); ?>"
-                       class="input-field">
+                       class="input-field tp-native-input">
                 <p class="text-white/40 text-xs mt-1">คำนวณอัตโนมัติจากวันเริ่มงาน + จำนวนวัน</p>
             </div>
             <div>
                 <label class="block text-white/70 text-sm mb-1">วันที่ผ่านโปร (ยืนยันจริง)</label>
                 <input type="date" name="probation_passed_date" id="probation_passed_date"
                        value="<?php echo htmlspecialchars($probationPassedDate); ?>"
-                       class="input-field" onchange="onProbationPassed()">
+                       class="input-field tp-native-input" onchange="onProbationPassed()">
                 <p class="text-white/40 text-xs mt-1">เมื่อกรอกวันนี้ = ยืนยันผ่านโปร → เปลี่ยนเป็นพนักงานประจำ</p>
             </div>
         </div>
         
-        <div class="glass-card rounded-lg p-3 mt-4 bg-blue-500/10 border border-blue-500/20">
-            <p class="text-blue-400 text-sm">
-                <i class="fas fa-lightbulb mr-2"></i>
+        <div class="rounded-[20px] p-3 mt-4 bg-blue-500/10 border border-blue-500/25">
+            <p class="text-blue-300 text-sm leading-relaxed">
+                <i class="fas fa-lightbulb mr-2 text-amber-300" aria-hidden="true"></i>
                 เมื่อพนักงานผ่านโปร ระบบจะเริ่มหักประกันสังคมตามข้อมูลด้านล่าง
             </p>
         </div>
@@ -1025,11 +1025,11 @@ include dirname(__DIR__) . '/templates/header.php';
     </div><!-- /tab-work -->
     
     <!-- Tab 3: สวัสดิการ & การเงิน -->
-    <div id="tab-welfare" class="tab-panel space-y-6" style="display:none">
+    <div id="tab-welfare" class="tab-panel space-y-6" role="tabpanel" aria-labelledby="btn-tab-welfare" style="display:none">
     
     <!-- Social Security & Banking -->
-    <div class="glass-card rounded-xl p-6 min-w-0">
-        <h3 class="text-lg font-bold text-white mb-4 flex items-center">
+    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+        <h3 class="section-title mb-4 flex items-center text-white text-base sm:text-lg">
             <i class="fas fa-shield-alt text-cyan-400 mr-2"></i>
             ประกันสังคม & บัญชีธนาคาร
         </h3>
@@ -1044,12 +1044,12 @@ include dirname(__DIR__) . '/templates/header.php';
                 <?php if ($lockWelfare): ?>
                 <input type="hidden" name="social_security_id" value="<?php echo htmlspecialchars($employee['social_security_id'] ?? ''); ?>">
                 <input type="text" value="<?php echo htmlspecialchars($employee['social_security_id'] ?? ''); ?>"
-                       class="input-field bg-white/5 cursor-not-allowed" readonly>
+                       class="input-field tp-native-input bg-white/5 cursor-not-allowed" readonly>
                 <p class="text-white/40 text-xs mt-1"><i class="fas fa-lock mr-1"></i>CEO+</p>
                 <?php else: ?>
                 <input type="text" name="social_security_id"
                        value="<?php echo htmlspecialchars($employee['social_security_id'] ?? ''); ?>"
-                       class="input-field" placeholder="เลขที่ประกันสังคม">
+                       class="input-field tp-native-input" placeholder="เลขที่ประกันสังคม">
                 <?php endif; ?>
             </div>
             <div>
@@ -1057,12 +1057,12 @@ include dirname(__DIR__) . '/templates/header.php';
                 <?php if ($lockWelfare): ?>
                 <input type="hidden" name="social_security_start_date" value="<?php echo htmlspecialchars($employee['social_security_start_date'] ?? ''); ?>">
                 <input type="date" value="<?php echo htmlspecialchars($employee['social_security_start_date'] ?? ''); ?>"
-                       class="input-field bg-white/5 cursor-not-allowed" readonly>
+                       class="input-field tp-native-input bg-white/5 cursor-not-allowed" readonly>
                 <p class="text-white/40 text-xs mt-1">CEO+</p>
                 <?php else: ?>
                 <input type="date" name="social_security_start_date"
                        value="<?php echo htmlspecialchars($employee['social_security_start_date'] ?? ''); ?>"
-                       class="input-field">
+                       class="input-field tp-native-input">
                 <?php endif; ?>
                 <?php if (!$lockWelfare): ?>
                 <p class="text-white/40 text-xs mt-1">ปกติจะเริ่มหักหลังผ่านโปร</p>
@@ -1076,12 +1076,12 @@ include dirname(__DIR__) . '/templates/header.php';
                 <?php if ($lockWelfare): ?>
                 <input type="hidden" name="social_security_hospital" value="<?php echo htmlspecialchars($employee['social_security_hospital'] ?? ''); ?>">
                 <input type="text" value="<?php echo htmlspecialchars($employee['social_security_hospital'] ?? ''); ?>"
-                       class="input-field bg-white/5 cursor-not-allowed" readonly>
+                       class="input-field tp-native-input bg-white/5 cursor-not-allowed" readonly>
                 <p class="text-white/40 text-xs mt-1"><i class="fas fa-lock mr-1"></i>CEO+</p>
                 <?php else: ?>
                 <input type="text" name="social_security_hospital"
                        value="<?php echo htmlspecialchars($employee['social_security_hospital'] ?? ''); ?>"
-                       class="input-field" placeholder="ชื่อโรงพยาบาล">
+                       class="input-field tp-native-input" placeholder="ชื่อโรงพยาบาล">
                 <?php endif; ?>
             </div>
         </div>
@@ -1092,10 +1092,10 @@ include dirname(__DIR__) . '/templates/header.php';
                 <?php if ($lockWelfare): ?>
                 <input type="hidden" name="bank_name" value="<?php echo htmlspecialchars($employee['bank_name'] ?? ''); ?>">
                 <input type="text" value="<?php echo htmlspecialchars($employee['bank_name'] ?? ''); ?>"
-                       class="input-field bg-white/5 cursor-not-allowed" readonly>
+                       class="input-field tp-native-input bg-white/5 cursor-not-allowed" readonly>
                 <p class="text-white/40 text-xs mt-1"><i class="fas fa-lock mr-1"></i>CEO+</p>
                 <?php else: ?>
-                <select name="bank_name" class="input-field">
+                <select name="bank_name" class="input-field tp-native-select">
                     <option value="">-- เลือกธนาคาร --</option>
                     <?php foreach ($banks as $bank): ?>
                     <option value="<?php echo $bank; ?>" <?php echo ($employee['bank_name'] ?? '') === $bank ? 'selected' : ''; ?>>
@@ -1110,20 +1110,20 @@ include dirname(__DIR__) . '/templates/header.php';
                 <?php if ($lockWelfare): ?>
                 <input type="hidden" name="bank_account" value="<?php echo htmlspecialchars($employee['bank_account'] ?? ''); ?>">
                 <input type="text" value="<?php echo htmlspecialchars($employee['bank_account'] ?? ''); ?>"
-                       class="input-field bg-white/5 cursor-not-allowed" readonly>
+                       class="input-field tp-native-input bg-white/5 cursor-not-allowed" readonly>
                 <p class="text-white/40 text-xs mt-1"><i class="fas fa-lock mr-1"></i>CEO+</p>
                 <?php else: ?>
                 <input type="text" name="bank_account"
                        value="<?php echo htmlspecialchars($employee['bank_account'] ?? ''); ?>"
-                       class="input-field" placeholder="xxx-x-xxxxx-x">
+                       class="input-field tp-native-input" placeholder="xxx-x-xxxxx-x">
                 <?php endif; ?>
             </div>
         </div>
     </div>
     
     <!-- Emergency Contact -->
-    <div class="glass-card rounded-xl p-6 min-w-0">
-        <h3 class="text-lg font-bold text-white mb-4 flex items-center">
+    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+        <h3 class="section-title mb-4 flex items-center text-white text-base sm:text-lg">
             <i class="fas fa-phone-alt text-rose-400 mr-2"></i>
             ผู้ติดต่อกรณีฉุกเฉิน
         </h3>
@@ -1133,17 +1133,17 @@ include dirname(__DIR__) . '/templates/header.php';
                 <label class="block text-white/70 text-sm mb-1">ชื่อ-นามสกุล</label>
                 <input type="text" name="emergency_contact_name"
                        value="<?php echo htmlspecialchars($employee['emergency_contact_name'] ?? ''); ?>"
-                       class="input-field" placeholder="ชื่อผู้ติดต่อ">
+                       class="input-field tp-native-input" placeholder="ชื่อผู้ติดต่อ">
             </div>
             <div>
                 <label class="block text-white/70 text-sm mb-1">เบอร์โทรศัพท์</label>
                 <input type="tel" name="emergency_contact_phone"
                        value="<?php echo htmlspecialchars($employee['emergency_contact_phone'] ?? ''); ?>"
-                       class="input-field" placeholder="081-234-5678">
+                       class="input-field tp-native-input" placeholder="081-234-5678">
             </div>
             <div>
                 <label class="block text-white/70 text-sm mb-1">ความสัมพันธ์</label>
-                <select name="emergency_contact_relation" class="input-field">
+                <select name="emergency_contact_relation" class="input-field tp-native-select">
                     <option value="">-- เลือก --</option>
                     <?php 
                     $relations = ['บิดา', 'มารดา', 'คู่สมรส', 'บุตร', 'พี่น้อง', 'ญาติ', 'เพื่อน', 'อื่นๆ'];
@@ -1161,24 +1161,24 @@ include dirname(__DIR__) . '/templates/header.php';
     
     <?php if ($action === 'edit' && $employee): ?>
     <!-- Tab 4: ประวัติ & ครอบครัว -->
-    <div id="tab-history" class="tab-panel space-y-6" style="display:none">
+    <div id="tab-history" class="tab-panel space-y-6" role="tabpanel" aria-labelledby="btn-tab-history" style="display:none">
     
     <!-- Education History -->
-    <div class="glass-card rounded-xl p-6 min-w-0">
-        <h3 class="text-lg font-bold text-white mb-4 flex items-center justify-between">
+    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+        <h3 class="section-title mb-4 flex items-center justify-between text-white text-base sm:text-lg gap-3 flex-wrap">
             <span class="flex items-center">
                 <i class="fas fa-graduation-cap text-indigo-400 mr-2"></i>
                 ประวัติการศึกษา
             </span>
-            <button type="button" onclick="addEducationRow()" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-lg transition-colors">
-                <i class="fas fa-plus mr-1"></i>เพิ่ม
+            <button type="button" onclick="addEducationRow()" class="min-h-[44px] px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-[20px] transition-colors touch-manipulation font-semibold shrink-0">
+                <i class="fas fa-plus mr-1" aria-hidden="true"></i>เพิ่ม
             </button>
         </h3>
         
         <div id="education-rows">
             <?php if (!empty($educationRecords)): ?>
                 <?php foreach ($educationRecords as $i => $edu): ?>
-                <div class="education-row border border-white/10 rounded-lg p-4 mb-3" data-index="<?php echo $i; ?>">
+                <div class="education-row border border-white/10 rounded-[20px] p-4 mb-3" data-index="<?php echo $i; ?>">
                     <div class="flex justify-between items-start mb-3">
                         <span class="text-white/50 text-sm">ลำดับที่ <?php echo $i + 1; ?></span>
                         <button type="button" onclick="this.closest('.education-row').remove()" class="text-red-400 hover:text-red-300 text-sm">
@@ -1188,7 +1188,7 @@ include dirname(__DIR__) . '/templates/header.php';
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                         <div>
                             <label class="block text-white/70 text-xs mb-1">ระดับการศึกษา</label>
-                            <select name="edu_level[]" class="input-field text-sm">
+                            <select name="edu_level[]" class="input-field tp-native-select text-sm">
                                 <?php 
                                 $eduLevels = ['PRIMARY' => 'ประถมศึกษา', 'SECONDARY' => 'มัธยมต้น', 'HIGH_SCHOOL' => 'มัธยมปลาย/ปวช.', 'DIPLOMA' => 'ปวส./อนุปริญญา', 'BACHELOR' => 'ปริญญาตรี', 'MASTER' => 'ปริญญาโท', 'DOCTORATE' => 'ปริญญาเอก', 'OTHER' => 'อื่นๆ'];
                                 foreach ($eduLevels as $val => $label): ?>
@@ -1200,23 +1200,23 @@ include dirname(__DIR__) . '/templates/header.php';
                         </div>
                         <div>
                             <label class="block text-white/70 text-xs mb-1">สถาบัน</label>
-                            <input type="text" name="edu_institution[]" value="<?php echo htmlspecialchars($edu['institution'] ?? ''); ?>" class="input-field text-sm" placeholder="ชื่อสถาบัน">
+                            <input type="text" name="edu_institution[]" value="<?php echo htmlspecialchars($edu['institution'] ?? ''); ?>" class="input-field tp-native-input text-sm" placeholder="ชื่อสถาบัน">
                         </div>
                         <div>
                             <label class="block text-white/70 text-xs mb-1">คณะ</label>
-                            <input type="text" name="edu_faculty[]" value="<?php echo htmlspecialchars($edu['faculty'] ?? ''); ?>" class="input-field text-sm" placeholder="คณะ">
+                            <input type="text" name="edu_faculty[]" value="<?php echo htmlspecialchars($edu['faculty'] ?? ''); ?>" class="input-field tp-native-input text-sm" placeholder="คณะ">
                         </div>
                         <div>
                             <label class="block text-white/70 text-xs mb-1">สาขาวิชา</label>
-                            <input type="text" name="edu_major[]" value="<?php echo htmlspecialchars($edu['major'] ?? ''); ?>" class="input-field text-sm" placeholder="สาขา">
+                            <input type="text" name="edu_major[]" value="<?php echo htmlspecialchars($edu['major'] ?? ''); ?>" class="input-field tp-native-input text-sm" placeholder="สาขา">
                         </div>
                         <div>
                             <label class="block text-white/70 text-xs mb-1">ปีที่จบ (พ.ศ.)</label>
-                            <input type="number" name="edu_year[]" value="<?php echo $edu['graduation_year'] ?? ''; ?>" class="input-field text-sm" placeholder="2567">
+                            <input type="number" name="edu_year[]" value="<?php echo $edu['graduation_year'] ?? ''; ?>" class="input-field tp-native-input text-sm" placeholder="2567">
                         </div>
                         <div>
                             <label class="block text-white/70 text-xs mb-1">เกรดเฉลี่ย</label>
-                            <input type="number" name="edu_gpa[]" step="0.01" min="0" max="4" value="<?php echo $edu['gpa'] ?? ''; ?>" class="input-field text-sm" placeholder="3.50">
+                            <input type="number" name="edu_gpa[]" step="0.01" min="0" max="4" value="<?php echo $edu['gpa'] ?? ''; ?>" class="input-field tp-native-input text-sm" placeholder="3.50">
                         </div>
                     </div>
                 </div>
@@ -1232,21 +1232,21 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
     
     <!-- Work History -->
-    <div class="glass-card rounded-xl p-6 min-w-0">
-        <h3 class="text-lg font-bold text-white mb-4 flex items-center justify-between">
+    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+        <h3 class="section-title mb-4 flex items-center justify-between text-white text-base sm:text-lg gap-3 flex-wrap">
             <span class="flex items-center">
                 <i class="fas fa-history text-orange-400 mr-2"></i>
                 ประวัติการทำงาน (ก่อนเข้าบริษัท)
             </span>
-            <button type="button" onclick="addWorkHistoryRow()" class="px-3 py-1 bg-orange-600 hover:bg-orange-700 text-white text-sm rounded-lg transition-colors">
-                <i class="fas fa-plus mr-1"></i>เพิ่ม
+            <button type="button" onclick="addWorkHistoryRow()" class="min-h-[44px] px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm rounded-[20px] transition-colors touch-manipulation font-semibold shrink-0">
+                <i class="fas fa-plus mr-1" aria-hidden="true"></i>เพิ่ม
             </button>
         </h3>
         
         <div id="work-history-rows">
             <?php if (!empty($workHistoryRecords)): ?>
                 <?php foreach ($workHistoryRecords as $i => $wh): ?>
-                <div class="wh-row border border-white/10 rounded-lg p-4 mb-3" data-index="<?php echo $i; ?>">
+                <div class="wh-row border border-white/10 rounded-[20px] p-4 mb-3" data-index="<?php echo $i; ?>">
                     <div class="flex justify-between items-start mb-3">
                         <span class="text-white/50 text-sm">ลำดับที่ <?php echo $i + 1; ?></span>
                         <button type="button" onclick="this.closest('.wh-row').remove()" class="text-red-400 hover:text-red-300 text-sm">
@@ -1256,32 +1256,32 @@ include dirname(__DIR__) . '/templates/header.php';
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                         <div>
                             <label class="block text-white/70 text-xs mb-1">ชื่อบริษัท</label>
-                            <input type="text" name="wh_company[]" value="<?php echo htmlspecialchars($wh['company_name'] ?? ''); ?>" class="input-field text-sm" placeholder="ชื่อบริษัท">
+                            <input type="text" name="wh_company[]" value="<?php echo htmlspecialchars($wh['company_name'] ?? ''); ?>" class="input-field tp-native-input text-sm" placeholder="ชื่อบริษัท">
                         </div>
                         <div>
                             <label class="block text-white/70 text-xs mb-1">ตำแหน่ง</label>
-                            <input type="text" name="wh_position[]" value="<?php echo htmlspecialchars($wh['position'] ?? ''); ?>" class="input-field text-sm" placeholder="ตำแหน่ง">
+                            <input type="text" name="wh_position[]" value="<?php echo htmlspecialchars($wh['position'] ?? ''); ?>" class="input-field tp-native-input text-sm" placeholder="ตำแหน่ง">
                         </div>
                         <div>
                             <label class="block text-white/70 text-xs mb-1">เงินเดือนสุดท้าย</label>
-                            <input type="number" name="wh_salary[]" step="0.01" min="0" value="<?php echo $wh['last_salary'] ?? ''; ?>" class="input-field text-sm" placeholder="0.00">
+                            <input type="number" name="wh_salary[]" step="0.01" min="0" value="<?php echo $wh['last_salary'] ?? ''; ?>" class="input-field tp-native-input text-sm" placeholder="0.00">
                         </div>
                         <div>
                             <label class="block text-white/70 text-xs mb-1">วันที่เริ่ม</label>
-                            <input type="date" name="wh_start[]" value="<?php echo $wh['start_date'] ?? ''; ?>" class="input-field text-sm">
+                            <input type="date" name="wh_start[]" value="<?php echo $wh['start_date'] ?? ''; ?>" class="input-field tp-native-input text-sm">
                         </div>
                         <div>
                             <label class="block text-white/70 text-xs mb-1">วันที่สิ้นสุด</label>
-                            <input type="date" name="wh_end[]" value="<?php echo $wh['end_date'] ?? ''; ?>" class="input-field text-sm">
+                            <input type="date" name="wh_end[]" value="<?php echo $wh['end_date'] ?? ''; ?>" class="input-field tp-native-input text-sm">
                         </div>
                         <div>
                             <label class="block text-white/70 text-xs mb-1">สาเหตุที่ออก</label>
-                            <input type="text" name="wh_reason[]" value="<?php echo htmlspecialchars($wh['reason_for_leaving'] ?? ''); ?>" class="input-field text-sm" placeholder="สาเหตุ">
+                            <input type="text" name="wh_reason[]" value="<?php echo htmlspecialchars($wh['reason_for_leaving'] ?? ''); ?>" class="input-field tp-native-input text-sm" placeholder="สาเหตุ">
                         </div>
                     </div>
                     <div class="mt-3">
                         <label class="block text-white/70 text-xs mb-1">ลักษณะงาน/หน้าที่</label>
-                        <input type="text" name="wh_responsibilities[]" value="<?php echo htmlspecialchars($wh['responsibilities'] ?? ''); ?>" class="input-field text-sm" placeholder="อธิบายลักษณะงาน">
+                        <input type="text" name="wh_responsibilities[]" value="<?php echo htmlspecialchars($wh['responsibilities'] ?? ''); ?>" class="input-field tp-native-input text-sm" placeholder="อธิบายลักษณะงาน">
                     </div>
                 </div>
                 <?php endforeach; ?>
@@ -1296,21 +1296,21 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
     
     <!-- Family Info -->
-    <div class="glass-card rounded-xl p-6 min-w-0">
-        <h3 class="text-lg font-bold text-white mb-4 flex items-center justify-between">
+    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+        <h3 class="section-title mb-4 flex items-center justify-between text-white text-base sm:text-lg gap-3 flex-wrap">
             <span class="flex items-center">
                 <i class="fas fa-users text-pink-400 mr-2"></i>
                 ข้อมูลครอบครัว
             </span>
-            <button type="button" onclick="addFamilyRow()" class="px-3 py-1 bg-pink-600 hover:bg-pink-700 text-white text-sm rounded-lg transition-colors">
-                <i class="fas fa-plus mr-1"></i>เพิ่ม
+            <button type="button" onclick="addFamilyRow()" class="min-h-[44px] px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white text-sm rounded-[20px] transition-colors touch-manipulation font-semibold shrink-0">
+                <i class="fas fa-plus mr-1" aria-hidden="true"></i>เพิ่ม
             </button>
         </h3>
         
         <div id="family-rows">
             <?php if (!empty($familyRecords)): ?>
                 <?php foreach ($familyRecords as $i => $fam): ?>
-                <div class="fam-row border border-white/10 rounded-lg p-4 mb-3" data-index="<?php echo $i; ?>">
+                <div class="fam-row border border-white/10 rounded-[20px] p-4 mb-3" data-index="<?php echo $i; ?>">
                     <div class="flex justify-between items-start mb-3">
                         <span class="text-white/50 text-sm">ลำดับที่ <?php echo $i + 1; ?></span>
                         <button type="button" onclick="this.closest('.fam-row').remove()" class="text-red-400 hover:text-red-300 text-sm">
@@ -1320,7 +1320,7 @@ include dirname(__DIR__) . '/templates/header.php';
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                         <div>
                             <label class="block text-white/70 text-xs mb-1">ความสัมพันธ์</label>
-                            <select name="fam_relationship[]" class="input-field text-sm">
+                            <select name="fam_relationship[]" class="input-field tp-native-select text-sm">
                                 <?php 
                                 $famRels = ['FATHER' => 'บิดา', 'MOTHER' => 'มารดา', 'SPOUSE' => 'คู่สมรส', 'CHILD' => 'บุตร', 'SIBLING' => 'พี่น้อง', 'OTHER' => 'อื่นๆ'];
                                 foreach ($famRels as $val => $label): ?>
@@ -1332,23 +1332,23 @@ include dirname(__DIR__) . '/templates/header.php';
                         </div>
                         <div>
                             <label class="block text-white/70 text-xs mb-1">ชื่อ-นามสกุล</label>
-                            <input type="text" name="fam_name[]" value="<?php echo htmlspecialchars($fam['name'] ?? ''); ?>" class="input-field text-sm" placeholder="ชื่อ-นามสกุล">
+                            <input type="text" name="fam_name[]" value="<?php echo htmlspecialchars($fam['name'] ?? ''); ?>" class="input-field tp-native-input text-sm" placeholder="ชื่อ-นามสกุล">
                         </div>
                         <div>
                             <label class="block text-white/70 text-xs mb-1">อาชีพ</label>
-                            <input type="text" name="fam_occupation[]" value="<?php echo htmlspecialchars($fam['occupation'] ?? ''); ?>" class="input-field text-sm" placeholder="อาชีพ">
+                            <input type="text" name="fam_occupation[]" value="<?php echo htmlspecialchars($fam['occupation'] ?? ''); ?>" class="input-field tp-native-input text-sm" placeholder="อาชีพ">
                         </div>
                         <div>
                             <label class="block text-white/70 text-xs mb-1">เบอร์โทร</label>
-                            <input type="tel" name="fam_phone[]" value="<?php echo htmlspecialchars($fam['phone'] ?? ''); ?>" class="input-field text-sm" placeholder="081-234-5678">
+                            <input type="tel" name="fam_phone[]" value="<?php echo htmlspecialchars($fam['phone'] ?? ''); ?>" class="input-field tp-native-input text-sm" placeholder="081-234-5678">
                         </div>
                         <div>
                             <label class="block text-white/70 text-xs mb-1">เลขบัตรประชาชน</label>
-                            <input type="text" name="fam_id_card[]" maxlength="13" value="<?php echo htmlspecialchars($fam['id_card_number'] ?? ''); ?>" class="input-field text-sm">
+                            <input type="text" name="fam_id_card[]" maxlength="13" value="<?php echo htmlspecialchars($fam['id_card_number'] ?? ''); ?>" class="input-field tp-native-input text-sm">
                         </div>
                         <div>
                             <label class="block text-white/70 text-xs mb-1">วันเกิด</label>
-                            <input type="date" name="fam_birth_date[]" value="<?php echo $fam['birth_date'] ?? ''; ?>" class="input-field text-sm">
+                            <input type="date" name="fam_birth_date[]" value="<?php echo $fam['birth_date'] ?? ''; ?>" class="input-field tp-native-input text-sm">
                         </div>
                         <div class="flex items-end pb-1">
                             <label class="flex items-center cursor-pointer">
@@ -1374,11 +1374,11 @@ include dirname(__DIR__) . '/templates/header.php';
     </div><!-- /tab-history -->
     
     <!-- Tab 5: ระบบ -->
-    <div id="tab-system" class="tab-panel space-y-6" style="display:none">
+    <div id="tab-system" class="tab-panel space-y-6" role="tabpanel" aria-labelledby="btn-tab-system" style="display:none">
     
     <!-- LINE Info (Read-only) -->
-    <div class="glass-card rounded-xl p-6 min-w-0">
-        <h3 class="text-lg font-bold text-white mb-4 flex items-center">
+    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+        <h3 class="section-title mb-4 flex items-center text-white text-base sm:text-lg">
             <i class="fab fa-line text-green-400 mr-2"></i>
             ข้อมูล LINE (เชื่อมต่อจาก CRM)
         </h3>
@@ -1387,7 +1387,7 @@ include dirname(__DIR__) . '/templates/header.php';
             <div>
                 <label class="block text-white/70 text-sm mb-1">LINE User ID</label>
                 <input type="text" value="<?php echo htmlspecialchars($employee['line_user_id'] ?? '-'); ?>" 
-                       class="input-field bg-white/5" readonly>
+                       class="input-field tp-native-input bg-white/5" readonly>
             </div>
             <div>
                 <label class="block text-white/70 text-sm mb-1">LINE Display Name</label>
@@ -1397,7 +1397,7 @@ include dirname(__DIR__) . '/templates/header.php';
                          class="w-10 h-10 rounded-full object-cover">
                     <?php endif; ?>
                     <input type="text" value="<?php echo htmlspecialchars($employee['line_display_name'] ?? '-'); ?>" 
-                           class="input-field bg-white/5 flex-1" readonly>
+                           class="input-field tp-native-input bg-white/5 flex-1" readonly>
                 </div>
             </div>
         </div>
@@ -1408,8 +1408,8 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
     
     <!-- System Info -->
-    <div class="glass-card rounded-xl p-6 min-w-0">
-        <h3 class="text-lg font-bold text-white mb-4 flex items-center">
+    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+        <h3 class="section-title mb-4 flex items-center text-white text-base sm:text-lg">
             <i class="fas fa-server text-violet-400 mr-2"></i>
             ข้อมูลระบบ
         </h3>
@@ -1442,12 +1442,12 @@ include dirname(__DIR__) . '/templates/header.php';
     <?php endif; ?>
     
     <!-- Submit Buttons -->
-    <div class="glass-card rounded-xl p-3 min-w-0 sticky bottom-[calc(72px+env(safe-area-inset-bottom))] md:bottom-4 z-30 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3">
-        <a href="/hr/employees.php" class="w-full sm:w-auto min-h-[48px] px-6 py-3 inline-flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors font-medium touch-manipulation">
+    <div class="native-card tp-native-card tp-native-data-card p-3 sm:p-4 min-w-0 sticky bottom-[calc(72px+env(safe-area-inset-bottom))] md:bottom-4 z-30 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 rounded-[20px]">
+        <a href="/hr/employees.php" class="w-full sm:w-auto min-h-[48px] px-6 py-3 inline-flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-[20px] transition-colors font-medium touch-manipulation">
             ยกเลิก
         </a>
-        <button type="submit" class="w-full sm:w-auto min-h-[56px] px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors font-semibold touch-manipulation">
-            <i class="fas fa-save mr-2"></i>
+        <button type="submit" class="w-full sm:w-auto min-h-[56px] px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-[20px] transition-colors font-semibold touch-manipulation">
+            <i class="fas fa-save mr-2" aria-hidden="true"></i>
             <?php echo $action === 'edit' ? 'บันทึกการแก้ไข' : 'เพิ่มพนักงาน'; ?>
         </button>
     </div>
@@ -1455,9 +1455,9 @@ include dirname(__DIR__) . '/templates/header.php';
 
 <?php if ($action === 'edit' && $employee && $canEditSensitive): ?>
 <!-- Change Password Section (CEO+ only — same gate as server-side handler) -->
-<div class="glass-card rounded-xl p-6 mt-6 min-w-0">
-    <h3 class="text-lg font-bold text-white mb-4 flex items-center">
-        <i class="fas fa-key text-yellow-400 mr-2"></i>
+<div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 mt-6 min-w-0">
+    <h3 class="section-title mb-4 flex items-center text-white text-base sm:text-lg">
+        <i class="fas fa-key text-amber-400 mr-2 text-xl" aria-hidden="true"></i>
         เปลี่ยนรหัสผ่าน
     </h3>
     
@@ -1467,39 +1467,43 @@ include dirname(__DIR__) . '/templates/header.php';
         <input type="hidden" name="employee_id" value="<?php echo (int)$id; ?>">
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label class="block text-white/70 text-sm mb-1">รหัสผ่านใหม่</label>
-                <input type="password" name="new_password" class="input-field" required minlength="<?php echo MIN_PASSWORD_LENGTH; ?>" placeholder="อย่างน้อย <?php echo MIN_PASSWORD_LENGTH; ?> ตัวอักษร">
+            <div class="tp-native-form-group mb-0">
+                <label for="emp-new-password" class="text-white/70 text-sm font-medium">รหัสผ่านใหม่</label>
+                <input type="password" id="emp-new-password" name="new_password" class="input-field tp-native-input w-full" required minlength="<?php echo MIN_PASSWORD_LENGTH; ?>" placeholder="อย่างน้อย <?php echo MIN_PASSWORD_LENGTH; ?> ตัวอักษร" autocomplete="new-password">
             </div>
-            <div>
-                <label class="block text-white/70 text-sm mb-1">ยืนยันรหัสผ่านใหม่</label>
-                <input type="password" name="confirm_password" class="input-field" required placeholder="กรอกรหัสผ่านอีกครั้ง">
+            <div class="tp-native-form-group mb-0">
+                <label for="emp-confirm-password" class="text-white/70 text-sm font-medium">ยืนยันรหัสผ่านใหม่</label>
+                <input type="password" id="emp-confirm-password" name="confirm_password" class="input-field tp-native-input w-full" required placeholder="กรอกรหัสผ่านอีกครั้ง" autocomplete="new-password">
             </div>
         </div>
         
-        <button type="submit" class="w-full sm:w-auto min-h-[48px] px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors">
-            <i class="fas fa-key mr-2"></i>เปลี่ยนรหัสผ่าน
+        <button type="submit" class="w-full sm:w-auto min-h-[56px] px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-[20px] transition-colors font-semibold touch-manipulation">
+            <i class="fas fa-key mr-2" aria-hidden="true"></i>เปลี่ยนรหัสผ่าน
         </button>
     </form>
 </div>
 <?php endif; ?>
 
 <style>
-.tab-btn { color: rgba(255,255,255,0.5); background: transparent; }
-.tab-btn:hover { color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.05); }
-.tab-btn.active { color: white; background: rgba(139,92,246,0.3); box-shadow: 0 0 0 1px rgba(139,92,246,0.4); }
+.tab-btn { color: rgba(255,255,255,0.55); background: transparent; border-radius: 20px; }
+.tab-btn:hover { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.06); }
+.tab-btn.active { color: white; background: rgba(124,58,237,0.35); box-shadow: 0 0 0 1px rgba(167,139,250,0.45); }
 </style>
 
 <script>
 function switchTab(tabId) {
-    // Hide all panels
-    document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
-    // Deactivate all buttons
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    // Show selected panel & activate button
-    document.getElementById(tabId).style.display = '';
-    document.getElementById('btn-' + tabId).classList.add('active');
-    // Save to sessionStorage
+    document.querySelectorAll('.tab-panel').forEach(p => { p.style.display = 'none'; });
+    document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+    });
+    const panel = document.getElementById(tabId);
+    const btn = document.getElementById('btn-' + tabId);
+    if (panel) panel.style.display = '';
+    if (btn) {
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+    }
     sessionStorage.setItem('emp_active_tab', tabId);
 }
 
@@ -1563,7 +1567,7 @@ function addEducationRow() {
     const container = document.getElementById('education-rows');
     const idx = eduIndex++;
     const html = `
-    <div class="education-row border border-white/10 rounded-lg p-4 mb-3">
+    <div class="education-row border border-white/10 rounded-[20px] p-4 mb-3">
         <div class="flex justify-between items-start mb-3">
             <span class="text-white/50 text-sm">ใหม่</span>
             <button type="button" onclick="this.closest('.education-row').remove()" class="text-red-400 hover:text-red-300 text-sm">
@@ -1573,7 +1577,7 @@ function addEducationRow() {
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
                 <label class="block text-white/70 text-xs mb-1">ระดับการศึกษา</label>
-                <select name="edu_level[]" class="input-field text-sm">
+                <select name="edu_level[]" class="input-field tp-native-select text-sm">
                     <option value="PRIMARY">ประถมศึกษา</option>
                     <option value="SECONDARY">มัธยมต้น</option>
                     <option value="HIGH_SCHOOL">มัธยมปลาย/ปวช.</option>
@@ -1586,23 +1590,23 @@ function addEducationRow() {
             </div>
             <div>
                 <label class="block text-white/70 text-xs mb-1">สถาบัน</label>
-                <input type="text" name="edu_institution[]" class="input-field text-sm" placeholder="ชื่อสถาบัน">
+                <input type="text" name="edu_institution[]" class="input-field tp-native-input text-sm" placeholder="ชื่อสถาบัน">
             </div>
             <div>
                 <label class="block text-white/70 text-xs mb-1">คณะ</label>
-                <input type="text" name="edu_faculty[]" class="input-field text-sm" placeholder="คณะ">
+                <input type="text" name="edu_faculty[]" class="input-field tp-native-input text-sm" placeholder="คณะ">
             </div>
             <div>
                 <label class="block text-white/70 text-xs mb-1">สาขาวิชา</label>
-                <input type="text" name="edu_major[]" class="input-field text-sm" placeholder="สาขา">
+                <input type="text" name="edu_major[]" class="input-field tp-native-input text-sm" placeholder="สาขา">
             </div>
             <div>
                 <label class="block text-white/70 text-xs mb-1">ปีที่จบ (พ.ศ.)</label>
-                <input type="number" name="edu_year[]" class="input-field text-sm" placeholder="2567">
+                <input type="number" name="edu_year[]" class="input-field tp-native-input text-sm" placeholder="2567">
             </div>
             <div>
                 <label class="block text-white/70 text-xs mb-1">เกรดเฉลี่ย</label>
-                <input type="number" name="edu_gpa[]" step="0.01" min="0" max="4" class="input-field text-sm" placeholder="3.50">
+                <input type="number" name="edu_gpa[]" step="0.01" min="0" max="4" class="input-field tp-native-input text-sm" placeholder="3.50">
             </div>
         </div>
     </div>`;
@@ -1615,7 +1619,7 @@ function addWorkHistoryRow() {
     if (emptyMsg) emptyMsg.remove();
     const container = document.getElementById('work-history-rows');
     const html = `
-    <div class="wh-row border border-white/10 rounded-lg p-4 mb-3">
+    <div class="wh-row border border-white/10 rounded-[20px] p-4 mb-3">
         <div class="flex justify-between items-start mb-3">
             <span class="text-white/50 text-sm">ใหม่</span>
             <button type="button" onclick="this.closest('.wh-row').remove()" class="text-red-400 hover:text-red-300 text-sm">
@@ -1625,32 +1629,32 @@ function addWorkHistoryRow() {
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
                 <label class="block text-white/70 text-xs mb-1">ชื่อบริษัท</label>
-                <input type="text" name="wh_company[]" class="input-field text-sm" placeholder="ชื่อบริษัท">
+                <input type="text" name="wh_company[]" class="input-field tp-native-input text-sm" placeholder="ชื่อบริษัท">
             </div>
             <div>
                 <label class="block text-white/70 text-xs mb-1">ตำแหน่ง</label>
-                <input type="text" name="wh_position[]" class="input-field text-sm" placeholder="ตำแหน่ง">
+                <input type="text" name="wh_position[]" class="input-field tp-native-input text-sm" placeholder="ตำแหน่ง">
             </div>
             <div>
                 <label class="block text-white/70 text-xs mb-1">เงินเดือนสุดท้าย</label>
-                <input type="number" name="wh_salary[]" step="0.01" min="0" class="input-field text-sm" placeholder="0.00">
+                <input type="number" name="wh_salary[]" step="0.01" min="0" class="input-field tp-native-input text-sm" placeholder="0.00">
             </div>
             <div>
                 <label class="block text-white/70 text-xs mb-1">วันที่เริ่ม</label>
-                <input type="date" name="wh_start[]" class="input-field text-sm">
+                <input type="date" name="wh_start[]" class="input-field tp-native-input text-sm">
             </div>
             <div>
                 <label class="block text-white/70 text-xs mb-1">วันที่สิ้นสุด</label>
-                <input type="date" name="wh_end[]" class="input-field text-sm">
+                <input type="date" name="wh_end[]" class="input-field tp-native-input text-sm">
             </div>
             <div>
                 <label class="block text-white/70 text-xs mb-1">สาเหตุที่ออก</label>
-                <input type="text" name="wh_reason[]" class="input-field text-sm" placeholder="สาเหตุ">
+                <input type="text" name="wh_reason[]" class="input-field tp-native-input text-sm" placeholder="สาเหตุ">
             </div>
         </div>
         <div class="mt-3">
             <label class="block text-white/70 text-xs mb-1">ลักษณะงาน/หน้าที่</label>
-            <input type="text" name="wh_responsibilities[]" class="input-field text-sm" placeholder="อธิบายลักษณะงาน">
+            <input type="text" name="wh_responsibilities[]" class="input-field tp-native-input text-sm" placeholder="อธิบายลักษณะงาน">
         </div>
     </div>`;
     container.insertAdjacentHTML('beforeend', html);
@@ -1663,7 +1667,7 @@ function addFamilyRow() {
     const container = document.getElementById('family-rows');
     const idx = famIndex++;
     const html = `
-    <div class="fam-row border border-white/10 rounded-lg p-4 mb-3">
+    <div class="fam-row border border-white/10 rounded-[20px] p-4 mb-3">
         <div class="flex justify-between items-start mb-3">
             <span class="text-white/50 text-sm">ใหม่</span>
             <button type="button" onclick="this.closest('.fam-row').remove()" class="text-red-400 hover:text-red-300 text-sm">
@@ -1673,7 +1677,7 @@ function addFamilyRow() {
         <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
             <div>
                 <label class="block text-white/70 text-xs mb-1">ความสัมพันธ์</label>
-                <select name="fam_relationship[]" class="input-field text-sm">
+                <select name="fam_relationship[]" class="input-field tp-native-select text-sm">
                     <option value="FATHER">บิดา</option>
                     <option value="MOTHER">มารดา</option>
                     <option value="SPOUSE">คู่สมรส</option>
@@ -1684,23 +1688,23 @@ function addFamilyRow() {
             </div>
             <div>
                 <label class="block text-white/70 text-xs mb-1">ชื่อ-นามสกุล</label>
-                <input type="text" name="fam_name[]" class="input-field text-sm" placeholder="ชื่อ-นามสกุล">
+                <input type="text" name="fam_name[]" class="input-field tp-native-input text-sm" placeholder="ชื่อ-นามสกุล">
             </div>
             <div>
                 <label class="block text-white/70 text-xs mb-1">อาชีพ</label>
-                <input type="text" name="fam_occupation[]" class="input-field text-sm" placeholder="อาชีพ">
+                <input type="text" name="fam_occupation[]" class="input-field tp-native-input text-sm" placeholder="อาชีพ">
             </div>
             <div>
                 <label class="block text-white/70 text-xs mb-1">เบอร์โทร</label>
-                <input type="tel" name="fam_phone[]" class="input-field text-sm" placeholder="081-234-5678">
+                <input type="tel" name="fam_phone[]" class="input-field tp-native-input text-sm" placeholder="081-234-5678">
             </div>
             <div>
                 <label class="block text-white/70 text-xs mb-1">เลขบัตรประชาชน</label>
-                <input type="text" name="fam_id_card[]" maxlength="13" class="input-field text-sm">
+                <input type="text" name="fam_id_card[]" maxlength="13" class="input-field tp-native-input text-sm">
             </div>
             <div>
                 <label class="block text-white/70 text-xs mb-1">วันเกิด</label>
-                <input type="date" name="fam_birth_date[]" class="input-field text-sm">
+                <input type="date" name="fam_birth_date[]" class="input-field tp-native-input text-sm">
             </div>
             <div class="flex items-end pb-1">
                 <label class="flex items-center cursor-pointer">

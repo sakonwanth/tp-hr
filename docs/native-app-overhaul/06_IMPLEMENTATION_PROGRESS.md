@@ -30,7 +30,8 @@
 | HR-UI-013 Certificate print | **COMPLETE** | `certificate_print.php` — screen shell + pages stack; toolbar POST lang switch; print layout unchanged; `$isHrDash` doc-number gate |
 | HR-UI-014 HR dashboard | **COMPLETE** | `hr/index.php` — `tp-native-summary-card` stats, native data cards, quick-action grid, table shell, reject modal |
 | HR-UI-015 Employees list | **COMPLETE** | `hr/employees.php` — native filter card, stat links, table shell + 44px actions, leave modal, empty state |
-| HR-UI-016 … HR-UI-026 (excl. above) | **NOT_STARTED** | — |
+| HR-UI-016 Employee form | **COMPLETE** | `hr/employee_form.php` — native section cards, tabs a11y, tp-native inputs, sticky actions, password card |
+| HR-UI-017 … HR-UI-026 (excl. above) | **NOT_STARTED** | — |
 | HR-UI-SHELL-01 | **REFACTORED** | — |
 | HR-UI-SHELL-02 | **COMPLETE** | — |
 | HR-UI-SHELL-03 | **COMPLETE** | — |
