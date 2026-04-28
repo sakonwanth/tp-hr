@@ -1,0 +1,91 @@
+---
+description: ใช้ UI UX Pro Max skill + มาตรฐาน TP สำหรับงาน UI/UX
+globs:
+  - "**/*.php"
+  - "**/*.html"
+  - "**/*.htm"
+  - "**/*.css"
+  - "**/*.scss"
+  - "**/*.tsx"
+  - "**/*.jsx"
+  - "**/*.vue"
+  - "**/*.svelte"
+  - "**/UI_*.md"
+alwaysApply: false
+---
+
+# UI UX Pro Max — บังคับใช้สำหรับงาน UI/UX
+
+ใช้ rule นี้ทุกครั้งที่งานเกี่ยวข้องกับ: หน้าจอ, สไตล์, spacing, typography, accessibility, responsive, form, navigation, color, animation, interaction state
+
+## 1. ลำดับความสำคัญ (สำคัญที่สุด)
+
+ถ้าขัดกัน ให้ยึดลำดับนี้ **บนสุดชนะ**
+
+1. **มาตรฐาน TP** (source of truth ของระบบจริง)
+   - `/Applications/XAMPP/xamppfiles/htdocs/tp-common/UI_RULES.md`
+   - `/Applications/XAMPP/xamppfiles/htdocs/tp-common/UI_UX_STANDARD.md`
+2. **UI UX Pro Max skill** (ฐานความรู้/ reasoning)
+   - Skill หลัก: `/Applications/XAMPP/xamppfiles/htdocs/tp-common/ui-ux-pro-max/.claude/skills/ui-ux-pro-max/SKILL.md`
+   - Skills เสริม: `/Applications/XAMPP/xamppfiles/htdocs/tp-common/ui-ux-pro-max/.claude/skills/{design,design-system,ui-styling,brand,slides,banner-design}/SKILL.md`
+   - ฐานข้อมูล CSV: `/Applications/XAMPP/xamppfiles/htdocs/tp-common/ui-ux-pro-max/src/ui-ux-pro-max/data/`
+3. **เอกสาร audit ของ TP** (สถานะปัจจุบัน)
+   - `/Applications/XAMPP/xamppfiles/htdocs/tp-common/UI_AUDIT_REPORT.md`
+   - `/Applications/XAMPP/xamppfiles/htdocs/tp-common/UI_UX_AUDIT_REPORT.md`
+   - `/Applications/XAMPP/xamppfiles/htdocs/tp-common/UI_SCREEN_MAP.md`
+
+## 2. วิธี "ใช้ skill"
+
+ก่อนตัดสินใจดีไซน์/เขียนโค้ด UI ใหม่หรือแก้ของเดิม ให้
+
+1. **อ่าน `SKILL.md`** ของ UI UX Pro Max — โดยเฉพาะหมวดที่ตรงกับงาน
+   - `§1 Accessibility` (CRITICAL) — contrast, focus, keyboard, aria
+   - `§2 Touch & Interaction` (CRITICAL) — 44×44, spacing, feedback
+   - `§3 Performance`
+   - `§4 Style Selection`
+   - `§5 Layout & Responsive`
+   - `§6 Typography & Color`
+   - `§7 Animation`
+   - `§8 Forms & Feedback`
+   - `§9 Navigation Patterns`
+   - `§10 Charts & Data`
+2. **อ่านมาตรฐาน TP** (`UI_RULES.md` + `UI_UX_STANDARD.md`)
+3. ถ้าขัดกัน — **ยึด TP**
+
+## 3. ขอบเขต TP (สรุปจาก UI_RULES.md)
+
+| รายการ | TP | UI UX Pro Max | ใช้ค่าไหน |
+|--------|----|--------------|-----------|
+| Touch target | ≥ 48×48px | ≥ 44×44pt | **48×48px (TP เข้มกว่า)** |
+| Button height | ≥ 48px | — | 48px |
+| Input height | ≥ 52px | base 16px font | 52px |
+| Card radius | 16px | สอดคล้อง style | 16px |
+| Spacing | 8px scale | 4/8 dp | 8px |
+| Typography | Kanit | ตามแนะนำ | Kanit (ยกเว้น `tp-checkin` = IBM Plex Sans Thai ตาม UI_UX_STANDARD §0.1) |
+| Wrap ในปุ่ม/เมนู | ห้าม | — | ห้าม |
+| Sticky CTA | required | recommended | required |
+| Loading/Empty/Error/Success state | required | recommended | required |
+| Mobile width | ≤ 480px | 375 / 768 / 1024 / 1440 | ใช้ทั้งคู่ — TP กำหนด max 480 |
+| Tablet width | ≤ 1024px | — | 1024px |
+
+## 4. Tier convergence (จาก UI_UX_STANDARD §0.2)
+
+- **Tier A** (`tp-checkin`, `tp-hr`, `tp-crm`): glass shell, gradient canvas, IBM Plex Sans Thai (ที่ใช้ shell), purple `#7c3aed`
+- **Tier B** (`tp-erp`): ทุก viewport ใช้งานได้ + horizontal scroll + sticky first column — ไม่ต้องเลียนแบบ glass
+
+## 5. ห้าม
+
+- **อย่าแก้ไฟล์ใน `tp-common/ui-ux-pro-max/`** (เป็น skill upstream — แก้แล้ว update ยาก)
+- ถ้าต้องเพิ่มกฎเฉพาะ TP — แก้ใน `UI_RULES.md` หรือ `UI_UX_STANDARD.md` เท่านั้น
+- ห้ามใช้ emoji เป็นไอคอน (ตาม Pro Max §4 + UI standard); ใช้ SVG (Heroicons / Lucide / Font Awesome ที่โหลดอยู่แล้ว)
+
+## 6. Pre-delivery checklist (ก่อนปิดงาน UI)
+
+- [ ] Touch target ≥ 48×48
+- [ ] Contrast ≥ 4.5:1 บนข้อความปกติ / ≥ 3:1 บนข้อความใหญ่
+- [ ] Focus ring มองเห็นชัด (ห้ามลบ outline)
+- [ ] ทดสอบที่ 375 / 768 / 1024 อย่างน้อย
+- [ ] ไม่มี horizontal scroll นอกพื้นที่ scroll ที่ตั้งใจ
+- [ ] Loading / Empty / Error / Success state ครบ
+- [ ] ใช้ Kanit (หรือ Plex สำหรับ shell) ไม่ใช้ font ปะปน
+- [ ] ปฏิบัติตาม `prefers-reduced-motion`
