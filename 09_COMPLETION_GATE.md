@@ -34,9 +34,9 @@ Strict interpretation of “every loading / empty / error / skeleton on every ro
 | Per-route automated visual regression | **Outstanding** |
 | Skeleton loaders on every async block | **Partial** — `tpHrNativeLoadingHtml()` + `.tp-visually-hidden` on HR async modals (`employees`, `leaves`, `attendance` history) |
 | Independent tablet viewport verification (listed heights × every page) | **Outstanding** |
-| Smoke E2E (Playwright) | **Started** — `tests/e2e/` (health, login, guest redirect on `index.php` / `checkin.php` / `leave.php` / `hr/index.php`); see **`docs/E2E_PLAYWRIGHT.md`** |
+| Smoke E2E (Playwright) | **Started** — guest smoke + optional **auth** (`PLAYWRIGHT_HR_USER` / `PLAYWRIGHT_HR_PASSWORD` → `auth.setup` + `authenticated.spec`); see **`docs/E2E_PLAYWRIGHT.md`** |
 
-**Backlog:** auth’d flows (storage state), visual regression pipeline, tablet viewport matrix.
+**Backlog:** visual regression pipeline, tablet viewport matrix, HR-only routes with an HR test account.
 
 ---
 
@@ -49,6 +49,7 @@ Strict interpretation of “every loading / empty / error / skeleton on every ro
 | `templates/header.php` + `login.php`: **`?v=6`** |
 | Earlier: **v5** shell (`02` 35 components; **`.tp-native-table-shell`**; **`hr/employees.php`** pagination / table shell) |
 | **`tests/e2e/protected-routes.spec.cjs`**: guest redirect smoke for dashboard / check-in / leave / HR index |
+| **Auth E2E** (optional env): **`auth.setup.cjs`**, **`authenticated.spec.cjs`**, **`playwright/.auth/`** gitignored |
 
 ---
 
