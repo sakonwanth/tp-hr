@@ -202,7 +202,15 @@ require_once __DIR__ . '/templates/header.php';
                 <div class="grid grid-cols-2 gap-4 mb-8">
                     <div class="p-4 rounded-lg bg-white/5 text-center">
                         <p class="text-white/60 text-sm mb-1">เวลาเข้างาน</p>
-                        <p class="text-2xl font-bold <?php echo $today_attendance && $today_attendance['check_in_time'] ? 'text-green-400' : 'text-white/30'; ?>">
+                        <p class="text-2xl font-bold <?php
+                            $ciClass = 'text-white/30';
+                            if ($today_attendance && $today_attendance['check_in_time']) {
+                                $lateM = (int)($today_attendance['late_minutes'] ?? 0);
+                                $st = (string)($today_attendance['status'] ?? '');
+                                $ciClass = ($lateM > 0 || $st === 'LATE') ? 'text-amber-400' : 'text-green-400';
+                            }
+                            echo $ciClass;
+                        ?>">
                             <?php
                             if ($today_attendance && $today_attendance['check_in_time']) {
                                 echo date('H:i', strtotime($today_attendance['check_in_time']));
@@ -306,7 +314,10 @@ require_once __DIR__ . '/templates/header.php';
                             <i class="fas fa-sun mr-1"></i>วันนี้ · <?php echo date('d M', strtotime($ls_today)); ?>
                         </p>
                         <p class="text-white text-2xl font-bold tracking-tight">
-                            <?php echo date('H:i', strtotime($ls_today_row['planned_start_time'])); ?>
+                            <?php
+                            $lsTt = strtotime((string)($ls_today_row['planned_start_time'] ?? ''));
+                            echo $lsTt !== false ? date('H:i', $lsTt) : '—:—';
+                            ?>
                             <span class="text-white/50 text-sm font-normal">น.</span>
                         </p>
                         <?php if (!empty($ls_today_row['planned_reason'])): ?>
@@ -324,7 +335,10 @@ require_once __DIR__ . '/templates/header.php';
                             <i class="fas fa-moon mr-1"></i>พรุ่งนี้ · <?php echo date('d M', strtotime($ls_tomorrow)); ?>
                         </p>
                         <p class="text-white text-2xl font-bold tracking-tight">
-                            <?php echo date('H:i', strtotime($ls_tomorrow_row['planned_start_time'])); ?>
+                            <?php
+                            $lsTt2 = strtotime((string)($ls_tomorrow_row['planned_start_time'] ?? ''));
+                            echo $lsTt2 !== false ? date('H:i', $lsTt2) : '—:—';
+                            ?>
                             <span class="text-white/50 text-sm font-normal">น.</span>
                         </p>
                         <?php if (!empty($ls_tomorrow_row['planned_reason'])): ?>
@@ -658,14 +672,29 @@ require_once __DIR__ . '/templates/header.php';
 <script>
 const CSRF_TOKEN = <?php echo json_encode(csrfToken(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
 
-// Current time display
-function updateClock() {
-    const now = new Date();
-    const time = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    document.getElementById('current-time').textContent = time;
+// Current time display (manual HH:MM:SS — avoids blank/stuck output on some WebKit locale combos)
+function formatClock(d) {
+    const h = String(d.getHours()).padStart(2, '0');
+    const m = String(d.getMinutes()).padStart(2, '0');
+    const s = String(d.getSeconds()).padStart(2, '0');
+    return h + ':' + m + ':' + s;
 }
-setInterval(updateClock, 1000);
-updateClock();
+function updateClock() {
+    const el = document.getElementById('current-time');
+    if (!el) return;
+    try {
+        el.textContent = formatClock(new Date());
+    } catch (e) { /* noop */ }
+}
+function startClockTick() {
+    updateClock();
+    setInterval(updateClock, 1000);
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startClockTick);
+} else {
+    startClockTick();
+}
 
 // Variables
 let checkinType = '';
@@ -674,18 +703,38 @@ let photoData = null;
 let userLatitude = null;
 let userLongitude = null;
 
-// Get user location on page load
-navigator.geolocation.getCurrentPosition(
-    (position) => {
-        userLatitude = position.coords.latitude;
-        userLongitude = position.coords.longitude;
-        document.getElementById('location-status').innerHTML = '<i class="fas fa-check-circle text-green-400 mr-1"></i> พร้อมลงเวลา';
-    },
-    (error) => {
-        document.getElementById('location-status').innerHTML = '<i class="fas fa-exclamation-triangle text-yellow-400 mr-1"></i> ไม่สามารถระบุตำแหน่งได้';
-    },
-    { enableHighAccuracy: true }
-);
+// Get user location on page load (timeout + maximumAge — without timeout some devices hang on "กำลังตรวจสอบ...")
+(function initPageGeolocation() {
+    const lsEl = document.getElementById('location-status');
+    const geoOpts = { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 };
+    let settled = false;
+    function setStatus(html) {
+        if (lsEl) lsEl.innerHTML = html;
+        settled = true;
+    }
+    if (!navigator.geolocation) {
+        if (lsEl) lsEl.innerHTML = '<i class="fas fa-exclamation-triangle text-amber-400 mr-1"></i> เบราว์เซอร์ไม่รองรับ GPS';
+        settled = true;
+        return;
+    }
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            userLatitude = position.coords.latitude;
+            userLongitude = position.coords.longitude;
+            setStatus('<i class="fas fa-check-circle text-green-400 mr-1"></i> พร้อมลงเวลา');
+        },
+        () => {
+            setStatus('<i class="fas fa-exclamation-triangle text-yellow-400 mr-1"></i> ไม่สามารถระบุตำแหน่งได้ — เปิด GPS แล้วลองใหม่');
+        },
+        geoOpts
+    );
+    setTimeout(function () {
+        if (!settled && lsEl && (lsEl.textContent || '').indexOf('กำลังตรวจสอบ') !== -1) {
+            lsEl.innerHTML = '<i class="fas fa-exclamation-triangle text-amber-400 mr-1"></i> รอระบุตำแหน่งนาน — ลองเปิด GPS หรือรีเฟรช';
+            settled = true;
+        }
+    }, 18000);
+})();
 
 // Start check-in process
 function startCheckin(type) {
@@ -771,7 +820,7 @@ function getLocation() {
         (error) => {
             locationText.innerHTML = `<span class="text-yellow-400"><i class="fas fa-exclamation-triangle mr-1"></i>ไม่สามารถระบุตำแหน่งได้</span>`;
         },
-        { enableHighAccuracy: true, timeout: 10000 }
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
     );
 }
 
@@ -835,9 +884,9 @@ async function confirmCheckin(outsideReason = null) {
             const isPending = !!(result.data && result.data.pending_approval);
             closeCheckinModal();
             if (isPending) {
-                showToast(result.message || 'ส่งคำขอเรียบร้อย รอผู้อนุมัติ', 'success');
+                showToast('success', 'สำเร็จ', result.message || 'ส่งคำขอเรียบร้อย รอผู้อนุมัติ');
             } else {
-                showToast(checkinType === 'in' ? 'ลงเวลาเข้างานสำเร็จ' : 'ลงเวลาออกงานสำเร็จ', 'success');
+                showToast('success', 'สำเร็จ', checkinType === 'in' ? 'ลงเวลาเข้างานสำเร็จ' : 'ลงเวลาออกงานสำเร็จ');
             }
             setTimeout(() => location.reload(), 1500);
             return;
@@ -850,12 +899,12 @@ async function confirmCheckin(outsideReason = null) {
             openOffsiteModal(result.error);
             return;
         }
-        showToast(result.error || 'เกิดข้อผิดพลาด', 'error');
+        showToast('error', 'ผิดพลาด', result.error || 'เกิดข้อผิดพลาด');
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-check mr-2"></i>ยืนยัน';
     } catch (err) {
         console.error('Check-in error:', err);
-        showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+        showToast('error', 'ผิดพลาด', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-check mr-2"></i>ยืนยัน';
     }
@@ -876,7 +925,7 @@ function closeOffsiteModal() {
 function submitOffsite() {
     const reason = document.getElementById('offsite-reason').value.trim();
     if (reason.length < 5) {
-        showToast('กรุณาระบุเหตุผลอย่างน้อย 5 ตัวอักษร', 'error');
+        showToast('error', 'ผิดพลาด', 'กรุณาระบุเหตุผลอย่างน้อย 5 ตัวอักษร');
         document.getElementById('offsite-reason').focus();
         return;
     }
@@ -922,8 +971,8 @@ async function submitLateStart() {
     })();
     const reason = document.getElementById('ls-reason').value.trim();
 
-    if (!planned_time) { showToast('กรุณาเลือกเวลาที่จะเข้างาน', 'error'); return; }
-    if (reason.length < 5) { showToast('กรุณาระบุเหตุผลอย่างน้อย 5 ตัวอักษร', 'error'); return; }
+    if (!planned_time) { showToast('error', 'ผิดพลาด', 'กรุณาเลือกเวลาที่จะเข้างาน'); return; }
+    if (reason.length < 5) { showToast('error', 'ผิดพลาด', 'กรุณาระบุเหตุผลอย่างน้อย 5 ตัวอักษร'); return; }
 
     const now = new Date();
     const targetDate = (target === 'today')
@@ -944,15 +993,15 @@ async function submitLateStart() {
         });
         const data = await resp.json();
         if (data.success) {
-            showToast(data.message || 'แจ้งเข้างานสายเรียบร้อย', 'success');
+            showToast('success', 'สำเร็จ', data.message || 'แจ้งเข้างานสายเรียบร้อย');
             closeLateStartModal();
             setTimeout(() => location.reload(), 800);
         } else {
-            showToast(data.error || 'เกิดข้อผิดพลาด', 'error');
+            showToast('error', 'ผิดพลาด', data.error || 'เกิดข้อผิดพลาด');
         }
     } catch (err) {
         console.error('submitLateStart:', err);
-        showToast('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้', 'error');
+        showToast('error', 'ผิดพลาด', 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้');
     }
 }
 async function cancelLateStart(targetDate) {
@@ -965,14 +1014,14 @@ async function cancelLateStart(targetDate) {
         });
         const data = await resp.json();
         if (data.success) {
-            showToast(data.message || 'ยกเลิกเรียบร้อย', 'success');
+            showToast('success', 'สำเร็จ', data.message || 'ยกเลิกเรียบร้อย');
             setTimeout(() => location.reload(), 800);
         } else {
-            showToast(data.error || 'เกิดข้อผิดพลาด', 'error');
+            showToast('error', 'ผิดพลาด', data.error || 'เกิดข้อผิดพลาด');
         }
     } catch (err) {
         console.error('cancelLateStart:', err);
-        showToast('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้', 'error');
+        showToast('error', 'ผิดพลาด', 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้');
     }
 }
 
