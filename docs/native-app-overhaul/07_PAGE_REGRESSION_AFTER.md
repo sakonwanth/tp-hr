@@ -44,6 +44,7 @@
 | HR dashboard `/hr/index.php` | **REGRESSION_PASS** (static QA: queries + `/api/leave.php` approve/reject unchanged; markup/CSS + modal a11y only) |
 | Employees `/hr/employees.php` | **REGRESSION_PASS** (static QA: GET filters + pagination + POST export/delete unchanged; `/api/leave.php` modal data unchanged) |
 | Employee form `/hr/employee_form.php` | **REGRESSION_PASS** (static QA: POST main form + change_password + permission strips unchanged; markup/CSS + tab a11y only) |
+| Employee view `/hr/employee_view.php` | **REGRESSION_PASS** (static QA: GET id + queries + CEO salary gate unchanged; display labels + UI only) |
 | Other pages in 01 §A | **REGRESSION_PENDING** |
 
 ### Dashboard — `/` (`index.php`)
@@ -168,3 +169,11 @@
 | POST save (users + schedules + edu/work/family) + CSRF | PASS |
 | POST `change_password` branch | PASS |
 | Tab switch + dynamic rows (names unchanged) | PASS |
+
+### Employee view — `/hr/employee_view.php`
+
+| Check | Result |
+|-------|--------|
+| HR gate + load user + stats + today attendance | PASS (unchanged) |
+| `isCEOOrAbove()` salary block | PASS |
+| Links to edit / employees / employee_attendance | PASS |

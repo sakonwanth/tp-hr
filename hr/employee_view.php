@@ -47,8 +47,8 @@ $empTypeLabel = [
     'PROBATION' => 'ทดลองงาน', 'PERMANENT' => 'พนักงานประจำ',
     'CONTRACT' => 'สัญญาจ้าง', 'PARTTIME' => 'พาร์ทไทม์',
 ];
-$genderLabel = ['MALE'=>'ชาย','FEMALE'=>'หญิง','OTHER'=>'อื่นๆ'];
-$maritalLabel = ['SINGLE'=>'โสด','MARRIED'=>'สมรส','DIVORCED'=>'หย่าร้าง','WIDOWED'=>'หม้าย'];
+$genderLabel = ['M' => 'ชาย', 'F' => 'หญิง', 'MALE' => 'ชาย', 'FEMALE' => 'หญิง', 'OTHER' => 'อื่นๆ'];
+$maritalLabel = ['SINGLE' => 'โสด', 'MARRIED' => 'สมรส', 'DIVORCED' => 'หย่า', 'WIDOWED' => 'หม้าย', 'SEPARATED' => 'แยกกันอยู่'];
 
 $fullName = trim(($emp['title'] ?? '') . ' ' . ($emp['first_name_th'] ?? '') . ' ' . ($emp['last_name_th'] ?? ''));
 $fullNameEn = trim(($emp['first_name_en'] ?? '') . ' ' . ($emp['last_name_en'] ?? ''));
@@ -61,9 +61,9 @@ if (!function_exists('tp_hr_emp_view_row')) {
     function tp_hr_emp_view_row($label, $value, $icon = null) {
         $iconHtml = $icon ? '<i class="fas fa-' . htmlspecialchars($icon) . ' text-white/50 mr-2"></i>' : '';
         $v = ($value === null || $value === '') ? '<span class="text-white/40">-</span>' : htmlspecialchars((string)$value);
-        echo '<div class="flex justify-between items-start py-2 border-b border-white/5">'
-            . '<span class="text-white/60 text-sm">' . $iconHtml . htmlspecialchars($label) . '</span>'
-            . '<span class="text-white text-sm text-right ml-4">' . $v . '</span>'
+        echo '<div class="flex justify-between items-start gap-4 py-2.5 border-b border-white/[0.06] min-w-0">'
+            . '<span class="text-white/65 text-sm shrink-0">' . $iconHtml . htmlspecialchars($label) . '</span>'
+            . '<span class="text-white text-sm text-right min-w-0 break-words">' . $v . '</span>'
             . '</div>';
     }
 }
@@ -83,55 +83,59 @@ if (!function_exists('tp_hr_emp_view_row')) {
             <p class="text-slate-300 text-sm mt-1.5"><?php echo htmlspecialchars($fullName); ?></p>
         </div>
         <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto shrink-0">
+            <a href="/hr/employee_attendance.php?id=<?php echo (int)$emp['id']; ?>"
+               class="inline-flex items-center justify-center min-h-[48px] px-4 py-2 bg-violet-500/15 hover:bg-violet-500/25 border border-violet-500/25 text-violet-200 rounded-[20px] transition-colors font-medium touch-manipulation">
+                <i class="fas fa-clock mr-2" aria-hidden="true"></i>ประวัติลงเวลา
+            </a>
             <?php if (canManageUsers()): ?>
             <a href="/hr/employee_form.php?action=edit&id=<?php echo (int)$emp['id']; ?>"
-               class="inline-flex items-center justify-center min-h-[56px] px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors font-medium touch-manipulation">
-                <i class="fas fa-edit mr-2"></i>แก้ไข
+               class="inline-flex items-center justify-center min-h-[56px] px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-[20px] transition-colors font-semibold touch-manipulation">
+                <i class="fas fa-edit mr-2" aria-hidden="true"></i>แก้ไข
             </a>
             <?php endif; ?>
-            <a href="/hr/employees.php" class="inline-flex items-center justify-center min-h-[48px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors font-medium touch-manipulation">
-                <i class="fas fa-arrow-left mr-2"></i>กลับ
+            <a href="/hr/employees.php" class="inline-flex items-center justify-center min-h-[48px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-[20px] transition-colors font-medium touch-manipulation">
+                <i class="fas fa-arrow-left mr-2" aria-hidden="true"></i>กลับ
             </a>
         </div>
     </div>
 </div>
 
 <!-- Profile Header -->
-<div class="glass-card rounded-xl p-4 sm:p-6 mb-6 min-w-0 overflow-hidden">
+<div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 mb-6 min-w-0 max-w-full overflow-hidden">
     <div class="flex flex-col md:flex-row gap-6 items-start">
-        <div class="flex-shrink-0">
+        <div class="flex-shrink-0 mx-auto md:mx-0">
             <?php if (!empty($emp['avatar'])): ?>
-                <img src="<?php echo htmlspecialchars($emp['avatar']); ?>" class="w-32 h-32 rounded-full object-cover border-2 border-white/20">
+                <img src="<?php echo htmlspecialchars($emp['avatar']); ?>" alt="" class="w-32 h-32 rounded-full object-cover border-2 border-white/20">
             <?php else: ?>
-                <div class="w-32 h-32 rounded-full bg-violet-600/30 flex items-center justify-center text-white text-5xl font-bold">
+                <div class="w-32 h-32 rounded-full bg-violet-600/30 flex items-center justify-center text-white text-5xl font-bold" aria-hidden="true">
                     <?php echo htmlspecialchars(mb_substr($emp['first_name_th'] ?? '?', 0, 1)); ?>
                 </div>
             <?php endif; ?>
         </div>
-        <div class="flex-1">
-            <div class="flex flex-wrap items-center gap-2 mb-2">
-                <h2 class="text-2xl font-bold text-white"><?php echo htmlspecialchars($fullName); ?></h2>
+        <div class="flex-1 min-w-0 text-center md:text-left">
+            <div class="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-2">
+                <h2 class="text-2xl font-bold text-white tracking-tight"><?php echo htmlspecialchars($fullName); ?></h2>
                 <?php if (($emp['work_mode'] ?? 'OFFICE') === 'WFH'): ?>
-                    <span class="px-3 py-1 rounded-full text-xs bg-blue-500/20 text-blue-300"><i class="fas fa-home mr-1"></i>WFH</span>
+                    <span class="px-3 py-1 rounded-[20px] text-xs font-medium bg-blue-500/20 text-blue-300 border border-blue-500/20"><i class="fas fa-home mr-1" aria-hidden="true"></i>WFH</span>
                 <?php else: ?>
-                    <span class="px-3 py-1 rounded-full text-xs bg-slate-500/20 text-slate-300"><i class="fas fa-building mr-1"></i>Office</span>
+                    <span class="px-3 py-1 rounded-[20px] text-xs font-medium bg-slate-500/20 text-slate-300 border border-white/10"><i class="fas fa-building mr-1" aria-hidden="true"></i>Office</span>
                 <?php endif; ?>
                 <?php if ((int)$emp['is_active'] === 1): ?>
-                    <span class="px-3 py-1 rounded-full text-xs bg-green-500/20 text-green-400">ทำงาน</span>
+                    <span class="px-3 py-1 rounded-[20px] text-xs font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/25">ทำงาน</span>
                 <?php else: ?>
-                    <span class="px-3 py-1 rounded-full text-xs bg-red-500/20 text-red-400">พ้นสภาพ</span>
+                    <span class="px-3 py-1 rounded-[20px] text-xs font-medium bg-red-500/20 text-red-300 border border-red-500/25">พ้นสภาพ</span>
                 <?php endif; ?>
             </div>
             <?php if ($fullNameEn): ?>
-            <p class="text-white/60 mb-1"><?php echo htmlspecialchars($fullNameEn); ?><?php echo !empty($emp['nickname']) ? ' (' . htmlspecialchars($emp['nickname']) . ')' : ''; ?></p>
+            <p class="text-white/60 mb-1 text-sm"><?php echo htmlspecialchars($fullNameEn); ?><?php echo !empty($emp['nickname']) ? ' (' . htmlspecialchars($emp['nickname']) . ')' : ''; ?></p>
             <?php endif; ?>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mt-3 text-sm">
-                <div class="text-white/80"><i class="fas fa-id-badge text-white/50 mr-2"></i><?php echo htmlspecialchars($emp['employee_code'] ?? '-'); ?></div>
-                <div class="text-white/80"><i class="fas fa-building text-white/50 mr-2"></i><?php echo htmlspecialchars($emp['department'] ?? '-'); ?></div>
-                <div class="text-white/80"><i class="fas fa-briefcase text-white/50 mr-2"></i><?php echo htmlspecialchars($emp['position'] ?? '-'); ?></div>
-                <div class="text-white/80"><i class="fas fa-envelope text-white/50 mr-2"></i><?php echo htmlspecialchars($emp['email'] ?? '-'); ?></div>
-                <div class="text-white/80"><i class="fas fa-phone text-white/50 mr-2"></i><?php echo htmlspecialchars($emp['phone'] ?? '-'); ?></div>
-                <div class="text-white/80"><i class="fas fa-user-shield text-white/50 mr-2"></i><?php echo htmlspecialchars($emp['role_name'] ?? '-'); ?></div>
+                <div class="text-white/80 min-w-0 break-words"><i class="fas fa-id-badge text-white/50 mr-2 shrink-0" aria-hidden="true"></i><?php echo htmlspecialchars($emp['employee_code'] ?? '-'); ?></div>
+                <div class="text-white/80 min-w-0 break-words"><i class="fas fa-building text-white/50 mr-2 shrink-0" aria-hidden="true"></i><?php echo htmlspecialchars($emp['department'] ?? '-'); ?></div>
+                <div class="text-white/80 min-w-0 break-words"><i class="fas fa-briefcase text-white/50 mr-2 shrink-0" aria-hidden="true"></i><?php echo htmlspecialchars($emp['position'] ?? '-'); ?></div>
+                <div class="text-white/80 min-w-0 break-words"><i class="fas fa-envelope text-white/50 mr-2 shrink-0" aria-hidden="true"></i><?php echo htmlspecialchars($emp['email'] ?? '-'); ?></div>
+                <div class="text-white/80 min-w-0 break-words"><i class="fas fa-phone text-white/50 mr-2 shrink-0" aria-hidden="true"></i><?php echo htmlspecialchars($emp['phone'] ?? '-'); ?></div>
+                <div class="text-white/80 min-w-0 break-words"><i class="fas fa-user-shield text-white/50 mr-2 shrink-0" aria-hidden="true"></i><?php echo htmlspecialchars($emp['role_name'] ?? '-'); ?></div>
             </div>
         </div>
     </div>
@@ -139,38 +143,47 @@ if (!function_exists('tp_hr_emp_view_row')) {
 
 <!-- Stats -->
 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 min-w-0 max-w-full">
-    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden">
-        <p class="text-white/60 text-xs">สถานะวันนี้</p>
-        <p class="text-white text-lg font-bold mt-1">
+    <div class="stat-card tp-native-summary-card group min-w-0">
+        <p class="text-slate-300 text-xs">สถานะวันนี้</p>
+        <p class="text-white text-lg font-bold mt-1 min-h-[1.75rem]">
             <?php
             if ($today) {
-                $statusColors = ['PRESENT'=>'green','LATE'=>'yellow','WFH'=>'blue','LEAVE'=>'purple','ABSENT'=>'red','HOLIDAY'=>'gray','HALF_DAY'=>'orange'];
-                $c = $statusColors[$today['status']] ?? 'gray';
-                echo '<span class="text-' . $c . '-400">' . htmlspecialchars($today['status']) . '</span>';
+                $st = (string)($today['status'] ?? '');
+                $map = [
+                    'PRESENT' => ['th' => 'มาตรงเวลา', 'cls' => 'text-emerald-400'],
+                    'LATE' => ['th' => 'มาสาย', 'cls' => 'text-amber-400'],
+                    'WFH' => ['th' => 'WFH', 'cls' => 'text-blue-400'],
+                    'LEAVE' => ['th' => 'ลา', 'cls' => 'text-violet-400'],
+                    'ABSENT' => ['th' => 'ขาด', 'cls' => 'text-red-400'],
+                    'HOLIDAY' => ['th' => 'วันหยุด', 'cls' => 'text-slate-400'],
+                    'HALF_DAY' => ['th' => 'ครึ่งวัน', 'cls' => 'text-orange-400'],
+                ];
+                $info = $map[$st] ?? ['th' => $st, 'cls' => 'text-white/80'];
+                echo '<span class="' . htmlspecialchars($info['cls']) . '">' . htmlspecialchars($info['th']) . '</span>';
             } else {
-                echo '<span class="text-white/40">-</span>';
+                echo '<span class="text-white/45">ยังไม่มีข้อมูล</span>';
             }
             ?>
         </p>
     </div>
-    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden">
-        <p class="text-white/60 text-xs">ลงเวลาปีนี้ (วัน)</p>
-        <p class="text-white text-lg font-bold mt-1"><?php echo number_format((int)($stats['att_this_year'] ?? 0)); ?></p>
+    <div class="stat-card tp-native-summary-card group min-w-0">
+        <p class="text-slate-300 text-xs">ลงเวลาปีนี้ (วัน)</p>
+        <p class="text-white text-lg font-bold mt-1 tabular-nums"><?php echo number_format((int)($stats['att_this_year'] ?? 0)); ?></p>
     </div>
-    <div class="glass-card rounded-xl p-4 min-w-0 overflow-hidden">
-        <p class="text-white/60 text-xs">วันลาปีนี้</p>
-        <p class="text-white text-lg font-bold mt-1"><?php echo number_format((float)($stats['leaves_this_year'] ?? 0), 1); ?> วัน</p>
+    <div class="stat-card tp-native-summary-card group min-w-0">
+        <p class="text-slate-300 text-xs">วันลาปีนี้</p>
+        <p class="text-white text-lg font-bold mt-1 tabular-nums"><?php echo number_format((float)($stats['leaves_this_year'] ?? 0), 1); ?> วัน</p>
     </div>
-    <div class="glass-card p-4">
-        <p class="text-white/60 text-xs">ใบลารออนุมัติ</p>
-        <p class="text-white text-lg font-bold mt-1"><?php echo (int)($stats['pending_leaves'] ?? 0); ?></p>
+    <div class="stat-card tp-native-summary-card group min-w-0">
+        <p class="text-slate-300 text-xs">ใบลารออนุมัติ</p>
+        <p class="text-white text-lg font-bold mt-1 tabular-nums"><?php echo (int)($stats['pending_leaves'] ?? 0); ?></p>
     </div>
 </div>
 
 <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 min-w-0 max-w-full">
     <!-- Personal -->
-    <div class="glass-card rounded-xl p-4 sm:p-6 min-w-0 overflow-hidden">
-        <h3 class="text-lg font-bold text-white mb-3"><i class="fas fa-user text-violet-400 mr-2"></i>ข้อมูลส่วนตัว</h3>
+    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0 max-w-full overflow-hidden">
+        <h3 class="section-title mb-4 text-white text-base sm:text-lg"><i class="fas fa-user text-violet-400 mr-2 text-xl" aria-hidden="true"></i>ข้อมูลส่วนตัว</h3>
         <?php
         tp_hr_emp_view_row('เพศ', $genderLabel[$emp['gender'] ?? ''] ?? null);
         tp_hr_emp_view_row('วันเกิด', !empty($emp['birth_date']) ? formatDateThai($emp['birth_date']) : null);
@@ -187,8 +200,8 @@ if (!function_exists('tp_hr_emp_view_row')) {
     </div>
 
     <!-- Employment -->
-    <div class="glass-card p-6">
-        <h3 class="text-lg font-bold text-white mb-3"><i class="fas fa-briefcase text-emerald-400 mr-2"></i>ข้อมูลการจ้างงาน</h3>
+    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0 max-w-full overflow-hidden">
+        <h3 class="section-title mb-4 text-white text-base sm:text-lg"><i class="fas fa-briefcase text-emerald-400 mr-2 text-xl" aria-hidden="true"></i>ข้อมูลการจ้างงาน</h3>
         <?php
         tp_hr_emp_view_row('วันที่เริ่มงาน', !empty($emp['hire_date']) ? formatDateThai($emp['hire_date']) : null, 'calendar');
         tp_hr_emp_view_row('ประเภทการจ้าง', $empTypeLabel[$emp['employment_type'] ?? ''] ?? null);
@@ -209,8 +222,8 @@ if (!function_exists('tp_hr_emp_view_row')) {
     </div>
 
     <!-- Contact / Emergency -->
-    <div class="glass-card rounded-xl p-4 sm:p-6 min-w-0 overflow-hidden">
-        <h3 class="text-lg font-bold text-white mb-3"><i class="fas fa-phone-alt text-yellow-400 mr-2"></i>ติดต่อฉุกเฉิน</h3>
+    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0 max-w-full overflow-hidden">
+        <h3 class="section-title mb-4 text-white text-base sm:text-lg"><i class="fas fa-phone-alt text-amber-400 mr-2 text-xl" aria-hidden="true"></i>ติดต่อฉุกเฉิน</h3>
         <?php
         tp_hr_emp_view_row('ชื่อผู้ติดต่อ', $emp['emergency_contact_name'] ?? null);
         tp_hr_emp_view_row('เบอร์โทร', $emp['emergency_contact_phone'] ?? null);
@@ -219,8 +232,8 @@ if (!function_exists('tp_hr_emp_view_row')) {
     </div>
 
     <!-- Payroll -->
-    <div class="glass-card rounded-xl p-4 sm:p-6 min-w-0 overflow-hidden">
-        <h3 class="text-lg font-bold text-white mb-3"><i class="fas fa-money-check text-green-400 mr-2"></i>การเงินและประกันสังคม</h3>
+    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0 max-w-full overflow-hidden">
+        <h3 class="section-title mb-4 text-white text-base sm:text-lg"><i class="fas fa-money-check text-emerald-400 mr-2 text-xl" aria-hidden="true"></i>การเงินและประกันสังคม</h3>
         <?php
         if (isCEOOrAbove()) {
             $effSalary = getEffectiveSalary($emp);
