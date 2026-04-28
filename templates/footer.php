@@ -21,11 +21,11 @@ $isAdminPage = is_string($cp) && strncmp($cp, 'hr-', 3) === 0;
     <div class="max-w-lg mx-auto grid grid-cols-5 px-2 py-2">
         <?php
         $items = [
-            ['key' => 'dashboard', 'href' => '/',            'icon' => 'fa-home',               'label' => 'หน้าแรก'],
-            ['key' => 'checkin',   'href' => '/checkin.php',  'icon' => 'fa-fingerprint',       'label' => 'ลงเวลา'],
-            ['key' => 'leave',     'href' => '/leave.php',    'icon' => 'fa-calendar-alt',      'label' => 'ลา'],
-            ['key' => 'payslip',   'href' => '/payslip.php',  'icon' => 'fa-file-invoice-dollar','label' => 'สลิป'],
-            ['key' => 'profile',   'href' => '/profile.php',  'icon' => 'fa-user',              'label' => 'ฉัน'],
+            ['key' => 'dashboard', 'href' => '/',            'icon' => 'fa-home',               'label' => 'หน้าแรก', 'aria' => 'หน้าแรก'],
+            ['key' => 'checkin',   'href' => '/checkin.php',  'icon' => 'fa-fingerprint',       'label' => 'ลงเวลา', 'aria' => 'ลงเวลาเข้า-ออกงาน'],
+            ['key' => 'leave',     'href' => '/leave.php',    'icon' => 'fa-calendar-alt',      'label' => 'ลา', 'aria' => 'การลา'],
+            ['key' => 'payslip',   'href' => '/payslip.php',  'icon' => 'fa-file-invoice-dollar','label' => 'สลิป', 'aria' => 'สลิปเงินเดือน'],
+            ['key' => 'profile',   'href' => '/profile.php',  'icon' => 'fa-user',              'label' => 'ฉัน', 'aria' => 'โปรไฟล์และตั้งค่า'],
         ];
         foreach ($items as $it):
             $isHere = ($cp === $it['key']);
@@ -34,6 +34,7 @@ $isAdminPage = is_string($cp) && strncmp($cp, 'hr-', 3) === 0;
         ?>
         <a href="<?php echo htmlspecialchars($it['href']); ?>"
            class="touch-manipulation flex flex-col items-center justify-center gap-1 min-h-[56px] py-2 rounded-xl transition-colors <?php echo $active; ?> <?php echo $bg; ?>"
+           aria-label="<?php echo htmlspecialchars($it['aria']); ?>"
            <?php if ($isHere): ?>aria-current="page"<?php endif; ?>>
             <i class="fas <?php echo htmlspecialchars($it['icon']); ?> text-lg"></i>
             <span class="text-[11px] font-medium leading-none"><?php echo htmlspecialchars($it['label']); ?></span>

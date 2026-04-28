@@ -521,6 +521,10 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 12px;
         }
+        /* Odd tile count leaves an empty hole; span last orphan full-width (employee grid + HR admin grid only). */
+        .mobile-menu-scroll .mobile-menu-grid:not(.mobile-menu-grid--logout) > a.mobile-menu-tile:last-child:nth-child(odd) {
+            grid-column: 1 / -1;
+        }
         .mobile-menu-section-label {
             font-size: 0.6875rem;
             font-weight: 700;
@@ -1142,15 +1146,24 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
 
 <script>
 function openMobileMenu() {
-    document.getElementById('mobileSidebar').classList.remove('hidden');
+    var sheet = document.getElementById('mobileSidebar');
+    if (!sheet) return;
+    sheet.classList.remove('hidden');
     if (typeof uiLockBodyScroll === 'function') uiLockBodyScroll(true);
     else document.body.style.overflow = 'hidden';
+    requestAnimationFrame(function () {
+        var closeBtn = sheet.querySelector('.mobile-menu-close');
+        if (closeBtn && typeof closeBtn.focus === 'function') closeBtn.focus();
+    });
 }
 
 function closeMobileMenu() {
-    document.getElementById('mobileSidebar').classList.add('hidden');
+    var sheet = document.getElementById('mobileSidebar');
+    if (sheet) sheet.classList.add('hidden');
     if (typeof uiLockBodyScroll === 'function') uiLockBodyScroll(false);
     else document.body.style.overflow = '';
+    var menuBtn = document.getElementById('mobileMenuBtn');
+    if (menuBtn && typeof menuBtn.focus === 'function') menuBtn.focus();
 }
 
 document.getElementById('mobileMenuBtn')?.addEventListener('click', openMobileMenu);
