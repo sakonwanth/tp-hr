@@ -13,7 +13,7 @@ $isAdminPage = is_string($cp) && strncmp($cp, 'hr-', 3) === 0;
 ?>
 
 <?php if (!$isAdminPage): ?>
-<!-- Mobile Bottom Navigation (employee-first) — visuals locked in assets/css/native-shell.css v12 -->
+<!-- Mobile Bottom Navigation (employee-first) — visuals locked in assets/css/native-shell.css v13 -->
 <nav id="tpHrMobileBottomTab"
      class="app-shell-mobile-only tp-native-bottom-tab-nav fixed bottom-0 left-0 right-0 touch-manipulation overscroll-contain transition-opacity transition-transform duration-200 ease-out"
      role="navigation"

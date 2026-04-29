@@ -4,11 +4,11 @@ Statuses: **`NOT_STARTED` · `IN_PROGRESS` · `REFACTORED` · `COMPLETE` · `REG
 
 | Page / area | Wave | Before | After (2026-04-28) | Status |
 |-------------|------|--------|---------------------|--------|
-| Global **`native-shell.css`** | Wave 1 | v11 gap/chip issues | **v12**: IOS26 `:root`, tab stretch, form gaps, textarea min, buffers | **COMPLETE** |
-| **`templates/header.php` link`** | Wave 1 | `?v=11` | `?v=12` | **COMPLETE** |
+| Global **`native-shell.css`** | Wave 1–2 | v11 gap/chip issues | **v12** tokens + tab stretch; **v13** IOS typography helpers (`.tp-ios-*`) | **COMPLETE** |
+| **`templates/header.php` link`** | Wave 1→2 | `?v=11` | **`?v=13`** (extends Wave 2 helpers) | **COMPLETE** |
 | **`templates/native/component_registry.php`** | Wave 1 | Native keys only | **IOS*** alias layer | **COMPLETE** |
 | `index.php` (dashboard) | Wave 2 | Legacy hero | **NOT_STARTED** visually | NOT_STARTED |
-| `checkin.php` | Wave 2 | — | NOT_STARTED |
+| `checkin.php` | Wave 2 | ESS clock + CTA dominant | **`v=13`** tokens: `.tp-ios-page-title`, hero clock, **`max-w` 960**, section gaps **20/32**, history row **54px**, `aria-live` clock | **REFACTORED** |
 | Employee leave funnel | Wave 2 | — | NOT_STARTED |
 | `hr/*.php` admin shells | Wave 3 | — | NOT_STARTED |
 

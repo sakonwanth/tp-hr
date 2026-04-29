@@ -1,9 +1,8 @@
 /**
  * TP-HR — Native component system (iOS 26–inspired + UI UX Pro Max).
- * v12: IOS26 spacing — section gap 20px mobile, scroll buffer ≥144px, card radius/pad uplift,
- * extended spacing scale (40/48), bottom-tab links fill grid columns (uniform active chip).
- * Headers load this file as `/assets/css/native-shell.css?v=12`.
- * UI UX Pro Max: touch ≥48px, inputs ≥54px (--tp-native-input-min), primary CTA ≥56px.
+ * v13: `.tp-ios-page-title` / `.tp-ios-hero-number` / `.tp-ios-caption-muted` for Wave-2 screen passes.
+ * v12: IOS26 spacing tokens, bottom-tab stretch, scroll buffer ≥144px tab slot ≥96px.
+ * Headers: `/assets/css/native-shell.css?v=13`.
  */
 
 html {
@@ -658,5 +657,29 @@ body.tp-native-app .section-title {
 
 .tp-native-action-sheet {
   z-index: var(--tp-modal-z);
+}
+
+/* ---------- IOS26 typography helpers (Wave 2+ routes) ---------- */
+.tp-ios-page-title {
+  font-size: var(--tp-font-page-title);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: #f8fafc;
+}
+
+.tp-ios-hero-number {
+  font-size: var(--tp-font-hero-number);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  color: #fff;
+}
+
+.tp-ios-caption-muted {
+  font-size: var(--tp-font-caption);
+  color: rgba(255, 255, 255, 0.62);
+  line-height: 1.4;
 }
 

@@ -12,7 +12,7 @@ Execute after **each completed page**:
 
 | Area | Verification |
 |------|----------------|
-| Mobile bottom tabs uniform active frame | Stretch grid (**native-shell v12**) · label `nowrap` |
+| Mobile bottom tabs uniform active frame | Stretch grid (**native-shell v12+**) · label `nowrap` |
 | Bottom buffer | **`--tp-scroll-end-buffer`** = **144px** |
 
 ## Per-route matrix
@@ -21,4 +21,4 @@ Populate when Waves 2–3 land. Placeholder:** all routes **PENDING**.
 
 | Route/file | Tester | Device | PASS date |
 |------------|--------|--------|-----------|
-| *—* | — | — | — |
+| `checkin.php` | Automated | Chromium mobile W | Pending human |

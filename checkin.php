@@ -125,12 +125,13 @@ $monthly_summary = $stmt->fetch();
 require_once __DIR__ . '/templates/header.php';
 ?>
 
-<div>
+<div class="tp-checkin-page tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
     <!-- Page Header -->
-    <div class="mb-4 md:mb-6">
-        <h1 class="text-2xl font-bold text-white tracking-tight">ลงเวลาเข้า-ออกงาน</h1>
-        <p class="text-white/60 text-sm mt-1"><?php echo formatDateThai(date('Y-m-d')); ?></p>
-    </div>
+    <header class="mb-5 md:mb-8">
+        <p class="tp-ios-caption-muted mb-1"><?php echo htmlspecialchars(formatDateThai(date('Y-m-d')), ENT_QUOTES, 'UTF-8'); ?></p>
+        <h1 class="tp-ios-page-title">ลงเวลาเข้า-ออกงาน</h1>
+        <p class="text-white/55 text-[0.9375rem] mt-2 leading-snug max-w-[42rem]">แตะปุ่มใหญ่เพื่อลงเวลาเข้าหรือออก และดูสถานะตำแหน่งจาก GPS</p>
+    </header>
     
     <?php if ($error): ?>
     <div class="tp-native-error-state bg-red-500/15 border border-red-400/45 text-red-200 px-4 py-3 rounded-[20px] mb-4 md:mb-6 flex items-start gap-3" role="alert">
@@ -159,14 +160,14 @@ require_once __DIR__ . '/templates/header.php';
     </div>
     <?php endif; ?>
 
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 md:gap-8 xl:gap-8">
         <!-- Left Column: Check-in Card -->
         <div class="xl:col-span-2">
             <div class="native-card tp-native-card tp-native-data-card">
                 <!-- Current Time Display -->
-                <div class="text-center mb-6 md:mb-8">
-                    <div class="text-[48px] leading-none font-bold text-white mb-2 tabular-nums time-display" id="current-time">--:--:--</div>
-                    <p class="text-white/60 text-base"><?php echo formatDateThai(date('Y-m-d')); ?></p>
+                <div class="text-center mb-6 md:mb-8" aria-live="polite" aria-atomic="true">
+                    <div class="tp-ios-hero-number mb-3 time-display" id="current-time">--:--:--</div>
+                    <p class="text-white/60 text-[0.9375rem]"><?php echo htmlspecialchars(formatDateThai(date('Y-m-d')), ENT_QUOTES, 'UTF-8'); ?></p>
                     
                     <div class="mt-4 flex items-center justify-center gap-2 flex-wrap">
                         <?php if ($shift): ?>
@@ -299,7 +300,7 @@ require_once __DIR__ . '/templates/header.php';
         </div>
         
         <!-- Right Column: Summary & History -->
-        <div class="space-y-4 md:space-y-6">
+        <div class="space-y-5 md:space-y-6">
             <!-- Planned Late Start (แจ้งเข้างานสายล่วงหน้า) -->
             <?php if ($ls_has_any): ?>
             <div>
@@ -450,7 +451,7 @@ require_once __DIR__ . '/templates/header.php';
                         $attDate = $att['attendance_date'];
                         $hol = $holidayMap[$attDate] ?? null;
                     ?>
-                    <div class="p-3 min-h-[52px] rounded-[20px] bg-white/5 border border-white/8 flex items-center justify-between gap-2">
+                    <div class="p-3 min-h-[54px] rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/8 flex items-center justify-between gap-2">
                         <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-2">
                                 <p class="text-white text-sm truncate">
