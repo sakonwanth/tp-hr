@@ -24,3 +24,4 @@ Populate when Waves 2–3 land. Placeholder:** all routes **PENDING**.
 | `checkin.php` | Automated | Chromium mobile W | Pending human |
 | `index.php` | Automated | Pending | Pending human |
 | `leave.php` / `request_form.php` | Automated | Pending | Pending human |
+| **`leave_history.php`** | Automated | Pending | Pending human |

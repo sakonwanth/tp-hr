@@ -92,16 +92,17 @@ if (!in_array($year, $availableYears)) {
 include 'templates/header.php';
 ?>
 
-<div class="mb-6 min-w-0">
-    <nav class="text-sm text-white/60 mb-1" aria-label="Breadcrumb">
+<div class="tp-leave-history-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<div class="mb-5 md:mb-8 min-w-0">
+    <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
         <a href="leave.php" class="hover:text-white touch-manipulation">การลา</a>
         <span class="mx-2">/</span>
         <span class="text-white">ประวัติการลา</span>
     </nav>
-    <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+    <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between gap-y-4">
         <div class="min-w-0 flex-1">
-            <h1 class="text-2xl font-bold text-white tracking-tight">ประวัติการลา</h1>
-            <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">กรองตามปี ประเภท และสถานะ ดูสรุปวันลาที่ใช้ไปในแต่ละประเภท</p>
+            <h1 class="tp-ios-page-title">ประวัติการลา</h1>
+            <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">กรองตามปี ประเภท และสถานะ ดูสรุปวันลาที่ใช้ไปในแต่ละประเภท</p>
         </div>
         <a href="leave.php?action=request" class="btn-primary btn-primary-prominent w-full sm:w-auto shrink-0 inline-flex items-center justify-center touch-manipulation">
             <i class="fas fa-plus mr-2"></i>ยื่นขอลาใหม่
@@ -111,7 +112,7 @@ include 'templates/header.php';
 
 <!-- Summary Cards -->
 <?php if (!empty($summary)): ?>
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6 mb-4 md:mb-6 min-w-0 max-w-full">
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-5 xl:gap-6 mb-5 md:mb-8 min-w-0 max-w-full">
     <?php foreach ($summary as $sum): ?>
     <div class="native-card tp-native-card tp-native-data-card min-w-0">
         <div class="flex items-center gap-3 min-w-0">
@@ -133,8 +134,8 @@ include 'templates/header.php';
 <?php endif; ?>
 
 <!-- Filters -->
-<div class="native-card tp-native-card tp-native-data-card mb-4 md:mb-6 min-w-0">
-    <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 min-w-0">
+<div class="native-card tp-native-card tp-native-data-card mb-5 md:mb-8 min-w-0">
+    <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-5 min-w-0">
         <div class="min-w-0">
             <label class="block text-white/60 text-xs mb-1">ปี</label>
             <select name="year" class="input-field" onchange="this.form.submit()">
@@ -165,7 +166,7 @@ include 'templates/header.php';
             </select>
         </div>
         <div class="flex items-end min-w-0">
-            <a href="leave_history.php?year=<?php echo (int)$year; ?>" class="touch-manipulation w-full min-h-[48px] inline-flex items-center justify-center py-2.5 bg-white/10 hover:bg-white/20 text-white text-center rounded-[20px] transition-colors font-medium">
+            <a href="leave_history.php?year=<?php echo (int)$year; ?>" class="touch-manipulation w-full min-h-[48px] inline-flex items-center justify-center py-2.5 bg-white/10 hover:bg-white/20 text-white text-center rounded-[var(--tp-ios-card-radius)] transition-colors font-medium">
                 <i class="fas fa-redo mr-2" aria-hidden="true"></i>รีเซ็ต
             </a>
         </div>
@@ -175,7 +176,7 @@ include 'templates/header.php';
 <!-- Results -->
 <div class="native-card tp-native-card tp-native-data-card min-w-0 max-w-full overflow-hidden">
     <?php if (empty($requests)): ?>
-    <div class="tp-native-empty-state text-center py-12 px-4 rounded-[20px] border border-dashed border-white/15 max-w-none mx-4 my-4">
+    <div class="tp-native-empty-state text-center py-12 px-4 rounded-[var(--tp-ios-card-radius)] border border-dashed border-white/15 max-w-none mx-4 my-4">
         <i class="fas fa-calendar-times text-slate-500 text-4xl mb-3 block" aria-hidden="true"></i>
         <p class="text-slate-400 text-sm">ไม่พบประวัติการลา</p>
     </div>
@@ -195,15 +196,15 @@ include 'templates/header.php';
     ];
     ?>
     <!-- Mobile: card stack (< md) -->
-    <div class="md:hidden space-y-3 min-w-0 p-1">
+    <div class="md:hidden space-y-4 min-w-0 p-1">
         <?php foreach ($requests as $req): ?>
-        <div class="rounded-[20px] bg-white/5 border border-white/8 p-4 min-w-0">
+        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/8 p-4 min-w-0">
             <div class="flex items-center justify-between gap-2 mb-2 min-w-0">
                 <div class="flex items-center gap-2 min-w-0">
                     <span class="w-2 h-2 rounded-full shrink-0" style="background-color: <?php echo htmlspecialchars($req['color_code'] ?? '#6B7280'); ?>"></span>
                     <span class="text-white font-medium truncate min-w-0"><?php echo htmlspecialchars($req['leave_type_name']); ?></span>
                 </div>
-                <span class="px-2.5 py-1 rounded-[20px] text-xs font-medium shrink-0 border border-white/10 <?php echo $statusColors[$req['status']] ?? 'bg-gray-500/20 text-gray-400'; ?>">
+                <span class="px-2.5 py-1 rounded-[var(--tp-ios-card-radius)] text-xs font-medium shrink-0 border border-white/10 <?php echo $statusColors[$req['status']] ?? 'bg-gray-500/20 text-gray-400'; ?>">
                     <?php echo $statusText[$req['status']] ?? $req['status']; ?>
                 </span>
             </div>
@@ -219,11 +220,11 @@ include 'templates/header.php';
             <p class="text-white/50 text-xs mt-2 line-clamp-2"><?php echo htmlspecialchars($req['reason']); ?></p>
             
             <div class="flex gap-2 mt-3">
-                <button type="button" onclick="viewDetail(<?php echo $req['id']; ?>)" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-[20px] transition-colors touch-manipulation font-medium">
+                <button type="button" onclick="viewDetail(<?php echo $req['id']; ?>)" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-medium">
                     <i class="fas fa-eye mr-1" aria-hidden="true"></i>ดูรายละเอียด
                 </button>
                 <?php if ($req['status'] === 'PENDING'): ?>
-                <button type="button" onclick="cancelRequest(<?php echo $req['id']; ?>)" class="flex-1 min-h-[48px] py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-300 text-sm rounded-[20px] transition-colors touch-manipulation font-medium">
+                <button type="button" onclick="cancelRequest(<?php echo $req['id']; ?>)" class="flex-1 min-h-[48px] py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-300 text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-medium">
                     <i class="fas fa-times mr-1" aria-hidden="true"></i>ยกเลิก
                 </button>
                 <?php endif; ?>
@@ -274,11 +275,11 @@ include 'templates/header.php';
                     </span>
                 </td>
                 <td class="px-6 py-4 text-center">
-                    <button type="button" onclick="viewDetail(<?php echo $req['id']; ?>)" class="min-h-[48px] min-w-[48px] inline-flex items-center justify-center p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-[20px] transition-colors touch-manipulation" title="ดูรายละเอียด">
+                    <button type="button" onclick="viewDetail(<?php echo $req['id']; ?>)" class="min-h-[48px] min-w-[48px] inline-flex items-center justify-center p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="ดูรายละเอียด">
                         <i class="fas fa-eye" aria-hidden="true"></i>
                     </button>
                     <?php if ($req['status'] === 'PENDING'): ?>
-                    <button type="button" onclick="cancelRequest(<?php echo $req['id']; ?>)" class="min-h-[48px] min-w-[48px] inline-flex items-center justify-center p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-[20px] transition-colors touch-manipulation" title="ยกเลิก">
+                    <button type="button" onclick="cancelRequest(<?php echo $req['id']; ?>)" class="min-h-[48px] min-w-[48px] inline-flex items-center justify-center p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="ยกเลิก">
                         <i class="fas fa-times" aria-hidden="true"></i>
                     </button>
                     <?php endif; ?>
@@ -299,21 +300,23 @@ include 'templates/header.php';
         <div class="flex flex-wrap gap-2 justify-center sm:justify-end">
             <?php if ($page > 1): ?>
             <a href="?year=<?php echo $year; ?>&type=<?php echo $type; ?>&status=<?php echo urlencode($status); ?>&page=<?php echo $page - 1; ?>" 
-               class="touch-manipulation min-h-[48px] min-w-[48px] inline-flex items-center justify-center px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-[20px] transition-colors">
+               aria-label="หน้าก่อนหน้า"
+               class="touch-manipulation min-h-[48px] min-w-[48px] inline-flex items-center justify-center px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] transition-colors">
                 <i class="fas fa-chevron-left" aria-hidden="true"></i>
             </a>
             <?php endif; ?>
             
             <?php for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++): ?>
             <a href="?year=<?php echo $year; ?>&type=<?php echo $type; ?>&status=<?php echo urlencode($status); ?>&page=<?php echo $i; ?>" 
-               class="touch-manipulation min-h-[56px] min-w-[48px] inline-flex items-center justify-center px-3 py-2 <?php echo $i === $page ? 'bg-violet-600 text-white' : 'bg-white/10 hover:bg-white/20 text-white'; ?> rounded-[20px] transition-colors font-medium">
+               class="touch-manipulation min-h-[56px] min-w-[48px] inline-flex items-center justify-center px-3 py-2 <?php echo $i === $page ? 'bg-violet-600 text-white' : 'bg-white/10 hover:bg-white/20 text-white'; ?> rounded-[var(--tp-ios-card-radius)] transition-colors font-medium">
                 <?php echo $i; ?>
             </a>
             <?php endfor; ?>
             
             <?php if ($page < $totalPages): ?>
             <a href="?year=<?php echo $year; ?>&type=<?php echo $type; ?>&status=<?php echo urlencode($status); ?>&page=<?php echo $page + 1; ?>" 
-               class="touch-manipulation min-h-[48px] min-w-[48px] inline-flex items-center justify-center px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-[20px] transition-colors">
+               aria-label="หน้าถัดไป"
+               class="touch-manipulation min-h-[48px] min-w-[48px] inline-flex items-center justify-center px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] transition-colors">
                 <i class="fas fa-chevron-right" aria-hidden="true"></i>
             </a>
             <?php endif; ?>
@@ -322,13 +325,14 @@ include 'templates/header.php';
     <?php endif; ?>
     <?php endif; ?>
 </div>
+</div>
 
 <!-- Detail Modal -->
 <div id="detail-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
     <div class="native-card tp-native-card w-full max-w-lg my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
         <div class="flex items-center justify-between mb-6 gap-2">
             <h3 class="text-xl font-bold text-white">รายละเอียดคำขอลา</h3>
-            <button type="button" onclick="closeModal()" class="min-h-[48px] min-w-[48px] inline-flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 rounded-[20px] touch-manipulation" aria-label="ปิด">
+            <button type="button" onclick="closeModal()" class="min-h-[48px] min-w-[48px] inline-flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 rounded-[var(--tp-ios-card-radius)] touch-manipulation" aria-label="ปิด">
                 <i class="fas fa-times" aria-hidden="true"></i>
             </button>
         </div>
