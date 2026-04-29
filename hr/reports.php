@@ -225,7 +225,7 @@ $reportFlashErr = flash('error');
 require_once __DIR__ . '/../templates/header.php';
 ?>
 
-<div class="tp-hr-admin-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<div class="tp-hr-admin-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
 <?php if ($reportFlashOk): ?>
 <div class="mb-4 rounded-[var(--tp-ios-card-radius)] border border-emerald-500/30 bg-emerald-500/15 px-4 py-3 text-emerald-200 text-sm" role="status">
     <i class="fas fa-check-circle mr-2" aria-hidden="true"></i><?php echo htmlspecialchars($reportFlashOk); ?>
@@ -238,7 +238,7 @@ require_once __DIR__ . '/../templates/header.php';
 <?php endif; ?>
 
 <!-- Page Header -->
-<div class="mb-5 md:mb-8 min-w-0">
+<header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
     <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
         <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
         <span class="mx-2">/</span>
@@ -267,7 +267,7 @@ require_once __DIR__ . '/../templates/header.php';
     </form>
     <?php endif; ?>
     </div>
-</div>
+</header>
 
 <!-- Report Type Tabs -->
 <div class="flex gap-2 mb-6 overflow-x-auto pb-2 min-w-0 -mx-1 px-1" role="tablist" aria-label="ประเภทรายงาน">

@@ -69,8 +69,8 @@ if (!function_exists('tp_hr_emp_view_row')) {
 }
 ?>
 
-<div class="tp-hr-admin-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
-<div class="mb-5 md:mb-8 min-w-0">
+<div class="tp-hr-admin-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
     <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
         <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
         <span class="mx-2">/</span>
@@ -99,7 +99,7 @@ if (!function_exists('tp_hr_emp_view_row')) {
             </a>
         </div>
     </div>
-</div>
+</header>
 
 <!-- Profile Header -->
 <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 mb-6 min-w-0 max-w-full overflow-hidden">
@@ -143,7 +143,7 @@ if (!function_exists('tp_hr_emp_view_row')) {
 </div>
 
 <!-- Stats -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5 mb-5 md:mb-8 min-w-0 max-w-full">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-6 md:mb-8 min-w-0 max-w-full">
     <div class="stat-card tp-native-summary-card group min-w-0">
         <p class="text-slate-300 text-xs">สถานะวันนี้</p>
         <p class="text-white text-lg font-bold mt-1 min-h-[1.75rem]">

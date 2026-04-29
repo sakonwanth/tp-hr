@@ -160,9 +160,9 @@ $workShifts = $pdo->query("SELECT * FROM hr_work_shifts ORDER BY id")->fetchAll(
 require_once __DIR__ . '/../templates/header.php';
 ?>
 
-<div class="tp-hr-admin-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<div class="tp-hr-admin-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
 <!-- Page Header -->
-<div class="mb-5 md:mb-8 min-w-0">
+<header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
     <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
         <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
         <span class="mx-2">/</span>
@@ -173,7 +173,7 @@ require_once __DIR__ . '/../templates/header.php';
         <span>ตั้งค่าระบบ</span>
     </h1>
     <p class="tp-ios-caption-muted max-w-[42rem]">จัดการการตั้งค่าระบบ HR</p>
-</div>
+</header>
 
 <?php if (isset($success)): ?>
 <div class="mb-4 rounded-[var(--tp-ios-card-radius)] border border-emerald-500/30 bg-emerald-500/15 px-4 py-3 text-emerald-200 text-sm" role="status">

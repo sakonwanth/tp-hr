@@ -92,8 +92,8 @@ $current_page = 'hr-documents';
 include dirname(__DIR__) . '/templates/header.php';
 ?>
 
-<div class="tp-hr-admin-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
-<div class="mb-5 md:mb-8 min-w-0">
+<div class="tp-hr-admin-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
     <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
         <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
         <span class="mx-2">/</span>
@@ -103,7 +103,7 @@ include dirname(__DIR__) . '/templates/header.php';
         <h1 class="tp-ios-page-title">จัดการคำขอเอกสาร</h1>
         <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">ติดตามสถานะคำขอ กรองตามเดือนและประเภทเอกสาร</p>
     </div>
-</div>
+</header>
 
 <!-- Stats -->
 <div class="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-6 min-w-0 max-w-full">

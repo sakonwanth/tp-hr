@@ -105,14 +105,14 @@ $current_page = 'hr-dashboard';
 include dirname(__DIR__) . '/templates/header.php';
 ?>
 
-<div class="tp-hr-admin-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
-<div class="mb-5 md:mb-8 min-w-0">
+<div class="tp-hr-admin-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
     <h1 class="tp-ios-page-title">แดชบอร์ด HR</h1>
     <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">ภาพรวมการเข้างาน การลา และคำขอเอกสาร ณ วันที่ <?php echo formatDateThai($today); ?></p>
-</div>
+</header>
 
 <!-- Quick Stats -->
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-5 xl:gap-6 mb-5 md:mb-8 min-w-0 max-w-full">
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8 min-w-0 max-w-full">
     <div class="stat-card tp-native-summary-card group min-w-0">
         <div class="flex items-center gap-4">
             <div class="stat-icon bg-emerald-500/15 border border-emerald-400/25 transition-colors">
@@ -166,7 +166,7 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
 </div>
 
-<div class="grid grid-cols-1 xl:grid-cols-2 gap-5 md:gap-8 mb-5 md:mb-8 min-w-0 max-w-full">
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-8 mb-6 md:mb-8 min-w-0 max-w-full">
     <!-- Pending Leave Requests -->
     <div class="native-card tp-native-card tp-native-data-card min-w-0 max-w-full overflow-hidden">
         <div class="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between gap-3 min-w-0">
