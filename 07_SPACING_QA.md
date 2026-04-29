@@ -2,6 +2,8 @@
 
 Apply **per page** after refactor in **`06_IMPLEMENTATION_PROGRESS.md`**.
 
+**Which pages?** Full route list (ESS · HRA · PUB) is in **`08_VISUAL_QA_AFTER.md`** row matrices — run **`07`** alongside **`08`** questions on the same pass when possible.
+
 Target tokens: **`00_IOS26_DESIGN_DIRECTION.md`** + **`01_IOS26_COMPONENT_SYSTEM.md`**.
 
 ### Global PASS criteria (blocking any page)
