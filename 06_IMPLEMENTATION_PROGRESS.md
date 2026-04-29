@@ -10,7 +10,9 @@ Statuses: **`NOT_STARTED` · `IN_PROGRESS` · `REFACTORED` · `COMPLETE` · `REG
 | **`index.php`** (dashboard) | MASTER v15 | Wave-2 polish | **`tp-ios-master-screen`** · **glass sticky slab** · **`tp-ios-attendance-panel`** · floating tabs | **REFACTORED** |
 | **`checkin.php`** | Wave 6 · align master | **`tp-checkin-stack`** only | **`tp-ios-master-screen`** · **`tp-ios-large-title-block`** · **เข้า/ออก** wells **`tp-ios-attendance-panel`** · grid **`gap-6`** · column **`space-y-6`** | **REFACTORED** |
 | `leave.php` + **`modules/employee/leaves/request_form.php`** | Wave **6 · v15** | Flat header · **`gap-5`** | **`tp-ios-master-screen`** · **`tp-ios-large-title-block`** · grid **`gap-6`** · balance tiles **`tp-ios-attendance-panel`** · form inputs **`tp-native-*`** · actions **54/58** | **REFACTORED** |
-| ESS remainder · **`leave_history.php`** · **`attendance_history.php`** · etc. | Wave 4 | Mixed | Stacks + **`tp-ios-*`** | **REFACTORED** *(QA vs v15)* |
+| **`leave_history.php`** | Wave **6 · v15** | Header spacing · filter gap-4 | **`tp-ios-master-screen`** · **`tp-ios-large-title-block`** (`<header>`) · **`gap-6`** · **`tp-native-select`** · **`tp-ios-attendance-panel`** · reset **`min-h-[54px]`** | **REFACTORED** |
+| **`attendance_history.php`** | Wave **6 · v15** | Section rhythm drift | **`tp-ios-master-screen`** · **`tp-ios-large-title-block`** · filters/summary **`gap-6`** · **`tp-native-select`** · list rows **`tp-ios-attendance-panel`** | **REFACTORED** |
+| **`profile.php`** · **`payslip.php`** · **`certificate.php`** · **`dayoff_schedule.php`** | Wave 6 | Mixed | Stacks + **`tp-ios-*`** | **NEXT** *(pending)* |
 | **`login.php`** | Polish | — | Token radii | **REFACTORED** |
 | **`hr/*.php`** (admin) | Wave 3 | Mixed | **`tp-hr-admin-stack`** + titles | **REFACTORED** *(QA chrome)* |
 

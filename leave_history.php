@@ -92,8 +92,8 @@ if (!in_array($year, $availableYears)) {
 include 'templates/header.php';
 ?>
 
-<div class="tp-leave-history-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
-<div class="mb-5 md:mb-8 min-w-0">
+<div class="tp-leave-history-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
     <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
         <a href="leave.php" class="hover:text-white touch-manipulation">การลา</a>
         <span class="mx-2">/</span>
@@ -108,11 +108,9 @@ include 'templates/header.php';
             <i class="fas fa-plus mr-2"></i>ยื่นขอลาใหม่
         </a>
     </div>
-</div>
-
-<!-- Summary Cards -->
+</header>
 <?php if (!empty($summary)): ?>
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-5 xl:gap-6 mb-5 md:mb-8 min-w-0 max-w-full">
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-6 min-w-0 max-w-full">
     <?php foreach ($summary as $sum): ?>
     <div class="native-card tp-native-card tp-native-data-card min-w-0">
         <div class="flex items-center gap-3 min-w-0">
@@ -134,11 +132,11 @@ include 'templates/header.php';
 <?php endif; ?>
 
 <!-- Filters -->
-<div class="native-card tp-native-card tp-native-data-card mb-5 md:mb-8 min-w-0">
-    <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-5 min-w-0">
+<div class="native-card tp-native-card tp-native-data-card mb-6 min-w-0">
+    <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 min-w-0">
         <div class="min-w-0">
             <label class="block text-white/60 text-xs mb-1">ปี</label>
-            <select name="year" class="input-field" onchange="this.form.submit()">
+            <select name="year" class="input-field tp-native-select" onchange="this.form.submit()">
                 <?php foreach ($availableYears as $y): ?>
                 <option value="<?php echo $y; ?>" <?php echo $y == $year ? 'selected' : ''; ?>><?php echo $y + 543; ?></option>
                 <?php endforeach; ?>
@@ -146,7 +144,7 @@ include 'templates/header.php';
         </div>
         <div class="min-w-0">
             <label class="block text-white/60 text-xs mb-1">ประเภทการลา</label>
-            <select name="type" class="input-field" onchange="this.form.submit()">
+            <select name="type" class="input-field tp-native-select" onchange="this.form.submit()">
                 <option value="">ทั้งหมด</option>
                 <?php foreach ($leaveTypes as $lt): ?>
                 <option value="<?php echo $lt['id']; ?>" <?php echo $type == $lt['id'] ? 'selected' : ''; ?>>
@@ -157,7 +155,7 @@ include 'templates/header.php';
         </div>
         <div class="min-w-0">
             <label class="block text-white/60 text-xs mb-1">สถานะ</label>
-            <select name="status" class="input-field" onchange="this.form.submit()">
+            <select name="status" class="input-field tp-native-select" onchange="this.form.submit()">
                 <option value="">ทั้งหมด</option>
                 <option value="PENDING" <?php echo $status === 'PENDING' ? 'selected' : ''; ?>>รออนุมัติ</option>
                 <option value="APPROVED" <?php echo $status === 'APPROVED' ? 'selected' : ''; ?>>อนุมัติ</option>
@@ -166,7 +164,7 @@ include 'templates/header.php';
             </select>
         </div>
         <div class="flex items-end min-w-0">
-            <a href="leave_history.php?year=<?php echo (int)$year; ?>" class="touch-manipulation w-full min-h-[48px] inline-flex items-center justify-center py-2.5 bg-white/10 hover:bg-white/20 text-white text-center rounded-[var(--tp-ios-card-radius)] transition-colors font-medium">
+            <a href="leave_history.php?year=<?php echo (int)$year; ?>" class="touch-manipulation w-full min-h-[54px] inline-flex items-center justify-center py-2.5 bg-white/10 hover:bg-white/20 text-white text-center rounded-[var(--tp-radius-button)] transition-colors font-medium">
                 <i class="fas fa-redo mr-2" aria-hidden="true"></i>รีเซ็ต
             </a>
         </div>
@@ -196,9 +194,9 @@ include 'templates/header.php';
     ];
     ?>
     <!-- Mobile: card stack (< md) -->
-    <div class="md:hidden space-y-4 min-w-0 p-1">
+    <div class="md:hidden space-y-6 min-w-0 p-1">
         <?php foreach ($requests as $req): ?>
-        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/8 p-4 min-w-0">
+        <div class="tp-ios-attendance-panel p-4 min-w-0">
             <div class="flex items-center justify-between gap-2 mb-2 min-w-0">
                 <div class="flex items-center gap-2 min-w-0">
                     <span class="w-2 h-2 rounded-full shrink-0" style="background-color: <?php echo htmlspecialchars($req['color_code'] ?? '#6B7280'); ?>"></span>

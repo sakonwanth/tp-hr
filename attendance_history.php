@@ -137,9 +137,9 @@ require_once __DIR__ . '/templates/header.php';
 $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
 ?>
 
-<div class="tp-attendance-history-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<div class="tp-attendance-history-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
     <!-- Page Header -->
-    <div class="mb-5 md:mb-8 min-w-0">
+    <header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
         <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
             <a href="checkin.php" class="hover:text-white touch-manipulation">ลงเวลา</a>
             <span class="mx-2">/</span>
@@ -150,18 +150,17 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
                 <h1 class="tp-ios-page-title">ประวัติการลงเวลา</h1>
                 <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">สรุปรายเดือน กรองสถานะ และดูรายวันจนถึงวันนี้</p>
             </div>
-            <a href="checkin.php" class="btn-primary btn-primary-prominent w-full sm:w-auto shrink-0 inline-flex items-center justify-center touch-manipulation rounded-[var(--tp-ios-card-radius)]">
+            <a href="checkin.php" class="btn-primary btn-primary-prominent w-full sm:w-auto shrink-0 inline-flex items-center justify-center touch-manipulation rounded-[var(--tp-radius-button)]">
                 <i class="fas fa-fingerprint mr-2 text-xl" aria-hidden="true"></i>ลงเวลา
             </a>
         </div>
-    </div>
-    
+    </header>
     <!-- Filters -->
-    <div class="native-card tp-native-card tp-native-data-card p-4 mb-4 md:mb-6 min-w-0">
-        <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 gap-4 min-w-0 max-w-full">
+    <div class="native-card tp-native-card tp-native-data-card p-4 mb-6 min-w-0">
+        <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 gap-6 min-w-0 max-w-full">
             <div class="min-w-0">
                 <label class="block text-white/60 text-xs mb-1">เดือน</label>
-                <select name="month" class="input-field w-full" onchange="this.form.submit()">
+                <select name="month" class="input-field tp-native-select w-full" onchange="this.form.submit()">
                     <?php foreach ($month_options as $opt): ?>
                     <option value="<?php echo htmlspecialchars($opt['value']); ?>" <?php echo $month === $opt['value'] ? 'selected' : ''; ?>>
                         <?php echo htmlspecialchars($opt['label']); ?>
@@ -171,7 +170,7 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
             </div>
             <div class="min-w-0">
                 <label class="block text-white/60 text-xs mb-1">สถานะ</label>
-                <select name="status" class="input-field w-full" onchange="this.form.submit()">
+                <select name="status" class="input-field tp-native-select w-full" onchange="this.form.submit()">
                     <option value="">ทั้งหมด</option>
                     <option value="PRESENT" <?php echo $status_filter === 'PRESENT' ? 'selected' : ''; ?>>มาทำงาน</option>
                     <option value="LATE" <?php echo $status_filter === 'LATE' ? 'selected' : ''; ?>>มาสาย</option>
@@ -184,7 +183,7 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
     </div>
     
     <!-- Summary Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6 mb-4 md:mb-6 min-w-0 max-w-full">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-6 min-w-0 max-w-full">
         <div class="native-card tp-native-card tp-native-data-card p-4 text-center min-w-0">
             <p class="text-white/60 text-sm">มาทำงาน</p>
             <p class="text-3xl font-bold text-emerald-400"><?php echo $summary['present_days'] ?? 0; ?></p>
@@ -217,7 +216,7 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
     <!-- Attendance Table -->
     <div class="native-card tp-native-card tp-native-data-card min-w-0 max-w-full overflow-hidden">
         <?php if ($allDays): ?>
-        <div class="md:hidden p-3 space-y-3 min-w-0">
+        <div class="md:hidden p-3 space-y-6 min-w-0">
             <?php foreach ($allDays as $day): ?>
             <?php
             $att = $day['attendance'];
@@ -258,7 +257,7 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
                 ? floor($att['ot_minutes'] / 60) . ':' . str_pad($att['ot_minutes'] % 60, 2, '0', STR_PAD_LEFT)
                 : '-';
             ?>
-            <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/8 p-4 min-w-0">
+            <div class="tp-ios-attendance-panel p-4 min-w-0">
                 <div class="flex items-start justify-between gap-3 min-w-0">
                     <div class="min-w-0 flex-1">
                         <div class="text-white font-semibold"><?php echo formatDateThai($day['date']); ?></div>
