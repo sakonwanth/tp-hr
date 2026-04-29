@@ -12,7 +12,10 @@ Statuses: **`NOT_STARTED` · `IN_PROGRESS` · `REFACTORED` · `COMPLETE` · `REG
 | `leave.php` + **`modules/employee/leaves/request_form.php`** | Wave **6 · v15** | Flat header · **`gap-5`** | **`tp-ios-master-screen`** · **`tp-ios-large-title-block`** · grid **`gap-6`** · balance tiles **`tp-ios-attendance-panel`** · form inputs **`tp-native-*`** · actions **54/58** | **REFACTORED** |
 | **`leave_history.php`** | Wave **6 · v15** | Header spacing · filter gap-4 | **`tp-ios-master-screen`** · **`tp-ios-large-title-block`** (`<header>`) · **`gap-6`** · **`tp-native-select`** · **`tp-ios-attendance-panel`** · reset **`min-h-[54px]`** | **REFACTORED** |
 | **`attendance_history.php`** | Wave **6 · v15** | Section rhythm drift | **`tp-ios-master-screen`** · **`tp-ios-large-title-block`** · filters/summary **`gap-6`** · **`tp-native-select`** · list rows **`tp-ios-attendance-panel`** | **REFACTORED** |
-| **`profile.php`** · **`payslip.php`** · **`certificate.php`** · **`dayoff_schedule.php`** | Wave 6 | Mixed | Stacks + **`tp-ios-*`** | **NEXT** *(pending)* |
+| **`profile.php`** | Wave 6 · v15 | Flat stack · **`input-field`** | **`tp-ios-master-screen`** · **`tp-ios-large-title-block`** · nav/grid **`gap-6`** · section **`space-y-6`** · list rows **`tp-ios-attendance-panel`** · modal fields **`tp-native-*`** | **REFACTORED** |
+| **`payslip.php`** | Wave 6 · v15 | List/detail headers | **`tp-ios-master-screen`** · slip header · list **`tp-ios-large-title-block`** · YTD **`gap-6`** · **`tp-native-select`** (ปี) · slip rows **`tp-ios-attendance-panel`** | **REFACTORED** |
+| **`certificate.php`** | Wave 6 · v15 | Form/list cards | **`tp-ios-master-screen`** · **`tp-ios-large-title-block`** · grid **`gap-6`** · form **`tp-native-*`** · hub/history **`tp-ios-attendance-panel`** | **REFACTORED** |
+| **`dayoff_schedule.php`** | Wave 6 · v15 | Month filter spacing | **`tp-ios-master-screen`** · **`tp-ios-large-title-block`** · **`tp-native-select`** · weekly **`space-y-6`** | **REFACTORED** |
 | **`login.php`** | Polish | — | Token radii | **REFACTORED** |
 | **`hr/*.php`** (admin) | Wave 3 | Mixed | **`tp-hr-admin-stack`** + titles | **REFACTORED** *(QA chrome)* |
 

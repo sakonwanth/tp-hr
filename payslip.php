@@ -159,7 +159,7 @@ $latestSlip = !empty($slips) ? $slips[0] : null;
 include 'templates/header.php';
 ?>
 
-<div class="tp-payslip-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<div class="tp-payslip-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
 <?php if ($slip): ?>
 <?php
 // ชื่อบริษัท — ดึงจาก system_settings (เดียวกับ print_template / CRM)
@@ -185,7 +185,7 @@ try {
 ?>
 <!-- Slip Detail View -->
 <?php $slipYear = (int)date('Y', strtotime($slip['payroll_month'])); ?>
-<div class="mb-5 md:mb-8 min-w-0">
+<header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
     <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
         <a href="payslip.php?year=<?php echo $slipYear; ?>" class="hover:text-white touch-manipulation">สลิปเงินเดือน</a>
         <span class="mx-2">/</span>
@@ -203,7 +203,7 @@ try {
             <?php tp_hr_payslip_download_form((int)$slip['id'], 'w-full sm:w-auto min-h-[56px] px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors inline-flex items-center justify-center font-semibold touch-manipulation border-0', '<i class="fas fa-download mr-2" aria-hidden="true"></i>ดาวน์โหลด PDF', true); ?>
         </div>
     </div>
-</div>
+</header>
 
 <!-- Payslip Card -->
 <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 print:bg-white print:text-black min-w-0 overflow-x-auto" id="payslip-content">
@@ -382,13 +382,13 @@ try {
 
 <?php else: ?>
 <!-- Slip List View -->
-<div class="mb-5 md:mb-8 min-w-0">
+<header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
     <h1 class="tp-ios-page-title">สลิปเงินเดือน</h1>
     <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">ดูสรุปสะสมตามปี กรองปี พร้อมดูรายละเอียดและดาวน์โหลดสลิปที่อนุมัติแล้ว</p>
-</div>
+</header>
 
 <!-- YTD Summary -->
-<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6 mb-4 md:mb-6 min-w-0 max-w-full">
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 mb-6 min-w-0 max-w-full">
     <div class="native-card tp-native-card tp-native-data-card min-w-0">
         <p class="text-white/50 text-sm truncate">รายได้สะสม <?php echo $year + 543; ?></p>
         <p class="text-lg sm:text-xl font-bold text-green-400 mt-1 tabular-nums"><?php echo number_format($ytd['ytd_income'] ?? 0, 2); ?></p>
@@ -412,11 +412,11 @@ try {
 </div>
 
 <!-- Year Filter -->
-<div class="native-card tp-native-card tp-native-data-card mb-4 md:mb-6 min-w-0">
+<div class="native-card tp-native-card tp-native-data-card mb-6 min-w-0">
     <form method="GET" class="flex flex-wrap items-end gap-4 min-w-0">
         <div class="min-w-0">
             <label class="block text-white/60 text-xs mb-1" for="payslip-year">ปี (พ.ศ.)</label>
-            <select id="payslip-year" name="year" class="input-field w-full sm:w-40 min-w-0" onchange="this.form.submit()">
+            <select id="payslip-year" name="year" class="input-field tp-native-select w-full sm:w-40 min-w-0" onchange="this.form.submit()">
                 <?php foreach ($availableYears as $y): ?>
                 <option value="<?php echo $y; ?>" <?php echo $y == $year ? 'selected' : ''; ?>><?php echo $y + 543; ?></option>
                 <?php endforeach; ?>
@@ -433,7 +433,7 @@ try {
         <p class="text-slate-400 text-sm">ไม่พบสลิปเงินเดือนในปี <?php echo $year + 543; ?></p>
     </div>
     <?php else: ?>
-    <div class="space-y-3 p-3 md:p-4 min-w-0">
+    <div class="space-y-6 p-3 md:p-4 min-w-0">
         <?php foreach ($slips as $s): ?>
         <?php
         $monthName = thaiMonth(date('n', strtotime($s['payroll_month'])));
@@ -451,7 +451,7 @@ try {
             'paid' => 'จ่ายแล้ว'
         ];
         ?>
-        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/8 p-4 md:p-5 min-w-0 transition-colors hover:bg-white/[0.07]">
+        <div class="tp-ios-attendance-panel p-4 md:p-5 min-w-0 transition-colors hover:bg-white/[0.07]">
             <div class="flex flex-col gap-4 min-w-0">
                 <div class="flex items-start gap-4 min-w-0">
                     <div class="w-12 h-12 rounded-[var(--tp-ios-card-radius)] bg-violet-600/20 flex items-center justify-center flex-shrink-0">

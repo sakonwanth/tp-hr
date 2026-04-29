@@ -43,11 +43,11 @@ $pendingCount = $stmtPending->fetchColumn();
 include 'templates/header.php';
 ?>
 
-<div class="tp-certificate-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
-<div class="mb-5 md:mb-8 min-w-0">
+<div class="tp-certificate-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
     <h1 class="tp-ios-page-title">ขอหนังสือรับรอง</h1>
     <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">ขอเอกสารรับรองการทำงาน หนังสือรับรองเงินเดือน และอื่นๆ ติดตามสถานะและดาวน์โหลดได้จากประวัติด้านล่าง</p>
-</div>
+</header>
 
 <?php if ($action === 'new' || $action === 'request'): ?>
 <!-- New Request Form -->
@@ -59,7 +59,7 @@ include 'templates/header.php';
     </nav>
 </div>
 
-<div class="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6 min-w-0 max-w-full">
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6 min-w-0 max-w-full">
     <div class="xl:col-span-2 min-w-0">
         <form id="certificate-form" class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0" method="POST" action="/api/certificate.php">
             <input type="hidden" name="action" value="create">
@@ -68,7 +68,7 @@ include 'templates/header.php';
             <!-- Document Type -->
             <div class="tp-native-form-group">
                 <label class="block text-white/80 text-sm font-medium mb-2">ประเภทเอกสาร <span class="text-red-400">*</span></label>
-                <select name="template_id" id="template_id" required class="input-field" onchange="updateTemplateInfo()">
+                <select name="template_id" id="template_id" required class="input-field tp-native-select" onchange="updateTemplateInfo()">
                     <option value="">-- เลือกประเภทเอกสาร --</option>
                     <?php foreach ($templates as $tpl): ?>
                     <option value="<?php echo $tpl['id']; ?>" 
@@ -103,13 +103,13 @@ include 'templates/header.php';
             <!-- Number of Copies -->
             <div class="tp-native-form-group">
                 <label class="block text-white/80 text-sm font-medium mb-2">จำนวนฉบับ</label>
-                <input type="number" name="copies" value="1" min="1" max="10" class="input-field w-32">
+                <input type="number" name="copies" value="1" min="1" max="10" class="input-field tp-native-input w-32">
             </div>
             
             <!-- Purpose -->
             <div class="tp-native-form-group">
                 <label class="block text-white/80 text-sm font-medium mb-2">วัตถุประสงค์การใช้งาน <span class="text-red-400">*</span></label>
-                <select name="purpose" id="purpose" required class="input-field" onchange="toggleCustomPurpose()">
+                <select name="purpose" id="purpose" required class="input-field tp-native-select" onchange="toggleCustomPurpose()">
                     <option value="">-- เลือกวัตถุประสงค์ --</option>
                     <option value="VISA">ขอวีซ่า / เดินทางไปต่างประเทศ</option>
                     <option value="BANK">ติดต่อธนาคาร / สินเชื่อ</option>
@@ -123,13 +123,13 @@ include 'templates/header.php';
             <!-- Custom Purpose -->
             <div class="tp-native-form-group hidden" id="custom-purpose-div">
                 <label class="block text-white/80 text-sm font-medium mb-2">ระบุวัตถุประสงค์</label>
-                <input type="text" name="purpose_detail" class="input-field" placeholder="กรุณาระบุวัตถุประสงค์">
+                <input type="text" name="purpose_detail" class="input-field tp-native-input" placeholder="กรุณาระบุวัตถุประสงค์">
             </div>
             
             <!-- Additional Notes -->
             <div class="tp-native-form-group">
                 <label class="block text-white/80 text-sm font-medium mb-2">หมายเหตุเพิ่มเติม</label>
-                <textarea name="notes" rows="3" class="input-field" placeholder="รายละเอียดเพิ่มเติมที่ต้องการระบุในเอกสาร (ถ้ามี)"></textarea>
+                <textarea name="notes" rows="3" class="input-field tp-native-textarea" placeholder="รายละเอียดเพิ่มเติมที่ต้องการระบุในเอกสาร (ถ้ามี)"></textarea>
             </div>
             
             <!-- Rush Request -->
@@ -156,7 +156,7 @@ include 'templates/header.php';
     </div>
     
     <!-- Info -->
-    <div class="space-y-4 md:space-y-6 min-w-0">
+    <div class="space-y-6 min-w-0">
         <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
             <h3 class="section-title mb-4 flex flex-wrap items-center gap-2">
                 <i class="fas fa-info-circle text-blue-400 text-2xl" aria-hidden="true"></i>
@@ -176,7 +176,7 @@ include 'templates/header.php';
             </h3>
             <div class="space-y-2">
                 <?php foreach ($templates as $tpl): ?>
-                <div class="py-3 px-3 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/8">
+                <div class="tp-ios-attendance-panel py-3 px-3">
                     <p class="text-white font-medium"><?php echo htmlspecialchars($tpl['name']); ?></p>
                     <?php if ($tpl['description']): ?>
                     <p class="text-white/50 text-sm"><?php echo htmlspecialchars($tpl['description']); ?></p>
@@ -257,7 +257,7 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
 
 <?php else: ?>
 <!-- Request List View -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6 min-w-0 max-w-full">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 min-w-0 max-w-full">
     <a href="certificate.php?action=new" class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0 hover:bg-white/[0.07] transition-colors group touch-manipulation border-violet-500/20">
         <div class="flex items-center gap-4">
             <div class="w-12 h-12 rounded-[var(--tp-ios-card-radius)] bg-violet-600/20 flex items-center justify-center group-hover:bg-violet-600/30 transition-colors">
@@ -339,9 +339,9 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
         'CANCELLED' => 'ยกเลิก'
     ];
     ?>
-    <div class="space-y-3 p-3 md:p-4 min-w-0">
+    <div class="space-y-6 p-3 md:p-4 min-w-0">
         <?php foreach ($myRequests as $req): ?>
-        <div class="p-4 md:p-5 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/8 hover:bg-white/[0.07] transition-colors min-w-0">
+        <div class="tp-ios-attendance-panel p-4 md:p-5 hover:bg-white/[0.07] transition-colors min-w-0">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 min-w-0">
                 <div class="flex items-center gap-4 min-w-0">
                     <div class="w-12 h-12 rounded-[var(--tp-ios-card-radius)] bg-violet-600/20 flex items-center justify-center flex-shrink-0">

@@ -157,8 +157,8 @@ for ($i = -1; $i < 6; $i++) {
 include __DIR__ . '/templates/header.php';
 ?>
 
-<div class="tp-dayoff-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
-<div class="mb-5 md:mb-8 max-w-3xl min-w-0">
+<div class="tp-dayoff-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<header class="tp-ios-large-title-block mb-6 md:mb-8 max-w-3xl min-w-0">
     <nav class="mb-2 text-sm text-white/60" aria-label="Breadcrumb">
         <a href="checkin.php" class="inline-flex min-h-[48px] items-center hover:text-white touch-manipulation">ลงเวลา</a>
         <span class="mx-2">/</span>
@@ -171,27 +171,27 @@ include __DIR__ . '/templates/header.php';
         </p>
         <p class="tp-ios-caption-muted">ขอเปลี่ยนวันหยุดรายสัปดาห์ได้ รอผู้บริหารอนุมัติ</p>
     </div>
-</div>
+</header>
 
 <?php if ($success): ?>
-<div class="tp-native-success-state bg-emerald-500/15 border border-emerald-400/40 text-emerald-200 px-4 py-3 rounded-[var(--tp-ios-card-radius)] mb-4 md:mb-6 flex items-start gap-3 max-w-none mx-0 w-full" role="status">
+<div class="tp-native-success-state bg-emerald-500/15 border border-emerald-400/40 text-emerald-200 px-4 py-3 rounded-[var(--tp-ios-card-radius)] mb-6 flex items-start gap-3 max-w-none mx-0 w-full" role="status">
     <i class="fas fa-check-circle text-2xl shrink-0 mt-0.5" aria-hidden="true"></i>
     <span class="text-base leading-snug"><?php echo htmlspecialchars($success); ?></span>
 </div>
 <?php endif; ?>
 
 <?php if ($error): ?>
-<div class="tp-native-error-state bg-red-500/15 border border-red-400/45 text-red-200 px-4 py-3 rounded-[var(--tp-ios-card-radius)] mb-4 md:mb-6 flex items-start gap-3 max-w-none mx-0 w-full" role="alert">
+<div class="tp-native-error-state bg-red-500/15 border border-red-400/45 text-red-200 px-4 py-3 rounded-[var(--tp-ios-card-radius)] mb-6 flex items-start gap-3 max-w-none mx-0 w-full" role="alert">
     <i class="fas fa-exclamation-circle text-2xl shrink-0 mt-0.5" aria-hidden="true"></i>
     <span class="text-base leading-snug"><?php echo htmlspecialchars($error); ?></span>
 </div>
 <?php endif; ?>
 
 <!-- Month Filter -->
-<div class="native-card tp-native-card tp-native-data-card p-4 mb-4 md:mb-6 min-w-0">
+<div class="native-card tp-native-card tp-native-data-card p-4 mb-6 min-w-0">
     <form method="GET" class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
         <label for="dayoff-month-select" class="text-white/70 text-sm font-medium shrink-0">เดือน</label>
-        <select id="dayoff-month-select" name="month" class="input-field w-full sm:w-auto sm:min-w-[12rem] touch-manipulation" onchange="this.form.submit()">
+        <select id="dayoff-month-select" name="month" class="input-field tp-native-select w-full sm:w-auto sm:min-w-[12rem] touch-manipulation" onchange="this.form.submit()">
             <?php foreach ($monthOptions as $opt): ?>
             <option value="<?php echo $opt['value']; ?>" <?php echo $month === $opt['value'] ? 'selected' : ''; ?>>
                 <?php echo $opt['label']; ?>
@@ -202,7 +202,7 @@ include __DIR__ . '/templates/header.php';
 </div>
 
 <!-- Weekly Schedule -->
-<div class="space-y-4 md:space-y-6 min-w-0">
+<div class="space-y-6 min-w-0">
     <?php foreach ($weeks as $week): 
         $req = $requests[$week['start']] ?? null;
         $effectiveDayOff = $defaultDayOff;

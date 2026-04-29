@@ -85,14 +85,14 @@ include 'templates/header.php';
 exit;
 endif; ?>
 
-<div class="tp-profile-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
-<div class="mb-5 md:mb-8 min-w-0">
+<div class="tp-profile-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
     <h1 class="tp-ios-page-title">ข้อมูลส่วนตัว</h1>
     <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">ดูและแก้ไขข้อมูลส่วนตัว ผู้ติดต่อฉุกเฉิน ครอบครัว การศึกษา และประวัติการทำงาน</p>
-</div>
+</header>
 
 <!-- Profile Tabs — แถวละ 2 ปุ่ม ไอคอนบน ข้อความล่าง (กว้างพอไม่ตกบรรทัด) -->
-<nav class="grid grid-cols-2 gap-2 sm:gap-3 mb-4 md:mb-6 min-w-0" aria-label="ส่วนข้อมูลโปรไฟล์">
+<nav class="grid grid-cols-2 gap-3 sm:gap-4 mb-6 min-w-0" aria-label="ส่วนข้อมูลโปรไฟล์">
     <a href="profile.php" class="profile-tab-tile rounded-[var(--tp-ios-card-radius)] min-h-[52px] sm:min-h-[4.5rem] px-2 py-2.5 flex flex-col items-center justify-center gap-1.5 text-center touch-manipulation border border-transparent <?php echo !$action ? 'bg-violet-600 text-white border-violet-500/40' : 'bg-white/10 text-white/80 hover:text-white hover:bg-white/15 border-white/10'; ?> transition-colors">
         <i class="fas fa-user text-2xl opacity-90" aria-hidden="true"></i>
         <span class="text-xs font-semibold leading-tight whitespace-nowrap">ข้อมูลทั่วไป</span>
@@ -117,7 +117,7 @@ endif; ?>
 
 <?php if (!$action): ?>
 <!-- General Info -->
-<div class="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6 min-w-0 max-w-full">
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6 min-w-0 max-w-full">
     <!-- Profile Card -->
     <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
         <div class="text-center mb-6">
@@ -176,13 +176,13 @@ endif; ?>
     </div>
     
     <!-- Personal Info -->
-    <div class="xl:col-span-2 space-y-4 md:space-y-6">
+    <div class="xl:col-span-2 space-y-6">
         <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
             <h3 class="section-title mb-4 flex flex-wrap items-center gap-2">
                 <i class="fas fa-id-card text-violet-400 text-2xl" aria-hidden="true"></i>
                 ข้อมูลส่วนตัว
             </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <p class="text-white/50 text-sm">ชื่อ-นามสกุล (ไทย)</p>
                     <p class="text-white"><?php echo htmlspecialchars(($profile['first_name_th'] ?? '') . ' ' . ($profile['last_name_th'] ?? '')); ?></p>
@@ -228,7 +228,7 @@ endif; ?>
                 <i class="fas fa-briefcase text-emerald-400 text-2xl" aria-hidden="true"></i>
                 ข้อมูลการจ้างงาน
             </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <p class="text-white/50 text-sm">รหัสพนักงาน</p>
                     <p class="text-white"><?php echo htmlspecialchars($profile['employee_code'] ?? '-'); ?></p>
@@ -270,7 +270,7 @@ endif; ?>
                 <i class="fas fa-map-marker-alt text-sky-400 text-2xl" aria-hidden="true"></i>
                 ที่อยู่
             </h3>
-            <div class="space-y-4">
+            <div class="space-y-6">
                 <div>
                     <p class="text-white/50 text-sm">ที่อยู่ปัจจุบัน</p>
                     <p class="text-white"><?php echo htmlspecialchars($profile['address'] ?? '-'); ?></p>
@@ -306,7 +306,7 @@ endif; ?>
     <?php else: ?>
     <div class="space-y-3">
         <?php foreach ($emergencyContacts as $contact): ?>
-        <div class="p-4 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="tp-ios-attendance-panel p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div class="flex items-start sm:items-center gap-4 min-w-0">
                 <div class="w-12 h-12 rounded-full bg-violet-600/25 flex items-center justify-center shrink-0">
                     <i class="fas fa-user text-violet-400 text-xl" aria-hidden="true"></i>
@@ -364,7 +364,7 @@ endif; ?>
         ];
         $age = $member['birth_date'] ? (new DateTime())->diff(new DateTime($member['birth_date']))->y : '-';
         ?>
-        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/8 p-4">
+        <div class="tp-ios-attendance-panel p-4">
             <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
                     <p class="text-white font-medium break-words"><?php echo htmlspecialchars($member['name']); ?></p>
@@ -447,7 +447,7 @@ endif; ?>
     <?php else: ?>
     <div class="space-y-3">
         <?php foreach ($educations as $edu): ?>
-        <div class="p-4 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div class="tp-ios-attendance-panel p-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div class="flex gap-4 min-w-0">
                 <div class="w-12 h-12 rounded-[var(--tp-ios-card-radius)] bg-blue-500/20 flex items-center justify-center flex-shrink-0">
                     <i class="fas fa-graduation-cap text-blue-400 text-xl" aria-hidden="true"></i>
@@ -501,7 +501,7 @@ endif; ?>
     <?php else: ?>
     <div class="space-y-3">
         <?php foreach ($workHistory as $work): ?>
-        <div class="p-4 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div class="tp-ios-attendance-panel p-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div class="flex gap-4 min-w-0">
                 <div class="w-12 h-12 rounded-[var(--tp-ios-card-radius)] bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
                     <i class="fas fa-building text-emerald-400 text-xl" aria-hidden="true"></i>
@@ -571,18 +571,18 @@ function openEditModal(type) {
         content.innerHTML = `
             <?php echo csrfField(); ?>
             <input type="hidden" name="action" value="update_contact">
-            <div class="space-y-4">
+            <div class="space-y-6">
                 <div>
                     <label class="block text-white/80 text-sm mb-2">อีเมล</label>
-                    <input type="email" name="email" value="<?php echo htmlspecialchars($profile['email'] ?? ''); ?>" class="input-field">
+                    <input type="email" name="email" value="<?php echo htmlspecialchars($profile['email'] ?? ''); ?>" class="input-field tp-native-input">
                 </div>
                 <div>
                     <label class="block text-white/80 text-sm mb-2">เบอร์โทรศัพท์</label>
-                    <input type="tel" name="phone" value="<?php echo htmlspecialchars($profile['phone'] ?? ''); ?>" class="input-field">
+                    <input type="tel" name="phone" value="<?php echo htmlspecialchars($profile['phone'] ?? ''); ?>" class="input-field tp-native-input">
                 </div>
                 <div>
                     <label class="block text-white/80 text-sm mb-2">ที่อยู่ปัจจุบัน</label>
-                    <textarea name="address" rows="3" class="input-field"><?php echo htmlspecialchars($profile['address'] ?? ''); ?></textarea>
+                    <textarea name="address" rows="3" class="input-field tp-native-textarea"><?php echo htmlspecialchars($profile['address'] ?? ''); ?></textarea>
                 </div>
             </div>
         `;
@@ -603,14 +603,14 @@ function openAddModal(type) {
             content: `
                 <?php echo csrfField(); ?>
                 <input type="hidden" name="action" value="add_emergency">
-                <div class="space-y-4">
+                <div class="space-y-6">
                     <div>
                         <label class="block text-white/80 text-sm mb-2">ชื่อ-นามสกุล *</label>
-                        <input type="text" name="name" required class="input-field">
+                        <input type="text" name="name" required class="input-field tp-native-input">
                     </div>
                     <div>
                         <label class="block text-white/80 text-sm mb-2">ความสัมพันธ์ *</label>
-                        <select name="relationship" required class="input-field">
+                        <select name="relationship" required class="input-field tp-native-select">
                             <option value="">-- เลือก --</option>
                             <option value="บิดา">บิดา</option>
                             <option value="มารดา">มารดา</option>
@@ -623,7 +623,7 @@ function openAddModal(type) {
                     </div>
                     <div>
                         <label class="block text-white/80 text-sm mb-2">เบอร์โทรศัพท์ *</label>
-                        <input type="tel" name="phone" required class="input-field">
+                        <input type="tel" name="phone" required class="input-field tp-native-input">
                     </div>
                     <div>
                         <label class="flex items-center">
@@ -639,10 +639,10 @@ function openAddModal(type) {
             content: `
                 <?php echo csrfField(); ?>
                 <input type="hidden" name="action" value="add_family">
-                <div class="space-y-4">
+                <div class="space-y-6">
                     <div>
                         <label class="block text-white/80 text-sm mb-2">ความสัมพันธ์ *</label>
-                        <select name="relationship" required class="input-field">
+                        <select name="relationship" required class="input-field tp-native-select">
                             <option value="">-- เลือก --</option>
                             <option value="FATHER">บิดา</option>
                             <option value="MOTHER">มารดา</option>
@@ -653,15 +653,15 @@ function openAddModal(type) {
                     </div>
                     <div>
                         <label class="block text-white/80 text-sm mb-2">ชื่อ-นามสกุล *</label>
-                        <input type="text" name="name" required class="input-field">
+                        <input type="text" name="name" required class="input-field tp-native-input">
                     </div>
                     <div>
                         <label class="block text-white/80 text-sm mb-2">วันเกิด</label>
-                        <input type="date" name="birth_date" class="input-field">
+                        <input type="date" name="birth_date" class="input-field tp-native-input">
                     </div>
                     <div>
                         <label class="block text-white/80 text-sm mb-2">อาชีพ</label>
-                        <input type="text" name="occupation" class="input-field">
+                        <input type="text" name="occupation" class="input-field tp-native-input">
                     </div>
                 </div>
             `
@@ -671,10 +671,10 @@ function openAddModal(type) {
             content: `
                 <?php echo csrfField(); ?>
                 <input type="hidden" name="action" value="add_education">
-                <div class="space-y-4">
+                <div class="space-y-6">
                     <div>
                         <label class="block text-white/80 text-sm mb-2">ระดับการศึกษา *</label>
-                        <select name="degree" required class="input-field">
+                        <select name="degree" required class="input-field tp-native-select">
                             <option value="">-- เลือก --</option>
                             <option value="มัธยมศึกษาตอนต้น">มัธยมศึกษาตอนต้น</option>
                             <option value="มัธยมศึกษาตอนปลาย">มัธยมศึกษาตอนปลาย</option>
@@ -687,20 +687,20 @@ function openAddModal(type) {
                     </div>
                     <div>
                         <label class="block text-white/80 text-sm mb-2">สถาบันการศึกษา *</label>
-                        <input type="text" name="institution" required class="input-field">
+                        <input type="text" name="institution" required class="input-field tp-native-input">
                     </div>
                     <div>
                         <label class="block text-white/80 text-sm mb-2">สาขาวิชา</label>
-                        <input type="text" name="field_of_study" class="input-field">
+                        <input type="text" name="field_of_study" class="input-field tp-native-input">
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-2 gap-6">
                         <div>
                             <label class="block text-white/80 text-sm mb-2">ปีที่จบ (พ.ศ.)</label>
-                            <input type="number" name="graduation_year" class="input-field" min="2500" max="2600">
+                            <input type="number" name="graduation_year" class="input-field tp-native-input" min="2500" max="2600">
                         </div>
                         <div>
                             <label class="block text-white/80 text-sm mb-2">เกรดเฉลี่ย</label>
-                            <input type="number" name="gpa" step="0.01" min="0" max="4" class="input-field">
+                            <input type="number" name="gpa" step="0.01" min="0" max="4" class="input-field tp-native-input">
                         </div>
                     </div>
                 </div>
@@ -711,32 +711,32 @@ function openAddModal(type) {
             content: `
                 <?php echo csrfField(); ?>
                 <input type="hidden" name="action" value="add_work">
-                <div class="space-y-4">
+                <div class="space-y-6">
                     <div>
                         <label class="block text-white/80 text-sm mb-2">บริษัท/องค์กร *</label>
-                        <input type="text" name="company_name" required class="input-field">
+                        <input type="text" name="company_name" required class="input-field tp-native-input">
                     </div>
                     <div>
                         <label class="block text-white/80 text-sm mb-2">ตำแหน่ง *</label>
-                        <input type="text" name="position" required class="input-field">
+                        <input type="text" name="position" required class="input-field tp-native-input">
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-2 gap-6">
                         <div>
                             <label class="block text-white/80 text-sm mb-2">วันที่เริ่มงาน *</label>
-                            <input type="date" name="start_date" required class="input-field">
+                            <input type="date" name="start_date" required class="input-field tp-native-input">
                         </div>
                         <div>
                             <label class="block text-white/80 text-sm mb-2">วันที่สิ้นสุด</label>
-                            <input type="date" name="end_date" class="input-field">
+                            <input type="date" name="end_date" class="input-field tp-native-input">
                         </div>
                     </div>
                     <div>
                         <label class="block text-white/80 text-sm mb-2">หน้าที่ความรับผิดชอบ</label>
-                        <textarea name="responsibilities" rows="3" class="input-field"></textarea>
+                        <textarea name="responsibilities" rows="3" class="input-field tp-native-textarea"></textarea>
                     </div>
                     <div>
                         <label class="block text-white/80 text-sm mb-2">เหตุผลที่ลาออก</label>
-                        <input type="text" name="leaving_reason" class="input-field">
+                        <input type="text" name="leaving_reason" class="input-field tp-native-input">
                     </div>
                 </div>
             `
