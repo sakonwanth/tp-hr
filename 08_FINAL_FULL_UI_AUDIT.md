@@ -1,12 +1,22 @@
-# 08_FINAL_FULL_UI_AUDIT.md — TP-HR (gate — **OPEN**)
+# 08_FINAL_FULL_UI_AUDIT.md — TP-HR (full UI audit gate)
 
-**Status:** 🔶 **Incomplete** · structural foundation shipped (**native-shell v12**).
+**Status:** 🔶 **Open for device / polish** — structural + page markup passes for **Waves 1–3** are shipped (`06`).
 
-| Criterion (#20 in mission Brief) | State |
-|---------------------------------|-------|
-| Every discovered templated route uses locked IOS primitives | 🔶 Pending Wave 2–3 markup passes |
-| Spacing QA | ✅ Token parity · ⏳ per-page |
-| Overflow | ⏳ device matrix |
-| CTA/nav collisions | ⏳ re-check Wave 2 modals |
+| Criterion | State |
+|-----------|--------|
+| Templated routes use IOS shell + tokens (`native-shell` v12+, **v13** typography helpers) | ✅ Foundation + Wave 2–3 pages refactored per `06` |
+| Per-page spacing / radii vs tokens | ✅ Markup sweep done for scoped waves · ⏳ spot-check on devices |
+| Overflow / horizontal bleed | ⏳ device matrix (**`07`**) |
+| CTA vs bottom-tab / modal collision | ⏳ re-check modals & sticky actions on narrow viewports |
 
-**Closing condition:** rerun after **`06_IMPLEMENTATION_PROGRESS.md`** shows **`COMPLETE`** for all P0/P1 screens listed in **`01`**.
+**Closing condition (this file):**
+
+1. `06_IMPLEMENTATION_PROGRESS.md` reflects **COMPLETE** or **REFACTORED** for all routes your mission cares about — **done for Waves 1–3 listed there.**
+2. **`07_PAGE_REGRESSION_AFTER.md`** PASS dates filled (or equivalent QA log).
+3. No open **P0** layout breaks on agreed breakpoints (e.g. 375 / 768 / 1024).
+
+When the above are satisfied, set this doc’s header **Status** to **CLOSED** and note the QA date.
+
+---
+
+*Last updated: 2026-04-28 — Wave 2–3 markup passes complete; pending human viewport QA.*
