@@ -1,5 +1,7 @@
 # 05_IOS26_COMPONENT_SYSTEM.md — TP-HR authoritative spec
 
+> **⚠️ Superseded by `01_IOS26_COMPONENT_SYSTEM.md` (expanded 27-component taxonomy + spacing targets · 2026-04-30).** Keep this file for historical backlinks only.
+
 Aligned with **`assets/css/native-shell.css`** (v12) + UI UX Pro Max skill (**touch/accessibility/layout** tiers).
 
 ---

@@ -16,3 +16,9 @@ Statuses: **`NOT_STARTED` · `IN_PROGRESS` · `REFACTORED` · `COMPLETE` · `REG
 | **`login.php`** | Polish | Success/error banners **`rounded-[20px]`** | **`rounded-[var(--tp-ios-card-radius)]`** (markup-only) | **REFACTORED** |
 
 **Regression:** PHPUnit / API tests untouched. Manual viewport QA: Wave **2–4** routes (**`07`** matrix).
+
+---
+
+### Phase 6 — optional per-route detail tracking
+
+For deep audits, duplicate each row above with granular columns (**components replaced · visual deltas · UX · spacing/mobile/tablet · regression**) in a spreadsheet or appendix table—**`06_IMPLEMENTATION_PROGRESS.md`** remains the condensed source of truth.
