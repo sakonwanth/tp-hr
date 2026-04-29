@@ -1,6 +1,6 @@
 # 01_FULL_UI_INVENTORY.md — TP-HR (`PROJECT_TARGET`)
 
-**Generated:** 2026-04-28 · **Baseline shell:** `/assets/css/native-shell.css?v=12` · **Discovery:** codebase scan (`templates/header.php`, `login.php`, public routes).
+**Generated:** 2026-04-30 · **Baseline shell:** `/assets/css/native-shell.css?v=15` · **Discovery:** codebase scan (`templates/header.php`, `login.php`, `hr/*.php`, public routes).
 
 Purpose: exhaustive **user-visible** UI inventory (excluding pure API handlers that return JSON only). Paths are relative to `tp-hr/`.
 
@@ -50,6 +50,7 @@ Legend: **UI type** ≈ Employee self-service (`ESS`), HR admin (`HRA`), public 
 | 20 | HR attendance admin | `/hr/attendance.php` | `hr/attendance.php` | `hr-attendance` | Audit adjustments | P0 | yes |
 | 21 | Leave approvals | `/hr/leaves.php` | `hr/leaves.php` | `hr-leaves` | Pending list | P0 | yes |
 | 22 | Day-off change approvals | `/hr/dayoff_approvals.php` | `hr/dayoff_approvals.php` | `hr-dayoff` | CEO approvals | P1 | yes |
+| 22a | Attendance adjustments (CEO) | `/hr/attendance_adjustments.php` | `hr/attendance_adjustments.php` | `hr-attendance-adjustments` | Approve check-in/out edits | P1 | yes |
 | 23 | Documents queue | `/hr/documents.php` | `hr/documents.php` | `hr-documents` | Document ops | P1 | yes |
 | 24 | Document templates | `/hr/document_templates.php` | `hr/document_templates.php` | `hr-document-templates` | Template CRUD | P2 | yes |
 | 25 | Reports | `/hr/reports.php` | `hr/reports.php` | `hr-reports` | Charts / CSV | P1 | yes |
@@ -70,13 +71,13 @@ Legend: **UI type** ≈ Employee self-service (`ESS`), HR admin (`HRA`), public 
 |----------------|-------|
 | App chrome | `templates/header.php`, `templates/footer.php` |
 | Locked registry | `templates/native/component_registry.php` |
-| Global styles | `/assets/css/app.css`, `/assets/css/native-shell.css?v=12` |
+| Global styles | `/assets/css/app.css`, `/assets/css/native-shell.css?v=15` |
 
 ---
 
 ### Count summary (browser UI routes in B+C+A)
 
 - **Standalone / auth screens:** ~4 login/verify/print helpers  
-- **ESS + HR templated shells:** ~23 primary controller files (+ embedded `modules/` partials)
+- **ESS + HR templated shells:** ~24 primary controller files (+ embedded `modules/` partials)
 
 **Needs refactor (`yes`):** treat all P0/P1/P2 screens as **`NEEDS_REFACTOR`** until individually marked complete in **`06_IMPLEMENTATION_PROGRESS.md`**.

@@ -125,9 +125,9 @@ $monthly_summary = $stmt->fetch();
 require_once __DIR__ . '/templates/header.php';
 ?>
 
-<div class="tp-checkin-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
-    <!-- Page Header -->
-    <header class="mb-5 md:mb-8">
+<div class="tp-checkin-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+    <!-- Page Header — same large-title rhythm as index.php (master) -->
+    <header class="tp-ios-large-title-block mb-6 md:mb-8">
         <p class="tp-ios-caption-muted mb-1"><?php echo htmlspecialchars(formatDateThai(date('Y-m-d')), ENT_QUOTES, 'UTF-8'); ?></p>
         <h1 class="tp-ios-page-title">ลงเวลาเข้า-ออกงาน</h1>
         <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">แตะปุ่มใหญ่เพื่อลงเวลาเข้าหรือออก และดูสถานะตำแหน่งจาก GPS</p>
@@ -160,7 +160,7 @@ require_once __DIR__ . '/templates/header.php';
     </div>
     <?php endif; ?>
 
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 md:gap-8 xl:gap-8">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8 xl:gap-8">
         <!-- Left Column: Check-in Card -->
         <div class="xl:col-span-2">
             <div class="native-card tp-native-card tp-native-data-card">
@@ -203,7 +203,7 @@ require_once __DIR__ . '/templates/header.php';
                 ?>
                 <!-- Today's Status -->
                 <div class="grid grid-cols-2 gap-4 mb-6 md:mb-8">
-                    <div class="p-4 text-center rounded-[var(--tp-radius-card)] tp-native-well">
+                    <div class="tp-ios-attendance-panel p-4 text-center">
                         <p class="text-white/60 text-sm mb-1">เวลาเข้างาน</p>
                         <p class="text-2xl font-bold <?php
                             $ciClass = 'text-white/30';
@@ -239,7 +239,7 @@ require_once __DIR__ . '/templates/header.php';
                         <?php endif; ?>
                     </div>
 
-                    <div class="p-4 text-center rounded-[var(--tp-radius-card)] tp-native-well">
+                    <div class="tp-ios-attendance-panel p-4 text-center">
                         <p class="text-white/60 text-sm mb-1">เวลาออกงาน</p>
                         <p class="text-2xl font-bold <?php echo $today_attendance && $today_attendance['check_out_time'] ? 'text-blue-400' : 'text-white/30'; ?>">
                             <?php
@@ -300,7 +300,7 @@ require_once __DIR__ . '/templates/header.php';
         </div>
         
         <!-- Right Column: Summary & History -->
-        <div class="space-y-5 md:space-y-6">
+        <div class="space-y-6">
             <!-- Planned Late Start (แจ้งเข้างานสายล่วงหน้า) -->
             <?php if ($ls_has_any): ?>
             <div>

@@ -2,23 +2,22 @@
 
 Statuses: **`NOT_STARTED` · `IN_PROGRESS` · `REFACTORED` · `COMPLETE` · `REGRESSION_FAIL`**.
 
-| Page / area | Wave | Before | After (2026-04-28) | Status |
-|-------------|------|--------|---------------------|--------|
-| Global **`native-shell.css`** | Wave 1–2–3 tokens | v11 gap/chip issues | **v14** aligns **`01_IOS26`** (section gap **24**, btn **58**, buffer **160**, input **56**, textarea **120**) | **COMPLETE** |
-| **`templates/header.php` + `login.php` link`** | Wave 3 | mixed `?v` | **`?v=14`** unified | **COMPLETE** |
-| **`templates/native/component_registry.php`** | Wave 1 | Native keys only | **IOS*** alias layer | **COMPLETE** |
-| `index.php` (dashboard) | Wave 2 · **spacing polish post–v14** | Legacy hero grid · mixed `gap-5`/16px wells | **`tp-dashboard-stack`** + **Tailwind gaps → 24px section rhythm** (`gap-6` · `space-y-6`) · inner wells **`p-5`** wherever content · hero summary padding fix (header CSS) · radii **`--tp-ios-card-radius`** | **REFACTORED** |
-| `checkin.php` | Wave 2 | ESS clock + CTA dominant | **Shell `?v=14`** · `.tp-ios-page-title`, hero clock, **`max-w` 960**, section spacing via tokens + history rows, `aria-live` clock | **REFACTORED** |
-| `leave.php` + **`modules/employee/leaves/request_form.php`** | Wave 2 | Flat title + `rounded-[20px]` mix | **`tp-leave-stack`** 960px · **`.tp-ios-*` titles** · grids **gap-5/8** · **token radii** · form **p-5 sm:p-7** · cancel/submit radii | **REFACTORED** |
-| **`leave_history.php`** | Wave 2 | Dense header · `rounded-[20px]` mix | **`tp-leave-history-stack`** · **`.tp-ios-page-title` / caption** · summary/filter/results gaps · **token radii** · table + mobile cards + pagination + modal close button aligned | **REFACTORED** |
-| **`hr/*.php`** (13 files) | Wave 3 | Mixed titles · `rounded-[20px]` | **`tp-hr-admin-stack`** 960px · **`.tp-ios-*`** page headers · **token radii** · stack closes before **modals** / **`footer`** (IDs & scripts preserved) | **REFACTORED** |
-| **ESS remainder** (`dayoff_schedule.php`, **`attendance_history.php`**, **`certificate.php`**, **`payslip.php`**, **`profile.php`**) | Wave 4 | Mixed radii · flat titles | **`tp-*-stack`** 960px · **`.tp-ios-*`** · **`rounded-[var(--tp-ios-card-radius)]`** (**`checkin.php`** already had **`tp-checkin-stack`** + **`.tp-ios-*`** from Wave **2**; Wave **4** added token radii sweep) | **REFACTORED** |
-| **`login.php`** | Polish | Success/error banners **`rounded-[20px]`** | **`rounded-[var(--tp-ios-card-radius)]`** (markup-only) | **REFACTORED** |
+| Page / area | Wave | Before | After | Status |
+|-------------|------|--------|-------|--------|
+| Global **`native-shell.css`** | v15 | v14 tokens | **v15** — floating **Liquid Glass** tab pill · gradient scrim · **glass sticky CTA slab** (`tp-ios-sticky-cta-slab`) · typography scale · **`--tp-bottom-nav-slot`** | **COMPLETE** |
+| **`templates/header.php` + `login.php`** CSS link | v15 | `?v=14` | **`?v=15`** | **COMPLETE** |
+| **`01` · `04` · `05` docs** | Phase 4–5 | Pointer-only · T4 shorthand | **`04`** body + sync rules · **`01`** + **`hr/attendance_adjustments.php`** · **`05`** **T5** + full route table | **COMPLETE** |
+| **`index.php`** (dashboard) | MASTER v15 | Wave-2 polish | **`tp-ios-master-screen`** · **glass sticky slab** · **`tp-ios-attendance-panel`** · floating tabs | **REFACTORED** |
+| **`checkin.php`** | Wave 6 · align master | **`tp-checkin-stack`** only | **`tp-ios-master-screen`** · **`tp-ios-large-title-block`** · **เข้า/ออก** wells **`tp-ios-attendance-panel`** · grid **`gap-6`** · column **`space-y-6`** | **REFACTORED** |
+| `leave.php` + **`modules/employee/leaves/request_form.php`** | Wave 2 | Flat title | Token titles · form wells | **REFACTORED** *(QA vs v15)* |
+| ESS remainder · **`leave_history.php`** · **`attendance_history.php`** · etc. | Wave 4 | Mixed | Stacks + **`tp-ios-*`** | **REFACTORED** *(QA vs v15)* |
+| **`login.php`** | Polish | — | Token radii | **REFACTORED** |
+| **`hr/*.php`** (admin) | Wave 3 | Mixed | **`tp-hr-admin-stack`** + titles | **REFACTORED** *(QA chrome)* |
 
-**Regression:** PHPUnit / API tests untouched. Manual viewport QA: Wave **2–4** routes (**`07`** matrix).
+**Regression:** PHPUnit / API untouched. Viewport QA: **`03`** · **`07_SPACING_QA.md`** · **`08_VISUAL_QA_AFTER.md`**.
 
 ---
 
-### Phase 6 — optional per-route detail tracking
+### Per-route detail (Phase 9)
 
-For deep audits, duplicate each row above with granular columns (**components replaced · visual deltas · UX · spacing/mobile/tablet · regression**) in a spreadsheet or appendix table—**`06_IMPLEMENTATION_PROGRESS.md`** remains the condensed source of truth.
+Expand with: **Page** · **Route** · **File** · **Components** · **Visual** · **UX** · **Spacing** · **Mobile** · **Tablet** · **Regression**.
