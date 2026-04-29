@@ -17,6 +17,7 @@ Statuses: **`NOT_STARTED` · `IN_PROGRESS` · `REFACTORED` · `COMPLETE` · `REG
 | **`certificate.php`** | Wave 6 · v15 | Form/list cards | **`tp-ios-master-screen`** · **`tp-ios-large-title-block`** · grid **`gap-6`** · form **`tp-native-*`** · hub/history **`tp-ios-attendance-panel`** | **REFACTORED** |
 | **`dayoff_schedule.php`** | Wave 6 · v15 | Month filter spacing | **`tp-ios-master-screen`** · **`tp-ios-large-title-block`** · **`tp-native-select`** · weekly **`space-y-6`** | **REFACTORED** |
 | **`login.php`** | Polish | — | Token radii | **REFACTORED** |
+| **`verify_document.php`** (public) | Wave **8** | Inline-only styles | **`app.css` + `native-shell.css?v=15`** · **`native-card`** · **`tp-native-*`** controls · captions **`tp-ios-caption-muted`** | **REFACTORED** |
 | **`hr/*.php`** (admin) | Wave **7 · v15** | **`tp-hr-admin-stack`** only | เพิ่ม **`tp-ios-master-screen`** · หัวแต่ละหน้าเป็น **`tp-ios-large-title-block`** (`<header>`) · **`mb-6`** / กริดสรุป **`gap-6`** สอดคล้อง ESS | **REFACTORED** |
 
 **Regression:** PHPUnit / API untouched. Viewport QA: **`03`** · **`07_SPACING_QA.md`** · **`08_VISUAL_QA_AFTER.md`**.
