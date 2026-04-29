@@ -18,6 +18,7 @@ Statuses: **`NOT_STARTED` · `IN_PROGRESS` · `REFACTORED` · `COMPLETE` · `REG
 | **`dayoff_schedule.php`** | Wave 6 · v15 | Month filter spacing | **`tp-ios-master-screen`** · **`tp-ios-large-title-block`** · **`tp-native-select`** · weekly **`space-y-6`** | **REFACTORED** |
 | **`login.php`** | Polish | — | Token radii | **REFACTORED** |
 | **`verify_document.php`** (public) | Wave **8** | Inline-only styles | **`app.css` + `native-shell.css?v=15`** · **`native-card`** · **`tp-native-*`** controls · captions **`tp-ios-caption-muted`** | **REFACTORED** |
+| **`certificate_print.php`** | Wave **9** | Hardcoded toolbar radii · indigo primary | **`native-shell.css?v=15`** (tokens) · screen chrome **`border-radius`/touch โทเค็น** · พิมพ์ปุ่มตรง **`tp-native-btn-primary`** gradient · **`.page`** ล็อกฟอนต์ **Sarabun** | **REFACTORED** |
 | **`hr/*.php`** (admin) | Wave **7 · v15** | **`tp-hr-admin-stack`** only | เพิ่ม **`tp-ios-master-screen`** · หัวแต่ละหน้าเป็น **`tp-ios-large-title-block`** (`<header>`) · **`mb-6`** / กริดสรุป **`gap-6`** สอดคล้อง ESS | **REFACTORED** |
 
 **Regression:** PHPUnit / API untouched. Viewport QA: **`03`** · **`07_SPACING_QA.md`** · **`08_VISUAL_QA_AFTER.md`**.

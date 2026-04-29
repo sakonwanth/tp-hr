@@ -293,6 +293,8 @@ function signerName(array $s, bool $isEn): string {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title><?php echo htmlspecialchars($page_title); ?></title>
+<link rel="icon" type="image/svg+xml" href="/assets/icons/tphr-app-icon.svg">
+<link rel="stylesheet" href="/assets/css/native-shell.css?v=15">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ---------- Reset / Base (cloned from CRM payroll_print design system) ---------- */
@@ -321,7 +323,7 @@ body {
         margin: 0 auto;
     }
     .pages-stack {
-        border-radius: 20px;
+        border-radius: var(--tp-ios-card-radius);
         border: 1px solid rgba(255,255,255,0.1);
         background: rgba(30, 41, 59, 0.45);
         padding: 16px 12px 20px;
@@ -344,6 +346,7 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    font-family: 'Sarabun', sans-serif;
 }
 .page:last-child { page-break-after: auto; margin-bottom: 0; }
 
@@ -358,18 +361,18 @@ body {
     gap: 10px;
     padding: 12px 14px;
     font-family: system-ui, -apple-system, sans-serif;
-    border-radius: 16px;
+    border-radius: var(--tp-ios-card-radius);
     border: 1px solid rgba(255,255,255,0.12);
     background: rgba(30, 41, 59, 0.85);
 }
 .toolbar-left { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .toolbar a, .toolbar button, .toolbar .tb-btn {
     padding: 10px 16px;
-    min-height: 44px;
+    min-height: var(--tp-native-touch-min, 48px);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 12px;
+    border-radius: var(--tp-radius-small-control);
     border: 1px solid rgba(255,255,255,0.14);
     background: rgba(15, 23, 42, 0.6);
     color: #e2e8f0;
@@ -383,12 +386,14 @@ body {
 }
 .toolbar form { display: inline; margin: 0; }
 .toolbar .btn-print {
-    background: #4f46e5;
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
     color: #fff;
     border-color: rgba(255,255,255,0.2);
     font-weight: 600;
+    min-height: var(--tp-native-btn-secondary-min, 54px);
+    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.35);
 }
-.toolbar .btn-print:hover { background: #6366f1; }
+.toolbar .btn-print:hover { background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%); }
 
 /* ---------- Watermark ---------- */
 .watermark {
