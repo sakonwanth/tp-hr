@@ -158,7 +158,7 @@ $scopeGroups = [
     'ปรับเวลา' => [
         'adjustments.read'     => 'อ่านคำขอปรับเวลา (ผูกพนักงาน หรือ + read_all)',
         'adjustments.read_all' => 'อ่านทุกคน',
-        'adjustments.approve'  => 'อนุมัติ/ปฏิเสธ',
+        'adjustments.approve'  => 'อนุมัติ/ปฏิเสธ (ผู้ออกคีย์ต้องเป็น CEO+)',
     ],
     'เงินเดือน' => [
         'payroll.read'     => 'อ่านสลิป/รอบ (ผูกพนักงาน หรือ + read_all)',

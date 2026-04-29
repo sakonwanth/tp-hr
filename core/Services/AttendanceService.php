@@ -140,8 +140,13 @@ class AttendanceService
 
     public function getUserForAttendance(int $userId): ?array
     {
-        $stmt = $this->pdo->prepare("SELECT id, employee_code, work_mode FROM users WHERE id = ? AND is_active = 1 LIMIT 1");
-        $stmt->execute([$userId]);
+        try {
+            $stmt = $this->pdo->prepare("SELECT id, employee_code, work_mode FROM users WHERE id = ? AND is_active = 1 LIMIT 1");
+            $stmt->execute([$userId]);
+        } catch (PDOException $e) {
+            $stmt = $this->pdo->prepare("SELECT id, employee_code, 'OFFICE' AS work_mode FROM users WHERE id = ? AND is_active = 1 LIMIT 1");
+            $stmt->execute([$userId]);
+        }
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         return $user ?: null;
     }

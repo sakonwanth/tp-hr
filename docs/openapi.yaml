@@ -653,7 +653,7 @@ paths:
   /attendance-adjustments/{id}/approve:
     post:
       tags: [Attendance Adjustments]
-      summary: Approve adjustment (applies to hr_attendances)
+      summary: Approve adjustment as CEO-level actor (applies to hr_attendances)
       parameters:
         - $ref: '#/components/parameters/ResourceId'
       requestBody:
@@ -674,7 +674,7 @@ paths:
   /attendance-adjustments/{id}/reject:
     post:
       tags: [Attendance Adjustments]
-      summary: Reject adjustment
+      summary: Reject adjustment as CEO-level actor
       parameters:
         - $ref: '#/components/parameters/ResourceId'
       requestBody:

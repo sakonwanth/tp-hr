@@ -1072,6 +1072,11 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
                 </a>
                 
                 <?php if ($isCEO): ?>
+                <a href="/hr/attendance_adjustments.php" class="nav-item <?php echo $current_page === 'hr-attendance-adjustments' ? 'active' : ''; ?>">
+                    <i class="fas fa-business-time"></i>
+                    <span>อนุมัติแก้เวลา</span>
+                </a>
+
                 <a href="/hr/dayoff_approvals.php" class="nav-item <?php echo $current_page === 'hr-dayoff' ? 'active' : ''; ?>">
                     <i class="fas fa-calendar-day"></i>
                     <span>อนุมัติเปลี่ยนวันหยุด</span>
@@ -1216,6 +1221,10 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
                         <span>อนุมัติการลา</span>
                     </a>
                     <?php if ($isCEO): ?>
+                    <a href="/hr/attendance_adjustments.php" class="mobile-menu-tile <?php echo $current_page === 'hr-attendance-adjustments' ? 'active' : ''; ?>">
+                        <i class="fas fa-business-time" aria-hidden="true"></i>
+                        <span>อนุมัติแก้เวลา</span>
+                    </a>
                     <a href="/hr/dayoff_approvals.php" class="mobile-menu-tile <?php echo $current_page === 'hr-dayoff' ? 'active' : ''; ?>">
                         <i class="fas fa-calendar-day" aria-hidden="true"></i>
                         <span>อนุมัติเปลี่ยนวันหยุด</span>

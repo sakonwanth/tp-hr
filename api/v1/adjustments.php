@@ -4,7 +4,7 @@
  *
  *   GET  /api/v1/attendance-adjustments[?status=&from=&to=&user_id=]  scope: adjustments.read (+ adjustments.read_all if key has no service_user_id)
  *   POST /api/v1/attendance-adjustments/{id}/approve                  scope: adjustments.approve
- *        body: { reviewer_id?, remarks? } — reviewer_id ผูกกับผู้ออก API key เมื่อมี created_by
+ *        body: { reviewer_id?, remarks? } — reviewer_id ผูกกับผู้ออก API key เมื่อมี created_by (CEO+)
  *        On approve: applies requested times to hr_attendances.
  *   POST /api/v1/attendance-adjustments/{id}/reject                   scope: adjustments.approve
  *        body: { reviewer_id?, remarks }
@@ -66,100 +66,19 @@ ApiAuth::require(['adjustments.approve']);
 apiKeyForbidServiceScoped();
 if (!in_array($action, ['approve', 'reject'], true)) ApiAuth::fail(404, 'Unknown action');
 $body = ApiAuth::input();
-$reviewerId = apiKeyResolveActorForApi($pdo, ApiAuth::currentKey(), $body, 'reviewer_id', MANAGER_ROLES);
+$reviewerId = apiKeyResolveActorForApi($pdo, ApiAuth::currentKey(), $body, 'reviewer_id', CEO_ROLES);
 $remarks = trim($body['remarks'] ?? '');
 
-$stmt = $pdo->prepare("SELECT * FROM hr_attendance_adjustments WHERE id = ? LIMIT 1");
-$stmt->execute([$id]);
-$cur = $stmt->fetch(PDO::FETCH_ASSOC);
-if (!$cur) ApiAuth::fail(404, 'Not found');
-if ($cur['status'] !== 'PENDING') ApiAuth::fail(409, 'Already processed');
-
 try {
-    $pdo->beginTransaction();
+    $service = new AttendanceAdjustmentService($pdo);
     if ($action === 'approve') {
-        $attStmt = $pdo->prepare("SELECT * FROM hr_attendances WHERE id = ? LIMIT 1 FOR UPDATE");
-        $attStmt->execute([(int)$cur['attendance_id']]);
-        $attendance = $attStmt->fetch(PDO::FETCH_ASSOC);
-        if (!$attendance) {
-            $pdo->rollBack();
-            ApiAuth::fail(404, 'Parent attendance not found');
-        }
-
-        $attendanceService = new AttendanceService($pdo);
-        $targetUser = $attendanceService->getUserForAttendance((int)$cur['user_id']);
-        if (!$targetUser) {
-            $pdo->rollBack();
-            ApiAuth::fail(404, 'User not found or inactive');
-        }
-
-        $date = (string)$attendance['attendance_date'];
-        $checkIn = !empty($cur['requested_check_in'])
-            ? AttendanceService::normalizeDateTime($date, (string)$cur['requested_check_in'])
-            : ($attendance['check_in_time'] ?? null);
-        $checkOut = !empty($cur['requested_check_out'])
-            ? AttendanceService::normalizeDateTime($date, (string)$cur['requested_check_out'])
-            : ($attendance['check_out_time'] ?? null);
-        $shift = $attendanceService->getShiftById((int)($attendance['shift_id'] ?? 0));
-        $summary = $attendanceService->summarizeAttendance(
-            $targetUser,
-            $shift,
-            $date,
-            $checkIn,
-            $checkOut,
-            $attendance['planned_start_time'] ?? null,
-            $attendance['status'] ?? null
-        );
-
-        $pdo->prepare("
-            UPDATE hr_attendances
-            SET check_in_time = ?,
-                check_out_time = ?,
-                check_in_type = CASE WHEN ? = 1 THEN 'MANUAL' ELSE check_in_type END,
-                check_out_type = CASE WHEN ? = 1 THEN 'MANUAL' ELSE check_out_type END,
-                work_minutes = ?,
-                break_minutes = ?,
-                late_minutes = ?,
-                early_leave_minutes = ?,
-                ot_minutes = ?,
-                status = ?,
-                adjusted_by = ?,
-                adjusted_at = NOW(),
-                adjustment_reason = ?,
-                updated_at = NOW()
-            WHERE id = ?
-        ")->execute([
-            $checkIn,
-            $checkOut,
-            !empty($cur['requested_check_in']) ? 1 : 0,
-            !empty($cur['requested_check_out']) ? 1 : 0,
-            (int)$summary['work_minutes'],
-            (int)$summary['break_minutes'],
-            (int)$summary['late_minutes'],
-            (int)$summary['early_leave_minutes'],
-            (int)$summary['ot_minutes'],
-            (string)$summary['status'],
-            $reviewerId,
-            $cur['reason'],
-            (int)$cur['attendance_id'],
-        ]);
-
-        $pdo->prepare("
-            UPDATE hr_attendance_adjustments
-            SET status='APPROVED', reviewed_by=?, reviewed_at=NOW(), review_remarks=?
-            WHERE id=?
-        ")->execute([$reviewerId, $remarks ?: null, $id]);
+        $service->approve($id, $reviewerId, $remarks);
     } else {
-        if ($remarks === '') { $pdo->rollBack(); ApiAuth::fail(400, 'remarks required for reject'); }
-        $pdo->prepare("
-            UPDATE hr_attendance_adjustments
-            SET status='REJECTED', reviewed_by=?, reviewed_at=NOW(), review_remarks=?
-            WHERE id=?
-        ")->execute([$reviewerId, $remarks, $id]);
+        $service->reject($id, $reviewerId, $remarks);
     }
-    $pdo->commit();
+} catch (AttendanceAdjustmentException $e) {
+    ApiAuth::fail($e->httpStatus(), $e->getMessage());
 } catch (Throwable $e) {
-    if ($pdo->inTransaction()) $pdo->rollBack();
     tpHrLogException($e, 'api/v1/adjustments');
     ApiAuth::fail(500, 'Internal server error');
 }

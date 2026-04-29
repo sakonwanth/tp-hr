@@ -73,6 +73,7 @@ Authorization: Bearer tphr_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ### Attendance adjustments (`adjustments.*`)
 - `GET /attendance-adjustments[?status=&from=&to=&user_id=]`
 - `POST /attendance-adjustments/{id}/approve|reject` — `{ reviewer_id, remarks }`
+  - Approval actor must be CEO-level (`Admin`, `Chairman`, `CEO`).
   - On approve, writes `requested_check_in/out` back to `hr_attendances`.
 
 ### Payroll (`payroll.read`, approved/paid only)

@@ -165,6 +165,7 @@ CREATE TABLE IF NOT EXISTS hr_attendance_adjustments (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     attendance_id BIGINT NOT NULL,
     user_id INT NOT NULL,
+    adjustment_type ENUM('check_in','check_out','both') NOT NULL DEFAULT 'both',
     
     original_check_in DATETIME,
     original_check_out DATETIME,
@@ -174,7 +175,7 @@ CREATE TABLE IF NOT EXISTS hr_attendance_adjustments (
     reason TEXT NOT NULL,
     document_path VARCHAR(255),
     
-    status ENUM('PENDING','APPROVED','REJECTED') DEFAULT 'PENDING',
+    status ENUM('PENDING','APPROVED','REJECTED','CANCELLED') DEFAULT 'PENDING',
     reviewed_by INT,
     reviewed_at DATETIME,
     review_remarks TEXT,
@@ -186,6 +187,7 @@ CREATE TABLE IF NOT EXISTS hr_attendance_adjustments (
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (reviewed_by) REFERENCES users(id),
     INDEX idx_status (status),
+    INDEX idx_attendance_id (attendance_id),
     INDEX idx_user_id (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='คำขอแก้ไขเวลา';
 
