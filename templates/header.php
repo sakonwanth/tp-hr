@@ -35,7 +35,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
     
     <!-- Tailwind CSS (compiled) -->
     <link rel="stylesheet" href="/assets/css/app.css">
-    <link rel="stylesheet" href="/assets/css/native-shell.css?v=11">
+    <link rel="stylesheet" href="/assets/css/native-shell.css?v=12">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -223,7 +223,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-height: 48px;
+            min-height: 52px;
             padding: 10px 20px;
             background: rgba(148, 163, 184, 0.1);
             color: #fff;
@@ -243,7 +243,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             max-width: 100%;
             min-width: 0;
             padding: 12px 16px;
-            min-height: 52px;
+            min-height: 54px;
             font-size: 16px;
             background: rgba(15, 23, 42, 0.8);
             border: 1px solid rgba(148, 163, 184, 0.2);
@@ -731,7 +731,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             align-items: center;
             gap: 18px;
             padding: 14px 18px;
-            min-height: 52px;
+            min-height: 54px;
         }
         .dashboard-hero-row + .dashboard-hero-row {
             border-top: 1px solid rgba(255, 255, 255, 0.07);

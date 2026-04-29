@@ -1,75 +1,82 @@
-# 01 — Full UI inventory (TP-HR)
+# 01_FULL_UI_INVENTORY.md — TP-HR (`PROJECT_TARGET`)
 
-**Generated / rescanned:** 2026-04-28 — `PROJECT_TARGET = tp-hr`  
-**Evidence:** filesystem glob `**/*.php` (application tree), `grep` for `templates/header.php` entry points, **`PAGE_AUDIT_ORDERED_TP_HR.md`**.
+**Generated:** 2026-04-28 · **Baseline shell:** `/assets/css/native-shell.css?v=12` · **Discovery:** codebase scan (`templates/header.php`, `login.php`, public routes).
 
-**Stack:** IBM Plex Sans Thai + **`assets/css/native-shell.css?v=5`** + shell classes on `templates/header.php` / `templates/footer.php`.
+Purpose: exhaustive **user-visible** UI inventory (excluding pure API handlers that return JSON only). Paths are relative to `tp-hr/`.
 
-## Summary
-
-ลำดับ audit ครบและจำนวนล่าสุดใน **`PAGE_AUDIT_ORDERED_TP_HR.md`** — **27** route/view UI ที่มี HTML สำหรับผู้ใช้ + พาร์เชียล (`modules/employee/leaves/request_form.php`, `modules/employee/payslip/print_template.php`)
-
-| Area | Count (โดยประมาณ) |
-|------|------:|
-| Authenticated pages using `templates/header.php` | 23 |
-| Standalone / special UI | 3 |
-| Auth UI | 1 |
+Legend: **UI type** ≈ Employee self-service (`ESS`), HR admin (`HRA`), public (`PUB`), auth (`AUTH`), ancillary (`*`).
 
 ---
 
-## Employee / general (bottom tab nav on mobile when `current_page` ≠ `hr-*`)
+## A. Auth & public (no `templates/header.php` chrome)
 
-| # | Page name | Route | File | Layout | `current_page` | Role | Priority |
-|---|-----------|-------|------|--------|----------------|------|----------|
-| 1 | Dashboard | `/` | `index.php` | header + main + bottom nav | `dashboard` | logged-in | P0 |
-| 2 | Check-in/out | `/checkin.php` | `checkin.php` | header + main + bottom nav | `checkin` | logged-in | P0 |
-| 3 | Leave hub | `/leave.php` | `leave.php` | header + main + bottom nav | `leave` | logged-in | P0 |
-| 4 | Leave request | `/leave.php?action=request` | `leave.php` + `modules/employee/leaves/request_form.php` | nested partial | `leave` | logged-in | P0 |
-| 5 | Payslip | `/payslip.php` | `payslip.php` | header + main + bottom nav | `payslip` | logged-in | P1 |
-| 6 | Certificate request | `/certificate.php` | `certificate.php` | header + main + bottom nav | `certificate` | logged-in | P1 |
-| 7 | Day-off schedule | `/dayoff_schedule.php` | `dayoff_schedule.php` | header + main + bottom nav | `dayoff` | logged-in | P2 |
-| 8 | Profile | `/profile.php` | `profile.php` | header + main + bottom nav | `profile` | logged-in | P0 |
-| 9 | Attendance history | `/attendance_history.php` | `attendance_history.php` | header + main + bottom nav | *(set in file)* | logged-in | P2 |
-|10 | Leave history | `/leave_history.php` | `leave_history.php` | header + main + bottom nav | *(set in file)* | logged-in | P2 |
+| # | Screen | Route(s) | File | Layout | Role | Business purpose | UI type | Priority | Refactor later |
+|---|--------|----------|------|--------|------|-------------------|---------|----------|----------------|
+| 1 | Login | `/login.php` | `login.php` | Inline HTML + Tailwind CDN / brand | Guests | SSO/credentials LINE | AUTH | P0 | yes |
+| 2 | Logout | POST `/logout.php` | `logout.php` | Redirect only | All | Session end | * | — | no UI |
+| 3 | Document verify | `/verify_document.php` | `verify_document.php` | Standalone centered card | Public | Verify certificate authenticity | PUB | P1 | yes |
+| 4 | Certificate print helper | varies | `certificate_print.php` | Print-oriented | Conditional | Printable output | ESS/PUB | P2 | yes |
 
 ---
 
-## HR admin (`/hr/*`, `current_page` = `hr-*`; no bottom tab bar)
+## B. Employee self-service — `templates/header.php` + `templates/footer.php` (mobile bottom tab strip when `$current_page` not `hr-*`)
 
-| # | Page name | Route | File | `current_page` |
-|---|-----------|-------|------|------------------|
-| 11 | HR dashboard | `/hr/index.php` | `hr/index.php` | `hr-dashboard` |
-| 12 | Employees list | `/hr/employees.php` | `hr/employees.php` | `hr-employees` |
-| 13 | Employee view | `/hr/employee_view.php` | `hr/employee_view.php` | *(see file)* |
-| 14 | Employee create/edit | `/hr/employee_form.php` | `hr/employee_form.php` | *(see file)* |
-| 15 | Employee attendance | `/hr/employee_attendance.php` | `hr/employee_attendance.php` | *(see file)* |
-| 16 | Leave approvals | `/hr/leaves.php` | `hr/leaves.php` | `hr-leaves` |
-| 17 | HR attendance mgmt | `/hr/attendance.php` | `hr/attendance.php` | `hr-attendance` |
-| 18 | Documents | `/hr/documents.php` | `hr/documents.php` | `hr-documents` |
-| 19 | Document templates | `/hr/document_templates.php` | `hr/document_templates.php` | `hr-document-templates` |
-| 20 | API keys | `/hr/api_keys.php` | `hr/api_keys.php` | *(see file)* |
-| 21 | Reports | `/hr/reports.php` | `hr/reports.php` | `hr-reports` |
-| 22 | Settings | `/hr/settings.php` | `hr/settings.php` | `hr-settings` |
-| 23 | Day-off approvals | `/hr/dayoff_approvals.php` | `hr/dayoff_approvals.php` | `hr-dayoff` |
+| # | Screen | Typical URL | File | `current_page` | Role | Purpose | Priority | Refactor later |
+|---|--------|----------------|------|-----------------|------|---------|----------|----------------|
+| 5 | Dashboard | `/`, `/index.php` | `index.php` | `dashboard` | ESS | Home / quick actions | P0 | yes |
+| 6 | Check-in/out | `/checkin.php` | `checkin.php` | `checkin` | ESS | Attendance stamping | P0 | yes |
+| 7 | Leave hub | `/leave.php` | `leave.php` | `leave` | ESS | Navigate to requests | P0 | yes |
+| 8 | Leave request form | via `leave.php` + module | `modules/employee/leaves/request_form.php` | (parent `leave`) | ESS | Submit leave | P0 | yes |
+| 9 | Leave history | `/leave_history.php` | `leave_history.php` | varies | ESS | Filters / cancel | P0 | yes |
+| 10 | Attendance history | `/attendance_history.php` | `attendance_history.php` | varies | ESS | Timeline | P1 | yes |
+| 11 | Payslip list | `/payslip.php` | `payslip.php` | `payslip` | ESS | Payroll slip download | P0 | yes |
+| 12 | Certificate requests | `/certificate.php` | `certificate.php` | `certificate` | ESS | Request HR letters | P1 | yes |
+| 13 | Day-off weekly schedule | `/dayoff_schedule.php` | `dayoff_schedule.php` | `dayoff` | ESS | Rotating weekly off-days | P1 | yes |
+| 14 | Profile | `/profile.php` | `profile.php` | `profile` | ESS | Employee profile | P0 | yes |
 
 ---
 
-## Standalone / non-shell
+## C. HR administrator — `$current_page` prefixed `hr-` · **no bottom tab bar** (`footer.php` logic)
 
-| # | Page name | Route | File | Notes |
-|---|-----------|-------|------|------|
-| 24 | Login | `/login.php` | `login.php` | `body.login-page-root.tp-native-app`, `native-shell.css`, 56px CTAs, 52px inputs |
-| 25 | Verify document (public) | `/verify_document.php` | `verify_document.php` | Light card UI; IBM Plex + 20px radius + touch targets aligned |
-| 26 | Certificate print preview | POST `/certificate_print.php` | `certificate_print.php` | Print-focused HTML; logic unchanged |
+*(Permission-gated routes use `Auth` + helpers like `hr_can_access_hr_dashboard()`, CEO-only sections flagged in markup.)*
+
+| # | Screen | URL | File | `current_page` | Purpose | Priority | Refactor later |
+|---|--------|-----|------|----------------|---------|----------|----------------|
+| 15 | HR Dashboard | `/hr/index.php` | `hr/index.php` | `hr-dashboard` | HR KPI tiles | P0 | yes |
+| 16 | Employees directory | `/hr/employees.php` | `hr/employees.php` | `hr-employees` | Manage roster | P0 | yes |
+| 17 | Employee create/edit | `/hr/employee_form.php` | `hr/employee_form.php` | `hr-employee-edit` etc. | Forms | P0 | yes |
+| 18 | Employee view | `/hr/employee_view.php` | `hr/employee_view.php` | `hr-employee` | Detail | P1 | yes |
+| 19 | Employee attendance | `/hr/employee_attendance.php` | `hr/employee_attendance.php` | varies | Drill-down | P1 | yes |
+| 20 | HR attendance admin | `/hr/attendance.php` | `hr/attendance.php` | `hr-attendance` | Audit adjustments | P0 | yes |
+| 21 | Leave approvals | `/hr/leaves.php` | `hr/leaves.php` | `hr-leaves` | Pending list | P0 | yes |
+| 22 | Day-off change approvals | `/hr/dayoff_approvals.php` | `hr/dayoff_approvals.php` | `hr-dayoff` | CEO approvals | P1 | yes |
+| 23 | Documents queue | `/hr/documents.php` | `hr/documents.php` | `hr-documents` | Document ops | P1 | yes |
+| 24 | Document templates | `/hr/document_templates.php` | `hr/document_templates.php` | `hr-document-templates` | Template CRUD | P2 | yes |
+| 25 | Reports | `/hr/reports.php` | `hr/reports.php` | `hr-reports` | Charts / CSV | P1 | yes |
+| 26 | API keys | `/hr/api_keys.php` | `hr/api_keys.php` | `hr-api-keys` | External API | P2 | yes |
+| 27 | Settings | `/hr/settings.php` | `hr/settings.php` | `hr-settings` | Tenant toggles | P1 | yes |
 
 ---
 
-## API / tests / cron (excluded from UI inventory)
+## D. Machine / API · **not full UI routes** (no row required for UX refactor; QA contract-only)
 
-`api/*`, `tests/*`, `cron/*`, `scripts/*`, `logout.php` (redirect), `webhook.php`, `modules/*/print_template.php` (embed).
+`/api/**/*.php`, `webhook.php`, `cron/**/*.php`, `scripts/**/*.php`, `tests/**/*.php`.
 
 ---
 
-## Refactor flag
+## E. Supporting partials / assets (referenced by shells)
 
-All shell-backed pages: **refactored** with unified **AppShell** semantics via `body.tp-native-app`, conditional `body.tp-with-tab-nav` (employee routes), **`main#tp-hr-main.content-area.tp-native-page`**, **BottomTabNavigation** (`tp-native-bottom-tab-nav`), and **design tokens** in `assets/css/native-shell.css`.
+| Component area | Paths |
+|----------------|-------|
+| App chrome | `templates/header.php`, `templates/footer.php` |
+| Locked registry | `templates/native/component_registry.php` |
+| Global styles | `/assets/css/app.css`, `/assets/css/native-shell.css?v=12` |
+
+---
+
+### Count summary (browser UI routes in B+C+A)
+
+- **Standalone / auth screens:** ~4 login/verify/print helpers  
+- **ESS + HR templated shells:** ~23 primary controller files (+ embedded `modules/` partials)
+
+**Needs refactor (`yes`):** treat all P0/P1/P2 screens as **`NEEDS_REFACTOR`** until individually marked complete in **`06_IMPLEMENTATION_PROGRESS.md`**.

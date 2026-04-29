@@ -1,30 +1,24 @@
-# 07 — Page regression QA (after refactor)
+# 07_PAGE_REGRESSION_AFTER.md — TP-HR (live log)
 
-## Automated / static checks
+Execute after **each completed page**:
 
-| Check | Result |
-|-------|--------|
-| Routes unchanged | Pass (no PHP route edits) |
-| `Auth::requireLogin()` pages unchanged | Pass |
-| CSRF / session | Pass (no bootstrap edits) |
+1. Reload route (**200** desktop + mobile emulation)
+2. Form POST still hits same endpoint + CSRF untouched
+3. HR permissions gates unchanged (**CEO**/HR scopes)
+4. Visual: **no horizontal bleed**, **sticky CTA** clears tab bar (**`var(--tp-bottom-nav-slot)`**)
+5. **Touch ≥48**, **buttons ≥ specs** (**56/52** px)
 
-## Layout QA (employee + tablet viewports)
+## Global regressions prevented (Wave 1)
 
-| Check | Result |
-|-------|--------|
-| Bottom navigation overlap on last content | Mitigated via `main.tp-native-page` bottom padding + `--tp-scroll-end-buffer` |
-| CTA visibility | Primary actions remain in content; hero CTA on dashboard unchanged |
-| Safe area top | Existing `mobile-app-header-bar` uses `env(safe-area-inset-top)` |
-| Safe area bottom | Tab nav + `padding-bottom: env(safe-area-inset-bottom)` on nav |
-| Horizontal scroll | `html, body { overflow-x: clip }` in `native-shell.css` |
+| Area | Verification |
+|------|----------------|
+| Mobile bottom tabs uniform active frame | Stretch grid (**native-shell v12**) · label `nowrap` |
+| Bottom buffer | **`--tp-scroll-end-buffer`** = **144px** |
 
-## Manual smoke (recommended)
+## Per-route matrix
 
-1. Log in → Home: scroll to bottom; confirm last card clears bottom nav.  
-2. Open Check-in: primary actions tappable; no clipped inputs.  
-3. HR user: open `/hr/employees.php`; confirm no double horizontal padding on desktop.  
-4. Log out → Login: submit with 52px+ fields and 56px buttons (visual).
+Populate when Waves 2–3 land. Placeholder:** all routes **PENDING**.
 
-## Failures
-
-None recorded for this migration.
+| Route/file | Tester | Device | PASS date |
+|------------|--------|--------|-----------|
+| *—* | — | — | — |

@@ -1,22 +1,15 @@
-# 06 — Implementation progress
+# 06_IMPLEMENTATION_PROGRESS.md — TP-HR IOS26 rollout
 
-| Page / area | Route | File | Status | Files modified | Mobile | Tablet | QA |
-|-------------|-------|------|--------|----------------|--------|--------|-----|
-| Shell + layout | * | `templates/header.php`, `templates/footer.php` | **COMPLETE** | `tp-native-stack--page`; `dashboard`→`tp-native-page--home` | ✓ | ✓ | ✓ |
-| Native CSS | * | `assets/css/native-shell.css` **v5** | **COMPLETE** | Icon tokens; table shell `.tp-native-table-shell`; 35-alias registry; **`?v=5`** | ✓ | ✓ | ✓ |
-| HR Employees pagination + table shell | `/hr/employees.php` | `hr/employees.php` | **COMPLETE** | Touch ≥48px pagination; **`tp-native-table-shell`** around desktop table | ✓ | ✓ | ✓ |
-| Sticky primary (home) | `/` | `index.php` | **COMPLETE** | Mobile `.home-sticky-cta` → ลงเวลา | ✓ | ✓ | ✓ |
-| Dashboard | `/` | `index.php` | **COMPLETE** | Inherited shell | ✓ | ✓ | ✓ |
-| Check-in | `/checkin.php` | `checkin.php` | **COMPLETE** | Inherited shell | ✓ | ✓ | ✓ |
-| Leave | `/leave.php` | `leave.php`, `modules/employee/leaves/request_form.php` | **COMPLETE** | Inherited shell | ✓ | ✓ | ✓ |
-| Payslip | `/payslip.php` | `payslip.php` | **COMPLETE** | Inherited shell | ✓ | ✓ | ✓ |
-| Certificate | `/certificate.php` | `certificate.php` | **COMPLETE** | Inherited shell | ✓ | ✓ | ✓ |
-| Day-off schedule | `/dayoff_schedule.php` | `dayoff_schedule.php` | **COMPLETE** | Inherited shell | ✓ | ✓ | ✓ |
-| Profile | `/profile.php` | `profile.php` | **COMPLETE** | Inherited shell | ✓ | ✓ | ✓ |
-| Histories | `/attendance_history.php`, `/leave_history.php` | attendance/leave history | **COMPLETE** | Inherited shell | ✓ | ✓ | ✓ |
-| HR admin | `/hr/*.php` | listed in `01_FULL_UI_INVENTORY.md` | **COMPLETE** | Inherited shell | ✓ | ✓ | ✓ |
-| Login | `/login.php` | `login.php` | **COMPLETE** | Explicit | ✓ | ✓ | ✓ |
-| Verify | `/verify_document.php` | `verify_document.php` | **COMPLETE** | Explicit | ✓ | ✓ | ✓ |
-| Certificate print | POST `/certificate_print.php` | `certificate_print.php` | **UNCHANGED UI** | — | print | print | N/A |
+Statuses: **`NOT_STARTED` · `IN_PROGRESS` · `REFACTORED` · `COMPLETE` · `REGRESSION_FAIL`**.
 
-All authenticated routes pick up **main** landmark + **scroll buffer** + **touch targets** without per-file edits where possible.
+| Page / area | Wave | Before | After (2026-04-28) | Status |
+|-------------|------|--------|---------------------|--------|
+| Global **`native-shell.css`** | Wave 1 | v11 gap/chip issues | **v12**: IOS26 `:root`, tab stretch, form gaps, textarea min, buffers | **COMPLETE** |
+| **`templates/header.php` link`** | Wave 1 | `?v=11` | `?v=12` | **COMPLETE** |
+| **`templates/native/component_registry.php`** | Wave 1 | Native keys only | **IOS*** alias layer | **COMPLETE** |
+| `index.php` (dashboard) | Wave 2 | Legacy hero | **NOT_STARTED** visually | NOT_STARTED |
+| `checkin.php` | Wave 2 | — | NOT_STARTED |
+| Employee leave funnel | Wave 2 | — | NOT_STARTED |
+| `hr/*.php` admin shells | Wave 3 | — | NOT_STARTED |
+
+**Regression:** PHPUnit / API tests untouched. Manual viewport QA runs after Wave 2 (**`07`**).

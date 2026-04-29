@@ -1,13 +1,9 @@
 /**
- * TP-HR — Native component system (design lock; aligned with tp-checkin v5).
- * v3: global touch bump (Utilities: min-h/w 44→48; brand primary buttons 56 via markup pass).
- * v4: main horizontal padding respects safe-area + never zeroed by stray overrides.
- * v5: icon size tokens; table scroll shell; locked aliases for loading/confirmation; header ?v=5.
- * v6: .tp-visually-hidden for screen-reader text with spinners; header ?v=6.
- * v10: Bottom tab bar — iOS-inspired materials (muted tint, SF-like chip; no violet glow halo); header ?v=10.
- * v11: Surfaces prefer tint + shadow + inset highlight over stacking 1px white borders (reduces “boxed” chrome); header ?v=11.
- * UI UX Pro Max: touch ≥48px, inputs ≥52px, primary CTA ≥56px, card radius 20px,
- * scroll-end buffer ≥120px, bottom slot ≥88px when tab bar present.
+ * TP-HR — Native component system (iOS 26–inspired + UI UX Pro Max).
+ * v12: IOS26 spacing — section gap 20px mobile, scroll buffer ≥144px, card radius/pad uplift,
+ * extended spacing scale (40/48), bottom-tab links fill grid columns (uniform active chip).
+ * Headers load this file as `/assets/css/native-shell.css?v=12`.
+ * UI UX Pro Max: touch ≥48px, inputs ≥54px (--tp-native-input-min), primary CTA ≥56px.
  */
 
 html {
@@ -18,7 +14,7 @@ body {
   overflow-x: clip;
 }
 
-/* ---------- Design tokens (spacing lock: 4–32) ---------- */
+/* ---------- Design tokens — IOS26 scale (spacing lock) ---------- */
 :root {
   --tp-space-4: 4px;
   --tp-space-8: 8px;
@@ -27,24 +23,40 @@ body {
   --tp-space-20: 20px;
   --tp-space-24: 24px;
   --tp-space-32: 32px;
+  --tp-space-40: 40px;
+  --tp-space-48: 48px;
 
   --tp-page-pad-mobile: var(--tp-space-16);
   --tp-page-pad-tablet: var(--tp-space-24);
-  --tp-section-gap-mobile: var(--tp-space-16);
+  --tp-section-gap-mobile: var(--tp-space-20);
   --tp-section-gap-tablet: var(--tp-space-24);
 
-  --tp-radius-card: 20px;
+  --tp-ios-card-radius: 24px;
+  --tp-radius-small-control: 14px;
+  --tp-radius-control: var(--tp-radius-small-control);
+  --tp-radius-card: var(--tp-ios-card-radius);
   --tp-card-radius: var(--tp-radius-card);
-  --tp-radius-control: 12px;
-  --tp-card-pad: var(--tp-space-16);
+  --tp-radius-button: clamp(18px, 3vw, 22px);
+  --tp-sheet-radius: 28px;
+
+  --tp-card-pad-mobile: 18px;
+  --tp-card-pad-tablet: 22px;
+  --tp-card-pad: var(--tp-card-pad-mobile);
+  --tp-card-gap-min: var(--tp-space-16);
+
+  --tp-form-group-gap-min: 18px;
+  --tp-max-content-form: min(680px, 100%);
+  --tp-max-content-dashboard: min(960px, 100%);
 
   --tp-native-btn-min: 56px;
-  --tp-native-input-min: 52px;
+  --tp-native-btn-secondary-min: 52px;
+  --tp-native-input-min: 54px;
+  --tp-native-textarea-min-h: 112px;
   --tp-native-touch-min: 48px;
   --tp-header-min-h: 64px;
   --tp-bottom-nav-max-h: 72px;
-  --tp-bottom-nav-slot: max(88px, calc(var(--tp-bottom-nav-max-h) + env(safe-area-inset-bottom, 0px)));
-  --tp-scroll-end-buffer: 120px;
+  --tp-bottom-nav-slot: max(96px, calc(var(--tp-bottom-nav-max-h) + env(safe-area-inset-bottom, 0px)));
+  --tp-scroll-end-buffer: 144px;
   --tp-cta-gap-above-tabs: var(--tp-space-24);
 
   --tp-bottom-nav-z: 50;
@@ -59,6 +71,14 @@ body {
 
   /* iOS-like tab semantics (adapted for dark branded shell — not literal UIKit clones) */
   --tp-ios-tab-chip-radius: 14px;
+
+  /* Typography scale (clamp for Dynamic Type-safe web) */
+  --tp-font-page-title: clamp(1.375rem, 4vw, 1.875rem);
+  --tp-font-section: clamp(1.0625rem, 3vw, 1.25rem);
+  --tp-font-card-title: clamp(1rem, 2.6vw, 1.125rem);
+  --tp-font-body: 0.9375rem;
+  --tp-font-caption: 0.75rem;
+  --tp-font-hero-number: clamp(2.125rem, 8vw, 3rem);
   --tp-ios-tab-fill-selected: rgba(255, 255, 255, 0.1);
   --tp-ios-tab-border-selected: rgba(255, 255, 255, 0.1);
   --tp-ios-tab-tint-selected: rgb(217, 210, 255);
@@ -158,13 +178,16 @@ body.tp-native-app.tp-app-shell {
   align-items: center;
   justify-content: center;
   gap: 4px;
-  min-height: max(48px, var(--tp-native-touch-min));
+  justify-self: stretch;
+  align-self: stretch;
+  width: 100%;
   min-width: 0;
-  max-width: 4.25rem;
-  width: max-content;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 8px 7px;
+  max-width: none;
+  min-height: max(48px, var(--tp-native-touch-min));
+  margin-left: 0;
+  margin-right: 0;
+  box-sizing: border-box;
+  padding: 8px 4px;
   border-radius: var(--tp-ios-tab-chip-radius);
   text-decoration: none;
   color: var(--tp-ios-tab-label-muted);
@@ -240,6 +263,7 @@ body.tp-native-app.tp-app-shell {
   text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tp-native-bottom-tab-link[aria-current="page"] .tp-native-bottom-tab-ic {
@@ -297,6 +321,12 @@ body.tp-native-app.tp-app-shell {
   padding: var(--tp-card-pad);
 }
 
+@media (min-width: 768px) {
+  .native-card {
+    padding: var(--tp-card-pad-tablet);
+  }
+}
+
 /* Inner regions inside a card: step down luminance instead of adding another stroked rectangle */
 .tp-native-well {
   border-radius: var(--tp-radius-card);
@@ -330,7 +360,7 @@ body.tp-native-app.tp-app-shell {
 }
 
 .tp-native-form-group {
-  margin-bottom: var(--tp-space-16);
+  margin-bottom: var(--tp-form-group-gap-min);
 }
 
 .tp-native-form-group > label:first-child {
@@ -345,13 +375,14 @@ body.tp-native-app.tp-app-shell {
 .tp-native-select,
 .tp-native-textarea {
   min-height: var(--tp-native-input-min);
+  padding: 14px 16px;
   font-size: 1rem;
-  border-radius: var(--tp-radius-card);
+  border-radius: var(--tp-radius-small-control);
   box-sizing: border-box;
 }
 
 .tp-native-textarea {
-  min-height: 100px;
+  min-height: var(--tp-native-textarea-min-h);
   resize: vertical;
 }
 
@@ -366,8 +397,7 @@ body.tp-native-app.tp-app-shell {
   touch-action: manipulation;
   font-size: 1rem;
   font-weight: 600;
-  border-radius: var(--tp-radius-control);
-  color: #fff;
+  border-radius: var(--tp-radius-button);
   background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
   border: none;
   box-shadow: 0 4px 20px rgba(124, 58, 237, 0.35);
@@ -375,7 +405,7 @@ body.tp-native-app.tp-app-shell {
 
 .tp-native-btn-secondary {
   width: 100%;
-  min-height: var(--tp-native-touch-min);
+  min-height: var(--tp-native-btn-secondary-min);
   display: inline-flex;
   align-items: center;
   justify-content: center;
