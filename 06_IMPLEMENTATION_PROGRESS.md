@@ -9,7 +9,7 @@ Statuses: **`NOT_STARTED` · `IN_PROGRESS` · `REFACTORED` · `COMPLETE` · `REG
 | **`01` · `04` · `05` docs** | Phase 4–5 | Pointer-only · T4 shorthand | **`04`** body + sync rules · **`01`** + **`hr/attendance_adjustments.php`** · **`05`** **T5** + full route table | **COMPLETE** |
 | **`index.php`** (dashboard) | MASTER v15 | Wave-2 polish | **`tp-ios-master-screen`** · **glass sticky slab** · **`tp-ios-attendance-panel`** · floating tabs | **REFACTORED** |
 | **`checkin.php`** | Wave 6 · align master | **`tp-checkin-stack`** only | **`tp-ios-master-screen`** · **`tp-ios-large-title-block`** · **เข้า/ออก** wells **`tp-ios-attendance-panel`** · grid **`gap-6`** · column **`space-y-6`** | **REFACTORED** |
-| `leave.php` + **`modules/employee/leaves/request_form.php`** | Wave 2 | Flat title | Token titles · form wells | **REFACTORED** *(QA vs v15)* |
+| `leave.php` + **`modules/employee/leaves/request_form.php`** | Wave **6 · v15** | Flat header · **`gap-5`** | **`tp-ios-master-screen`** · **`tp-ios-large-title-block`** · grid **`gap-6`** · balance tiles **`tp-ios-attendance-panel`** · form inputs **`tp-native-*`** · actions **54/58** | **REFACTORED** |
 | ESS remainder · **`leave_history.php`** · **`attendance_history.php`** · etc. | Wave 4 | Mixed | Stacks + **`tp-ios-*`** | **REFACTORED** *(QA vs v15)* |
 | **`login.php`** | Polish | — | Token radii | **REFACTORED** |
 | **`hr/*.php`** (admin) | Wave 3 | Mixed | **`tp-hr-admin-stack`** + titles | **REFACTORED** *(QA chrome)* |

@@ -23,7 +23,7 @@ $stmt->execute([$user['id']]);
 $leave_types_form = $stmt->fetchAll();
 ?>
 
-<div class="mb-5 md:mb-8 min-w-0">
+<div class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
     <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
         <a href="leave.php" class="hover:text-white touch-manipulation">การลา</a>
         <span class="mx-2">/</span>
@@ -33,7 +33,7 @@ $leave_types_form = $stmt->fetchAll();
     <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">กรอกช่วงวันที่และเหตุผล ระบบจะคำนวณจำนวนวันลาให้</p>
 </div>
 
-<div class="grid grid-cols-1 xl:grid-cols-3 gap-5 md:gap-8 min-w-0 max-w-full">
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8 min-w-0 max-w-full">
     <div class="xl:col-span-2 min-w-0">
         <form id="leave-form" class="native-card tp-native-card tp-native-data-card min-w-0 max-w-full overflow-x-clip p-5 sm:p-7" method="POST" action="/api/leave.php" enctype="multipart/form-data">
             <input type="hidden" name="action" value="create">
@@ -42,7 +42,7 @@ $leave_types_form = $stmt->fetchAll();
             <!-- Leave Type -->
             <div class="tp-native-form-group min-w-0 max-w-full">
                 <label class="block text-white/80 text-sm font-medium mb-2">ประเภทการลา <span class="text-red-400">*</span></label>
-                <select name="leave_type_id" id="leave_type_id" required class="input-field" onchange="updateLeaveInfo()">
+                <select name="leave_type_id" id="leave_type_id" required class="input-field tp-native-select" onchange="updateLeaveInfo()">
                     <option value="">-- เลือกประเภทการลา --</option>
                     <?php foreach ($leave_types_form as $type): ?>
                     <option value="<?php echo $type['id']; ?>" 
@@ -65,13 +65,13 @@ $leave_types_form = $stmt->fetchAll();
                 <div class="min-w-0 max-w-full">
                     <label class="block text-white/80 text-sm font-medium mb-2">วันที่เริ่มต้น <span class="text-red-400">*</span></label>
                     <div class="input-date-shell">
-                        <input type="date" name="start_date" id="start_date" required class="input-field"
+                        <input type="date" name="start_date" id="start_date" required class="input-field tp-native-input"
                                min="<?php echo date('Y-m-d'); ?>" onchange="calculateDays()">
                     </div>
                 </div>
                 <div class="min-w-0 max-w-full">
                     <label class="block text-white/80 text-sm font-medium mb-2">ช่วงเวลา</label>
-                    <select name="start_period" id="start_period" class="input-field" onchange="calculateDays()">
+                    <select name="start_period" id="start_period" class="input-field tp-native-select" onchange="calculateDays()">
                         <option value="FULL">ทั้งวัน</option>
                         <option value="AM">ครึ่งวันเช้า</option>
                         <option value="PM">ครึ่งวันบ่าย</option>
@@ -83,13 +83,13 @@ $leave_types_form = $stmt->fetchAll();
                 <div class="min-w-0 max-w-full">
                     <label class="block text-white/80 text-sm font-medium mb-2">วันที่สิ้นสุด <span class="text-red-400">*</span></label>
                     <div class="input-date-shell">
-                        <input type="date" name="end_date" id="end_date" required class="input-field"
+                        <input type="date" name="end_date" id="end_date" required class="input-field tp-native-input"
                                min="<?php echo date('Y-m-d'); ?>" onchange="calculateDays()">
                     </div>
                 </div>
                 <div class="min-w-0 max-w-full">
                     <label class="block text-white/80 text-sm font-medium mb-2">ช่วงเวลา</label>
-                    <select name="end_period" id="end_period" class="input-field" onchange="calculateDays()">
+                    <select name="end_period" id="end_period" class="input-field tp-native-select" onchange="calculateDays()">
                         <option value="FULL">ทั้งวัน</option>
                         <option value="AM">ครึ่งวันเช้า</option>
                         <option value="PM">ครึ่งวันบ่าย</option>
@@ -109,14 +109,14 @@ $leave_types_form = $stmt->fetchAll();
             <!-- Reason -->
             <div class="tp-native-form-group">
                 <label class="block text-white/80 text-sm font-medium mb-2">เหตุผลการลา <span class="text-red-400">*</span></label>
-                <textarea name="reason" id="reason" required rows="3" class="input-field" 
+                <textarea name="reason" id="reason" required rows="3" class="input-field tp-native-textarea" 
                           placeholder="ระบุเหตุผลการลา..."></textarea>
             </div>
             
             <!-- Contact Number -->
             <div class="tp-native-form-group">
                 <label class="block text-white/80 text-sm font-medium mb-2">เบอร์ติดต่อระหว่างลา</label>
-                <input type="tel" name="contact_number" class="input-field" 
+                <input type="tel" name="contact_number" class="input-field tp-native-input" 
                        placeholder="เบอร์โทรที่สามารถติดต่อได้" value="<?php echo htmlspecialchars($user['phone'] ?? ''); ?>">
             </div>
             
@@ -139,10 +139,10 @@ $leave_types_form = $stmt->fetchAll();
             
             <!-- Buttons -->
             <div class="flex flex-col-reverse md:flex-row gap-4 md:gap-5 pt-2">
-                <a href="leave.php" class="touch-manipulation flex-1 min-h-[52px] inline-flex items-center justify-center py-3 bg-white/10 hover:bg-white/20 text-white text-center rounded-[var(--tp-ios-card-radius)] transition-colors font-medium border-0">
+                <a href="leave.php" class="touch-manipulation flex-1 min-h-[54px] inline-flex items-center justify-center py-3 bg-white/10 hover:bg-white/20 text-white text-center rounded-[var(--tp-radius-button)] transition-colors font-medium border-0">
                     ยกเลิก
                 </a>
-                <button type="submit" class="btn-primary touch-manipulation flex-1 inline-flex items-center justify-center gap-2 min-h-[56px] py-3 rounded-[var(--tp-ios-card-radius)] font-semibold border-0">
+                <button type="submit" class="btn-primary touch-manipulation flex-1 inline-flex items-center justify-center gap-2 min-h-[58px] py-3 rounded-[var(--tp-radius-button)] font-semibold border-0">
                     <i class="fas fa-paper-plane" aria-hidden="true"></i><span>ส่งคำขอลา</span>
                 </button>
             </div>
@@ -150,7 +150,7 @@ $leave_types_form = $stmt->fetchAll();
     </div>
     
     <!-- Right Column: Info -->
-    <div class="space-y-5 md:space-y-6 min-w-0">
+    <div class="space-y-6 min-w-0">
         <!-- Leave Balance -->
         <div class="native-card tp-native-card tp-native-data-card min-w-0">
             <h3 class="section-title mb-4">

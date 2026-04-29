@@ -62,14 +62,14 @@ if ($action === 'request') {
 require_once __DIR__ . '/templates/header.php';
 ?>
 
-<div class="tp-leave-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<div class="tp-leave-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
     <?php if ($action === 'request'): ?>
     <!-- Leave Request Form -->
     <?php include __DIR__ . '/modules/employee/leaves/request_form.php'; ?>
     
     <?php else: ?>
     <!-- Leave Dashboard -->
-    <div class="mb-5 md:mb-8 min-w-0">
+    <header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
         <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between gap-y-4">
             <div class="min-w-0 flex-1">
                 <h1 class="tp-ios-page-title">การลา</h1>
@@ -79,25 +79,25 @@ require_once __DIR__ . '/templates/header.php';
                 <i class="fas fa-plus mr-2"></i>ยื่นขอลา
             </a>
         </div>
-    </div>
+    </header>
     
     <?php if ($message): ?>
-    <div class="tp-native-success-state bg-emerald-500/15 border border-emerald-400/40 text-emerald-200 px-4 py-3 rounded-[var(--tp-ios-card-radius)] mb-5 md:mb-6 flex items-start gap-3 max-w-none mx-0 w-full" role="status">
+    <div class="tp-native-success-state bg-emerald-500/15 border border-emerald-400/40 text-emerald-200 px-4 py-3 rounded-[var(--tp-ios-card-radius)] mb-6 flex items-start gap-3 max-w-none mx-0 w-full" role="status">
         <i class="fas fa-check-circle text-2xl shrink-0 mt-0.5" aria-hidden="true"></i>
         <span class="text-base leading-snug"><?php echo htmlspecialchars($message); ?></span>
     </div>
     <?php endif; ?>
     
     <?php if ($error): ?>
-    <div class="tp-native-error-state bg-red-500/15 border border-red-400/45 text-red-200 px-4 py-3 rounded-[var(--tp-ios-card-radius)] mb-5 md:mb-6 flex items-start gap-3 max-w-none mx-0 w-full" role="alert">
+    <div class="tp-native-error-state bg-red-500/15 border border-red-400/45 text-red-200 px-4 py-3 rounded-[var(--tp-ios-card-radius)] mb-6 flex items-start gap-3 max-w-none mx-0 w-full" role="alert">
         <i class="fas fa-exclamation-circle text-2xl shrink-0 mt-0.5" aria-hidden="true"></i>
         <span class="text-base leading-snug"><?php echo htmlspecialchars($error); ?></span>
     </div>
     <?php endif; ?>
     
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 md:gap-8 min-w-0 max-w-full">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8 min-w-0 max-w-full">
         <!-- Left Column -->
-        <div class="xl:col-span-2 space-y-5 md:space-y-6 min-w-0">
+        <div class="xl:col-span-2 space-y-6 min-w-0">
             <!-- Leave Balance -->
             <div class="native-card tp-native-card tp-native-data-card min-w-0">
                 <h2 class="section-title mb-4">
@@ -108,7 +108,7 @@ require_once __DIR__ . '/templates/header.php';
                 <?php if ($entitlements): ?>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 min-w-0">
                     <?php foreach ($entitlements as $ent): ?>
-                    <div class="p-4 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/8 min-w-0">
+                    <div class="tp-ios-attendance-panel p-4 min-w-0">
                         <div class="flex items-center justify-between gap-2 mb-2 min-w-0">
                             <span class="text-white font-medium truncate min-w-0"><?php echo htmlspecialchars($ent['name']); ?></span>
                             <span class="text-xs px-2 py-1 rounded-full" style="background-color: <?php echo $ent['color'] ?? '#6B7280'; ?>20; color: <?php echo $ent['color'] ?? '#6B7280'; ?>">
@@ -189,7 +189,7 @@ require_once __DIR__ . '/templates/header.php';
                         default => 'bg-gray-500/20 text-gray-300 border border-gray-500/30'
                     };
                     ?>
-                    <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/8 p-4">
+                    <div class="tp-ios-attendance-panel p-4">
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0">
                                 <span class="inline-flex px-2.5 py-1 text-xs rounded-full"
@@ -274,7 +274,7 @@ require_once __DIR__ . '/templates/header.php';
         </div>
         
         <!-- Right Column -->
-        <div class="space-y-5 md:space-y-6 min-w-0">
+        <div class="space-y-6 min-w-0">
             <!-- Quick Request -->
             <div class="native-card tp-native-card tp-native-data-card min-w-0">
                 <h2 class="section-title mb-4">
