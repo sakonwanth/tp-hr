@@ -82,10 +82,10 @@ $announcements = $stmt->fetchAll();
 require_once __DIR__ . '/templates/header.php';
 ?>
 
-<div class="tp-dashboard-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<div class="tp-dashboard-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
 
 <!-- หัวหน้าแรก: การ์ดสรุปวันที่/ตำแหน่ง — layout จาก CSS ใน header (ไม่ใช้ Tailwind arbitrary grid) -->
-<div class="dashboard-hero">
+<div class="dashboard-hero tp-ios-large-title-block">
     <div class="dashboard-hero-inner">
         <div class="dashboard-hero-main">
             <h1 class="dashboard-hero-title tp-ios-page-title">
@@ -213,11 +213,11 @@ require_once __DIR__ . '/templates/header.php';
             </h2>
             
             <?php if ($myData['today_attendance']): ?>
-                <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between bg-slate-800/50 rounded-[var(--tp-ios-card-radius)] p-5 md:p-6 border border-white/6">
+                <div class="tp-ios-attendance-panel flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between p-5 md:p-6">
                     <div class="flex items-center justify-center gap-6 sm:gap-8">
                         <div class="text-center px-2 sm:px-4">
-                            <p class="text-slate-400 text-xs mb-1">เข้างาน</p>
-                            <p class="text-2xl font-bold text-emerald-400 tabular-nums">
+                            <p class="tp-ios-caption-muted text-xs mb-1">เข้างาน</p>
+                            <p class="tp-ios-hero-number text-emerald-400">
                                 <?php echo $myData['today_attendance']['check_in_time'] 
                                     ? date('H:i', strtotime($myData['today_attendance']['check_in_time'])) 
                                     : '-'; ?>
@@ -227,8 +227,8 @@ require_once __DIR__ . '/templates/header.php';
                             <i class="fas fa-arrow-right"></i>
                         </div>
                         <div class="text-center px-2 sm:px-4">
-                            <p class="text-slate-400 text-xs mb-1">ออกงาน</p>
-                            <p class="text-2xl font-bold tabular-nums <?php echo $myData['today_attendance']['check_out_time'] ? 'text-blue-400' : 'text-slate-600'; ?>">
+                            <p class="tp-ios-caption-muted text-xs mb-1">ออกงาน</p>
+                            <p class="tp-ios-hero-number <?php echo $myData['today_attendance']['check_out_time'] ? 'text-blue-400' : 'text-slate-600'; ?>">
                                 <?php echo $myData['today_attendance']['check_out_time'] 
                                     ? date('H:i', strtotime($myData['today_attendance']['check_out_time'])) 
                                     : '-'; ?>
@@ -424,10 +424,12 @@ require_once __DIR__ . '/templates/header.php';
 <!-- Primary CTA แบบ sticky เหนือแถบแท็บ — เฉพาะมือถือ/แท็บเล็ต (ซ่อนที่ desktop มีแถบข้าง) -->
 <div class="app-shell-mobile-only home-sticky-cta tp-sticky-primary-action print:hidden" role="region" aria-label="ลงเวลาด่วน">
     <div class="home-sticky-cta-inner max-w-lg mx-auto w-full px-0">
-        <a href="/checkin.php" class="tp-native-btn-primary w-full justify-center shadow-lg no-underline text-white gap-2">
-            <i class="fas fa-fingerprint" aria-hidden="true"></i>
-            <span class="whitespace-nowrap">ลงเวลา</span>
-        </a>
+        <div class="tp-ios-sticky-cta-slab">
+            <a href="/checkin.php" class="tp-native-btn-primary w-full justify-center shadow-lg no-underline text-white gap-2">
+                <i class="fas fa-fingerprint" aria-hidden="true"></i>
+                <span class="whitespace-nowrap">ลงเวลา</span>
+            </a>
+        </div>
     </div>
 </div>
 

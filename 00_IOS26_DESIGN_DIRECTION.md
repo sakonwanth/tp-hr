@@ -137,4 +137,4 @@ Blocking **FAIL** if any captured on **390×844** (and **375×667** spot):
 
 ## Delta note (CSS vs specification)
 
-**`native-shell.css` v14 (2026-04)** aligns primary **58px**, scroll buffer **160px**, section gap **mobile 24px**, input **56px**, textarea **120px**, card padding **mobile 20 → tablet 24**. **`07_SPACING_QA.md`** still applies per-route.
+**`native-shell.css` v15 (2026-04-30):** floating **Liquid Glass** bottom tab **pill** (blur + saturation + inset radius `--tp-sheet-radius`), bottom **gradient scrim**, **glass sticky CTA** slab (`.tp-ios-sticky-cta-slab`), **typography** caps aligned to §12 (page title max **28px**, section **~19px**). Reserved chrome: `--tp-bottom-nav-slot` includes strip + padding + safe area. Spacing QA: **`07_SPACING_QA.md`** per route.

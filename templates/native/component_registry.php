@@ -86,8 +86,10 @@ return [
     'IOSWarningBlock' => 'tp-native-warning-block',
     'IOSTableToCardPattern' => 'tp-native-table-shell',
     'IOSProgressStep' => 'tp-native-progress-step',
-    'IOSQuickActionCard' => 'quick-action tp-native-quick-action-card',
-    'IOSSectionHeader' => 'section-title tp-native-section-title',
+    'IOSMasterScreen' => 'tp-ios-master-screen',
+
+    'IOSStickyCTAGlass' => 'tp-ios-sticky-cta-slab',
+    'IOSAttendanceWell' => 'tp-ios-attendance-panel',
     'IOSScrollContainer' => 'tp-native-stack--page',
     'IOSKeyboardSafeForm' => 'tp-native-form-group',
 ];

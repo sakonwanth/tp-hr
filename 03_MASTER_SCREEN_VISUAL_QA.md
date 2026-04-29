@@ -1,20 +1,21 @@
 # 03_MASTER_SCREEN_VISUAL_QA.md — Master screen acceptance gate (`index.php`)
 
 **Screen:** ESS Dashboard — **`index.php`**  
-**Statuses:** ✅ Pass · ❌ Fail (block Phase 8 wave expansion)
+**Shell:** `assets/css/native-shell.css` **v15** (`templates/header.php` / `login.php`)  
+**Statuses:** ✅ Pass · ❌ Fail (block Phase 6 wave until fixed)
 
 | # | Question | ✅ / ❌ | Notes |
 |---|----------|---------|-------|
-| 1 | Looks like a polished **native-feel mobile app** (dense web admin metaphor gone)? | | |
-| 2 | Reads **iOS 26-inspired** depth (glass + layered opaque cards), not Bootstrap-table soup? | | |
-| 3 | **Liquid Glass** clearly visible **only** where rules allow (tabs, sticky CTA, headers)? | | |
-| 4 | **Spacing calm**: consistent ladders (16/24/section gaps)—no cramped blocks? | | |
-| 5 | Primary action **instantly obvious** (ลงเวลา)—both hero cue + sticky CTA? | | |
-| 6 | **Bottom chrome never obscures scroll-end** (`--tp-scroll-end-buffer`/`--tp-bottom-nav-slot`) | | |
-| 7 | **Visual balance**: hero weight vs KPI cards vs grids feels intentional? | | |
-| 8 | **Cards align** vertically (consistent radii/wells)? | | |
-| 9 | **Typography lock** respects scale (titles/body/caption)? | | |
-|10 | Clearly **better hierarchy** than Wave-0 screenshots (side-by-side if needed)? | | |
+| 1 | Looks like a polished **native-feel mobile app** (not a generic web admin table)? | | |
+| 2 | Reads **iOS 26–inspired**: layered depth, **glass on chrome** + **opaque content wells**? | | |
+| 3 | **Liquid Glass** clearly visible on **floating tab pill**, **sticky CTA slab**, and **mobile header** — not heavy blur on body copy cards? | | |
+| 4 | **Spacing calm**: section gaps **24px**, gutters **≥16** mobile / **≥24** tablet — no random tight stacks? | | |
+| 5 | Primary action **ลงเวลา** obvious (hero + **glass** sticky CTA + tab “ลงเวลา”)? | | |
+| 6 | **Bottom chrome** never clips scroll-end (`--tp-scroll-end-buffer` **160px**, `--tp-bottom-nav-slot` **v15**)? | | |
+| 7 | **Visual balance**: hero vs KPI vs grids feels intentional? | | |
+| 8 | **Cards align** — **24px** radius on mobile (no leftover **14px** mismatch)? | | |
+| 9 | **Typography lock**: page title **≤28px**, section **~19px**, time row uses **hero number** scale? | | |
+|10 | Clearly **better** than pre–v15 web dashboard metaphor? | | |
 
 ## Device matrix (minimum captures)
 
@@ -22,16 +23,25 @@
 |------------------|---------|
 | iPhone 14 class — **390×844** | |
 | Compact — **375×667** | |
-| Tablet portrait — optional **834×1194** | |
+| Tablet portrait — **768+** (optional) | |
 
 ## Blocking defects (examples)
 
-Horizontal scroll • sticky CTA under tab strip • blurred content text • clipped last card • mismatched arbitrary radii vs tokens.
+Horizontal scroll · sticky CTA hidden under tab pill · **unreadable** blurred paragraph text · last card clipped · mixed radii (14 vs 24) · **wrapped** primary CTA label.
 
-**Rule:** any ❌ ⇒ **fix `index.php` CSS/markup footprint** (`assets/css/native-shell.css` bumps w/ **`?v`** discipline) **before** mass Wave replicates.
+**Rule:** any ❌ ⇒ fix **`index.php` + `native-shell.css` + `header.php` inline tokens** (bump **`?v=`** when CSS changes) **before** rolling the pattern to other routes.
 
 ---
 
-## Engineering pass snapshot (automated markup alignment)
+## Engineering pass snapshot (automated)
 
-**2026:** Post–**`native-shell` v14** pass on **`index.php`**: major stacks use **`gap-6` / `space-y-6`** (**24px**) · inner list wells **`p-5`** (**20px**) · attendance status block **`p-5 md:p-6`** · **`dashboard-hero`** margins use **`--tp-space-*`** / **`--tp-section-gap-mobile`** · **`dashboard-hero-summary`** padding normalized (**no stray 4px**). **Human fills ✅ / ❌** in the matrix above before closing Phase 8.
+**2026-04-30 · v15**
+
+- **Floating tab bar:** `.tp-native-bottom-tab-nav` = transparent + **gradient scrim** `::before`; `.tp-native-bottom-tab-strip` = **28px** radius glass **pill**, `saturate(200%)` + `blur(28px)`.
+- **Sticky CTA:** `.tp-ios-sticky-cta-slab` frosted container around `.tp-native-btn-primary`.
+- **Attendance block:** `.tp-ios-attendance-panel` = **well** surface (no stacked glass on copy).
+- **Time display:** `.tp-ios-hero-number` + `.tp-ios-caption-muted` (hero number **color** from utilities — base rule does not force white).
+- **Chrome slot:** `--tp-bottom-nav-slot` = `max(100px, calc(72px + 12px + safe-area))`.
+- **Header (mobile):** `.mobile-app-header.header-glass` stronger blur + saturation (`header.php` inline).
+
+**Human:** fill ✅ / ❌ in the matrix above before closing Phase 3 and starting Phase 6 page-by-page work.

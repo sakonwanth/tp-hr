@@ -94,3 +94,19 @@ Existing PHP `$stats`, `$myData`, `$announcements` queries remain. This doc resh
 3. **HR KPI grid** responsiveness — swipe row on XS if columns overflow horizontally (anti-pattern forbidden).  
 
 **Do not** touch SQL / `Auth::*` branches.
+
+---
+
+## Implementation status (`native-shell.css` **v15**)
+
+| Item | Done |
+|------|------|
+| Floating **Liquid Glass** tab pill (`--tp-sheet-radius`, blur + saturate, inset horizontal margin) | Yes |
+| Bottom **gradient scrim** behind tab (depth, not flat grey slab) | Yes |
+| **Glass** sticky CTA container (`.tp-ios-sticky-cta-slab`) above tab slot | Yes |
+| **Compact header** glass (mobile `header-glass` blur + saturation bump) | Yes |
+| **Attendance** time block = **opaque well** (`.tp-ios-attendance-panel`) — readable, not stacked glass | Yes |
+| Time digits use **`tp-ios-hero-number`** + caption tokens | Yes |
+| Master screen marker classes: **`tp-ios-master-screen`**, **`tp-ios-large-title-block`** | Yes |
+| Mobile card radius **24px** locked (removed 14px override in `header.php` ≤640px) | Yes |
+| Primary hero CTA **58px** min-height (`.btn-primary-prominent`) | Yes |

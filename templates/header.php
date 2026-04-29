@@ -35,7 +35,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
     
     <!-- Tailwind CSS (compiled) -->
     <link rel="stylesheet" href="/assets/css/app.css">
-    <link rel="stylesheet" href="/assets/css/native-shell.css?v=14">
+    <link rel="stylesheet" href="/assets/css/native-shell.css?v=15">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -207,11 +207,11 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
 
         /* Hero primary CTA on dashboard — reads clearly as main action */
         .btn-primary-prominent {
-            min-height: 56px;
+            min-height: 58px;
             padding: 14px 28px;
             font-size: 1.0625rem;
             font-weight: 600;
-            border-radius: 14px;
+            border-radius: clamp(18px, 3vw, 22px);
             box-shadow: 0 8px 32px rgba(124, 58, 237, 0.45), 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
@@ -312,13 +312,13 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
 
         /* แถบบนมือถือ — โทนเอกสาร / องค์กร (คงโครงสร้างเดิม) */
         .mobile-app-header.header-glass {
-            background: linear-gradient(180deg, rgba(15, 23, 42, 0.97) 0%, rgba(15, 23, 42, 0.9) 100%);
-            backdrop-filter: blur(28px) saturate(1.12);
-            -webkit-backdrop-filter: blur(28px) saturate(1.12);
-            border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.94) 0%, rgba(15, 23, 42, 0.82) 100%);
+            backdrop-filter: blur(32px) saturate(1.38);
+            -webkit-backdrop-filter: blur(32px) saturate(1.38);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.16);
             box-shadow:
-                0 1px 0 rgba(255, 255, 255, 0.05) inset,
-                0 12px 40px rgba(0, 0, 0, 0.22);
+                0 1px 0 rgba(255, 255, 255, 0.06) inset,
+                0 14px 44px rgba(0, 0, 0, 0.26);
         }
 
         .mobile-app-header-bar {
@@ -848,18 +848,19 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         @media (max-width: 640px) {
             .glass-card,
             .stat-card {
-                border-radius: 14px;
+                border-radius: var(--tp-ios-card-radius, 24px);
             }
 
             .quick-action {
                 padding: 16px 10px;
                 min-height: 104px;
+                border-radius: var(--tp-ios-card-radius, 24px);
             }
 
             .quick-action-icon {
                 width: 48px;
                 height: 48px;
-                border-radius: 14px;
+                border-radius: var(--tp-radius-small-control, 14px);
                 margin-bottom: 10px;
             }
         }
