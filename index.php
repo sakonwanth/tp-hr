@@ -82,11 +82,13 @@ $announcements = $stmt->fetchAll();
 require_once __DIR__ . '/templates/header.php';
 ?>
 
+<div class="tp-dashboard-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+
 <!-- หัวหน้าแรก: การ์ดสรุปวันที่/ตำแหน่ง — layout จาก CSS ใน header (ไม่ใช้ Tailwind arbitrary grid) -->
 <div class="dashboard-hero">
     <div class="dashboard-hero-inner">
         <div class="dashboard-hero-main">
-            <h1 class="dashboard-hero-title">
+            <h1 class="dashboard-hero-title tp-ios-page-title">
                 สวัสดี, <?php echo htmlspecialchars($user['first_name_th'] ?? $user['username']); ?>
             </h1>
             <div class="dashboard-hero-summary">
@@ -111,7 +113,7 @@ require_once __DIR__ . '/templates/header.php';
 
 <?php if ($isHR): ?>
 <!-- HR Stats Cards -->
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6 md:mb-8">
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-6 md:mb-8">
     <div class="stat-card tp-native-summary-card group">
         <div class="flex items-center gap-4">
             <div class="stat-icon bg-blue-500/15 border border-blue-400/25 transition-colors">
@@ -162,9 +164,9 @@ require_once __DIR__ . '/templates/header.php';
 </div>
 <?php endif; ?>
 
-<div class="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6">
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-5 md:gap-8">
     <!-- Left Column -->
-    <div class="xl:col-span-2 space-y-4 md:space-y-6">
+    <div class="xl:col-span-2 space-y-5 md:space-y-6">
         
         <!-- Quick Actions -->
         <div class="native-card tp-native-card tp-native-data-card">
@@ -172,7 +174,7 @@ require_once __DIR__ . '/templates/header.php';
                 <i class="fas fa-bolt text-amber-400 text-2xl" aria-hidden="true"></i>
                 ทางลัดด่วน
             </h2>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
                 <a href="/checkin.php" class="quick-action tp-native-quick-action-card group relative border-2 border-emerald-400/35 bg-emerald-500/5">
                     <div class="quick-action-icon bg-emerald-500/20 border border-emerald-400/30">
                         <i class="fas fa-fingerprint text-emerald-300 text-2xl" aria-hidden="true"></i>
@@ -211,7 +213,7 @@ require_once __DIR__ . '/templates/header.php';
             </h2>
             
             <?php if ($myData['today_attendance']): ?>
-                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-slate-800/50 rounded-[20px] p-4 border border-white/6">
+                <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between bg-slate-800/50 rounded-[var(--tp-ios-card-radius)] p-4 md:p-5 border border-white/6">
                     <div class="flex items-center justify-center gap-6 sm:gap-8">
                         <div class="text-center px-2 sm:px-4">
                             <p class="text-slate-400 text-xs mb-1">เข้างาน</p>
@@ -247,7 +249,7 @@ require_once __DIR__ . '/templates/header.php';
                     <?php endif; ?>
                 </div>
             <?php else: ?>
-                <div class="tp-native-empty-state text-center py-12 bg-slate-800/30 rounded-[20px] border border-dashed border-slate-600/80">
+                <div class="tp-native-empty-state text-center py-12 bg-slate-800/30 rounded-[var(--tp-ios-card-radius)] border border-dashed border-slate-600/80">
                     <i class="fas fa-clock text-slate-500 text-4xl mb-4" aria-hidden="true"></i>
                     <p class="text-slate-300 mb-2 text-base">คุณยังไม่ได้ลงเวลาเข้างานวันนี้</p>
                     <p class="text-slate-500 text-sm mb-4">แตะปุ่มด้านล่างหรือทางลัดเพื่อลงเวลา</p>
@@ -272,7 +274,7 @@ require_once __DIR__ . '/templates/header.php';
             </div>
             
             <?php if ($myData['leave_balance']): ?>
-                <div class="space-y-4">
+                <div class="space-y-5">
                     <?php foreach ($myData['leave_balance'] as $leave): ?>
                     <?php 
                         $percentage = $leave['entitled_days'] > 0 
@@ -280,7 +282,7 @@ require_once __DIR__ . '/templates/header.php';
                             : 0;
                         $barColor = $percentage > 50 ? 'bg-emerald-500' : ($percentage > 20 ? 'bg-amber-500' : 'bg-red-500');
                     ?>
-                    <div class="bg-slate-800/50 rounded-[20px] p-4 border border-white/6">
+                    <div class="bg-slate-800/50 rounded-[var(--tp-ios-card-radius)] p-4 border border-white/6">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-white font-medium"><?php echo htmlspecialchars($leave['name']); ?></span>
                             <div class="flex items-center gap-1">
@@ -295,7 +297,7 @@ require_once __DIR__ . '/templates/header.php';
                     <?php endforeach; ?>
                 </div>
             <?php else: ?>
-                <div class="tp-native-empty-state text-center py-10 rounded-[20px] border border-dashed border-slate-600/60 bg-slate-800/20">
+                <div class="tp-native-empty-state text-center py-10 rounded-[var(--tp-ios-card-radius)] border border-dashed border-slate-600/60 bg-slate-800/20">
                     <i class="fas fa-calendar-times text-slate-500 text-4xl mb-3" aria-hidden="true"></i>
                     <p class="text-slate-300 text-base">ยังไม่มีข้อมูลสิทธิ์วันลา</p>
                     <p class="text-slate-500 text-sm mt-1">ติดต่อ HR หากควรมีสิทธิ์แต่ไม่แสดง</p>
@@ -305,7 +307,7 @@ require_once __DIR__ . '/templates/header.php';
     </div>
     
     <!-- Right Column -->
-    <div class="space-y-4 md:space-y-6">
+    <div class="space-y-5 md:space-y-6">
         
         <!-- Pending Requests -->
         <?php if ($myData['pending_leaves']): ?>
@@ -316,7 +318,7 @@ require_once __DIR__ . '/templates/header.php';
             </h2>
             <div class="space-y-3">
                 <?php foreach ($myData['pending_leaves'] as $leave): ?>
-                <div class="bg-slate-800/50 rounded-[20px] p-4 border border-white/6">
+                <div class="bg-slate-800/50 rounded-[var(--tp-ios-card-radius)] p-4 border border-white/6">
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-white font-medium"><?php echo htmlspecialchars($leave['leave_type_name']); ?></span>
                         <span class="badge badge-warning">รออนุมัติ</span>
@@ -344,7 +346,7 @@ require_once __DIR__ . '/templates/header.php';
             <?php if ($announcements): ?>
                 <div class="space-y-3">
                     <?php foreach ($announcements as $ann): ?>
-                    <div class="bg-slate-800/50 rounded-[20px] p-4 border border-white/6 hover:bg-slate-800/80 transition-colors cursor-pointer">
+                    <div class="bg-slate-800/50 rounded-[var(--tp-ios-card-radius)] p-4 border border-white/6 hover:bg-slate-800/80 transition-colors cursor-pointer">
                         <?php if ($ann['is_pinned']): ?>
                         <span class="inline-flex items-center text-xs text-red-400 mb-2">
                             <i class="fas fa-thumbtack mr-1"></i>
@@ -361,7 +363,7 @@ require_once __DIR__ . '/templates/header.php';
                     <?php endforeach; ?>
                 </div>
             <?php else: ?>
-                <div class="tp-native-empty-state text-center py-10 rounded-[20px] border border-dashed border-slate-600/60 bg-slate-800/20">
+                <div class="tp-native-empty-state text-center py-10 rounded-[var(--tp-ios-card-radius)] border border-dashed border-slate-600/60 bg-slate-800/20">
                     <i class="fas fa-bullhorn text-slate-500 text-4xl mb-3" aria-hidden="true"></i>
                     <p class="text-slate-300 text-base">ไม่มีประกาศใหม่</p>
                 </div>
@@ -377,9 +379,9 @@ require_once __DIR__ . '/templates/header.php';
             </h2>
             <div class="space-y-2">
                 <?php if ($stats['pending_leaves'] > 0): ?>
-                <a href="/hr/leaves.php?status=pending" class="flex items-center justify-between min-h-[48px] p-3 rounded-[20px] bg-slate-800/50 hover:bg-primary-500/10 transition-colors group touch-manipulation border border-white/6">
+                <a href="/hr/leaves.php?status=pending" class="flex items-center justify-between min-h-[48px] p-3 rounded-[var(--tp-ios-card-radius)] bg-slate-800/50 hover:bg-primary-500/10 transition-colors group touch-manipulation border border-white/6">
                     <div class="flex items-center gap-3 min-w-0">
-                        <div class="w-12 h-12 rounded-[20px] bg-amber-500/20 border border-amber-400/25 flex items-center justify-center shrink-0">
+                        <div class="w-12 h-12 rounded-[var(--tp-ios-card-radius)] bg-amber-500/20 border border-amber-400/25 flex items-center justify-center shrink-0">
                             <i class="fas fa-calendar-times text-amber-400 text-xl" aria-hidden="true"></i>
                         </div>
                         <span class="text-white font-medium">คำขอลา</span>
@@ -392,9 +394,9 @@ require_once __DIR__ . '/templates/header.php';
                 <?php endif; ?>
                 
                 <?php if ($stats['pending_documents'] > 0): ?>
-                <a href="/hr/documents.php?status=pending" class="flex items-center justify-between min-h-[48px] p-3 rounded-[20px] bg-slate-800/50 hover:bg-primary-500/10 transition-colors group touch-manipulation border border-white/6">
+                <a href="/hr/documents.php?status=pending" class="flex items-center justify-between min-h-[48px] p-3 rounded-[var(--tp-ios-card-radius)] bg-slate-800/50 hover:bg-primary-500/10 transition-colors group touch-manipulation border border-white/6">
                     <div class="flex items-center gap-3 min-w-0">
-                        <div class="w-12 h-12 rounded-[20px] bg-purple-500/20 border border-purple-400/25 flex items-center justify-center shrink-0">
+                        <div class="w-12 h-12 rounded-[var(--tp-ios-card-radius)] bg-purple-500/20 border border-purple-400/25 flex items-center justify-center shrink-0">
                             <i class="fas fa-file-alt text-purple-400 text-xl" aria-hidden="true"></i>
                         </div>
                         <span class="text-white font-medium">คำขอเอกสาร</span>
@@ -416,6 +418,7 @@ require_once __DIR__ . '/templates/header.php';
         </div>
         <?php endif; ?>
     </div>
+</div>
 </div>
 
 <!-- Primary CTA แบบ sticky เหนือแถบแท็บ — เฉพาะมือถือ/แท็บเล็ต (ซ่อนที่ desktop มีแถบข้าง) -->

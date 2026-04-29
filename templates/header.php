@@ -707,22 +707,23 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             margin-bottom: 2rem;
         }
         .dashboard-hero h1.dashboard-hero-title {
-            font-size: 1.5rem;
+            font-size: var(--tp-font-page-title);
             font-weight: 700;
             color: #fff;
             margin: 0 0 1rem 0;
-            line-height: 1.3;
+            line-height: 1.25;
             letter-spacing: -0.02em;
         }
         @media (min-width: 640px) {
             .dashboard-hero h1.dashboard-hero-title {
-                font-size: 1.875rem;
+                /* clamp in --tp-font-page-title covers responsive scale */
+                line-height: 1.2;
             }
         }
         .dashboard-hero-summary {
             border: 1px solid rgba(255, 255, 255, 0.1);
             background: rgba(30, 41, 59, 0.55);
-            border-radius: 16px;
+            border-radius: var(--tp-ios-card-radius);
             padding: 4px 4px;
             margin-bottom: 1.25rem;
         }
