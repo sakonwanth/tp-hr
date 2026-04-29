@@ -40,4 +40,4 @@
 
 ---
 
-*Aligned with `06_IMPLEMENTATION_PROGRESS.md`: 2026-04-28 — Waves **1–4** refactor rows marked **REFACTORED** / **COMPLETE** (human device gate in `07` still **PENDING**).*
+*Aligned with `06_IMPLEMENTATION_PROGRESS.md`: 2026-04-28 — Waves **1–4** refactor rows marked **REFACTORED** / **COMPLETE**; device gate (**`07`**) remains **pending human**.*

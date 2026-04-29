@@ -12,7 +12,7 @@ Statuses: **`NOT_STARTED` · `IN_PROGRESS` · `REFACTORED` · `COMPLETE` · `REG
 | `leave.php` + **`modules/employee/leaves/request_form.php`** | Wave 2 | Flat title + `rounded-[20px]` mix | **`tp-leave-stack`** 960px · **`.tp-ios-*` titles** · grids **gap-5/8** · **token radii** · form **p-5 sm:p-7** · cancel/submit radii | **REFACTORED** |
 | **`leave_history.php`** | Wave 2 | Dense header · `rounded-[20px]` mix | **`tp-leave-history-stack`** · **`.tp-ios-page-title` / caption** · summary/filter/results gaps · **token radii** · table + mobile cards + pagination + modal close button aligned | **REFACTORED** |
 | **`hr/*.php`** (13 files) | Wave 3 | Mixed titles · `rounded-[20px]` | **`tp-hr-admin-stack`** 960px · **`.tp-ios-*`** page headers · **token radii** · stack closes before **modals** / **`footer`** (IDs & scripts preserved) | **REFACTORED** |
-| **ESS remainder** (`dayoff_schedule.php`, **`attendance_history.php`**, **`certificate.php`**, **`payslip.php`**, **`profile.php`**) | Wave 4 | Mixed radii · flat titles | **`tp-*-stack`** 960px · **`.tp-ios-*`** · **token radii** | **REFACTORED** |
-| **`login.php`** | Post-wave polish | Success/error banners used **`rounded-[20px]`** | Alerts use **`rounded-[var(--tp-ios-card-radius)]`** (logic unchanged) | **COMPLETE** |
+| **ESS remainder** (`dayoff_schedule.php`, **`attendance_history.php`**, **`certificate.php`**, **`payslip.php`**, **`profile.php`**) | Wave 4 | Mixed radii · flat titles | **`tp-*-stack`** 960px · **`.tp-ios-*`** · **`rounded-[var(--tp-ios-card-radius)]`** (**`checkin.php`** already had **`tp-checkin-stack`** + **`.tp-ios-*`** from Wave **2**; Wave **4** added token radii sweep) | **REFACTORED** |
+| **`login.php`** | Polish | Success/error banners **`rounded-[20px]`** | **`rounded-[var(--tp-ios-card-radius)]`** (markup-only) | **REFACTORED** |
 
-**Regression:** PHPUnit / API tests untouched. Manual viewport QA: Wave **2–4** ESS + **`hr/*`** + **`login`** success/error (**`07`** matrix).
+**Regression:** PHPUnit / API tests untouched. Manual viewport QA: Wave **2–4** routes (**`07`** matrix).
