@@ -137,4 +137,4 @@ Blocking **FAIL** if any captured on **390×844** (and **375×667** spot):
 
 ## Delta note (CSS vs specification)
 
-Some **targets** above (primary **58px**, scroll buffer **160px**, section gap **24px**) are **explicitly stricter than current `native-shell.css` v13** — **`07_SPACING_QA.md`** will track gap-closure; do not invent ad-hoc offsets in pages—**bump tokens** instead.
+**`native-shell.css` v14 (2026-04)** aligns primary **58px**, scroll buffer **160px**, section gap **mobile 24px**, input **56px**, textarea **120px**, card padding **mobile 20 → tablet 24**. **`07_SPACING_QA.md`** still applies per-route.

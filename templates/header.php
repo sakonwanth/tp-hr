@@ -35,7 +35,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
     
     <!-- Tailwind CSS (compiled) -->
     <link rel="stylesheet" href="/assets/css/app.css">
-    <link rel="stylesheet" href="/assets/css/native-shell.css?v=13">
+    <link rel="stylesheet" href="/assets/css/native-shell.css?v=14">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">

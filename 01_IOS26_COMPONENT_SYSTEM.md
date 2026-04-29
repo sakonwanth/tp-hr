@@ -2,7 +2,7 @@
 
 **PROJECT_TARGET:** `tp-hr`  
 **Replaces/overrides narrative in:** `05_IOS26_COMPONENT_SYSTEM.md` (keep file for backwards links; implement against **this** document).  
-**CSS source of truth:** `assets/css/native-shell.css` (bump **`?v=`** in `templates/header.php` only on intentional releases).
+**CSS source of truth:** `assets/css/native-shell.css` — **`?v=14`** in **`templates/header.php`** + **`login.php`**.
 
 ---
 
@@ -14,21 +14,21 @@
 |---------------------|----------------|------------------------|
 | Page padding mobile ≥16px | `--tp-page-pad-mobile` | OK |
 | Page padding tablet ≥24px | `--tp-page-pad-tablet` | OK |
-| Section gap = **24px** | `--tp-section-gap-*` | **Target 24 mobile** — reconcile from 20 in shell |
+| Section gap = **24px** | `--tp-section-gap-*` → **OK** · **`native-shell.css` v14** |
 | Card gap | `--tp-card-gap-min` ≥16px | OK |
-| Card padding mobile **20–24px** | `--tp-card-pad-mobile` etc. | Converge to **20 minimum** mobile |
+| Card padding mobile **20–24px** | `--tp-card-pad-mobile` etc. | **20px mobile · 24px tablet** (`v14`) |
 | Card radius | `--tp-ios-card-radius` · 24px | OK |
 | Control radius | `--tp-radius-button` clamp 18–22px | OK |
 | Sheet/modal radius | `--tp-sheet-radius` 28px | OK |
-| Primary button height **58px** | `--tp-native-btn-min` | Shell **56px** — **Wave-1 bump** |
-| Secondary **54px** | `--tp-native-btn-secondary-min` **52px** — **wave** toward 54 |
-| Input height **56px** min | `--tp-native-input-min` **54px** — **wave +1 stage** |
-| Textarea ≥120px tall | `--tp-native-textarea-min-h` | Shell **112px** |
+| Primary button height **58px** | `--tp-native-btn-min` | **OK** · **v14** |
+| Secondary **54px** | `--tp-native-btn-secondary-min` | **OK** · **v14** |
+| Input height **56px** min | `--tp-native-input-min` | **OK** · **v14** |
+| Textarea ≥120px tall | `--tp-native-textarea-min-h` | **OK** · **v14** |
 | Touch target | `--tp-native-touch-min` ≥48px | OK |
 | Bottom nav max height | `--tp-bottom-nav-max-h` ≤72px | OK |
 | Bottom chrome slot ≥96px safe | `--tp-bottom-nav-slot` | OK |
 | Sticky CTA gap above tabs | `--tp-cta-gap-above-tabs` 24px + safe | OK |
-| Final scroll buffer **≥160px** | `--tp-scroll-end-buffer` | Shell **144px** — **raise in wave** |
+| Final scroll buffer **≥160px** | `--tp-scroll-end-buffer` | **OK** · **160px v14** |
 
 **Typography (target sizes — use existing fluid vars until step-align):**
 

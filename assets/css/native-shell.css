@@ -1,8 +1,8 @@
 /**
  * TP-HR — Native component system (iOS 26–inspired + UI UX Pro Max).
+ * v14: token alignment (`00_IOS26_DESIGN_DIRECTION.md`): section-gap mobile +24 · primary btn min 58 · input min 56 · textarea min 120 · scroll-end buffer 160 · card pad mobile +20).
  * v13: `.tp-ios-page-title` / `.tp-ios-hero-number` / `.tp-ios-caption-muted` for Wave-2 screen passes.
- * v12: IOS26 spacing tokens, bottom-tab stretch, scroll buffer ≥144px tab slot ≥96px.
- * Headers: `/assets/css/native-shell.css?v=13`.
+ * Headers: `/assets/css/native-shell.css?v=14`.
  */
 
 html {
@@ -27,7 +27,7 @@ body {
 
   --tp-page-pad-mobile: var(--tp-space-16);
   --tp-page-pad-tablet: var(--tp-space-24);
-  --tp-section-gap-mobile: var(--tp-space-20);
+  --tp-section-gap-mobile: var(--tp-space-24);
   --tp-section-gap-tablet: var(--tp-space-24);
 
   --tp-ios-card-radius: 24px;
@@ -38,8 +38,8 @@ body {
   --tp-radius-button: clamp(18px, 3vw, 22px);
   --tp-sheet-radius: 28px;
 
-  --tp-card-pad-mobile: 18px;
-  --tp-card-pad-tablet: 22px;
+  --tp-card-pad-mobile: 20px;
+  --tp-card-pad-tablet: 24px;
   --tp-card-pad: var(--tp-card-pad-mobile);
   --tp-card-gap-min: var(--tp-space-16);
 
@@ -47,15 +47,15 @@ body {
   --tp-max-content-form: min(680px, 100%);
   --tp-max-content-dashboard: min(960px, 100%);
 
-  --tp-native-btn-min: 56px;
-  --tp-native-btn-secondary-min: 52px;
-  --tp-native-input-min: 54px;
-  --tp-native-textarea-min-h: 112px;
+  --tp-native-btn-min: 58px;
+  --tp-native-btn-secondary-min: 54px;
+  --tp-native-input-min: 56px;
+  --tp-native-textarea-min-h: 120px;
   --tp-native-touch-min: 48px;
   --tp-header-min-h: 64px;
   --tp-bottom-nav-max-h: 72px;
   --tp-bottom-nav-slot: max(96px, calc(var(--tp-bottom-nav-max-h) + env(safe-area-inset-bottom, 0px)));
-  --tp-scroll-end-buffer: 144px;
+  --tp-scroll-end-buffer: 160px;
   --tp-cta-gap-above-tabs: var(--tp-space-24);
 
   --tp-bottom-nav-z: 50;
@@ -575,7 +575,7 @@ body.tp-native-app:not(.tp-with-tab-nav) main.content-area.tp-native-page {
   }
 }
 
-/* Legacy TP-HR: primary buttons meet 56px */
+/* Legacy TP-HR: primary buttons meet design token min (58px) */
 body.tp-native-app:not(.login-page-root) .btn-primary:not(.btn-primary-prominent) {
   min-height: var(--tp-native-btn-min);
   box-sizing: border-box;
