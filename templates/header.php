@@ -703,8 +703,8 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
 
         /* Dashboard hero — การ์ดเดียว แถวละ ไอคอน + ข้อความ (แนวนอนชัดเจน) */
         .dashboard-hero {
-            margin-top: 0.375rem;
-            margin-bottom: 2rem;
+            margin-top: var(--tp-space-8);
+            margin-bottom: var(--tp-section-gap-mobile);
         }
         .dashboard-hero h1.dashboard-hero-title {
             font-size: var(--tp-font-page-title);
@@ -724,8 +724,9 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             border: 1px solid rgba(255, 255, 255, 0.1);
             background: rgba(30, 41, 59, 0.55);
             border-radius: var(--tp-ios-card-radius);
-            padding: 4px 4px;
-            margin-bottom: 1.25rem;
+            padding: 0;
+            overflow: hidden;
+            margin-bottom: var(--tp-space-20);
         }
         .dashboard-hero-row {
             display: flex;

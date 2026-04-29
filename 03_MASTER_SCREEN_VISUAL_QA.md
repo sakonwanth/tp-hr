@@ -29,3 +29,9 @@
 Horizontal scroll • sticky CTA under tab strip • blurred content text • clipped last card • mismatched arbitrary radii vs tokens.
 
 **Rule:** any ❌ ⇒ **fix `index.php` CSS/markup footprint** (`assets/css/native-shell.css` bumps w/ **`?v`** discipline) **before** mass Wave replicates.
+
+---
+
+## Engineering pass snapshot (automated markup alignment)
+
+**2026:** Post–**`native-shell` v14** pass on **`index.php`**: major stacks use **`gap-6` / `space-y-6`** (**24px**) · inner list wells **`p-5`** (**20px**) · attendance status block **`p-5 md:p-6`** · **`dashboard-hero`** margins use **`--tp-space-*`** / **`--tp-section-gap-mobile`** · **`dashboard-hero-summary`** padding normalized (**no stray 4px**). **Human fills ✅ / ❌** in the matrix above before closing Phase 8.
