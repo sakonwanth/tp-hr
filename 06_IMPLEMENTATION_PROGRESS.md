@@ -9,7 +9,7 @@ Statuses: **`NOT_STARTED` · `IN_PROGRESS` · `REFACTORED` · `COMPLETE` · `REG
 | **`templates/native/component_registry.php`** | Wave 1 | Native keys only | **IOS*** alias layer | **COMPLETE** |
 | `index.php` (dashboard) | Wave 2 | Legacy hero grid | **`tp-dashboard-stack` max-width 960px**, hero **`--tp-font-page-title`**, HR grid **gap-5**, main **gap-8**, radii **`--tp-ios-card-radius`** · header hero summary aligned | **REFACTORED** |
 | `checkin.php` | Wave 2 | ESS clock + CTA dominant | **`v=13`** tokens: `.tp-ios-page-title`, hero clock, **`max-w` 960**, section gaps **20/32**, history row **54px**, `aria-live` clock | **REFACTORED** |
-| Employee leave funnel | Wave 2 | — | NOT_STARTED |
+| `leave.php` + **`modules/employee/leaves/request_form.php`** | Wave 2 | Flat title + `rounded-[20px]` mix | **`tp-leave-stack`** 960px · **`.tp-ios-*` titles** · grids **gap-5/8** · **token radii** · form **p-5 sm:p-7** · cancel/submit radii | **REFACTORED** |
 | `hr/*.php` admin shells | Wave 3 | — | NOT_STARTED |
 
 **Regression:** PHPUnit / API tests untouched. Manual viewport QA runs after Wave 2 (**`07`**).

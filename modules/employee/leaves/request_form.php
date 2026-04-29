@@ -23,19 +23,19 @@ $stmt->execute([$user['id']]);
 $leave_types_form = $stmt->fetchAll();
 ?>
 
-<div class="mb-6 min-w-0">
-    <nav class="text-sm text-white/60 mb-1" aria-label="Breadcrumb">
+<div class="mb-5 md:mb-8 min-w-0">
+    <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
         <a href="leave.php" class="hover:text-white touch-manipulation">การลา</a>
         <span class="mx-2">/</span>
         <span class="text-white">ยื่นขอลา</span>
     </nav>
-    <h1 class="text-2xl font-bold text-white tracking-tight">ยื่นขอลา</h1>
-    <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">กรอกช่วงวันที่และเหตุผล ระบบจะคำนวณจำนวนวันลาให้</p>
+    <h1 class="tp-ios-page-title">ยื่นขอลา</h1>
+    <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">กรอกช่วงวันที่และเหตุผล ระบบจะคำนวณจำนวนวันลาให้</p>
 </div>
 
-<div class="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6 min-w-0 max-w-full">
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-5 md:gap-8 min-w-0 max-w-full">
     <div class="xl:col-span-2 min-w-0">
-        <form id="leave-form" class="native-card tp-native-card tp-native-data-card min-w-0 max-w-full overflow-x-clip p-4 sm:p-6" method="POST" action="/api/leave.php" enctype="multipart/form-data">
+        <form id="leave-form" class="native-card tp-native-card tp-native-data-card min-w-0 max-w-full overflow-x-clip p-5 sm:p-7" method="POST" action="/api/leave.php" enctype="multipart/form-data">
             <input type="hidden" name="action" value="create">
             <?php echo csrfField(); ?>
             
@@ -61,7 +61,7 @@ $leave_types_form = $stmt->fetchAll();
             </div>
             
             <!-- Date Range -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 tp-native-form-group min-w-0 max-w-full">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 tp-native-form-group min-w-0 max-w-full">
                 <div class="min-w-0 max-w-full">
                     <label class="block text-white/80 text-sm font-medium mb-2">วันที่เริ่มต้น <span class="text-red-400">*</span></label>
                     <div class="input-date-shell">
@@ -79,7 +79,7 @@ $leave_types_form = $stmt->fetchAll();
                 </div>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 tp-native-form-group min-w-0">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 tp-native-form-group min-w-0">
                 <div class="min-w-0 max-w-full">
                     <label class="block text-white/80 text-sm font-medium mb-2">วันที่สิ้นสุด <span class="text-red-400">*</span></label>
                     <div class="input-date-shell">
@@ -98,7 +98,7 @@ $leave_types_form = $stmt->fetchAll();
             </div>
             
             <!-- Days Summary -->
-            <div class="p-4 rounded-[20px] bg-violet-500/10 border border-violet-400/35 tp-native-form-group">
+            <div class="p-4 md:p-5 rounded-[var(--tp-ios-card-radius)] bg-violet-500/10 border border-violet-400/35 tp-native-form-group">
                 <div class="flex items-center justify-between">
                     <span class="text-white/70">จำนวนวันลา:</span>
                     <span class="text-2xl font-bold text-violet-400" id="total-days">0</span>
@@ -126,7 +126,7 @@ $leave_types_form = $stmt->fetchAll();
                     เอกสารประกอบ
                     <span class="text-white/50 text-xs" id="doc-required-label">(ถ้ามี)</span>
                 </label>
-                <div class="border-2 border-dashed border-white/20 rounded-[20px] p-4 sm:p-6 text-center hover:border-violet-500/50 transition-colors bg-white/[0.03]">
+                <div class="border-2 border-dashed border-white/20 rounded-[var(--tp-ios-card-radius)] p-5 sm:p-6 text-center hover:border-violet-500/50 transition-colors bg-white/[0.03]">
                     <input type="file" name="document" id="document" class="hidden" accept=".pdf,.jpg,.jpeg,.png">
                     <label for="document" class="touch-manipulation cursor-pointer flex flex-col items-center justify-center min-h-[52px] py-2">
                         <i class="fas fa-cloud-upload-alt text-3xl text-white/30 mb-2" aria-hidden="true"></i>
@@ -138,11 +138,11 @@ $leave_types_form = $stmt->fetchAll();
             </div>
             
             <!-- Buttons -->
-            <div class="flex flex-col-reverse md:flex-row gap-3 pt-2">
-                <a href="leave.php" class="touch-manipulation flex-1 min-h-[52px] inline-flex items-center justify-center py-3 bg-white/10 hover:bg-white/20 text-white text-center rounded-[20px] transition-colors font-medium border-0">
+            <div class="flex flex-col-reverse md:flex-row gap-4 md:gap-5 pt-2">
+                <a href="leave.php" class="touch-manipulation flex-1 min-h-[52px] inline-flex items-center justify-center py-3 bg-white/10 hover:bg-white/20 text-white text-center rounded-[var(--tp-ios-card-radius)] transition-colors font-medium border-0">
                     ยกเลิก
                 </a>
-                <button type="submit" class="btn-primary touch-manipulation flex-1 inline-flex items-center justify-center gap-2 min-h-[56px] py-3 rounded-[20px] font-semibold border-0">
+                <button type="submit" class="btn-primary touch-manipulation flex-1 inline-flex items-center justify-center gap-2 min-h-[56px] py-3 rounded-[var(--tp-ios-card-radius)] font-semibold border-0">
                     <i class="fas fa-paper-plane" aria-hidden="true"></i><span>ส่งคำขอลา</span>
                 </button>
             </div>
@@ -150,7 +150,7 @@ $leave_types_form = $stmt->fetchAll();
     </div>
     
     <!-- Right Column: Info -->
-    <div class="space-y-4 md:space-y-6 min-w-0">
+    <div class="space-y-5 md:space-y-6 min-w-0">
         <!-- Leave Balance -->
         <div class="native-card tp-native-card tp-native-data-card min-w-0">
             <h3 class="section-title mb-4">

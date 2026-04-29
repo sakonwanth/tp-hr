@@ -15,7 +15,7 @@ Priorities derive from **`01_FULL_UI_INVENTORY.md`**. Tasks are **non-breaking U
 | ID | Page | Exact issues | Approach |
 |----|------|----------------|----------|
 | T2-1 | `checkin.php` | Sticky modal / GPS legibility · fab collision | ✅ Visual pass (**native-shell v13**): IOS title/hero typography, gutters, **`aria-live`** on clock · **Logic/scripts unchanged** |
-| T2-2 | `leave` flow | Dense form · confirm buttons | IOSInsetGroupedCard + IOSFormGroup rhythm |
+| T2-2 | `leave.php` + **`request_form.php`** | Dense form · inconsistent radii | ✅ **REFACTORED**: **`tp-leave-stack`**, **`.tp-ios-*`**, **gap-5/8**, **`--tp-ios-card-radius`**, form padding lift |
 | T2-3 | `leave_history.php` | Filter sheet affordance | IOSFilterSheet + IOSSearchBar |
 
 *(Continue listing each HR admin screen in Waves 3–4 mirroring **`hr/*.php`** with table-shell → card refactor.)*

@@ -62,18 +62,18 @@ if ($action === 'request') {
 require_once __DIR__ . '/templates/header.php';
 ?>
 
-<div>
+<div class="tp-leave-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
     <?php if ($action === 'request'): ?>
     <!-- Leave Request Form -->
     <?php include __DIR__ . '/modules/employee/leaves/request_form.php'; ?>
     
     <?php else: ?>
     <!-- Leave Dashboard -->
-    <div class="mb-6 min-w-0">
-        <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+    <div class="mb-5 md:mb-8 min-w-0">
+        <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between gap-y-4">
             <div class="min-w-0 flex-1">
-                <h1 class="text-2xl font-bold text-white tracking-tight">การลา</h1>
-                <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">จัดการวันลา ติดตามคำขอ และดูสิทธิ์คงเหลือของคุณ</p>
+                <h1 class="tp-ios-page-title">การลา</h1>
+                <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">จัดการวันลา ติดตามคำขอ และดูสิทธิ์คงเหลือของคุณ</p>
             </div>
             <a href="?action=request" class="btn-primary btn-primary-prominent w-full sm:w-auto shrink-0 inline-flex items-center justify-center touch-manipulation">
                 <i class="fas fa-plus mr-2"></i>ยื่นขอลา
@@ -82,22 +82,22 @@ require_once __DIR__ . '/templates/header.php';
     </div>
     
     <?php if ($message): ?>
-    <div class="tp-native-success-state bg-emerald-500/15 border border-emerald-400/40 text-emerald-200 px-4 py-3 rounded-[20px] mb-4 md:mb-6 flex items-start gap-3 max-w-none mx-0 w-full" role="status">
+    <div class="tp-native-success-state bg-emerald-500/15 border border-emerald-400/40 text-emerald-200 px-4 py-3 rounded-[var(--tp-ios-card-radius)] mb-5 md:mb-6 flex items-start gap-3 max-w-none mx-0 w-full" role="status">
         <i class="fas fa-check-circle text-2xl shrink-0 mt-0.5" aria-hidden="true"></i>
         <span class="text-base leading-snug"><?php echo htmlspecialchars($message); ?></span>
     </div>
     <?php endif; ?>
     
     <?php if ($error): ?>
-    <div class="tp-native-error-state bg-red-500/15 border border-red-400/45 text-red-200 px-4 py-3 rounded-[20px] mb-4 md:mb-6 flex items-start gap-3 max-w-none mx-0 w-full" role="alert">
+    <div class="tp-native-error-state bg-red-500/15 border border-red-400/45 text-red-200 px-4 py-3 rounded-[var(--tp-ios-card-radius)] mb-5 md:mb-6 flex items-start gap-3 max-w-none mx-0 w-full" role="alert">
         <i class="fas fa-exclamation-circle text-2xl shrink-0 mt-0.5" aria-hidden="true"></i>
         <span class="text-base leading-snug"><?php echo htmlspecialchars($error); ?></span>
     </div>
     <?php endif; ?>
     
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6 min-w-0 max-w-full">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 md:gap-8 min-w-0 max-w-full">
         <!-- Left Column -->
-        <div class="xl:col-span-2 space-y-4 md:space-y-6 min-w-0">
+        <div class="xl:col-span-2 space-y-5 md:space-y-6 min-w-0">
             <!-- Leave Balance -->
             <div class="native-card tp-native-card tp-native-data-card min-w-0">
                 <h2 class="section-title mb-4">
@@ -106,9 +106,9 @@ require_once __DIR__ . '/templates/header.php';
                 </h2>
                 
                 <?php if ($entitlements): ?>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 min-w-0">
                     <?php foreach ($entitlements as $ent): ?>
-                    <div class="p-4 rounded-[20px] bg-white/5 border border-white/8 min-w-0">
+                    <div class="p-4 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/8 min-w-0">
                         <div class="flex items-center justify-between gap-2 mb-2 min-w-0">
                             <span class="text-white font-medium truncate min-w-0"><?php echo htmlspecialchars($ent['name']); ?></span>
                             <span class="text-xs px-2 py-1 rounded-full" style="background-color: <?php echo $ent['color'] ?? '#6B7280'; ?>20; color: <?php echo $ent['color'] ?? '#6B7280'; ?>">
@@ -155,7 +155,7 @@ require_once __DIR__ . '/templates/header.php';
                     <?php endforeach; ?>
                 </div>
                 <?php else: ?>
-                <div class="tp-native-empty-state text-center py-8 rounded-[20px] border border-dashed border-white/15 max-w-none mx-0">
+                <div class="tp-native-empty-state text-center py-8 rounded-[var(--tp-ios-card-radius)] border border-dashed border-white/15 max-w-none mx-0">
                     <i class="fas fa-info-circle text-slate-500 text-3xl mb-2 block" aria-hidden="true"></i>
                     <p class="text-slate-400 text-sm px-4">ยังไม่มีข้อมูลสิทธิ์วันลา กรุณาติดต่อฝ่าย HR</p>
                 </div>
@@ -189,7 +189,7 @@ require_once __DIR__ . '/templates/header.php';
                         default => 'bg-gray-500/20 text-gray-300 border border-gray-500/30'
                     };
                     ?>
-                    <div class="rounded-[20px] bg-white/5 border border-white/8 p-4">
+                    <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/8 p-4">
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0">
                                 <span class="inline-flex px-2.5 py-1 text-xs rounded-full"
@@ -203,12 +203,12 @@ require_once __DIR__ . '/templates/header.php';
                             </span>
                         </div>
                         <div class="mt-3 grid grid-cols-2 gap-2">
-                            <div class="rounded-[20px] bg-black/20 border border-white/8 px-3 py-2">
+                            <div class="rounded-[var(--tp-ios-card-radius)] bg-black/20 border border-white/8 px-3 py-2">
                                 <div class="text-[11px] text-white/50">จำนวนวัน</div>
                                 <div class="text-white font-semibold"><?php echo number_format($leave['total_days'], 1); ?> วัน</div>
                             </div>
                             <a href="leave_history.php"
-                               class="min-h-[48px] rounded-[20px] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold flex items-center justify-center touch-manipulation">
+                               class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold flex items-center justify-center touch-manipulation">
                                 <i class="fas fa-eye mr-2" aria-hidden="true"></i>รายละเอียด
                             </a>
                         </div>
@@ -265,7 +265,7 @@ require_once __DIR__ . '/templates/header.php';
                     </table>
                 </div>
                 <?php else: ?>
-                <div class="tp-native-empty-state text-center py-8 rounded-[20px] border border-dashed border-white/15 max-w-none mx-0">
+                <div class="tp-native-empty-state text-center py-8 rounded-[var(--tp-ios-card-radius)] border border-dashed border-white/15 max-w-none mx-0">
                     <i class="fas fa-calendar-times text-slate-500 text-3xl mb-2 block" aria-hidden="true"></i>
                     <p class="text-slate-400 text-sm">ยังไม่มีประวัติการลา</p>
                 </div>
@@ -274,7 +274,7 @@ require_once __DIR__ . '/templates/header.php';
         </div>
         
         <!-- Right Column -->
-        <div class="space-y-4 md:space-y-6 min-w-0">
+        <div class="space-y-5 md:space-y-6 min-w-0">
             <!-- Quick Request -->
             <div class="native-card tp-native-card tp-native-data-card min-w-0">
                 <h2 class="section-title mb-4">
@@ -285,8 +285,8 @@ require_once __DIR__ . '/templates/header.php';
                 <div class="space-y-3">
                     <?php foreach (array_slice($leave_types, 0, 4) as $type): ?>
                     <a href="?action=request&type=<?php echo $type['id']; ?>" 
-                       class="flex min-h-[48px] items-center gap-3 p-3 rounded-[20px] bg-white/5 hover:bg-white/10 border border-white/8 transition-colors touch-manipulation">
-                        <div class="w-10 h-10 rounded-[20px] flex items-center justify-center shrink-0" 
+                       class="flex min-h-[48px] items-center gap-3 p-3 rounded-[var(--tp-ios-card-radius)] bg-white/5 hover:bg-white/10 border border-white/8 transition-colors touch-manipulation">
+                        <div class="w-10 h-10 rounded-[var(--tp-ios-card-radius)] flex items-center justify-center shrink-0" 
                              style="background-color: <?php echo $type['color'] ?? '#6B7280'; ?>20">
                             <i class="fas fa-<?php echo $type['icon'] ?? 'calendar'; ?> text-xl" aria-hidden="true"
                                style="color: <?php echo $type['color'] ?? '#6B7280'; ?>"></i>
@@ -310,7 +310,7 @@ require_once __DIR__ . '/templates/header.php';
                 
                 <div class="space-y-3">
                     <?php foreach ($pending_requests as $req): ?>
-                    <div class="p-3 rounded-[20px] bg-white/5 border border-white/8">
+                    <div class="p-3 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/8">
                         <div class="flex items-center justify-between mb-2">
                             <span class="px-2 py-1 text-xs rounded" style="background-color: <?php echo $req['color'] ?? '#6B7280'; ?>20; color: <?php echo $req['color'] ?? '#6B7280'; ?>">
                                 <?php echo htmlspecialchars($req['leave_type_name']); ?>
@@ -325,7 +325,7 @@ require_once __DIR__ . '/templates/header.php';
                         </p>
                         <div class="mt-3 flex">
                             <button type="button" onclick="cancelRequest(<?php echo $req['id']; ?>)"
-                                    class="w-full md:w-auto md:ml-auto min-h-[48px] px-4 py-2 rounded-[20px] bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-200 text-sm font-semibold transition-colors touch-manipulation">
+                                    class="w-full md:w-auto md:ml-auto min-h-[48px] px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-200 text-sm font-semibold transition-colors touch-manipulation">
                                 <i class="fas fa-times mr-2" aria-hidden="true"></i>ยกเลิกคำขอ
                             </button>
                         </div>
@@ -354,8 +354,8 @@ require_once __DIR__ . '/templates/header.php';
                 <?php if ($holidays): ?>
                 <div class="space-y-2">
                     <?php foreach ($holidays as $h): ?>
-                    <div class="flex items-center gap-3 p-2 rounded-[20px] hover:bg-white/5 border border-transparent hover:border-white/8">
-                        <div class="w-12 h-12 rounded-[20px] bg-red-500/20 flex flex-col items-center justify-center shrink-0">
+                    <div class="flex items-center gap-3 p-2 rounded-[var(--tp-ios-card-radius)] hover:bg-white/5 border border-transparent hover:border-white/8">
+                        <div class="w-12 h-12 rounded-[var(--tp-ios-card-radius)] bg-red-500/20 flex flex-col items-center justify-center shrink-0">
                             <span class="text-red-400 text-xs"><?php echo date('M', strtotime($h['date'])); ?></span>
                             <span class="text-white font-bold"><?php echo date('j', strtotime($h['date'])); ?></span>
                         </div>
@@ -367,7 +367,7 @@ require_once __DIR__ . '/templates/header.php';
                     <?php endforeach; ?>
                 </div>
                 <?php else: ?>
-                <div class="tp-native-empty-state text-center py-6 rounded-[20px] border border-dashed border-white/15 max-w-none mx-0">
+                <div class="tp-native-empty-state text-center py-6 rounded-[var(--tp-ios-card-radius)] border border-dashed border-white/15 max-w-none mx-0">
                     <p class="text-slate-400 text-sm">ไม่มีวันหยุดที่จะถึง</p>
                 </div>
                 <?php endif; ?>
