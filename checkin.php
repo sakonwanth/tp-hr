@@ -125,12 +125,12 @@ $monthly_summary = $stmt->fetch();
 require_once __DIR__ . '/templates/header.php';
 ?>
 
-<div class="tp-checkin-page tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<div class="tp-checkin-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
     <!-- Page Header -->
     <header class="mb-5 md:mb-8">
         <p class="tp-ios-caption-muted mb-1"><?php echo htmlspecialchars(formatDateThai(date('Y-m-d')), ENT_QUOTES, 'UTF-8'); ?></p>
         <h1 class="tp-ios-page-title">ลงเวลาเข้า-ออกงาน</h1>
-        <p class="text-white/55 text-[0.9375rem] mt-2 leading-snug max-w-[42rem]">แตะปุ่มใหญ่เพื่อลงเวลาเข้าหรือออก และดูสถานะตำแหน่งจาก GPS</p>
+        <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">แตะปุ่มใหญ่เพื่อลงเวลาเข้าหรือออก และดูสถานะตำแหน่งจาก GPS</p>
     </header>
     
     <?php if ($error): ?>

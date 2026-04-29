@@ -21,6 +21,7 @@ Populate when Waves 2–3 land. Placeholder:** all routes **PENDING**.
 
 | Route/file | Tester | Device | PASS date |
 |------------|--------|--------|-----------|
+| **`login.php`** (success/error banners) | Automated | Pending | Pending human |
 | `checkin.php` | Automated | Chromium mobile W | Pending human |
 | `index.php` | Automated | Pending | Pending human |
 | `leave.php` / `request_form.php` | Automated | Pending | Pending human |

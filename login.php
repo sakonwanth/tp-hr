@@ -258,7 +258,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <!-- Success Message -->
         <?php if ($success): ?>
-        <div class="tp-native-success-state bg-emerald-500/15 border border-emerald-400/40 text-emerald-200 px-4 py-3 rounded-[20px] mb-6 flex items-start gap-3" role="status">
+        <div class="tp-native-success-state bg-emerald-500/15 border border-emerald-400/40 text-emerald-200 px-4 py-3 rounded-[var(--tp-ios-card-radius)] mb-6 flex items-start gap-3" role="status">
             <i class="fas fa-check-circle text-2xl shrink-0 mt-0.5" aria-hidden="true"></i>
             <span class="text-base leading-snug"><?php echo htmlspecialchars($success); ?></span>
         </div>
@@ -266,7 +266,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <!-- Error Message -->
         <?php if ($error): ?>
-        <div class="tp-native-error-state bg-red-500/15 border border-red-400/45 text-red-200 px-4 py-3 rounded-[20px] mb-6 flex items-start gap-3" role="alert">
+        <div class="tp-native-error-state bg-red-500/15 border border-red-400/45 text-red-200 px-4 py-3 rounded-[var(--tp-ios-card-radius)] mb-6 flex items-start gap-3" role="alert">
             <i class="fas fa-exclamation-circle text-2xl shrink-0 mt-0.5" aria-hidden="true"></i>
             <span class="text-base leading-snug"><?php echo htmlspecialchars($error); ?></span>
         </div>
