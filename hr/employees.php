@@ -214,19 +214,20 @@ $flashSuccess = flash('success');
 $flashError = flash('error');
 ?>
 
-<div class="mb-6 min-w-0">
-    <nav class="text-sm text-white/60 mb-1" aria-label="Breadcrumb">
+<div class="tp-hr-admin-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<div class="mb-5 md:mb-8 min-w-0">
+    <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
         <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
         <span class="mx-2">/</span>
         <span class="text-white">จัดการพนักงาน</span>
     </nav>
-    <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+    <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between gap-y-4">
         <div class="min-w-0 flex-1">
-            <h1 class="text-2xl font-bold text-white tracking-tight">จัดการพนักงาน</h1>
-            <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">ค้นหา กรองแผนกและสถานะ ดูสรุปและดำเนินการรายคน</p>
+            <h1 class="tp-ios-page-title">จัดการพนักงาน</h1>
+            <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">ค้นหา กรองแผนกและสถานะ ดูสรุปและดำเนินการรายคน</p>
         </div>
         <?php if (canManageUsers()): ?>
-        <a href="employees.php?action=add" class="w-full sm:w-auto shrink-0 inline-flex items-center justify-center min-h-[56px] px-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-[20px] transition-colors font-semibold touch-manipulation">
+        <a href="employees.php?action=add" class="w-full sm:w-auto shrink-0 inline-flex items-center justify-center min-h-[56px] px-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors font-semibold touch-manipulation">
             <i class="fas fa-plus mr-2" aria-hidden="true"></i>เพิ่มพนักงาน
         </a>
         <?php endif; ?>
@@ -234,13 +235,13 @@ $flashError = flash('error');
 </div>
 
 <?php if ($flashSuccess): ?>
-<div class="mb-4 rounded-[20px] border border-emerald-500/30 bg-emerald-500/15 px-4 py-3 text-emerald-200" role="status">
+<div class="mb-4 rounded-[var(--tp-ios-card-radius)] border border-emerald-500/30 bg-emerald-500/15 px-4 py-3 text-emerald-200" role="status">
     <i class="fas fa-check-circle mr-2" aria-hidden="true"></i><?php echo htmlspecialchars($flashSuccess); ?>
 </div>
 <?php endif; ?>
 
 <?php if ($flashError): ?>
-<div class="mb-4 rounded-[20px] border border-red-500/30 bg-red-500/15 px-4 py-3 text-red-200" role="alert">
+<div class="mb-4 rounded-[var(--tp-ios-card-radius)] border border-red-500/30 bg-red-500/15 px-4 py-3 text-red-200" role="alert">
     <i class="fas fa-exclamation-circle mr-2" aria-hidden="true"></i><?php echo htmlspecialchars($flashError); ?>
 </div>
 <?php endif; ?>
@@ -288,13 +289,13 @@ $flashError = flash('error');
             </select>
         </div>
         <div class="flex items-end gap-2 min-w-0 sm:col-span-2 xl:col-span-1">
-            <button type="submit" class="flex-1 min-h-[56px] py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-[20px] transition-colors touch-manipulation font-semibold">
+            <button type="submit" class="flex-1 min-h-[56px] py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-semibold">
                 <i class="fas fa-search mr-2" aria-hidden="true"></i>ค้นหา
             </button>
         </div>
     </form>
     <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-3 min-w-0 mt-4 pt-4 border-t border-white/10">
-        <a href="employees.php" class="flex-1 min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white text-center rounded-[20px] transition-colors touch-manipulation inline-flex items-center justify-center font-medium">
+        <a href="employees.php" class="flex-1 min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white text-center rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation inline-flex items-center justify-center font-medium">
             <i class="fas fa-redo mr-2" aria-hidden="true"></i>รีเซ็ต
         </a>
         <form method="post" class="flex-1 min-w-0">
@@ -303,7 +304,7 @@ $flashError = flash('error');
             <input type="hidden" name="search" value="<?php echo htmlspecialchars($search); ?>">
             <input type="hidden" name="department" value="<?php echo htmlspecialchars($department); ?>">
             <input type="hidden" name="status" value="<?php echo htmlspecialchars($status); ?>">
-            <button type="submit" class="w-full min-h-[56px] py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-center rounded-[20px] transition-colors touch-manipulation inline-flex items-center justify-center font-semibold gap-2">
+            <button type="submit" class="w-full min-h-[56px] py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-center rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation inline-flex items-center justify-center font-semibold gap-2">
                 <i class="fas fa-file-excel" aria-hidden="true"></i>Export CSV
             </button>
         </form>
@@ -313,7 +314,7 @@ $flashError = flash('error');
 <!-- Employee List -->
 <div class="native-card tp-native-card tp-native-data-card min-w-0 max-w-full overflow-hidden">
     <?php if (empty($employees)): ?>
-    <div class="tp-native-empty-state text-center py-12 px-4 rounded-[20px] border border-dashed border-white/15 max-w-none mx-4 my-4">
+    <div class="tp-native-empty-state text-center py-12 px-4 rounded-[var(--tp-ios-card-radius)] border border-dashed border-white/15 max-w-none mx-4 my-4">
         <i class="fas fa-users text-slate-500 text-4xl mb-3 block" aria-hidden="true"></i>
         <p class="text-slate-400 text-sm">ไม่พบพนักงาน</p>
     </div>
@@ -342,7 +343,7 @@ $flashError = flash('error');
         $activeCls = $isActive ? 'bg-green-500/15 border border-green-500/30 text-green-200'
             : 'bg-red-500/15 border border-red-500/30 text-red-200';
         ?>
-        <div class="rounded-[20px] bg-white/5 border border-white/10 p-4 min-w-0">
+        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4 min-w-0">
             <div class="flex items-start justify-between gap-3">
                 <div class="flex items-center gap-3 min-w-0">
                     <?php if (!empty($emp['avatar'])): ?>
@@ -379,11 +380,11 @@ $flashError = flash('error');
             </div>
 
             <div class="grid grid-cols-2 gap-2 mt-4">
-                <div class="rounded-[20px] bg-black/20 border border-white/10 px-3 py-2">
+                <div class="rounded-[var(--tp-ios-card-radius)] bg-black/20 border border-white/10 px-3 py-2">
                     <div class="text-[11px] text-white/50">เริ่มงาน</div>
                     <div class="text-white font-semibold text-sm"><?php echo htmlspecialchars($hire); ?></div>
                 </div>
-                <div class="rounded-[20px] bg-black/20 border border-white/10 px-3 py-2">
+                <div class="rounded-[var(--tp-ios-card-radius)] bg-black/20 border border-white/10 px-3 py-2">
                     <div class="text-[11px] text-white/50">ลาปีนี้</div>
                     <div class="text-white font-semibold text-sm"><?php echo htmlspecialchars($leaveDays); ?> วัน</div>
                 </div>
@@ -396,29 +397,29 @@ $flashError = flash('error');
 
             <div class="grid grid-cols-2 gap-2 mt-4">
                 <a href="/hr/employee_attendance.php?id=<?php echo (int)$emp['id']; ?>"
-                   class="min-h-[48px] rounded-[20px] bg-violet-500/15 hover:bg-violet-500/25 border border-violet-500/20 text-violet-200 text-sm font-semibold flex items-center justify-center touch-manipulation">
+                   class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-violet-500/15 hover:bg-violet-500/25 border border-violet-500/20 text-violet-200 text-sm font-semibold flex items-center justify-center touch-manipulation">
                     <i class="fas fa-clock mr-2" aria-hidden="true"></i>ลงเวลา
                 </a>
                 <button type="button"
                         title="สิทธิ์การลาและประวัติ"
                         onclick="viewLeaveBalance(<?php echo (int)$emp['id']; ?>)"
-                        class="min-h-[48px] rounded-[20px] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
+                        class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
                     <i class="fas fa-calendar-alt mr-2" aria-hidden="true"></i>สิทธิ์ลา
                 </button>
                 <?php if (canManageUsers() || hr_can_access_hr_dashboard()): ?>
                 <a href="employees.php?action=edit&id=<?php echo (int)$emp['id']; ?>"
-                   class="min-h-[48px] rounded-[20px] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold flex items-center justify-center touch-manipulation">
+                   class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold flex items-center justify-center touch-manipulation">
                     <i class="fas fa-edit mr-2" aria-hidden="true"></i>แก้ไข
                 </a>
                 <?php endif; ?>
                 <a href="employee_view.php?id=<?php echo (int)$emp['id']; ?>"
-                   class="min-h-[48px] rounded-[20px] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold flex items-center justify-center touch-manipulation">
+                   class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold flex items-center justify-center touch-manipulation">
                     <i class="fas fa-eye mr-2" aria-hidden="true"></i>ดูข้อมูล
                 </a>
                 <?php if (canManageUsers()): ?>
                 <button type="button"
                         onclick="confirmDelete(<?php echo (int)$emp['id']; ?>, '<?php echo htmlspecialchars($emp['first_name_th'] ?? '', ENT_QUOTES); ?>')"
-                        class="col-span-2 min-h-[48px] rounded-[20px] bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-200 text-sm font-semibold touch-manipulation">
+                        class="col-span-2 min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-200 text-sm font-semibold touch-manipulation">
                     <i class="fas fa-trash mr-2"></i>ลบพนักงาน
                 </button>
                 <?php endif; ?>
@@ -480,47 +481,47 @@ $flashError = flash('error');
                     </td>
                     <td class="px-4 py-3 text-center">
                         <?php if ($emp['checked_in_today']): ?>
-                        <span class="px-3 py-1 rounded-[20px] text-xs bg-emerald-500/20 text-emerald-300">เข้างาน</span>
+                        <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs bg-emerald-500/20 text-emerald-300">เข้างาน</span>
                         <?php elseif (($emp['work_mode'] ?? 'OFFICE') === 'WFH'): ?>
-                        <span class="px-3 py-1 rounded-[20px] text-xs bg-blue-500/20 text-blue-300">WFH</span>
+                        <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs bg-blue-500/20 text-blue-300">WFH</span>
                         <?php else: ?>
-                        <span class="px-3 py-1 rounded-[20px] text-xs bg-gray-500/20 text-gray-400">-</span>
+                        <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs bg-gray-500/20 text-gray-400">-</span>
                         <?php endif; ?>
                     </td>
                     <td class="px-4 py-3 text-center">
                         <?php if ($emp['is_active']): ?>
-                        <span class="px-3 py-1 rounded-[20px] text-xs bg-emerald-500/20 text-emerald-300">ทำงาน</span>
+                        <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs bg-emerald-500/20 text-emerald-300">ทำงาน</span>
                         <?php else: ?>
-                        <span class="px-3 py-1 rounded-[20px] text-xs bg-red-500/20 text-red-400">พ้นสภาพ</span>
+                        <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs bg-red-500/20 text-red-400">พ้นสภาพ</span>
                         <?php endif; ?>
                     </td>
                     <td class="px-4 py-3 text-center">
                         <div class="inline-flex flex-wrap items-center justify-center gap-2 max-w-[220px] mx-auto">
                         <a href="employee_view.php?id=<?php echo (int)$emp['id']; ?>"
-                           class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center bg-white/10 hover:bg-white/20 text-white text-sm rounded-[20px] transition-colors touch-manipulation" title="ดูข้อมูล" aria-label="ดูข้อมูล">
+                           class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center bg-white/10 hover:bg-white/20 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="ดูข้อมูล" aria-label="ดูข้อมูล">
                             <i class="fas fa-eye" aria-hidden="true"></i>
                         </a>
                         <a href="/hr/employee_attendance.php?id=<?php echo (int)$emp['id']; ?>"
-                           class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center bg-violet-500/20 hover:bg-violet-500/30 text-violet-300 text-sm rounded-[20px] transition-colors touch-manipulation" title="ดูลงเวลา" aria-label="ดูลงเวลา">
+                           class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center bg-violet-500/20 hover:bg-violet-500/30 text-violet-300 text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="ดูลงเวลา" aria-label="ดูลงเวลา">
                             <i class="fas fa-clock" aria-hidden="true"></i>
                         </a>
                         <?php if (canManageUsers()): ?>
                         <a href="employees.php?action=edit&id=<?php echo (int)$emp['id']; ?>"
-                           class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center bg-white/10 hover:bg-white/20 text-white text-sm rounded-[20px] transition-colors touch-manipulation" title="แก้ไข" aria-label="แก้ไข">
+                           class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center bg-white/10 hover:bg-white/20 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="แก้ไข" aria-label="แก้ไข">
                             <i class="fas fa-edit" aria-hidden="true"></i>
                         </a>
                         <button type="button" onclick="confirmDelete(<?php echo (int)$emp['id']; ?>, '<?php echo htmlspecialchars($emp['first_name_th'] ?? '', ENT_QUOTES, 'UTF-8'); ?>')"
-                                class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center bg-red-500/20 hover:bg-red-500/30 text-red-300 text-sm rounded-[20px] transition-colors touch-manipulation" title="ปิดใช้งาน" aria-label="ปิดใช้งาน">
+                                class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center bg-red-500/20 hover:bg-red-500/30 text-red-300 text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="ปิดใช้งาน" aria-label="ปิดใช้งาน">
                             <i class="fas fa-trash" aria-hidden="true"></i>
                         </button>
                         <?php elseif (hr_can_access_hr_dashboard()): ?>
                         <a href="employees.php?action=edit&id=<?php echo (int)$emp['id']; ?>"
-                           class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center bg-white/10 hover:bg-white/20 text-white text-sm rounded-[20px] transition-colors touch-manipulation" title="แก้ไข" aria-label="แก้ไข">
+                           class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center bg-white/10 hover:bg-white/20 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="แก้ไข" aria-label="แก้ไข">
                             <i class="fas fa-edit" aria-hidden="true"></i>
                         </a>
                         <?php endif; ?>
                         <button type="button" onclick="viewLeaveBalance(<?php echo (int)$emp['id']; ?>)"
-                                class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center bg-white/10 hover:bg-white/20 text-white text-sm rounded-[20px] transition-colors touch-manipulation" title="สิทธิ์การลาและประวัติ" aria-label="สิทธิ์การลา">
+                                class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center bg-white/10 hover:bg-white/20 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="สิทธิ์การลาและประวัติ" aria-label="สิทธิ์การลา">
                             <i class="fas fa-calendar-alt" aria-hidden="true"></i>
                         </button>
                         </div>
@@ -541,7 +542,7 @@ $flashError = flash('error');
         <div class="flex flex-wrap gap-2 shrink-0">
             <?php if ($page > 1): ?>
             <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $page - 1])); ?>"
-               class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded-[20px] transition-colors touch-manipulation"
+               class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation"
                aria-label="หน้าก่อน">
                 <i class="fas fa-chevron-left" aria-hidden="true"></i>
             </a>
@@ -549,7 +550,7 @@ $flashError = flash('error');
             
             <?php for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++): ?>
             <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $i])); ?>"
-               class="inline-flex min-h-[48px] min-w-[44px] items-center justify-center px-3 py-1 <?php echo $i === $page ? 'bg-violet-600 text-white' : 'bg-white/10 hover:bg-white/20 text-white'; ?> rounded-[20px] transition-colors touch-manipulation"
+               class="inline-flex min-h-[48px] min-w-[44px] items-center justify-center px-3 py-1 <?php echo $i === $page ? 'bg-violet-600 text-white' : 'bg-white/10 hover:bg-white/20 text-white'; ?> rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation"
                <?php echo $i === $page ? ' aria-current="page"' : ''; ?>>
                 <?php echo $i; ?>
             </a>
@@ -557,7 +558,7 @@ $flashError = flash('error');
             
             <?php if ($page < $totalPages): ?>
             <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $page + 1])); ?>"
-               class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded-[20px] transition-colors touch-manipulation"
+               class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation"
                aria-label="หน้าถัดไป">
                 <i class="fas fa-chevron-right" aria-hidden="true"></i>
             </a>
@@ -567,13 +568,14 @@ $flashError = flash('error');
     <?php endif; ?>
     <?php endif; ?>
 </div>
+</div>
 
 <!-- Leave Balance Modal -->
 <div id="leave-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="leave-modal-title">
     <div class="native-card tp-native-card w-full max-w-lg my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
         <div class="flex items-center justify-between mb-6 gap-3">
             <h3 id="leave-modal-title" class="text-xl font-bold text-white">สิทธิ์การลาและประวัติ</h3>
-            <button type="button" onclick="closeLeaveModal()" class="tp-native-icon-btn min-h-[44px] min-w-[44px] text-white/70 hover:text-white hover:bg-white/10 rounded-[20px]" aria-label="ปิด">
+            <button type="button" onclick="closeLeaveModal()" class="tp-native-icon-btn min-h-[44px] min-w-[44px] text-white/70 hover:text-white hover:bg-white/10 rounded-[var(--tp-ios-card-radius)]" aria-label="ปิด">
                 <i class="fas fa-times" aria-hidden="true"></i>
             </button>
         </div>
@@ -616,7 +618,7 @@ async function viewLeaveBalance(userId) {
             const used = Number(e.used_days) || 0;
             const usedPercent = denom > 0 ? Math.min(100, Math.round((used / denom) * 100)) : 0;
             html += `
-                <div class="rounded-[20px] bg-white/5 border border-white/10 p-4">
+                <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4">
                     <div class="flex items-center justify-between mb-2 gap-2">
                         <span class="text-white font-medium">${e.leave_type_name}</span>
                         <div class="flex items-center shrink-0">
@@ -642,7 +644,7 @@ async function viewLeaveBalance(userId) {
                 const d0 = r.start_date || '';
                 const d1 = r.end_date || '';
                 const range = d0 === d1 ? d0 : (d0 + ' – ' + d1);
-                html += `<li class="rounded-[20px] bg-white/5 border border-white/10 px-3 py-2 text-white/85">
+                html += `<li class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 px-3 py-2 text-white/85">
                     <span class="font-medium text-white">${r.leave_type_name || 'ลา'}</span>
                     <span class="text-white/50 mx-1">·</span>${range}
                     <span class="text-white/50 mx-1">·</span>${Number(r.total_days).toFixed(1)} วัน

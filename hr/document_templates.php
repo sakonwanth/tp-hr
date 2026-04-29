@@ -348,22 +348,23 @@ $L = [
 include dirname(__DIR__) . '/templates/header.php';
 ?>
 
-<div class="mb-6 min-w-0">
-    <nav class="text-sm text-white/60 mb-1" aria-label="Breadcrumb">
+<div class="tp-hr-admin-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<div class="mb-5 md:mb-8 min-w-0">
+    <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
         <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
         <span class="mx-2">/</span>
         <a href="/hr/documents.php" class="hover:text-white touch-manipulation">จัดการคำขอเอกสาร</a>
         <span class="mx-2">/</span>
         <span class="text-white">ตั้งค่าเอกสารรับรอง</span>
     </nav>
-    <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+    <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between gap-y-4">
         <div class="min-w-0 flex-1">
-            <h1 class="text-2xl font-bold text-white tracking-tight">ตั้งค่าเอกสารรับรอง</h1>
-            <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">ข้อมูลบริษัท โลโก้ ตราประทับ ลายเซ็น และเค้าโครงเอกสาร</p>
+            <h1 class="tp-ios-page-title">ตั้งค่าเอกสารรับรอง</h1>
+            <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">ข้อมูลบริษัท โลโก้ ตราประทับ ลายเซ็น และเค้าโครงเอกสาร</p>
         </div>
         <?php if (!$editRow && !$isCreating): ?>
         <div class="flex gap-2 shrink-0 w-full sm:w-auto">
-            <a href="?edit=new" class="inline-flex items-center justify-center min-h-[56px] px-4 py-2 rounded-[20px] bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold touch-manipulation w-full sm:w-auto">
+            <a href="?edit=new" class="inline-flex items-center justify-center min-h-[56px] px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold touch-manipulation w-full sm:w-auto">
                 <i class="fas fa-plus mr-1" aria-hidden="true"></i> เพิ่มเอกสารใหม่
             </a>
         </div>
@@ -372,12 +373,12 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <?php if ($success): ?>
-<div class="mb-4 rounded-[20px] border border-emerald-500/30 bg-emerald-500/15 px-4 py-3 text-emerald-200 text-sm" role="status">
+<div class="mb-4 rounded-[var(--tp-ios-card-radius)] border border-emerald-500/30 bg-emerald-500/15 px-4 py-3 text-emerald-200 text-sm" role="status">
     <i class="fas fa-check-circle mr-2" aria-hidden="true"></i><?php echo htmlspecialchars($success); ?>
 </div>
 <?php endif; ?>
 <?php if ($error): ?>
-<div class="mb-4 rounded-[20px] border border-red-500/30 bg-red-500/15 px-4 py-3 text-red-200 text-sm" role="alert">
+<div class="mb-4 rounded-[var(--tp-ios-card-radius)] border border-red-500/30 bg-red-500/15 px-4 py-3 text-red-200 text-sm" role="alert">
     <i class="fas fa-exclamation-circle mr-2" aria-hidden="true"></i><?php echo htmlspecialchars($error); ?>
 </div>
 <?php endif; ?>
@@ -386,7 +387,7 @@ include dirname(__DIR__) . '/templates/header.php';
 <!-- ======================================================== -->
 <!-- COMPANY-WIDE DOCUMENT SETTINGS                            -->
 <!-- ======================================================== -->
-<details class="native-card tp-native-card rounded-[20px] mb-6 overflow-hidden border border-white/10 group" <?php echo empty($settings['company_logo']) ? 'open' : ''; ?>>
+<details class="native-card tp-native-card rounded-[var(--tp-ios-card-radius)] mb-6 overflow-hidden border border-white/10 group" <?php echo empty($settings['company_logo']) ? 'open' : ''; ?>>
     <summary class="p-5 cursor-pointer flex items-center justify-between hover:bg-white/5">
         <div class="flex items-center gap-3">
             <i class="fas fa-building text-violet-400 text-lg"></i>
@@ -404,7 +405,7 @@ include dirname(__DIR__) . '/templates/header.php';
 
             <!-- Logo & Seal -->
                 <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="p-4 rounded-[20px] bg-white/5 border border-white/10">
+                <div class="p-4 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10">
                     <label class="block text-white/80 text-sm font-medium mb-2">
                         <i class="fas fa-image mr-1 text-violet-300"></i> โลโก้บริษัท
                     </label>
@@ -418,7 +419,7 @@ include dirname(__DIR__) . '/templates/header.php';
                         class="input-field tp-native-input w-full mb-2">
                     <input type="file" name="company_logo" accept="image/*" class="w-full text-white/70 text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-violet-500 file:text-white file:text-xs">
                 </div>
-                <div class="p-4 rounded-[20px] bg-white/5 border border-white/10">
+                <div class="p-4 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10">
                     <label class="block text-white/80 text-sm font-medium mb-2">
                         <i class="fas fa-stamp mr-1 text-amber-300"></i> ตราประทับบริษัท (สำหรับพิมพ์ทับลายเซ็น)
                     </label>
@@ -484,7 +485,7 @@ include dirname(__DIR__) . '/templates/header.php';
                         <label class="block text-white/70 text-xs mb-1">ข้อความท้ายเอกสารเริ่มต้น</label>
                         <textarea name="doc_footer_note_th" rows="2" placeholder="เช่น เอกสารฉบับนี้ออกโดยระบบ HR อัตโนมัติ สามารถตรวจสอบผ่าน QR Code ได้" class="input-field tp-native-textarea w-full"><?php echo htmlspecialchars($settings['doc_footer_note_th'] ?? ''); ?></textarea>
                     </div>
-                    <div class="md:col-span-2 p-3 rounded-[20px] bg-indigo-500/10 border border-indigo-500/30">
+                    <div class="md:col-span-2 p-3 rounded-[var(--tp-ios-card-radius)] bg-indigo-500/10 border border-indigo-500/30">
                         <label class="inline-flex items-center cursor-pointer">
                             <input type="checkbox" name="doc_show_esignature" value="1" <?php echo !empty($settings['doc_show_esignature']) ? 'checked' : ''; ?> class="form-checkbox h-4 w-4 text-indigo-500 rounded">
                             <span class="ml-2 text-sm text-white/90">เปิดใช้ลายเซ็นอิเล็กทรอนิกส์ทั่วทั้งระบบ <span class="text-white/50 text-xs">(แสดงภาพลายเซ็นของผู้ลงนามในเอกสาร)</span></span>
@@ -494,7 +495,7 @@ include dirname(__DIR__) . '/templates/header.php';
             </div>
 
             <div class="md:col-span-2 flex justify-end">
-                <button type="submit" class="px-5 py-2 rounded-[20px] bg-violet-500 hover:bg-violet-600 text-white text-sm font-medium">
+                <button type="submit" class="px-5 py-2 rounded-[var(--tp-ios-card-radius)] bg-violet-500 hover:bg-violet-600 text-white text-sm font-medium">
                     <i class="fas fa-save mr-1"></i> บันทึกข้อมูลบริษัท
                 </button>
             </div>
@@ -505,7 +506,7 @@ include dirname(__DIR__) . '/templates/header.php';
 <!-- ======================================================== -->
 <!-- E-SIGNATURE MANAGEMENT                                    -->
 <!-- ======================================================== -->
-<details class="native-card tp-native-card rounded-[20px] mb-6 overflow-hidden border border-white/10 group">
+<details class="native-card tp-native-card rounded-[var(--tp-ios-card-radius)] mb-6 overflow-hidden border border-white/10 group">
     <summary class="p-5 cursor-pointer flex items-center justify-between hover:bg-white/5">
         <div class="flex items-center gap-3">
             <i class="fas fa-signature text-indigo-400 text-lg"></i>
@@ -518,7 +519,7 @@ include dirname(__DIR__) . '/templates/header.php';
     </summary>
     <div class="p-5 border-t border-white/10 grid grid-cols-1 md:grid-cols-2 gap-4">
         <?php foreach ($signerCandidates as $sc): ?>
-        <div class="p-4 rounded-[20px] bg-white/5 border border-white/10">
+        <div class="p-4 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10">
             <div class="flex items-start justify-between mb-2">
                 <div>
                     <p class="text-white font-medium"><?php echo htmlspecialchars(($sc['title'] ?? '') . ($sc['first_name_th'] ?? '') . ' ' . ($sc['last_name_th'] ?? '')); ?></p>
@@ -555,23 +556,23 @@ include dirname(__DIR__) . '/templates/header.php';
 <!-- ======================================================== -->
 <!-- TEMPLATE LIST                                             -->
 <!-- ======================================================== -->
-<div class="native-card tp-native-card tp-native-data-card overflow-hidden min-w-0 rounded-[20px]">
+<div class="native-card tp-native-card tp-native-data-card overflow-hidden min-w-0 rounded-[var(--tp-ios-card-radius)]">
     <?php if (empty($tpls)): ?>
-    <div class="tp-native-empty-state text-center py-12 px-4 rounded-[20px] border border-dashed border-white/15 max-w-none mx-4 my-4">
+    <div class="tp-native-empty-state text-center py-12 px-4 rounded-[var(--tp-ios-card-radius)] border border-dashed border-white/15 max-w-none mx-4 my-4">
         <i class="fas fa-file-alt text-slate-500 text-4xl mb-3 block" aria-hidden="true"></i>
         <p class="text-slate-400 text-sm">ยังไม่มีเทมเพลตเอกสาร</p>
-        <a href="?edit=new" class="mt-4 inline-flex min-h-[48px] items-center justify-center rounded-[20px] bg-violet-600 hover:bg-violet-700 px-4 text-white text-sm font-semibold touch-manipulation">
+        <a href="?edit=new" class="mt-4 inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 hover:bg-violet-700 px-4 text-white text-sm font-semibold touch-manipulation">
             <i class="fas fa-plus mr-2" aria-hidden="true"></i>เพิ่มเอกสารแรก
         </a>
     </div>
     <?php else: ?>
     <div class="p-4 border-b border-white/10 flex items-center justify-between">
         <h2 class="text-white font-semibold"><i class="fas fa-file-alt mr-2 text-violet-400" aria-hidden="true"></i>รายการเอกสารในระบบ</h2>
-        <a href="?edit=new" class="px-3 py-1.5 rounded-[20px] bg-violet-500 hover:bg-violet-600 text-white text-xs font-medium touch-manipulation"><i class="fas fa-plus mr-1" aria-hidden="true"></i>เพิ่ม</a>
+        <a href="?edit=new" class="px-3 py-1.5 rounded-[var(--tp-ios-card-radius)] bg-violet-500 hover:bg-violet-600 text-white text-xs font-medium touch-manipulation"><i class="fas fa-plus mr-1" aria-hidden="true"></i>เพิ่ม</a>
     </div>
     <div class="md:hidden p-3 space-y-3">
         <?php foreach ($tpls as $t): ?>
-        <div class="rounded-[20px] bg-white/5 border border-white/10 p-4 space-y-3">
+        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4 space-y-3">
             <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
                     <p class="text-white/50 text-xs">ลำดับ <?= (int)$t['sort_order']; ?> · <span class="font-mono text-violet-300"><?php echo htmlspecialchars($t['code']); ?></span></p>
@@ -585,35 +586,35 @@ include dirname(__DIR__) . '/templates/header.php';
                 <?php endif; ?>
             </div>
             <div class="grid grid-cols-3 gap-2 text-center text-xs">
-                <div class="rounded-[20px] bg-black/20 border border-white/10 py-2 px-1">
+                <div class="rounded-[var(--tp-ios-card-radius)] bg-black/20 border border-white/10 py-2 px-1">
                     <div class="text-white/45">หมวด</div>
                     <div class="text-white/85 truncate"><?php echo htmlspecialchars($categories[$t['category']] ?? $t['category']); ?></div>
                 </div>
-                <div class="rounded-[20px] bg-black/20 border border-white/10 py-2">
+                <div class="rounded-[var(--tp-ios-card-radius)] bg-black/20 border border-white/10 py-2">
                     <div class="text-white/45">ดำเนินการ</div>
                     <div class="text-white font-medium"><?php echo (int)$t['processing_days']; ?> วัน</div>
                 </div>
-                <div class="rounded-[20px] bg-black/20 border border-white/10 py-2">
+                <div class="rounded-[var(--tp-ios-card-radius)] bg-black/20 border border-white/10 py-2">
                     <div class="text-white/45">ใช้งาน</div>
                     <div class="text-white/80"><?php echo (int)$t['request_count']; ?></div>
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-2">
-                <a href="?edit=<?php echo (int)$t['id']; ?>" class="min-h-[48px] flex items-center justify-center rounded-[20px] bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 text-sm font-semibold touch-manipulation">
+                <a href="?edit=<?php echo (int)$t['id']; ?>" class="min-h-[48px] flex items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 text-sm font-semibold touch-manipulation">
                     <i class="fas fa-edit mr-2" aria-hidden="true"></i>แก้ไข
                 </a>
                 <form method="POST" class="contents">
                     <input type="hidden" name="_token" value="<?php echo csrfToken(); ?>">
                     <input type="hidden" name="action" value="toggle_active">
                     <input type="hidden" name="id" value="<?php echo (int)$t['id']; ?>">
-                    <button type="submit" class="w-full min-h-[48px] rounded-[20px] bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-sm font-semibold touch-manipulation" title="สลับเปิด/ปิด">
+                    <button type="submit" class="w-full min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-sm font-semibold touch-manipulation" title="สลับเปิด/ปิด">
                         <i class="fas fa-power-off mr-2" aria-hidden="true"></i>เปิด/ปิด
                     </button>
                 </form>
             </div>
             <?php if ((int)$t['request_count'] === 0): ?>
             <button type="button"
-                class="w-full min-h-[48px] rounded-[20px] bg-red-500/20 hover:bg-red-500/30 text-red-300 text-sm font-semibold touch-manipulation"
+                class="w-full min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-red-500/20 hover:bg-red-500/30 text-red-300 text-sm font-semibold touch-manipulation"
                 data-dt-delete-id="<?php echo (int)$t['id']; ?>"
                 data-dt-delete-name="<?php echo htmlspecialchars($t['name'], ENT_QUOTES, 'UTF-8'); ?>"
                 onclick="dtOpenDeleteTemplateModal(this)">
@@ -657,16 +658,16 @@ include dirname(__DIR__) . '/templates/header.php';
                         <?php endif; ?>
                     </td>
                     <td class="px-4 py-3 text-center whitespace-nowrap">
-                        <a href="?edit=<?php echo (int)$t['id']; ?>" class="inline-block px-2 py-1 rounded-[20px] bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 text-xs touch-manipulation" title="แก้ไข"><i class="fas fa-edit" aria-hidden="true"></i></a>
+                        <a href="?edit=<?php echo (int)$t['id']; ?>" class="inline-block px-2 py-1 rounded-[var(--tp-ios-card-radius)] bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 text-xs touch-manipulation" title="แก้ไข"><i class="fas fa-edit" aria-hidden="true"></i></a>
                         <form method="POST" class="inline-block">
                             <input type="hidden" name="_token" value="<?php echo csrfToken(); ?>">
                             <input type="hidden" name="action" value="toggle_active">
                             <input type="hidden" name="id" value="<?php echo (int)$t['id']; ?>">
-                            <button type="submit" class="px-2 py-1 rounded-[20px] bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs touch-manipulation" title="สลับเปิด/ปิด"><i class="fas fa-power-off" aria-hidden="true"></i></button>
+                            <button type="submit" class="px-2 py-1 rounded-[var(--tp-ios-card-radius)] bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs touch-manipulation" title="สลับเปิด/ปิด"><i class="fas fa-power-off" aria-hidden="true"></i></button>
                         </form>
                         <?php if ((int)$t['request_count'] === 0): ?>
                         <button type="button"
-                            class="px-2 py-1 rounded-[20px] bg-red-500/20 hover:bg-red-500/30 text-red-300 text-xs touch-manipulation"
+                            class="px-2 py-1 rounded-[var(--tp-ios-card-radius)] bg-red-500/20 hover:bg-red-500/30 text-red-300 text-xs touch-manipulation"
                             data-dt-delete-id="<?php echo (int)$t['id']; ?>"
                             data-dt-delete-name="<?php echo htmlspecialchars($t['name'], ENT_QUOTES, 'UTF-8'); ?>"
                             onclick="dtOpenDeleteTemplateModal(this)"
@@ -711,7 +712,7 @@ if (!empty($editRow['id'])) {
     <input type="hidden" name="id" value="<?php echo (int)($editRow['id'] ?? 0); ?>">
 
     <!-- Section 1: Basic -->
-    <div class="native-card tp-native-card rounded-[20px] overflow-hidden">
+    <div class="native-card tp-native-card rounded-[var(--tp-ios-card-radius)] overflow-hidden">
         <div class="p-4 border-b border-white/10 bg-white/5 flex items-center gap-3">
             <div class="w-8 h-8 rounded-full bg-violet-500/30 text-violet-200 flex items-center justify-center font-bold">1</div>
             <div>
@@ -767,7 +768,7 @@ if (!empty($editRow['id'])) {
     </div>
 
     <!-- Section 2: Header -->
-    <div class="native-card tp-native-card rounded-[20px] overflow-hidden">
+    <div class="native-card tp-native-card rounded-[var(--tp-ios-card-radius)] overflow-hidden">
         <div class="p-4 border-b border-white/10 bg-white/5 flex items-center gap-3">
             <div class="w-8 h-8 rounded-full bg-blue-500/30 text-blue-200 flex items-center justify-center font-bold">2</div>
             <div>
@@ -798,7 +799,7 @@ if (!empty($editRow['id'])) {
     </div>
 
     <!-- Section 3: Body -->
-    <div class="native-card tp-native-card rounded-[20px] overflow-hidden">
+    <div class="native-card tp-native-card rounded-[var(--tp-ios-card-radius)] overflow-hidden">
         <div class="p-4 border-b border-white/10 bg-white/5 flex items-center gap-3">
             <div class="w-8 h-8 rounded-full bg-emerald-500/30 text-emerald-200 flex items-center justify-center font-bold">3</div>
             <div>
@@ -836,7 +837,7 @@ if (!empty($editRow['id'])) {
     </div>
 
     <!-- Section 4: Signatures -->
-    <div class="native-card tp-native-card rounded-[20px] overflow-hidden">
+    <div class="native-card tp-native-card rounded-[var(--tp-ios-card-radius)] overflow-hidden">
         <div class="p-4 border-b border-white/10 bg-white/5 flex items-center gap-3">
             <div class="w-8 h-8 rounded-full bg-indigo-500/30 text-indigo-200 flex items-center justify-center font-bold">4</div>
             <div>
@@ -902,7 +903,7 @@ if (!empty($editRow['id'])) {
     </div>
 
     <!-- Section 5: Footer -->
-    <div class="native-card tp-native-card rounded-[20px] overflow-hidden">
+    <div class="native-card tp-native-card rounded-[var(--tp-ios-card-radius)] overflow-hidden">
         <div class="p-4 border-b border-white/10 bg-white/5 flex items-center gap-3">
             <div class="w-8 h-8 rounded-full bg-rose-500/30 text-rose-200 flex items-center justify-center font-bold">5</div>
             <div>
@@ -933,20 +934,20 @@ if (!empty($editRow['id'])) {
     </div>
 
     <!-- Action bar -->
-    <div class="native-card tp-native-card rounded-[20px] overflow-hidden border border-white/10 p-4 flex items-center justify-between sticky bottom-4 z-20 shadow-lg">
+    <div class="native-card tp-native-card rounded-[var(--tp-ios-card-radius)] overflow-hidden border border-white/10 p-4 flex items-center justify-between sticky bottom-4 z-20 shadow-lg">
         <div class="text-white/60 text-xs">
             <?php if ($editRow && !empty($editRow['updated_at'])): ?>
                 อัปเดตล่าสุด: <?php echo htmlspecialchars($editRow['updated_at']); ?>
             <?php endif; ?>
         </div>
         <div class="flex gap-2">
-            <a href="document_templates.php" class="px-4 py-2 rounded-[20px] bg-white/10 text-white/80 hover:bg-white/20 text-sm">ยกเลิก</a>
+            <a href="document_templates.php" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-white/10 text-white/80 hover:bg-white/20 text-sm">ยกเลิก</a>
             <?php if ($editRow && $certPreviewReqId > 0): ?>
-                <button type="submit" form="hr_doc_tpl_cert_preview" class="px-4 py-2 rounded-[20px] bg-violet-500/20 hover:bg-violet-500/30 text-violet-200 text-sm">
+                <button type="submit" form="hr_doc_tpl_cert_preview" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-violet-500/20 hover:bg-violet-500/30 text-violet-200 text-sm">
                     <i class="fas fa-print mr-1"></i> ดูตัวอย่าง
                 </button>
             <?php endif; ?>
-            <button type="submit" class="px-6 py-2 rounded-[20px] bg-violet-500 hover:bg-violet-600 text-white text-sm font-medium">
+            <button type="submit" class="px-6 py-2 rounded-[var(--tp-ios-card-radius)] bg-violet-500 hover:bg-violet-600 text-white text-sm font-medium">
                 <i class="fas fa-save mr-1"></i> บันทึกทั้งหมด
             </button>
         </div>
@@ -955,9 +956,11 @@ if (!empty($editRow['id'])) {
 
 <?php endif; ?>
 
+</div>
+
 <!-- Confirm delete template -->
 <div id="dt-delete-template-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="dt-delete-template-title">
-    <div class="native-card tp-native-card w-full max-w-md my-auto rounded-[20px] p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
+    <div class="native-card tp-native-card w-full max-w-md my-auto rounded-[var(--tp-ios-card-radius)] p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
         <h3 id="dt-delete-template-title" class="text-xl font-bold text-white mb-2">ยืนยันการลบเทมเพลต</h3>
         <p class="text-white/70 text-sm mb-6">ต้องการลบเอกสาร <strong id="dt-delete-template-name" class="text-white font-semibold"></strong> หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้</p>
         <form method="POST" action="document_templates.php">
@@ -965,8 +968,8 @@ if (!empty($editRow['id'])) {
             <input type="hidden" name="action" value="delete_template">
             <input type="hidden" name="id" id="dt-delete-template-id" value="">
             <div class="flex flex-wrap gap-2 justify-end">
-                <button type="button" class="px-4 py-2 rounded-[20px] bg-white/10 text-white/90 hover:bg-white/20 text-sm touch-manipulation" onclick="dtCloseDeleteTemplateModal()">ยกเลิก</button>
-                <button type="submit" class="px-4 py-2 rounded-[20px] bg-red-600 hover:bg-red-700 text-white text-sm font-medium touch-manipulation">ลบเทมเพลต</button>
+                <button type="button" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-white/10 text-white/90 hover:bg-white/20 text-sm touch-manipulation" onclick="dtCloseDeleteTemplateModal()">ยกเลิก</button>
+                <button type="submit" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-red-600 hover:bg-red-700 text-white text-sm font-medium touch-manipulation">ลบเทมเพลต</button>
             </div>
         </form>
     </div>
@@ -974,7 +977,7 @@ if (!empty($editRow['id'])) {
 
 <!-- Confirm remove signature -->
 <div id="dt-remove-signature-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="dt-remove-signature-title">
-    <div class="native-card tp-native-card w-full max-w-md my-auto rounded-[20px] p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
+    <div class="native-card tp-native-card w-full max-w-md my-auto rounded-[var(--tp-ios-card-radius)] p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
         <h3 id="dt-remove-signature-title" class="text-xl font-bold text-white mb-2">ลบลายเซ็นนี้?</h3>
         <p class="text-white/70 text-sm mb-6">ภาพลายเซ็นจะถูกนำออกจากบัญชีผู้ลงนามรายนี้</p>
         <form method="POST" action="document_templates.php" id="dt-remove-signature-form">
@@ -982,8 +985,8 @@ if (!empty($editRow['id'])) {
             <input type="hidden" name="action" value="remove_signature">
             <input type="hidden" name="user_id" id="dt-remove-signature-user-id" value="">
             <div class="flex flex-wrap gap-2 justify-end">
-                <button type="button" class="px-4 py-2 rounded-[20px] bg-white/10 text-white/90 hover:bg-white/20 text-sm touch-manipulation" onclick="dtCloseRemoveSignatureModal()">ยกเลิก</button>
-                <button type="submit" class="px-4 py-2 rounded-[20px] bg-red-600 hover:bg-red-700 text-white text-sm font-medium touch-manipulation">ลบลายเซ็น</button>
+                <button type="button" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-white/10 text-white/90 hover:bg-white/20 text-sm touch-manipulation" onclick="dtCloseRemoveSignatureModal()">ยกเลิก</button>
+                <button type="submit" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-red-600 hover:bg-red-700 text-white text-sm font-medium touch-manipulation">ลบลายเซ็น</button>
             </div>
         </form>
     </div>

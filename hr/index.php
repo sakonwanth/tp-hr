@@ -105,13 +105,14 @@ $current_page = 'hr-dashboard';
 include dirname(__DIR__) . '/templates/header.php';
 ?>
 
-<div class="mb-6 min-w-0">
-    <h1 class="text-2xl font-bold text-white tracking-tight">แดชบอร์ด HR</h1>
-    <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">ภาพรวมการเข้างาน การลา และคำขอเอกสาร ณ วันที่ <?php echo formatDateThai($today); ?></p>
+<div class="tp-hr-admin-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<div class="mb-5 md:mb-8 min-w-0">
+    <h1 class="tp-ios-page-title">แดชบอร์ด HR</h1>
+    <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">ภาพรวมการเข้างาน การลา และคำขอเอกสาร ณ วันที่ <?php echo formatDateThai($today); ?></p>
 </div>
 
 <!-- Quick Stats -->
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6 md:mb-8 min-w-0 max-w-full">
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-5 xl:gap-6 mb-5 md:mb-8 min-w-0 max-w-full">
     <div class="stat-card tp-native-summary-card group min-w-0">
         <div class="flex items-center gap-4">
             <div class="stat-icon bg-emerald-500/15 border border-emerald-400/25 transition-colors">
@@ -165,7 +166,7 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
 </div>
 
-<div class="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6 mb-6 min-w-0 max-w-full">
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-5 md:gap-8 mb-5 md:mb-8 min-w-0 max-w-full">
     <!-- Pending Leave Requests -->
     <div class="native-card tp-native-card tp-native-data-card min-w-0 max-w-full overflow-hidden">
         <div class="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between gap-3 min-w-0">
@@ -177,7 +178,7 @@ include dirname(__DIR__) . '/templates/header.php';
         </div>
 
         <?php if (empty($recentLeaves)): ?>
-        <div class="tp-native-empty-state text-center py-12 px-4 rounded-[20px] border border-dashed border-white/15 max-w-none mx-4 my-4">
+        <div class="tp-native-empty-state text-center py-12 px-4 rounded-[var(--tp-ios-card-radius)] border border-dashed border-white/15 max-w-none mx-4 my-4">
             <i class="fas fa-check-circle text-emerald-400/90 text-4xl mb-3 block" aria-hidden="true"></i>
             <p class="text-slate-400 text-sm">ไม่มีคำขอลารออนุมัติ</p>
         </div>
@@ -202,11 +203,11 @@ include dirname(__DIR__) . '/templates/header.php';
                     </div>
                     <div class="flex flex-col sm:flex-row gap-2 shrink-0 w-full sm:w-auto">
                         <button type="button" onclick="approveLeave(<?php echo (int)$leave['id']; ?>)"
-                                class="min-h-[56px] px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-[20px] transition-colors touch-manipulation font-semibold">
+                                class="min-h-[56px] px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-semibold">
                             อนุมัติ
                         </button>
                         <button type="button" onclick="rejectLeave(<?php echo (int)$leave['id']; ?>)"
-                                class="min-h-[48px] px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/25 text-red-300 text-sm rounded-[20px] transition-colors touch-manipulation font-medium">
+                                class="min-h-[48px] px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/25 text-red-300 text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-medium">
                             ไม่อนุมัติ
                         </button>
                     </div>
@@ -227,7 +228,7 @@ include dirname(__DIR__) . '/templates/header.php';
         </div>
 
         <?php if (empty($onLeaveToday)): ?>
-        <div class="tp-native-empty-state text-center py-12 px-4 rounded-[20px] border border-dashed border-white/15 max-w-none mx-4 my-4">
+        <div class="tp-native-empty-state text-center py-12 px-4 rounded-[var(--tp-ios-card-radius)] border border-dashed border-white/15 max-w-none mx-4 my-4">
             <i class="fas fa-users text-emerald-400/90 text-4xl mb-3 block" aria-hidden="true"></i>
             <p class="text-slate-400 text-sm">ไม่มีพนักงานลาวันนี้</p>
         </div>
@@ -302,16 +303,16 @@ include dirname(__DIR__) . '/templates/header.php';
 
     <div class="md:hidden p-3 space-y-3">
         <?php foreach ($recentDocs as $doc): ?>
-        <div class="rounded-[20px] bg-white/5 border border-white/10 p-4 space-y-3 min-w-0">
+        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4 space-y-3 min-w-0">
             <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
                     <p class="text-white/50 text-xs uppercase tracking-wide">เลขที่</p>
                     <p class="text-white font-mono text-sm"><?php echo htmlspecialchars($doc['request_number']); ?></p>
                 </div>
                 <?php if ($doc['status'] === 'PENDING'): ?>
-                <span class="shrink-0 px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs rounded-[20px]">รอดำเนินการ</span>
+                <span class="shrink-0 px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs rounded-[var(--tp-ios-card-radius)]">รอดำเนินการ</span>
                 <?php else: ?>
-                <span class="shrink-0 px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-[20px]">กำลังดำเนินการ</span>
+                <span class="shrink-0 px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-[var(--tp-ios-card-radius)]">กำลังดำเนินการ</span>
                 <?php endif; ?>
             </div>
             <div>
@@ -328,7 +329,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 <p class="text-white/80 text-sm"><?php echo formatDateThai($doc['created_at']); ?></p>
             </div>
             <a href="documents.php?action=process&id=<?php echo (int)$doc['id']; ?>"
-               class="flex min-h-[56px] items-center justify-center rounded-[20px] bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold transition-colors touch-manipulation">
+               class="flex min-h-[56px] items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold transition-colors touch-manipulation">
                 ดำเนินการ
             </a>
         </div>
@@ -356,14 +357,14 @@ include dirname(__DIR__) . '/templates/header.php';
                     <td class="px-4 py-3 text-white/70 text-sm"><?php echo formatDateThai($doc['created_at']); ?></td>
                     <td class="px-4 py-3 text-center">
                         <?php if ($doc['status'] === 'PENDING'): ?>
-                        <span class="px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs rounded-[20px]">รอดำเนินการ</span>
+                        <span class="px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs rounded-[var(--tp-ios-card-radius)]">รอดำเนินการ</span>
                         <?php else: ?>
-                        <span class="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-[20px]">กำลังดำเนินการ</span>
+                        <span class="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-[var(--tp-ios-card-radius)]">กำลังดำเนินการ</span>
                         <?php endif; ?>
                     </td>
                     <td class="px-4 py-3 text-center">
                         <a href="documents.php?action=process&id=<?php echo (int)$doc['id']; ?>"
-                           class="inline-flex min-h-[56px] items-center justify-center px-4 bg-violet-600 hover:bg-violet-700 text-white text-sm rounded-[20px] transition-colors touch-manipulation font-semibold">
+                           class="inline-flex min-h-[56px] items-center justify-center px-4 bg-violet-600 hover:bg-violet-700 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-semibold">
                             ดำเนินการ
                         </a>
                     </td>
@@ -374,6 +375,7 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
 </div>
 <?php endif; ?>
+</div>
 
 <!-- Reject Modal -->
 <div id="reject-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="reject-modal-title">
@@ -387,10 +389,10 @@ include dirname(__DIR__) . '/templates/header.php';
                           placeholder="ระบุเหตุผลที่ไม่อนุมัติ..."></textarea>
             </div>
             <div class="flex flex-col sm:flex-row gap-3 pt-2">
-                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[20px] touch-manipulation font-medium">
+                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium">
                     ยกเลิก
                 </button>
-                <button type="submit" class="flex-1 min-h-[56px] py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-[20px] touch-manipulation font-semibold">
+                <button type="submit" class="flex-1 min-h-[56px] py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold">
                     ไม่อนุมัติ
                 </button>
             </div>

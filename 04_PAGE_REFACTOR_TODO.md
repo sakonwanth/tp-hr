@@ -18,6 +18,12 @@ Priorities derive from **`01_FULL_UI_INVENTORY.md`**. Tasks are **non-breaking U
 | T2-2 | `leave.php` + **`request_form.php`** | Dense form · inconsistent radii | ✅ **REFACTORED**: **`tp-leave-stack`**, **`.tp-ios-*`**, **gap-5/8**, **`--tp-ios-card-radius`**, form padding lift |
 | T2-3 | `leave_history.php` | Filter sheet affordance | ✅ **REFACTORED**: **`tp-leave-history-stack`** · **`max-w-[min(960px,100%)]`** · **`.tp-ios-*`** header · grids/filters **`gap-5`/md‑`gap-8`** · **`rounded-[var(--tp-ios-card-radius)]`** · **`detail-modal`** / `viewDetail` / **`cancelRequest`** untouched |
 
-*(Continue listing each HR admin screen in Waves 3–4 mirroring **`hr/*.php`** with table-shell → card refactor.)*
+## Wave 3 — HR admin (`hr/*.php`)
+
+| ID | Scope | Notes |
+|----|--------|--------|
+| T3-1 | **`hr/index.php`**, **`hr/employees.php`**, **`hr/leaves.php`**, **`hr/attendance.php`**, **`hr/documents.php`**, **`hr/dayoff_approvals.php`**, **`hr/settings.php`**, **`hr/reports.php`**, **`hr/api_keys.php`**, **`hr/document_templates.php`**, **`hr/employee_form.php`**, **`hr/employee_view.php`**, **`hr/employee_attendance.php`** | ✅ **`tp-hr-admin-stack`** · **`max-w-[min(960px,100%)]`** · **`.tp-ios-page-title` / `tp-ios-caption-muted`** headers · **`rounded-[var(--tp-ios-card-radius)]`** sweep · modals **`#id`** / JS **unchanged** |
+
+*(Wave 4 optional: denser table→card patterns on specific admin tables — only if product asks.)*
 
 **Risk:** **Low** for CSS-only/visual; **Medium** where JS listens to DOM selectors — grep `getElementById` before renaming nodes.

@@ -138,21 +138,22 @@ if ($month !== '') {
 include dirname(__DIR__) . '/templates/header.php';
 ?>
 
-<div class="mb-6 min-w-0">
-    <nav class="text-sm text-white/60 mb-1" aria-label="Breadcrumb">
+<div class="tp-hr-admin-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<div class="mb-5 md:mb-8 min-w-0">
+    <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
         <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
         <span class="mx-2">/</span>
         <span class="text-white">อนุมัติเปลี่ยนวันหยุด</span>
     </nav>
-    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 gap-y-4">
         <div class="min-w-0 flex-1">
-            <h1 class="text-2xl font-bold text-white tracking-tight">อนุมัติเปลี่ยนวันหยุดประจำสัปดาห์</h1>
-            <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">พนักงานขอเปลี่ยนวันหยุดในแต่ละสัปดาห์</p>
+            <h1 class="tp-ios-page-title">อนุมัติเปลี่ยนวันหยุดประจำสัปดาห์</h1>
+            <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">พนักงานขอเปลี่ยนวันหยุดในแต่ละสัปดาห์</p>
         </div>
         <?php if ($pendingCount > 0 && $statusFilter === 'PENDING'): ?>
         <button type="button"
                 onclick="openApproveAllModal()"
-                class="w-full sm:w-auto min-h-[56px] px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[20px] transition-colors touch-manipulation font-semibold shadow-sm shadow-emerald-900/30">
+                class="w-full sm:w-auto min-h-[56px] px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-semibold shadow-sm shadow-emerald-900/30">
             <i class="fas fa-check-double mr-2" aria-hidden="true"></i>อนุมัติทั้งหมด (<?php echo (int)$pendingCount; ?>)
         </button>
         <?php endif; ?>
@@ -160,13 +161,13 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <?php if ($flashOk = flash('success')): ?>
-<div class="mb-4 rounded-[20px] border border-emerald-500/30 bg-emerald-500/15 px-4 py-3 text-emerald-200" role="status">
+<div class="mb-4 rounded-[var(--tp-ios-card-radius)] border border-emerald-500/30 bg-emerald-500/15 px-4 py-3 text-emerald-200" role="status">
     <p><i class="fas fa-check-circle mr-2" aria-hidden="true"></i><?php echo htmlspecialchars($flashOk); ?></p>
 </div>
 <?php endif; ?>
 
 <?php if ($flashErr = flash('error')): ?>
-<div class="mb-4 rounded-[20px] border border-red-500/30 bg-red-500/15 px-4 py-3 text-red-200" role="alert">
+<div class="mb-4 rounded-[var(--tp-ios-card-radius)] border border-red-500/30 bg-red-500/15 px-4 py-3 text-red-200" role="alert">
     <p><i class="fas fa-exclamation-circle mr-2" aria-hidden="true"></i><?php echo htmlspecialchars($flashErr); ?></p>
 </div>
 <?php endif; ?>
@@ -174,29 +175,29 @@ include dirname(__DIR__) . '/templates/header.php';
 <!-- Stats -->
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6 min-w-0 max-w-full">
     <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['status' => 'PENDING']))); ?>"
-       class="stat-card tp-native-summary-card rounded-[20px] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $statusFilter === 'PENDING' ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
+       class="stat-card tp-native-summary-card rounded-[var(--tp-ios-card-radius)] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $statusFilter === 'PENDING' ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
         <p class="text-slate-300 text-sm truncate">รออนุมัติ</p>
         <p class="text-2xl font-bold text-amber-400 tabular-nums mt-1"><?php echo (int)($doStats['pending'] ?? 0); ?></p>
     </a>
     <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['status' => 'APPROVED']))); ?>"
-       class="stat-card tp-native-summary-card rounded-[20px] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $statusFilter === 'APPROVED' ? 'ring-2 ring-emerald-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
+       class="stat-card tp-native-summary-card rounded-[var(--tp-ios-card-radius)] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $statusFilter === 'APPROVED' ? 'ring-2 ring-emerald-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
         <p class="text-slate-300 text-sm truncate">อนุมัติแล้ว</p>
         <p class="text-2xl font-bold text-emerald-400 tabular-nums mt-1"><?php echo (int)($doStats['approved'] ?? 0); ?></p>
     </a>
     <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['status' => 'REJECTED']))); ?>"
-       class="stat-card tp-native-summary-card rounded-[20px] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $statusFilter === 'REJECTED' ? 'ring-2 ring-red-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
+       class="stat-card tp-native-summary-card rounded-[var(--tp-ios-card-radius)] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $statusFilter === 'REJECTED' ? 'ring-2 ring-red-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
         <p class="text-slate-300 text-sm truncate">ไม่อนุมัติ</p>
         <p class="text-2xl font-bold text-red-400 tabular-nums mt-1"><?php echo (int)($doStats['rejected'] ?? 0); ?></p>
     </a>
     <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['status' => '']))); ?>"
-       class="stat-card tp-native-summary-card rounded-[20px] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $statusFilter === '' ? 'ring-2 ring-violet-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
+       class="stat-card tp-native-summary-card rounded-[var(--tp-ios-card-radius)] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $statusFilter === '' ? 'ring-2 ring-violet-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
         <p class="text-slate-300 text-sm truncate">ทั้งหมด</p>
         <p class="text-2xl font-bold text-violet-400 tabular-nums mt-1"><?php echo (int)($doStats['total'] ?? 0); ?></p>
     </a>
 </div>
 
 <!-- Filters -->
-<div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 mb-6 min-w-0 overflow-hidden rounded-[20px]">
+<div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 mb-6 min-w-0 overflow-hidden rounded-[var(--tp-ios-card-radius)]">
     <h2 class="section-title mb-4 text-white text-lg">
         <i class="fas fa-filter text-violet-400 text-xl mr-2" aria-hidden="true"></i>
         กรองคำขอ
@@ -221,16 +222,16 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <!-- Requests Table -->
-<div class="native-card tp-native-card tp-native-data-card overflow-hidden min-w-0 rounded-[20px]">
+<div class="native-card tp-native-card tp-native-data-card overflow-hidden min-w-0 rounded-[var(--tp-ios-card-radius)]">
     <?php if (empty($allRequests)): ?>
-    <div class="tp-native-empty-state text-center py-12 px-4 rounded-[20px] border border-dashed border-white/15 max-w-none mx-4 my-4">
+    <div class="tp-native-empty-state text-center py-12 px-4 rounded-[var(--tp-ios-card-radius)] border border-dashed border-white/15 max-w-none mx-4 my-4">
         <i class="fas fa-calendar-check text-slate-500 text-4xl mb-3 block" aria-hidden="true"></i>
         <p class="text-slate-400 text-sm">ไม่มีคำขอ</p>
     </div>
     <?php else: ?>
     <div class="md:hidden p-4 space-y-3">
         <?php foreach ($allRequests as $req): ?>
-        <div class="rounded-[20px] bg-white/5 border border-white/10 p-4">
+        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4">
             <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
                     <p class="text-white font-medium break-words"><?php echo htmlspecialchars($req['first_name_th'] . ' ' . $req['last_name_th']); ?></p>
@@ -251,18 +252,18 @@ include dirname(__DIR__) . '/templates/header.php';
                     default => $st
                 };
                 ?>
-                <span class="px-2.5 py-1 text-xs rounded-[20px] shrink-0 font-semibold <?php echo $stChip; ?>">
+                <span class="px-2.5 py-1 text-xs rounded-[var(--tp-ios-card-radius)] shrink-0 font-semibold <?php echo $stChip; ?>">
                     <?php echo htmlspecialchars($stLabel); ?>
                 </span>
             </div>
 
             <div class="grid grid-cols-2 gap-3 mt-4 text-sm">
-                <div class="rounded-[20px] bg-black/20 border border-white/10 px-3 py-2">
+                <div class="rounded-[var(--tp-ios-card-radius)] bg-black/20 border border-white/10 px-3 py-2">
                     <p class="text-white/50 text-[11px]">สัปดาห์</p>
                     <p class="text-white font-semibold"><?php echo formatDateThai($req['week_start']); ?></p>
                     <p class="text-white/50 text-xs">ถึง <?php echo formatDateThai($req['week_end']); ?></p>
                 </div>
-                <div class="rounded-[20px] bg-black/20 border border-white/10 px-3 py-2">
+                <div class="rounded-[var(--tp-ios-card-radius)] bg-black/20 border border-white/10 px-3 py-2">
                     <p class="text-white/50 text-[11px]">เปลี่ยนวันหยุด</p>
                     <p><span class="text-sky-400"><?php echo $dayNames[(int)$req['original_day_off']]; ?></span>
                         <i class="fas fa-arrow-right text-white/30 mx-1" aria-hidden="true"></i>
@@ -280,13 +281,13 @@ include dirname(__DIR__) . '/templates/header.php';
             <div class="grid grid-cols-2 gap-2 mt-4">
                 <button type="button"
                         onclick="openApproveOneModal(<?php echo (int)$req['id']; ?>)"
-                        class="min-h-[56px] rounded-[20px] bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-colors touch-manipulation shadow-sm shadow-emerald-900/30">
+                        class="min-h-[56px] rounded-[var(--tp-ios-card-radius)] bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-colors touch-manipulation shadow-sm shadow-emerald-900/30">
                     <i class="fas fa-check mr-2" aria-hidden="true"></i>อนุมัติ
                 </button>
                 <button type="button"
                         data-emp-label="<?php echo htmlspecialchars(trim(($req['first_name_th'] ?? '') . ' ' . ($req['last_name_th'] ?? '')), ENT_QUOTES); ?>"
                         onclick="openRejectModal(event, <?php echo (int)$req['id']; ?>)"
-                        class="min-h-[56px] rounded-[20px] bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 font-semibold transition-colors touch-manipulation">
+                        class="min-h-[56px] rounded-[var(--tp-ios-card-radius)] bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 font-semibold transition-colors touch-manipulation">
                     <i class="fas fa-times mr-2" aria-hidden="true"></i>ไม่อนุมัติ
                 </button>
             </div>
@@ -344,7 +345,7 @@ include dirname(__DIR__) . '/templates/header.php';
                             default => $stRow
                         };
                         ?>
-                        <span class="inline-flex items-center px-3 py-1 text-xs rounded-[20px] <?php echo $stChip; ?>">
+                        <span class="inline-flex items-center px-3 py-1 text-xs rounded-[var(--tp-ios-card-radius)] <?php echo $stChip; ?>">
                             <?php echo htmlspecialchars($stLabel); ?>
                         </span>
                         <?php if ($req['status'] !== 'PENDING' && $req['reviewer_name_first']): ?>
@@ -358,13 +359,13 @@ include dirname(__DIR__) . '/templates/header.php';
                         <div class="flex flex-wrap items-center justify-center gap-2">
                             <button type="button"
                                     onclick="openApproveOneModal(<?php echo (int)$req['id']; ?>)"
-                                    class="inline-flex items-center gap-1.5 min-h-[56px] px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-[20px] transition-colors touch-manipulation">
+                                    class="inline-flex items-center gap-1.5 min-h-[56px] px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation">
                                 <i class="fas fa-check" aria-hidden="true"></i><span>อนุมัติ</span>
                             </button>
                             <button type="button"
                                     data-emp-label="<?php echo htmlspecialchars(trim(($req['first_name_th'] ?? '') . ' ' . ($req['last_name_th'] ?? '')), ENT_QUOTES); ?>"
                                     onclick="openRejectModal(event, <?php echo (int)$req['id']; ?>)"
-                                    class="inline-flex items-center gap-1.5 min-h-[48px] px-3 py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 text-sm font-medium rounded-[20px] transition-colors touch-manipulation">
+                                    class="inline-flex items-center gap-1.5 min-h-[48px] px-3 py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 text-sm font-medium rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation">
                                 <i class="fas fa-times" aria-hidden="true"></i><span>ปฏิเสธ</span>
                             </button>
                         </div>
@@ -379,6 +380,7 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
     <?php endif; ?>
 </div>
+</div>
 
 <!-- Hidden POST: อนุมัติรายการเดียว (ยืนยันผ่านโมดัล) -->
 <form id="approve-one-form" method="POST" class="hidden" aria-hidden="true"><?php echo csrfField(); ?>
@@ -388,27 +390,27 @@ include dirname(__DIR__) . '/templates/header.php';
 
 <!-- ยืนยันอนุมัติ 1 รายการ -->
 <div id="approve-one-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="approve-one-title">
-    <div class="native-card tp-native-card w-full max-w-md my-auto rounded-[20px] p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
+    <div class="native-card tp-native-card w-full max-w-md my-auto rounded-[var(--tp-ios-card-radius)] p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
         <h3 id="approve-one-title" class="text-xl font-bold text-white mb-1">อนุมัติคำขอนี้?</h3>
         <p class="text-white/65 text-sm mb-6">ระบบจะบันทึกสถานะเป็นอนุมัติ และแจ้งในประวัติตามเดิม</p>
         <div class="flex flex-col sm:flex-row gap-3">
-            <button type="button" onclick="closeApproveOneModal()" class="flex-1 min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[20px] touch-manipulation font-medium">ยกเลิก</button>
-            <button type="button" onclick="submitApproveOne()" class="flex-1 min-h-[56px] py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[20px] touch-manipulation font-semibold">อนุมัติ</button>
+            <button type="button" onclick="closeApproveOneModal()" class="flex-1 min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium">ยกเลิก</button>
+            <button type="button" onclick="submitApproveOne()" class="flex-1 min-h-[56px] py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold">อนุมัติ</button>
         </div>
     </div>
 </div>
 
 <!-- ยืนยันอนุมัติทั้งหมด (CEO) -->
 <div id="approve-all-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="approve-all-title">
-    <div class="native-card tp-native-card w-full max-w-md my-auto rounded-[20px] p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
+    <div class="native-card tp-native-card w-full max-w-md my-auto rounded-[var(--tp-ios-card-radius)] p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
         <h3 id="approve-all-title" class="text-xl font-bold text-white mb-1">อนุมัติคำขอที่รอทั้งหมด?</h3>
         <p class="text-white/65 text-sm mb-6">มีคำขอสถานะ &quot;รออนุมัติ&quot; ทั้งหมด <strong class="text-white"><?php echo (int)$pendingCount; ?></strong> รายการ (ทุกช่วงเวลาในระบบ) — ยืนยันดำเนินการ?</p>
         <form method="POST" id="approve-all-form-el">
             <?php echo csrfField(); ?>
             <input type="hidden" name="action" value="approve_all">
             <div class="flex flex-col sm:flex-row gap-3">
-                <button type="button" onclick="closeApproveAllModal()" class="flex-1 min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[20px] touch-manipulation font-medium">ยกเลิก</button>
-                <button type="submit" class="flex-1 min-h-[56px] py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[20px] touch-manipulation font-semibold">อนุมัติทั้งหมด</button>
+                <button type="button" onclick="closeApproveAllModal()" class="flex-1 min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium">ยกเลิก</button>
+                <button type="submit" class="flex-1 min-h-[56px] py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold">อนุมัติทั้งหมด</button>
             </div>
         </form>
     </div>
@@ -416,7 +418,7 @@ include dirname(__DIR__) . '/templates/header.php';
 
 <!-- Reject Modal -->
 <div id="reject-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="reject-modal-title">
-    <div class="native-card tp-native-card w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden rounded-[20px] pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
+    <div class="native-card tp-native-card w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden rounded-[var(--tp-ios-card-radius)] pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <form method="POST" class="p-6">
             <?php echo csrfField(); ?>
             <input type="hidden" name="action" value="reject">
@@ -431,8 +433,8 @@ include dirname(__DIR__) . '/templates/header.php';
             </div>
             
             <div class="flex flex-col-reverse sm:flex-row gap-3">
-                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[48px] bg-white/10 hover:bg-white/20 text-white rounded-[20px] transition-colors touch-manipulation font-medium">ยกเลิก</button>
-                <button type="submit" class="flex-1 min-h-[56px] bg-red-600 hover:bg-red-700 text-white rounded-[20px] transition-colors touch-manipulation font-semibold">
+                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[48px] bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-medium">ยกเลิก</button>
+                <button type="submit" class="flex-1 min-h-[56px] bg-red-600 hover:bg-red-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-semibold">
                     <i class="fas fa-times mr-2" aria-hidden="true"></i>ไม่อนุมัติ
                 </button>
             </div>

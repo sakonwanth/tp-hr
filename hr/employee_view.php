@@ -69,31 +69,32 @@ if (!function_exists('tp_hr_emp_view_row')) {
 }
 ?>
 
-<div class="mb-6 min-w-0">
-    <nav class="text-sm text-white/60 mb-1" aria-label="Breadcrumb">
+<div class="tp-hr-admin-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<div class="mb-5 md:mb-8 min-w-0">
+    <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
         <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
         <span class="mx-2">/</span>
         <a href="/hr/employees.php" class="hover:text-white touch-manipulation">จัดการพนักงาน</a>
         <span class="mx-2">/</span>
         <span class="text-white">ดูข้อมูล</span>
     </nav>
-    <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+    <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between gap-y-4">
         <div class="min-w-0 flex-1">
-            <h1 class="text-2xl font-bold text-white tracking-tight"><?php echo htmlspecialchars($page_title); ?></h1>
-            <p class="text-slate-300 text-sm mt-1.5"><?php echo htmlspecialchars($fullName); ?></p>
+            <h1 class="tp-ios-page-title"><?php echo htmlspecialchars($page_title); ?></h1>
+            <p class="tp-ios-caption-muted mt-2"><?php echo htmlspecialchars($fullName); ?></p>
         </div>
         <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto shrink-0">
             <a href="/hr/employee_attendance.php?id=<?php echo (int)$emp['id']; ?>"
-               class="inline-flex items-center justify-center min-h-[48px] px-4 py-2 bg-violet-500/15 hover:bg-violet-500/25 border border-violet-500/25 text-violet-200 rounded-[20px] transition-colors font-medium touch-manipulation">
+               class="inline-flex items-center justify-center min-h-[48px] px-4 py-2 bg-violet-500/15 hover:bg-violet-500/25 border border-violet-500/25 text-violet-200 rounded-[var(--tp-ios-card-radius)] transition-colors font-medium touch-manipulation">
                 <i class="fas fa-clock mr-2" aria-hidden="true"></i>ประวัติลงเวลา
             </a>
             <?php if (canManageUsers()): ?>
             <a href="/hr/employee_form.php?action=edit&id=<?php echo (int)$emp['id']; ?>"
-               class="inline-flex items-center justify-center min-h-[56px] px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-[20px] transition-colors font-semibold touch-manipulation">
+               class="inline-flex items-center justify-center min-h-[56px] px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors font-semibold touch-manipulation">
                 <i class="fas fa-edit mr-2" aria-hidden="true"></i>แก้ไข
             </a>
             <?php endif; ?>
-            <a href="/hr/employees.php" class="inline-flex items-center justify-center min-h-[48px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-[20px] transition-colors font-medium touch-manipulation">
+            <a href="/hr/employees.php" class="inline-flex items-center justify-center min-h-[48px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] transition-colors font-medium touch-manipulation">
                 <i class="fas fa-arrow-left mr-2" aria-hidden="true"></i>กลับ
             </a>
         </div>
@@ -116,14 +117,14 @@ if (!function_exists('tp_hr_emp_view_row')) {
             <div class="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-2">
                 <h2 class="text-2xl font-bold text-white tracking-tight"><?php echo htmlspecialchars($fullName); ?></h2>
                 <?php if (($emp['work_mode'] ?? 'OFFICE') === 'WFH'): ?>
-                    <span class="px-3 py-1 rounded-[20px] text-xs font-medium bg-blue-500/20 text-blue-300 border border-blue-500/20"><i class="fas fa-home mr-1" aria-hidden="true"></i>WFH</span>
+                    <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs font-medium bg-blue-500/20 text-blue-300 border border-blue-500/20"><i class="fas fa-home mr-1" aria-hidden="true"></i>WFH</span>
                 <?php else: ?>
-                    <span class="px-3 py-1 rounded-[20px] text-xs font-medium bg-slate-500/20 text-slate-300 border border-white/10"><i class="fas fa-building mr-1" aria-hidden="true"></i>Office</span>
+                    <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs font-medium bg-slate-500/20 text-slate-300 border border-white/10"><i class="fas fa-building mr-1" aria-hidden="true"></i>Office</span>
                 <?php endif; ?>
                 <?php if ((int)$emp['is_active'] === 1): ?>
-                    <span class="px-3 py-1 rounded-[20px] text-xs font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/25">ทำงาน</span>
+                    <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/25">ทำงาน</span>
                 <?php else: ?>
-                    <span class="px-3 py-1 rounded-[20px] text-xs font-medium bg-red-500/20 text-red-300 border border-red-500/25">พ้นสภาพ</span>
+                    <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs font-medium bg-red-500/20 text-red-300 border border-red-500/25">พ้นสภาพ</span>
                 <?php endif; ?>
             </div>
             <?php if ($fullNameEn): ?>
@@ -142,7 +143,7 @@ if (!function_exists('tp_hr_emp_view_row')) {
 </div>
 
 <!-- Stats -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 min-w-0 max-w-full">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5 mb-5 md:mb-8 min-w-0 max-w-full">
     <div class="stat-card tp-native-summary-card group min-w-0">
         <p class="text-slate-300 text-xs">สถานะวันนี้</p>
         <p class="text-white text-lg font-bold mt-1 min-h-[1.75rem]">
@@ -180,7 +181,7 @@ if (!function_exists('tp_hr_emp_view_row')) {
     </div>
 </div>
 
-<div class="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 min-w-0 max-w-full">
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-5 md:gap-8 min-w-0 max-w-full">
     <!-- Personal -->
     <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0 max-w-full overflow-hidden">
         <h3 class="section-title mb-4 text-white text-base sm:text-lg"><i class="fas fa-user text-violet-400 mr-2 text-xl" aria-hidden="true"></i>ข้อมูลส่วนตัว</h3>
@@ -253,6 +254,7 @@ if (!function_exists('tp_hr_emp_view_row')) {
         tp_hr_emp_view_row('โรงพยาบาลประกันสังคม', $emp['social_security_hospital'] ?? null);
         ?>
     </div>
+</div>
 </div>
 
 <?php include dirname(__DIR__) . '/templates/footer.php'; ?>

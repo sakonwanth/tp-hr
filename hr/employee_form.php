@@ -441,29 +441,30 @@ $current_page = 'hr-employees';
 include dirname(__DIR__) . '/templates/header.php';
 ?>
 
-<div class="mb-6 min-w-0">
-    <nav class="text-sm text-white/60 mb-1" aria-label="Breadcrumb">
+<div class="tp-hr-admin-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<div class="mb-5 md:mb-8 min-w-0">
+    <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
         <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
         <span class="mx-2">/</span>
         <a href="/hr/employees.php" class="hover:text-white touch-manipulation">จัดการพนักงาน</a>
         <span class="mx-2">/</span>
         <span class="text-white"><?php echo $action === 'edit' ? 'แก้ไข' : 'เพิ่ม'; ?></span>
     </nav>
-    <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+    <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between gap-y-4">
         <div class="min-w-0 flex-1">
-            <h1 class="text-2xl font-bold text-white tracking-tight"><?php echo htmlspecialchars($page_title); ?></h1>
+            <h1 class="tp-ios-page-title"><?php echo htmlspecialchars($page_title); ?></h1>
             <?php if ($formSubtitle !== ''): ?>
-            <p class="text-slate-300 text-sm mt-1.5 leading-relaxed"><?php echo htmlspecialchars($formSubtitle); ?></p>
+            <p class="tp-ios-caption-muted mt-2 max-w-[42rem]"><?php echo htmlspecialchars($formSubtitle); ?></p>
             <?php endif; ?>
         </div>
-        <a href="/hr/employees.php" class="w-full sm:w-auto shrink-0 inline-flex items-center justify-center min-h-[48px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-[20px] transition-colors font-medium touch-manipulation">
+        <a href="/hr/employees.php" class="w-full sm:w-auto shrink-0 inline-flex items-center justify-center min-h-[48px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] transition-colors font-medium touch-manipulation">
             <i class="fas fa-arrow-left mr-2" aria-hidden="true"></i>กลับ
         </a>
     </div>
 </div>
 
 <!-- Info Box: Shared with CRM -->
-<div class="native-card tp-native-card tp-native-data-card p-4 mb-6 min-w-0 border-l-4 border-blue-500/80 rounded-[20px]" role="status">
+<div class="native-card tp-native-card tp-native-data-card p-4 mb-6 min-w-0 border-l-4 border-blue-500/80 rounded-[var(--tp-ios-card-radius)]" role="status">
     <div class="flex items-start gap-3">
         <i class="fas fa-info-circle text-blue-400 mt-0.5 shrink-0" aria-hidden="true"></i>
         <div class="min-w-0">
@@ -474,7 +475,7 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <?php if (!empty($errors)): ?>
-<div class="native-card tp-native-card tp-native-data-card p-4 mb-6 min-w-0 border-l-4 border-red-500/80 rounded-[20px]" role="alert">
+<div class="native-card tp-native-card tp-native-data-card p-4 mb-6 min-w-0 border-l-4 border-red-500/80 rounded-[var(--tp-ios-card-radius)]" role="alert">
     <div class="flex items-start gap-3">
         <i class="fas fa-exclamation-circle text-red-400 mt-0.5 shrink-0" aria-hidden="true"></i>
         <div class="min-w-0">
@@ -490,7 +491,7 @@ include dirname(__DIR__) . '/templates/header.php';
 <?php endif; ?>
 
 <?php if ($success): ?>
-<div class="native-card tp-native-card tp-native-data-card p-4 mb-6 min-w-0 border-l-4 border-emerald-500/80 rounded-[20px]" role="status">
+<div class="native-card tp-native-card tp-native-data-card p-4 mb-6 min-w-0 border-l-4 border-emerald-500/80 rounded-[var(--tp-ios-card-radius)]" role="status">
     <div class="flex items-start gap-3">
         <i class="fas fa-check-circle text-emerald-400 mt-0.5 shrink-0" aria-hidden="true"></i>
         <p class="text-emerald-200"><?php echo htmlspecialchars($success); ?></p>
@@ -502,29 +503,29 @@ include dirname(__DIR__) . '/templates/header.php';
     <?php echo csrfField(); ?>
     
     <!-- Tab Navigation -->
-    <div class="native-card tp-native-card tp-native-data-card p-1.5 min-w-0 flex flex-nowrap overflow-x-auto gap-1 sticky top-3 z-30 [-webkit-overflow-scrolling:touch] overscroll-x-contain rounded-[20px]" role="tablist" aria-label="ส่วนของแบบฟอร์มพนักงาน">
-        <button type="button" role="tab" aria-selected="true" aria-controls="tab-personal" onclick="switchTab('tab-personal')" id="btn-tab-personal" class="tab-btn active shrink-0 min-h-[48px] px-4 py-2.5 rounded-[20px] text-sm font-medium transition-all flex items-center gap-2 touch-manipulation">
+    <div class="native-card tp-native-card tp-native-data-card p-1.5 min-w-0 flex flex-nowrap overflow-x-auto gap-1 sticky top-3 z-30 [-webkit-overflow-scrolling:touch] overscroll-x-contain rounded-[var(--tp-ios-card-radius)]" role="tablist" aria-label="ส่วนของแบบฟอร์มพนักงาน">
+        <button type="button" role="tab" aria-selected="true" aria-controls="tab-personal" onclick="switchTab('tab-personal')" id="btn-tab-personal" class="tab-btn active shrink-0 min-h-[48px] px-4 py-2.5 rounded-[var(--tp-ios-card-radius)] text-sm font-medium transition-all flex items-center gap-2 touch-manipulation">
             <i class="fas fa-user" aria-hidden="true"></i>
             <span class="hidden sm:inline">ข้อมูลส่วนตัว</span>
             <span class="sm:hidden">ส่วนตัว</span>
         </button>
-        <button type="button" role="tab" aria-selected="false" aria-controls="tab-work" onclick="switchTab('tab-work')" id="btn-tab-work" class="tab-btn shrink-0 min-h-[48px] px-4 py-2.5 rounded-[20px] text-sm font-medium transition-all flex items-center gap-2 touch-manipulation">
+        <button type="button" role="tab" aria-selected="false" aria-controls="tab-work" onclick="switchTab('tab-work')" id="btn-tab-work" class="tab-btn shrink-0 min-h-[48px] px-4 py-2.5 rounded-[var(--tp-ios-card-radius)] text-sm font-medium transition-all flex items-center gap-2 touch-manipulation">
             <i class="fas fa-briefcase" aria-hidden="true"></i>
             <span class="hidden sm:inline">ข้อมูลการทำงาน</span>
             <span class="sm:hidden">การทำงาน</span>
         </button>
-        <button type="button" role="tab" aria-selected="false" aria-controls="tab-welfare" onclick="switchTab('tab-welfare')" id="btn-tab-welfare" class="tab-btn shrink-0 min-h-[48px] px-4 py-2.5 rounded-[20px] text-sm font-medium transition-all flex items-center gap-2 touch-manipulation">
+        <button type="button" role="tab" aria-selected="false" aria-controls="tab-welfare" onclick="switchTab('tab-welfare')" id="btn-tab-welfare" class="tab-btn shrink-0 min-h-[48px] px-4 py-2.5 rounded-[var(--tp-ios-card-radius)] text-sm font-medium transition-all flex items-center gap-2 touch-manipulation">
             <i class="fas fa-shield-alt" aria-hidden="true"></i>
             <span class="hidden sm:inline">สวัสดิการ & การเงิน</span>
             <span class="sm:hidden">สวัสดิการ</span>
         </button>
         <?php if ($action === 'edit' && $employee): ?>
-        <button type="button" role="tab" aria-selected="false" aria-controls="tab-history" onclick="switchTab('tab-history')" id="btn-tab-history" class="tab-btn shrink-0 min-h-[48px] px-4 py-2.5 rounded-[20px] text-sm font-medium transition-all flex items-center gap-2 touch-manipulation">
+        <button type="button" role="tab" aria-selected="false" aria-controls="tab-history" onclick="switchTab('tab-history')" id="btn-tab-history" class="tab-btn shrink-0 min-h-[48px] px-4 py-2.5 rounded-[var(--tp-ios-card-radius)] text-sm font-medium transition-all flex items-center gap-2 touch-manipulation">
             <i class="fas fa-history" aria-hidden="true"></i>
             <span class="hidden sm:inline">ประวัติ & ครอบครัว</span>
             <span class="sm:hidden">ประวัติ</span>
         </button>
-        <button type="button" role="tab" aria-selected="false" aria-controls="tab-system" onclick="switchTab('tab-system')" id="btn-tab-system" class="tab-btn shrink-0 min-h-[48px] px-4 py-2.5 rounded-[20px] text-sm font-medium transition-all flex items-center gap-2 touch-manipulation">
+        <button type="button" role="tab" aria-selected="false" aria-controls="tab-system" onclick="switchTab('tab-system')" id="btn-tab-system" class="tab-btn shrink-0 min-h-[48px] px-4 py-2.5 rounded-[var(--tp-ios-card-radius)] text-sm font-medium transition-all flex items-center gap-2 touch-manipulation">
             <i class="fas fa-cog" aria-hidden="true"></i>
             <span class="hidden sm:inline">ระบบ</span>
         </button>
@@ -986,7 +987,7 @@ include dirname(__DIR__) . '/templates/header.php';
         ?>
         
         <?php if ($probationStatus): ?>
-        <div class="rounded-[20px] p-3 mb-4 border <?php echo $probationStatusClass; ?>">
+        <div class="rounded-[var(--tp-ios-card-radius)] p-3 mb-4 border <?php echo $probationStatusClass; ?>">
             <i class="fas fa-info-circle mr-2"></i><?php echo $probationStatus; ?>
         </div>
         <?php endif; ?>
@@ -1014,7 +1015,7 @@ include dirname(__DIR__) . '/templates/header.php';
             </div>
         </div>
         
-        <div class="rounded-[20px] p-3 mt-4 bg-blue-500/10 border border-blue-500/25">
+        <div class="rounded-[var(--tp-ios-card-radius)] p-3 mt-4 bg-blue-500/10 border border-blue-500/25">
             <p class="text-blue-300 text-sm leading-relaxed">
                 <i class="fas fa-lightbulb mr-2 text-amber-300" aria-hidden="true"></i>
                 เมื่อพนักงานผ่านโปร ระบบจะเริ่มหักประกันสังคมตามข้อมูลด้านล่าง
@@ -1170,7 +1171,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 <i class="fas fa-graduation-cap text-indigo-400 mr-2"></i>
                 ประวัติการศึกษา
             </span>
-            <button type="button" onclick="addEducationRow()" class="min-h-[44px] px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-[20px] transition-colors touch-manipulation font-semibold shrink-0">
+            <button type="button" onclick="addEducationRow()" class="min-h-[44px] px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-semibold shrink-0">
                 <i class="fas fa-plus mr-1" aria-hidden="true"></i>เพิ่ม
             </button>
         </h3>
@@ -1178,7 +1179,7 @@ include dirname(__DIR__) . '/templates/header.php';
         <div id="education-rows">
             <?php if (!empty($educationRecords)): ?>
                 <?php foreach ($educationRecords as $i => $edu): ?>
-                <div class="education-row border border-white/10 rounded-[20px] p-4 mb-3" data-index="<?php echo $i; ?>">
+                <div class="education-row border border-white/10 rounded-[var(--tp-ios-card-radius)] p-4 mb-3" data-index="<?php echo $i; ?>">
                     <div class="flex justify-between items-start mb-3">
                         <span class="text-white/50 text-sm">ลำดับที่ <?php echo $i + 1; ?></span>
                         <button type="button" onclick="this.closest('.education-row').remove()" class="text-red-400 hover:text-red-300 text-sm">
@@ -1238,7 +1239,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 <i class="fas fa-history text-orange-400 mr-2"></i>
                 ประวัติการทำงาน (ก่อนเข้าบริษัท)
             </span>
-            <button type="button" onclick="addWorkHistoryRow()" class="min-h-[44px] px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm rounded-[20px] transition-colors touch-manipulation font-semibold shrink-0">
+            <button type="button" onclick="addWorkHistoryRow()" class="min-h-[44px] px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-semibold shrink-0">
                 <i class="fas fa-plus mr-1" aria-hidden="true"></i>เพิ่ม
             </button>
         </h3>
@@ -1246,7 +1247,7 @@ include dirname(__DIR__) . '/templates/header.php';
         <div id="work-history-rows">
             <?php if (!empty($workHistoryRecords)): ?>
                 <?php foreach ($workHistoryRecords as $i => $wh): ?>
-                <div class="wh-row border border-white/10 rounded-[20px] p-4 mb-3" data-index="<?php echo $i; ?>">
+                <div class="wh-row border border-white/10 rounded-[var(--tp-ios-card-radius)] p-4 mb-3" data-index="<?php echo $i; ?>">
                     <div class="flex justify-between items-start mb-3">
                         <span class="text-white/50 text-sm">ลำดับที่ <?php echo $i + 1; ?></span>
                         <button type="button" onclick="this.closest('.wh-row').remove()" class="text-red-400 hover:text-red-300 text-sm">
@@ -1302,7 +1303,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 <i class="fas fa-users text-pink-400 mr-2"></i>
                 ข้อมูลครอบครัว
             </span>
-            <button type="button" onclick="addFamilyRow()" class="min-h-[44px] px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white text-sm rounded-[20px] transition-colors touch-manipulation font-semibold shrink-0">
+            <button type="button" onclick="addFamilyRow()" class="min-h-[44px] px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-semibold shrink-0">
                 <i class="fas fa-plus mr-1" aria-hidden="true"></i>เพิ่ม
             </button>
         </h3>
@@ -1310,7 +1311,7 @@ include dirname(__DIR__) . '/templates/header.php';
         <div id="family-rows">
             <?php if (!empty($familyRecords)): ?>
                 <?php foreach ($familyRecords as $i => $fam): ?>
-                <div class="fam-row border border-white/10 rounded-[20px] p-4 mb-3" data-index="<?php echo $i; ?>">
+                <div class="fam-row border border-white/10 rounded-[var(--tp-ios-card-radius)] p-4 mb-3" data-index="<?php echo $i; ?>">
                     <div class="flex justify-between items-start mb-3">
                         <span class="text-white/50 text-sm">ลำดับที่ <?php echo $i + 1; ?></span>
                         <button type="button" onclick="this.closest('.fam-row').remove()" class="text-red-400 hover:text-red-300 text-sm">
@@ -1442,11 +1443,11 @@ include dirname(__DIR__) . '/templates/header.php';
     <?php endif; ?>
     
     <!-- Submit Buttons -->
-    <div class="native-card tp-native-card tp-native-data-card p-3 sm:p-4 min-w-0 sticky bottom-[calc(72px+env(safe-area-inset-bottom))] md:bottom-4 z-30 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 rounded-[20px]">
-        <a href="/hr/employees.php" class="w-full sm:w-auto min-h-[48px] px-6 py-3 inline-flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-[20px] transition-colors font-medium touch-manipulation">
+    <div class="native-card tp-native-card tp-native-data-card p-3 sm:p-4 min-w-0 sticky bottom-[calc(72px+env(safe-area-inset-bottom))] md:bottom-4 z-30 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 rounded-[var(--tp-ios-card-radius)]">
+        <a href="/hr/employees.php" class="w-full sm:w-auto min-h-[48px] px-6 py-3 inline-flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] transition-colors font-medium touch-manipulation">
             ยกเลิก
         </a>
-        <button type="submit" class="w-full sm:w-auto min-h-[56px] px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-[20px] transition-colors font-semibold touch-manipulation">
+        <button type="submit" class="w-full sm:w-auto min-h-[56px] px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors font-semibold touch-manipulation">
             <i class="fas fa-save mr-2" aria-hidden="true"></i>
             <?php echo $action === 'edit' ? 'บันทึกการแก้ไข' : 'เพิ่มพนักงาน'; ?>
         </button>
@@ -1477,7 +1478,7 @@ include dirname(__DIR__) . '/templates/header.php';
             </div>
         </div>
         
-        <button type="submit" class="w-full sm:w-auto min-h-[56px] px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-[20px] transition-colors font-semibold touch-manipulation">
+        <button type="submit" class="w-full sm:w-auto min-h-[56px] px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors font-semibold touch-manipulation">
             <i class="fas fa-key mr-2" aria-hidden="true"></i>เปลี่ยนรหัสผ่าน
         </button>
     </form>
@@ -1567,7 +1568,7 @@ function addEducationRow() {
     const container = document.getElementById('education-rows');
     const idx = eduIndex++;
     const html = `
-    <div class="education-row border border-white/10 rounded-[20px] p-4 mb-3">
+    <div class="education-row border border-white/10 rounded-[var(--tp-ios-card-radius)] p-4 mb-3">
         <div class="flex justify-between items-start mb-3">
             <span class="text-white/50 text-sm">ใหม่</span>
             <button type="button" onclick="this.closest('.education-row').remove()" class="text-red-400 hover:text-red-300 text-sm">
@@ -1619,7 +1620,7 @@ function addWorkHistoryRow() {
     if (emptyMsg) emptyMsg.remove();
     const container = document.getElementById('work-history-rows');
     const html = `
-    <div class="wh-row border border-white/10 rounded-[20px] p-4 mb-3">
+    <div class="wh-row border border-white/10 rounded-[var(--tp-ios-card-radius)] p-4 mb-3">
         <div class="flex justify-between items-start mb-3">
             <span class="text-white/50 text-sm">ใหม่</span>
             <button type="button" onclick="this.closest('.wh-row').remove()" class="text-red-400 hover:text-red-300 text-sm">
@@ -1667,7 +1668,7 @@ function addFamilyRow() {
     const container = document.getElementById('family-rows');
     const idx = famIndex++;
     const html = `
-    <div class="fam-row border border-white/10 rounded-[20px] p-4 mb-3">
+    <div class="fam-row border border-white/10 rounded-[var(--tp-ios-card-radius)] p-4 mb-3">
         <div class="flex justify-between items-start mb-3">
             <span class="text-white/50 text-sm">ใหม่</span>
             <button type="button" onclick="this.closest('.fam-row').remove()" class="text-red-400 hover:text-red-300 text-sm">
@@ -1720,5 +1721,7 @@ function addFamilyRow() {
 
 document.addEventListener('DOMContentLoaded', toggleProbation);
 </script>
+
+</div>
 
 <?php include dirname(__DIR__) . '/templates/footer.php'; ?>

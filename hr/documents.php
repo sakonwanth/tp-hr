@@ -92,44 +92,45 @@ $current_page = 'hr-documents';
 include dirname(__DIR__) . '/templates/header.php';
 ?>
 
-<div class="mb-6 min-w-0">
-    <nav class="text-sm text-white/60 mb-1" aria-label="Breadcrumb">
+<div class="tp-hr-admin-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<div class="mb-5 md:mb-8 min-w-0">
+    <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
         <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
         <span class="mx-2">/</span>
         <span class="text-white">จัดการคำขอเอกสาร</span>
     </nav>
     <div class="min-w-0">
-        <h1 class="text-2xl font-bold text-white tracking-tight">จัดการคำขอเอกสาร</h1>
-        <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">ติดตามสถานะคำขอ กรองตามเดือนและประเภทเอกสาร</p>
+        <h1 class="tp-ios-page-title">จัดการคำขอเอกสาร</h1>
+        <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">ติดตามสถานะคำขอ กรองตามเดือนและประเภทเอกสาร</p>
     </div>
 </div>
 
 <!-- Stats -->
 <div class="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-6 min-w-0 max-w-full">
     <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['status' => 'PENDING']))); ?>"
-       class="stat-card tp-native-summary-card rounded-[20px] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'PENDING' ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
+       class="stat-card tp-native-summary-card rounded-[var(--tp-ios-card-radius)] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'PENDING' ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
         <p class="text-slate-300 text-sm truncate">รอดำเนินการ</p>
         <p class="text-2xl font-bold text-amber-400 tabular-nums mt-1"><?php echo (int)($stats['pending'] ?? 0); ?></p>
     </a>
     <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['status' => 'PROCESSING']))); ?>"
-       class="stat-card tp-native-summary-card rounded-[20px] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'PROCESSING' ? 'ring-2 ring-sky-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
+       class="stat-card tp-native-summary-card rounded-[var(--tp-ios-card-radius)] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'PROCESSING' ? 'ring-2 ring-sky-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
         <p class="text-slate-300 text-sm truncate">กำลังจัดทำ</p>
         <p class="text-2xl font-bold text-sky-400 tabular-nums mt-1"><?php echo (int)($stats['processing'] ?? 0); ?></p>
     </a>
     <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['status' => 'READY']))); ?>"
-       class="stat-card tp-native-summary-card rounded-[20px] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'READY' ? 'ring-2 ring-emerald-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
+       class="stat-card tp-native-summary-card rounded-[var(--tp-ios-card-radius)] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'READY' ? 'ring-2 ring-emerald-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
         <p class="text-slate-300 text-sm truncate">จัดทำแล้ว</p>
         <p class="text-2xl font-bold text-emerald-400 tabular-nums mt-1"><?php echo (int)($stats['completed'] ?? 0); ?></p>
     </a>
     <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['status' => 'ALL']))); ?>"
-       class="stat-card tp-native-summary-card rounded-[20px] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'ALL' ? 'ring-2 ring-violet-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
+       class="stat-card tp-native-summary-card rounded-[var(--tp-ios-card-radius)] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'ALL' ? 'ring-2 ring-violet-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
         <p class="text-slate-300 text-sm truncate">ทั้งหมด</p>
         <p class="text-2xl font-bold text-violet-400 tabular-nums mt-1"><?php echo (int)($stats['total'] ?? 0); ?></p>
     </a>
 </div>
 
 <!-- Filters -->
-<div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 mb-6 min-w-0 overflow-hidden rounded-[20px]">
+<div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 mb-6 min-w-0 overflow-hidden rounded-[var(--tp-ios-card-radius)]">
     <h2 class="section-title mb-4 text-white text-lg">
         <i class="fas fa-filter text-violet-400 text-xl mr-2" aria-hidden="true"></i>
         กรองคำขอเอกสาร
@@ -152,7 +153,7 @@ include dirname(__DIR__) . '/templates/header.php';
             </select>
         </div>
         <div class="flex items-end">
-            <a href="documents.php" class="w-full min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white text-center rounded-[20px] transition-colors touch-manipulation inline-flex items-center justify-center gap-2 font-medium">
+            <a href="documents.php" class="w-full min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white text-center rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation inline-flex items-center justify-center gap-2 font-medium">
                 <i class="fas fa-redo" aria-hidden="true"></i>รีเซ็ต
             </a>
         </div>
@@ -160,9 +161,9 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <!-- Results -->
-<div class="native-card tp-native-card tp-native-data-card overflow-hidden min-w-0 rounded-[20px]">
+<div class="native-card tp-native-card tp-native-data-card overflow-hidden min-w-0 rounded-[var(--tp-ios-card-radius)]">
     <?php if (empty($requests)): ?>
-    <div class="tp-native-empty-state text-center py-12 px-4 rounded-[20px] border border-dashed border-white/15 max-w-none mx-4 my-4">
+    <div class="tp-native-empty-state text-center py-12 px-4 rounded-[var(--tp-ios-card-radius)] border border-dashed border-white/15 max-w-none mx-4 my-4">
         <i class="fas fa-file-alt text-slate-500 text-4xl mb-3 block" aria-hidden="true"></i>
         <p class="text-slate-400 text-sm">ไม่พบคำขอเอกสาร</p>
     </div>
@@ -199,13 +200,13 @@ include dirname(__DIR__) . '/templates/header.php';
         $chipCls = $statusColors[$st] ?? 'border border-white/15 bg-white/5 text-white/70';
         $chipLbl = $statusText[$st] ?? $st;
         ?>
-        <div class="rounded-[20px] bg-white/5 border border-white/10 p-4 space-y-3">
+        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4 space-y-3">
             <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
                     <p class="text-white/50 text-xs uppercase tracking-wide">รหัสคำขอ</p>
                     <p class="text-white font-mono text-sm"><?php echo htmlspecialchars($reqNo); ?></p>
                 </div>
-                <span class="shrink-0 px-2.5 py-1 rounded-[20px] text-xs font-semibold <?php echo $chipCls; ?>">
+                <span class="shrink-0 px-2.5 py-1 rounded-[var(--tp-ios-card-radius)] text-xs font-semibold <?php echo $chipCls; ?>">
                     <?php echo htmlspecialchars($chipLbl); ?>
                 </span>
             </div>
@@ -235,7 +236,7 @@ include dirname(__DIR__) . '/templates/header.php';
             tpHrCertificatePrintForm(
                 $reqId,
                 'flex w-full',
-                'flex min-h-[56px] w-full items-center justify-center rounded-[20px] bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold transition-colors touch-manipulation',
+                'flex min-h-[56px] w-full items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold transition-colors touch-manipulation',
                 '<i class="fas fa-print mr-2" aria-hidden="true"></i>ดู / พิมพ์เอกสาร',
                 true
             );
@@ -244,27 +245,27 @@ include dirname(__DIR__) . '/templates/header.php';
             <?php if ($st === 'PENDING'): ?>
             <div class="grid grid-cols-2 gap-2">
                 <button type="button" onclick="updateDocStatus(<?php echo $reqId; ?>, 'PROCESSING')"
-                        class="min-h-[48px] rounded-[20px] bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold touch-manipulation">
+                        class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold touch-manipulation">
                     <i class="fas fa-play mr-2" aria-hidden="true"></i>เริ่มจัดทำ
                 </button>
                 <button type="button" onclick="rejectDoc(<?php echo $reqId; ?>)"
-                        class="min-h-[48px] rounded-[20px] bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 text-sm font-semibold touch-manipulation">
+                        class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 text-sm font-semibold touch-manipulation">
                     <i class="fas fa-times mr-2" aria-hidden="true"></i>ปฏิเสธ
                 </button>
             </div>
             <?php elseif ($st === 'PROCESSING'): ?>
             <button type="button" onclick="completeDoc(<?php echo $reqId; ?>)"
-                    class="w-full min-h-[56px] rounded-[20px] bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold touch-manipulation">
+                    class="w-full min-h-[56px] rounded-[var(--tp-ios-card-radius)] bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold touch-manipulation">
                 <i class="fas fa-check mr-2" aria-hidden="true"></i>จัดทำเสร็จ
             </button>
             <?php elseif (in_array($st, ['COMPLETED', 'READY', 'DELIVERED'], true) && !empty($req['document_url'])): ?>
             <a href="<?php echo htmlspecialchars($req['document_url']); ?>" target="_blank" rel="noopener noreferrer"
-               class="flex min-h-[48px] items-center justify-center rounded-[20px] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
+               class="flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
                 <i class="fas fa-download mr-2" aria-hidden="true"></i>ดาวน์โหลดเอกสาร
             </a>
             <?php else: ?>
             <button type="button" onclick="viewDocDetail(<?php echo $reqId; ?>)"
-                    class="w-full min-h-[48px] rounded-[20px] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
+                    class="w-full min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
                 <i class="fas fa-eye mr-2" aria-hidden="true"></i>ดูรายละเอียด
             </button>
             <?php endif; ?>
@@ -311,7 +312,7 @@ include dirname(__DIR__) . '/templates/header.php';
                     </td>
                     <td class="px-4 py-3 text-center">
                         <?php $rs = (string)($req['status'] ?? ''); ?>
-                        <span class="inline-flex items-center px-3 py-1 rounded-[20px] text-xs <?php echo $statusColors[$rs] ?? 'border border-white/15 bg-white/5 text-white/70'; ?>">
+                        <span class="inline-flex items-center px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs <?php echo $statusColors[$rs] ?? 'border border-white/15 bg-white/5 text-white/70'; ?>">
                             <?php echo htmlspecialchars($statusText[$rs] ?? $rs); ?>
                         </span>
                     </td>
@@ -321,7 +322,7 @@ include dirname(__DIR__) . '/templates/header.php';
                         tpHrCertificatePrintForm(
                             (int)$req['id'],
                             'inline-flex items-center',
-                            'inline-flex min-h-[44px] min-w-[44px] items-center justify-center px-3 py-2 bg-violet-600 hover:bg-violet-700 text-white text-xs font-medium rounded-[20px] transition-colors touch-manipulation',
+                            'inline-flex min-h-[44px] min-w-[44px] items-center justify-center px-3 py-2 bg-violet-600 hover:bg-violet-700 text-white text-xs font-medium rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation',
                             '<i class="fas fa-print" aria-hidden="true"></i>',
                             true,
                             true,
@@ -331,25 +332,25 @@ include dirname(__DIR__) . '/templates/header.php';
                         ?>
                         <?php if ($req['status'] === 'PENDING'): ?>
                         <button type="button" onclick="updateDocStatus(<?php echo (int)$req['id']; ?>, 'PROCESSING')" 
-                                class="inline-flex min-h-[44px] items-center gap-1.5 px-3 py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold rounded-[20px] transition-colors touch-manipulation" title="เริ่มจัดทำ">
+                                class="inline-flex min-h-[44px] items-center gap-1.5 px-3 py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="เริ่มจัดทำ">
                             <i class="fas fa-play" aria-hidden="true"></i><span class="hidden xl:inline">เริ่ม</span>
                         </button>
                         <button type="button" onclick="rejectDoc(<?php echo (int)$req['id']; ?>)"
-                                class="inline-flex min-h-[44px] items-center gap-1.5 px-3 py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 text-xs font-medium rounded-[20px] transition-colors touch-manipulation" title="ปฏิเสธ">
+                                class="inline-flex min-h-[44px] items-center gap-1.5 px-3 py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 text-xs font-medium rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="ปฏิเสธ">
                             <i class="fas fa-times" aria-hidden="true"></i><span class="hidden xl:inline">ปฏิเสธ</span>
                         </button>
                         <?php elseif ($req['status'] === 'PROCESSING'): ?>
                         <button type="button" onclick="completeDoc(<?php echo (int)$req['id']; ?>)" 
-                                class="inline-flex min-h-[44px] items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-[20px] transition-colors touch-manipulation" title="จัดทำเสร็จ">
+                                class="inline-flex min-h-[44px] items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="จัดทำเสร็จ">
                             <i class="fas fa-check" aria-hidden="true"></i><span class="hidden xl:inline">เสร็จ</span>
                         </button>
                         <?php elseif (in_array($req['status'], ['COMPLETED', 'READY', 'DELIVERED'], true) && $req['document_url']): ?>
                         <a href="<?php echo htmlspecialchars($req['document_url']); ?>" target="_blank" rel="noopener noreferrer"
-                           class="inline-flex min-h-[44px] items-center gap-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs rounded-[20px] transition-colors touch-manipulation" title="ดาวน์โหลด">
+                           class="inline-flex min-h-[44px] items-center gap-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="ดาวน์โหลด">
                             <i class="fas fa-download" aria-hidden="true"></i><span class="hidden xl:inline">ดาวน์โหลด</span>
                         </a>
                         <?php else: ?>
-                        <button type="button" onclick="viewDocDetail(<?php echo (int)$req['id']; ?>)" class="inline-flex min-h-[44px] items-center gap-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs rounded-[20px] transition-colors touch-manipulation" title="ดูรายละเอียด">
+                        <button type="button" onclick="viewDocDetail(<?php echo (int)$req['id']; ?>)" class="inline-flex min-h-[44px] items-center gap-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="ดูรายละเอียด">
                             <i class="fas fa-eye" aria-hidden="true"></i><span class="hidden xl:inline">ดู</span>
                         </button>
                         <?php endif; ?>
@@ -371,21 +372,21 @@ include dirname(__DIR__) . '/templates/header.php';
         <div class="flex gap-2">
             <?php if ($page > 1): ?>
             <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($_GET, ['page' => $page - 1]))); ?>" 
-               class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center px-3 bg-white/10 hover:bg-white/20 text-white rounded-[20px] transition-colors touch-manipulation" aria-label="หน้าก่อน">
+               class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center px-3 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" aria-label="หน้าก่อน">
                 <i class="fas fa-chevron-left" aria-hidden="true"></i>
             </a>
             <?php endif; ?>
             
             <?php for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++): ?>
             <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($_GET, ['page' => $i]))); ?>" 
-               class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center px-3 <?php echo $i === $page ? 'bg-violet-600 text-white' : 'bg-white/10 hover:bg-white/20 text-white'; ?> rounded-[20px] transition-colors touch-manipulation">
+               class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center px-3 <?php echo $i === $page ? 'bg-violet-600 text-white' : 'bg-white/10 hover:bg-white/20 text-white'; ?> rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation">
                 <?php echo (int)$i; ?>
             </a>
             <?php endfor; ?>
             
             <?php if ($page < $totalPages): ?>
             <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($_GET, ['page' => $page + 1]))); ?>" 
-               class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center px-3 bg-white/10 hover:bg-white/20 text-white rounded-[20px] transition-colors touch-manipulation" aria-label="หน้าถัดไป">
+               class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center px-3 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" aria-label="หน้าถัดไป">
                 <i class="fas fa-chevron-right" aria-hidden="true"></i>
             </a>
             <?php endif; ?>
@@ -394,10 +395,11 @@ include dirname(__DIR__) . '/templates/header.php';
     <?php endif; ?>
     <?php endif; ?>
 </div>
+</div>
 
 <!-- Complete Modal -->
 <div id="complete-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="complete-modal-title">
-    <div class="native-card tp-native-card w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden rounded-[20px] pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
+    <div class="native-card tp-native-card w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden rounded-[var(--tp-ios-card-radius)] pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <form id="complete-form" class="p-6" enctype="multipart/form-data">
             <h3 id="complete-modal-title" class="text-xl font-bold text-white mb-4">จัดทำเอกสารเสร็จสิ้น</h3>
             <input type="hidden" name="request_id" id="complete-request-id">
@@ -414,8 +416,8 @@ include dirname(__DIR__) . '/templates/header.php';
             </div>
             
             <div class="flex flex-col sm:flex-row gap-4">
-                <button type="button" onclick="closeCompleteModal()" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-[20px] touch-manipulation font-medium">ยกเลิก</button>
-                <button type="submit" class="flex-1 min-h-[56px] py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[20px] touch-manipulation font-semibold">บันทึก</button>
+                <button type="button" onclick="closeCompleteModal()" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium">ยกเลิก</button>
+                <button type="submit" class="flex-1 min-h-[56px] py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold">บันทึก</button>
             </div>
         </form>
     </div>
@@ -423,7 +425,7 @@ include dirname(__DIR__) . '/templates/header.php';
 
 <!-- Reject Modal -->
 <div id="reject-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="reject-modal-title">
-    <div class="native-card tp-native-card w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden rounded-[20px] pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
+    <div class="native-card tp-native-card w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden rounded-[var(--tp-ios-card-radius)] pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <form id="reject-form" class="p-6">
             <h3 id="reject-modal-title" class="text-xl font-bold text-white mb-4">ปฏิเสธคำขอเอกสาร</h3>
             <input type="hidden" name="request_id" id="reject-request-id">
@@ -432,8 +434,8 @@ include dirname(__DIR__) . '/templates/header.php';
                 <textarea name="reason" id="reject-reason" required rows="3" class="input-field tp-native-textarea w-full"></textarea>
             </div>
             <div class="flex flex-col sm:flex-row gap-4">
-                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-[20px] touch-manipulation font-medium">ยกเลิก</button>
-                <button type="submit" class="flex-1 min-h-[56px] py-2 bg-red-600 hover:bg-red-700 text-white rounded-[20px] touch-manipulation font-semibold">ปฏิเสธ</button>
+                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium">ยกเลิก</button>
+                <button type="submit" class="flex-1 min-h-[56px] py-2 bg-red-600 hover:bg-red-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold">ปฏิเสธ</button>
             </div>
         </form>
     </div>
@@ -441,10 +443,10 @@ include dirname(__DIR__) . '/templates/header.php';
 
 <!-- รายละเอียด (placeholder — แทน alert) -->
 <div id="detail-stub-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="detail-stub-title">
-    <div class="native-card tp-native-card w-full max-w-md my-auto rounded-[20px] p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
+    <div class="native-card tp-native-card w-full max-w-md my-auto rounded-[var(--tp-ios-card-radius)] p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
         <h3 id="detail-stub-title" class="text-xl font-bold text-white mb-2">รายละเอียดคำขอ</h3>
         <p class="text-white/65 text-sm mb-6">คำขอเอกสาร <span id="detail-stub-id" class="font-mono text-white"></span> — ยังไม่มีหน้ารายละเอียดแยกในรุ่นนี้ ใช้ปุ่มดู/พิมพ์หรือข้อมูลในตารางแทน</p>
-        <button type="button" onclick="closeDetailStubModal()" class="w-full min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[20px] touch-manipulation font-medium">ปิด</button>
+        <button type="button" onclick="closeDetailStubModal()" class="w-full min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium">ปิด</button>
     </div>
 </div>
 

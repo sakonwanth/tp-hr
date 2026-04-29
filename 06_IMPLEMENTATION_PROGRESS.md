@@ -11,6 +11,6 @@ Statuses: **`NOT_STARTED` · `IN_PROGRESS` · `REFACTORED` · `COMPLETE` · `REG
 | `checkin.php` | Wave 2 | ESS clock + CTA dominant | **`v=13`** tokens: `.tp-ios-page-title`, hero clock, **`max-w` 960**, section gaps **20/32**, history row **54px**, `aria-live` clock | **REFACTORED** |
 | `leave.php` + **`modules/employee/leaves/request_form.php`** | Wave 2 | Flat title + `rounded-[20px]` mix | **`tp-leave-stack`** 960px · **`.tp-ios-*` titles** · grids **gap-5/8** · **token radii** · form **p-5 sm:p-7** · cancel/submit radii | **REFACTORED** |
 | **`leave_history.php`** | Wave 2 | Dense header · `rounded-[20px]` mix | **`tp-leave-history-stack`** · **`.tp-ios-page-title` / caption** · summary/filter/results gaps · **token radii** · table + mobile cards + pagination + modal close button aligned | **REFACTORED** |
-| `hr/*.php` admin shells | Wave 3 | — | NOT_STARTED |
+| **`hr/*.php`** (13 files) | Wave 3 | Mixed titles · `rounded-[20px]` | **`tp-hr-admin-stack`** 960px · **`.tp-ios-*`** page headers · **token radii** · stack closes before **modals** / **`footer`** (IDs & scripts preserved) | **REFACTORED** |
 
-**Regression:** PHPUnit / API tests untouched. Manual viewport QA runs after Wave 2 (**`07`**).
+**Regression:** PHPUnit / API tests untouched. Manual viewport QA: Wave 2 routes + **Wave 3 `hr/*`** (**`07`**).

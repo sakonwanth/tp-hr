@@ -146,41 +146,42 @@ $current_page = 'hr-attendance';
 include dirname(__DIR__) . '/templates/header.php';
 ?>
 
-<div class="mb-6 min-w-0">
-    <nav class="text-sm text-white/60 mb-1" aria-label="Breadcrumb">
+<div class="tp-hr-admin-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<div class="mb-5 md:mb-8 min-w-0">
+    <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
         <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
         <span class="mx-2">/</span>
         <span class="text-white">จัดการเวลาทำงาน</span>
     </nav>
     <div class="min-w-0">
-        <h1 class="text-2xl font-bold text-white tracking-tight">จัดการเวลาทำงาน</h1>
-        <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">สรุปการเข้างานตามวันที่ กรองแผนกและสถานะ</p>
+        <h1 class="tp-ios-page-title">จัดการเวลาทำงาน</h1>
+        <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">สรุปการเข้างานตามวันที่ กรองแผนกและสถานะ</p>
     </div>
 </div>
 
 <!-- Stats -->
 <div class="grid grid-cols-2 md:grid-cols-5 gap-2 sm:gap-4 mb-6 min-w-0 max-w-full">
     <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['status' => '']))); ?>"
-       class="stat-card tp-native-summary-card rounded-[20px] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo !$status ? 'ring-2 ring-violet-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
+       class="stat-card tp-native-summary-card rounded-[var(--tp-ios-card-radius)] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo !$status ? 'ring-2 ring-violet-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
         <p class="text-slate-300 text-sm truncate">พนักงานทั้งหมด</p>
         <p class="text-2xl font-bold text-violet-400 tabular-nums mt-1"><?php echo (int)$stats['total_employees']; ?></p>
     </a>
     <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['status' => 'PRESENT']))); ?>"
-       class="stat-card tp-native-summary-card rounded-[20px] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'PRESENT' ? 'ring-2 ring-emerald-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
+       class="stat-card tp-native-summary-card rounded-[var(--tp-ios-card-radius)] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'PRESENT' ? 'ring-2 ring-emerald-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
         <p class="text-slate-300 text-sm truncate">เข้างาน</p>
         <p class="text-2xl font-bold text-emerald-400 tabular-nums mt-1"><?php echo (int)($stats['checked_in'] ?? 0); ?></p>
     </a>
     <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['status' => 'ABSENT']))); ?>"
-       class="stat-card tp-native-summary-card rounded-[20px] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'ABSENT' ? 'ring-2 ring-red-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
+       class="stat-card tp-native-summary-card rounded-[var(--tp-ios-card-radius)] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'ABSENT' ? 'ring-2 ring-red-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
         <p class="text-slate-300 text-sm truncate">ขาดงาน</p>
         <p class="text-2xl font-bold text-red-400 tabular-nums mt-1"><?php echo (int)$absentCount; ?></p>
     </a>
     <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['status' => 'LATE']))); ?>"
-       class="stat-card tp-native-summary-card rounded-[20px] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'LATE' ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
+       class="stat-card tp-native-summary-card rounded-[var(--tp-ios-card-radius)] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'LATE' ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
         <p class="text-slate-300 text-sm truncate">สาย</p>
         <p class="text-2xl font-bold text-amber-400 tabular-nums mt-1"><?php echo (int)($stats['late_count'] ?? 0); ?></p>
     </a>
-    <div class="stat-card tp-native-summary-card rounded-[20px] p-4 min-w-0 overflow-hidden md:col-span-1 col-span-2">
+    <div class="stat-card tp-native-summary-card rounded-[var(--tp-ios-card-radius)] p-4 min-w-0 overflow-hidden md:col-span-1 col-span-2">
         <p class="text-slate-300 text-sm truncate">เวลาเข้างานเฉลี่ย</p>
         <p class="text-2xl font-bold text-sky-300 tabular-nums mt-1"><?php echo $stats['avg_check_in'] ? substr($stats['avg_check_in'], 0, 5) : '--:--'; ?></p>
     </div>
@@ -212,16 +213,16 @@ include dirname(__DIR__) . '/templates/header.php';
             </select>
         </div>
         <div class="flex flex-wrap items-end gap-2 lg:col-span-4">
-            <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['date' => date('Y-m-d')]))); ?>" class="flex-1 min-h-[48px] min-w-[7rem] py-2.5 bg-white/10 hover:bg-white/20 text-white text-center rounded-[20px] transition-colors touch-manipulation inline-flex items-center justify-center font-medium">วันนี้</a>
-            <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['date' => date('Y-m-d', strtotime('-1 day', strtotime($date)))]))); ?>" class="min-h-[48px] min-w-[48px] px-3 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[20px] inline-flex items-center justify-center touch-manipulation" aria-label="วันก่อนหน้า">
+            <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['date' => date('Y-m-d')]))); ?>" class="flex-1 min-h-[48px] min-w-[7rem] py-2.5 bg-white/10 hover:bg-white/20 text-white text-center rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation inline-flex items-center justify-center font-medium">วันนี้</a>
+            <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['date' => date('Y-m-d', strtotime('-1 day', strtotime($date)))]))); ?>" class="min-h-[48px] min-w-[48px] px-3 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] inline-flex items-center justify-center touch-manipulation" aria-label="วันก่อนหน้า">
                 <i class="fas fa-chevron-left" aria-hidden="true"></i>
             </a>
-            <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['date' => date('Y-m-d', strtotime('+1 day', strtotime($date)))]))); ?>" class="min-h-[48px] min-w-[48px] px-3 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[20px] inline-flex items-center justify-center touch-manipulation" aria-label="วันถัดไป">
+            <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['date' => date('Y-m-d', strtotime('+1 day', strtotime($date)))]))); ?>" class="min-h-[48px] min-w-[48px] px-3 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] inline-flex items-center justify-center touch-manipulation" aria-label="วันถัดไป">
                 <i class="fas fa-chevron-right" aria-hidden="true"></i>
             </a>
         </div>
         <div class="flex items-end lg:col-span-2">
-            <a href="attendance.php?action=report&amp;month=<?php echo htmlspecialchars(date('Y-m', strtotime($date))); ?>" class="w-full min-h-[56px] py-2.5 bg-violet-600 hover:bg-violet-700 text-white text-center rounded-[20px] transition-colors touch-manipulation inline-flex items-center justify-center font-semibold gap-2">
+            <a href="attendance.php?action=report&amp;month=<?php echo htmlspecialchars(date('Y-m', strtotime($date))); ?>" class="w-full min-h-[56px] py-2.5 bg-violet-600 hover:bg-violet-700 text-white text-center rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation inline-flex items-center justify-center font-semibold gap-2">
                 <i class="fas fa-file-export" aria-hidden="true"></i>รายงาน
             </a>
         </div>
@@ -240,7 +241,7 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <?php if ($holidayInfo || $isWeekend): ?>
-<div class="rounded-[20px] p-4 mb-4 <?php echo $holidayInfo ? 'bg-orange-500/20 border border-orange-500/30' : 'bg-blue-500/20 border border-blue-500/30'; ?>">
+<div class="rounded-[var(--tp-ios-card-radius)] p-4 mb-4 <?php echo $holidayInfo ? 'bg-orange-500/20 border border-orange-500/30' : 'bg-blue-500/20 border border-blue-500/30'; ?>">
     <div class="flex items-center gap-3">
         <i class="fas <?php echo $holidayInfo ? 'fa-calendar-check text-orange-400' : 'fa-calendar-day text-blue-400'; ?> text-xl" aria-hidden="true"></i>
         <div>
@@ -273,9 +274,9 @@ include dirname(__DIR__) . '/templates/header.php';
 <?php endif; ?>
 
 <!-- List -->
-<div class="native-card tp-native-card tp-native-data-card overflow-hidden min-w-0 rounded-[20px]">
+<div class="native-card tp-native-card tp-native-data-card overflow-hidden min-w-0 rounded-[var(--tp-ios-card-radius)]">
     <?php if (empty($records)): ?>
-    <div class="tp-native-empty-state text-center py-12 px-4 rounded-[20px] border border-dashed border-white/15 max-w-none mx-4 my-4">
+    <div class="tp-native-empty-state text-center py-12 px-4 rounded-[var(--tp-ios-card-radius)] border border-dashed border-white/15 max-w-none mx-4 my-4">
         <i class="fas fa-users text-slate-500 text-4xl mb-3 block" aria-hidden="true"></i>
         <p class="text-slate-400 text-sm">ไม่พบข้อมูล</p>
     </div>
@@ -325,7 +326,7 @@ include dirname(__DIR__) . '/templates/header.php';
         $workHours = $rec['work_minutes'] ? number_format(((float)$rec['work_minutes']) / 60, 1) : '-';
         $otHours = ($rec['ot_minutes'] ?? 0) > 0 ? (int)floor(((int)$rec['ot_minutes']) / 60) : 0;
         ?>
-        <div class="rounded-[20px] bg-white/5 border border-white/10 p-4">
+        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4">
             <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
                     <a href="/hr/employee_attendance.php?id=<?php echo (int)$rec['id']; ?>"
@@ -336,21 +337,21 @@ include dirname(__DIR__) . '/templates/header.php';
                         <?php echo htmlspecialchars($empCode); ?> · <?php echo htmlspecialchars($dept); ?>
                     </div>
                 </div>
-                <span class="shrink-0 inline-flex items-center px-2.5 py-1 rounded-[20px] text-xs font-semibold <?php echo $statusCls; ?>">
+                <span class="shrink-0 inline-flex items-center px-2.5 py-1 rounded-[var(--tp-ios-card-radius)] text-xs font-semibold <?php echo $statusCls; ?>">
                     <?php echo htmlspecialchars($statusLabel); ?>
                 </span>
             </div>
 
             <div class="grid grid-cols-3 gap-2 mt-4">
-                <div class="rounded-[20px] bg-black/20 border border-white/10 px-3 py-2">
+                <div class="rounded-[var(--tp-ios-card-radius)] bg-black/20 border border-white/10 px-3 py-2">
                     <div class="text-[11px] text-white/50">เข้า</div>
                     <div class="text-white font-semibold"><?php echo htmlspecialchars($checkInHHMM); ?></div>
                 </div>
-                <div class="rounded-[20px] bg-black/20 border border-white/10 px-3 py-2">
+                <div class="rounded-[var(--tp-ios-card-radius)] bg-black/20 border border-white/10 px-3 py-2">
                     <div class="text-[11px] text-white/50">ออก</div>
                     <div class="text-white font-semibold"><?php echo htmlspecialchars($checkOutHHMM); ?></div>
                 </div>
-                <div class="rounded-[20px] bg-black/20 border border-white/10 px-3 py-2">
+                <div class="rounded-[var(--tp-ios-card-radius)] bg-black/20 border border-white/10 px-3 py-2">
                     <div class="text-[11px] text-white/50">ชั่วโมง</div>
                     <div class="text-white font-semibold">
                         <?php echo htmlspecialchars($workHours); ?>
@@ -370,25 +371,25 @@ include dirname(__DIR__) . '/templates/header.php';
             <div class="grid grid-cols-2 gap-2 mt-4">
                 <button type="button"
                         onclick="editAttendance(<?php echo (int)$rec['id']; ?>, '<?php echo htmlspecialchars($date, ENT_QUOTES); ?>', <?php echo $rec['attendance_id'] ?? 'null'; ?>, '<?php echo $rec['check_in_time'] ? date('H:i', strtotime($rec['check_in_time'])) : ''; ?>', '<?php echo $rec['check_out_time'] ? date('H:i', strtotime($rec['check_out_time'])) : ''; ?>')"
-                        class="min-h-[48px] rounded-[20px] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
+                        class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
                     <i class="fas fa-edit mr-2" aria-hidden="true"></i>แก้ไขเวลา
                 </button>
                 <button type="button"
                         onclick="viewHistory(<?php echo (int)$rec['id']; ?>, '<?php echo htmlspecialchars($date, ENT_QUOTES); ?>', '<?php echo htmlspecialchars(($rec['first_name_th'] ?? '') . ' ' . ($rec['last_name_th'] ?? ''), ENT_QUOTES); ?>')"
-                        class="min-h-[48px] rounded-[20px] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
+                        class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
                     <i class="fas fa-history mr-2" aria-hidden="true"></i>ประวัติ
                 </button>
                 <?php if ($hasAttendance && $rec['check_in_latitude']): ?>
                 <button type="button"
                         onclick="viewLocation(<?php echo $rec['check_in_latitude']; ?>, <?php echo $rec['check_in_longitude']; ?>)"
-                        class="min-h-[48px] rounded-[20px] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
+                        class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
                     <i class="fas fa-map-marker-alt mr-2" aria-hidden="true"></i>ตำแหน่ง
                 </button>
                 <?php endif; ?>
                 <?php if ($hasAttendance): ?>
                 <button type="button"
                         onclick="deleteAttendance(<?php echo (int)$rec['id']; ?>, '<?php echo htmlspecialchars($date, ENT_QUOTES); ?>', '<?php echo htmlspecialchars(($rec['first_name_th'] ?? '') . ' ' . ($rec['last_name_th'] ?? ''), ENT_QUOTES); ?>')"
-                        class="min-h-[48px] rounded-[20px] bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-200 text-sm font-semibold touch-manipulation">
+                        class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-200 text-sm font-semibold touch-manipulation">
                     <i class="fas fa-trash mr-2" aria-hidden="true"></i>ลบข้อมูล
                 </button>
                 <?php endif; ?>
@@ -463,17 +464,17 @@ include dirname(__DIR__) . '/templates/header.php';
                     </td>
                     <td class="px-4 py-3 text-center">
                         <?php if (!$hasAttendance && $holidayInfo): ?>
-                        <span class="px-3 py-1 rounded-[20px] text-xs border border-orange-500/25 bg-orange-500/15 text-orange-300">วันหยุด</span>
+                        <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs border border-orange-500/25 bg-orange-500/15 text-orange-300">วันหยุด</span>
                         <?php elseif (!$hasAttendance && $onLeave): ?>
-                        <span class="px-3 py-1 rounded-[20px] text-xs border border-blue-500/25 bg-blue-500/15 text-blue-300">ลา</span>
+                        <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs border border-blue-500/25 bg-blue-500/15 text-blue-300">ลา</span>
                         <?php elseif (!$hasAttendance && $isUserDayOff): ?>
-                        <span class="px-3 py-1 rounded-[20px] text-xs border border-sky-500/25 bg-sky-500/15 text-sky-300">วันหยุดประจำสัปดาห์</span>
+                        <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs border border-sky-500/25 bg-sky-500/15 text-sky-300">วันหยุดประจำสัปดาห์</span>
                         <?php elseif (!$hasAttendance): ?>
-                        <span class="px-3 py-1 rounded-[20px] text-xs border border-red-500/25 bg-red-500/15 text-red-300">ขาดงาน</span>
+                        <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs border border-red-500/25 bg-red-500/15 text-red-300">ขาดงาน</span>
                         <?php elseif ($isLate): ?>
-                        <span class="px-3 py-1 rounded-[20px] text-xs border border-amber-500/25 bg-amber-500/15 text-amber-300">มาสาย</span>
+                        <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs border border-amber-500/25 bg-amber-500/15 text-amber-300">มาสาย</span>
                         <?php else: ?>
-                        <span class="px-3 py-1 rounded-[20px] text-xs border border-emerald-500/25 bg-emerald-500/15 text-emerald-300">ปกติ</span>
+                        <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs border border-emerald-500/25 bg-emerald-500/15 text-emerald-300">ปกติ</span>
                         <?php endif; ?>
                     </td>
                     <td class="px-4 py-3 text-center text-white/60 text-sm">
@@ -521,12 +522,12 @@ include dirname(__DIR__) . '/templates/header.php';
         </p>
         <div class="flex gap-2">
             <?php if ($page > 1): ?>
-            <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($_GET, ['page' => $page - 1]))); ?>" class="min-h-[48px] min-w-[48px] inline-flex items-center justify-center px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-[20px] touch-manipulation" aria-label="หน้าก่อนหน้า">
+            <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($_GET, ['page' => $page - 1]))); ?>" class="min-h-[48px] min-w-[48px] inline-flex items-center justify-center px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation" aria-label="หน้าก่อนหน้า">
                 <i class="fas fa-chevron-left" aria-hidden="true"></i>
             </a>
             <?php endif; ?>
             <?php if ($page < $totalPages): ?>
-            <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($_GET, ['page' => $page + 1]))); ?>" class="min-h-[48px] min-w-[48px] inline-flex items-center justify-center px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-[20px] touch-manipulation" aria-label="หน้าถัดไป">
+            <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($_GET, ['page' => $page + 1]))); ?>" class="min-h-[48px] min-w-[48px] inline-flex items-center justify-center px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation" aria-label="หน้าถัดไป">
                 <i class="fas fa-chevron-right" aria-hidden="true"></i>
             </a>
             <?php endif; ?>
@@ -535,10 +536,11 @@ include dirname(__DIR__) . '/templates/header.php';
     <?php endif; ?>
     <?php endif; ?>
 </div>
+</div>
 
 <!-- Edit Modal -->
 <div id="edit-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
-    <div class="native-card tp-native-card w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] rounded-[20px]">
+    <div class="native-card tp-native-card w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] rounded-[var(--tp-ios-card-radius)]">
         <form id="edit-form" class="p-6">
             <h3 id="edit-modal-title" class="text-xl font-bold text-white mb-4">แก้ไขเวลาทำงาน</h3>
             <input type="hidden" name="user_id" id="edit-user-id">
@@ -567,8 +569,8 @@ include dirname(__DIR__) . '/templates/header.php';
             </div>
             
             <div class="flex flex-col sm:flex-row gap-4">
-                <button type="button" onclick="closeEditModal()" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-[20px] touch-manipulation">ยกเลิก</button>
-                <button type="submit" class="flex-1 min-h-[56px] py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-[20px] touch-manipulation font-semibold">บันทึก</button>
+                <button type="button" onclick="closeEditModal()" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation">ยกเลิก</button>
+                <button type="submit" class="flex-1 min-h-[56px] py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold">บันทึก</button>
             </div>
         </form>
     </div>
@@ -576,15 +578,15 @@ include dirname(__DIR__) . '/templates/header.php';
 
 <!-- Location Modal -->
 <div id="location-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="location-modal-title">
-    <div class="native-card tp-native-card w-full max-w-lg my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] rounded-[20px]">
+    <div class="native-card tp-native-card w-full max-w-lg my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] rounded-[var(--tp-ios-card-radius)]">
         <div class="p-4">
             <div class="flex items-center justify-between mb-4">
                 <h3 id="location-modal-title" class="text-lg font-bold text-white">ตำแหน่ง Check-in</h3>
-                <button type="button" onclick="closeLocationModal()" class="p-2 min-h-[48px] min-w-[48px] text-white/60 hover:text-white hover:bg-white/10 rounded-[20px]" aria-label="ปิด">
+                <button type="button" onclick="closeLocationModal()" class="p-2 min-h-[48px] min-w-[48px] text-white/60 hover:text-white hover:bg-white/10 rounded-[var(--tp-ios-card-radius)]" aria-label="ปิด">
                     <i class="fas fa-times" aria-hidden="true"></i>
                 </button>
             </div>
-            <div id="map" class="w-full h-80 rounded-[20px] bg-white/10"></div>
+            <div id="map" class="w-full h-80 rounded-[var(--tp-ios-card-radius)] bg-white/10"></div>
             <div class="mt-2 text-center">
                 <a id="map-link" href="#" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm">
                     <i class="fas fa-external-link-alt mr-1"></i>เปิดใน Google Maps
@@ -596,7 +598,7 @@ include dirname(__DIR__) . '/templates/header.php';
 
 <!-- Delete Confirmation Modal -->
 <div id="delete-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
-    <div class="native-card tp-native-card w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] rounded-[20px]">
+    <div class="native-card tp-native-card w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] rounded-[var(--tp-ios-card-radius)]">
         <form id="delete-form" class="p-6">
             <div class="flex items-center gap-3 mb-4">
                 <div class="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center text-red-400">
@@ -607,7 +609,7 @@ include dirname(__DIR__) . '/templates/header.php';
                     <p id="delete-subtitle" class="text-white/60 text-sm"></p>
                 </div>
             </div>
-            <div class="bg-red-500/10 border border-red-500/30 rounded-[20px] p-3 mb-4 text-red-200 text-sm">
+            <div class="bg-red-500/10 border border-red-500/30 rounded-[var(--tp-ios-card-radius)] p-3 mb-4 text-red-200 text-sm">
                 <i class="fas fa-info-circle mr-1"></i> การลบจะลบข้อมูลทั้งหมดของวันนี้ (เวลาเข้า/ออก, รูป, พิกัด, ชั่วโมงทำงาน) และระบบจะคำนวณสถานะใหม่ตามบริบท (วันหยุด/ลา/ขาดงาน) — ไม่สามารถกู้คืนได้
             </div>
             <input type="hidden" name="user_id" id="delete-user-id">
@@ -617,8 +619,8 @@ include dirname(__DIR__) . '/templates/header.php';
                 <textarea name="note" id="delete-note" rows="3" class="input-field tp-native-textarea" placeholder="ระบุเหตุผลการลบข้อมูล (จำเป็น)" required></textarea>
             </div>
             <div class="flex flex-col sm:flex-row gap-3">
-                <button type="button" onclick="closeDeleteModal()" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-[20px] touch-manipulation">ยกเลิก</button>
-                <button type="submit" class="flex-1 min-h-[56px] py-2 bg-red-600 hover:bg-red-700 text-white rounded-[20px] touch-manipulation font-semibold"><i class="fas fa-trash mr-1" aria-hidden="true"></i> ยืนยันการลบ</button>
+                <button type="button" onclick="closeDeleteModal()" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation">ยกเลิก</button>
+                <button type="submit" class="flex-1 min-h-[56px] py-2 bg-red-600 hover:bg-red-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold"><i class="fas fa-trash mr-1" aria-hidden="true"></i> ยืนยันการลบ</button>
             </div>
         </form>
     </div>
@@ -626,14 +628,14 @@ include dirname(__DIR__) . '/templates/header.php';
 
 <!-- History Modal -->
 <div id="history-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="history-modal-title">
-    <div class="native-card tp-native-card w-full max-w-3xl my-auto max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden rounded-[20px]">
+    <div class="native-card tp-native-card w-full max-w-3xl my-auto max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden rounded-[var(--tp-ios-card-radius)]">
         <div class="p-6 border-b border-white/10 flex items-center justify-between">
             <div>
                 <h3 id="history-modal-title" class="text-xl font-bold text-white">ประวัติการแก้ไขเวลาทำงาน</h3>
                 <p id="history-subtitle" class="text-white/60 text-sm mt-1"></p>
                 <p class="text-white/40 text-xs mt-1"><i class="fas fa-info-circle"></i> ประวัติทั้งหมดของพนักงานคนนี้ในวันนี้ เรียงจากล่าสุด — ชื่อที่แสดงคือผู้ดำเนินการแก้ไข</p>
             </div>
-            <button type="button" onclick="closeHistoryModal()" class="p-2 min-h-[48px] min-w-[48px] text-white/60 hover:text-white hover:bg-white/10 rounded-[20px]" aria-label="ปิด">
+            <button type="button" onclick="closeHistoryModal()" class="p-2 min-h-[48px] min-w-[48px] text-white/60 hover:text-white hover:bg-white/10 rounded-[var(--tp-ios-card-radius)]" aria-label="ปิด">
                 <i class="fas fa-times" aria-hidden="true"></i>
             </button>
         </div>
