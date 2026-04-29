@@ -24,6 +24,12 @@ Priorities derive from **`01_FULL_UI_INVENTORY.md`**. Tasks are **non-breaking U
 |----|--------|--------|
 | T3-1 | **`hr/index.php`**, **`hr/employees.php`**, **`hr/leaves.php`**, **`hr/attendance.php`**, **`hr/documents.php`**, **`hr/dayoff_approvals.php`**, **`hr/settings.php`**, **`hr/reports.php`**, **`hr/api_keys.php`**, **`hr/document_templates.php`**, **`hr/employee_form.php`**, **`hr/employee_view.php`**, **`hr/employee_attendance.php`** | ✅ **`tp-hr-admin-stack`** · **`max-w-[min(960px,100%)]`** · **`.tp-ios-page-title` / `tp-ios-caption-muted`** headers · **`rounded-[var(--tp-ios-card-radius)]`** sweep · modals **`#id`** / JS **unchanged** |
 
-*(Wave 4 optional: denser table→card patterns on specific admin tables — only if product asks.)*
+## Wave 4 — Remaining ESS templates
+
+| ID | Scope | Notes |
+|----|--------|--------|
+| T4-1 | **`dayoff_schedule.php`**, **`attendance_history.php`**, **`certificate.php`**, **`payslip.php`**, **`profile.php`** + **`checkin.php`** radius alignment | ✅ **`tp-*-stack`** / **`.tp-ios-*`** where listed · **`checkin.php`** token radii only |
+
+*(Optional later: denser table→card patterns on specific admin tables — only if product asks.)*
 
 **Risk:** **Low** for CSS-only/visual; **Medium** where JS listens to DOM selectors — grep `getElementById` before renaming nodes.

@@ -43,9 +43,10 @@ $pendingCount = $stmtPending->fetchColumn();
 include 'templates/header.php';
 ?>
 
-<div class="mb-4 md:mb-6 min-w-0">
-    <h1 class="text-2xl font-bold text-white tracking-tight">ขอหนังสือรับรอง</h1>
-    <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">ขอเอกสารรับรองการทำงาน หนังสือรับรองเงินเดือน และอื่นๆ ติดตามสถานะและดาวน์โหลดได้จากประวัติด้านล่าง</p>
+<div class="tp-certificate-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<div class="mb-5 md:mb-8 min-w-0">
+    <h1 class="tp-ios-page-title">ขอหนังสือรับรอง</h1>
+    <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">ขอเอกสารรับรองการทำงาน หนังสือรับรองเงินเดือน และอื่นๆ ติดตามสถานะและดาวน์โหลดได้จากประวัติด้านล่าง</p>
 </div>
 
 <?php if ($action === 'new' || $action === 'request'): ?>
@@ -84,15 +85,15 @@ include 'templates/header.php';
             <div class="tp-native-form-group">
                 <label class="block text-white/80 text-sm font-medium mb-2">ภาษา</label>
                 <div class="flex flex-col sm:flex-row sm:flex-wrap gap-3">
-                    <label class="flex items-center min-h-[48px] cursor-pointer touch-manipulation rounded-[20px] border border-white/10 bg-white/5 px-4 has-[:checked]:border-violet-500/50 has-[:checked]:bg-violet-500/10">
+                    <label class="flex items-center min-h-[48px] cursor-pointer touch-manipulation rounded-[var(--tp-ios-card-radius)] border border-white/10 bg-white/5 px-4 has-[:checked]:border-violet-500/50 has-[:checked]:bg-violet-500/10">
                         <input type="radio" name="language" value="TH" checked class="mr-2 accent-violet-500">
                         <span class="text-white">ภาษาไทย</span>
                     </label>
-                    <label class="flex items-center min-h-[48px] cursor-pointer touch-manipulation rounded-[20px] border border-white/10 bg-white/5 px-4 has-[:checked]:border-violet-500/50 has-[:checked]:bg-violet-500/10">
+                    <label class="flex items-center min-h-[48px] cursor-pointer touch-manipulation rounded-[var(--tp-ios-card-radius)] border border-white/10 bg-white/5 px-4 has-[:checked]:border-violet-500/50 has-[:checked]:bg-violet-500/10">
                         <input type="radio" name="language" value="EN" class="mr-2 accent-violet-500">
                         <span class="text-white">ภาษาอังกฤษ</span>
                     </label>
-                    <label class="flex items-center min-h-[48px] cursor-pointer touch-manipulation rounded-[20px] border border-white/10 bg-white/5 px-4 has-[:checked]:border-violet-500/50 has-[:checked]:bg-violet-500/10">
+                    <label class="flex items-center min-h-[48px] cursor-pointer touch-manipulation rounded-[var(--tp-ios-card-radius)] border border-white/10 bg-white/5 px-4 has-[:checked]:border-violet-500/50 has-[:checked]:bg-violet-500/10">
                         <input type="radio" name="language" value="BOTH" class="mr-2 accent-violet-500">
                         <span class="text-white">ทั้งสองภาษา</span>
                     </label>
@@ -132,7 +133,7 @@ include 'templates/header.php';
             </div>
             
             <!-- Rush Request -->
-            <div class="tp-native-form-group p-4 rounded-[20px] bg-amber-500/10 border border-amber-400/35">
+            <div class="tp-native-form-group p-4 rounded-[var(--tp-ios-card-radius)] bg-amber-500/10 border border-amber-400/35">
                 <label class="flex items-start gap-3 min-h-[48px] cursor-pointer touch-manipulation">
                     <input type="checkbox" name="is_urgent" value="1" class="mt-1 accent-yellow-500 shrink-0">
                     <div>
@@ -144,10 +145,10 @@ include 'templates/header.php';
             
             <!-- Buttons -->
             <div class="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 pt-2">
-                <a href="certificate.php" class="touch-manipulation flex-1 min-h-[52px] inline-flex items-center justify-center py-3 bg-white/10 hover:bg-white/20 text-white text-center rounded-[20px] transition-colors font-medium">
+                <a href="certificate.php" class="touch-manipulation flex-1 min-h-[52px] inline-flex items-center justify-center py-3 bg-white/10 hover:bg-white/20 text-white text-center rounded-[var(--tp-ios-card-radius)] transition-colors font-medium">
                     ยกเลิก
                 </a>
-                <button type="submit" class="touch-manipulation flex-1 min-h-[56px] inline-flex items-center justify-center gap-2 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-[20px] transition-colors font-semibold border-0">
+                <button type="submit" class="touch-manipulation flex-1 min-h-[56px] inline-flex items-center justify-center gap-2 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors font-semibold border-0">
                     <i class="fas fa-paper-plane" aria-hidden="true"></i><span>ส่งคำขอ</span>
                 </button>
             </div>
@@ -175,7 +176,7 @@ include 'templates/header.php';
             </h3>
             <div class="space-y-2">
                 <?php foreach ($templates as $tpl): ?>
-                <div class="py-3 px-3 rounded-[20px] bg-white/5 border border-white/8">
+                <div class="py-3 px-3 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/8">
                     <p class="text-white font-medium"><?php echo htmlspecialchars($tpl['name']); ?></p>
                     <?php if ($tpl['description']): ?>
                     <p class="text-white/50 text-sm"><?php echo htmlspecialchars($tpl['description']); ?></p>
@@ -259,7 +260,7 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6 min-w-0 max-w-full">
     <a href="certificate.php?action=new" class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0 hover:bg-white/[0.07] transition-colors group touch-manipulation border-violet-500/20">
         <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-[20px] bg-violet-600/20 flex items-center justify-center group-hover:bg-violet-600/30 transition-colors">
+            <div class="w-12 h-12 rounded-[var(--tp-ios-card-radius)] bg-violet-600/20 flex items-center justify-center group-hover:bg-violet-600/30 transition-colors">
                 <i class="fas fa-plus text-violet-400 text-xl" aria-hidden="true"></i>
             </div>
             <div>
@@ -271,7 +272,7 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
     
     <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
         <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-[20px] bg-amber-500/20 flex items-center justify-center">
+            <div class="w-12 h-12 rounded-[var(--tp-ios-card-radius)] bg-amber-500/20 flex items-center justify-center">
                 <i class="fas fa-hourglass-half text-amber-400 text-xl" aria-hidden="true"></i>
             </div>
             <div>
@@ -283,7 +284,7 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
     
     <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
         <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-[20px] bg-emerald-500/20 flex items-center justify-center">
+            <div class="w-12 h-12 rounded-[var(--tp-ios-card-radius)] bg-emerald-500/20 flex items-center justify-center">
                 <i class="fas fa-check-circle text-emerald-400 text-xl" aria-hidden="true"></i>
             </div>
             <div>
@@ -310,10 +311,10 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
     </div>
     
     <?php if (empty($myRequests)): ?>
-    <div class="tp-native-empty-state text-center py-12 px-4 rounded-[20px] border border-dashed border-white/15 max-w-none mx-4 my-4">
+    <div class="tp-native-empty-state text-center py-12 px-4 rounded-[var(--tp-ios-card-radius)] border border-dashed border-white/15 max-w-none mx-4 my-4">
         <i class="fas fa-file-signature text-slate-500 text-4xl mb-3 block" aria-hidden="true"></i>
         <p class="text-slate-400 text-sm">ยังไม่มีประวัติการขอหนังสือรับรอง</p>
-        <a href="certificate.php?action=new" class="inline-flex mt-4 min-h-[56px] items-center justify-center px-6 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-[20px] transition-colors touch-manipulation font-semibold">
+        <a href="certificate.php?action=new" class="inline-flex mt-4 min-h-[56px] items-center justify-center px-6 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-semibold">
             ขอหนังสือรับรองใหม่
         </a>
     </div>
@@ -340,10 +341,10 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
     ?>
     <div class="space-y-3 p-3 md:p-4 min-w-0">
         <?php foreach ($myRequests as $req): ?>
-        <div class="p-4 md:p-5 rounded-[20px] bg-white/5 border border-white/8 hover:bg-white/[0.07] transition-colors min-w-0">
+        <div class="p-4 md:p-5 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/8 hover:bg-white/[0.07] transition-colors min-w-0">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 min-w-0">
                 <div class="flex items-center gap-4 min-w-0">
-                    <div class="w-12 h-12 rounded-[20px] bg-violet-600/20 flex items-center justify-center flex-shrink-0">
+                    <div class="w-12 h-12 rounded-[var(--tp-ios-card-radius)] bg-violet-600/20 flex items-center justify-center flex-shrink-0">
                         <i class="fas fa-file-alt text-violet-400 text-xl" aria-hidden="true"></i>
                     </div>
                     <div class="min-w-0">
@@ -353,12 +354,12 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
                             ขอเมื่อ <?php echo formatDateThai($req['created_at']); ?>
                         </p>
                         <?php if ($req['is_urgent']): ?>
-                        <span class="inline-block mt-1 px-2 py-0.5 bg-amber-500/20 text-amber-300 text-xs rounded-[20px] border border-amber-500/30">ด่วน</span>
+                        <span class="inline-block mt-1 px-2 py-0.5 bg-amber-500/20 text-amber-300 text-xs rounded-[var(--tp-ios-card-radius)] border border-amber-500/30">ด่วน</span>
                         <?php endif; ?>
                     </div>
                 </div>
                 <div class="flex flex-col gap-2 w-full md:w-auto md:items-end md:shrink-0">
-                    <span class="px-3 py-1 rounded-[20px] text-xs font-medium border border-white/10 self-start <?php echo $statusColors[$req['status']] ?? 'bg-gray-500/20 text-gray-400'; ?>">
+                    <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs font-medium border border-white/10 self-start <?php echo $statusColors[$req['status']] ?? 'bg-gray-500/20 text-gray-400'; ?>">
                         <?php echo htmlspecialchars($statusText[$req['status']] ?? $req['status']); ?>
                     </span>
                     <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
@@ -367,7 +368,7 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
                     tpHrCertificatePrintForm(
                         (int)$req['id'],
                         'inline-flex w-full sm:w-auto min-w-0',
-                        'min-h-[56px] inline-flex items-center justify-center px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-[20px] transition-colors text-sm font-semibold touch-manipulation w-full sm:w-auto border-0',
+                        'min-h-[56px] inline-flex items-center justify-center px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors text-sm font-semibold touch-manipulation w-full sm:w-auto border-0',
                         '<i class="fas fa-print mr-2" aria-hidden="true"></i>ดู / พิมพ์',
                         true
                     );
@@ -376,12 +377,12 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
 
                     <?php if (in_array($req['status'], ['COMPLETED', 'READY', 'DELIVERED'], true) && !empty($req['file_path'])): ?>
                     <a href="<?php echo htmlspecialchars($req['file_path']); ?>" target="_blank" rel="noopener noreferrer"
-                       class="min-h-[56px] inline-flex items-center justify-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[20px] transition-colors text-sm font-semibold touch-manipulation w-full sm:w-auto">
+                       class="min-h-[56px] inline-flex items-center justify-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors text-sm font-semibold touch-manipulation w-full sm:w-auto">
                         <i class="fas fa-download mr-2" aria-hidden="true"></i>ดาวน์โหลด
                     </a>
                     <?php elseif ($req['status'] === 'PENDING'): ?>
                     <button type="button" onclick="cancelRequest(<?php echo (int)$req['id']; ?>)"
-                            class="min-h-[48px] inline-flex items-center justify-center px-4 py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-300 rounded-[20px] transition-colors text-sm font-medium touch-manipulation w-full sm:w-auto">
+                            class="min-h-[48px] inline-flex items-center justify-center px-4 py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-300 rounded-[var(--tp-ios-card-radius)] transition-colors text-sm font-medium touch-manipulation w-full sm:w-auto">
                         <i class="fas fa-times mr-2" aria-hidden="true"></i>ยกเลิก
                     </button>
                     <?php endif; ?>
@@ -389,7 +390,7 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
                 </div>
             </div>
             <?php if ($req['status'] === 'REJECTED' && $req['reject_reason']): ?>
-            <div class="mt-3 p-3 rounded-[20px] bg-red-500/10 border border-red-400/35">
+            <div class="mt-3 p-3 rounded-[var(--tp-ios-card-radius)] bg-red-500/10 border border-red-400/35">
                 <p class="text-red-300 text-sm flex gap-2"><i class="fas fa-exclamation-circle shrink-0 mt-0.5" aria-hidden="true"></i><span><?php echo htmlspecialchars($req['reject_reason']); ?></span></p>
             </div>
             <?php endif; ?>
@@ -429,5 +430,7 @@ async function cancelRequest(id) {
 }
 </script>
 <?php endif; ?>
+
+</div>
 
 <?php include 'templates/footer.php'; ?>

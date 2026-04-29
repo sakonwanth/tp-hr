@@ -26,3 +26,4 @@ Populate when Waves 2–3 land. Placeholder:** all routes **PENDING**.
 | `leave.php` / `request_form.php` | Automated | Pending | Pending human |
 | **`leave_history.php`** | Automated | Pending | Pending human |
 | **`hr/*.php`** (admin) | Automated | Pending | Pending human |
+| **`dayoff_schedule.php`**, **`attendance_history.php`**, **`certificate.php`**, **`payslip.php`**, **`profile.php`** | Automated | Pending | Pending human |

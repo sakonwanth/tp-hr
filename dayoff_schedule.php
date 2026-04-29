@@ -157,30 +157,31 @@ for ($i = -1; $i < 6; $i++) {
 include __DIR__ . '/templates/header.php';
 ?>
 
-<div class="mb-4 md:mb-6 max-w-3xl min-w-0">
-    <nav class="mb-3 text-sm text-white/60" aria-label="Breadcrumb">
+<div class="tp-dayoff-stack tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<div class="mb-5 md:mb-8 max-w-3xl min-w-0">
+    <nav class="mb-2 text-sm text-white/60" aria-label="Breadcrumb">
         <a href="checkin.php" class="inline-flex min-h-[48px] items-center hover:text-white touch-manipulation">ลงเวลา</a>
         <span class="mx-2">/</span>
         <span class="text-white">วันหยุดประจำสัปดาห์</span>
     </nav>
-    <h1 class="mb-4 text-2xl font-bold leading-tight text-white sm:text-3xl">วันหยุดประจำสัปดาห์</h1>
-    <div class="space-y-3 text-sm leading-relaxed text-white/70">
-        <p class="text-base text-white/95">
-            วันหยุดเริ่มต้น: <span class="font-semibold text-violet-200">วัน<?php echo htmlspecialchars($dayNames[$defaultDayOff]); ?></span>
+    <h1 class="tp-ios-page-title">วันหยุดประจำสัปดาห์</h1>
+    <div class="mt-2 space-y-2 text-sm">
+        <p class="tp-ios-caption-muted">
+            วันหยุดเริ่มต้น: <span class="font-semibold text-violet-200/95">วัน<?php echo htmlspecialchars($dayNames[$defaultDayOff]); ?></span>
         </p>
-        <p>ขอเปลี่ยนวันหยุดรายสัปดาห์ได้ รอผู้บริหารอนุมัติ</p>
+        <p class="tp-ios-caption-muted">ขอเปลี่ยนวันหยุดรายสัปดาห์ได้ รอผู้บริหารอนุมัติ</p>
     </div>
 </div>
 
 <?php if ($success): ?>
-<div class="tp-native-success-state bg-emerald-500/15 border border-emerald-400/40 text-emerald-200 px-4 py-3 rounded-[20px] mb-4 md:mb-6 flex items-start gap-3 max-w-none mx-0 w-full" role="status">
+<div class="tp-native-success-state bg-emerald-500/15 border border-emerald-400/40 text-emerald-200 px-4 py-3 rounded-[var(--tp-ios-card-radius)] mb-4 md:mb-6 flex items-start gap-3 max-w-none mx-0 w-full" role="status">
     <i class="fas fa-check-circle text-2xl shrink-0 mt-0.5" aria-hidden="true"></i>
     <span class="text-base leading-snug"><?php echo htmlspecialchars($success); ?></span>
 </div>
 <?php endif; ?>
 
 <?php if ($error): ?>
-<div class="tp-native-error-state bg-red-500/15 border border-red-400/45 text-red-200 px-4 py-3 rounded-[20px] mb-4 md:mb-6 flex items-start gap-3 max-w-none mx-0 w-full" role="alert">
+<div class="tp-native-error-state bg-red-500/15 border border-red-400/45 text-red-200 px-4 py-3 rounded-[var(--tp-ios-card-radius)] mb-4 md:mb-6 flex items-start gap-3 max-w-none mx-0 w-full" role="alert">
     <i class="fas fa-exclamation-circle text-2xl shrink-0 mt-0.5" aria-hidden="true"></i>
     <span class="text-base leading-snug"><?php echo htmlspecialchars($error); ?></span>
 </div>
@@ -210,11 +211,11 @@ include __DIR__ . '/templates/header.php';
         if ($req) {
             if ($req['status'] === 'APPROVED') {
                 $effectiveDayOff = (int)$req['requested_day_off'];
-                $statusBadge = '<span class="px-2.5 py-1 text-xs font-medium rounded-[20px] border border-white/10 bg-green-500/20 text-green-400">อนุมัติแล้ว</span>';
+                $statusBadge = '<span class="px-2.5 py-1 text-xs font-medium rounded-[var(--tp-ios-card-radius)] border border-white/10 bg-green-500/20 text-green-400">อนุมัติแล้ว</span>';
             } elseif ($req['status'] === 'PENDING') {
-                $statusBadge = '<span class="px-2.5 py-1 text-xs font-medium rounded-[20px] border border-white/10 bg-amber-500/20 text-amber-300">รออนุมัติ</span>';
+                $statusBadge = '<span class="px-2.5 py-1 text-xs font-medium rounded-[var(--tp-ios-card-radius)] border border-white/10 bg-amber-500/20 text-amber-300">รออนุมัติ</span>';
             } elseif ($req['status'] === 'REJECTED') {
-                $statusBadge = '<span class="px-2.5 py-1 text-xs font-medium rounded-[20px] border border-white/10 bg-red-500/20 text-red-400">ไม่อนุมัติ</span>';
+                $statusBadge = '<span class="px-2.5 py-1 text-xs font-medium rounded-[var(--tp-ios-card-radius)] border border-white/10 bg-red-500/20 text-red-400">ไม่อนุมัติ</span>';
             }
         }
         
@@ -255,7 +256,7 @@ include __DIR__ . '/templates/header.php';
             
             <?php if (!$req || $req['status'] === 'REJECTED'): ?>
             <button type="button" onclick="openChangeModal('<?php echo $week['start']; ?>', '<?php echo $week['end']; ?>', <?php echo $week['num']; ?>)" 
-                    class="btn-primary shrink-0 px-4 min-h-[48px] sm:min-h-[52px] rounded-[20px] text-xs sm:text-sm self-start sm:self-auto touch-manipulation border-0">
+                    class="btn-primary shrink-0 px-4 min-h-[48px] sm:min-h-[52px] rounded-[var(--tp-ios-card-radius)] text-xs sm:text-sm self-start sm:self-auto touch-manipulation border-0">
                 <i class="fas fa-exchange-alt mr-1" aria-hidden="true"></i>ขอเปลี่ยนวันหยุด
             </button>
             <?php elseif ($req && $req['status'] === 'PENDING'): ?>
@@ -263,7 +264,7 @@ include __DIR__ . '/templates/header.php';
                 <?php echo csrfField(); ?>
                 <input type="hidden" name="action" value="cancel_request">
                 <input type="hidden" name="request_id" value="<?php echo $req['id']; ?>">
-                <button type="submit" class="min-h-[48px] px-3 py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-300 text-xs sm:text-sm rounded-[20px] transition-colors touch-manipulation font-medium"
+                <button type="submit" class="min-h-[48px] px-3 py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-300 text-xs sm:text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-medium"
                         onclick="return confirm('ยกเลิกคำขอเปลี่ยนวันหยุดสัปดาห์นี้?')">
                     <i class="fas fa-times mr-1" aria-hidden="true"></i>ยกเลิกคำขอ
                 </button>
@@ -295,7 +296,7 @@ include __DIR__ . '/templates/header.php';
                     $sub = 'วันทำงาน';
                 }
             ?>
-            <div class="flex items-start gap-3 rounded-[20px] border px-3 py-3 <?php echo $rowCls; ?>">
+            <div class="flex items-start gap-3 rounded-[var(--tp-ios-card-radius)] border px-3 py-3 <?php echo $rowCls; ?>">
                 <div class="shrink-0 pt-0.5 text-sm font-semibold tabular-nums">
                     <span class="text-white/70"><?php echo htmlspecialchars($dowShort); ?></span>
                     <span class="ml-1 text-white"><?php echo (int)$wd['day']; ?></span>
@@ -313,7 +314,7 @@ include __DIR__ . '/templates/header.php';
             <?php endforeach; ?>
             
             <?php foreach ($weekDays as $wd): 
-                $cellClass = 'rounded-[20px] px-1.5 py-2 text-center text-sm min-h-[4.5rem] flex flex-col items-center justify-start gap-1 touch-manipulation ';
+                $cellClass = 'rounded-[var(--tp-ios-card-radius)] px-1.5 py-2 text-center text-sm min-h-[4.5rem] flex flex-col items-center justify-start gap-1 touch-manipulation ';
                 if (!$wd['in_month']) {
                     $cellClass .= 'opacity-35 bg-white/5 text-white/50';
                 } elseif ($wd['is_holiday']) {
@@ -379,6 +380,7 @@ include __DIR__ . '/templates/header.php';
         <span class="inline-flex items-center gap-2 min-h-[48px] sm:min-h-0"><span class="inline-block w-3 h-3 shrink-0 rounded-[6px] bg-white/10" aria-hidden="true"></span> วันทำงาน</span>
     </div>
 </div>
+</div>
 
 <!-- Change Day-Off Modal -->
 <div id="change-modal" class="tp-native-modal fixed inset-0 hidden flex items-center justify-center p-4 overflow-y-auto overscroll-contain bg-black/50 backdrop-blur-sm pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]">
@@ -394,7 +396,7 @@ include __DIR__ . '/templates/header.php';
             
             <div class="tp-native-form-group">
                 <label class="block text-white/70 text-sm mb-1">วันหยุดเดิม</label>
-                <div class="input-field bg-white/5 cursor-not-allowed text-white/50 rounded-[20px]">
+                <div class="input-field bg-white/5 cursor-not-allowed text-white/50 rounded-[var(--tp-ios-card-radius)]">
                     <?php echo $dayNames[$defaultDayOff]; ?>
                 </div>
             </div>
@@ -416,10 +418,10 @@ include __DIR__ . '/templates/header.php';
             </div>
             
             <div class="flex flex-col-reverse gap-3 sm:flex-row pt-2">
-                <button type="button" onclick="closeChangeModal()" class="flex-1 min-h-[52px] inline-flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-[20px] font-semibold touch-manipulation border-0">
+                <button type="button" onclick="closeChangeModal()" class="flex-1 min-h-[52px] inline-flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] font-semibold touch-manipulation border-0">
                     ยกเลิก
                 </button>
-                <button type="submit" class="flex-1 min-h-[56px] inline-flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white rounded-[20px] font-semibold touch-manipulation border-0">
+                <button type="submit" class="flex-1 min-h-[56px] inline-flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] font-semibold touch-manipulation border-0">
                     <i class="fas fa-paper-plane" aria-hidden="true"></i>ส่งคำขอ
                 </button>
             </div>
