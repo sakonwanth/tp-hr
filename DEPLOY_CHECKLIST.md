@@ -15,7 +15,7 @@
 - [ ] **Regression scope:** confirm PHP-only deploy (no unintended `database/migrations/*` in the same commit unless that release includes DB work).
 - [ ] **`npm run verify:shell-cache`** passes locally **or** GitHub Actions **`ci.yml` / `deploy.yml` (validate)** green after **`npm ci`** — ensures every PHP loader of **`native-shell.css`** uses the same **`?v=`**.
 
-**Authoritative IOS26 state:** [`06_IMPLEMENTATION_PROGRESS.md`](06_IMPLEMENTATION_PROGRESS.md) · **Manual QA:** [`07_SPACING_QA.md`](07_SPACING_QA.md) · [`08_VISUAL_QA_AFTER.md`](08_VISUAL_QA_AFTER.md) · **[`10_BROWSER_VIEWPORT_QA.md`](10_BROWSER_VIEWPORT_QA.md)** · master dashboard: [`03_MASTER_SCREEN_VISUAL_QA.md`](03_MASTER_SCREEN_VISUAL_QA.md) · **completion narrative:** [`09_COMPLETION_GATE.md`](09_COMPLETION_GATE.md).
+**Authoritative IOS26 state:** [`06_IMPLEMENTATION_PROGRESS.md`](06_IMPLEMENTATION_PROGRESS.md) · **Manual QA:** [`07_SPACING_QA.md`](07_SPACING_QA.md) · [`08_VISUAL_QA_AFTER.md`](08_VISUAL_QA_AFTER.md) · **[`10_BROWSER_VIEWPORT_QA.md`](10_BROWSER_VIEWPORT_QA.md)** · static viewport/CSS evidence: [`AUDIT_04_VIEWPORT.md`](AUDIT_04_VIEWPORT.md) · master dashboard: [`03_MASTER_SCREEN_VISUAL_QA.md`](03_MASTER_SCREEN_VISUAL_QA.md) · **completion narrative:** [`09_COMPLETION_GATE.md`](09_COMPLETION_GATE.md).
 
 ---
 

@@ -17,7 +17,7 @@ Older wave labels (**1–4**) and **`07_PAGE_REGRESSION_AFTER.md`** remain as hi
 | Metric | Value |
 |--------|-------|
 | Refactor waves per **`06`** | Shell **v15** + Waves **6–9** shipped |
-| Automated browser/UI proof in CI | API / route smoke (`tests/e2e`) optional; **no substitute** for device matrix |
+| Automated browser/UI proof in CI | API / route smoke (`tests/e2e`) optional; **`verify:shell-cache`** enforces **`native-shell`** **`?v=`** consistency · **no substitute** for device matrix (**`AUDIT_04_VIEWPORT`** = static CSS only) |
 | Device viewport matrix | **Pending** — fill **`08`** matrices + **`10_BROWSER_VIEWPORT_QA.md`** log + **`03`** (`/`) |
 
 ---

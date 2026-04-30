@@ -21,7 +21,7 @@ Statuses: **`NOT_STARTED` · `IN_PROGRESS` · `REFACTORED` · `COMPLETE` · `REG
 | **`certificate_print.php`** | Wave **9** | Hardcoded toolbar radii · indigo primary | **`native-shell.css?v=15`** (tokens) · screen chrome **`border-radius`/touch โทเค็น** · พิมพ์ปุ่มตรง **`tp-native-btn-primary`** gradient · **`.page`** ล็อกฟอนต์ **Sarabun** | **REFACTORED** |
 | **`hr/*.php`** (admin) | Wave **7 · v15** | **`tp-hr-admin-stack`** only | เพิ่ม **`tp-ios-master-screen`** · หัวแต่ละหน้าเป็น **`tp-ios-large-title-block`** (`<header>`) · **`mb-6`** / กริดสรุป **`gap-6`** สอดคล้อง ESS | **REFACTORED** |
 
-**Regression:** PHPUnit / API untouched. Viewport QA: **`03`** · **`07_SPACING_QA.md`** (**route list → `08`**). **`08_VISUAL_QA_AFTER.md`** — per-route **ESS · HRA · PUB/AUTH** check matrices · breakpoint / scroll QA **`10_BROWSER_VIEWPORT_QA.md`**. **CI:** **`npm run verify:shell-cache`** runs on push/PR (`.github/workflows/ci.yml`) so **`native-shell.css`** **`?v=`** stays consistent across PHP loaders.
+**Regression:** PHPUnit / API untouched. Viewport QA: **`03`** · **`07_SPACING_QA.md`** (**route list → `08`**). **`08_VISUAL_QA_AFTER.md`** — per-route **ESS · HRA · PUB/AUTH** check matrices · breakpoint / scroll QA **`10_BROWSER_VIEWPORT_QA.md`**. Static padding/overflow rationale: **`AUDIT_04_VIEWPORT.md`**. **CI:** **`npm run verify:shell-cache`** runs on push/PR (`.github/workflows/ci.yml`) so **`native-shell.css`** **`?v=`** stays consistent across PHP loaders.
 
 **Deploy:** **[`DEPLOY_CHECKLIST.md`](DEPLOY_CHECKLIST.md)** — ก่อน deploy: cache-bust **`native-shell.css`** สม่ำเสมอ · หลัง deploy smoke ESS/HRA/login/verify พร้อม rollback note.
 

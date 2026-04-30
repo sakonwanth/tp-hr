@@ -7,6 +7,7 @@ Purpose: replicate **`03`** master QA across **every** ESS · HRA · PUB/AUTH ro
 - Master dashboard (**`index.php` only**): **`03_MASTER_SCREEN_VISUAL_QA.md`**
 - Spacing/token checks: **`07_SPACING_QA.md`**
 - Browser width / scroll-end / tab QA: **`10_BROWSER_VIEWPORT_QA.md`**
+- Static viewport/CSS rationale (evidence table): **`AUDIT_04_VIEWPORT.md`**
 
 ---
 

@@ -8,6 +8,7 @@
 - Per-route visual matrices: **`08_VISUAL_QA_AFTER.md`**
 - Dashboard master gate: **`03_MASTER_SCREEN_VISUAL_QA.md`**
 - Completion narrative: **`09_COMPLETION_GATE.md`** · deploy: **`DEPLOY_CHECKLIST.md`**
+- Static viewport/CSS evidence (no browser): **`AUDIT_04_VIEWPORT.md`**
 
 **Shell CSS:** `assets/css/native-shell.css`
 
