@@ -521,7 +521,7 @@ foreach ($workShifts as $_ws) {
                     </td>
                     <td class="px-4 py-3 text-center">
                         <button type="button" onclick="editLeaveType(<?php echo htmlspecialchars(json_encode($lt)); ?>)" 
-                                class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-[var(--tp-ios-card-radius)] text-violet-300 hover:bg-violet-500/20 touch-manipulation"
+                                class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] text-violet-300 hover:bg-violet-500/20 touch-manipulation"
                                 title="แก้ไข">
                             <i class="fas fa-edit" aria-hidden="true"></i>
                         </button>
@@ -538,7 +538,7 @@ foreach ($workShifts as $_ws) {
     <div class="native-card tp-native-card w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden rounded-[var(--tp-ios-card-radius)] p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] border border-white/10">
         <div class="flex items-center justify-between mb-4">
             <h3 id="editLeaveTypeModalTitle" class="text-lg font-semibold text-white">แก้ไขประเภทการลา</h3>
-            <button type="button" onclick="closeModal('editLeaveTypeModal')" class="text-white/50 hover:text-white touch-manipulation min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-[var(--tp-ios-card-radius)]" aria-label="ปิด">
+            <button type="button" onclick="closeModal('editLeaveTypeModal')" class="text-white/50 hover:text-white touch-manipulation min-h-[48px] min-w-[48px] inline-flex items-center justify-center rounded-[var(--tp-ios-card-radius)]" aria-label="ปิด">
                 <i class="fas fa-times" aria-hidden="true"></i>
             </button>
         </div>

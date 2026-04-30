@@ -442,7 +442,7 @@ require_once __DIR__ . '/../templates/header.php';
                     </td>
                     <td class="px-4 py-3 text-center">
                         <a href="/hr/employee_attendance.php?id=<?php echo $row['id']; ?>" 
-                           class="inline-flex min-h-[40px] min-w-[40px] items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-500/20 text-violet-300 hover:bg-violet-500/30 text-xs px-3 transition-colors touch-manipulation"
+                           class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-500/20 text-violet-300 hover:bg-violet-500/30 text-xs px-3 transition-colors touch-manipulation"
                            title="ดูประวัติลงเวลา">
                             <i class="fas fa-clock mr-1" aria-hidden="true"></i>ดู
                         </a>

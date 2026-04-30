@@ -124,12 +124,11 @@ if (TP_COMMON_AVAILABLE) {
 
 // TP-CRM shared components (ถ้ามี)
 $tpCrmPath = dirname(BASE_PATH) . '/tp-crm';
-if (file_exists($tpCrmPath . '/bootstrap.php')) {
-    define('TP_CRM_PATH', $tpCrmPath);
-    define('TP_CRM_AVAILABLE', true);
-} else {
-    define('TP_CRM_PATH', null);
-    define('TP_CRM_AVAILABLE', false);
+if (!defined('TP_CRM_PATH')) {
+    define('TP_CRM_PATH', file_exists($tpCrmPath . '/bootstrap.php') ? $tpCrmPath : null);
+}
+if (!defined('TP_CRM_AVAILABLE')) {
+    define('TP_CRM_AVAILABLE', TP_CRM_PATH !== null);
 }
 
 // Auto-stamp WFH attendance for logged-in WFH users (once per session-day).

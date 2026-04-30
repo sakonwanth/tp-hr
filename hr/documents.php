@@ -322,7 +322,7 @@ include dirname(__DIR__) . '/templates/header.php';
                         tpHrCertificatePrintForm(
                             (int)$req['id'],
                             'inline-flex items-center',
-                            'inline-flex min-h-[44px] min-w-[44px] items-center justify-center px-3 py-2 bg-violet-600 hover:bg-violet-700 text-white text-xs font-medium rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation',
+                            'inline-flex min-h-[48px] min-w-[48px] items-center justify-center px-3 py-2 bg-violet-600 hover:bg-violet-700 text-white text-xs font-medium rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation',
                             '<i class="fas fa-print" aria-hidden="true"></i>',
                             true,
                             true,
@@ -332,25 +332,25 @@ include dirname(__DIR__) . '/templates/header.php';
                         ?>
                         <?php if ($req['status'] === 'PENDING'): ?>
                         <button type="button" onclick="updateDocStatus(<?php echo (int)$req['id']; ?>, 'PROCESSING')" 
-                                class="inline-flex min-h-[44px] items-center gap-1.5 px-3 py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="เริ่มจัดทำ">
+                                class="inline-flex min-h-[48px] items-center gap-1.5 px-3 py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="เริ่มจัดทำ">
                             <i class="fas fa-play" aria-hidden="true"></i><span class="hidden xl:inline">เริ่ม</span>
                         </button>
                         <button type="button" onclick="rejectDoc(<?php echo (int)$req['id']; ?>)"
-                                class="inline-flex min-h-[44px] items-center gap-1.5 px-3 py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 text-xs font-medium rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="ปฏิเสธ">
+                                class="inline-flex min-h-[48px] items-center gap-1.5 px-3 py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 text-xs font-medium rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="ปฏิเสธ">
                             <i class="fas fa-times" aria-hidden="true"></i><span class="hidden xl:inline">ปฏิเสธ</span>
                         </button>
                         <?php elseif ($req['status'] === 'PROCESSING'): ?>
                         <button type="button" onclick="completeDoc(<?php echo (int)$req['id']; ?>)" 
-                                class="inline-flex min-h-[44px] items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="จัดทำเสร็จ">
+                                class="inline-flex min-h-[48px] items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="จัดทำเสร็จ">
                             <i class="fas fa-check" aria-hidden="true"></i><span class="hidden xl:inline">เสร็จ</span>
                         </button>
                         <?php elseif (in_array($req['status'], ['COMPLETED', 'READY', 'DELIVERED'], true) && $req['document_url']): ?>
                         <a href="<?php echo htmlspecialchars($req['document_url']); ?>" target="_blank" rel="noopener noreferrer"
-                           class="inline-flex min-h-[44px] items-center gap-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="ดาวน์โหลด">
+                           class="inline-flex min-h-[48px] items-center gap-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="ดาวน์โหลด">
                             <i class="fas fa-download" aria-hidden="true"></i><span class="hidden xl:inline">ดาวน์โหลด</span>
                         </a>
                         <?php else: ?>
-                        <button type="button" onclick="viewDocDetail(<?php echo (int)$req['id']; ?>)" class="inline-flex min-h-[44px] items-center gap-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="ดูรายละเอียด">
+                        <button type="button" onclick="viewDocDetail(<?php echo (int)$req['id']; ?>)" class="inline-flex min-h-[48px] items-center gap-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="ดูรายละเอียด">
                             <i class="fas fa-eye" aria-hidden="true"></i><span class="hidden xl:inline">ดู</span>
                         </button>
                         <?php endif; ?>

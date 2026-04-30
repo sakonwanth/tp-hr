@@ -258,7 +258,7 @@ require_once __DIR__ . '/../templates/header.php';
                         <div class="text-white/90 text-sm font-semibold mb-3 pb-2 border-b border-white/10"><?= htmlspecialchars($groupTitle) ?></div>
                         <div class="flex flex-wrap gap-2.5">
                             <?php foreach ($scopes as $sv => $sl): ?>
-                            <label class="inline-flex items-center gap-2 text-white/80 text-sm bg-white/5 px-3 py-2 rounded-[var(--tp-ios-card-radius)] border border-transparent hover:border-violet-500/30 cursor-pointer touch-manipulation min-h-[44px]">
+                            <label class="inline-flex items-center gap-2 text-white/80 text-sm bg-white/5 px-3 py-2 rounded-[var(--tp-ios-card-radius)] border border-transparent hover:border-violet-500/30 cursor-pointer touch-manipulation min-h-[48px]">
                                 <input type="checkbox" name="scopes[]" value="<?= htmlspecialchars($sv) ?>" class="rounded border-white/20 text-violet-600 focus:ring-violet-500 shrink-0">
                                 <span><?= htmlspecialchars($sl) ?> <code class="text-white/45 text-xs">(<?= htmlspecialchars($sv) ?>)</code></span>
                             </label>
@@ -414,14 +414,14 @@ require_once __DIR__ . '/../templates/header.php';
                     <td class="px-4 py-3 text-center whitespace-nowrap">
                         <?php if ((int)$k['is_active'] === 1): ?>
                         <button type="button"
-                            class="inline-flex min-h-[44px] min-w-[72px] items-center justify-center rounded-[var(--tp-ios-card-radius)] text-rose-300 hover:bg-rose-500/15 text-xs font-medium touch-manipulation"
+                            class="inline-flex min-h-[48px] min-w-[72px] items-center justify-center rounded-[var(--tp-ios-card-radius)] text-rose-300 hover:bg-rose-500/15 text-xs font-medium touch-manipulation"
                             data-ak-act="revoke"
                             data-ak-id="<?= (int)$k['id'] ?>"
                             data-ak-name="<?= htmlspecialchars($k['name'], ENT_QUOTES, 'UTF-8') ?>"
                             onclick="hrApiKeysOpenActionModal(this)">Revoke</button>
                         <?php else: ?>
                         <button type="button"
-                            class="inline-flex min-h-[44px] min-w-[72px] items-center justify-center rounded-[var(--tp-ios-card-radius)] text-emerald-300 hover:bg-emerald-500/15 text-xs font-medium touch-manipulation"
+                            class="inline-flex min-h-[48px] min-w-[72px] items-center justify-center rounded-[var(--tp-ios-card-radius)] text-emerald-300 hover:bg-emerald-500/15 text-xs font-medium touch-manipulation"
                             data-ak-act="activate"
                             data-ak-id="<?= (int)$k['id'] ?>"
                             data-ak-name="<?= htmlspecialchars($k['name'], ENT_QUOTES, 'UTF-8') ?>"

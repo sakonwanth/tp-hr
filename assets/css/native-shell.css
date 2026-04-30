@@ -1,5 +1,5 @@
 /**
- * TP-HR — Native component system (iOS 26–inspired + UI UX Pro Max).
+ * TP-HR — Native component system (iOS 26–inspired).
  * v15: Liquid Glass chrome — floating inset tab strip + gradient scrim · glass sticky CTA slab (`tp-ios-sticky-cta-slab`) · typography caps (page title max 28px · section ~19px · card title ~17px).
  * v14: token ladder + scroll buffer 160 · primary 58 · input 56 · textarea 120.
  * Headers: `/assets/css/native-shell.css?v=15`.
@@ -31,8 +31,8 @@ body {
   --tp-section-gap-tablet: var(--tp-space-24);
 
   --tp-ios-card-radius: 24px;
-  --tp-radius-small-control: 14px;
-  --tp-radius-control: var(--tp-radius-small-control);
+  --tp-radius-small-control: 18px;
+  --tp-radius-control: clamp(18px, 3vw, 22px);
   --tp-radius-card: var(--tp-ios-card-radius);
   --tp-card-radius: var(--tp-radius-card);
   --tp-radius-button: clamp(18px, 3vw, 22px);
@@ -752,4 +752,3 @@ body.tp-native-app .section-title i {
   color: rgba(255, 255, 255, 0.62);
   line-height: 1.4;
 }
-

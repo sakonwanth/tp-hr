@@ -39,11 +39,11 @@ Apply **backdrop blur + hairline luminance separation** primarily to:
 |------|----------------|
 | Mobile page horizontal inset | **16px** (`--tp-page-pad-mobile`) |
 | Tablet page horizontal inset | **24px** (`--tp-page-pad-tablet`) |
-| **Section gap (target)** | **24px** — align CSS **`--tp-section-gap-*`** to this on next token wave; interim: **never &lt; 20px** between titled sections |
+| **Section gap** | **24px** |
 | Between stacked cards | **16–20px** (`--tp-card-gap-min`) |
 | Form group spacing | **≥ 18px** (`--tp-form-group-gap-min`) |
 | Sticky CTA above tab strip | **`--tp-cta-gap-above-tabs` = 24px** + safe area |
-| **Final scroll buffer** — target | **≥ 160px** (current shell **144px** — **raise on wave** so last line clears tab + FAB) |
+| **Final scroll buffer** | **≥ 160px** |
 | Bottom safe stack | Tab slot **`≥ 96px`** (`--tp-bottom-nav-slot`; includes safe-area) |
 
 Random “12px here, 28px there” spacing is **disallowed** unless it maps onto the ladder via tokens.
@@ -71,7 +71,7 @@ Random “12px here, 28px there” spacing is **disallowed** unless it maps onto
 
 | Variant | Height target | Radius | Notes |
 |---------|---------------|--------|--------|
-| Primary | **58px target** (`--tp-native-btn-min` may be 56px until bump — **Phase 7 measures**) | `clamp(18px,3vw,22px)` | One primary per viewport when possible |
+| Primary | **58px** | `clamp(18px,3vw,22px)` | One primary per viewport when possible |
 | Secondary | **54px** (`--tp-native-btn-secondary-min`) | Same | Outline / subdued fill |
 | Destructive | Same as secondary | Same | Hue from semantic danger token |
 
@@ -81,9 +81,9 @@ Random “12px here, 28px there” spacing is **disallowed** unless it maps onto
 
 ## 7. Form rules
 
-- Input min height **56px** target (implementation **54px min** until token wave).  
+- Input min height **56px**.  
 - Tap targets **≥ 48×48**.  
-- `textarea` min height **120px** target (currently **112px** — reconcile in QA).  
+- `textarea` min height **120px**.  
 - One column on mobile unless **tablet breakpoint** expands to `--tp-max-content-form`.
 
 ---
@@ -91,7 +91,7 @@ Random “12px here, 28px there” spacing is **disallowed** unless it maps onto
 ## 8. Card rules
 
 - **Outer radius:** 24px.  
-- **Padding:** mobile **20px** target (**current 18–20px OK** — converge to 20 locked).  
+- **Padding:** mobile **20px**.  
 - **Tablet:** 24px padding.  
 - **Separation:** Prefer **hairline divider** + gap over double borders — no gratuitous boxed frames.
 

@@ -498,30 +498,30 @@ $flashError = flash('error');
                     <td class="px-4 py-3 text-center">
                         <div class="inline-flex flex-wrap items-center justify-center gap-2 max-w-[220px] mx-auto">
                         <a href="employee_view.php?id=<?php echo (int)$emp['id']; ?>"
-                           class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center bg-white/10 hover:bg-white/20 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="ดูข้อมูล" aria-label="ดูข้อมูล">
+                           class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center bg-white/10 hover:bg-white/20 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="ดูข้อมูล" aria-label="ดูข้อมูล">
                             <i class="fas fa-eye" aria-hidden="true"></i>
                         </a>
                         <a href="/hr/employee_attendance.php?id=<?php echo (int)$emp['id']; ?>"
-                           class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center bg-violet-500/20 hover:bg-violet-500/30 text-violet-300 text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="ดูลงเวลา" aria-label="ดูลงเวลา">
+                           class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center bg-violet-500/20 hover:bg-violet-500/30 text-violet-300 text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="ดูลงเวลา" aria-label="ดูลงเวลา">
                             <i class="fas fa-clock" aria-hidden="true"></i>
                         </a>
                         <?php if (canManageUsers()): ?>
                         <a href="employees.php?action=edit&id=<?php echo (int)$emp['id']; ?>"
-                           class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center bg-white/10 hover:bg-white/20 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="แก้ไข" aria-label="แก้ไข">
+                           class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center bg-white/10 hover:bg-white/20 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="แก้ไข" aria-label="แก้ไข">
                             <i class="fas fa-edit" aria-hidden="true"></i>
                         </a>
                         <button type="button" onclick="confirmDelete(<?php echo (int)$emp['id']; ?>, '<?php echo htmlspecialchars($emp['first_name_th'] ?? '', ENT_QUOTES, 'UTF-8'); ?>')"
-                                class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center bg-red-500/20 hover:bg-red-500/30 text-red-300 text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="ปิดใช้งาน" aria-label="ปิดใช้งาน">
+                                class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center bg-red-500/20 hover:bg-red-500/30 text-red-300 text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="ปิดใช้งาน" aria-label="ปิดใช้งาน">
                             <i class="fas fa-trash" aria-hidden="true"></i>
                         </button>
                         <?php elseif (hr_can_access_hr_dashboard()): ?>
                         <a href="employees.php?action=edit&id=<?php echo (int)$emp['id']; ?>"
-                           class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center bg-white/10 hover:bg-white/20 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="แก้ไข" aria-label="แก้ไข">
+                           class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center bg-white/10 hover:bg-white/20 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="แก้ไข" aria-label="แก้ไข">
                             <i class="fas fa-edit" aria-hidden="true"></i>
                         </a>
                         <?php endif; ?>
                         <button type="button" onclick="viewLeaveBalance(<?php echo (int)$emp['id']; ?>)"
-                                class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center bg-white/10 hover:bg-white/20 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="สิทธิ์การลาและประวัติ" aria-label="สิทธิ์การลา">
+                                class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center bg-white/10 hover:bg-white/20 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="สิทธิ์การลาและประวัติ" aria-label="สิทธิ์การลา">
                             <i class="fas fa-calendar-alt" aria-hidden="true"></i>
                         </button>
                         </div>
@@ -550,7 +550,7 @@ $flashError = flash('error');
             
             <?php for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++): ?>
             <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $i])); ?>"
-               class="inline-flex min-h-[48px] min-w-[44px] items-center justify-center px-3 py-1 <?php echo $i === $page ? 'bg-violet-600 text-white' : 'bg-white/10 hover:bg-white/20 text-white'; ?> rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation"
+               class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center px-3 py-1 <?php echo $i === $page ? 'bg-violet-600 text-white' : 'bg-white/10 hover:bg-white/20 text-white'; ?> rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation"
                <?php echo $i === $page ? ' aria-current="page"' : ''; ?>>
                 <?php echo $i; ?>
             </a>
@@ -575,7 +575,7 @@ $flashError = flash('error');
     <div class="native-card tp-native-card w-full max-w-lg my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
         <div class="flex items-center justify-between mb-6 gap-3">
             <h3 id="leave-modal-title" class="text-xl font-bold text-white">สิทธิ์การลาและประวัติ</h3>
-            <button type="button" onclick="closeLeaveModal()" class="tp-native-icon-btn min-h-[44px] min-w-[44px] text-white/70 hover:text-white hover:bg-white/10 rounded-[var(--tp-ios-card-radius)]" aria-label="ปิด">
+            <button type="button" onclick="closeLeaveModal()" class="tp-native-icon-btn min-h-[48px] min-w-[48px] text-white/70 hover:text-white hover:bg-white/10 rounded-[var(--tp-ios-card-radius)]" aria-label="ปิด">
                 <i class="fas fa-times" aria-hidden="true"></i>
             </button>
         </div>

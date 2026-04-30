@@ -1171,7 +1171,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 <i class="fas fa-graduation-cap text-indigo-400 mr-2"></i>
                 ประวัติการศึกษา
             </span>
-            <button type="button" onclick="addEducationRow()" class="min-h-[44px] px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-semibold shrink-0">
+            <button type="button" onclick="addEducationRow()" class="min-h-[48px] px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-semibold shrink-0">
                 <i class="fas fa-plus mr-1" aria-hidden="true"></i>เพิ่ม
             </button>
         </h3>
@@ -1239,7 +1239,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 <i class="fas fa-history text-orange-400 mr-2"></i>
                 ประวัติการทำงาน (ก่อนเข้าบริษัท)
             </span>
-            <button type="button" onclick="addWorkHistoryRow()" class="min-h-[44px] px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-semibold shrink-0">
+            <button type="button" onclick="addWorkHistoryRow()" class="min-h-[48px] px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-semibold shrink-0">
                 <i class="fas fa-plus mr-1" aria-hidden="true"></i>เพิ่ม
             </button>
         </h3>
@@ -1303,7 +1303,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 <i class="fas fa-users text-pink-400 mr-2"></i>
                 ข้อมูลครอบครัว
             </span>
-            <button type="button" onclick="addFamilyRow()" class="min-h-[44px] px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-semibold shrink-0">
+            <button type="button" onclick="addFamilyRow()" class="min-h-[48px] px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-semibold shrink-0">
                 <i class="fas fa-plus mr-1" aria-hidden="true"></i>เพิ่ม
             </button>
         </h3>

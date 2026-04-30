@@ -2,6 +2,13 @@
 
 Purpose: replicate **`03`** master QA across **every** ESS · HRA · PUB/AUTH route after Waves **6–9** (see **`06_IMPLEMENTATION_PROGRESS.md`**).
 
+## Latest execution snapshot (2026-04-30)
+
+- Static iOS26 shell contract: **PASS** (`verify:static-ui`)
+- Route access / auth boundary regression: **PASS** (guest E2E **60/60** across phone + tablet)
+- Touch-target minimum uplift (<48 → 48): **applied** on HR/admin action controls
+- Authenticated role matrix: **PASS** via Playwright auth runs on production base URL (EMP self-service / HR admin / CEO-only paths, phone + tablet projects).
+
 **Related gates**
 
 - Master dashboard (**`index.php` only**): **`03_MASTER_SCREEN_VISUAL_QA.md`**

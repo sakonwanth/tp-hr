@@ -20,7 +20,7 @@ test('log in and save session storage', async ({ page }) => {
   await page.goto('login.php', { waitUntil: 'domcontentloaded' });
   await page.locator('input[name="username"]').fill(hrUser);
   await page.locator('input[name="password"]').fill(hrPass);
-  await page.getByRole('button', { name: /เข้าสู่ระบบ/i }).click();
+  await page.locator('form button[type="submit"]').click();
 
   await expect(page.locator('h1.dashboard-hero-title')).toBeVisible({ timeout: 30000 });
 

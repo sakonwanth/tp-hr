@@ -12,14 +12,14 @@ Target tokens: **`00_IOS26_DESIGN_DIRECTION.md`** + **`01_IOS26_COMPONENT_SYSTEM
 |---|-------|--------|
 | 1 | Page L/R inset **≥16px** mobile (**24px tablet**) | Inspect `main.tp-native-page*` |
 | 2 | Header-to-first section **≥16px** | DevTools ruler |
-| 3 | Between titled sections visually **≥24px** (**≥20 interim**) | screenshot |
+| 3 | Between titled sections visually **≥24px** | screenshot |
 | 4 | Card-to-card **≥16px** | markup gap tokens |
 | 5 | Card inner pad **≥20px** mobile | replace `p-4` outliers |
 | 6 | Field group spacing **≥18px** | `.tp-native-form-group` |
-| 7 | Inputs **≥56px** tall target (**54 interim**) | ruler |
-| 8 | Primary CTAs **≥58px target** (**56 interim**) | ruler |
+| 7 | Inputs **≥56px** tall | ruler |
+| 8 | Primary CTAs **≥58px** | ruler |
 | 9 | CTA above tab **`24px`** + **`--tp-bottom-nav-slot`** clearance | screenshot |
-|10 | **`--tp-scroll-end-buffer`** so last line unobstructed — **≥160 target** (**144 interim**) — **FAIL if overlap** |
+|10 | **`--tp-scroll-end-buffer`** so last line unobstructed — **≥160** — **FAIL if overlap** |
 |11 | Tabs never collide with body | scroll end |
 |12 | Last element readable | scroll full down |
 |13 | Inputs not hidden behind keyboard (**forms only**) — test iOS Simulator / device |
@@ -27,6 +27,12 @@ Target tokens: **`00_IOS26_DESIGN_DIRECTION.md`** + **`01_IOS26_COMPONENT_SYSTEM
 |15 | Columns align vertically on grid breakpoints | breakpoint QA |
 
 Any **FAIL:** fix **`native-shell`** token first; then page-level classes.
+
+### Latest automated checkpoint (2026-04-30)
+
+- Static shell gate: **PASS** (`npm run -s verify:static-ui`)
+- Touch-target sweep (`min-h/min-w` under 48 on interactive controls): **PASS after remediation**
+- Guest E2E regression (phone + tablet, `PLAYWRIGHT_BASE_URL=http://127.0.0.1/tp-hr/ npm run -s test:e2e`): **60 passed**
 
 ---
 
