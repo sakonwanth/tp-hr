@@ -97,6 +97,7 @@ tp-hr/
 ### Deploy และ IOS26 QA
 
 - **[DEPLOY_CHECKLIST.md](DEPLOY_CHECKLIST.md)** — เช็คก่อน/หลัง deploy (cache-bust **`native-shell.css`** · smoke ESS/HRA/login/verify · ชี้ไป **`06` / `07` / `08` / `03`**)
+- **[10_BROWSER_VIEWPORT_QA.md](10_BROWSER_VIEWPORT_QA.md)** — ความกว้างจอเลื่อน/tab/safe-area (ชุดเมตริกซ์ควบคู่ **`07`**/**`08`**)
 - **[09_COMPLETION_GATE.md](09_COMPLETION_GATE.md)** — ว่าเมื่อไหร่ถือว่า “พร้อมจากมุมผลิตภัณฑ์” (human QA เทียบ **`07` / `08` / `03`**)
 
 ## 🛠️ Development

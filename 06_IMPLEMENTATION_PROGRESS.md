@@ -21,7 +21,7 @@ Statuses: **`NOT_STARTED` · `IN_PROGRESS` · `REFACTORED` · `COMPLETE` · `REG
 | **`certificate_print.php`** | Wave **9** | Hardcoded toolbar radii · indigo primary | **`native-shell.css?v=15`** (tokens) · screen chrome **`border-radius`/touch โทเค็น** · พิมพ์ปุ่มตรง **`tp-native-btn-primary`** gradient · **`.page`** ล็อกฟอนต์ **Sarabun** | **REFACTORED** |
 | **`hr/*.php`** (admin) | Wave **7 · v15** | **`tp-hr-admin-stack`** only | เพิ่ม **`tp-ios-master-screen`** · หัวแต่ละหน้าเป็น **`tp-ios-large-title-block`** (`<header>`) · **`mb-6`** / กริดสรุป **`gap-6`** สอดคล้อง ESS | **REFACTORED** |
 
-**Regression:** PHPUnit / API untouched. Viewport QA: **`03`** · **`07_SPACING_QA.md`** (**route list → `08`**). **`08_VISUAL_QA_AFTER.md`** — per-route **ESS · HRA · PUB/AUTH** check matrices.
+**Regression:** PHPUnit / API untouched. Viewport QA: **`03`** · **`07_SPACING_QA.md`** (**route list → `08`**). **`08_VISUAL_QA_AFTER.md`** — per-route **ESS · HRA · PUB/AUTH** check matrices · breakpoint / scroll QA **`10_BROWSER_VIEWPORT_QA.md`**.
 
 **Deploy:** **[`DEPLOY_CHECKLIST.md`](DEPLOY_CHECKLIST.md)** — ก่อน deploy: cache-bust **`native-shell.css`** สม่ำเสมอ · หลัง deploy smoke ESS/HRA/login/verify พร้อม rollback note.
 
@@ -31,4 +31,4 @@ Statuses: **`NOT_STARTED` · `IN_PROGRESS` · `REFACTORED` · `COMPLETE` · `REG
 
 Optional deep-dive rows (**Page** · **Route** · **File** · **Components** · **Visual** · **UX** · **Spacing** · **Mobile** · **Tablet** · **Regression**) — add when a release or defect triage needs a paper trail.
 
-**Current step:** human **QA only** — execute **`07_SPACING_QA.md`** and **`08_VISUAL_QA_AFTER.md`**; dashboard-only gate **`03_MASTER_SCREEN_VISUAL_QA.md`** (**`/`** / **`index.php`**). Narrative readiness → **`09_COMPLETION_GATE.md`**.
+**Current step:** human **QA only** — execute **`07_SPACING_QA.md`** + **`08_VISUAL_QA_AFTER.md`** + **`10_BROWSER_VIEWPORT_QA.md`**; dashboard **`03_MASTER_SCREEN_VISUAL_QA.md`** (**`/`** / **`index.php`**). Narrative readiness → **`09_COMPLETION_GATE.md`**.
