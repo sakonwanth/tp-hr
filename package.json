@@ -12,7 +12,9 @@
     "test:e2e:api": "playwright test tests/e2e/health.spec.cjs tests/e2e/api-guest.spec.cjs",
     "test:e2e:ci": "PLAYWRIGHT_SKIP_TABLET=1 playwright test",
     "test:e2e:visual": "PLAYWRIGHT_VISUAL=1 playwright test",
-    "verify:shell-cache": "bash scripts/verify-native-shell-cache.sh"
+    "verify:shell-cache": "bash scripts/verify-native-shell-cache.sh",
+    "verify:ios26-pages": "bash scripts/verify-ios26-master-screen.sh",
+    "verify:static-ui": "bash scripts/verify-native-shell-cache.sh && bash scripts/verify-ios26-master-screen.sh"
   },
   "repository": {
     "type": "git",

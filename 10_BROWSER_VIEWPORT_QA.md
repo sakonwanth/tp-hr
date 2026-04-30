@@ -96,4 +96,4 @@ chmod +x scripts/verify-native-shell-cache.sh
 ./scripts/verify-native-shell-cache.sh
 ```
 
-Expect **`OK`** — every **`native-shell.css`** loader uses **`?v=15`** (override with **`NATIVE_SHELL_CACHE=…`** when you intentionally bump). The same check runs in **GitHub Actions** (`.github/workflows/ci.yml`) after **`npm ci`**.
+Expect **`OK`** — every **`native-shell.css`** loader uses **`?v=15`** (override with **`NATIVE_SHELL_CACHE=…`** when you intentionally bump). The same **`?v=`** check plus **`tp-ios-master-screen`** on ESS + **`hr/*.php`** is **`npm run verify:static-ui`** (runs on **GitHub Actions** **`.github/workflows/ci.yml`** and **`deploy.yml` validate** after **`npm ci`**).

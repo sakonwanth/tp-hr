@@ -4,7 +4,7 @@
 
 รันเฉพาะชุด **HTTP smoke** (`api/health.php` + 401 JSON จาก `api-guest`): `npm run test:e2e:api`
 
-ตรวจความสอดคล้อง cache-bust **`native-shell.css`**: `npm run verify:shell-cache` (รันใน **CI** หลัง `npm ci`; ค่าคาดหวังค่าเริ่ม **15** · เปลี่ยนด้วย **`NATIVE_SHELL_CACHE`** ใน shell ถ้าต้องการ)
+ตรวจแบบ static (ไม่ต้องมี PHP server): **`npm run verify:static-ui`** (**`native-shell.css`** **`?v=`** + **`tp-ios-master-screen`** บนหน้า ESS และ **`hr/*.php`**) · ชิ้นย่อย **`verify:shell-cache`** / **`verify:ios26-pages`** · รันใน **CI** หลัง **`npm ci`**
 
 ## สรุปไฟล์
 

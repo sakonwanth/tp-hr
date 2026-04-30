@@ -51,6 +51,7 @@
 |------|---------|
 | **Automated full viewport matrix** | **Not in repo** — ต้องทำ manual / Playwright ภายนอกชุดที่มีอยู่ |
 | **CSS overflow / padding safeguards** | **PASS (static)** — ตามตารางข้อ 2 |
+| **`verify:static-ui` (CI)** | **`native-shell` `?v=`** + **`tp-ios-master-screen`** บนหน้า ESS + **`hr/*.php`** — รันอัตโนมัติหลัง **`npm ci`** |
 | **Human viewport + visual/spacing gates** | **PENDING** — **`07`** · **`08`** · **`10`** · **`03`** |
 
 เมื่อ manual ผ่าน ให้ระบุวันที่ในแถว **`08`** / log **`10`** และ (ถ้าต้องการ) อัปเดตแถว **§1** ด้านบนเป็น **PASS**.

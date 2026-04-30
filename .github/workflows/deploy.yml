@@ -29,10 +29,10 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-      - name: npm ci — native-shell cache consistency
+      - name: npm ci — static UI guards (native-shell ?v= + IOS26 page shells)
         run: |
           npm ci
-          npm run verify:shell-cache
+          npm run verify:static-ui
 
   deploy:
     name: Deploy (SSH)
