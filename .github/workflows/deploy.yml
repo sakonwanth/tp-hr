@@ -12,7 +12,7 @@ env:
 
 jobs:
   validate:
-    name: Validate PHP
+    name: Validate PHP & shell cache bump
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,6 +24,15 @@ jobs:
         run: |
           find . -name "*.php" -not -path "./vendor/*" -print0 | xargs -0 -n1 php -l
           echo "OK"
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: npm ci — native-shell cache consistency
+        run: |
+          npm ci
+          npm run verify:shell-cache
 
   deploy:
     name: Deploy (SSH)
