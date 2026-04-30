@@ -31,4 +31,4 @@ Statuses: **`NOT_STARTED` · `IN_PROGRESS` · `REFACTORED` · `COMPLETE` · `REG
 
 Optional deep-dive rows (**Page** · **Route** · **File** · **Components** · **Visual** · **UX** · **Spacing** · **Mobile** · **Tablet** · **Regression**) — add when a release or defect triage needs a paper trail.
 
-**Current step:** human **QA only** — execute **`07_SPACING_QA.md`** and **`08_VISUAL_QA_AFTER.md`**; dashboard-only gate remains **`03_MASTER_SCREEN_VISUAL_QA.md`** for **`index.php`**.
+**Current step:** human **QA only** — execute **`07_SPACING_QA.md`** and **`08_VISUAL_QA_AFTER.md`**; dashboard-only gate **`03_MASTER_SCREEN_VISUAL_QA.md`** (**`/`** / **`index.php`**). Narrative readiness → **`09_COMPLETION_GATE.md`**.

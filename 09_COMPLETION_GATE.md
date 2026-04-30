@@ -4,40 +4,43 @@
 
 | Layer | Status | Notes |
 |-------|--------|-------|
-| **Wave 1** — Shell, tokens, `native-shell.css?v=13`, component registry | **COMPLETE** | See `06_IMPLEMENTATION_PROGRESS.md` |
-| **Wave 2** — ESS: `index.php`, `checkin.php`, `leave.php`, `modules/.../request_form.php`, `leave_history.php` | **REFACTORED** (markup/tokens) | Manual QA: `07_PAGE_REGRESSION_AFTER.md` |
-| **Wave 3** — `hr/*.php` (13 admin pages) | **REFACTORED** (markup/tokens) | Manual QA: `07` |
-| **Wave 4** — Remaining ESS (`dayoff_schedule`, `attendance_history`, `certificate`, `payslip`, `profile`; `checkin` parity sweep) | **REFACTORED** (markup/tokens) | Manual QA: **`07`** Wave 4 rows |
-| **Full product / device gate** — viewport polish, overflow, nav vs CTA | **NOT PASSED** | Requires human QA on target breakpoints |
+| **Shell + cache** — `native-shell.css` **v15**, **`?v=15`** everywhere shell loads | **COMPLETE** | `templates/header.php` · `login.php` · `verify_document.php` · `certificate_print.php` — authoritative table · **`06_IMPLEMENTATION_PROGRESS.md`** |
+| **Waves 6–9** — ESS + HRA + public **`verify_document`** + **`certificate_print`** screen chrome | **REFACTORED** | Per **`06`**; auth, APIs, contracts unchanged intentionally |
+| **Full product gate** — spacing, overflow, nav vs body, typography, tables→cards XS | **NOT PASSED** | **Human QA** · **`07_SPACING_QA.md`** + **`08_VISUAL_QA_AFTER.md`** · dashboard **`03_MASTER_SCREEN_VISUAL_QA.md`** |
 
-**Refactor discipline:** No intentional changes to auth, API contracts, form field names, or modal/JS hook IDs in Waves **2–4**.
+Older wave labels (**1–4**) and **`07_PAGE_REGRESSION_AFTER.md`** remain as historical breadcrumbs; **`07`** + **`08`** supersede regression-only runs for IOS26 fidelity.
 
 ---
 
-## Metrics snapshot (qualitative)
+## Metrics snapshot
 
 | Metric | Value |
-|--------|--------|
-| Waves **1–3** shipped (per `06`) | Shell + ESS hot paths + **`hr/*`** stacks |
-| Automated browser QA in CI | Not in scope for this rollout |
-| Device viewport matrix | **Pending** (see `07`) |
+|--------|-------|
+| Refactor waves per **`06`** | Shell **v15** + Waves **6–9** shipped |
+| Automated browser/UI proof in CI | API / route smoke (`tests/e2e`) optional; **no substitute** for device matrix |
+| Device viewport matrix | **Pending** — fill **`08`** matrices + **`03`** |
 
 ---
 
 ## Next actions (in order)
 
-1. Execute **`07_PAGE_REGRESSION_AFTER.md`** on Wave **2–4** routes (ESS + **`hr/*`**) — at least **375px** and one desktop width.
-2. Log findings; fix blockers or ticket non-blocking polish.
-3. Update **`08_FINAL_FULL_UI_AUDIT.md`** when the device/overflow/CTA matrix is actually run (closes the “audit gate” section there).
+1. Run **`08_VISUAL_QA_AFTER.md`** route matrices (**ESS**, **HRA**, **AUTH/PUB/print**) together with **`07_SPACING_QA.md`** global criteria where aligned.
+2. Run **`03_MASTER_SCREEN_VISUAL_QA.md`** for **`index.php`** (**`/`**) when validating the master dashboard shell.
+3. Log defects; fix **`native-shell`** / tokens before page‑one hacks; bump **`?v=`** if CSS changes ship.
+4. Use **`DEPLOY_CHECKLIST.md`** before/after each deploy touching shell or broad markup.
+
+**(Optional)** When QA is exercised end-to-end, add a dated note under **`06`** or annotate **`08_FINAL_FULL_UI_AUDIT.md`** if that audit file is still tracked for releases.
+
+---
 
 ## Sign-off shorthand
 
 | Claim | Allowed? |
-|-------|------------|
-| Merge/deploy UI refactors as in `06` | Yes, per normal release |
-| “All `04` / `06` tasks for Waves **1–4** done” | Yes, if **`04`** / **`06`** say so |
-| “Zero UI issues on all devices” | **No** until device QA is done or explicitly waived |
+|-------|----------|
+| Merge/deploy per **`06`** + normal review | Yes |
+| “IOS26 refactor waves in **`06`** are done” | Yes, matching **`06`** statuses |
+| “Zero UI issues on all devices/viewports” | **No** until **`07`** + **`08`** (+ **`03`**) PASS or waived in writing |
 
 ---
 
-*Aligned with `06_IMPLEMENTATION_PROGRESS.md`: 2026-04-28 — Waves **1–4** refactor rows marked **REFACTORED** / **COMPLETE**; device gate (**`07`**) remains **pending human**.*
+*Aligned with `06_IMPLEMENTATION_PROGRESS.md` (**2026-04-30**): engineering waves **COMPLETE**/`REFACTORED`; product gate remains **human QA** via **`07`** / **`08`** / **`03`***

@@ -46,4 +46,4 @@ Horizontal scroll · sticky CTA hidden under tab pill · **unreadable** blurred 
 - **Chrome slot:** `--tp-bottom-nav-slot` = `max(100px, calc(72px + 12px + safe-area))`.
 - **Header (mobile):** `.mobile-app-header.header-glass` stronger blur + saturation (`header.php` inline).
 
-**Human:** fill ✅ / ❌ in the matrix above before closing Phase 3 and starting Phase 6 page-by-page work.
+**Human QA:** Fill ✅ / ❌ and the device matrix when validating **`/`** · mirror the same **`/`** row in **`08_VISUAL_QA_AFTER.md`** for traceability beside other ESS routes.
