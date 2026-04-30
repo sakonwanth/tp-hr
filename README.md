@@ -94,6 +94,10 @@ tp-hr/
 - [HR System Architecture](docs/HR_SYSTEM_ARCHITECTURE.md) - โครงสร้างระบบทั้งหมด
 - [Playwright E2E](docs/E2E_PLAYWRIGHT.md) — สเปก + ตัวแปร env; ดัชนีสเปกใน [`tests/e2e/README.md`](tests/e2e/README.md)
 
+### Deploy และ IOS26 QA
+
+- **[DEPLOY_CHECKLIST.md](DEPLOY_CHECKLIST.md)** — เช็คก่อน/หลัง deploy (cache-bust **`native-shell.css`** · smoke ESS/HRA/login/verify · ชี้ไป **`06` / `07` / `08` / `03`**)
+
 ## 🛠️ Development
 
 ### รันในโหมด Development

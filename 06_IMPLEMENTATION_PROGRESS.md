@@ -23,6 +23,8 @@ Statuses: **`NOT_STARTED` · `IN_PROGRESS` · `REFACTORED` · `COMPLETE` · `REG
 
 **Regression:** PHPUnit / API untouched. Viewport QA: **`03`** · **`07_SPACING_QA.md`** (**route list → `08`**). **`08_VISUAL_QA_AFTER.md`** — per-route **ESS · HRA · PUB/AUTH** check matrices.
 
+**Deploy:** **[`DEPLOY_CHECKLIST.md`](DEPLOY_CHECKLIST.md)** — ก่อน deploy: cache-bust **`native-shell.css`** สม่ำเสมอ · หลัง deploy smoke ESS/HRA/login/verify พร้อม rollback note.
+
 ---
 
 ### Per-route detail (Phase 9)
