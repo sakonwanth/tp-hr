@@ -4,6 +4,8 @@
 **Shell:** `assets/css/native-shell.css` **v15** (`templates/header.php` / `login.php`)  
 **Statuses:** ✅ Pass · ❌ Fail (block Phase 6 wave until fixed)
 
+After full IOS26 rollout, also record the **`/`** row in **`08_VISUAL_QA_AFTER.md`** so dashboard regressions stay traceable next to other ESS routes.
+
 | # | Question | ✅ / ❌ | Notes |
 |---|----------|---------|-------|
 | 1 | Looks like a polished **native-feel mobile app** (not a generic web admin table)? | | |

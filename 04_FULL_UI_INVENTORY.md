@@ -34,6 +34,6 @@ That file lists:
 
 ## Delta vs earlier exports
 
-- **2026-04-30:** HR route **`hr/attendance_adjustments.php`** added to **`01_FULL_UI_INVENTORY.md`** · shell reference bumped to **`?v=15`**.
+- **2026-04-30:** HR route **`hr/attendance_adjustments.php`** in **`01`** · shell **`?v=15`** · IOS26 waves **6–9** complete per **`06`** · **`08_VISUAL_QA_AFTER.md`** added for per-route **`07`/`08`** QA (next human gate).
 
 Phase **5** mapping: **[`05_PAGE_TO_IOS26_PATTERN_MAP.md`](05_PAGE_TO_IOS26_PATTERN_MAP.md)** · progress: **[`06_IMPLEMENTATION_PROGRESS.md`](06_IMPLEMENTATION_PROGRESS.md)**.

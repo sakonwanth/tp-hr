@@ -27,4 +27,6 @@ Statuses: **`NOT_STARTED` · `IN_PROGRESS` · `REFACTORED` · `COMPLETE` · `REG
 
 ### Per-route detail (Phase 9)
 
-Expand with: **Page** · **Route** · **File** · **Components** · **Visual** · **UX** · **Spacing** · **Mobile** · **Tablet** · **Regression**.
+Optional deep-dive rows (**Page** · **Route** · **File** · **Components** · **Visual** · **UX** · **Spacing** · **Mobile** · **Tablet** · **Regression**) — add when a release or defect triage needs a paper trail.
+
+**Current step:** human **QA only** — execute **`07_SPACING_QA.md`** and **`08_VISUAL_QA_AFTER.md`**; dashboard-only gate remains **`03_MASTER_SCREEN_VISUAL_QA.md`** for **`index.php`**.

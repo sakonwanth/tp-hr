@@ -80,4 +80,6 @@ Legend: **UI type** ≈ Employee self-service (`ESS`), HR admin (`HRA`), public 
 - **Standalone / auth screens:** ~4 login/verify/print helpers  
 - **ESS + HR templated shells:** ~24 primary controller files (+ embedded `modules/` partials)
 
-**Needs refactor (`yes`):** treat all P0/P1/P2 screens as **`NEEDS_REFACTOR`** until individually marked complete in **`06_IMPLEMENTATION_PROGRESS.md`**.
+**IOS26 implementation:** waves **MASTER + 6–9** are marked **REFACTORED** or **COMPLETE** in **`06_IMPLEMENTATION_PROGRESS.md`** (shell, ESS, HRA, `verify_document`, `certificate_print`). The **`Refactor later`** column above is the Phase 4 inventory schema (historical **yes** flags) — **authoritative status is `06`**, not this column alone.
+
+**Next gate (human):** run **`07_SPACING_QA.md`** + **`08_VISUAL_QA_AFTER.md`** route matrices; keep **`03_MASTER_SCREEN_VISUAL_QA.md`** for **`index.php`** dashboard acceptance.
