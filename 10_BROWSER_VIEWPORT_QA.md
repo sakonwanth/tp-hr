@@ -95,4 +95,4 @@ chmod +x scripts/verify-native-shell-cache.sh
 ./scripts/verify-native-shell-cache.sh
 ```
 
-Expect **`OK`** — every **`native-shell.css`** loader uses **`?v=15`** (override with **`NATIVE_SHELL_CACHE=…`** when you intentionally bump).
+Expect **`OK`** — every **`native-shell.css`** loader uses **`?v=15`** (override with **`NATIVE_SHELL_CACHE=…`** when you intentionally bump). The same check runs in **GitHub Actions** (`.github/workflows/ci.yml`) after **`npm ci`**.

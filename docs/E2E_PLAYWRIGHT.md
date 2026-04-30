@@ -36,10 +36,11 @@ npx playwright install chromium
 | `npm run test:e2e:ci` | Guest + auth **without** tablet projects (`PLAYWRIGHT_SKIP_TABLET=1`) — quicker for CI. |
 | `npm run test:e2e:api` | **`health`** + **`api-guest`** (`request`-only subset). |
 | `npm run test:e2e:visual` | Same as **`PLAYWRIGHT_VISUAL=1 npm run test:e2e`**. |
+| `npm run verify:shell-cache` | Fails PRs if **`native-shell.css`** loaders use inconsistent **`?v=`** (default **15**) — see **`10_BROWSER_VIEWPORT_QA.md`**. |
 
 ## CI (GitHub Actions)
 
-**`.github/workflows/ci.yml`** runs **`npm ci`**, **`npx playwright install chromium`**, and **`npx playwright test --list`** so a broken config or bad imports fail the build **without** a running PHP server. Full browser E2E against XAMPP remains a local (or integration host) step with **`PLAYWRIGHT_BASE_URL`** and optional auth env.
+**`.github/workflows/ci.yml`** runs **`npm ci`**, **`npm run verify:shell-cache`** (every PHP loader of **`native-shell.css`** shares the same **`?v=`**), **`npx playwright install chromium`**, and **`npx playwright test --list`** so a broken config or bad imports fail the build **without** a running PHP server. Full browser E2E against XAMPP remains a local (or integration host) step with **`PLAYWRIGHT_BASE_URL`** and optional auth env.
 
 ## Authenticated flows (optional env)
 

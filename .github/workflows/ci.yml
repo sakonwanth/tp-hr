@@ -38,5 +38,6 @@ jobs:
       - name: Playwright — install & list tests (no server — validates config & imports)
         run: |
           npm ci
+          npm run verify:shell-cache
           npx playwright install chromium
           npx playwright test --list
