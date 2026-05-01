@@ -111,6 +111,7 @@ require_once BASE_PATH . '/core/ApiAuth.php';
 require_once BASE_PATH . '/core/WfhStamp.php';
 require_once BASE_PATH . '/core/Services/AttendanceService.php';
 require_once BASE_PATH . '/core/Services/AttendanceAdjustmentService.php';
+require_once BASE_PATH . '/core/Services/OutsideAttendanceService.php';
 
 // Phase 7: Structured logging + audit log
 if (TP_COMMON_AVAILABLE) {

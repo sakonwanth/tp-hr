@@ -64,19 +64,16 @@ $body = ApiAuth::input();
 $reviewerId = apiKeyResolveActorForApi($pdo, ApiAuth::currentKey(), $body, 'reviewer_id', MANAGER_ROLES);
 $remarks = trim($body['remarks'] ?? '');
 
-$stmt = $pdo->prepare("SELECT id, status FROM hr_attendance_outside_requests WHERE id = ? LIMIT 1");
-$stmt->execute([$id]);
-$cur = $stmt->fetch(PDO::FETCH_ASSOC);
-if (!$cur) ApiAuth::fail(404, 'Not found');
-if ($cur['status'] !== 'PENDING') ApiAuth::fail(409, 'Already processed');
+$service = new OutsideAttendanceService($pdo);
+try {
+    $result = $action === 'approve'
+        ? $service->approve($id, $reviewerId, $remarks)
+        : $service->reject($id, $reviewerId, $remarks);
+} catch (OutsideAttendanceException $e) {
+    ApiAuth::fail($e->httpStatus(), $e->getMessage());
+} catch (Throwable $e) {
+    tpHrLogException($e, 'api/v1/outside');
+    ApiAuth::fail(500, 'Internal server error');
+}
 
-$newStatus = $action === 'approve' ? 'APPROVED' : 'REJECTED';
-if ($newStatus === 'REJECTED' && $remarks === '') ApiAuth::fail(400, 'remarks required for reject');
-
-$pdo->prepare("
-    UPDATE hr_attendance_outside_requests
-    SET status=?, reviewed_by=?, reviewed_at=NOW(), review_remarks=?
-    WHERE id=?
-")->execute([$newStatus, $reviewerId, $remarks ?: null, $id]);
-
-ApiAuth::success(['data' => ['id' => $id, 'status' => $newStatus]]);
+ApiAuth::success(['data' => $result]);

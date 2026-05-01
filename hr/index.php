@@ -43,6 +43,11 @@ $stmtDoc = $pdo->prepare("SELECT COUNT(*) FROM hr_document_requests WHERE status
 $stmtDoc->execute();
 $pendingDocs = $stmtDoc->fetchColumn();
 
+// Pending outside-location attendance requests
+$stmtOutside = $pdo->prepare("SELECT COUNT(*) FROM hr_attendance_outside_requests WHERE status = 'PENDING'");
+$stmtOutside->execute();
+$pendingOutside = $stmtOutside->fetchColumn();
+
 // Recent leaves to approve
 $stmtRecentLeaves = $pdo->prepare("
     SELECT lr.*, lt.name as leave_type_name, lt.color as color_code,
@@ -112,7 +117,7 @@ include dirname(__DIR__) . '/templates/header.php';
 </header>
 
 <!-- Quick Stats -->
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8 min-w-0 max-w-full">
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 md:gap-6 mb-6 md:mb-8 min-w-0 max-w-full">
     <div class="stat-card tp-native-summary-card group min-w-0">
         <div class="flex items-center gap-4">
             <div class="stat-icon bg-emerald-500/15 border border-emerald-400/25 transition-colors">
@@ -150,6 +155,19 @@ include dirname(__DIR__) . '/templates/header.php';
             </div>
         </div>
         <a href="leaves.php" class="text-violet-400 text-sm hover:underline mt-3 inline-block touch-manipulation font-medium">ดูทั้งหมด →</a>
+    </div>
+
+    <div class="stat-card tp-native-summary-card group min-w-0">
+        <div class="flex items-center gap-4">
+            <div class="stat-icon bg-sky-500/15 border border-sky-400/25 transition-colors">
+                <i class="fas fa-location-dot text-sky-400 text-2xl" aria-hidden="true"></i>
+            </div>
+            <div class="min-w-0 flex-1">
+                <p class="text-slate-300 text-sm">รอนอกสถานที่</p>
+                <p class="text-2xl font-bold text-white tabular-nums"><?php echo (int)$pendingOutside; ?></p>
+            </div>
+        </div>
+        <a href="outside_attendance.php" class="text-sky-400 text-sm hover:underline mt-3 inline-block touch-manipulation font-medium">ดูทั้งหมด →</a>
     </div>
 
     <div class="stat-card tp-native-summary-card group min-w-0">

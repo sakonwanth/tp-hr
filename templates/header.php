@@ -5,6 +5,7 @@
 $current_user = Auth::user();
 $isHR = hr_can_access_hr_dashboard();
 $isCEO = isCEOOrAbove();
+$canApproveOutsideAttendance = Auth::hasRole(MANAGER_ROLES);
 $current_page = $current_page ?? '';
 $cp_shell = $current_page;
 $tp_hr_is_hr_route = is_string($cp_shell) && strncmp($cp_shell, 'hr-', 3) === 0;
@@ -243,11 +244,11 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             max-width: 100%;
             min-width: 0;
             padding: 12px 16px;
-            min-height: 54px;
+            min-height: 56px;
             font-size: 16px;
             background: rgba(15, 23, 42, 0.8);
             border: 1px solid rgba(148, 163, 184, 0.2);
-            border-radius: 10px;
+            border-radius: var(--tp-radius-button);
             color: #fff;
             transition: all 0.2s ease;
             touch-action: manipulation;
@@ -428,7 +429,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             justify-content: center;
             min-height: 48px;
             padding: 0 18px;
-            border-radius: 11px;
+            border-radius: var(--tp-radius-small-control);
             border: none;
             background: rgba(255, 255, 255, 0.1);
             color: #f1f5f9;
@@ -489,9 +490,9 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
+            width: 48px;
+            height: 48px;
+            border-radius: var(--tp-radius-small-control);
             border: 1px solid rgba(148, 163, 184, 0.18);
             background: rgba(30, 41, 59, 0.65);
             color: #f1f5f9;
@@ -1041,6 +1042,13 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
                 <i class="fas fa-calendar-week"></i>
                 <span>วันหยุดประจำสัปดาห์</span>
             </a>
+
+            <?php if ($canApproveOutsideAttendance && !$isHR): ?>
+            <a href="/hr/outside_attendance.php" class="nav-item <?php echo $current_page === 'hr-outside-attendance' ? 'active' : ''; ?>">
+                <i class="fas fa-location-dot"></i>
+                <span>อนุมัตินอกสถานที่</span>
+            </a>
+            <?php endif; ?>
             
             <a href="/profile.php" class="nav-item <?php echo $current_page === 'profile' ? 'active' : ''; ?>">
                 <i class="fas fa-user"></i>
@@ -1066,6 +1074,11 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
                 <a href="/hr/attendance.php" class="nav-item <?php echo $current_page === 'hr-attendance' ? 'active' : ''; ?>">
                     <i class="fas fa-user-clock"></i>
                     <span>จัดการลงเวลา</span>
+                </a>
+
+                <a href="/hr/outside_attendance.php" class="nav-item <?php echo $current_page === 'hr-outside-attendance' ? 'active' : ''; ?>">
+                    <i class="fas fa-location-dot"></i>
+                    <span>อนุมัตินอกสถานที่</span>
                 </a>
                 
                 <a href="/hr/leaves.php" class="nav-item <?php echo $current_page === 'hr-leaves' ? 'active' : ''; ?>">
@@ -1193,6 +1206,12 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
                     <i class="fas fa-calendar-week" aria-hidden="true"></i>
                     <span>วันหยุดประจำสัปดาห์</span>
                 </a>
+                <?php if ($canApproveOutsideAttendance && !$isHR): ?>
+                <a href="/hr/outside_attendance.php" class="mobile-menu-tile <?php echo $current_page === 'hr-outside-attendance' ? 'active' : ''; ?>">
+                    <i class="fas fa-location-dot" aria-hidden="true"></i>
+                    <span>อนุมัตินอกสถานที่</span>
+                </a>
+                <?php endif; ?>
                 <a href="/profile.php" class="mobile-menu-tile <?php echo $current_page === 'profile' ? 'active' : ''; ?>">
                     <i class="fas fa-user" aria-hidden="true"></i>
                     <span>ข้อมูลส่วนตัว</span>
@@ -1217,6 +1236,10 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
                     <a href="/hr/attendance.php" class="mobile-menu-tile <?php echo $current_page === 'hr-attendance' ? 'active' : ''; ?>">
                         <i class="fas fa-user-clock" aria-hidden="true"></i>
                         <span>จัดการลงเวลา</span>
+                    </a>
+                    <a href="/hr/outside_attendance.php" class="mobile-menu-tile <?php echo $current_page === 'hr-outside-attendance' ? 'active' : ''; ?>">
+                        <i class="fas fa-location-dot" aria-hidden="true"></i>
+                        <span>อนุมัตินอกสถานที่</span>
                     </a>
                     <a href="/hr/leaves.php" class="mobile-menu-tile <?php echo $current_page === 'hr-leaves' ? 'active' : ''; ?>">
                         <i class="fas fa-calendar-check" aria-hidden="true"></i>

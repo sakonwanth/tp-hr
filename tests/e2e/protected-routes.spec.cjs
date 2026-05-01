@@ -16,6 +16,7 @@ const PROTECTED_ROUTES = [
   { name: 'day-off schedule', path: 'dayoff_schedule.php' },
   { name: 'hr leaves mgmt', path: 'hr/leaves.php' },
   { name: 'hr attendance mgmt', path: 'hr/attendance.php' },
+  { name: 'hr outside attendance approvals', path: 'hr/outside_attendance.php' },
   { name: 'hr documents', path: 'hr/documents.php' },
   { name: 'hr employee view', path: 'hr/employee_view.php' },
   { name: 'hr employee attendance', path: 'hr/employee_attendance.php' },
@@ -31,7 +32,7 @@ const PROTECTED_ROUTES = [
 test.describe('Protected routes (guest)', () => {
   for (const { name, path } of PROTECTED_ROUTES) {
     test(`${name} (${path}) sends unauthenticated visitor to a login page`, async ({ page }) => {
-      await page.goto(path, { waitUntil: 'load' });
+      await page.goto(path, { waitUntil: 'domcontentloaded' });
       await expect(page).toHaveURL(/login\.php/i);
     });
   }

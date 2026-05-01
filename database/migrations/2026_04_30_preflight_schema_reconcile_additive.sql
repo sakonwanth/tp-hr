@@ -21,6 +21,10 @@ ALTER TABLE hr_attendances ADD COLUMN IF NOT EXISTS late_excused_reason TEXT NUL
 ALTER TABLE hr_attendances ADD COLUMN IF NOT EXISTS late_notified_at DATETIME NULL AFTER late_excused_reason;
 ALTER TABLE hr_attendances ADD COLUMN IF NOT EXISTS is_offsite TINYINT(1) NOT NULL DEFAULT 0 AFTER check_out_ip;
 ALTER TABLE hr_attendances ADD COLUMN IF NOT EXISTS offsite_status ENUM('PENDING','APPROVED','REJECTED') NULL AFTER is_offsite;
+ALTER TABLE hr_attendances ADD COLUMN IF NOT EXISTS offsite_reason TEXT NULL AFTER offsite_status;
+ALTER TABLE hr_attendances ADD COLUMN IF NOT EXISTS offsite_approved_by INT NULL AFTER offsite_reason;
+ALTER TABLE hr_attendances ADD COLUMN IF NOT EXISTS offsite_approved_at DATETIME NULL AFTER offsite_approved_by;
+ALTER TABLE hr_attendances ADD COLUMN IF NOT EXISTS offsite_remarks TEXT NULL AFTER offsite_approved_at;
 CREATE INDEX IF NOT EXISTS idx_hr_att_planned ON hr_attendances (user_id, attendance_date, planned_start_time);
 
 -- -------------------------------------------------------------------

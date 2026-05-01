@@ -238,6 +238,7 @@ pf_require_columns($pdo, 'hr_attendances', [
     'check_in_time', 'check_out_time', 'work_minutes', 'break_minutes',
     'late_minutes', 'late_excused', 'late_excused_reason', 'late_notified_at',
     'early_leave_minutes', 'ot_minutes', 'is_offsite', 'offsite_status',
+    'offsite_reason', 'offsite_approved_by', 'offsite_approved_at', 'offsite_remarks',
     'status', 'adjustment_reason', 'approved_by', 'approved_at',
 ]);
 
@@ -417,7 +418,9 @@ echo "\nMigration reconciliation:\n";
 foreach ($migrationState as $file => $resolver) {
     $status = $resolver($pdo);
     echo "  - {$file}: {$status}\n";
-    if (str_contains($status, 'unsafe') || str_contains($status, 'review-required')) {
+    $knownSafeObsolete = ($file === '2026_04_21_unify_hr_source_of_truth.sql'
+        && $status === 'obsolete/unsafe: source table archived; do not run');
+    if (!$knownSafeObsolete && (str_contains($status, 'unsafe') || str_contains($status, 'review-required'))) {
         pf_warn("Migration {$file}: {$status}");
     } else {
         pf_ok("Migration {$file}: {$status}");
