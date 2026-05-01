@@ -12,8 +12,6 @@ if (Auth::check()) {
     redirect($redirect);
 }
 
-$pdo = Database::getInstance()->getConnection();
-
 // System settings
 $system_name = 'TP-HR';
 $system_tagline = 'Human Resource Management';
@@ -158,12 +156,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .input-field {
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
+            border-radius: var(--tp-radius-button);
             color: white;
             transition: all 0.3s ease;
             font-size: 16px !important;
             touch-action: manipulation;
-            min-height: 52px;
+            min-height: 56px;
             box-sizing: border-box;
         }
 
@@ -180,10 +178,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .btn-login {
             background: #7c3aed;
-            border-radius: 12px;
+            border-radius: var(--tp-radius-button);
             transition: background 0.2s ease, box-shadow 0.2s ease;
             font-weight: 600;
-            min-height: 56px;
+            min-height: 58px;
             touch-action: manipulation;
             box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
         }
@@ -199,10 +197,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .btn-line {
             background: #06C755;
-            border-radius: 12px;
+            border-radius: var(--tp-radius-button);
             font-weight: 600;
             transition: all 0.3s ease;
-            min-height: 56px;
+            min-height: 54px;
             touch-action: manipulation;
         }
 
