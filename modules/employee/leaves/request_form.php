@@ -61,7 +61,7 @@ $leave_types_form = $stmt->fetchAll();
             </div>
             
             <!-- Date Range -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 tp-native-form-group min-w-0 max-w-full">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 tp-native-form-group min-w-0 max-w-full">
                 <div class="min-w-0 max-w-full">
                     <label class="block text-white/80 text-sm font-medium mb-2">วันที่เริ่มต้น <span class="text-red-400">*</span></label>
                     <div class="input-date-shell">
@@ -79,7 +79,7 @@ $leave_types_form = $stmt->fetchAll();
                 </div>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 tp-native-form-group min-w-0">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 tp-native-form-group min-w-0">
                 <div class="min-w-0 max-w-full">
                     <label class="block text-white/80 text-sm font-medium mb-2">วันที่สิ้นสุด <span class="text-red-400">*</span></label>
                     <div class="input-date-shell">
@@ -138,7 +138,7 @@ $leave_types_form = $stmt->fetchAll();
             </div>
             
             <!-- Buttons -->
-            <div class="flex flex-col-reverse md:flex-row gap-4 md:gap-5 pt-2">
+            <div class="flex flex-col-reverse md:flex-row gap-5 md:gap-6 pt-2">
                 <a href="leave.php" class="touch-manipulation flex-1 min-h-[54px] inline-flex items-center justify-center py-3 bg-white/10 hover:bg-white/20 text-white text-center rounded-[var(--tp-radius-button)] transition-colors font-medium border-0">
                     ยกเลิก
                 </a>

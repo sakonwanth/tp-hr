@@ -306,7 +306,7 @@ endif; ?>
     <?php else: ?>
     <div class="space-y-3">
         <?php foreach ($emergencyContacts as $contact): ?>
-        <div class="tp-ios-attendance-panel p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="tp-ios-attendance-panel p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
             <div class="flex items-start sm:items-center gap-4 min-w-0">
                 <div class="w-12 h-12 rounded-full bg-violet-600/25 flex items-center justify-center shrink-0">
                     <i class="fas fa-user text-violet-400 text-xl" aria-hidden="true"></i>
@@ -364,7 +364,7 @@ endif; ?>
         ];
         $age = $member['birth_date'] ? (new DateTime())->diff(new DateTime($member['birth_date']))->y : '-';
         ?>
-        <div class="tp-ios-attendance-panel p-4">
+        <div class="tp-ios-attendance-panel p-5">
             <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
                     <p class="text-white font-medium break-words"><?php echo htmlspecialchars($member['name']); ?></p>
@@ -447,7 +447,7 @@ endif; ?>
     <?php else: ?>
     <div class="space-y-3">
         <?php foreach ($educations as $edu): ?>
-        <div class="tp-ios-attendance-panel p-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div class="tp-ios-attendance-panel p-5 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6">
             <div class="flex gap-4 min-w-0">
                 <div class="w-12 h-12 rounded-[var(--tp-ios-card-radius)] bg-blue-500/20 flex items-center justify-center flex-shrink-0">
                     <i class="fas fa-graduation-cap text-blue-400 text-xl" aria-hidden="true"></i>
@@ -501,7 +501,7 @@ endif; ?>
     <?php else: ?>
     <div class="space-y-3">
         <?php foreach ($workHistory as $work): ?>
-        <div class="tp-ios-attendance-panel p-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div class="tp-ios-attendance-panel p-5 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6">
             <div class="flex gap-4 min-w-0">
                 <div class="w-12 h-12 rounded-[var(--tp-ios-card-radius)] bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
                     <i class="fas fa-building text-emerald-400 text-xl" aria-hidden="true"></i>

@@ -451,7 +451,7 @@ try {
             'paid' => 'จ่ายแล้ว'
         ];
         ?>
-        <div class="tp-ios-attendance-panel p-4 md:p-5 min-w-0 transition-colors hover:bg-white/[0.07]">
+        <div class="tp-ios-attendance-panel p-5 md:p-6 min-w-0 transition-colors hover:bg-white/[0.07]">
             <div class="flex flex-col gap-4 min-w-0">
                 <div class="flex items-start gap-4 min-w-0">
                     <div class="w-12 h-12 rounded-[var(--tp-ios-card-radius)] bg-violet-600/20 flex items-center justify-center flex-shrink-0">

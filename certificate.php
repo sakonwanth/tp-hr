@@ -341,7 +341,7 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
     ?>
     <div class="space-y-6 p-3 md:p-4 min-w-0">
         <?php foreach ($myRequests as $req): ?>
-        <div class="tp-ios-attendance-panel p-4 md:p-5 hover:bg-white/[0.07] transition-colors min-w-0">
+        <div class="tp-ios-attendance-panel p-5 md:p-6 hover:bg-white/[0.07] transition-colors min-w-0">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 min-w-0">
                 <div class="flex items-center gap-4 min-w-0">
                     <div class="w-12 h-12 rounded-[var(--tp-ios-card-radius)] bg-violet-600/20 flex items-center justify-center flex-shrink-0">

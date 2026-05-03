@@ -257,7 +257,7 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
                 ? floor($att['ot_minutes'] / 60) . ':' . str_pad($att['ot_minutes'] % 60, 2, '0', STR_PAD_LEFT)
                 : '-';
             ?>
-            <div class="tp-ios-attendance-panel p-4 min-w-0">
+            <div class="tp-ios-attendance-panel p-5 min-w-0">
                 <div class="flex items-start justify-between gap-3 min-w-0">
                     <div class="min-w-0 flex-1">
                         <div class="text-white font-semibold"><?php echo formatDateThai($day['date']); ?></div>

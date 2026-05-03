@@ -196,7 +196,7 @@ include 'templates/header.php';
     <!-- Mobile: card stack (< md) -->
     <div class="md:hidden space-y-6 min-w-0 p-1">
         <?php foreach ($requests as $req): ?>
-        <div class="tp-ios-attendance-panel p-4 min-w-0">
+        <div class="tp-ios-attendance-panel p-5 min-w-0">
             <div class="flex items-center justify-between gap-2 mb-2 min-w-0">
                 <div class="flex items-center gap-2 min-w-0">
                     <span class="w-2 h-2 rounded-full shrink-0" style="background-color: <?php echo htmlspecialchars($req['color_code'] ?? '#6B7280'); ?>"></span>
