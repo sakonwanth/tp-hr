@@ -1179,7 +1179,7 @@ include dirname(__DIR__) . '/templates/header.php';
         <div id="education-rows">
             <?php if (!empty($educationRecords)): ?>
                 <?php foreach ($educationRecords as $i => $edu): ?>
-                <div class="education-row border border-white/10 rounded-[var(--tp-ios-card-radius)] p-4 mb-3" data-index="<?php echo $i; ?>">
+                <div class="education-row border border-white/10 rounded-[var(--tp-ios-card-radius)] p-5 mb-3" data-index="<?php echo $i; ?>">
                     <div class="flex justify-between items-start mb-3">
                         <span class="text-white/50 text-sm">ลำดับที่ <?php echo $i + 1; ?></span>
                         <button type="button" onclick="this.closest('.education-row').remove()" class="text-red-400 hover:text-red-300 text-sm">
@@ -1247,7 +1247,7 @@ include dirname(__DIR__) . '/templates/header.php';
         <div id="work-history-rows">
             <?php if (!empty($workHistoryRecords)): ?>
                 <?php foreach ($workHistoryRecords as $i => $wh): ?>
-                <div class="wh-row border border-white/10 rounded-[var(--tp-ios-card-radius)] p-4 mb-3" data-index="<?php echo $i; ?>">
+                <div class="wh-row border border-white/10 rounded-[var(--tp-ios-card-radius)] p-5 mb-3" data-index="<?php echo $i; ?>">
                     <div class="flex justify-between items-start mb-3">
                         <span class="text-white/50 text-sm">ลำดับที่ <?php echo $i + 1; ?></span>
                         <button type="button" onclick="this.closest('.wh-row').remove()" class="text-red-400 hover:text-red-300 text-sm">
@@ -1311,7 +1311,7 @@ include dirname(__DIR__) . '/templates/header.php';
         <div id="family-rows">
             <?php if (!empty($familyRecords)): ?>
                 <?php foreach ($familyRecords as $i => $fam): ?>
-                <div class="fam-row border border-white/10 rounded-[var(--tp-ios-card-radius)] p-4 mb-3" data-index="<?php echo $i; ?>">
+                <div class="fam-row border border-white/10 rounded-[var(--tp-ios-card-radius)] p-5 mb-3" data-index="<?php echo $i; ?>">
                     <div class="flex justify-between items-start mb-3">
                         <span class="text-white/50 text-sm">ลำดับที่ <?php echo $i + 1; ?></span>
                         <button type="button" onclick="this.closest('.fam-row').remove()" class="text-red-400 hover:text-red-300 text-sm">
@@ -1568,7 +1568,7 @@ function addEducationRow() {
     const container = document.getElementById('education-rows');
     const idx = eduIndex++;
     const html = `
-    <div class="education-row border border-white/10 rounded-[var(--tp-ios-card-radius)] p-4 mb-3">
+    <div class="education-row border border-white/10 rounded-[var(--tp-ios-card-radius)] p-5 mb-3">
         <div class="flex justify-between items-start mb-3">
             <span class="text-white/50 text-sm">ใหม่</span>
             <button type="button" onclick="this.closest('.education-row').remove()" class="text-red-400 hover:text-red-300 text-sm">
@@ -1620,7 +1620,7 @@ function addWorkHistoryRow() {
     if (emptyMsg) emptyMsg.remove();
     const container = document.getElementById('work-history-rows');
     const html = `
-    <div class="wh-row border border-white/10 rounded-[var(--tp-ios-card-radius)] p-4 mb-3">
+    <div class="wh-row border border-white/10 rounded-[var(--tp-ios-card-radius)] p-5 mb-3">
         <div class="flex justify-between items-start mb-3">
             <span class="text-white/50 text-sm">ใหม่</span>
             <button type="button" onclick="this.closest('.wh-row').remove()" class="text-red-400 hover:text-red-300 text-sm">
@@ -1668,7 +1668,7 @@ function addFamilyRow() {
     const container = document.getElementById('family-rows');
     const idx = famIndex++;
     const html = `
-    <div class="fam-row border border-white/10 rounded-[var(--tp-ios-card-radius)] p-4 mb-3">
+    <div class="fam-row border border-white/10 rounded-[var(--tp-ios-card-radius)] p-5 mb-3">
         <div class="flex justify-between items-start mb-3">
             <span class="text-white/50 text-sm">ใหม่</span>
             <button type="button" onclick="this.closest('.fam-row').remove()" class="text-red-400 hover:text-red-300 text-sm">

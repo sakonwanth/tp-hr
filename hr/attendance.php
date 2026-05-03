@@ -162,26 +162,26 @@ include dirname(__DIR__) . '/templates/header.php';
 <!-- Stats -->
 <div class="grid grid-cols-2 md:grid-cols-5 gap-2 sm:gap-4 mb-6 min-w-0 max-w-full">
     <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['status' => '']))); ?>"
-       class="stat-card tp-native-summary-card rounded-[var(--tp-ios-card-radius)] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo !$status ? 'ring-2 ring-violet-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
+       class="stat-card tp-native-summary-card rounded-[var(--tp-ios-card-radius)] p-5 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo !$status ? 'ring-2 ring-violet-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
         <p class="text-slate-300 text-sm truncate">พนักงานทั้งหมด</p>
         <p class="text-2xl font-bold text-violet-400 tabular-nums mt-1"><?php echo (int)$stats['total_employees']; ?></p>
     </a>
     <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['status' => 'PRESENT']))); ?>"
-       class="stat-card tp-native-summary-card rounded-[var(--tp-ios-card-radius)] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'PRESENT' ? 'ring-2 ring-emerald-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
+       class="stat-card tp-native-summary-card rounded-[var(--tp-ios-card-radius)] p-5 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'PRESENT' ? 'ring-2 ring-emerald-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
         <p class="text-slate-300 text-sm truncate">เข้างาน</p>
         <p class="text-2xl font-bold text-emerald-400 tabular-nums mt-1"><?php echo (int)($stats['checked_in'] ?? 0); ?></p>
     </a>
     <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['status' => 'ABSENT']))); ?>"
-       class="stat-card tp-native-summary-card rounded-[var(--tp-ios-card-radius)] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'ABSENT' ? 'ring-2 ring-red-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
+       class="stat-card tp-native-summary-card rounded-[var(--tp-ios-card-radius)] p-5 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'ABSENT' ? 'ring-2 ring-red-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
         <p class="text-slate-300 text-sm truncate">ขาดงาน</p>
         <p class="text-2xl font-bold text-red-400 tabular-nums mt-1"><?php echo (int)$absentCount; ?></p>
     </a>
     <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['status' => 'LATE']))); ?>"
-       class="stat-card tp-native-summary-card rounded-[var(--tp-ios-card-radius)] p-4 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'LATE' ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
+       class="stat-card tp-native-summary-card rounded-[var(--tp-ios-card-radius)] p-5 min-w-0 overflow-hidden touch-manipulation transition-shadow <?php echo $status === 'LATE' ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>">
         <p class="text-slate-300 text-sm truncate">สาย</p>
         <p class="text-2xl font-bold text-amber-400 tabular-nums mt-1"><?php echo (int)($stats['late_count'] ?? 0); ?></p>
     </a>
-    <div class="stat-card tp-native-summary-card rounded-[var(--tp-ios-card-radius)] p-4 min-w-0 overflow-hidden md:col-span-1 col-span-2">
+    <div class="stat-card tp-native-summary-card rounded-[var(--tp-ios-card-radius)] p-5 min-w-0 overflow-hidden md:col-span-1 col-span-2">
         <p class="text-slate-300 text-sm truncate">เวลาเข้างานเฉลี่ย</p>
         <p class="text-2xl font-bold text-sky-300 tabular-nums mt-1"><?php echo $stats['avg_check_in'] ? substr($stats['avg_check_in'], 0, 5) : '--:--'; ?></p>
     </div>
@@ -241,7 +241,7 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <?php if ($holidayInfo || $isWeekend): ?>
-<div class="rounded-[var(--tp-ios-card-radius)] p-4 mb-4 <?php echo $holidayInfo ? 'bg-orange-500/20 border border-orange-500/30' : 'bg-blue-500/20 border border-blue-500/30'; ?>">
+<div class="rounded-[var(--tp-ios-card-radius)] p-5 mb-4 <?php echo $holidayInfo ? 'bg-orange-500/20 border border-orange-500/30' : 'bg-blue-500/20 border border-blue-500/30'; ?>">
     <div class="flex items-center gap-3">
         <i class="fas <?php echo $holidayInfo ? 'fa-calendar-check text-orange-400' : 'fa-calendar-day text-blue-400'; ?> text-xl" aria-hidden="true"></i>
         <div>
@@ -326,7 +326,7 @@ include dirname(__DIR__) . '/templates/header.php';
         $workHours = $rec['work_minutes'] ? number_format(((float)$rec['work_minutes']) / 60, 1) : '-';
         $otHours = ($rec['ot_minutes'] ?? 0) > 0 ? (int)floor(((int)$rec['ot_minutes']) / 60) : 0;
         ?>
-        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4">
+        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-5">
             <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
                     <a href="/hr/employee_attendance.php?id=<?php echo (int)$rec['id']; ?>"
@@ -539,7 +539,7 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <!-- Edit Modal -->
-<div id="edit-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+<div id="edit-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-5 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
     <div class="native-card tp-native-card w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] rounded-[var(--tp-ios-card-radius)]">
         <form id="edit-form" class="p-6">
             <h3 id="edit-modal-title" class="text-xl font-bold text-white mb-4">แก้ไขเวลาทำงาน</h3>
@@ -577,7 +577,7 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <!-- Location Modal -->
-<div id="location-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="location-modal-title">
+<div id="location-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-5 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="location-modal-title">
     <div class="native-card tp-native-card w-full max-w-lg my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] rounded-[var(--tp-ios-card-radius)]">
         <div class="p-4">
             <div class="flex items-center justify-between mb-4">
@@ -597,7 +597,7 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div id="delete-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+<div id="delete-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-5 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
     <div class="native-card tp-native-card w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] rounded-[var(--tp-ios-card-radius)]">
         <form id="delete-form" class="p-6">
             <div class="flex items-center gap-3 mb-4">
@@ -627,7 +627,7 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <!-- History Modal -->
-<div id="history-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="history-modal-title">
+<div id="history-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-5 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="history-modal-title">
     <div class="native-card tp-native-card w-full max-w-3xl my-auto max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden rounded-[var(--tp-ios-card-radius)]">
         <div class="p-6 border-b border-white/10 flex items-center justify-between">
             <div>
@@ -896,7 +896,7 @@ async function viewHistory(userId, date, empName) {
             if (isLegacy) {
                 const legacyNote = (o.note && o.note.trim()) ? o.note : '<span class="text-white/40">(ไม่ได้ระบุเหตุผล)</span>';
                 return `
-                <div class="border border-white/10 rounded-lg p-4 mb-3 opacity-80">
+                <div class="border border-white/10 rounded-lg p-5 mb-3 opacity-80">
                     ${header}
                     <div class="text-xs text-yellow-300 mb-2"><i class="fas fa-info-circle"></i> รายการเก่า — ระบบยังไม่ได้เก็บรายละเอียดก่อน/หลังในช่วงนั้น</div>
                     <div class="text-sm text-white/80"><span class="text-white/50">เหตุผล:</span> ${legacyNote}</div>
@@ -904,7 +904,7 @@ async function viewHistory(userId, date, empName) {
             }
             if (isDelete) {
                 return `
-                <div class="border border-red-500/30 bg-red-500/5 rounded-lg p-4 mb-3">
+                <div class="border border-red-500/30 bg-red-500/5 rounded-lg p-5 mb-3">
                     ${header}
                     <div class="text-sm text-white/80 mb-2"><span class="text-white/50">เหตุผลการลบ:</span> ${n.adjustment_reason || '—'}</div>
                     <div class="text-xs text-white/60 mb-1">ข้อมูลก่อนถูกลบ:</div>
@@ -926,7 +926,7 @@ async function viewHistory(userId, date, empName) {
             ];
             const rows = fields.map(([lbl, k]) => diffRow(lbl, o[k], n[k])).join('');
             return `
-            <div class="border border-white/10 rounded-lg p-4 mb-3">
+            <div class="border border-white/10 rounded-lg p-5 mb-3">
                 ${header}
                 <table class="w-full text-sm">
                     <thead>

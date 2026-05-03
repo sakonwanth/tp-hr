@@ -321,7 +321,7 @@ include dirname(__DIR__) . '/templates/header.php';
 
     <div class="md:hidden p-3 space-y-3">
         <?php foreach ($recentDocs as $doc): ?>
-        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4 space-y-3 min-w-0">
+        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-5 space-y-3 min-w-0">
             <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
                     <p class="text-white/50 text-xs uppercase tracking-wide">เลขที่</p>
@@ -396,7 +396,7 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <!-- Reject Modal -->
-<div id="reject-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="reject-modal-title">
+<div id="reject-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-5 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="reject-modal-title">
     <div class="native-card tp-native-card w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
         <form id="reject-form" class="space-y-4">
             <h3 id="reject-modal-title" class="text-xl font-bold text-white">ไม่อนุมัติคำขอลา</h3>

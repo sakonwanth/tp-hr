@@ -405,7 +405,7 @@ include dirname(__DIR__) . '/templates/header.php';
 
             <!-- Logo & Seal -->
                 <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="p-4 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10">
+                <div class="p-5 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10">
                     <label class="block text-white/80 text-sm font-medium mb-2">
                         <i class="fas fa-image mr-1 text-violet-300"></i> โลโก้บริษัท
                     </label>
@@ -419,7 +419,7 @@ include dirname(__DIR__) . '/templates/header.php';
                         class="input-field tp-native-input w-full mb-2">
                     <input type="file" name="company_logo" accept="image/*" class="w-full text-white/70 text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-violet-500 file:text-white file:text-xs">
                 </div>
-                <div class="p-4 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10">
+                <div class="p-5 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10">
                     <label class="block text-white/80 text-sm font-medium mb-2">
                         <i class="fas fa-stamp mr-1 text-amber-300"></i> ตราประทับบริษัท (สำหรับพิมพ์ทับลายเซ็น)
                     </label>
@@ -428,7 +428,7 @@ include dirname(__DIR__) . '/templates/header.php';
                             <img src="<?php echo htmlspecialchars($settings['company_seal']); ?>" alt="seal" style="max-height:80px;">
                         </div>
                     <?php else: ?>
-                        <div class="bg-white/5 border border-dashed border-white/20 rounded p-4 mb-2 text-center text-white/40 text-xs">
+                        <div class="bg-white/5 border border-dashed border-white/20 rounded p-5 mb-2 text-center text-white/40 text-xs">
                             ยังไม่มีตราประทับ — เอกสารจะเว้นที่ว่างสำหรับประทับจริง
                         </div>
                     <?php endif; ?>
@@ -519,7 +519,7 @@ include dirname(__DIR__) . '/templates/header.php';
     </summary>
     <div class="p-5 border-t border-white/10 grid grid-cols-1 md:grid-cols-2 gap-4">
         <?php foreach ($signerCandidates as $sc): ?>
-        <div class="p-4 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10">
+        <div class="p-5 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10">
             <div class="flex items-start justify-between mb-2">
                 <div>
                     <p class="text-white font-medium"><?php echo htmlspecialchars(($sc['title'] ?? '') . ($sc['first_name_th'] ?? '') . ' ' . ($sc['last_name_th'] ?? '')); ?></p>
@@ -566,13 +566,13 @@ include dirname(__DIR__) . '/templates/header.php';
         </a>
     </div>
     <?php else: ?>
-    <div class="p-4 border-b border-white/10 flex items-center justify-between">
+    <div class="p-5 border-b border-white/10 flex items-center justify-between">
         <h2 class="text-white font-semibold"><i class="fas fa-file-alt mr-2 text-violet-400" aria-hidden="true"></i>รายการเอกสารในระบบ</h2>
         <a href="?edit=new" class="px-3 py-1.5 rounded-[var(--tp-ios-card-radius)] bg-violet-500 hover:bg-violet-600 text-white text-xs font-medium touch-manipulation"><i class="fas fa-plus mr-1" aria-hidden="true"></i>เพิ่ม</a>
     </div>
-    <div class="md:hidden p-3 space-y-3">
+    <div class="md:hidden p-5 space-y-4">
         <?php foreach ($tpls as $t): ?>
-        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4 space-y-3">
+        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-5 space-y-3">
             <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
                     <p class="text-white/50 text-xs">ลำดับ <?= (int)$t['sort_order']; ?> · <span class="font-mono text-violet-300"><?php echo htmlspecialchars($t['code']); ?></span></p>
@@ -713,7 +713,7 @@ if (!empty($editRow['id'])) {
 
     <!-- Section 1: Basic -->
     <div class="native-card tp-native-card rounded-[var(--tp-ios-card-radius)] overflow-hidden">
-        <div class="p-4 border-b border-white/10 bg-white/5 flex items-center gap-3">
+        <div class="p-5 border-b border-white/10 bg-white/5 flex items-center gap-3">
             <div class="w-8 h-8 rounded-full bg-violet-500/30 text-violet-200 flex items-center justify-center font-bold">1</div>
             <div>
                 <h2 class="text-white font-semibold">ข้อมูลพื้นฐาน</h2>
@@ -769,7 +769,7 @@ if (!empty($editRow['id'])) {
 
     <!-- Section 2: Header -->
     <div class="native-card tp-native-card rounded-[var(--tp-ios-card-radius)] overflow-hidden">
-        <div class="p-4 border-b border-white/10 bg-white/5 flex items-center gap-3">
+        <div class="p-5 border-b border-white/10 bg-white/5 flex items-center gap-3">
             <div class="w-8 h-8 rounded-full bg-blue-500/30 text-blue-200 flex items-center justify-center font-bold">2</div>
             <div>
                 <h2 class="text-white font-semibold">ส่วนหัวเอกสาร (Header)</h2>
@@ -800,7 +800,7 @@ if (!empty($editRow['id'])) {
 
     <!-- Section 3: Body -->
     <div class="native-card tp-native-card rounded-[var(--tp-ios-card-radius)] overflow-hidden">
-        <div class="p-4 border-b border-white/10 bg-white/5 flex items-center gap-3">
+        <div class="p-5 border-b border-white/10 bg-white/5 flex items-center gap-3">
             <div class="w-8 h-8 rounded-full bg-emerald-500/30 text-emerald-200 flex items-center justify-center font-bold">3</div>
             <div>
                 <h2 class="text-white font-semibold">ส่วนกลาง (เนื้อหาหลัก)</h2>
@@ -838,7 +838,7 @@ if (!empty($editRow['id'])) {
 
     <!-- Section 4: Signatures -->
     <div class="native-card tp-native-card rounded-[var(--tp-ios-card-radius)] overflow-hidden">
-        <div class="p-4 border-b border-white/10 bg-white/5 flex items-center gap-3">
+        <div class="p-5 border-b border-white/10 bg-white/5 flex items-center gap-3">
             <div class="w-8 h-8 rounded-full bg-indigo-500/30 text-indigo-200 flex items-center justify-center font-bold">4</div>
             <div>
                 <h2 class="text-white font-semibold">ส่วนลงนาม (Signatures)</h2>
@@ -904,7 +904,7 @@ if (!empty($editRow['id'])) {
 
     <!-- Section 5: Footer -->
     <div class="native-card tp-native-card rounded-[var(--tp-ios-card-radius)] overflow-hidden">
-        <div class="p-4 border-b border-white/10 bg-white/5 flex items-center gap-3">
+        <div class="p-5 border-b border-white/10 bg-white/5 flex items-center gap-3">
             <div class="w-8 h-8 rounded-full bg-rose-500/30 text-rose-200 flex items-center justify-center font-bold">5</div>
             <div>
                 <h2 class="text-white font-semibold">ส่วนท้าย (Footer)</h2>
@@ -959,7 +959,7 @@ if (!empty($editRow['id'])) {
 </div>
 
 <!-- Confirm delete template -->
-<div id="dt-delete-template-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="dt-delete-template-title">
+<div id="dt-delete-template-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-5 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="dt-delete-template-title">
     <div class="native-card tp-native-card w-full max-w-md my-auto rounded-[var(--tp-ios-card-radius)] p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
         <h3 id="dt-delete-template-title" class="text-xl font-bold text-white mb-2">ยืนยันการลบเทมเพลต</h3>
         <p class="text-white/70 text-sm mb-6">ต้องการลบเอกสาร <strong id="dt-delete-template-name" class="text-white font-semibold"></strong> หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้</p>
@@ -976,7 +976,7 @@ if (!empty($editRow['id'])) {
 </div>
 
 <!-- Confirm remove signature -->
-<div id="dt-remove-signature-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="dt-remove-signature-title">
+<div id="dt-remove-signature-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-5 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="dt-remove-signature-title">
     <div class="native-card tp-native-card w-full max-w-md my-auto rounded-[var(--tp-ios-card-radius)] p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
         <h3 id="dt-remove-signature-title" class="text-xl font-bold text-white mb-2">ลบลายเซ็นนี้?</h3>
         <p class="text-white/70 text-sm mb-6">ภาพลายเซ็นจะถูกนำออกจากบัญชีผู้ลงนามรายนี้</p>

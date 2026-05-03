@@ -329,7 +329,7 @@ foreach ($workShifts as $_ws) {
 
         <div class="md:hidden space-y-3">
             <?php foreach ($holidays as $holiday): ?>
-            <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4">
+            <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-5">
                 <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
                         <p class="text-white font-medium break-words"><?php echo htmlspecialchars($holiday['name']); ?></p>
@@ -424,7 +424,7 @@ foreach ($workShifts as $_ws) {
             $conditions[] = 'ต้องมีเอกสาร';
         }
         ?>
-        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4">
+        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-5">
             <div class="flex items-start justify-between gap-3">
                 <div class="flex items-start gap-3 min-w-0">
                     <div class="w-3 h-3 rounded-full mt-1.5 shrink-0" style="background: <?php echo $lt['color']; ?>"></div>
@@ -534,7 +534,7 @@ foreach ($workShifts as $_ws) {
 </div>
 
 <!-- Edit Leave Type Modal -->
-<div id="editLeaveTypeModal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="editLeaveTypeModalTitle">
+<div id="editLeaveTypeModal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-5 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="editLeaveTypeModalTitle">
     <div class="native-card tp-native-card w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden rounded-[var(--tp-ios-card-radius)] p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] border border-white/10">
         <div class="flex items-center justify-between mb-4">
             <h3 id="editLeaveTypeModalTitle" class="text-lg font-semibold text-white">แก้ไขประเภทการลา</h3>
@@ -622,7 +622,7 @@ function closeModal(id) {
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <?php foreach ($workShifts as $shift): ?>
         <?php $shiftRowId = (int)$shift['id']; ?>
-        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4">
+        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-5">
             <div class="flex items-center justify-between mb-3">
                 <div>
                     <h3 class="text-white font-medium"><?php echo htmlspecialchars(function_exists('shift_display_label') ? shift_display_label($shift) : $shift['name']); ?></h3>
@@ -679,7 +679,7 @@ function closeModal(id) {
 </div>
 
 <!-- Confirm delete holiday (opened from Holidays tab) -->
-<div id="hr-settings-del-holiday-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="hr-settings-del-holiday-title">
+<div id="hr-settings-del-holiday-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-5 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="hr-settings-del-holiday-title">
     <div class="native-card tp-native-card w-full max-w-md my-auto rounded-[var(--tp-ios-card-radius)] p-6 border border-white/10 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
         <h3 id="hr-settings-del-holiday-title" class="text-xl font-bold text-white mb-2">ลบวันหยุด</h3>
         <p class="text-white/70 text-sm mb-6">ยืนยันการลบ <strong id="hr-settings-del-holiday-name" class="text-white font-semibold"></strong> หรือไม่?</p>

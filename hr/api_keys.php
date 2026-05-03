@@ -254,7 +254,7 @@ require_once __DIR__ . '/../templates/header.php';
                 </p>
                 <div class="space-y-4">
                     <?php foreach ($scopeGroups as $groupTitle => $scopes): ?>
-                    <div class="rounded-[var(--tp-ios-card-radius)] border border-white/10 bg-white/[0.04] p-4">
+                    <div class="rounded-[var(--tp-ios-card-radius)] border border-white/10 bg-white/[0.04] p-5">
                         <div class="text-white/90 text-sm font-semibold mb-3 pb-2 border-b border-white/10"><?= htmlspecialchars($groupTitle) ?></div>
                         <div class="flex flex-wrap gap-2.5">
                             <?php foreach ($scopes as $sv => $sl): ?>
@@ -311,7 +311,7 @@ require_once __DIR__ . '/../templates/header.php';
         </div>
         <div class="md:hidden p-3 space-y-3">
             <?php foreach ($keys as $k): $scopes = json_decode($k['scopes'] ?? '[]', true) ?: []; ?>
-                <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4 space-y-3">
+                <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-5 space-y-3">
                     <div class="flex items-start justify-between gap-2">
                         <div class="min-w-0">
                             <p class="text-white font-semibold break-words"><?= htmlspecialchars($k['name']) ?></p>
@@ -500,7 +500,7 @@ require_once __DIR__ . '/../templates/header.php';
 </div>
 
 <!-- Revoke / Activate confirmation (replaces window.confirm) -->
-<div id="hr-ak-action-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="hr-ak-action-modal-title">
+<div id="hr-ak-action-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-5 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="hr-ak-action-modal-title">
     <form id="hr-ak-action-form" method="POST" class="native-card tp-native-card w-full max-w-md my-auto rounded-[var(--tp-ios-card-radius)] p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)] border border-white/10">
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken()) ?>">
         <input type="hidden" name="action" id="hr-ak-modal-action" value="">

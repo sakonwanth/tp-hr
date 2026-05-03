@@ -288,7 +288,7 @@ include dirname(__DIR__) . '/templates/header.php';
             ? floor($att['work_minutes'] / 60) . ':' . str_pad((string)($att['work_minutes'] % 60), 2, '0', STR_PAD_LEFT)
             : '-';
         ?>
-        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4 min-w-0">
+        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-5 min-w-0">
             <div class="flex items-start justify-between gap-3">
                 <div>
                     <div class="text-white font-semibold"><?php echo formatDateThai($day['date']); ?></div>

@@ -25,6 +25,8 @@ Statuses: **`NOT_STARTED` · `IN_PROGRESS` · `COMPLETE` · `REGRESSION_FAIL`**.
 
 **Spacing parity sweep — ESS เหลือ (wells **`p-5`** / **`p-5 md:p-6`**, grids **`gap-5 md:gap-6`):** **`certificate.php`**, **`payslip.php`**, **`profile.php`** (**`gap-6`** บนการ์ดแถวหลัก), **`leave_history.php`**, **`attendance_history.php`**, **`modules/employee/leaves/request_form.php`**.
 
+**HR admin · spacing parity (wave):** **`hr/document_templates.php`** inner cards/section headers/mobile stack/modals **`p-5`** · **`hr/*.php`** summary **`tp-native-summary-card`** **`p-5`** · inset **`bg-white/5 … p-5`** · รายการมือถือ **`p-5 space-y-4`** (dayoff / adjustments) · **`employee_form.php`** แถว education/wh/fam **`p-5`** · **`outside_attendance`** การ์ดคำขอ **`p-5 sm:p-6`** · **`attendance.php`** แบนเนอร์วันหยุด + บล็อกใน modal **`p-5`** · modal gutter ทั่ว **`hr/*.php`** **`p-5`** (สอดคล้องเอกสารเทมเพลต).
+
 **Regression:** PHPUnit / API untouched. Viewport QA: **`03`** · **`07_SPACING_QA.md`** (**route list → `08`**). **`08_VISUAL_QA_AFTER.md`** — per-route **ESS · HRA · PUB/AUTH** check matrices · breakpoint / scroll QA **`10_BROWSER_VIEWPORT_QA.md`**. Static padding/overflow rationale: **`AUDIT_04_VIEWPORT.md`**. **CI:** **`npm run verify:static-ui`** on push/PR/deploy validate — **`native-shell.css`** **`?v=`** consistency + **`tp-ios-master-screen`** on listed full pages (see **`scripts/verify-ios26-master-screen.sh`**).
 
 **Deploy:** **[`DEPLOY_CHECKLIST.md`](DEPLOY_CHECKLIST.md)** — ก่อน deploy: cache-bust **`native-shell.css`** สม่ำเสมอ · หลัง deploy smoke ESS/HRA/login/verify พร้อม rollback note.

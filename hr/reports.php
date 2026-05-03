@@ -334,7 +334,7 @@ require_once __DIR__ . '/../templates/header.php';
     <?php if ($reportData): ?>
     <div class="md:hidden space-y-3">
         <?php foreach ($reportData as $row): ?>
-        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4">
+        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-5">
             <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
                     <p class="text-white font-semibold truncate"><?php echo htmlspecialchars($row['full_name']); ?></p>
@@ -488,7 +488,7 @@ require_once __DIR__ . '/../templates/header.php';
             $dow = (int)$row['dow'];
             $isWeekend = ($dow === 1 || $dow === 7);
         ?>
-        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4">
+        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-5">
             <div class="flex flex-wrap items-center gap-2">
                 <span class="text-white font-semibold"><?php echo formatDateThai($row['attendance_date']); ?></span>
                 <?php if ($row['holiday_name']): ?>
@@ -599,7 +599,7 @@ require_once __DIR__ . '/../templates/header.php';
             </tbody>
         </table>
     </div>
-    <div class="mt-4 rounded-[var(--tp-ios-card-radius)] border border-white/10 bg-white/5 p-4 text-xs text-white/60 space-y-1">
+    <div class="mt-4 rounded-[var(--tp-ios-card-radius)] border border-white/10 bg-white/5 p-5 text-xs text-white/60 space-y-1">
         <p><i class="fas fa-info-circle mr-1 text-violet-400" aria-hidden="true"></i> <strong class="text-white/90">คำอธิบายคอลัมน์:</strong></p>
         <p>• <strong class="text-white">มาทำงาน</strong> = ตรงเวลา + สาย + WFH + ครึ่งวัน (ไม่รวมลา/ขาดงาน)</p>
         <p>• <strong class="text-red-400">ขาดงาน</strong> = ไม่ได้เช็คอินและไม่ได้ลา (ระบบ cron มาร์คอัตโนมัติเวลา 20:01 ทุกวัน)</p>
@@ -627,7 +627,7 @@ require_once __DIR__ . '/../templates/header.php';
     <?php if ($reportData): ?>
     <div class="md:hidden space-y-3">
         <?php foreach ($reportData as $row): ?>
-        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4">
+        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-5">
             <p class="text-white font-semibold"><?php echo htmlspecialchars($row['full_name']); ?></p>
             <p class="text-slate-500 text-xs"><?php echo htmlspecialchars($row['position'] ?? '-'); ?></p>
             <p class="text-slate-400 text-sm mt-1"><?php echo htmlspecialchars($row['department'] ?? '-'); ?></p>

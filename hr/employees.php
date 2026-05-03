@@ -343,7 +343,7 @@ $flashError = flash('error');
         $activeCls = $isActive ? 'bg-green-500/15 border border-green-500/30 text-green-200'
             : 'bg-red-500/15 border border-red-500/30 text-red-200';
         ?>
-        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4 min-w-0">
+        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-5 min-w-0">
             <div class="flex items-start justify-between gap-3">
                 <div class="flex items-center gap-3 min-w-0">
                     <?php if (!empty($emp['avatar'])): ?>
@@ -571,7 +571,7 @@ $flashError = flash('error');
 </div>
 
 <!-- Leave Balance Modal -->
-<div id="leave-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="leave-modal-title">
+<div id="leave-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-5 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="leave-modal-title">
     <div class="native-card tp-native-card w-full max-w-lg my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
         <div class="flex items-center justify-between mb-6 gap-3">
             <h3 id="leave-modal-title" class="text-xl font-bold text-white">สิทธิ์การลาและประวัติ</h3>
@@ -618,7 +618,7 @@ async function viewLeaveBalance(userId) {
             const used = Number(e.used_days) || 0;
             const usedPercent = denom > 0 ? Math.min(100, Math.round((used / denom) * 100)) : 0;
             html += `
-                <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4">
+                <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-5">
                     <div class="flex items-center justify-between mb-2 gap-2">
                         <span class="text-white font-medium">${e.leave_type_name}</span>
                         <div class="flex items-center shrink-0">
