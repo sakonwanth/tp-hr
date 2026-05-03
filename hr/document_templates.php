@@ -36,49 +36,34 @@ function dt_getAllSettings(PDO $pdo): array {
 }
 
 function dt_handleUpload(array $file, string $subdir, array $allowed = ['png','jpg','jpeg','webp']): string {
-    if (!in_array($subdir, ['company','signatures'], true)) throw new Exception('ประเภทการอัปโหลดไม่ถูกต้อง');
-    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) return '';
-    if ($file['error'] !== UPLOAD_ERR_OK) throw new Exception('อัปโหลดล้มเหลว (error: ' . $file['error'] . ')');
-    if ($file['size'] > 5 * 1024 * 1024) throw new Exception('ไฟล์เกิน 5MB');
+    if (!in_array($subdir, ['company','signatures'], true)) {
+        throw new Exception('ประเภทการอัปโหลดไม่ถูกต้อง');
+    }
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+        return '';
+    }
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+        throw new Exception('อัปโหลดล้มเหลว (error: ' . $file['error'] . ')');
+    }
 
-    $mime = '';
-    if (function_exists('finfo_open')) {
-        $fi = finfo_open(FILEINFO_MIME_TYPE);
-        if ($fi) {
-            $mime = strtolower(trim((string)finfo_file($fi, $file['tmp_name'])));
-            finfo_close($fi);
-        }
-    }
-    if (in_array($mime, ['image/jpg', 'image/pjpeg'], true)) {
-        $mime = 'image/jpeg';
-    }
-    $mimeToExt = [
-        'image/jpeg' => 'jpg',
-        'image/png' => 'png',
-        'image/webp' => 'webp',
-    ];
-    $ext = $mimeToExt[$mime] ?? '';
-    if ($ext === '') {
-        throw new Exception('อนุญาตเฉพาะรูป PNG, JPG, WEBP');
-    }
     $allowedNorm = array_map(static function ($e) {
         $e = strtolower((string)$e);
         return $e === 'jpeg' ? 'jpg' : $e;
     }, $allowed);
-    if (!in_array($ext, $allowedNorm, true)) {
-        throw new Exception('อนุญาตเฉพาะ: ' . implode(', ', $allowed));
-    }
-    if (@getimagesize($file['tmp_name']) === false) {
-        throw new Exception('ไฟล์รูปภาพไม่ถูกต้อง');
-    }
+    $allowedNorm = array_values(array_unique($allowedNorm));
 
-    $dir = (defined('UPLOAD_PATH') ? UPLOAD_PATH : (BASE_PATH . '/uploads')) . '/' . $subdir;
-    if (!is_dir($dir)) @mkdir($dir, 0775, true);
-    $name = $subdir . '_' . bin2hex(random_bytes(6)) . '_' . time() . '.' . $ext;
-    $dest = $dir . '/' . $name;
-    if (!move_uploaded_file($file['tmp_name'], $dest)) throw new Exception('บันทึกไฟล์ไม่ได้');
-    @chmod($dest, 0644);
-    return '/uploads/' . $subdir . '/' . $name;
+    $result = uploadFile($file, 'uploads/' . $subdir, [
+        'types' => $allowedNorm,
+        'max_size' => 5 * 1024 * 1024,
+    ]);
+    if (!($result['success'] ?? false)) {
+        throw new Exception((string)($result['message'] ?? 'อัปโหลดไม่สำเร็จ'));
+    }
+    $rel = (string)($result['path'] ?? '');
+    if ($rel === '') {
+        throw new Exception('บันทึกไฟล์ไม่ได้');
+    }
+    return '/' . str_replace('\\', '/', $rel);
 }
 
 // ------------------------------------------------------------------
