@@ -17,11 +17,6 @@ $pdo = getDB();
 $user = Auth::user();
 $method = $_SERVER['REQUEST_METHOD'];
 
-// Self-heal planned_start_time columns (mirror of tp-checkin)
-if (function_exists('ensurePlannedStartTimeColumns')) {
-    try { ensurePlannedStartTimeColumns($pdo); } catch (Throwable $e) { /* non-fatal */ }
-}
-
 // Handle requests
 if ($method === 'POST') {
     $input = json_decode(file_get_contents('php://input') ?: '', true);

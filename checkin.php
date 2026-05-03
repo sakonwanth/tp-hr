@@ -49,9 +49,6 @@ $late_start_cutoff_hour = 7;
 $late_start_can_today_request = ['ok' => false];
 $late_start_can_tomorrow_request = ['ok' => true];
 try {
-    if (function_exists('ensurePlannedStartTimeColumns')) {
-        ensurePlannedStartTimeColumns($pdo);
-    }
     $ls_stmt = $pdo->prepare("
         SELECT attendance_date, planned_start_time, planned_reason, planned_requested_at
         FROM hr_attendances

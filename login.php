@@ -75,19 +75,23 @@ if (!$lineLoginEnabled) {
 
 // Handle login form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
-    $password = $_POST['password'] ?? '';
-    
-    if (empty($username) || empty($password)) {
-        $error = 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน';
+    if (!verifyCsrfToken()) {
+        $error = 'คำขอไม่ถูกต้องหรือเซสชันหมดอายุ กรุณารีเฟรชหน้าแล้วลองใหม่';
     } else {
-        $result = Auth::login($username, $password);
-        
-        if ($result['success']) {
-            $redirect = safeRedirectTarget(loginReturnQueryValue(), '/');
-            redirect($redirect);
+        $username = trim($_POST['username'] ?? '');
+        $password = $_POST['password'] ?? '';
+
+        if (empty($username) || empty($password)) {
+            $error = 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน';
         } else {
-            $error = $result['message'];
+            $result = Auth::login($username, $password);
+
+            if ($result['success']) {
+                $redirect = safeRedirectTarget(loginReturnQueryValue(), '/');
+                redirect($redirect);
+            } else {
+                $error = $result['message'];
+            }
         }
     }
 }
@@ -272,6 +276,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <!-- Login Form: field stack tighter than meta→submit so the button does not feel "floating" far below -->
         <form method="POST" action="">
+            <?php echo csrfField(); ?>
             <div class="space-y-4">
             <!-- Username -->
             <div class="tp-native-form-group">

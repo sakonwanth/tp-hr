@@ -713,53 +713,15 @@ if (!function_exists('shift_sanitize_name_on_save')) {
 
 /**
  * =============================================================================
- * Planned Late Start helpers — mirror ของ tp-checkin/core/Helpers.php
+ * Planned Late Start — schema
  * =============================================================================
- * tp-hr/checkin.php ต้องมีฟีเจอร์ "แจ้งเข้างานสายล่วงหน้า" เหมือน tp-checkin
- * โดย write ลง table เดียวกัน (hr_attendances.planned_start_time)
+ * Columns live on `hr_attendances` (planned_start_time, planned_reason, …).
+ * Runtime ALTER was removed (audit HIGH-002); apply DB migrations and run
+ * `scripts/production_preflight.php --strict` before production deploy.
  */
 if (!function_exists('ensurePlannedStartTimeColumns')) {
     function ensurePlannedStartTimeColumns(PDO $pdo): void {
-        static $checked = false;
-        if ($checked) return;
-        $checked = true;
-
-        $flagDir  = sys_get_temp_dir() . '/tp_hr_schema';
-        if (!is_dir($flagDir)) @mkdir($flagDir, 0755, true);
-        $flagFile = $flagDir . '/hr_attendances_planned_start.ok';
-        if (file_exists($flagFile) && (time() - filemtime($flagFile)) < 86400) {
-            return;
-        }
-
-        try {
-            $hasCol = function (string $col) use ($pdo): bool {
-                $s = $pdo->prepare(
-                    "SELECT 1 FROM information_schema.COLUMNS
-                     WHERE TABLE_SCHEMA = DATABASE()
-                       AND TABLE_NAME   = 'hr_attendances'
-                       AND COLUMN_NAME  = ?"
-                );
-                $s->execute([$col]);
-                return (bool) $s->fetchColumn();
-            };
-
-            $cols = [
-                ['planned_start_time',   "TIME NULL DEFAULT NULL",         'shift_id'],
-                ['planned_reason',       "VARCHAR(255) NULL DEFAULT NULL", 'planned_start_time'],
-                ['planned_requested_at', "DATETIME NULL DEFAULT NULL",     'planned_reason'],
-                ['planned_requested_by', "INT NULL DEFAULT NULL",          'planned_requested_at'],
-            ];
-            foreach ($cols as [$name, $def, $after]) {
-                if (!$hasCol($name)) {
-                    try { $pdo->exec("ALTER TABLE hr_attendances ADD COLUMN {$name} {$def} AFTER {$after}"); }
-                    catch (PDOException $e) { /* ignore */ }
-                }
-            }
-        } catch (Throwable $e) {
-            error_log('[tp-hr] ensurePlannedStartTimeColumns failed: ' . $e->getMessage());
-        }
-
-        @file_put_contents($flagFile, date('c'));
+        // intentional no-op — schema via migrations / preflight only
     }
 }
 
