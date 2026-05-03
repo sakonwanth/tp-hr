@@ -20,6 +20,8 @@ secrets/
 /storage/uploads/*
 /storage/documents/*
 /storage/temp/*
+/storage/cache/*
+!/storage/cache/.gitkeep
 !/storage/.gitkeep
 !/storage/uploads/.gitkeep
 !/storage/documents/.gitkeep
