@@ -28,11 +28,12 @@ Target tokens: **`00_IOS26_DESIGN_DIRECTION.md`** + **`01_IOS26_COMPONENT_SYSTEM
 
 Any **FAIL:** fix **`native-shell`** token first; then page-level classes.
 
-### Latest automated checkpoint (2026-04-30)
+### Latest automated checkpoint (2026-04-28)
 
 - Static shell gate: **PASS** (`npm run -s verify:static-ui`)
 - Touch-target sweep (`min-h/min-w` under 48 on interactive controls): **PASS after remediation**
-- Guest E2E regression (phone + tablet, `PLAYWRIGHT_BASE_URL=http://127.0.0.1/tp-hr/ npm run -s test:e2e`): **60 passed**
+- ESS **`tp-native-modal`** outer padding **`p-5`** (aligned with **`hr/*.php`**): **`checkin.php`** · **`leave_history.php`** · **`profile.php`** · **`dayoff_schedule.php`**
+- Guest E2E regression (phone + tablet, `PLAYWRIGHT_BASE_URL=http://127.0.0.1/tp-hr/ npm run -s test:e2e`): **60 passed** (prior run · re-run after modal tweak if regressions suspected)
 
 ---
 

@@ -536,7 +536,7 @@ endif; ?>
 </div>
 
 <!-- Edit Contact Modal -->
-<div id="edit-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
+<div id="edit-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-5 overflow-y-auto overscroll-contain">
     <div class="native-card tp-native-card w-full max-w-lg my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <form id="edit-form" class="p-6">
             <div class="flex items-center justify-between mb-6 gap-2">

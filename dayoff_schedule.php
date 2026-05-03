@@ -383,7 +383,7 @@ include __DIR__ . '/templates/header.php';
 </div>
 
 <!-- Change Day-Off Modal -->
-<div id="change-modal" class="tp-native-modal fixed inset-0 hidden flex items-center justify-center p-4 overflow-y-auto overscroll-contain bg-black/50 backdrop-blur-sm pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]">
+<div id="change-modal" class="tp-native-modal fixed inset-0 hidden flex items-center justify-center p-5 overflow-y-auto overscroll-contain bg-black/50 backdrop-blur-sm pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]">
     <div class="native-card tp-native-card w-full max-w-md my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <form method="POST" class="p-6">
             <?php echo csrfField(); ?>

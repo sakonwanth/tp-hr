@@ -326,7 +326,7 @@ include 'templates/header.php';
 </div>
 
 <!-- Detail Modal -->
-<div id="detail-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
+<div id="detail-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-5 overflow-y-auto overscroll-contain">
     <div class="native-card tp-native-card w-full max-w-lg my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
         <div class="flex items-center justify-between mb-6 gap-2">
             <h3 class="text-xl font-bold text-white">รายละเอียดคำขอลา</h3>
