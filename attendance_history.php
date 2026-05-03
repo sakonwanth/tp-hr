@@ -141,6 +141,8 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
     <!-- Page Header -->
     <header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
         <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
+            <a href="index.php" class="hover:text-white touch-manipulation">หน้าแรก</a>
+            <span class="mx-2">/</span>
             <a href="checkin.php" class="hover:text-white touch-manipulation">ลงเวลา</a>
             <span class="mx-2">/</span>
             <span class="text-white">ประวัติ</span>

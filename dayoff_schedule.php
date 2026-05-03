@@ -160,6 +160,8 @@ include __DIR__ . '/templates/header.php';
 <div class="tp-dayoff-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
 <header class="tp-ios-large-title-block mb-6 md:mb-8 max-w-3xl min-w-0">
     <nav class="mb-2 text-sm text-white/60" aria-label="Breadcrumb">
+        <a href="index.php" class="inline-flex min-h-[48px] items-center hover:text-white touch-manipulation">หน้าแรก</a>
+        <span class="mx-2">/</span>
         <a href="checkin.php" class="inline-flex min-h-[48px] items-center hover:text-white touch-manipulation">ลงเวลา</a>
         <span class="mx-2">/</span>
         <span class="text-white">วันหยุดประจำสัปดาห์</span>

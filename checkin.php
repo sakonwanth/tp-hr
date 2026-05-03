@@ -271,6 +271,11 @@ require_once __DIR__ . '/templates/header.php';
 <div class="tp-checkin-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
     <!-- Page Header — same large-title rhythm as index.php (master) -->
     <header class="tp-ios-large-title-block tp-checkin-page-header mb-6 md:mb-8">
+        <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
+            <a href="index.php" class="hover:text-white touch-manipulation">หน้าแรก</a>
+            <span class="mx-2">/</span>
+            <span class="text-white">ลงเวลา</span>
+        </nav>
         <div class="tp-checkin-header-chip">
             <i class="fas fa-calendar-day text-emerald-300" aria-hidden="true"></i>
             <span class="text-white/80 text-sm"><?php echo htmlspecialchars(formatDateThai(date('Y-m-d')), ENT_QUOTES, 'UTF-8'); ?></span>

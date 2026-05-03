@@ -187,6 +187,8 @@ try {
 <?php $slipYear = (int)date('Y', strtotime($slip['payroll_month'])); ?>
 <header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
     <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
+        <a href="index.php" class="hover:text-white touch-manipulation">หน้าแรก</a>
+        <span class="mx-2">/</span>
         <a href="payslip.php?year=<?php echo $slipYear; ?>" class="hover:text-white touch-manipulation">สลิปเงินเดือน</a>
         <span class="mx-2">/</span>
         <span class="text-white">รายละเอียดสลิป</span>
@@ -383,6 +385,11 @@ try {
 <?php else: ?>
 <!-- Slip List View -->
 <header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
+    <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
+        <a href="index.php" class="hover:text-white touch-manipulation">หน้าแรก</a>
+        <span class="mx-2">/</span>
+        <span class="text-white">สลิปเงินเดือน</span>
+    </nav>
     <h1 class="tp-ios-page-title">สลิปเงินเดือน</h1>
     <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">ดูสรุปสะสมตามปี กรองปี พร้อมดูรายละเอียดและดาวน์โหลดสลิปที่อนุมัติแล้ว</p>
 </header>

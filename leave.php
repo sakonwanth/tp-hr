@@ -70,6 +70,11 @@ require_once __DIR__ . '/templates/header.php';
     <?php else: ?>
     <!-- Leave Dashboard -->
     <header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
+        <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
+            <a href="index.php" class="hover:text-white touch-manipulation">หน้าแรก</a>
+            <span class="mx-2">/</span>
+            <span class="text-white">การลา</span>
+        </nav>
         <div class="flex flex-col gap-6 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between gap-y-6">
             <div class="min-w-0 flex-1">
                 <h1 class="tp-ios-page-title">การลา</h1>
