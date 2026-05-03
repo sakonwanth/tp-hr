@@ -70,7 +70,7 @@ require_once __DIR__ . '/templates/header.php';
     <?php else: ?>
     <!-- Leave Dashboard -->
     <header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
-        <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between gap-y-4">
+        <div class="flex flex-col gap-6 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between gap-y-6">
             <div class="min-w-0 flex-1">
                 <h1 class="tp-ios-page-title">การลา</h1>
                 <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">จัดการวันลา ติดตามคำขอ และดูสิทธิ์คงเหลือของคุณ</p>
@@ -106,9 +106,9 @@ require_once __DIR__ . '/templates/header.php';
                 </h2>
                 
                 <?php if ($entitlements): ?>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 min-w-0">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 min-w-0">
                     <?php foreach ($entitlements as $ent): ?>
-                    <div class="tp-ios-attendance-panel p-4 min-w-0">
+                    <div class="tp-ios-attendance-panel p-5 min-w-0">
                         <div class="flex items-center justify-between gap-2 mb-2 min-w-0">
                             <span class="text-white font-medium truncate min-w-0"><?php echo htmlspecialchars($ent['name']); ?></span>
                             <span class="text-xs px-2 py-1 rounded-full" style="background-color: <?php echo $ent['color'] ?? '#6B7280'; ?>20; color: <?php echo $ent['color'] ?? '#6B7280'; ?>">
@@ -189,7 +189,7 @@ require_once __DIR__ . '/templates/header.php';
                         default => 'bg-gray-500/20 text-gray-300 border border-gray-500/30'
                     };
                     ?>
-                    <div class="tp-ios-attendance-panel p-4">
+                    <div class="tp-ios-attendance-panel p-5">
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0">
                                 <span class="inline-flex px-2.5 py-1 text-xs rounded-full"

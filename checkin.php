@@ -125,12 +125,161 @@ $monthly_summary = $stmt->fetch();
 require_once __DIR__ . '/templates/header.php';
 ?>
 
+<style>
+    .tp-checkin-stack {
+        --checkin-accent: #10b981;
+        --checkin-accent-2: #38bdf8;
+    }
+    .tp-checkin-page-header {
+        display: grid;
+        gap: 0.75rem;
+    }
+    .tp-checkin-header-chip {
+        width: fit-content;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.625rem;
+        padding: 0 0.95rem;
+        border-radius: var(--tp-radius-button, 18px);
+        background: rgba(255,255,255,0.09);
+        border: 1px solid rgba(255,255,255,0.14);
+        box-shadow: var(--tp-surface-well-inset);
+    }
+    .tp-checkin-hero-card {
+        padding: clamp(1.25rem, 4vw, 2rem);
+        overflow: hidden;
+        position: relative;
+    }
+    .tp-checkin-hero-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background:
+            radial-gradient(circle at 18% 10%, rgba(16,185,129,0.16), transparent 32%),
+            radial-gradient(circle at 92% 4%, rgba(56,189,248,0.13), transparent 30%);
+    }
+    .tp-checkin-hero-card > * {
+        position: relative;
+        z-index: 1;
+    }
+    .tp-checkin-clock-panel {
+        display: grid;
+        place-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 0 1rem;
+    }
+    .tp-checkin-shift-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+    .tp-checkin-status-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+        margin: 1rem 0 1.5rem;
+    }
+    .tp-checkin-status-tile {
+        min-height: 132px;
+        display: grid;
+        align-content: center;
+        gap: 0.35rem;
+        background: rgba(15,23,42,0.42);
+        border: 1px solid rgba(255,255,255,0.10);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+    .tp-checkin-primary-action {
+        width: min(100%, 28rem);
+        min-height: 76px;
+        border-radius: 28px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.9rem;
+        padding: 0 1.35rem;
+        border: 1px solid rgba(255,255,255,0.18);
+        box-shadow: 0 18px 46px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.18);
+        transform: translateZ(0);
+    }
+    .tp-checkin-primary-action i,
+    .tp-checkin-primary-action--done i {
+        font-size: 1.8rem;
+        margin: 0 !important;
+    }
+    .tp-checkin-primary-action span {
+        font-size: 1.08rem;
+        letter-spacing: 0;
+    }
+    .tp-checkin-primary-action--in {
+        background: linear-gradient(135deg, #059669, #10b981);
+    }
+    .tp-checkin-primary-action--out {
+        background: linear-gradient(135deg, #0284c7, #38bdf8);
+    }
+    .tp-checkin-primary-action--done {
+        width: min(100%, 28rem);
+        min-height: 76px;
+        border-radius: 28px;
+        background: rgba(15,23,42,0.72);
+        border: 1px solid rgba(255,255,255,0.12);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.09);
+    }
+    .tp-checkin-location-pill {
+        min-height: 48px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 1rem;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.12);
+        box-shadow: var(--tp-surface-well-inset);
+    }
+    .tp-checkin-side-stack {
+        display: grid;
+        gap: 1.25rem;
+        align-content: start;
+    }
+    .tp-checkin-quick-actions {
+        gap: 0.85rem;
+    }
+    .tp-checkin-quick-actions a,
+    .tp-checkin-late-cta {
+        border: 1px solid rgba(255,255,255,0.11);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+    @media (max-width: 640px) {
+        .tp-checkin-hero-card {
+            padding: 1rem;
+            border-radius: 28px;
+        }
+        .tp-checkin-status-grid {
+            gap: 0.75rem;
+        }
+        .tp-checkin-status-tile {
+            min-height: 118px;
+            padding: 0.85rem !important;
+        }
+        .tp-checkin-primary-action,
+        .tp-checkin-primary-action--done {
+            min-height: 72px;
+            border-radius: 24px;
+        }
+    }
+</style>
+
 <div class="tp-checkin-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
     <!-- Page Header — same large-title rhythm as index.php (master) -->
-    <header class="tp-ios-large-title-block mb-6 md:mb-8">
-        <p class="tp-ios-caption-muted mb-1"><?php echo htmlspecialchars(formatDateThai(date('Y-m-d')), ENT_QUOTES, 'UTF-8'); ?></p>
+    <header class="tp-ios-large-title-block tp-checkin-page-header mb-6 md:mb-8">
+        <div class="tp-checkin-header-chip">
+            <i class="fas fa-calendar-day text-emerald-300" aria-hidden="true"></i>
+            <span class="text-white/80 text-sm"><?php echo htmlspecialchars(formatDateThai(date('Y-m-d')), ENT_QUOTES, 'UTF-8'); ?></span>
+        </div>
         <h1 class="tp-ios-page-title">ลงเวลาเข้า-ออกงาน</h1>
-        <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">แตะปุ่มใหญ่เพื่อลงเวลาเข้าหรือออก และดูสถานะตำแหน่งจาก GPS</p>
+        <p class="tp-ios-caption-muted max-w-[42rem]">สถานะการทำงานวันนี้และการลงเวลาจาก TP-Checkin</p>
     </header>
     
     <?php if ($error): ?>
@@ -163,13 +312,13 @@ require_once __DIR__ . '/templates/header.php';
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8 xl:gap-8">
         <!-- Left Column: Check-in Card -->
         <div class="xl:col-span-2">
-            <div class="native-card tp-native-card tp-native-data-card">
+            <div class="native-card tp-native-card tp-native-data-card tp-checkin-hero-card">
                 <!-- Current Time Display -->
-                <div class="text-center mb-6 md:mb-8" aria-live="polite" aria-atomic="true">
+                <div class="tp-checkin-clock-panel text-center mb-4" aria-live="polite" aria-atomic="true">
                     <div class="tp-ios-hero-number mb-3 time-display" id="current-time">--:--:--</div>
                     <p class="text-white/60 text-[0.9375rem]"><?php echo htmlspecialchars(formatDateThai(date('Y-m-d')), ENT_QUOTES, 'UTF-8'); ?></p>
                     
-                    <div class="mt-4 flex items-center justify-center gap-2 flex-wrap">
+                    <div class="tp-checkin-shift-row mt-3">
                         <?php if ($shift): ?>
                         <div class="inline-flex items-center gap-2 min-h-[48px] px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-white/[0.09]">
                             <i class="fas fa-clock text-violet-400 text-2xl" aria-hidden="true"></i>
@@ -202,8 +351,8 @@ require_once __DIR__ . '/templates/header.php';
                 } catch (Throwable $e) { /* table may not exist yet */ }
                 ?>
                 <!-- Today's Status -->
-                <div class="grid grid-cols-2 gap-4 mb-6 md:mb-8">
-                    <div class="tp-ios-attendance-panel p-4 text-center">
+                <div class="tp-checkin-status-grid">
+                    <div class="tp-ios-attendance-panel tp-checkin-status-tile p-5 text-center">
                         <p class="text-white/60 text-sm mb-1">เวลาเข้างาน</p>
                         <p class="text-2xl font-bold <?php
                             $ciClass = 'text-white/30';
@@ -239,7 +388,7 @@ require_once __DIR__ . '/templates/header.php';
                         <?php endif; ?>
                     </div>
 
-                    <div class="tp-ios-attendance-panel p-4 text-center">
+                    <div class="tp-ios-attendance-panel tp-checkin-status-tile p-5 text-center">
                         <p class="text-white/60 text-sm mb-1">เวลาออกงาน</p>
                         <p class="text-2xl font-bold <?php echo $today_attendance && $today_attendance['check_out_time'] ? 'text-blue-400' : 'text-white/30'; ?>">
                             <?php
@@ -264,12 +413,12 @@ require_once __DIR__ . '/templates/header.php';
                 </div>
                 
                 <!-- Check-in/Check-out Buttons -->
-                <div class="flex flex-col items-center gap-4">
+                <div class="flex flex-col items-center gap-6">
                     <?php if (!$today_attendance || !$today_attendance['check_in_time']): ?>
                         <!-- Check-in Button -->
                         <button id="btn-checkin" type="button"
                                 onclick="startCheckin('in')"
-                                class="w-48 h-48 max-w-[85vw] max-h-[85vw] aspect-square rounded-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white shadow-lg transition-colors active:scale-[0.98] touch-manipulation flex flex-col items-center justify-center border-0">
+                                class="tp-checkin-primary-action tp-checkin-primary-action--in hover:brightness-110 active:scale-[0.985] text-white transition touch-manipulation border-0">
                             <i class="fas fa-fingerprint text-5xl mb-2 shrink-0" aria-hidden="true"></i>
                             <span class="text-lg font-bold whitespace-nowrap">ลงเวลาเข้า</span>
                         </button>
@@ -278,20 +427,20 @@ require_once __DIR__ . '/templates/header.php';
                         <!-- Check-out Button -->
                         <button id="btn-checkout" type="button"
                                 onclick="startCheckin('out')"
-                                class="w-48 h-48 max-w-[85vw] max-h-[85vw] aspect-square rounded-full bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white shadow-lg transition-colors active:scale-[0.98] touch-manipulation flex flex-col items-center justify-center border-0">
+                                class="tp-checkin-primary-action tp-checkin-primary-action--out hover:brightness-110 active:scale-[0.985] text-white transition touch-manipulation border-0">
                             <i class="fas fa-sign-out-alt text-5xl mb-2 shrink-0" aria-hidden="true"></i>
                             <span class="text-lg font-bold whitespace-nowrap">ลงเวลาออก</span>
                         </button>
                         
                     <?php else: ?>
                         <!-- All Done -->
-                        <div class="w-48 h-48 max-w-[85vw] max-h-[85vw] aspect-square rounded-full bg-slate-700/95 text-white flex flex-col items-center justify-center shadow-[0_12px_40px_rgba(0,0,0,0.42)]">
+                        <div class="tp-checkin-primary-action--done text-white flex items-center justify-center gap-3">
                             <i class="fas fa-check-circle text-5xl mb-2 text-emerald-400 shrink-0" aria-hidden="true"></i>
                             <span class="text-base font-semibold text-center px-2">ลงเวลาครบแล้ว</span>
                         </div>
                     <?php endif; ?>
                     
-                    <p class="text-white/50 text-sm text-center max-w-md px-2" id="location-status">
+                    <p class="tp-checkin-location-pill text-white/60 text-sm text-center max-w-md px-2" id="location-status">
                         <i class="fas fa-location-arrow mr-1"></i>
                         กำลังตรวจสอบตำแหน่ง...
                     </p>
@@ -300,7 +449,7 @@ require_once __DIR__ . '/templates/header.php';
         </div>
         
         <!-- Right Column: Summary & History -->
-        <div class="space-y-6">
+        <div class="tp-checkin-side-stack">
             <!-- Planned Late Start (แจ้งเข้างานสายล่วงหน้า) -->
             <?php if ($ls_has_any): ?>
             <div>
@@ -310,9 +459,9 @@ require_once __DIR__ . '/templates/header.php';
                     </h2>
                     <span class="text-white/40 text-xs"><?php echo ($ls_today_row ? 1 : 0) + ($ls_tomorrow_row ? 1 : 0); ?> รายการ</span>
                 </div>
-                <div class="space-y-3">
+                <div class="space-y-5">
                     <?php if ($ls_today_row): ?>
-                    <div class="rounded-[var(--tp-ios-card-radius)] bg-amber-500/13 p-4 shadow-[var(--tp-surface-well-inset)]">
+                    <div class="rounded-[var(--tp-ios-card-radius)] bg-amber-500/13 p-5 shadow-[var(--tp-surface-well-inset)]">
                         <p class="text-amber-300 text-xs font-semibold uppercase tracking-wide mb-1">
                             <i class="fas fa-sun mr-1"></i>วันนี้ · <?php echo date('d M', strtotime($ls_today)); ?>
                         </p>
@@ -333,7 +482,7 @@ require_once __DIR__ . '/templates/header.php';
                     </div>
                     <?php endif; ?>
                     <?php if ($ls_tomorrow_row): ?>
-                    <div class="rounded-[var(--tp-ios-card-radius)] bg-sky-500/13 p-4 shadow-[var(--tp-surface-well-inset)]">
+                    <div class="rounded-[var(--tp-ios-card-radius)] bg-sky-500/13 p-5 shadow-[var(--tp-surface-well-inset)]">
                         <p class="text-blue-300 text-xs font-semibold uppercase tracking-wide mb-1">
                             <i class="fas fa-moon mr-1"></i>พรุ่งนี้ · <?php echo date('d M', strtotime($ls_tomorrow)); ?>
                         </p>
@@ -363,7 +512,7 @@ require_once __DIR__ . '/templates/header.php';
             </div>
             <?php else: ?>
             <button type="button" onclick="openLateStartModal()"
-                    class="w-full min-h-[56px] rounded-[var(--tp-ios-card-radius)] bg-amber-500/23 hover:bg-amber-500/28 p-4 text-left transition-colors touch-manipulation flex items-center gap-4 shadow-[var(--tp-surface-well-inset)]">
+                    class="tp-checkin-late-cta w-full min-h-[64px] rounded-[var(--tp-ios-card-radius)] bg-amber-500/20 hover:bg-amber-500/26 p-5 text-left transition-colors touch-manipulation flex items-center gap-4 shadow-[var(--tp-surface-well-inset)]">
                     <div class="shrink-0 w-12 h-12 rounded-[var(--tp-ios-card-radius)] bg-amber-500 flex items-center justify-center">
                         <i class="fas fa-clock text-white text-2xl" aria-hidden="true"></i>
                     </div>
@@ -381,7 +530,7 @@ require_once __DIR__ . '/templates/header.php';
             <?php endif; ?>
 
             <!-- Quick links -->
-            <div class="grid grid-cols-2 gap-4">
+            <div class="tp-checkin-quick-actions grid grid-cols-2">
                 <a href="attendance_history.php" class="tp-native-well tp-native-well--interactive flex min-h-[48px] items-center justify-center gap-2 rounded-[var(--tp-ios-card-radius)] px-3 py-2.5 text-white/80 hover:text-white text-sm font-medium touch-manipulation whitespace-nowrap">
                     <i class="fas fa-history text-violet-400 text-xl" aria-hidden="true"></i>ประวัติเข้างาน
                 </a>
@@ -397,9 +546,7 @@ require_once __DIR__ . '/templates/header.php';
                     สรุปเดือนนี้
                 </h2>
                 
-                <div class="space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-white/70">มาทำงาน</span>
+                <div class="space-y-4">
                         <span class="text-green-400 font-medium"><?php echo $monthly_summary['present_days'] ?? 0; ?> วัน</span>
                     </div>
                     <div class="flex justify-between items-center">
