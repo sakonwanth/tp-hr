@@ -149,11 +149,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Get current tab
 $tab = $_GET['tab'] ?? 'general';
+$holidayYear = isset($_GET['year']) ? (int)$_GET['year'] : (int)date('Y');
+if ($holidayYear < 2000 || $holidayYear > 2100) {
+    $holidayYear = (int)date('Y');
+}
 
 // Fetch data based on tab
 $settings = $settingsService->allForHrSettingsPage();
 
-$holidays = $pdo->query("SELECT * FROM hr_holidays ORDER BY date")->fetchAll();
+$stmtHolidays = $pdo->prepare("SELECT * FROM hr_holidays WHERE YEAR(date) = ? ORDER BY date");
+$stmtHolidays->execute([$holidayYear]);
+$holidays = $stmtHolidays->fetchAll();
+$holidayCount = count($holidays);
+$holidayYearTh = $holidayYear + 543;
+$holidayMeetsMinimum = $holidayCount >= 13;
 $leaveTypes = $pdo->query("SELECT * FROM hr_leave_types ORDER BY sort_order")->fetchAll();
 $workShifts = $pdo->query("SELECT * FROM hr_work_shifts ORDER BY id")->fetchAll();
 
@@ -325,7 +334,22 @@ foreach ($workShifts as $_ws) {
     
     <!-- Holiday List -->
     <div class="xl:col-span-2 native-card tp-native-card tp-native-data-card overflow-hidden rounded-[var(--tp-ios-card-radius)] p-5 sm:p-6 min-w-0 border border-white/10">
-        <h2 class="text-lg font-semibold text-white mb-4">รายการวันหยุด <?php echo date('Y') + 543; ?></h2>
+        <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div class="min-w-0">
+                <h2 class="text-lg font-semibold text-white">รายการวันหยุด <?php echo (int)$holidayYearTh; ?></h2>
+                <p class="mt-1 text-sm <?php echo $holidayMeetsMinimum ? 'text-emerald-200/85' : 'text-amber-200/85'; ?>">
+                    <?php echo (int)$holidayCount; ?>/13 วันขั้นต่ำตามกฎหมาย
+                </p>
+            </div>
+            <form method="GET" class="flex shrink-0 items-center gap-2">
+                <input type="hidden" name="tab" value="holidays">
+                <label class="sr-only" for="holiday-year-filter">ปี ค.ศ.</label>
+                <input id="holiday-year-filter" type="number" name="year" min="2000" max="2100" value="<?php echo (int)$holidayYear; ?>" class="input-field tp-native-input w-28 min-h-[48px]">
+                <button type="submit" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/15 touch-manipulation">
+                    ดูปี
+                </button>
+            </form>
+        </div>
 
         <div class="md:hidden space-y-3">
             <?php foreach ($holidays as $holiday): ?>

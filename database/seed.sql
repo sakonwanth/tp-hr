@@ -47,28 +47,23 @@ INSERT INTO hr_document_templates (code, name, name_en, category, description, r
 
 -- =============================================
 -- 4. ข้อมูลวันหยุดปี 2026
+-- Company minimum traditional holidays: 13 days/year, including National Labour Day.
 -- =============================================
 
 INSERT INTO hr_holidays (date, name, name_en, type) VALUES
 ('2026-01-01', 'วันขึ้นปีใหม่', 'New Year\'s Day', 'PUBLIC'),
-('2026-02-26', 'วันมาฆบูชา', 'Makha Bucha Day', 'PUBLIC'),
+('2026-03-03', 'วันมาฆบูชา', 'Makha Bucha Day', 'PUBLIC'),
 ('2026-04-06', 'วันจักรี', 'Chakri Memorial Day', 'PUBLIC'),
 ('2026-04-13', 'วันสงกรานต์', 'Songkran Day 1', 'PUBLIC'),
 ('2026-04-14', 'วันสงกรานต์', 'Songkran Day 2', 'PUBLIC'),
 ('2026-04-15', 'วันสงกรานต์', 'Songkran Day 3', 'PUBLIC'),
 ('2026-05-01', 'วันแรงงานแห่งชาติ', 'National Labour Day', 'PUBLIC'),
 ('2026-05-04', 'วันฉัตรมงคล', 'Coronation Day', 'PUBLIC'),
-('2026-05-11', 'วันพืชมงคล', 'Royal Ploughing Ceremony Day', 'PUBLIC'),
-('2026-05-26', 'วันวิสาขบูชา', 'Visakha Bucha Day', 'PUBLIC'),
 ('2026-06-03', 'วันเฉลิมพระชนมพรรษาสมเด็จพระนางเจ้าฯ', 'Queen Suthida\'s Birthday', 'PUBLIC'),
-('2026-07-24', 'วันอาสาฬหบูชา', 'Asalha Bucha Day', 'PUBLIC'),
 ('2026-07-28', 'วันเฉลิมพระชนมพรรษา ร.10', 'King Vajiralongkorn\'s Birthday', 'PUBLIC'),
 ('2026-08-12', 'วันเฉลิมพระชนมพรรษา สมเด็จพระบรมราชชนนี', 'Queen Sirikit\'s Birthday', 'PUBLIC'),
 ('2026-10-13', 'วันคล้ายวันสวรรคต ร.9', 'King Bhumibol Memorial Day', 'PUBLIC'),
-('2026-10-23', 'วันปิยมหาราช', 'Chulalongkorn Day', 'PUBLIC'),
-('2026-12-05', 'วันคล้ายวันพระบรมราชสมภพ ร.9', 'King Bhumibol\'s Birthday', 'PUBLIC'),
-('2026-12-10', 'วันรัฐธรรมนูญ', 'Constitution Day', 'PUBLIC'),
-('2026-12-31', 'วันสิ้นปี', 'New Year\'s Eve', 'PUBLIC');
+('2026-12-10', 'วันรัฐธรรมนูญ', 'Constitution Day', 'PUBLIC');
 
 -- =============================================
 -- 5. ข้อมูลการตั้งค่าระบบ
