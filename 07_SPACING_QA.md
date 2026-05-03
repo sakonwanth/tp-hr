@@ -34,7 +34,8 @@ Any **FAIL:** fix **`native-shell`** token first; then page-level classes.
 - Touch-target sweep (`min-h/min-w` under 48 on interactive controls): **PASS after remediation**
 - ESS **`tp-native-modal`** outer padding **`p-5`** (aligned with **`hr/*.php`**): **`checkin.php`** · **`leave_history.php`** · **`profile.php`** · **`dayoff_schedule.php`**
 - Mobile **`md:hidden`** list wrapper gutters aligned to **`p-5`** (HR + **`attendance_history`**) where stacks were **`p-3`**
-- Guest E2E (`PLAYWRIGHT_SKIP_TABLET=1`, `PLAYWRIGHT_BASE_URL=http://127.0.0.1/tp-hr/ npm run -s test:e2e:ci`): **31 passed** (2026-04-28, after padding sweep)
+- Guest E2E (`PLAYWRIGHT_SKIP_TABLET=1`, `PLAYWRIGHT_BASE_URL=http://127.0.0.1/tp-hr/ npm run -s test:e2e:ci`): **31 passed** (phone-only slice)
+- Guest E2E full matrix (`PLAYWRIGHT_BASE_URL=http://127.0.0.1/tp-hr/ npm run -s test:e2e`): **62 passed** (chromium **+** tablet, 2026-04-28)
 
 ---
 
