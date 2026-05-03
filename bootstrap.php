@@ -7,6 +7,17 @@
 // Base path
 define('BASE_PATH', __DIR__);
 
+if (PHP_SAPI !== 'cli') {
+    $rid = trim((string) ($_SERVER['HTTP_X_REQUEST_ID'] ?? ''));
+    if ($rid === '' || strlen($rid) > 64 || !preg_match('/^[A-Za-z0-9._@-]+$/', $rid)) {
+        $rid = bin2hex(random_bytes(8));
+    }
+    $_SERVER['TP_REQUEST_ID'] = $rid;
+    if (!headers_sent()) {
+        header('X-Request-Id: ' . $rid, true);
+    }
+}
+
 // Detect TpCommon availability (local dev has vendor/ from composer install)
 $_autoload = BASE_PATH . '/vendor/autoload.php';
 if (file_exists($_autoload)) {
