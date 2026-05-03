@@ -188,7 +188,7 @@ include dirname(__DIR__) . '/templates/header.php';
         'CANCELLED' => 'ยกเลิก'
     ];
     ?>
-    <div class="md:hidden p-3 space-y-3">
+    <div class="md:hidden p-5 space-y-4">
         <?php foreach ($requests as $req): ?>
         <?php
         $reqId = (int)$req['id'];

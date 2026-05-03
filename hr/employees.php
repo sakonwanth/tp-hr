@@ -320,7 +320,7 @@ $flashError = flash('error');
     </div>
     <?php else: ?>
     <!-- Mobile-first: card list below md (tablet/desktop use table) -->
-    <div class="md:hidden p-3 space-y-3">
+    <div class="md:hidden p-5 space-y-4">
         <?php foreach ($employees as $emp): ?>
         <?php
         $fullName = trim((string)($emp['first_name_th'] ?? '') . ' ' . (string)($emp['last_name_th'] ?? ''));

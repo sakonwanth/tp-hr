@@ -249,7 +249,7 @@ include dirname(__DIR__) . '/templates/header.php';
 <!-- Attendance Table -->
 <div class="native-card tp-native-card tp-native-data-card min-w-0 max-w-full overflow-hidden">
     <?php if ($allDays): ?>
-    <div class="md:hidden p-3 space-y-3">
+    <div class="md:hidden p-5 space-y-4">
         <?php foreach ($allDays as $day): ?>
         <?php
         $att = $day['attendance'];

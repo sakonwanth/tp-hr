@@ -216,7 +216,7 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
     <!-- Attendance Table -->
     <div class="native-card tp-native-card tp-native-data-card min-w-0 max-w-full overflow-hidden">
         <?php if ($allDays): ?>
-        <div class="md:hidden p-3 space-y-6 min-w-0">
+        <div class="md:hidden p-5 space-y-6 min-w-0">
             <?php foreach ($allDays as $day): ?>
             <?php
             $att = $day['attendance'];

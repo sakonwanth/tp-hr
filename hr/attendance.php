@@ -282,7 +282,7 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
     <?php else: ?>
     <!-- Mobile-first: card list below md (table from md up — Wave B alignment) -->
-    <div class="md:hidden p-3 space-y-3">
+    <div class="md:hidden p-5 space-y-4">
         <?php foreach ($records as $rec): ?>
         <?php
         $hasAttendance = !empty($rec['attendance_id']);
