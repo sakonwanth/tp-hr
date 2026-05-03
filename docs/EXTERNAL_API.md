@@ -98,6 +98,8 @@ Status codes: 200, 201, 400, 401, 403, 404, 405, 409 (conflict), 429, 500
 ## Rate limit
 Per key. Headers: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`, `Retry-After` on 429.
 
+Counters are stored under `storage/api_ratelimit/` with a fallback directory under the server temp dir if that path is not writable. If neither is usable, the API responds with **503** `Rate limit store unavailable` unless the host sets **`HR_API_RATELIMIT_FAIL_OPEN=1`** (legacy fail-open: allow the request without counting).
+
 ## Example
 
 ```bash

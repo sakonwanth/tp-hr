@@ -175,8 +175,12 @@ class ApiAuth {
 
     private static function enforceRateLimit(array $key): void {
         $limit = max(1, (int)$key['rate_limit_per_min']);
-        $bucketDir = BASE_PATH . '/storage/api_ratelimit';
-        if (!is_dir($bucketDir)) @mkdir($bucketDir, 0775, true);
+        $bucketDir = self::rateLimitBucketDirectory();
+        if ($bucketDir === null) {
+            self::onRateLimitStorageUnavailable();
+            return;
+        }
+
         $minute = (int)floor(time() / 60);
         $file = $bucketDir . '/key_' . (int)$key['id'] . '_' . $minute . '.json';
 
@@ -184,12 +188,17 @@ class ApiAuth {
         if (random_int(1, 100) === 1) {
             $cutoff = time() - 300;
             foreach (glob($bucketDir . '/key_*.json') ?: [] as $old) {
-                if (@filemtime($old) < $cutoff) @unlink($old);
+                if (@filemtime($old) < $cutoff) {
+                    @unlink($old);
+                }
             }
         }
 
         $fp = @fopen($file, 'c+');
-        if (!$fp) return; // fail open if fs issue
+        if (!$fp) {
+            self::onRateLimitStorageUnavailable();
+            return;
+        }
         flock($fp, LOCK_EX);
         $raw = stream_get_contents($fp);
         $count = $raw !== false && $raw !== '' ? (int)$raw : 0;
@@ -209,6 +218,40 @@ class ApiAuth {
             header('Retry-After: ' . (60 - (time() % 60)));
             self::fail(429, 'Rate limit exceeded');
         }
+    }
+
+    /**
+     * Writable directory for per-minute JSON counters. Primary: storage; fallback: system temp.
+     */
+    private static function rateLimitBucketDirectory(): ?string {
+        $primary = BASE_PATH . '/storage/api_ratelimit';
+        $candidates = [
+            $primary,
+            rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR . '/') . '/tp_hr_api_ratelimit_' . substr(hash('sha256', BASE_PATH), 0, 16),
+        ];
+        foreach ($candidates as $dir) {
+            if ((!is_dir($dir) && !@mkdir($dir, 0770, true)) || !is_writable($dir)) {
+                continue;
+            }
+            return $dir;
+        }
+        return null;
+    }
+
+    /**
+     * MED-003: default fail-closed when bucket store cannot be used.
+     * Set HR_API_RATELIMIT_FAIL_OPEN=1 to allow requests without counting (legacy behavior).
+     */
+    private static function onRateLimitStorageUnavailable(): void {
+        $failOpen = filter_var(
+            $_ENV['HR_API_RATELIMIT_FAIL_OPEN'] ?? (getenv('HR_API_RATELIMIT_FAIL_OPEN') !== false ? getenv('HR_API_RATELIMIT_FAIL_OPEN') : '0'),
+            FILTER_VALIDATE_BOOLEAN
+        );
+        if ($failOpen) {
+            error_log('[tp-hr] ApiAuth: rate limit bucket unavailable, fail-open (HR_API_RATELIMIT_FAIL_OPEN)');
+            return;
+        }
+        self::fail(503, 'Rate limit store unavailable');
     }
 
     private static function applyCors(array $key): void {

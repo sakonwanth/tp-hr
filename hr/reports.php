@@ -51,6 +51,34 @@ if ($isPostExport) {
     $department = $_GET['department'] ?? '';
 }
 
+$reportMaxRangeDays = (int)($_ENV['HR_REPORT_MAX_RANGE_DAYS'] ?? (getenv('HR_REPORT_MAX_RANGE_DAYS') !== false ? getenv('HR_REPORT_MAX_RANGE_DAYS') : 366));
+if ($reportMaxRangeDays < 31) {
+    $reportMaxRangeDays = 366;
+}
+$reportRangeWasCapped = false;
+$ds = DateTimeImmutable::createFromFormat('Y-m-d', $startDate);
+$de = DateTimeImmutable::createFromFormat('Y-m-d', $endDate);
+if (!$ds || $ds->format('Y-m-d') !== $startDate || !$de || $de->format('Y-m-d') !== $endDate) {
+    flash('error', 'รูปแบบวันที่ไม่ถูกต้อง');
+    $rq = ['report' => $report];
+    if ($department !== '') {
+        $rq['department'] = $department;
+    }
+    redirect('/hr/reports.php?' . http_build_query($rq), 302);
+}
+if ($ds > $de) {
+    $startDate = $de->format('Y-m-d');
+    $endDate = $ds->format('Y-m-d');
+    $ds = DateTimeImmutable::createFromFormat('Y-m-d', $startDate);
+    $de = DateTimeImmutable::createFromFormat('Y-m-d', $endDate);
+}
+$rangeDays = $ds->diff($de)->days + 1;
+if ($rangeDays > $reportMaxRangeDays) {
+    $endDate = $ds->modify('+' . ($reportMaxRangeDays - 1) . ' days')->format('Y-m-d');
+    $de = DateTimeImmutable::createFromFormat('Y-m-d', $endDate);
+    $reportRangeWasCapped = true;
+}
+
 // Get departments for filter
 $departments = $pdo->query("SELECT DISTINCT department FROM users WHERE department IS NOT NULL AND department != '' ORDER BY department")->fetchAll(PDO::FETCH_COLUMN);
 
@@ -236,6 +264,11 @@ require_once __DIR__ . '/../templates/header.php';
     <i class="fas fa-exclamation-circle mr-2" aria-hidden="true"></i><?php echo htmlspecialchars($reportFlashErr); ?>
 </div>
 <?php endif; ?>
+<?php if (!empty($reportRangeWasCapped)): ?>
+<div class="mb-4 rounded-[var(--tp-ios-card-radius)] border border-amber-500/35 bg-amber-500/15 px-4 py-3 text-amber-100 text-sm" role="status">
+    <i class="fas fa-info-circle mr-2" aria-hidden="true"></i>ช่วงวันที่รายงานจำกัดสูงสุด <?php echo (int)$reportMaxRangeDays; ?> วัน — แสดงข้อมูลถึงวันที่ <?php echo htmlspecialchars(formatDateThai($endDate)); ?>
+</div>
+<?php endif; ?>
 
 <!-- Page Header -->
 <header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
@@ -299,6 +332,7 @@ require_once __DIR__ . '/../templates/header.php';
             <label class="block text-white/70 text-sm mb-1" for="hr-rep-end">วันที่สิ้นสุด</label>
             <input id="hr-rep-end" type="date" name="end_date" class="input-field tp-native-input w-full min-h-[48px]" value="<?php echo htmlspecialchars($endDate); ?>">
         </div>
+        <p class="w-full text-white/45 text-xs mb-0 basis-full">ช่วงวันที่สูงสุด <?php echo (int)$reportMaxRangeDays; ?> วันต่อครั้ง (ตั้งค่า <code class="text-white/60">HR_REPORT_MAX_RANGE_DAYS</code> ได้)</p>
         
         <?php if ($report === 'attendance' || $report === 'leave'): ?>
         <div class="tp-native-form-group mb-0 min-w-[12rem]">
