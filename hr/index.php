@@ -184,6 +184,14 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
 </div>
 
+<details class="hr-dashboard-secondary-accordion min-w-0 xl:contents group">
+    <summary class="hr-dashboard-secondary-accordion__summary native-card tp-native-card xl:hidden flex items-center justify-between gap-3 px-4 py-3.5 cursor-pointer touch-manipulation select-none text-left mb-4 list-none border border-white/10">
+        <span class="text-white font-semibold flex items-center gap-2 min-w-0">
+            <i class="fas fa-calendar-alt text-violet-400 flex-shrink-0" aria-hidden="true"></i>
+            <span class="truncate">คำขอลาและพนักงานลาวันนี้</span>
+        </span>
+        <i class="fas fa-chevron-down text-white/60 text-sm hr-dashboard-secondary-accordion__chevron flex-shrink-0 transition-transform duration-200" aria-hidden="true"></i>
+    </summary>
 <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-8 mb-6 md:mb-8 min-w-0 max-w-full">
     <!-- Pending Leave Requests -->
     <div class="native-card tp-native-card tp-native-data-card min-w-0 max-w-full overflow-hidden">
@@ -266,6 +274,7 @@ include dirname(__DIR__) . '/templates/header.php';
         <?php endif; ?>
     </div>
 </div>
+</details>
 
 <!-- Quick Actions -->
 <div class="native-card tp-native-card tp-native-data-card mb-6 min-w-0 max-w-full overflow-hidden">
@@ -310,6 +319,15 @@ include dirname(__DIR__) . '/templates/header.php';
 
 <!-- Pending Documents -->
 <?php if (!empty($recentDocs)): ?>
+<details class="hr-dashboard-secondary-accordion min-w-0 xl:contents group">
+    <summary class="hr-dashboard-secondary-accordion__summary native-card tp-native-card xl:hidden flex items-center justify-between gap-3 px-4 py-3.5 cursor-pointer touch-manipulation select-none text-left mb-4 list-none border border-white/10">
+        <span class="text-white font-semibold flex items-center gap-2 min-w-0">
+            <i class="fas fa-file-signature text-blue-400 flex-shrink-0" aria-hidden="true"></i>
+            <span class="truncate">คำขอเอกสารรอดำเนินการ</span>
+        </span>
+        <i class="fas fa-chevron-down text-white/60 text-sm hr-dashboard-secondary-accordion__chevron flex-shrink-0 transition-transform duration-200" aria-hidden="true"></i>
+    </summary>
+<div class="min-w-0 max-w-full">
 <div class="native-card tp-native-card tp-native-data-card min-w-0 max-w-full overflow-hidden">
     <div class="p-5 sm:p-6 border-b border-white/10 flex items-center justify-between gap-3 min-w-0">
         <h2 class="section-title mb-0 flex flex-wrap items-center gap-2 text-white min-w-0">
@@ -392,6 +410,8 @@ include dirname(__DIR__) . '/templates/header.php';
         </table>
     </div>
 </div>
+</div>
+</details>
 <?php endif; ?>
 </div>
 
@@ -502,6 +522,25 @@ document.getElementById('reject-form').addEventListener('submit', async function
 document.getElementById('reject-modal').addEventListener('click', function(e) {
     if (e.target === this) closeRejectModal();
 });
+</script>
+<script>
+(function () {
+    function hrDashboardSecondaryWide() {
+        return window.matchMedia('(min-width: 1280px)').matches;
+    }
+    function syncHrDashboardSecondaryAccordions() {
+        var wide = hrDashboardSecondaryWide();
+        document.querySelectorAll('.hr-dashboard-secondary-accordion').forEach(function (d) {
+            d.open = wide;
+        });
+    }
+    window.addEventListener('resize', syncHrDashboardSecondaryAccordions, { passive: true });
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', syncHrDashboardSecondaryAccordions);
+    } else {
+        syncHrDashboardSecondaryAccordions();
+    }
+})();
 </script>
 
 <?php include dirname(__DIR__) . '/templates/footer.php'; ?>

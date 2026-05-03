@@ -1,8 +1,9 @@
 /**
  * TP-HR — Native component system (iOS 26–inspired).
+ * v16: HR dashboard secondary `<details>` accordion (below `xl`) — chevron + marker reset.
  * v15: Liquid Glass chrome — floating inset tab strip + gradient scrim · glass sticky CTA slab (`tp-ios-sticky-cta-slab`) · typography caps (page title max 28px · section ~19px · card title ~17px).
  * v14: token ladder + scroll buffer 160 · primary 58 · input 56 · textarea 120.
- * Headers: `/assets/css/native-shell.css?v=15`.
+ * Headers: `/assets/css/native-shell.css?v=16`.
  */
 
 html {
@@ -751,4 +752,17 @@ body.tp-native-app .section-title i {
   font-size: var(--tp-font-caption);
   color: rgba(255, 255, 255, 0.62);
   line-height: 1.4;
+}
+
+/* ---------- HR dashboard — collapsible secondary blocks (< xl) ---------- */
+.hr-dashboard-secondary-accordion summary::-webkit-details-marker {
+  display: none;
+}
+
+.hr-dashboard-secondary-accordion summary {
+  list-style: none;
+}
+
+.hr-dashboard-secondary-accordion[open] .hr-dashboard-secondary-accordion__chevron {
+  transform: rotate(180deg);
 }
