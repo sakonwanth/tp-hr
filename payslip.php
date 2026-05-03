@@ -206,7 +206,7 @@ try {
 </header>
 
 <!-- Payslip Card -->
-<div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 print:bg-white print:text-black min-w-0 overflow-x-auto" id="payslip-content">
+<div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 print:bg-white print:text-black min-w-0 overflow-x-auto" id="payslip-content">
     <!-- Header -->
     <div class="flex items-start justify-between mb-6 pb-6 border-b border-white/10 print:border-gray-200">
         <div class="min-w-0 pr-2">

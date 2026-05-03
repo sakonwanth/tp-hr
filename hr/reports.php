@@ -286,7 +286,7 @@ require_once __DIR__ . '/../templates/header.php';
 </div>
 
 <!-- Filters -->
-<div class="native-card tp-native-card overflow-hidden rounded-[var(--tp-ios-card-radius)] p-4 sm:p-6 mb-6 min-w-0 border border-white/10">
+<div class="native-card tp-native-card overflow-hidden rounded-[var(--tp-ios-card-radius)] p-5 sm:p-6 mb-6 min-w-0 border border-white/10">
     <form method="GET" class="flex flex-wrap items-end gap-4">
         <input type="hidden" name="report" value="<?php echo htmlspecialchars($report); ?>">
         
@@ -723,7 +723,7 @@ require_once __DIR__ . '/../templates/header.php';
     <?php if ($reportData): ?>
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
         <?php foreach ($reportData as $row): ?>
-        <div class="native-card tp-native-card rounded-[var(--tp-ios-card-radius)] border border-white/10 bg-white/5 p-4">
+        <div class="native-card tp-native-card rounded-[var(--tp-ios-card-radius)] border border-white/10 bg-white/5 p-5">
             <div class="flex items-center gap-3 mb-3">
                 <div class="w-4 h-4 rounded-full" style="background: <?php echo $row['color']; ?>"></div>
                 <h3 class="text-white font-medium"><?php echo htmlspecialchars($row['leave_type']); ?></h3>

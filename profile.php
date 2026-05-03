@@ -119,7 +119,7 @@ endif; ?>
 <!-- General Info -->
 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 min-w-0 max-w-full">
     <!-- Profile Card -->
-    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+    <div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0">
         <div class="text-center mb-6">
             <div class="w-24 h-24 rounded-full bg-violet-600 flex items-center justify-center mx-auto mb-4">
                 <?php if (!empty($profile['profile_image'])): ?>
@@ -177,7 +177,7 @@ endif; ?>
     
     <!-- Personal Info -->
     <div class="xl:col-span-2 space-y-6">
-        <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+        <div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0">
             <h3 class="section-title mb-4 flex flex-wrap items-center gap-2">
                 <i class="fas fa-id-card text-violet-400 text-2xl" aria-hidden="true"></i>
                 ข้อมูลส่วนตัว
@@ -223,7 +223,7 @@ endif; ?>
             </div>
         </div>
         
-        <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+        <div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0">
             <h3 class="section-title mb-4 flex flex-wrap items-center gap-2">
                 <i class="fas fa-briefcase text-emerald-400 text-2xl" aria-hidden="true"></i>
                 ข้อมูลการจ้างงาน
@@ -265,7 +265,7 @@ endif; ?>
             </div>
         </div>
         
-        <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+        <div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0">
             <h3 class="section-title mb-4 flex flex-wrap items-center gap-2">
                 <i class="fas fa-map-marker-alt text-sky-400 text-2xl" aria-hidden="true"></i>
                 ที่อยู่
@@ -286,7 +286,7 @@ endif; ?>
 
 <?php elseif ($action === 'contact'): ?>
 <!-- Emergency Contacts -->
-<div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+<div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <h3 class="section-title mb-0 flex flex-wrap items-center gap-2">
             <i class="fas fa-phone-alt text-rose-400 text-2xl" aria-hidden="true"></i>
@@ -338,7 +338,7 @@ endif; ?>
 
 <?php elseif ($action === 'family'): ?>
 <!-- Family Members -->
-<div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+<div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <h3 class="section-title mb-0 flex flex-wrap items-center gap-2">
             <i class="fas fa-users text-amber-400 text-2xl" aria-hidden="true"></i>
@@ -428,7 +428,7 @@ endif; ?>
 
 <?php elseif ($action === 'education'): ?>
 <!-- Education -->
-<div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+<div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <h3 class="section-title mb-0 flex flex-wrap items-center gap-2">
             <i class="fas fa-graduation-cap text-blue-400 text-2xl" aria-hidden="true"></i>
@@ -482,7 +482,7 @@ endif; ?>
 
 <?php elseif ($action === 'work'): ?>
 <!-- Work History -->
-<div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+<div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <h3 class="section-title mb-0 flex flex-wrap items-center gap-2">
             <i class="fas fa-briefcase text-emerald-400 text-2xl" aria-hidden="true"></i>

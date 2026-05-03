@@ -156,7 +156,7 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
         </div>
     </header>
     <!-- Filters -->
-    <div class="native-card tp-native-card tp-native-data-card p-4 mb-6 min-w-0">
+    <div class="native-card tp-native-card tp-native-data-card p-5 mb-6 min-w-0">
         <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 gap-6 min-w-0 max-w-full">
             <div class="min-w-0">
                 <label class="block text-white/60 text-xs mb-1">เดือน</label>
@@ -184,19 +184,19 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
     
     <!-- Summary Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-6 min-w-0 max-w-full">
-        <div class="native-card tp-native-card tp-native-data-card p-4 text-center min-w-0">
+        <div class="native-card tp-native-card tp-native-data-card p-5 text-center min-w-0">
             <p class="text-white/60 text-sm">มาทำงาน</p>
             <p class="text-3xl font-bold text-emerald-400"><?php echo $summary['present_days'] ?? 0; ?></p>
             <p class="text-white/50 text-xs">วัน</p>
         </div>
         
-        <div class="native-card tp-native-card tp-native-data-card p-4 text-center min-w-0">
+        <div class="native-card tp-native-card tp-native-data-card p-5 text-center min-w-0">
             <p class="text-white/60 text-sm">มาสาย</p>
             <p class="text-3xl font-bold text-amber-400"><?php echo $summary['late_days'] ?? 0; ?></p>
             <p class="text-white/50 text-xs">ครั้ง</p>
         </div>
         
-        <div class="native-card tp-native-card tp-native-data-card p-4 text-center min-w-0">
+        <div class="native-card tp-native-card tp-native-data-card p-5 text-center min-w-0">
             <p class="text-white/60 text-sm">ชั่วโมงทำงาน</p>
             <p class="text-3xl font-bold text-white">
                 <?php echo floor(($summary['total_work_minutes'] ?? 0) / 60); ?>
@@ -204,7 +204,7 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
             <p class="text-white/50 text-xs">ชั่วโมง</p>
         </div>
         
-        <div class="native-card tp-native-card tp-native-data-card p-4 text-center min-w-0">
+        <div class="native-card tp-native-card tp-native-data-card p-5 text-center min-w-0">
             <p class="text-white/60 text-sm">OT</p>
             <p class="text-3xl font-bold text-emerald-400">
                 <?php echo floor(($summary['total_ot_minutes'] ?? 0) / 60); ?>

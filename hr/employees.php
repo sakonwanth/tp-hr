@@ -263,7 +263,7 @@ $flashError = flash('error');
 </div>
 
 <!-- Filters -->
-<div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 mb-6 min-w-0 max-w-full overflow-hidden">
+<div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 mb-6 min-w-0 max-w-full overflow-hidden">
     <h2 class="section-title mb-4 text-white text-lg">
         <i class="fas fa-filter text-violet-400 text-xl mr-2" aria-hidden="true"></i>
         ค้นหาและกรอง

@@ -188,8 +188,8 @@ include __DIR__ . '/templates/header.php';
 <?php endif; ?>
 
 <!-- Month Filter -->
-<div class="native-card tp-native-card tp-native-data-card p-4 mb-6 min-w-0">
-    <form method="GET" class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+<div class="native-card tp-native-card tp-native-data-card p-5 mb-6 min-w-0">
+    <form method="GET" class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-6">
         <label for="dayoff-month-select" class="text-white/70 text-sm font-medium shrink-0">เดือน</label>
         <select id="dayoff-month-select" name="month" class="input-field tp-native-select w-full sm:w-auto sm:min-w-[12rem] touch-manipulation" onchange="this.form.submit()">
             <?php foreach ($monthOptions as $opt): ?>
@@ -242,7 +242,7 @@ include __DIR__ . '/templates/header.php';
             $wCursor->modify('+1 day');
         }
     ?>
-    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-5 min-w-0">
+    <div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-3">
             <div class="flex flex-wrap items-center gap-3 min-w-0">
                 <h3 class="text-white font-medium">
@@ -368,7 +368,7 @@ include __DIR__ . '/templates/header.php';
 </div>
 
 <!-- Legend -->
-<div class="native-card tp-native-card tp-native-data-card p-4 sm:p-5 mt-4 md:mt-6 min-w-0">
+<div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 mt-4 md:mt-6 min-w-0">
     <p class="text-sm font-semibold text-white mb-3 flex flex-wrap items-center gap-2">
         <i class="fas fa-palette text-violet-400 text-xl" aria-hidden="true"></i>
         คำอธิบายสี

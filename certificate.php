@@ -61,7 +61,7 @@ include 'templates/header.php';
 
 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 min-w-0 max-w-full">
     <div class="xl:col-span-2 min-w-0">
-        <form id="certificate-form" class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0" method="POST" action="/api/certificate.php">
+        <form id="certificate-form" class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0" method="POST" action="/api/certificate.php">
             <input type="hidden" name="action" value="create">
             <?php echo csrfField(); ?>
             
@@ -157,7 +157,7 @@ include 'templates/header.php';
     
     <!-- Info -->
     <div class="space-y-6 min-w-0">
-        <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+        <div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0">
             <h3 class="section-title mb-4 flex flex-wrap items-center gap-2">
                 <i class="fas fa-info-circle text-blue-400 text-2xl" aria-hidden="true"></i>
                 ข้อมูลการขอหนังสือรับรอง
@@ -169,7 +169,7 @@ include 'templates/header.php';
             </div>
         </div>
         
-        <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+        <div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0">
             <h3 class="section-title mb-4 flex flex-wrap items-center gap-2">
                 <i class="fas fa-list-alt text-amber-400 text-2xl" aria-hidden="true"></i>
                 ประเภทเอกสารที่ขอได้
@@ -258,7 +258,7 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
 <?php else: ?>
 <!-- Request List View -->
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 min-w-0 max-w-full">
-    <a href="certificate.php?action=new" class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0 hover:bg-white/[0.07] transition-colors group touch-manipulation border-violet-500/20">
+    <a href="certificate.php?action=new" class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0 hover:bg-white/[0.07] transition-colors group touch-manipulation border-violet-500/20">
         <div class="flex items-center gap-4">
             <div class="w-12 h-12 rounded-[var(--tp-ios-card-radius)] bg-violet-600/20 flex items-center justify-center group-hover:bg-violet-600/30 transition-colors">
                 <i class="fas fa-plus text-violet-400 text-xl" aria-hidden="true"></i>
@@ -270,7 +270,7 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
         </div>
     </a>
     
-    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+    <div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0">
         <div class="flex items-center gap-4">
             <div class="w-12 h-12 rounded-[var(--tp-ios-card-radius)] bg-amber-500/20 flex items-center justify-center">
                 <i class="fas fa-hourglass-half text-amber-400 text-xl" aria-hidden="true"></i>
@@ -282,7 +282,7 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
         </div>
     </div>
     
-    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+    <div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0">
         <div class="flex items-center gap-4">
             <div class="w-12 h-12 rounded-[var(--tp-ios-card-radius)] bg-emerald-500/20 flex items-center justify-center">
                 <i class="fas fa-check-circle text-emerald-400 text-xl" aria-hidden="true"></i>

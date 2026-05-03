@@ -102,7 +102,7 @@ if (!function_exists('tp_hr_emp_view_row')) {
 </header>
 
 <!-- Profile Header -->
-<div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 mb-6 min-w-0 max-w-full overflow-hidden">
+<div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 mb-6 min-w-0 max-w-full overflow-hidden">
     <div class="flex flex-col md:flex-row gap-6 items-start">
         <div class="flex-shrink-0 mx-auto md:mx-0">
             <?php if (!empty($emp['avatar'])): ?>
@@ -183,7 +183,7 @@ if (!function_exists('tp_hr_emp_view_row')) {
 
 <div class="grid grid-cols-1 xl:grid-cols-2 gap-5 md:gap-8 min-w-0 max-w-full">
     <!-- Personal -->
-    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0 max-w-full overflow-hidden">
+    <div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0 max-w-full overflow-hidden">
         <h3 class="section-title mb-4 text-white text-base sm:text-lg"><i class="fas fa-user text-violet-400 mr-2 text-xl" aria-hidden="true"></i>ข้อมูลส่วนตัว</h3>
         <?php
         tp_hr_emp_view_row('เพศ', $genderLabel[$emp['gender'] ?? ''] ?? null);
@@ -201,7 +201,7 @@ if (!function_exists('tp_hr_emp_view_row')) {
     </div>
 
     <!-- Employment -->
-    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0 max-w-full overflow-hidden">
+    <div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0 max-w-full overflow-hidden">
         <h3 class="section-title mb-4 text-white text-base sm:text-lg"><i class="fas fa-briefcase text-emerald-400 mr-2 text-xl" aria-hidden="true"></i>ข้อมูลการจ้างงาน</h3>
         <?php
         tp_hr_emp_view_row('วันที่เริ่มงาน', !empty($emp['hire_date']) ? formatDateThai($emp['hire_date']) : null, 'calendar');
@@ -223,7 +223,7 @@ if (!function_exists('tp_hr_emp_view_row')) {
     </div>
 
     <!-- Contact / Emergency -->
-    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0 max-w-full overflow-hidden">
+    <div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0 max-w-full overflow-hidden">
         <h3 class="section-title mb-4 text-white text-base sm:text-lg"><i class="fas fa-phone-alt text-amber-400 mr-2 text-xl" aria-hidden="true"></i>ติดต่อฉุกเฉิน</h3>
         <?php
         tp_hr_emp_view_row('ชื่อผู้ติดต่อ', $emp['emergency_contact_name'] ?? null);
@@ -233,7 +233,7 @@ if (!function_exists('tp_hr_emp_view_row')) {
     </div>
 
     <!-- Payroll -->
-    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0 max-w-full overflow-hidden">
+    <div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0 max-w-full overflow-hidden">
         <h3 class="section-title mb-4 text-white text-base sm:text-lg"><i class="fas fa-money-check text-emerald-400 mr-2 text-xl" aria-hidden="true"></i>การเงินและประกันสังคม</h3>
         <?php
         if (isCEOOrAbove()) {

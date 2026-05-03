@@ -464,7 +464,7 @@ include dirname(__DIR__) . '/templates/header.php';
 </header>
 
 <!-- Info Box: Shared with CRM -->
-<div class="native-card tp-native-card tp-native-data-card p-4 mb-6 min-w-0 border-l-4 border-blue-500/80 rounded-[var(--tp-ios-card-radius)]" role="status">
+<div class="native-card tp-native-card tp-native-data-card p-5 mb-6 min-w-0 border-l-4 border-blue-500/80 rounded-[var(--tp-ios-card-radius)]" role="status">
     <div class="flex items-start gap-3">
         <i class="fas fa-info-circle text-blue-400 mt-0.5 shrink-0" aria-hidden="true"></i>
         <div class="min-w-0">
@@ -475,7 +475,7 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <?php if (!empty($errors)): ?>
-<div class="native-card tp-native-card tp-native-data-card p-4 mb-6 min-w-0 border-l-4 border-red-500/80 rounded-[var(--tp-ios-card-radius)]" role="alert">
+<div class="native-card tp-native-card tp-native-data-card p-5 mb-6 min-w-0 border-l-4 border-red-500/80 rounded-[var(--tp-ios-card-radius)]" role="alert">
     <div class="flex items-start gap-3">
         <i class="fas fa-exclamation-circle text-red-400 mt-0.5 shrink-0" aria-hidden="true"></i>
         <div class="min-w-0">
@@ -491,7 +491,7 @@ include dirname(__DIR__) . '/templates/header.php';
 <?php endif; ?>
 
 <?php if ($success): ?>
-<div class="native-card tp-native-card tp-native-data-card p-4 mb-6 min-w-0 border-l-4 border-emerald-500/80 rounded-[var(--tp-ios-card-radius)]" role="status">
+<div class="native-card tp-native-card tp-native-data-card p-5 mb-6 min-w-0 border-l-4 border-emerald-500/80 rounded-[var(--tp-ios-card-radius)]" role="status">
     <div class="flex items-start gap-3">
         <i class="fas fa-check-circle text-emerald-400 mt-0.5 shrink-0" aria-hidden="true"></i>
         <p class="text-emerald-200"><?php echo htmlspecialchars($success); ?></p>
@@ -536,7 +536,7 @@ include dirname(__DIR__) . '/templates/header.php';
     <div id="tab-personal" class="tab-panel space-y-6" role="tabpanel" aria-labelledby="btn-tab-personal">
     
     <!-- Basic Info -->
-    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+    <div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0">
         <h3 class="section-title mb-4 flex items-center text-white text-base sm:text-lg">
             <i class="fas fa-user text-violet-400 mr-2"></i>
             ข้อมูลพื้นฐาน
@@ -599,7 +599,7 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
     
     <!-- Personal Info -->
-    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+    <div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0">
         <h3 class="section-title mb-4 flex items-center text-white text-base sm:text-lg">
             <i class="fas fa-id-card text-violet-400 mr-2"></i>
             ข้อมูลส่วนตัว
@@ -797,7 +797,7 @@ include dirname(__DIR__) . '/templates/header.php';
     <div id="tab-work" class="tab-panel space-y-6" role="tabpanel" aria-labelledby="btn-tab-work" style="display:none">
     
     <!-- Work Info -->
-    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+    <div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0">
         <h3 class="section-title mb-4 flex items-center text-white text-base sm:text-lg">
             <i class="fas fa-briefcase text-violet-400 mr-2"></i>
             ข้อมูลการทำงาน
@@ -956,7 +956,7 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
     
     <!-- Probation Section -->
-    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0" id="probation-section">
+    <div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0" id="probation-section">
         <h3 class="section-title mb-4 flex items-center text-white text-base sm:text-lg">
             <i class="fas fa-user-clock text-amber-400 mr-2"></i>
             ระยะทดลองงาน (Probation)
@@ -1029,7 +1029,7 @@ include dirname(__DIR__) . '/templates/header.php';
     <div id="tab-welfare" class="tab-panel space-y-6" role="tabpanel" aria-labelledby="btn-tab-welfare" style="display:none">
     
     <!-- Social Security & Banking -->
-    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+    <div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0">
         <h3 class="section-title mb-4 flex items-center text-white text-base sm:text-lg">
             <i class="fas fa-shield-alt text-cyan-400 mr-2"></i>
             ประกันสังคม & บัญชีธนาคาร
@@ -1123,7 +1123,7 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
     
     <!-- Emergency Contact -->
-    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+    <div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0">
         <h3 class="section-title mb-4 flex items-center text-white text-base sm:text-lg">
             <i class="fas fa-phone-alt text-rose-400 mr-2"></i>
             ผู้ติดต่อกรณีฉุกเฉิน
@@ -1165,7 +1165,7 @@ include dirname(__DIR__) . '/templates/header.php';
     <div id="tab-history" class="tab-panel space-y-6" role="tabpanel" aria-labelledby="btn-tab-history" style="display:none">
     
     <!-- Education History -->
-    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+    <div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0">
         <h3 class="section-title mb-4 flex items-center justify-between text-white text-base sm:text-lg gap-3 flex-wrap">
             <span class="flex items-center">
                 <i class="fas fa-graduation-cap text-indigo-400 mr-2"></i>
@@ -1233,7 +1233,7 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
     
     <!-- Work History -->
-    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+    <div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0">
         <h3 class="section-title mb-4 flex items-center justify-between text-white text-base sm:text-lg gap-3 flex-wrap">
             <span class="flex items-center">
                 <i class="fas fa-history text-orange-400 mr-2"></i>
@@ -1297,7 +1297,7 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
     
     <!-- Family Info -->
-    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+    <div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0">
         <h3 class="section-title mb-4 flex items-center justify-between text-white text-base sm:text-lg gap-3 flex-wrap">
             <span class="flex items-center">
                 <i class="fas fa-users text-pink-400 mr-2"></i>
@@ -1378,7 +1378,7 @@ include dirname(__DIR__) . '/templates/header.php';
     <div id="tab-system" class="tab-panel space-y-6" role="tabpanel" aria-labelledby="btn-tab-system" style="display:none">
     
     <!-- LINE Info (Read-only) -->
-    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+    <div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0">
         <h3 class="section-title mb-4 flex items-center text-white text-base sm:text-lg">
             <i class="fab fa-line text-green-400 mr-2"></i>
             ข้อมูล LINE (เชื่อมต่อจาก CRM)
@@ -1409,7 +1409,7 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
     
     <!-- System Info -->
-    <div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 min-w-0">
+    <div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0">
         <h3 class="section-title mb-4 flex items-center text-white text-base sm:text-lg">
             <i class="fas fa-server text-violet-400 mr-2"></i>
             ข้อมูลระบบ
@@ -1443,7 +1443,7 @@ include dirname(__DIR__) . '/templates/header.php';
     <?php endif; ?>
     
     <!-- Submit Buttons -->
-    <div class="native-card tp-native-card tp-native-data-card p-3 sm:p-4 min-w-0 sticky bottom-[calc(72px+env(safe-area-inset-bottom))] md:bottom-4 z-30 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 rounded-[var(--tp-ios-card-radius)]">
+    <div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 min-w-0 sticky bottom-[calc(72px+env(safe-area-inset-bottom))] md:bottom-4 z-30 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 rounded-[var(--tp-ios-card-radius)]">
         <a href="/hr/employees.php" class="w-full sm:w-auto min-h-[48px] px-6 py-3 inline-flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] transition-colors font-medium touch-manipulation">
             ยกเลิก
         </a>
@@ -1456,7 +1456,7 @@ include dirname(__DIR__) . '/templates/header.php';
 
 <?php if ($action === 'edit' && $employee && $canEditSensitive): ?>
 <!-- Change Password Section (CEO+ only — same gate as server-side handler) -->
-<div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 mt-6 min-w-0">
+<div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 mt-6 min-w-0">
     <h3 class="section-title mb-4 flex items-center text-white text-base sm:text-lg">
         <i class="fas fa-key text-amber-400 mr-2 text-xl" aria-hidden="true"></i>
         เปลี่ยนรหัสผ่าน

@@ -172,7 +172,7 @@ include dirname(__DIR__) . '/templates/header.php';
 </header>
 
 <!-- Employee Info Card -->
-<div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 mb-6 min-w-0 max-w-full overflow-hidden">
+<div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 mb-6 min-w-0 max-w-full overflow-hidden">
     <div class="flex items-center gap-4 min-w-0">
         <div class="w-16 h-16 rounded-full bg-violet-500/20 flex items-center justify-center shrink-0" aria-hidden="true">
             <i class="fas fa-user text-violet-400 text-2xl"></i>
@@ -201,7 +201,7 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <!-- Month Filter -->
-<div class="native-card tp-native-card tp-native-data-card p-4 sm:p-6 mb-6 min-w-0 max-w-full overflow-hidden">
+<div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 mb-6 min-w-0 max-w-full overflow-hidden">
     <form method="GET" class="flex flex-wrap items-end gap-4" id="emp-att-month-form">
         <input type="hidden" name="id" value="<?php echo (int)$employeeId; ?>">
         <div class="tp-native-form-group mb-0 min-w-[200px]">

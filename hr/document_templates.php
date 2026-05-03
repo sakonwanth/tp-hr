@@ -934,7 +934,7 @@ if (!empty($editRow['id'])) {
     </div>
 
     <!-- Action bar -->
-    <div class="native-card tp-native-card rounded-[var(--tp-ios-card-radius)] overflow-hidden border border-white/10 p-4 flex items-center justify-between sticky bottom-4 z-20 shadow-lg">
+    <div class="native-card tp-native-card rounded-[var(--tp-ios-card-radius)] overflow-hidden border border-white/10 p-5 flex items-center justify-between sticky bottom-4 z-20 shadow-lg">
         <div class="text-white/60 text-xs">
             <?php if ($editRow && !empty($editRow['updated_at'])): ?>
                 อัปเดตล่าสุด: <?php echo htmlspecialchars($editRow['updated_at']); ?>

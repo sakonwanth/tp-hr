@@ -245,7 +245,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body class="login-page-root tp-native-app">
     <!-- Login Card -->
-    <div class="native-card tp-native-card w-full max-w-md p-4 sm:p-6 xl:p-8 shadow-xl">
+    <div class="native-card tp-native-card w-full max-w-md p-5 sm:p-6 xl:p-8 shadow-xl">
         <!-- Logo -->
         <div class="text-center mb-6 sm:mb-8">
             <img src="<?php echo htmlspecialchars($company_logo); ?>" alt="<?php echo htmlspecialchars($system_name); ?>" width="96" height="96" decoding="async" fetchpriority="high" class="w-24 h-24 mx-auto mb-4 logo-glow object-contain" onerror="this.onerror=null;this.src='<?php echo htmlspecialchars($hr_login_logo_fallback, ENT_QUOTES, 'UTF-8'); ?>';">
