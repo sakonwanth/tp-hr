@@ -98,7 +98,7 @@ $leave_types_form = $stmt->fetchAll();
             </div>
             
             <!-- Days Summary -->
-            <div class="p-4 md:p-5 rounded-[var(--tp-ios-card-radius)] bg-violet-500/10 border border-violet-400/35 tp-native-form-group">
+            <div class="p-5 md:p-6 rounded-[var(--tp-ios-card-radius)] bg-violet-500/10 border border-violet-400/35 tp-native-form-group">
                 <div class="flex items-center justify-between">
                     <span class="text-white/70">จำนวนวันลา:</span>
                     <span class="text-2xl font-bold text-violet-400" id="total-days">0</span>

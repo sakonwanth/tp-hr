@@ -33,7 +33,8 @@ Any **FAIL:** fix **`native-shell`** token first; then page-level classes.
 - Static shell gate: **PASS** (`npm run -s verify:static-ui`)
 - Touch-target sweep (`min-h/min-w` under 48 on interactive controls): **PASS after remediation**
 - ESS **`tp-native-modal`** outer padding **`p-5`** (aligned with **`hr/*.php`**): **`checkin.php`** · **`leave_history.php`** · **`profile.php`** · **`dayoff_schedule.php`**
-- Guest E2E regression (phone + tablet, `PLAYWRIGHT_BASE_URL=http://127.0.0.1/tp-hr/ npm run -s test:e2e`): **60 passed** (prior run · re-run after modal tweak if regressions suspected)
+- **`certificate.php` / `payslip.php` / `hr/index.php` / `hr/api_keys.php` / leave `request_form`** + **`templates/header.php` sidebar** + **`footer` toast**: padding lifted to **`p-5`/`p-5 md:p-6`/`p-5 sm:p-6`** where cards/list gutters were **`p-4`/`p-3`** outliers
+- Guest E2E (`PLAYWRIGHT_SKIP_TABLET=1`, `PLAYWRIGHT_BASE_URL=http://127.0.0.1/tp-hr/ npm run -s test:e2e:ci`): **31 passed** (2026-04-28, after padding sweep)
 
 ---
 

@@ -433,7 +433,7 @@ try {
         <p class="text-slate-400 text-sm">ไม่พบสลิปเงินเดือนในปี <?php echo $year + 543; ?></p>
     </div>
     <?php else: ?>
-    <div class="space-y-6 p-3 md:p-4 min-w-0">
+    <div class="space-y-6 p-5 md:p-6 min-w-0">
         <?php foreach ($slips as $s): ?>
         <?php
         $monthName = thaiMonth(date('n', strtotime($s['payroll_month'])));

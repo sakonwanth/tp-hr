@@ -187,7 +187,7 @@ include dirname(__DIR__) . '/templates/header.php';
 <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-8 mb-6 md:mb-8 min-w-0 max-w-full">
     <!-- Pending Leave Requests -->
     <div class="native-card tp-native-card tp-native-data-card min-w-0 max-w-full overflow-hidden">
-        <div class="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between gap-3 min-w-0">
+        <div class="p-5 sm:p-6 border-b border-white/10 flex items-center justify-between gap-3 min-w-0">
             <h2 class="section-title mb-0 flex flex-wrap items-center gap-2 text-white min-w-0">
                 <i class="fas fa-calendar-alt text-violet-400 text-2xl shrink-0" aria-hidden="true"></i>
                 <span class="min-w-0">คำขอลารออนุมัติ</span>
@@ -203,7 +203,7 @@ include dirname(__DIR__) . '/templates/header.php';
         <?php else: ?>
         <div class="divide-y divide-white/10">
             <?php foreach ($recentLeaves as $leave): ?>
-            <div class="p-4 hover:bg-white/[0.04] transition-colors min-w-0">
+            <div class="p-5 hover:bg-white/[0.04] transition-colors min-w-0">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between min-w-0">
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-1 min-w-0">
@@ -238,7 +238,7 @@ include dirname(__DIR__) . '/templates/header.php';
 
     <!-- On Leave Today -->
     <div class="native-card tp-native-card tp-native-data-card min-w-0 max-w-full overflow-hidden">
-        <div class="p-4 sm:p-5 border-b border-white/10">
+        <div class="p-5 sm:p-6 border-b border-white/10">
             <h2 class="section-title mb-0 flex flex-wrap items-center gap-2 text-white">
                 <i class="fas fa-user-minus text-orange-400 text-2xl" aria-hidden="true"></i>
                 ลาวันนี้ (<?php echo count($onLeaveToday); ?> คน)
@@ -253,7 +253,7 @@ include dirname(__DIR__) . '/templates/header.php';
         <?php else: ?>
         <div class="divide-y divide-white/10 max-h-80 overflow-y-auto overscroll-contain">
             <?php foreach ($onLeaveToday as $emp): ?>
-            <div class="p-3 flex items-center gap-3 min-w-0">
+            <div class="p-5 flex items-center gap-3 min-w-0">
                 <span class="w-2 h-2 rounded-full shrink-0" style="background-color: <?php echo htmlspecialchars($emp['color_code'] ?? '#6366f1', ENT_QUOTES, 'UTF-8'); ?>"></span>
                 <div class="flex-1 min-w-0">
                     <p class="text-white text-sm truncate"><?php echo htmlspecialchars($emp['first_name_th'] . ' ' . $emp['last_name_th']); ?></p>
@@ -269,13 +269,13 @@ include dirname(__DIR__) . '/templates/header.php';
 
 <!-- Quick Actions -->
 <div class="native-card tp-native-card tp-native-data-card mb-6 min-w-0 max-w-full overflow-hidden">
-    <div class="p-4 sm:p-5 border-b border-white/10">
+    <div class="p-5 sm:p-6 border-b border-white/10">
         <h2 class="section-title mb-0 flex flex-wrap items-center gap-2 text-white">
             <i class="fas fa-bolt text-amber-400 text-2xl" aria-hidden="true"></i>
             ทางลัด HR
         </h2>
     </div>
-    <div class="p-4 sm:p-5">
+    <div class="p-5 sm:p-6">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 min-w-0">
             <a href="leaves.php" class="quick-action tp-native-quick-action-card group relative min-h-[96px] sm:min-h-[116px] touch-manipulation border-violet-500/20">
                 <div class="quick-action-icon bg-violet-500/15 border border-violet-400/25 group-hover:bg-violet-500/25">
@@ -311,7 +311,7 @@ include dirname(__DIR__) . '/templates/header.php';
 <!-- Pending Documents -->
 <?php if (!empty($recentDocs)): ?>
 <div class="native-card tp-native-card tp-native-data-card min-w-0 max-w-full overflow-hidden">
-    <div class="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between gap-3 min-w-0">
+    <div class="p-5 sm:p-6 border-b border-white/10 flex items-center justify-between gap-3 min-w-0">
         <h2 class="section-title mb-0 flex flex-wrap items-center gap-2 text-white min-w-0">
             <i class="fas fa-file-signature text-blue-400 text-2xl shrink-0" aria-hidden="true"></i>
             <span class="min-w-0">คำขอเอกสารรอดำเนินการ</span>
@@ -319,7 +319,7 @@ include dirname(__DIR__) . '/templates/header.php';
         <a href="documents.php" class="text-blue-400 text-sm hover:underline shrink-0 touch-manipulation font-medium">ดูทั้งหมด</a>
     </div>
 
-    <div class="md:hidden p-3 space-y-3">
+    <div class="md:hidden p-5 space-y-4">
         <?php foreach ($recentDocs as $doc): ?>
         <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-5 space-y-3 min-w-0">
             <div class="flex items-start justify-between gap-2">

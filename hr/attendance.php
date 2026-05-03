@@ -579,7 +579,7 @@ include dirname(__DIR__) . '/templates/header.php';
 <!-- Location Modal -->
 <div id="location-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-5 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="location-modal-title">
     <div class="native-card tp-native-card w-full max-w-lg my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] rounded-[var(--tp-ios-card-radius)]">
-        <div class="p-4">
+        <div class="p-5">
             <div class="flex items-center justify-between mb-4">
                 <h3 id="location-modal-title" class="text-lg font-bold text-white">ตำแหน่ง Check-in</h3>
                 <button type="button" onclick="closeLocationModal()" class="p-2 min-h-[48px] min-w-[48px] text-white/60 hover:text-white hover:bg-white/10 rounded-[var(--tp-ios-card-radius)]" aria-label="ปิด">

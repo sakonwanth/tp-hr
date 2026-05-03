@@ -133,7 +133,7 @@ include 'templates/header.php';
             </div>
             
             <!-- Rush Request -->
-            <div class="tp-native-form-group p-4 rounded-[var(--tp-ios-card-radius)] bg-amber-500/10 border border-amber-400/35">
+            <div class="tp-native-form-group p-5 rounded-[var(--tp-ios-card-radius)] bg-amber-500/10 border border-amber-400/35">
                 <label class="flex items-start gap-3 min-h-[48px] cursor-pointer touch-manipulation">
                     <input type="checkbox" name="is_urgent" value="1" class="mt-1 accent-yellow-500 shrink-0">
                     <div>
@@ -303,7 +303,7 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
 
 <!-- Request History -->
 <div class="native-card tp-native-card tp-native-data-card min-w-0 max-w-full overflow-hidden">
-    <div class="p-4 sm:p-5 border-b border-white/10">
+    <div class="p-5 sm:p-6 border-b border-white/10">
         <h2 class="section-title mb-0 flex flex-wrap items-center gap-2 text-white">
             <i class="fas fa-file-signature text-violet-400 text-2xl" aria-hidden="true"></i>
             ประวัติการขอหนังสือรับรอง
@@ -339,7 +339,7 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
         'CANCELLED' => 'ยกเลิก'
     ];
     ?>
-    <div class="space-y-6 p-3 md:p-4 min-w-0">
+    <div class="space-y-6 p-5 md:p-6 min-w-0">
         <?php foreach ($myRequests as $req): ?>
         <div class="tp-ios-attendance-panel p-5 md:p-6 hover:bg-white/[0.07] transition-colors min-w-0">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 min-w-0">

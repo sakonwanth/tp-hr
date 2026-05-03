@@ -999,7 +999,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         </a>
         
         <!-- User Info -->
-        <div class="mb-6 p-4 rounded-2xl bg-slate-800/50 border border-slate-700/50">
+        <div class="mb-6 p-5 rounded-2xl bg-slate-800/50 border border-slate-700/50">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold">
                     <?php echo mb_substr($current_user['first_name_th'] ?? $current_user['username'], 0, 1); ?>

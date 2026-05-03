@@ -29,6 +29,8 @@ Statuses: **`NOT_STARTED` · `IN_PROGRESS` · `COMPLETE` · `REGRESSION_FAIL`**.
 
 **ESS modals · viewport gutter:** **`checkin.php`**, **`leave_history.php`**, **`profile.php`**, **`dayoff_schedule.php`** — ชั้นนอก **`tp-native-modal`** **`p-5`** (เทียบ **`hr/*.php`**).
 
+**ESS / chrome / HR dashboard parity:** **`certificate.php`** (**rush well** · **history header** **`p-5 sm:p-6`** · **list gutter** **`p-5 md:p-6`) · **`payslip.php`** (**list gutter** **`p-5 md:p-6`) · **`modules/employee/leaves/request_form.php`** (สรุปวันลา **`p-5 md:p-6`) · **`templates/header.php`** (**sidebar user** **`p-5`) · **`templates/footer.php`** (**toast** **`p-5`) · **`hr/index.php`** (**card headers** **`p-5 sm:p-6`**, **leave rows · on-leave chips · pending-docs mobile stack** **`p-5`**) · **`hr/api_keys.php`** (**section headers** + **mobile lists** **`p-5`) · **`hr/attendance.php`** (**location modal body** **`p-5`**).
+
 **Regression:** PHPUnit / API untouched. Viewport QA: **`03`** · **`07_SPACING_QA.md`** (**route list → `08`**). **`08_VISUAL_QA_AFTER.md`** — per-route **ESS · HRA · PUB/AUTH** check matrices · breakpoint / scroll QA **`10_BROWSER_VIEWPORT_QA.md`**. Static padding/overflow rationale: **`AUDIT_04_VIEWPORT.md`**. **CI:** **`npm run verify:static-ui`** on push/PR/deploy validate — **`native-shell.css`** **`?v=`** consistency + **`tp-ios-master-screen`** on listed full pages (see **`scripts/verify-ios26-master-screen.sh`**).
 
 **Deploy:** **[`DEPLOY_CHECKLIST.md`](DEPLOY_CHECKLIST.md)** — ก่อน deploy: cache-bust **`native-shell.css`** สม่ำเสมอ · หลัง deploy smoke ESS/HRA/login/verify พร้อม rollback note.

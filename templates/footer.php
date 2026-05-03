@@ -46,7 +46,7 @@ $isAdminPage = is_string($cp) && strncmp($cp, 'hr-', 3) === 0;
 
 <!-- Toast Notification -->
 <div id="toast" class="fixed left-4 right-4 z-50 hidden bottom-[calc(6rem+env(safe-area-inset-bottom,0px))]">
-    <div class="toast-panel bg-slate-800/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-xl p-4 flex items-center gap-3 w-full">
+    <div class="toast-panel bg-slate-800/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-xl p-5 flex items-center gap-3 w-full">
         <div id="toastIcon" class="w-8 h-8 rounded-lg flex items-center justify-center"></div>
         <div class="flex-1">
             <p id="toastTitle" class="text-white font-medium"></p>

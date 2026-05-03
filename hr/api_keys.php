@@ -306,10 +306,10 @@ require_once __DIR__ . '/../templates/header.php';
 
     <!-- Keys list -->
     <div class="native-card tp-native-card tp-native-data-card overflow-hidden rounded-[var(--tp-ios-card-radius)] mb-6 min-w-0 border border-white/10">
-        <div class="p-4 border-b border-white/10">
+        <div class="p-5 border-b border-white/10">
             <h2 class="text-lg font-semibold text-white">คีย์ทั้งหมด (<span role="status"><?= count($keys) ?></span>)</h2>
         </div>
-        <div class="md:hidden p-3 space-y-3">
+        <div class="md:hidden p-5 space-y-4">
             <?php foreach ($keys as $k): $scopes = json_decode($k['scopes'] ?? '[]', true) ?: []; ?>
                 <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-5 space-y-3">
                     <div class="flex items-start justify-between gap-2">
@@ -440,12 +440,12 @@ require_once __DIR__ . '/../templates/header.php';
 
     <!-- Recent logs -->
     <div class="native-card tp-native-card tp-native-data-card overflow-hidden rounded-[var(--tp-ios-card-radius)] min-w-0 border border-white/10">
-        <div class="p-4 border-b border-white/10">
+        <div class="p-5 border-b border-white/10">
             <h2 class="text-lg font-semibold text-white">Request Log (20 ล่าสุด)</h2>
         </div>
-        <div class="md:hidden p-3 space-y-2">
+        <div class="md:hidden p-5 space-y-4">
             <?php foreach ($recentLogs as $l): ?>
-                <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-3 text-xs">
+                <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-5 text-xs">
                     <div class="flex items-start justify-between gap-2">
                         <span class="text-white/55 shrink-0"><?= htmlspecialchars($l['created_at']) ?></span>
                         <span class="<?= ((int)$l['status_code'] >= 400) ? 'text-rose-300' : 'text-emerald-300' ?> font-mono font-semibold"><?= (int)$l['status_code'] ?></span>
