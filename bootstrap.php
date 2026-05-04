@@ -120,6 +120,7 @@ require_once BASE_PATH . '/core/Services/SettingsService.php';
 require_once BASE_PATH . '/core/Helpers.php';
 require_once BASE_PATH . '/core/ApiAuth.php';
 require_once BASE_PATH . '/core/WfhStamp.php';
+require_once BASE_PATH . '/core/Services/ThaiHolidaySyncService.php';
 require_once BASE_PATH . '/core/Services/AttendanceService.php';
 require_once BASE_PATH . '/core/Services/AttendanceAdjustmentService.php';
 require_once BASE_PATH . '/core/Services/OutsideAttendanceService.php';

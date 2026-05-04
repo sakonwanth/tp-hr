@@ -17,6 +17,7 @@ if (!isCEOOrAbove()) {
 $pdo = getDB();
 $user = Auth::user();
 $settingsService = new SettingsService($pdo);
+$thaiHolidaySyncService = new ThaiHolidaySyncService($pdo);
 
 $page_title = 'ตั้งค่าระบบ';
 $current_page = 'hr-settings';
@@ -78,6 +79,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute([$_POST['holiday_id']]);
                 Auth::log('delete_holiday', 'hr_holidays', $_POST['holiday_id']);
                 $success = 'ลบวันหยุดเรียบร้อยแล้ว';
+                break;
+
+            case 'sync_thai_holidays':
+                $fromYear = (int)($_POST['from_year'] ?? date('Y'));
+                $toYear = (int)($_POST['to_year'] ?? $fromYear);
+                $result = $thaiHolidaySyncService->syncRange($fromYear, $toYear);
+                Auth::log('sync_thai_holidays', 'hr_thai_holiday_sources', null, null, $result);
+                $success = 'อัปเดตวันหยุดประเทศไทยจาก API แล้ว (' . array_sum($result) . ' รายการ)';
+                break;
+
+            case 'use_thai_holiday':
+                $sourceHolidayId = (int)($_POST['source_holiday_id'] ?? 0);
+                if ($thaiHolidaySyncService->addSourceToCompanyHoliday($sourceHolidayId, (int)$user['id'])) {
+                    Auth::log('use_thai_holiday', 'hr_thai_holiday_sources', $sourceHolidayId);
+                    $success = 'เพิ่มวันหยุดเข้ารายการบริษัทแล้ว';
+                } else {
+                    $error = 'ไม่พบวันหยุดจาก API ที่เลือก';
+                }
+                break;
+
+            case 'use_all_thai_holidays_for_year':
+                $year = (int)($_POST['holiday_year'] ?? date('Y'));
+                $added = $thaiHolidaySyncService->addAllForYear($year, (int)$user['id']);
+                Auth::log('use_all_thai_holidays_for_year', 'hr_thai_holiday_sources', null, null, ['year' => $year, 'count' => $added]);
+                $success = 'เพิ่ม/อัปเดตวันหยุดบริษัทจาก API ปี ' . ($year + 543) . ' แล้ว ' . $added . ' รายการ';
                 break;
                 
             case 'update_leave_type':
@@ -163,6 +189,12 @@ $holidays = $stmtHolidays->fetchAll();
 $holidayCount = count($holidays);
 $holidayYearTh = $holidayYear + 543;
 $holidayMeetsMinimum = $holidayCount >= 13;
+$thaiHolidaySources = [];
+try {
+    $thaiHolidaySources = $thaiHolidaySyncService->importedForYear($holidayYear);
+} catch (Throwable $e) {
+    error_log('settings.importedForYear failed: ' . $e->getMessage());
+}
 $leaveTypes = $pdo->query("SELECT * FROM hr_leave_types ORDER BY sort_order")->fetchAll();
 $workShifts = $pdo->query("SELECT * FROM hr_work_shifts ORDER BY id")->fetchAll();
 
@@ -298,13 +330,14 @@ foreach ($workShifts as $_ws) {
 <?php elseif ($tab === 'holidays'): ?>
 <!-- Holidays -->
 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-    <!-- Add Holiday Form -->
-    <div class="native-card tp-native-card overflow-hidden rounded-[var(--tp-ios-card-radius)] p-5 sm:p-6 min-w-0 border border-white/10">
-        <h2 class="text-lg font-semibold text-white mb-4">เพิ่มวันหยุด</h2>
+    <div class="space-y-6 min-w-0">
+        <!-- Add Holiday Form -->
+        <div class="native-card tp-native-card overflow-hidden rounded-[var(--tp-ios-card-radius)] p-5 sm:p-6 min-w-0 border border-white/10">
+            <h2 class="text-lg font-semibold text-white mb-4">เพิ่มวันหยุด</h2>
         
-        <form method="POST" class="space-y-4">
-            <input type="hidden" name="csrf_token" value="<?php echo csrfToken(); ?>">
-            <input type="hidden" name="action" value="add_holiday">
+            <form method="POST" class="space-y-4">
+                <input type="hidden" name="csrf_token" value="<?php echo csrfToken(); ?>">
+                <input type="hidden" name="action" value="add_holiday">
             
             <div class="tp-native-form-group mb-0">
                 <label class="block text-white/70 text-sm mb-2" for="holiday-add-name">ชื่อวันหยุด</label>
@@ -329,7 +362,32 @@ foreach ($workShifts as $_ws) {
             <button type="submit" class="inline-flex min-h-[48px] w-full items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 hover:bg-violet-700 px-4 text-sm font-semibold text-white touch-manipulation gap-2">
                 <i class="fas fa-plus" aria-hidden="true"></i>เพิ่มวันหยุด
             </button>
-        </form>
+            </form>
+        </div>
+
+        <!-- Thailand Holiday API -->
+        <div class="native-card tp-native-card overflow-hidden rounded-[var(--tp-ios-card-radius)] p-5 sm:p-6 min-w-0 border border-white/10">
+            <h2 class="text-lg font-semibold text-white mb-2">API วันหยุดประเทศไทย</h2>
+            <p class="text-white/55 text-sm mb-4">ดึงรายการจาก API แล้วค่อยเลือกวันหยุดที่บริษัทต้องการใช้</p>
+
+            <form method="POST" class="space-y-4">
+                <input type="hidden" name="csrf_token" value="<?php echo csrfToken(); ?>">
+                <input type="hidden" name="action" value="sync_thai_holidays">
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="tp-native-form-group mb-0">
+                        <label class="block text-white/70 text-sm mb-2" for="holiday-sync-from">ตั้งแต่ปี</label>
+                        <input id="holiday-sync-from" type="number" name="from_year" min="2000" max="2100" value="<?php echo max(2000, (int)$holidayYear - 1); ?>" class="input-field tp-native-input w-full min-h-[48px]">
+                    </div>
+                    <div class="tp-native-form-group mb-0">
+                        <label class="block text-white/70 text-sm mb-2" for="holiday-sync-to">ถึงปี</label>
+                        <input id="holiday-sync-to" type="number" name="to_year" min="2000" max="2100" value="<?php echo min(2100, (int)$holidayYear + 1); ?>" class="input-field tp-native-input w-full min-h-[48px]">
+                    </div>
+                </div>
+                <button type="submit" class="inline-flex min-h-[48px] w-full items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-sky-600 hover:bg-sky-700 px-4 text-sm font-semibold text-white touch-manipulation gap-2">
+                    <i class="fas fa-cloud-download-alt" aria-hidden="true"></i>อัปเดตจาก API
+                </button>
+            </form>
+        </div>
     </div>
     
     <!-- Holiday List -->
@@ -424,6 +482,60 @@ foreach ($workShifts as $_ws) {
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            <?php endif; ?>
+        </div>
+
+        <div class="mt-6 border-t border-white/10 pt-5">
+            <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div class="min-w-0">
+                    <h3 class="text-base font-semibold text-white">รายการจาก API ประเทศไทย</h3>
+                    <p class="mt-1 text-sm text-white/55"><?php echo count($thaiHolidaySources); ?> รายการสำหรับปี <?php echo (int)$holidayYearTh; ?></p>
+                </div>
+                <?php if (!empty($thaiHolidaySources)): ?>
+                <form method="POST" class="shrink-0">
+                    <input type="hidden" name="csrf_token" value="<?php echo csrfToken(); ?>">
+                    <input type="hidden" name="action" value="use_all_thai_holidays_for_year">
+                    <input type="hidden" name="holiday_year" value="<?php echo (int)$holidayYear; ?>">
+                    <button type="submit" class="inline-flex min-h-[48px] w-full sm:w-auto items-center justify-center rounded-[var(--tp-ios-card-radius)] border border-emerald-500/30 bg-emerald-500/15 px-4 text-sm font-semibold text-emerald-100 hover:bg-emerald-500/25 touch-manipulation gap-2">
+                        <i class="fas fa-check-double" aria-hidden="true"></i>ใช้ทั้งหมด
+                    </button>
+                </form>
+                <?php endif; ?>
+            </div>
+
+            <?php if (empty($thaiHolidaySources)): ?>
+            <div class="tp-native-empty-state text-center py-8 px-4 rounded-[var(--tp-ios-card-radius)] border border-dashed border-white/15">
+                <i class="fas fa-cloud text-slate-500 text-3xl mb-2 block" aria-hidden="true"></i>
+                <p class="text-white/50 text-sm">ยังไม่มีข้อมูลจาก API สำหรับปีนี้</p>
+            </div>
+            <?php else: ?>
+            <div class="space-y-2">
+                <?php foreach ($thaiHolidaySources as $sourceHoliday): ?>
+                <div class="flex flex-col gap-3 rounded-[var(--tp-ios-card-radius)] bg-white/[0.04] border border-white/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="min-w-0">
+                        <p class="text-white font-medium break-words"><?php echo htmlspecialchars($sourceHoliday['name']); ?></p>
+                        <p class="mt-1 text-sm text-white/50 break-words">
+                            <?php echo formatDateThai($sourceHoliday['date']); ?>
+                            <?php if (!empty($sourceHoliday['name_en'])): ?>
+                            · <?php echo htmlspecialchars($sourceHoliday['name_en']); ?>
+                            <?php endif; ?>
+                        </p>
+                    </div>
+                    <?php if ((int)($sourceHoliday['is_selected'] ?? 0) === 1): ?>
+                    <span class="inline-flex min-h-[40px] shrink-0 items-center justify-center rounded-[var(--tp-ios-card-radius)] border border-emerald-500/30 bg-emerald-500/15 px-3 text-sm text-emerald-100">ใช้อยู่</span>
+                    <?php else: ?>
+                    <form method="POST" class="shrink-0">
+                        <input type="hidden" name="csrf_token" value="<?php echo csrfToken(); ?>">
+                        <input type="hidden" name="action" value="use_thai_holiday">
+                        <input type="hidden" name="source_holiday_id" value="<?php echo (int)$sourceHoliday['id']; ?>">
+                        <button type="submit" class="inline-flex min-h-[40px] w-full sm:w-auto items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 px-3 text-sm font-semibold text-white hover:bg-violet-700 touch-manipulation gap-2">
+                            <i class="fas fa-plus" aria-hidden="true"></i>เลือกใช้
+                        </button>
+                    </form>
+                    <?php endif; ?>
+                </div>
+                <?php endforeach; ?>
+            </div>
             <?php endif; ?>
         </div>
     </div>
