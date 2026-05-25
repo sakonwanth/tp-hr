@@ -426,12 +426,14 @@ function createLeaveRequest($pdo, $user) {
         return;
     }
     
-    // Check entitlement
+    $leaveYear = (int)date('Y', strtotime($startDate));
+
+    // Check entitlement (ปีตามวันเริ่มลา — รองรับย้อนหลัง)
     $stmt = $pdo->prepare("
         SELECT * FROM hr_leave_entitlements 
         WHERE user_id = ? AND leave_type_id = ? AND year = ?
     ");
-    $stmt->execute([$user['id'], $leaveTypeId, date('Y')]);
+    $stmt->execute([$user['id'], $leaveTypeId, $leaveYear]);
     $entitlement = $stmt->fetch();
     
     if (!$entitlement) {
@@ -440,7 +442,7 @@ function createLeaveRequest($pdo, $user) {
             INSERT INTO hr_leave_entitlements (user_id, leave_type_id, year, entitled_days)
             VALUES (?, ?, ?, ?)
         ");
-        $stmt->execute([$user['id'], $leaveTypeId, date('Y'), $leaveType['default_days_per_year']]);
+        $stmt->execute([$user['id'], $leaveTypeId, $leaveYear, $leaveType['default_days_per_year']]);
         
         $entitlement = [
             'entitled_days' => $leaveType['default_days_per_year'],
@@ -523,7 +525,7 @@ function createLeaveRequest($pdo, $user) {
             SET pending_days = pending_days + ?
             WHERE user_id = ? AND leave_type_id = ? AND year = ?
         ");
-        $stmt->execute([$totalDays, $user['id'], $leaveTypeId, date('Y')]);
+        $stmt->execute([$totalDays, $user['id'], $leaveTypeId, $leaveYear]);
         
         // Log action
         Auth::log('leave_request', 'hr_leave_requests', $requestId, null, [
