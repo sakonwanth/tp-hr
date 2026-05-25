@@ -337,10 +337,38 @@ header('Content-Type: text/html; charset=utf-8');
         .link-back:hover { text-decoration: underline; }
 
         @media print {
-            body { padding: 0; min-height: auto; overflow: visible; }
-            .page { padding: 18px 22px 24px; }
+            @page { size: A4 portrait; margin: 12mm 10mm; }
+            html, body {
+                width: 210mm;
+                max-width: 210mm;
+                min-height: 0;
+                height: auto;
+                margin: 0;
+                padding: 0;
+                overflow: visible;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .page {
+                width: auto;
+                padding: 0;
+                page-break-after: avoid;
+                page-break-inside: avoid;
+            }
             .no-print { display: none !important; }
             .watermark img { opacity: 0.035; width: 48%; }
+            /* Tighten vertical rhythm to guarantee single-page A4 fit */
+            .doc-header { padding-bottom: 12px; margin-bottom: 14px; }
+            .doc-title { margin-bottom: 14px; font-size: 16px; }
+            .section { margin-bottom: 10px; }
+            .info-table th, .info-table td,
+            .amount-table th, .amount-table td { padding: 6px 10px; font-size: 12px; }
+            .net-box { margin-top: 12px; padding: 10px 14px; }
+            .net-box .label { font-size: 14px; }
+            .net-box .value { font-size: 18px; }
+            .footer { margin-top: 14px; padding-top: 8px; font-size: 10px; }
+            /* Prevent table rows from splitting across pages */
+            tr, .section, .net-box, .footer { page-break-inside: avoid; }
         }
     </style>
 </head>
