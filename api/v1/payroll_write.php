@@ -10,10 +10,11 @@
  *
  *   POST /api/v1/payroll-runs/{id}/paid      scope: payroll.approve
  *
- *   POST /api/v1/payroll-runs/{id}/cancel-paid   scope: payroll.approve
- *        body: { "user_id": 5 }
+ *   POST /api/v1/payroll-runs/{id}/cancel-paid      scope: payroll.approve
  *
- *   GET  /api/v1/payroll-runs/{id}/calculate-preview  scope: payroll.read (+ payroll.read_all if key has no service_user_id)
+ *   POST /api/v1/payroll-runs/{id}/cancel-approval  scope: payroll.approve
+ *
+ *   POST /api/v1/payroll-runs/{id}/recalculate-slip   scope: payroll.write
  *        ?user_id=5&month=YYYY-MM
  *
  *   POST /api/v1/salary-setup                scope: payroll.write
@@ -47,7 +48,8 @@ if ($resource === 'payroll-runs') {
         }
         try {
             $createdBy = apiKeyResolveActorForApi($pdo, ApiAuth::currentKey(), $input, 'created_by', HR_ROLES);
-            $result = $service->createRun($month, $createdBy);
+            $payDay = isset($input['pay_day']) ? (int)$input['pay_day'] : null;
+            $result = $service->createRun($month, $createdBy, $payDay);
             ApiAuth::success(['data' => $result]);
         } catch (\RuntimeException $e) {
             tpHrLogException($e, 'payroll_write createRun');
@@ -94,6 +96,21 @@ if ($resource === 'payroll-runs') {
             ApiAuth::fail(409, $e->getMessage());
         } catch (\Throwable $e) {
             tpHrLogException($e, 'payroll_write cancelPaid');
+            ApiAuth::fail(500, 'Internal server error');
+        }
+    }
+
+    // POST /payroll-runs/{id}/cancel-approval
+    if ($method === 'POST' && $id > 0 && $sub === 'cancel-approval') {
+        ApiAuth::require(['payroll.approve']);
+        try {
+            $service->cancelApproval($id);
+            ApiAuth::success(['message' => 'ยกเลิกการอนุมัติแล้ว']);
+        } catch (\RuntimeException $e) {
+            tpHrLogException($e, 'payroll_write cancelApproval');
+            ApiAuth::fail(409, $e->getMessage());
+        } catch (\Throwable $e) {
+            tpHrLogException($e, 'payroll_write cancelApproval');
             ApiAuth::fail(500, 'Internal server error');
         }
     }

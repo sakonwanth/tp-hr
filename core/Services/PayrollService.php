@@ -743,7 +743,7 @@ class PayrollService
     /**
      * Create or recalculate a payroll run for a given month.
      */
-    public function createRun(string $month, int $createdBy): array
+    public function createRun(string $month, int $createdBy, ?int $payDay = null): array
     {
         $monthFirst = $month . '-01';
         $stmt = $this->pdo->prepare("SELECT id, status FROM payroll_runs WHERE payroll_month = ?");
@@ -756,13 +756,11 @@ class PayrollService
 
         $this->pdo->beginTransaction();
         try {
-            $payDay = $this->getDefaultPayDay();
+            $payDay = ($payDay !== null && $payDay >= 1 && $payDay <= 31) ? $payDay : $this->getDefaultPayDay();
             $runId = $existing ? (int)$existing['id'] : 0;
             if ($runId > 0) {
                 $this->pdo->prepare("DELETE FROM payroll_slips WHERE payroll_run_id = ?")->execute([$runId]);
-                $pd = $this->pdo->prepare("SELECT pay_day FROM payroll_runs WHERE id = ?");
-                $pd->execute([$runId]);
-                $payDay = (int)($pd->fetchColumn() ?: $payDay);
+                $this->pdo->prepare("UPDATE payroll_runs SET pay_day = ? WHERE id = ?")->execute([$payDay, $runId]);
             } else {
                 $this->pdo->prepare("INSERT INTO payroll_runs (payroll_month, pay_day, status, created_by) VALUES (?, ?, 'draft', ?)")
                     ->execute([$monthFirst, $payDay, $createdBy]);
@@ -812,8 +810,36 @@ class PayrollService
 
     public function approveRun(int $runId, int $approvedBy): void
     {
-        $this->pdo->prepare("UPDATE payroll_runs SET status = 'approved', approved_by = ?, approved_at = NOW() WHERE id = ?")
-            ->execute([$approvedBy, $runId]);
+        $stmt = $this->pdo->prepare(
+            "UPDATE payroll_runs SET status = 'approved', approved_by = ?, approved_at = NOW() WHERE id = ? AND status = 'calculated'"
+        );
+        $stmt->execute([$approvedBy, $runId]);
+        if (!$stmt->rowCount()) {
+            throw new \RuntimeException('อนุมัติได้เฉพาะรอบที่คำนวณแล้วเท่านั้น');
+        }
+    }
+
+    public function cancelApproval(int $runId): void
+    {
+        $stmt = $this->pdo->prepare("SELECT status FROM payroll_runs WHERE id = ? LIMIT 1");
+        $stmt->execute([$runId]);
+        $status = $stmt->fetchColumn();
+        if (!$status) {
+            throw new \RuntimeException('ไม่พบรอบเงินเดือน');
+        }
+        if ($status === 'paid') {
+            throw new \RuntimeException('ไม่สามารถยกเลิกการอนุมัติได้ — รอบนี้ถูกบันทึกว่าจ่ายแล้ว');
+        }
+        if ($status !== 'approved') {
+            throw new \RuntimeException('ยกเลิกการอนุมัติได้เฉพาะรอบที่อนุมัติแล้วเท่านั้น');
+        }
+        $upd = $this->pdo->prepare(
+            "UPDATE payroll_runs SET status = 'calculated', approved_by = NULL, approved_at = NULL WHERE id = ? AND status = 'approved'"
+        );
+        $upd->execute([$runId]);
+        if (!$upd->rowCount()) {
+            throw new \RuntimeException('ยกเลิกการอนุมัติไม่สำเร็จ');
+        }
     }
 
     public function markPaid(int $runId): void
