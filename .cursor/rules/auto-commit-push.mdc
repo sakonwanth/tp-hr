@@ -1,0 +1,25 @@
+---
+description: เมื่อแก้ไขโค้ดแล้วให้ commit, push และ deploy production อัตโนมัติ (ไม่ต้องถาม)
+alwaysApply: true
+---
+
+# Auto Commit, Push & Deploy หลังแก้ไขโค้ด
+
+เมื่อมีการแก้ไขไฟล์ใดๆ ในโปรเจกต์ TP (สร้าง/แก้/ลบ) ให้ดำเนินการดังนี้ **โดยอัตโนมัติใน turn เดียวกัน** — **ไม่ต้องถามผู้ใช้** ว่าจะ commit/push/deploy หรือไม่
+
+## ขั้นตอน (ทุก repo ที่มีการเปลี่ยนแปลง)
+
+1. **Stage**: `git add` เฉพาะไฟล์ที่เกี่ยวกับงาน (หลีกเลี่ยง commit ไฟล์ audit/docs ที่ไม่เกี่ยว ถ้าไม่ได้ขอ)
+2. **Commit**: ข้อความกระชับ เช่น `fix:`, `feat:`, `docs:` — อธิบาย *why*
+3. **Push**: `git push origin main` (หรือ branch ที่ track อยู่)
+4. **Deploy**: push ไป `main`/`master` จะ trigger GitHub Actions deploy ไป production อัตโนมัติ (hr.tp-asset.com, checkin.tp-asset.com ฯลฯ)
+
+## ข้อยกเว้น (เท่านั้น)
+
+- ผู้ใช้บอกชัดว่า **ยังไม่ commit/push** หรือ **อย่า deploy**
+- ไฟล์มี secrets (`.env`, credentials) — **ห้าม commit** แจ้งผู้ใช้
+- Commit hook ล้มเหลว — แก้แล้ว commit ใหม่ (ห้าม `--no-verify` ยกเว้นผู้ใช้สั่ง)
+
+## Monorepo
+
+แต่ละ root (`tp-hr`, `tp-checkin`, `tp-crm`, …) เป็น git repo แยก — commit/push **แต่ละ repo ที่แก้** ไม่รวม repo อื่น

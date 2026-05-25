@@ -21,6 +21,9 @@ $stmt = $pdo->prepare("
 ");
 $stmt->execute([$user['id']]);
 $leave_types_form = $stmt->fetchAll();
+
+// อนุญาตยื่นลาย้อนหลังได้ (สูงสุด 1 ปี) — กฎขอล่วงหน้าใช้เฉพาะวันลาในอนาคต
+$min_leave_date = date('Y-m-d', strtotime('-365 days'));
 ?>
 
 <div class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
@@ -32,7 +35,7 @@ $leave_types_form = $stmt->fetchAll();
         <span class="text-white">ยื่นขอลา</span>
     </nav>
     <h1 class="tp-ios-page-title">ยื่นขอลา</h1>
-    <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">กรอกช่วงวันที่และเหตุผล ระบบจะคำนวณจำนวนวันลาให้</p>
+    <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">กรอกช่วงวันที่และเหตุผล ระบบจะคำนวณจำนวนวันลาให้ — สามารถยื่นลาย้อนหลังได้ (ภายใน 1 ปี)</p>
 </div>
 
 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8 min-w-0 max-w-full">
@@ -68,7 +71,7 @@ $leave_types_form = $stmt->fetchAll();
                     <label class="block text-white/80 text-sm font-medium mb-2">วันที่เริ่มต้น <span class="text-red-400">*</span></label>
                     <div class="input-date-shell">
                         <input type="date" name="start_date" id="start_date" required class="input-field tp-native-input"
-                               min="<?php echo date('Y-m-d'); ?>" onchange="calculateDays()">
+                               min="<?php echo $min_leave_date; ?>" onchange="calculateDays()">
                     </div>
                 </div>
                 <div class="min-w-0 max-w-full">
@@ -86,7 +89,7 @@ $leave_types_form = $stmt->fetchAll();
                     <label class="block text-white/80 text-sm font-medium mb-2">วันที่สิ้นสุด <span class="text-red-400">*</span></label>
                     <div class="input-date-shell">
                         <input type="date" name="end_date" id="end_date" required class="input-field tp-native-input"
-                               min="<?php echo date('Y-m-d'); ?>" onchange="calculateDays()">
+                               min="<?php echo $min_leave_date; ?>" onchange="calculateDays()">
                     </div>
                 </div>
                 <div class="min-w-0 max-w-full">
@@ -248,11 +251,11 @@ function updateLeaveInfo() {
         docLabel.classList.add('text-white/50');
     }
     
-    // Set min date based on advance requirement
+    // อนุญาตย้อนหลัง — กฎล่วงหน้าตรวจที่ API เฉพาะวันลาในอนาคต
     const startDateInput = document.getElementById('start_date');
-    const minDate = new Date();
-    minDate.setDate(minDate.getDate() + minAdvance);
-    startDateInput.min = minDate.toISOString().split('T')[0];
+    const endDateInput = document.getElementById('end_date');
+    startDateInput.min = '<?php echo $min_leave_date; ?>';
+    endDateInput.min = startDateInput.value || '<?php echo $min_leave_date; ?>';
 }
 
 // Calculate total days
@@ -276,6 +279,8 @@ function calculateDays() {
         document.getElementById('end_date').value = startDate;
         return calculateDays();
     }
+
+    document.getElementById('end_date').min = startDate;
     
     let days = 0;
     let current = new Date(start);

@@ -400,12 +400,17 @@ function createLeaveRequest($pdo, $user) {
         return;
     }
     
-    // Check advance days requirement
-    if ($leaveType['min_days_advance'] > 0 && $leaveType['code'] !== 'SICK') {
+    // ย้อนหลังได้ — กฎขอล่วงหน้าใช้เฉพาะวันลาในอนาคต (ลาป่วยยกเว้นเสมอ)
+    $minRetroDate = (clone $today)->modify('-365 days');
+    if ($start < $minRetroDate) {
+        echo json_encode(['success' => false, 'error' => 'ไม่สามารถยื่นลาย้อนหลังเกิน 1 ปี']);
+        return;
+    }
+    if ($leaveType['min_days_advance'] > 0 && $leaveType['code'] !== 'SICK' && $start > $today) {
         $daysAdvance = $today->diff($start)->days;
-        if ($start <= $today || $daysAdvance < $leaveType['min_days_advance']) {
+        if ($daysAdvance < $leaveType['min_days_advance']) {
             echo json_encode([
-                'success' => false, 
+                'success' => false,
                 'error' => "การลา{$leaveType['name']}ต้องขอล่วงหน้าอย่างน้อย {$leaveType['min_days_advance']} วัน"
             ]);
             return;
