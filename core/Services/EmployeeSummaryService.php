@@ -55,18 +55,22 @@ class EmployeeSummaryService
         }
 
         $monthStart = $month . '-01';
-        $monthEnd = date('Y-m-t', strtotime($monthStart));
+        $payrollSvc = new PayrollService($this->pdo);
+        $payDay = $payrollSvc->getDefaultPayDay();
+        $period = $payrollSvc->attendancePeriodBounds($monthStart, $payDay);
+        $periodStart = $period['start'];
+        $periodEnd = $period['end'];
         $today = date('Y-m-d');
-        $lastDay = ($monthEnd <= $today) ? $monthEnd : $today;
+        $lastDay = min($periodEnd, $today);
 
         // แก้ record ที่ backfill เป็น ABSENT ก่อนอนุมัติลา (หรือ sync ล้มเหลว)
-        $this->reconcileAbsentOverlappingApprovedLeave($userId, $monthStart, $lastDay);
+        $this->reconcileAbsentOverlappingApprovedLeave($userId, $periodStart, $lastDay);
 
         $defaultDayOff = $this->getDefaultDayOff($userId);
-        $dayoffSwaps = $this->getApprovedDayoffSwaps($userId, $monthStart, $lastDay);
-        $holidays = $this->getHolidaysInRange($monthStart, $lastDay);
-        $attendanceByDate = $this->getAttendanceByDate($userId, $month);
-        $approvedLeaveByDate = $this->getApprovedLeaveDatesMap($userId, $monthStart, $lastDay);
+        $dayoffSwaps = $this->getApprovedDayoffSwaps($userId, $periodStart, $lastDay);
+        $holidays = $this->getHolidaysInRange($periodStart, $lastDay);
+        $attendanceByDate = $this->getAttendanceByDateRange($userId, $periodStart, $lastDay);
+        $approvedLeaveByDate = $this->getApprovedLeaveDatesMap($userId, $periodStart, $lastDay);
 
         $counts = [
             'calendar_days' => 0,
@@ -96,7 +100,7 @@ class EmployeeSummaryService
             'scheduled_off' => [],
         ];
 
-        $currentDay = $monthStart;
+        $currentDay = $periodStart;
         while ($currentDay <= $lastDay) {
             $counts['calendar_days']++;
             $dow = (int)date('w', strtotime($currentDay));
@@ -224,16 +228,16 @@ class EmployeeSummaryService
             $currentDay = date('Y-m-d', strtotime('+1 day', strtotime($currentDay)));
         }
 
-        $approvedLeaveDays = $this->getApprovedLeaveDaysInMonth($userId, $month);
-        $leaveByType = $this->getLeaveByTypeInMonth($userId, $month);
-        $leaveRequests = $this->getLeaveRequestsInMonth($userId, $month);
+        $approvedLeaveDays = $this->getApprovedLeaveDaysInRange($userId, $periodStart, $periodEnd);
+        $leaveByType = $this->getLeaveByTypeInRange($userId, $periodStart, $periodEnd);
+        $leaveRequests = $this->getLeaveRequestsInRange($userId, $periodStart, $lastDay);
         $pendingLeaves = $this->getPendingLeaveCount($userId);
         $entitlements = $this->getLeaveEntitlements((int)date('Y', strtotime($monthStart)), $userId);
-        $swapsInMonth = $this->getDayoffSwapsInMonth($userId, $month);
+        $swapsInMonth = $this->getDayoffSwapsInRange($userId, $periodStart, $lastDay);
 
         $payrollDeductions = ['absent_days' => 0.0, 'absence_deduction' => 0.0, 'breakdown' => [], 'warnings' => []];
         try {
-            $payrollDeductions = (new PayrollService($this->pdo))->computeAttendanceDeductions($userId, $monthStart);
+            $payrollDeductions = $payrollSvc->computeAttendanceDeductions($userId, $monthStart, $payDay);
         } catch (Throwable $e) {
             /* payroll preview optional */
         }
@@ -241,9 +245,10 @@ class EmployeeSummaryService
         return [
             'user_id' => $userId,
             'month' => $month,
-            'month_label' => formatDateThai($monthStart),
-            'period_start' => $monthStart,
-            'period_end' => $lastDay,
+            'month_label' => formatDateThai($periodStart) . ' – ' . formatDateThai($periodEnd),
+            'period_start' => $periodStart,
+            'period_end' => $periodEnd,
+            'pay_day' => $payDay,
             'counts' => $counts,
             'details' => $details,
             'approved_leave_days' => $approvedLeaveDays,
@@ -397,18 +402,25 @@ class EmployeeSummaryService
     /**
      * @return array<string,array<string,mixed>>
      */
-    private function getAttendanceByDate(int $userId, string $month): array
+    private function getAttendanceByDateRange(int $userId, string $from, string $to): array
     {
         $stmt = $this->pdo->prepare("
             SELECT * FROM hr_attendances
-            WHERE user_id = ? AND DATE_FORMAT(attendance_date, '%Y-%m') = ?
+            WHERE user_id = ? AND attendance_date BETWEEN ? AND ?
         ");
-        $stmt->execute([$userId, $month]);
+        $stmt->execute([$userId, $from, $to]);
         $map = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
             $map[$row['attendance_date']] = $row;
         }
         return $map;
+    }
+
+    private function getAttendanceByDate(int $userId, string $month): array
+    {
+        $monthStart = $month . '-01';
+        $monthEnd = date('Y-m-t', strtotime($monthStart));
+        return $this->getAttendanceByDateRange($userId, $monthStart, $monthEnd);
     }
 
     private function resolveEffectiveDayOff(string $date, int $defaultDayOff, array $swaps): int
@@ -478,29 +490,30 @@ class EmployeeSummaryService
         return $map;
     }
 
-    private function getApprovedLeaveDaysInMonth(int $userId, string $month): float
+    private function getApprovedLeaveDaysInRange(int $userId, string $from, string $to): float
     {
-        $monthStart = $month . '-01';
-        $monthEnd = date('Y-m-t', strtotime($monthStart));
         $stmt = $this->pdo->prepare("
             SELECT COALESCE(SUM(total_days), 0)
             FROM hr_leave_requests
             WHERE user_id = ? AND status = 'APPROVED'
             AND start_date <= ? AND end_date >= ?
         ");
-        $stmt->execute([$userId, $monthEnd, $monthStart]);
+        $stmt->execute([$userId, $to, $from]);
         return (float)$stmt->fetchColumn();
+    }
+
+    private function getApprovedLeaveDaysInMonth(int $userId, string $month): float
+    {
+        $monthStart = $month . '-01';
+        $monthEnd = date('Y-m-t', strtotime($monthStart));
+        return $this->getApprovedLeaveDaysInRange($userId, $monthStart, $monthEnd);
     }
 
     /**
      * @return list<array<string,mixed>>
      */
-    private function getLeaveRequestsInMonth(int $userId, string $month): array
+    private function getLeaveRequestsInRange(int $userId, string $from, string $to): array
     {
-        $monthStart = $month . '-01';
-        $monthEnd = date('Y-m-t', strtotime($monthStart));
-        $today = date('Y-m-d');
-        $lastDay = ($monthEnd <= $today) ? $monthEnd : $today;
         $dayNames = defined('THAI_DAY_NAMES') ? THAI_DAY_NAMES : ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
 
         $stmt = $this->pdo->prepare("
@@ -514,13 +527,13 @@ class EmployeeSummaryService
             AND lr.start_date <= ? AND lr.end_date >= ?
             ORDER BY lr.start_date ASC, lr.id ASC
         ");
-        $stmt->execute([$userId, $lastDay, $monthStart]);
+        $stmt->execute([$userId, $to, $from]);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
         foreach ($rows as &$r) {
             $daysInMonth = [];
-            $cursor = max($r['start_date'], $monthStart);
-            $end = min($r['end_date'], $lastDay);
+            $cursor = max($r['start_date'], $from);
+            $end = min($r['end_date'], $to);
             while ($cursor <= $end) {
                 $dow = (int)date('w', strtotime($cursor));
                 $daysInMonth[] = [
@@ -538,13 +551,20 @@ class EmployeeSummaryService
         return $rows;
     }
 
-    /**
-     * @return list<array<string,mixed>>
-     */
-    private function getLeaveByTypeInMonth(int $userId, string $month): array
+    private function getLeaveRequestsInMonth(int $userId, string $month): array
     {
         $monthStart = $month . '-01';
         $monthEnd = date('Y-m-t', strtotime($monthStart));
+        $today = date('Y-m-d');
+        $lastDay = min($monthEnd, $today);
+        return $this->getLeaveRequestsInRange($userId, $monthStart, $lastDay);
+    }
+
+    /**
+     * @return list<array<string,mixed>>
+     */
+    private function getLeaveByTypeInRange(int $userId, string $from, string $to): array
+    {
         $stmt = $this->pdo->prepare("
             SELECT lt.code, lt.name, lt.color,
                    COALESCE(SUM(lr.total_days), 0) AS days,
@@ -556,8 +576,15 @@ class EmployeeSummaryService
             GROUP BY lt.id
             ORDER BY lt.sort_order, lt.name
         ");
-        $stmt->execute([$userId, $monthEnd, $monthStart]);
+        $stmt->execute([$userId, $to, $from]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    private function getLeaveByTypeInMonth(int $userId, string $month): array
+    {
+        $monthStart = $month . '-01';
+        $monthEnd = date('Y-m-t', strtotime($monthStart));
+        return $this->getLeaveByTypeInRange($userId, $monthStart, $monthEnd);
     }
 
     private function getPendingLeaveCount(int $userId): int
@@ -595,22 +622,18 @@ class EmployeeSummaryService
     /**
      * @return list<array<string,mixed>>
      */
-    private function getDayoffSwapsInMonth(int $userId, string $month): array
+    private function getDayoffSwapsInRange(int $userId, string $from, string $to): array
     {
-        $monthStart = $month . '-01';
-        $monthEnd = date('Y-m-t', strtotime($monthStart));
-        $today = date('Y-m-d');
-        $lastDay = ($monthEnd <= $today) ? $monthEnd : $today;
         $dayNames = defined('THAI_DAY_NAMES') ? THAI_DAY_NAMES : ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
 
         $stmt = $this->pdo->prepare("
             SELECT id, week_start, week_end, original_day_off, requested_day_off, reason, status, created_at
             FROM hr_dayoff_requests
             WHERE user_id = ?
-            AND ((DATE_FORMAT(week_start, '%Y-%m') = ?) OR (DATE_FORMAT(week_end, '%Y-%m') = ?))
+              AND week_start <= ? AND week_end >= ?
             ORDER BY week_start DESC
         ");
-        $stmt->execute([$userId, $month, $month]);
+        $stmt->execute([$userId, $to, $from]);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
         foreach ($rows as &$r) {
             $r['original_day_label'] = $dayNames[(int)$r['original_day_off']] ?? '-';
@@ -627,6 +650,15 @@ class EmployeeSummaryService
             );
         }
         return $rows;
+    }
+
+    private function getDayoffSwapsInMonth(int $userId, string $month): array
+    {
+        $monthStart = $month . '-01';
+        $monthEnd = date('Y-m-t', strtotime($monthStart));
+        $today = date('Y-m-d');
+        $lastDay = min($monthEnd, $today);
+        return $this->getDayoffSwapsInRange($userId, $monthStart, $lastDay);
     }
 
     private function findWeekDateByDayOfWeek(string $weekStart, string $weekEnd, int $dayOfWeek): ?string

@@ -95,10 +95,54 @@ class PayrollService
         return round($tax / 12, 2);
     }
 
+    public function getDefaultPayDay(): int
+    {
+        $raw = (int)$this->getSetting('payroll_default_pay_day', '25');
+        return ($raw >= 1 && $raw <= 31) ? $raw : 25;
+    }
+
     /**
-     * Compute attendance deductions (absent/late/sick-no-cert).
+     * Payroll attendance period: (pay_day+1) of previous month → pay_day of payroll month.
+     * Default pay_day 25 → 26th prev month through 25th current month.
+     *
+     * @return array{start: string, end: string, pay_day: int}
      */
-    public function computeAttendanceDeductions(int $userId, string $monthFirst): array
+    public function attendancePeriodBounds(string $payrollMonth, ?int $payDay = null): array
+    {
+        if ($payDay === null) {
+            $payDay = $this->getDefaultPayDay();
+        }
+        $payDay = max(1, min(31, $payDay));
+
+        $ts = strtotime($payrollMonth);
+        if (!$ts) {
+            $today = date('Y-m-d');
+            return ['start' => $today, 'end' => $today, 'pay_day' => $payDay];
+        }
+
+        $lastDay = (int)date('t', $ts);
+        $endDay = min($payDay, $lastDay);
+        $periodEnd = date('Y-m-', $ts) . str_pad((string)$endDay, 2, '0', STR_PAD_LEFT);
+
+        $monthFirstTs = strtotime(date('Y-m-01', $ts));
+        $prevTs = strtotime('-1 month', $monthFirstTs);
+        $prevLast = (int)date('t', $prevTs);
+        $prevPayDay = min($payDay, $prevLast);
+        $startDay = $prevPayDay + 1;
+
+        if ($startDay > $prevLast) {
+            $periodStart = date('Y-m-01', $monthFirstTs);
+        } else {
+            $periodStart = date('Y-m-', $prevTs) . str_pad((string)$startDay, 2, '0', STR_PAD_LEFT);
+        }
+
+        return ['start' => $periodStart, 'end' => $periodEnd, 'pay_day' => $payDay];
+    }
+
+    /**
+     * Compute attendance deductions (absent/late) for the payroll period.
+     */
+    public function computeAttendanceDeductions(int $userId, string $monthFirst, ?int $payDay = null): array
     {
         $result = [
             'absent_days' => 0.0, 'late_count_30' => 0, 'late_count_60' => 0,
@@ -116,8 +160,10 @@ class PayrollService
         $lateOver60AsAbsent = (int)$this->getSetting('payroll_late_over60_as_absent', '1') === 1;
         $leaveAdvanceDays = (int)$this->getSetting('payroll_leave_advance_days', '7');
 
-        $monthStart = date('Y-m-01', strtotime($monthFirst));
-        $monthEnd = date('Y-m-t', strtotime($monthFirst));
+        $period = $this->attendancePeriodBounds($monthFirst, $payDay);
+        $periodStart = $period['start'];
+        $periodEnd = $period['end'];
+        $missingScanEnd = min($periodEnd, date('Y-m-d'));
 
         try {
             $stmt = $this->pdo->prepare("
@@ -125,7 +171,7 @@ class PayrollService
                 FROM hr_attendances WHERE user_id = ? AND attendance_date BETWEEN ? AND ?
                 ORDER BY attendance_date
             ");
-            $stmt->execute([$userId, $monthStart, $monthEnd]);
+            $stmt->execute([$userId, $periodStart, $periodEnd]);
             $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             return $result;
@@ -183,7 +229,7 @@ class PayrollService
             }
         }
 
-        foreach ($this->findMissingAbsentDates($userId, $monthStart, $monthEnd, $loggedDates) as $date) {
+        foreach ($this->findMissingAbsentDates($userId, $periodStart, $missingScanEnd, $loggedDates) as $date) {
             if (!empty($absentDates[$date])) continue;
             $result['absent_days'] += 1;
             $absentDates[$date] = true;
@@ -207,7 +253,7 @@ class PayrollService
                 WHERE lr.user_id = ? AND lr.status = 'APPROVED'
                   AND lr.start_date <= ? AND lr.end_date >= ?
             ");
-            $stmt->execute([$userId, $monthEnd, $monthStart]);
+            $stmt->execute([$userId, $periodEnd, $periodStart]);
             $leaves = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             $leaves = [];
@@ -239,7 +285,7 @@ class PayrollService
      * Calculate missing workdays directly from calendars/schedules, so payroll
      * does not silently under-deduct when the absence backfill cron has not run.
      */
-    private function findMissingAbsentDates(int $userId, string $monthStart, string $monthEnd, array $loggedDates): array
+    private function findMissingAbsentDates(int $userId, string $periodStart, string $scanEnd, array $loggedDates): array
     {
         try {
             $stmt = $this->pdo->prepare("
@@ -260,7 +306,7 @@ class PayrollService
         $holidays = [];
         try {
             $stmt = $this->pdo->prepare("SELECT date FROM hr_holidays WHERE is_active = 1 AND date BETWEEN ? AND ?");
-            $stmt->execute([$monthStart, $monthEnd]);
+            $stmt->execute([$periodStart, $scanEnd]);
             foreach ($stmt->fetchAll(PDO::FETCH_COLUMN) as $date) {
                 $holidays[$date] = true;
             }
@@ -277,10 +323,10 @@ class PayrollService
                   AND status NOT IN ('REJECTED','CANCELLED')
                   AND start_date <= ? AND end_date >= ?
             ");
-            $stmt->execute([$userId, $monthEnd, $monthStart]);
+            $stmt->execute([$userId, $scanEnd, $periodStart]);
             foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $leave) {
-                $start = max($monthStart, (string)$leave['start_date']);
-                $end = min($monthEnd, (string)$leave['end_date']);
+                $start = max($periodStart, (string)$leave['start_date']);
+                $end = min($scanEnd, (string)$leave['end_date']);
                 for ($ts = strtotime($start); $ts !== false && $ts <= strtotime($end); $ts += 86400) {
                     $leaveDates[date('Y-m-d', $ts)] = true;
                 }
@@ -297,7 +343,7 @@ class PayrollService
                 WHERE user_id = ? AND status = 'APPROVED'
                   AND week_start <= ? AND week_end >= ?
             ");
-            $stmt->execute([$userId, $monthEnd, $monthStart]);
+            $stmt->execute([$userId, $scanEnd, $periodStart]);
             $dayoffRequests = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Throwable $e) {
             $dayoffRequests = [];
@@ -305,7 +351,7 @@ class PayrollService
 
         $missingAbsentDates = [];
         $defaultDayOff = (int)($user['day_off'] ?? 0);
-        for ($ts = strtotime($monthStart); $ts !== false && $ts <= strtotime($monthEnd); $ts += 86400) {
+        for ($ts = strtotime($periodStart); $ts !== false && $ts <= strtotime($scanEnd); $ts += 86400) {
             $date = date('Y-m-d', $ts);
             if (!empty($loggedDates[$date])) continue;
             if (!empty($holidays[$date])) continue;
@@ -370,8 +416,11 @@ class PayrollService
      * Calculate a single employee's payroll for a given month.
      * Returns the full slip data array without persisting.
      */
-    public function calculateSlip(int $userId, string $monthFirst): array
+    public function calculateSlip(int $userId, string $monthFirst, ?int $payDay = null): array
     {
+        if ($payDay === null) {
+            $payDay = $this->getDefaultPayDay();
+        }
         $setup = $this->getSalarySetup($userId, $monthFirst);
         $gross = $setup ? (float)$setup['base_salary'] : 0;
         $bonus = $setup ? (float)($setup['bonus_fixed'] ?? 0) : 0;
@@ -412,7 +461,7 @@ class PayrollService
         $giEmpPct = $setup['group_insurance_employer_pct'] ?? 50;
         $groupInsurance = $this->calcGroupInsurance((float)$giTotal, (float)$giEmpPct);
 
-        $att = $this->computeAttendanceDeductions($userId, $monthFirst);
+        $att = $this->computeAttendanceDeductions($userId, $monthFirst, $payDay);
         $absenceDed = (float)$att['absence_deduction'];
         $latenessDed = (float)$att['lateness_deduction'];
         $attDetailJson = (!empty($att['breakdown']) || !empty($att['warnings']))
@@ -466,12 +515,16 @@ class PayrollService
 
         $this->pdo->beginTransaction();
         try {
+            $payDay = $this->getDefaultPayDay();
             $runId = $existing ? (int)$existing['id'] : 0;
             if ($runId > 0) {
                 $this->pdo->prepare("DELETE FROM payroll_slips WHERE payroll_run_id = ?")->execute([$runId]);
+                $pd = $this->pdo->prepare("SELECT pay_day FROM payroll_runs WHERE id = ?");
+                $pd->execute([$runId]);
+                $payDay = (int)($pd->fetchColumn() ?: $payDay);
             } else {
-                $this->pdo->prepare("INSERT INTO payroll_runs (payroll_month, pay_day, status, created_by) VALUES (?, 25, 'draft', ?)")
-                    ->execute([$monthFirst, $createdBy]);
+                $this->pdo->prepare("INSERT INTO payroll_runs (payroll_month, pay_day, status, created_by) VALUES (?, ?, 'draft', ?)")
+                    ->execute([$monthFirst, $payDay, $createdBy]);
                 $runId = (int)$this->pdo->lastInsertId();
             }
 
@@ -482,7 +535,7 @@ class PayrollService
             $ins = $this->pdo->prepare("INSERT INTO payroll_slips (payroll_run_id, user_id, gross_salary, bonus, allowances, income_other_json, total_income, tax_withheld, provident_fund, social_security, group_insurance, deduction_other_json, absent_days, late_count_30, late_count_60, absence_deduction, lateness_deduction, attendance_detail_json, total_deductions, net_salary) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
             foreach ($users as $uid) {
-                $slip = $this->calculateSlip((int)$uid, $monthFirst);
+                $slip = $this->calculateSlip((int)$uid, $monthFirst, $payDay);
                 $ins->execute([
                     $runId, $uid,
                     $slip['gross_salary'], $slip['bonus'], $slip['allowances'],
@@ -526,7 +579,15 @@ class PayrollService
 
     public function recalculateSlip(int $runId, int $userId, string $monthFirst): bool
     {
-        $slip = $this->calculateSlip($userId, $monthFirst);
+        $payDay = $this->getDefaultPayDay();
+        $runStmt = $this->pdo->prepare('SELECT pay_day FROM payroll_runs WHERE id = ? LIMIT 1');
+        $runStmt->execute([$runId]);
+        $runRow = $runStmt->fetch(PDO::FETCH_ASSOC);
+        if ($runRow && isset($runRow['pay_day'])) {
+            $payDay = (int)$runRow['pay_day'];
+        }
+
+        $slip = $this->calculateSlip($userId, $monthFirst, $payDay);
         $stmt = $this->pdo->prepare("SELECT id FROM payroll_slips WHERE payroll_run_id = ? AND user_id = ?");
         $stmt->execute([$runId, $userId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);

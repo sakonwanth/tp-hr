@@ -26,7 +26,7 @@ $month = (string)(getopt('', ['month:'])['month'] ?? '');
 if ($slipId > 0) {
     $stmt = $pdo->prepare("
         SELECT s.*, u.employee_code, u.first_name_th, u.last_name_th, u.work_mode,
-               r.payroll_month, r.status AS run_status, r.id AS run_id
+               r.payroll_month, r.pay_day, r.status AS run_status, r.id AS run_id
         FROM payroll_slips s
         JOIN users u ON u.id = s.user_id
         JOIN payroll_runs r ON r.id = s.payroll_run_id
@@ -52,13 +52,21 @@ if ($slipId > 0) {
 }
 
 $monthFirst = date('Y-m-01', strtotime($slip['payroll_month']));
-$monthEnd = date('Y-m-t', strtotime($monthFirst));
+$payDay = isset($slip['pay_day']) ? (int)$slip['pay_day'] : 25;
+if ($payDay < 1 || $payDay > 31) {
+    $payDay = 25;
+}
+$payroll = new PayrollService($pdo);
+$period = $payroll->attendancePeriodBounds($monthFirst, $payDay);
+$monthStart = $period['start'];
+$monthEnd = $period['end'];
 $name = trim(($slip['first_name_th'] ?? '') . ' ' . ($slip['last_name_th'] ?? ''));
 $code = $slip['employee_code'] ?? '-';
 
 echo "=== Payroll Absence Audit ===\n";
 echo "Employee: {$code} {$name} (user_id={$userId})\n";
-echo "Month: {$monthFirst} .. {$monthEnd}\n";
+echo "Month (payroll run): {$monthFirst}\n";
+echo "Pay period (attendance): {$monthStart} .. {$monthEnd} (จ่ายวันที่ {$payDay})\n";
 if ($slipId > 0) {
     echo "Slip ID: {$slipId}\n";
     echo "Run status: " . ($slip['run_status'] ?? '-') . " (run_id=" . ($slip['run_id'] ?? '-') . ")\n";
@@ -92,8 +100,7 @@ if ($slipId > 0) {
     }
 }
 
-$payroll = new PayrollService($pdo);
-$fresh = $payroll->computeAttendanceDeductions($userId, $monthFirst);
+$fresh = $payroll->computeAttendanceDeductions($userId, $monthFirst, $payDay);
 echo "\n--- Fresh PayrollService calculation (tp-hr canonical) ---\n";
 echo "absent_days: {$fresh['absent_days']}\n";
 echo "absence_deduction: {$fresh['absence_deduction']}\n";
