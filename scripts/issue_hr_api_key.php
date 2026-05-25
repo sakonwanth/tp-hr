@@ -11,7 +11,16 @@ declare(strict_types=1);
 require_once __DIR__ . '/../bootstrap.php';
 
 $name = $argv[1] ?? 'tp-crm integration';
-$scopes = ['payroll.read', 'payroll.write', 'payroll.approve', 'employees.read', 'attendance.read'];
+$scopes = [
+    'payroll.read',
+    'payroll.read_all',
+    'payroll.write',
+    'payroll.approve',
+    'employees.read',
+    'attendance.read',
+    'attendance.write',
+    'attendance.write_all',
+];
 
 $issued = ApiAuth::issue([
     'name' => $name,
@@ -22,6 +31,7 @@ $issued = ApiAuth::issue([
 ]);
 
 echo "Created HR API key for: {$name}\n";
+echo "Scopes: " . implode(', ', $scopes) . "\n";
 echo "Prefix: {$issued['prefix']}\n";
 echo "Key (save now — shown once):\n{$issued['key']}\n";
 echo "\nSet in tp-crm .env:\n";
