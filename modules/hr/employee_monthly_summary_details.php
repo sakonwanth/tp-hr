@@ -1,21 +1,21 @@
 <?php
 /**
  * Partial: รายละเอียดรายวัน (สาย / ลา / ขาด / สลับวันหยุด)
- * @var array $summary จาก EmployeeSummaryService::getMonthlySummary()
- * @var bool $compact แสดงแบบย่อ (ใช้ในตารางรวม)
+ * @var array $summary
+ * @var bool $compact
+ * @var bool $panelLayout ใช้ในแผงขยายตาราง (จัด grid 2 คอลัมน์)
  */
 if (empty($summary) || !is_array($summary)) {
     return;
 }
 $d = $summary['details'] ?? [];
-$attStatus = defined('ATTENDANCE_STATUS') ? ATTENDANCE_STATUS : [];
 $leaveStatus = defined('LEAVE_STATUS') ? LEAVE_STATUS : [];
 $compact = !empty($compact);
+$panelLayout = !empty($panelLayout);
 $employeeId = (int)($employeeId ?? $summary['user_id'] ?? 0);
 $showActions = !empty($showActions) && $employeeId > 0;
 $isCeo = function_exists('isCEOOrAbove') && isCEOOrAbove();
 
-$actionLinkClass = 'inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-white/10 hover:bg-white/20 text-violet-200 border border-white/10 touch-manipulation shrink-0 ml-auto';
 $attFixUrl = static function (int $uid, string $date) {
     return '/hr/attendance.php?' . http_build_query(['date' => $date, 'user_id' => $uid, 'fix' => 1]);
 };
@@ -26,246 +26,238 @@ $hasWfh = !empty($d['wfh']);
 $hasLeaveAtt = !empty($d['leave_attendance']);
 $hasLeaveReq = !empty($summary['leave_requests']);
 $hasHolidays = !empty($d['holidays']);
-$hasScheduledOff = !empty($d['scheduled_off']);
 $hasSwaps = !empty($summary['dayoff_swaps']);
 $hasPresent = !empty($d['present']);
 
-if (!$hasLate && !$hasAbsent && !$hasWfh && !$hasLeaveAtt && !$hasLeaveReq && !$hasHolidays && !$hasScheduledOff && !$hasSwaps) {
-    echo '<p class="text-white/45 text-sm py-2">ไม่มีรายการพิเศษในเดือนนี้</p>';
+if (!$hasLate && !$hasAbsent && !$hasWfh && !$hasLeaveAtt && !$hasLeaveReq && !$hasHolidays && !$hasSwaps) {
+    echo '<p class="text-white/50 text-sm py-4 px-1">ไม่มีรายการพิเศษในเดือนนี้</p>';
     return;
 }
 
-$sectionClass = $compact
-    ? 'rounded-[var(--tp-ios-card-radius)] bg-black/20 border border-white/8 overflow-hidden'
-    : 'rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 overflow-hidden';
-$headClass = $compact
-    ? 'px-3 py-2 text-xs font-semibold text-white/75 bg-white/5 border-b border-white/8'
-    : 'px-4 py-3 text-sm font-semibold text-white/85 bg-white/5 border-b border-white/10';
-$rowClass = $compact ? 'px-3 py-2 text-xs border-b border-white/5 last:border-0' : 'px-4 py-2.5 text-sm border-b border-white/5 last:border-0';
+$wrapClass = $panelLayout
+    ? 'grid grid-cols-1 xl:grid-cols-2 gap-5 lg:gap-6'
+    : ($compact ? 'flex flex-col gap-4' : 'flex flex-col gap-5');
+$cardClass = 'rounded-[var(--tp-ios-card-radius)] bg-white/[0.04] border border-white/10 overflow-hidden shadow-sm';
+$headClass = $panelLayout
+    ? 'px-5 py-4 text-sm font-semibold bg-white/[0.03] border-b border-white/10'
+    : ($compact ? 'px-4 py-3 text-sm font-semibold bg-white/[0.03] border-b border-white/10' : 'px-5 py-4 text-sm font-semibold bg-white/[0.03] border-b border-white/10');
+$listClass = 'divide-y divide-white/[0.06]';
+$rowPad = $panelLayout ? 'px-5 py-4' : ($compact ? 'px-4 py-3.5' : 'px-5 py-4');
+$actionBtn = 'inline-flex items-center justify-center gap-1.5 min-h-[40px] px-3 py-2 rounded-[var(--tp-ios-card-radius)] text-xs font-medium bg-violet-500/12 hover:bg-violet-500/22 text-violet-200 border border-violet-500/25 touch-manipulation shrink-0 whitespace-nowrap';
+
+$renderDayRow = static function (array $item, string $toneClass, array $metaParts, ?string $actionHref = null) use ($rowPad, $actionBtn, $showActions): void {
+    ?>
+    <li class="<?php echo $rowPad; ?>">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                    <span class="text-white font-semibold tabular-nums text-sm"><?php echo formatDateThai($item['date']); ?></span>
+                    <?php if (!empty($item['day_label'])): ?>
+                    <span class="text-white/45 text-xs"><?php echo htmlspecialchars($item['day_label']); ?></span>
+                    <?php endif; ?>
+                </div>
+                <?php if ($metaParts): ?>
+                <p class="mt-1.5 text-sm <?php echo $toneClass; ?> leading-relaxed"><?php echo implode(' · ', $metaParts); ?></p>
+                <?php endif; ?>
+            </div>
+            <?php if ($showActions && $actionHref): ?>
+            <a href="<?php echo htmlspecialchars($actionHref); ?>" class="<?php echo $actionBtn; ?>">
+                <i class="fas fa-edit text-[11px]" aria-hidden="true"></i>แก้ไขเวลา
+            </a>
+            <?php endif; ?>
+        </div>
+    </li>
+    <?php
+};
 ?>
 
-<div class="emp-summary-details space-y-3 <?php echo $compact ? 'text-xs' : ''; ?>">
+<div class="emp-summary-details <?php echo $wrapClass; ?>">
     <?php if ($hasLate): ?>
-    <div class="<?php echo $sectionClass; ?>">
+    <section class="<?php echo $cardClass; ?>">
         <h4 class="<?php echo $headClass; ?> text-amber-300">
-            <i class="fas fa-clock mr-1.5" aria-hidden="true"></i>มาสาย <?php echo count($d['late']); ?> วัน
+            <i class="fas fa-clock mr-2 opacity-80" aria-hidden="true"></i>มาสาย <?php echo count($d['late']); ?> วัน
         </h4>
-        <ul class="divide-y divide-white/5">
-            <?php foreach ($d['late'] as $item): ?>
-            <li class="<?php echo $rowClass; ?> flex flex-wrap items-center gap-x-3 gap-y-1">
-                <span class="text-white font-medium tabular-nums shrink-0"><?php echo formatDateThai($item['date']); ?></span>
-                <span class="text-white/45"><?php echo htmlspecialchars($item['day_label'] ?? ''); ?></span>
-                <?php if (!empty($item['check_in'])): ?>
-                <span class="text-amber-300">เข้า <?php echo htmlspecialchars($item['check_in']); ?></span>
-                <?php endif; ?>
-                <?php if ((int)($item['late_minutes'] ?? 0) > 0): ?>
-                <span class="text-amber-400/80">สาย <?php echo (int)$item['late_minutes']; ?> น.</span>
-                <?php endif; ?>
-                <?php if ($showActions): ?>
-                <a href="<?php echo htmlspecialchars($attFixUrl($employeeId, $item['date'])); ?>" class="<?php echo $actionLinkClass; ?>">
-                    <i class="fas fa-edit text-[10px]" aria-hidden="true"></i>แก้ไขเวลา
-                </a>
-                <?php endif; ?>
-            </li>
-            <?php endforeach; ?>
+        <ul class="<?php echo $listClass; ?>">
+            <?php foreach ($d['late'] as $item):
+                $meta = [];
+                if (!empty($item['check_in'])) {
+                    $meta[] = 'เข้า ' . htmlspecialchars($item['check_in']);
+                }
+                if ((int)($item['late_minutes'] ?? 0) > 0) {
+                    $meta[] = 'สาย ' . (int)$item['late_minutes'] . ' นาที';
+                }
+                $renderDayRow($item, 'text-amber-300/90', $meta, $showActions ? $attFixUrl($employeeId, $item['date']) : null);
+            endforeach; ?>
         </ul>
-    </div>
+    </section>
     <?php endif; ?>
 
     <?php if ($hasAbsent): ?>
-    <div class="<?php echo $sectionClass; ?>">
+    <section class="<?php echo $cardClass; ?>">
         <h4 class="<?php echo $headClass; ?> text-red-300">
-            <i class="fas fa-user-times mr-1.5" aria-hidden="true"></i>ขาดงาน <?php echo count($d['absent']); ?> วัน
+            <i class="fas fa-user-times mr-2 opacity-80" aria-hidden="true"></i>ขาดงาน <?php echo count($d['absent']); ?> วัน
         </h4>
-        <ul class="divide-y divide-white/5">
-            <?php foreach ($d['absent'] as $item): ?>
-            <li class="<?php echo $rowClass; ?> flex flex-wrap items-center gap-x-3 gap-y-1">
-                <span class="text-white font-medium tabular-nums shrink-0"><?php echo formatDateThai($item['date']); ?></span>
-                <span class="text-white/45"><?php echo htmlspecialchars($item['day_label'] ?? ''); ?></span>
-                <span class="text-red-300/90"><?php echo htmlspecialchars($item['reason'] ?? 'ขาดงาน'); ?></span>
-                <?php if ($showActions): ?>
-                <a href="<?php echo htmlspecialchars($attFixUrl($employeeId, $item['date'])); ?>" class="<?php echo $actionLinkClass; ?>" title="บันทึกเวลาเข้า-ออก หรือแก้สถานะ">
-                    <i class="fas fa-user-clock text-[10px]" aria-hidden="true"></i>แก้ไขเวลา
-                </a>
-                <?php endif; ?>
-            </li>
-            <?php endforeach; ?>
+        <ul class="<?php echo $listClass; ?> max-h-[min(420px,50vh)] overflow-y-auto overscroll-contain">
+            <?php foreach ($d['absent'] as $item):
+                $meta = [htmlspecialchars($item['reason'] ?? 'ขาดงาน')];
+                $renderDayRow($item, 'text-red-300/90', $meta, $showActions ? $attFixUrl($employeeId, $item['date']) : null);
+            endforeach; ?>
         </ul>
-    </div>
+    </section>
     <?php endif; ?>
 
     <?php if ($hasLeaveReq): ?>
-    <div class="<?php echo $sectionClass; ?>">
+    <section class="<?php echo $cardClass; ?><?php echo $panelLayout && ($hasLate || $hasAbsent) ? ' xl:col-span-2' : ''; ?>">
         <h4 class="<?php echo $headClass; ?> text-blue-300">
-            <i class="fas fa-calendar-minus mr-1.5" aria-hidden="true"></i>ใบลาในเดือนนี้
+            <i class="fas fa-calendar-minus mr-2 opacity-80" aria-hidden="true"></i>ใบลาในเดือนนี้
         </h4>
-        <div class="divide-y divide-white/5">
+        <div class="<?php echo $listClass; ?>">
             <?php foreach ($summary['leave_requests'] as $lr): ?>
-            <div class="<?php echo $rowClass; ?>">
-                <div class="flex flex-wrap items-center gap-2 mb-1.5">
-                    <span class="inline-flex px-2 py-0.5 rounded text-xs font-semibold border border-white/10"
-                          style="background-color: <?php echo htmlspecialchars($lr['color'] ?? '#3B82F6'); ?>20; color: <?php echo htmlspecialchars($lr['color'] ?? '#93C5FD'); ?>">
+            <div class="<?php echo $rowPad; ?>">
+                <div class="flex flex-wrap items-center gap-2 mb-3">
+                    <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold border border-white/10"
+                          style="background-color: <?php echo htmlspecialchars($lr['color'] ?? '#3B82F6'); ?>18; color: <?php echo htmlspecialchars($lr['color'] ?? '#93C5FD'); ?>">
                         <?php echo htmlspecialchars($lr['leave_type_name'] ?? $lr['code'] ?? 'ลา'); ?>
                     </span>
-                    <span class="px-2 py-0.5 rounded text-xs font-semibold <?php
+                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold <?php
                         echo match($lr['status'] ?? '') {
-                            'APPROVED' => 'bg-emerald-500/20 text-emerald-300',
-                            'PENDING' => 'bg-amber-500/20 text-amber-300',
-                            default => 'bg-slate-500/20 text-slate-300',
+                            'APPROVED' => 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/25',
+                            'PENDING' => 'bg-amber-500/15 text-amber-300 border border-amber-500/25',
+                            default => 'bg-slate-500/15 text-slate-300 border border-slate-500/25',
                         };
                     ?>"><?php echo htmlspecialchars($leaveStatus[$lr['status']] ?? ($lr['status'] ?? '')); ?></span>
-                    <span class="text-white/55 text-xs">
+                    <span class="text-white/55 text-sm">
                         <?php echo formatDateThai($lr['start_date']); ?>
                         <?php if ($lr['start_date'] !== $lr['end_date']): ?>
                         – <?php echo formatDateThai($lr['end_date']); ?>
                         <?php endif; ?>
-                        (<?php echo number_format((float)$lr['total_days'], 1); ?> วัน)
+                        · <?php echo number_format((float)$lr['total_days'], 1); ?> วัน
                     </span>
                 </div>
                 <?php if (!empty($lr['days_in_month'])): ?>
-                <div class="flex flex-wrap gap-1.5 mt-1">
+                <div class="flex flex-wrap gap-2">
                     <?php foreach ($lr['days_in_month'] as $day): ?>
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-500/10 text-blue-200 text-xs border border-blue-500/20">
-                        <span class="tabular-nums"><?php echo formatDateThai($day['date']); ?></span>
-                        <span class="text-blue-300/60"><?php echo htmlspecialchars($day['day_label']); ?></span>
+                    <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-[var(--tp-ios-card-radius)] bg-blue-500/10 text-blue-100 text-xs border border-blue-500/20">
+                        <span class="tabular-nums font-medium"><?php echo formatDateThai($day['date']); ?></span>
+                        <span class="text-blue-300/55"><?php echo htmlspecialchars($day['day_label']); ?></span>
                     </span>
                     <?php endforeach; ?>
                 </div>
                 <?php endif; ?>
                 <?php if (!$compact && !empty($lr['reason'])): ?>
-                <p class="text-white/45 text-xs mt-1.5"><?php echo htmlspecialchars($lr['reason']); ?></p>
+                <p class="text-white/45 text-sm mt-3 leading-relaxed"><?php echo htmlspecialchars($lr['reason']); ?></p>
                 <?php endif; ?>
                 <?php if ($showActions && ($lr['status'] ?? '') === 'PENDING'): ?>
-                <a href="/hr/leaves.php?status=pending" class="inline-flex items-center gap-1 mt-2 px-2 py-1 rounded text-xs font-medium bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 border border-amber-500/25 touch-manipulation">
-                    <i class="fas fa-check text-[10px]" aria-hidden="true"></i>ไปอนุมัติใบลา
+                <a href="/hr/leaves.php?status=pending" class="inline-flex items-center gap-1.5 mt-4 min-h-[40px] px-3 py-2 rounded-[var(--tp-ios-card-radius)] text-xs font-medium bg-amber-500/12 hover:bg-amber-500/22 text-amber-200 border border-amber-500/25 touch-manipulation">
+                    <i class="fas fa-check text-[11px]" aria-hidden="true"></i>ไปอนุมัติใบลา
                 </a>
                 <?php endif; ?>
             </div>
             <?php endforeach; ?>
         </div>
-    </div>
+    </section>
     <?php elseif ($hasLeaveAtt): ?>
-    <div class="<?php echo $sectionClass; ?>">
+    <section class="<?php echo $cardClass; ?>">
         <h4 class="<?php echo $headClass; ?> text-blue-300">
-            <i class="fas fa-calendar-minus mr-1.5" aria-hidden="true"></i>ลา (จากการลงเวลา) <?php echo count($d['leave_attendance']); ?> วัน
+            <i class="fas fa-calendar-minus mr-2 opacity-80" aria-hidden="true"></i>ลา (จากการลงเวลา) <?php echo count($d['leave_attendance']); ?> วัน
         </h4>
-        <ul class="divide-y divide-white/5">
-            <?php foreach ($d['leave_attendance'] as $item): ?>
-            <li class="<?php echo $rowClass; ?> flex flex-wrap items-center gap-x-3">
-                <span class="text-white font-medium tabular-nums"><?php echo formatDateThai($item['date']); ?></span>
-                <span class="text-white/45"><?php echo htmlspecialchars($item['day_label'] ?? ''); ?></span>
-            </li>
-            <?php endforeach; ?>
+        <ul class="<?php echo $listClass; ?>">
+            <?php foreach ($d['leave_attendance'] as $item):
+                $renderDayRow($item, 'text-blue-300/90', [], null);
+            endforeach; ?>
         </ul>
-    </div>
+    </section>
     <?php endif; ?>
 
     <?php if ($hasWfh): ?>
-    <div class="<?php echo $sectionClass; ?>">
+    <section class="<?php echo $cardClass; ?>">
         <h4 class="<?php echo $headClass; ?> text-purple-300">
-            <i class="fas fa-house-laptop mr-1.5" aria-hidden="true"></i>WFH <?php echo count($d['wfh']); ?> วัน
+            <i class="fas fa-house-laptop mr-2 opacity-80" aria-hidden="true"></i>WFH <?php echo count($d['wfh']); ?> วัน
         </h4>
-        <ul class="divide-y divide-white/5">
-            <?php foreach ($d['wfh'] as $item): ?>
-            <li class="<?php echo $rowClass; ?> flex flex-wrap items-center gap-x-3 gap-y-1">
-                <span class="text-white font-medium tabular-nums"><?php echo formatDateThai($item['date']); ?></span>
-                <span class="text-white/45"><?php echo htmlspecialchars($item['day_label'] ?? ''); ?></span>
-                <?php if (!empty($item['check_in'])): ?>
-                <span class="text-purple-300/80">เข้า <?php echo htmlspecialchars($item['check_in']); ?> – ออก <?php echo htmlspecialchars($item['check_out'] ?? '-'); ?></span>
-                <?php endif; ?>
-                <?php if ($showActions): ?>
-                <a href="<?php echo htmlspecialchars($attFixUrl($employeeId, $item['date'])); ?>" class="<?php echo $actionLinkClass; ?>">
-                    <i class="fas fa-edit text-[10px]" aria-hidden="true"></i>แก้ไขเวลา
-                </a>
-                <?php endif; ?>
-            </li>
-            <?php endforeach; ?>
+        <ul class="<?php echo $listClass; ?>">
+            <?php foreach ($d['wfh'] as $item):
+                $meta = [];
+                if (!empty($item['check_in'])) {
+                    $meta[] = 'เข้า ' . htmlspecialchars($item['check_in']) . ' – ออก ' . htmlspecialchars($item['check_out'] ?? '-');
+                }
+                $renderDayRow($item, 'text-purple-300/90', $meta, $showActions ? $attFixUrl($employeeId, $item['date']) : null);
+            endforeach; ?>
         </ul>
-    </div>
+    </section>
     <?php endif; ?>
 
     <?php if ($hasSwaps): ?>
-    <div class="<?php echo $sectionClass; ?>">
+    <section class="<?php echo $cardClass; ?>">
         <h4 class="<?php echo $headClass; ?> text-violet-300">
-            <i class="fas fa-calendar-day mr-1.5" aria-hidden="true"></i>การเปลี่ยนวันหยุด
+            <i class="fas fa-calendar-day mr-2 opacity-80" aria-hidden="true"></i>การเปลี่ยนวันหยุด
         </h4>
-        <div class="divide-y divide-white/5">
+        <div class="<?php echo $listClass; ?>">
             <?php foreach ($summary['dayoff_swaps'] as $swap): ?>
-            <div class="<?php echo $rowClass; ?>">
-                <div class="flex flex-wrap items-center gap-2 mb-1">
-                    <span class="px-2 py-0.5 rounded text-xs font-semibold <?php
+            <div class="<?php echo $rowPad; ?>">
+                <div class="flex flex-wrap items-center gap-2 mb-3">
+                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold <?php
                         echo match($swap['status'] ?? '') {
-                            'APPROVED' => 'bg-emerald-500/20 text-emerald-300',
-                            'PENDING' => 'bg-amber-500/20 text-amber-300',
-                            'REJECTED' => 'bg-red-500/20 text-red-300',
-                            default => 'bg-slate-500/20 text-slate-300',
+                            'APPROVED' => 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/25',
+                            'PENDING' => 'bg-amber-500/15 text-amber-300 border border-amber-500/25',
+                            'REJECTED' => 'bg-red-500/15 text-red-300 border border-red-500/25',
+                            default => 'bg-slate-500/15 text-slate-300 border border-slate-500/25',
                         };
                     ?>"><?php echo htmlspecialchars($leaveStatus[$swap['status']] ?? ($swap['status'] ?? '-')); ?></span>
-                    <span class="text-sky-300"><?php echo htmlspecialchars($swap['original_day_label'] ?? ''); ?></span>
-                    <i class="fas fa-arrow-right text-white/35 text-xs" aria-hidden="true"></i>
-                    <span class="text-violet-300 font-medium"><?php echo htmlspecialchars($swap['requested_day_label'] ?? ''); ?></span>
-                    <span class="text-white/45 text-xs ml-auto">
-                        สัปดาห์ <?php echo formatDateThai($swap['week_start'] ?? ''); ?> – <?php echo formatDateThai($swap['week_end'] ?? ''); ?>
-                    </span>
+                    <span class="text-sky-300 text-sm"><?php echo htmlspecialchars($swap['original_day_label'] ?? ''); ?></span>
+                    <i class="fas fa-arrow-right text-white/30 text-xs" aria-hidden="true"></i>
+                    <span class="text-violet-300 font-medium text-sm"><?php echo htmlspecialchars($swap['requested_day_label'] ?? ''); ?></span>
                 </div>
+                <p class="text-white/45 text-xs mb-3">
+                    สัปดาห์ <?php echo formatDateThai($swap['week_start'] ?? ''); ?> – <?php echo formatDateThai($swap['week_end'] ?? ''); ?>
+                </p>
                 <?php if (!empty($swap['affected_days'])): ?>
-                <div class="flex flex-wrap gap-1.5 mt-1">
+                <div class="flex flex-wrap gap-2">
                     <?php foreach ($swap['affected_days'] as $ad): ?>
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-violet-500/10 text-violet-200 text-xs border border-violet-500/20" title="<?php echo htmlspecialchars(($ad['was'] ?? '') . ' → ' . ($ad['now'] ?? '')); ?>">
-                        <span class="tabular-nums"><?php echo formatDateThai($ad['date']); ?></span>
-                        <span class="text-violet-300/70"><?php echo htmlspecialchars($ad['change'] ?? ''); ?></span>
+                    <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-[var(--tp-ios-card-radius)] bg-violet-500/10 text-violet-100 text-xs border border-violet-500/20">
+                        <span class="tabular-nums font-medium"><?php echo formatDateThai($ad['date']); ?></span>
+                        <span class="text-violet-300/60"><?php echo htmlspecialchars($ad['change'] ?? ''); ?></span>
                     </span>
                     <?php endforeach; ?>
                 </div>
                 <?php endif; ?>
-                <?php if (!$compact && !empty($swap['reason'])): ?>
-                <p class="text-white/45 text-xs mt-1"><?php echo htmlspecialchars($swap['reason']); ?></p>
-                <?php endif; ?>
                 <?php if ($showActions && ($swap['status'] ?? '') === 'PENDING' && $isCeo): ?>
-                <a href="/hr/dayoff_approvals.php" class="inline-flex items-center gap-1 mt-2 px-2 py-1 rounded text-xs font-medium bg-violet-500/15 hover:bg-violet-500/25 text-violet-200 border border-violet-500/25 touch-manipulation">
-                    <i class="fas fa-check text-[10px]" aria-hidden="true"></i>ไปอนุมัติสลับวันหยุด
+                <a href="/hr/dayoff_approvals.php" class="inline-flex items-center gap-1.5 mt-4 min-h-[40px] px-3 py-2 rounded-[var(--tp-ios-card-radius)] text-xs font-medium bg-violet-500/12 hover:bg-violet-500/22 text-violet-200 border border-violet-500/25 touch-manipulation">
+                    <i class="fas fa-check text-[11px]" aria-hidden="true"></i>ไปอนุมัติสลับวันหยุด
                 </a>
-                <?php elseif ($showActions && ($swap['status'] ?? '') === 'PENDING'): ?>
-                <span class="text-white/45 text-xs mt-1 block">รอ CEO อนุมัติที่เมนู อนุมัติเปลี่ยนวันหยุด</span>
                 <?php endif; ?>
             </div>
             <?php endforeach; ?>
         </div>
-    </div>
+    </section>
     <?php endif; ?>
 
     <?php if (!$compact && $hasHolidays): ?>
-    <div class="<?php echo $sectionClass; ?>">
+    <section class="<?php echo $cardClass; ?>">
         <h4 class="<?php echo $headClass; ?> text-emerald-300">
-            <i class="fas fa-star mr-1.5" aria-hidden="true"></i>วันหยุดนักขัตฤกษ์/บริษัท <?php echo count($d['holidays']); ?> วัน
+            <i class="fas fa-star mr-2 opacity-80" aria-hidden="true"></i>วันหยุดนักขัตฤกษ์/บริษัท <?php echo count($d['holidays']); ?> วัน
         </h4>
-        <ul class="divide-y divide-white/5">
-            <?php foreach ($d['holidays'] as $item): ?>
-            <li class="<?php echo $rowClass; ?> flex flex-wrap items-center gap-x-3">
-                <span class="text-white font-medium tabular-nums"><?php echo formatDateThai($item['date']); ?></span>
-                <span class="text-emerald-300"><?php echo htmlspecialchars($item['name'] ?? ''); ?></span>
-            </li>
-            <?php endforeach; ?>
+        <ul class="<?php echo $listClass; ?>">
+            <?php foreach ($d['holidays'] as $item):
+                $renderDayRow($item, 'text-emerald-300/90', [htmlspecialchars($item['name'] ?? '')], null);
+            endforeach; ?>
         </ul>
-    </div>
+    </section>
     <?php endif; ?>
 
     <?php if (!$compact && $hasPresent && empty($compactHidePresent)): ?>
-    <details class="<?php echo $sectionClass; ?> group">
+    <details class="<?php echo $cardClass; ?> group xl:col-span-2">
         <summary class="<?php echo $headClass; ?> text-emerald-300 cursor-pointer list-none flex items-center justify-between touch-manipulation">
-            <span><i class="fas fa-check-circle mr-1.5" aria-hidden="true"></i>มาทำงานครบ <?php echo count($d['present']); ?> วัน</span>
+            <span><i class="fas fa-check-circle mr-2 opacity-80" aria-hidden="true"></i>มาทำงานครบ <?php echo count($d['present']); ?> วัน</span>
             <i class="fas fa-chevron-down text-white/40 group-open:rotate-180 transition-transform text-xs" aria-hidden="true"></i>
         </summary>
-        <ul class="divide-y divide-white/5 max-h-64 overflow-y-auto">
-            <?php foreach ($d['present'] as $item): ?>
-            <li class="<?php echo $rowClass; ?> flex flex-wrap items-center gap-x-3 gap-y-1">
-                <span class="text-white/80 tabular-nums"><?php echo formatDateThai($item['date']); ?></span>
-                <span class="text-white/40"><?php echo htmlspecialchars($item['day_label'] ?? ''); ?></span>
-                <?php if (!empty($item['check_in'])): ?>
-                <span class="text-white/55"><?php echo htmlspecialchars($item['check_in']); ?> – <?php echo htmlspecialchars($item['check_out'] ?? '-'); ?></span>
-                <?php endif; ?>
-            </li>
-            <?php endforeach; ?>
+        <ul class="<?php echo $listClass; ?> max-h-72 overflow-y-auto">
+            <?php foreach ($d['present'] as $item):
+                $meta = [];
+                if (!empty($item['check_in'])) {
+                    $meta[] = htmlspecialchars($item['check_in']) . ' – ' . htmlspecialchars($item['check_out'] ?? '-');
+                }
+                $renderDayRow($item, 'text-white/55', $meta, null);
+            endforeach; ?>
         </ul>
     </details>
     <?php endif; ?>

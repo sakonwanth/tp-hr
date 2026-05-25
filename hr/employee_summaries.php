@@ -75,17 +75,18 @@ include dirname(__DIR__) . '/templates/header.php';
     </form>
 </div>
 
-<div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 mb-6 min-w-0 border border-sky-500/20 bg-sky-500/5">
-    <h2 class="text-white text-sm font-semibold mb-3">
-        <i class="fas fa-circle-info text-sky-400 mr-2" aria-hidden="true"></i>วิธีแก้ไขข้อมูล
-    </h2>
-    <ul class="text-white/70 text-sm space-y-2 list-none">
-        <li><strong class="text-amber-300">มาสาย / ขาด / ไม่มีลงเวลา</strong> — กด 「แก้ไขเวลา」 ที่วันนั้น → ไปหน้า <a href="/hr/attendance.php" class="text-violet-300 hover:text-violet-200 underline">จัดการลงเวลา</a> (HR แก้เวลาเข้า-ออกได้ทันที มี audit log)</li>
-        <li><strong class="text-blue-300">ลา</strong> — พนักงานยื่นใบลา (ย้อนหลังได้) → HR อนุมัติที่ <a href="/hr/leaves.php?status=pending" class="text-violet-300 hover:text-violet-200 underline">อนุมัติการลา</a></li>
-        <li><strong class="text-violet-300">สลับวันหยุด</strong> — CEO อนุมัติที่ <a href="/hr/dayoff_approvals.php" class="text-violet-300 hover:text-violet-200 underline">อนุมัติเปลี่ยนวันหยุด</a></li>
-        <li><strong class="text-white/80">พนักงานขอแก้เวลาเอง</strong> — CEO อนุมัติที่ <a href="/hr/attendance_adjustments.php" class="text-violet-300 hover:text-violet-200 underline">อนุมัติแก้เวลา</a></li>
-    </ul>
-    <p class="text-white/45 text-xs mt-3">หน้านี้เป็นสรุปอ่านอย่างเดียว — การแก้ไขทำผ่านเมนูด้านบนหรือปุ่มในรายละเอียดแต่ละวัน</p>
+<div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 mb-6 min-w-0 border border-sky-500/15 bg-sky-500/[0.04]">
+    <details class="group">
+        <summary class="text-white text-sm font-semibold cursor-pointer list-none flex items-center justify-between gap-3 touch-manipulation">
+            <span><i class="fas fa-circle-info text-sky-400 mr-2" aria-hidden="true"></i>วิธีแก้ไขข้อมูล</span>
+            <i class="fas fa-chevron-down text-white/40 group-open:rotate-180 transition-transform text-xs shrink-0" aria-hidden="true"></i>
+        </summary>
+        <ul class="text-white/70 text-sm space-y-3 list-none mt-4 pt-4 border-t border-white/10 leading-relaxed">
+            <li><strong class="text-amber-300">มาสาย / ขาด / ไม่มีลงเวลา</strong> — กด 「แก้ไขเวลา」 ที่วันนั้น → ไปหน้า <a href="/hr/attendance.php" class="text-violet-300 hover:text-violet-200 underline">จัดการลงเวลา</a></li>
+            <li><strong class="text-blue-300">ลา</strong> — พนักงานยื่นใบลา → HR อนุมัติที่ <a href="/hr/leaves.php?status=pending" class="text-violet-300 hover:text-violet-200 underline">อนุมัติการลา</a></li>
+            <li><strong class="text-violet-300">สลับวันหยุด</strong> — CEO อนุมัติที่ <a href="/hr/dayoff_approvals.php" class="text-violet-300 hover:text-violet-200 underline">อนุมัติเปลี่ยนวันหยุด</a></li>
+        </ul>
+    </details>
 </div>
 
 <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4 mb-6 min-w-0">
@@ -140,12 +141,18 @@ include dirname(__DIR__) . '/templates/header.php';
                     <div><span class="text-white/45 block">ชม.</span><span class="text-white font-bold tabular-nums"><?php echo number_format((float)$row['work_hours'], 0); ?></span></div>
                 </div>
             </summary>
-            <div class="px-4 pb-4 pt-0 border-t border-white/10">
-                <?php $summary = $row['summary']; $compact = true; $compactHidePresent = true; $showActions = true; $employeeId = (int)$row['id']; include dirname(__DIR__) . '/modules/hr/employee_monthly_summary_details.php'; ?>
-                <a href="/hr/employee_view.php?id=<?php echo (int)$row['id']; ?>&month=<?php echo urlencode($month); ?>"
-                   class="mt-3 inline-flex items-center justify-center min-h-[44px] w-full px-3 py-2 bg-violet-500/15 hover:bg-violet-500/25 text-violet-200 rounded-[var(--tp-ios-card-radius)] text-xs font-medium touch-manipulation">
-                    ดูโปรไฟล์เต็ม
-                </a>
+            <div class="px-4 pb-5 pt-4 border-t border-white/10 space-y-5">
+                <?php $summary = $row['summary']; $panelLayout = true; $compact = false; $compactHidePresent = true; $showActions = true; $employeeId = (int)$row['id']; include dirname(__DIR__) . '/modules/hr/employee_monthly_summary_details.php'; ?>
+                <div class="flex flex-col sm:flex-row flex-wrap gap-3 pt-2 border-t border-white/10">
+                    <a href="/hr/attendance.php?date=<?php echo urlencode($month . '-01'); ?>&user_id=<?php echo (int)$row['id']; ?>"
+                       class="inline-flex items-center justify-center min-h-[44px] px-4 py-2.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 rounded-[var(--tp-ios-card-radius)] text-sm font-medium touch-manipulation">
+                        <i class="fas fa-user-clock mr-2" aria-hidden="true"></i>จัดการเวลา
+                    </a>
+                    <a href="/hr/employee_view.php?id=<?php echo (int)$row['id']; ?>&month=<?php echo urlencode($month); ?>"
+                       class="inline-flex items-center justify-center min-h-[44px] px-4 py-2.5 bg-violet-500/15 hover:bg-violet-500/25 text-violet-200 rounded-[var(--tp-ios-card-radius)] text-sm font-medium touch-manipulation">
+                        ดูโปรไฟล์เต็ม
+                    </a>
+                </div>
             </div>
         </details>
         <?php endforeach; ?>
@@ -194,26 +201,28 @@ include dirname(__DIR__) . '/templates/header.php';
                         </button>
                     </td>
                 </tr>
-                <tr id="emp-detail-<?php echo (int)$row['id']; ?>" class="hidden border-b border-white/5 bg-black/20">
-                    <td colspan="11" class="px-4 py-4">
-                        <?php $summary = $row['summary']; $compact = true; $compactHidePresent = true; $showActions = true; $employeeId = (int)$row['id']; include dirname(__DIR__) . '/modules/hr/employee_monthly_summary_details.php'; ?>
-                        <div class="mt-3 flex flex-wrap gap-2">
-                            <a href="/hr/attendance.php?date=<?php echo urlencode($month . '-01'); ?>&user_id=<?php echo (int)$row['id']; ?>"
-                               class="inline-flex items-center justify-center min-h-[40px] px-3 py-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 rounded-[var(--tp-ios-card-radius)] text-xs font-medium touch-manipulation">
-                                <i class="fas fa-user-clock mr-1" aria-hidden="true"></i>จัดการเวลา
-                            </a>
-                            <a href="/hr/leaves.php?status=pending"
-                               class="inline-flex items-center justify-center min-h-[40px] px-3 py-1.5 bg-blue-500/15 hover:bg-blue-500/25 text-blue-200 rounded-[var(--tp-ios-card-radius)] text-xs font-medium touch-manipulation">
-                                <i class="fas fa-calendar-check mr-1" aria-hidden="true"></i>อนุมัติลา
-                            </a>
-                            <a href="/hr/employee_view.php?id=<?php echo (int)$row['id']; ?>&month=<?php echo urlencode($month); ?>"
-                               class="inline-flex items-center justify-center min-h-[40px] px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] text-xs font-medium touch-manipulation">
-                                โปรไฟล์เต็ม
-                            </a>
-                            <a href="/hr/employee_attendance.php?id=<?php echo (int)$row['id']; ?>&month=<?php echo urlencode($month); ?>"
-                               class="inline-flex items-center justify-center min-h-[40px] px-3 py-1.5 bg-violet-500/15 hover:bg-violet-500/25 text-violet-200 rounded-[var(--tp-ios-card-radius)] text-xs font-medium touch-manipulation">
-                                ปฏิทินรายวัน
-                            </a>
+                <tr id="emp-detail-<?php echo (int)$row['id']; ?>" class="hidden border-b border-white/10 bg-black/25">
+                    <td colspan="11" class="p-0 align-top">
+                        <div class="px-6 py-8 sm:px-8 sm:py-10 border-y border-white/10">
+                            <?php $summary = $row['summary']; $panelLayout = true; $compact = false; $compactHidePresent = true; $showActions = true; $employeeId = (int)$row['id']; include dirname(__DIR__) . '/modules/hr/employee_monthly_summary_details.php'; ?>
+                            <div class="mt-8 pt-6 border-t border-white/10 flex flex-wrap gap-3">
+                                <a href="/hr/attendance.php?date=<?php echo urlencode($month . '-01'); ?>&user_id=<?php echo (int)$row['id']; ?>"
+                                   class="inline-flex items-center justify-center min-h-[44px] px-5 py-2.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 rounded-[var(--tp-ios-card-radius)] text-sm font-medium touch-manipulation">
+                                    <i class="fas fa-user-clock mr-2" aria-hidden="true"></i>จัดการเวลา
+                                </a>
+                                <a href="/hr/leaves.php?status=pending"
+                                   class="inline-flex items-center justify-center min-h-[44px] px-5 py-2.5 bg-blue-500/15 hover:bg-blue-500/25 text-blue-200 rounded-[var(--tp-ios-card-radius)] text-sm font-medium touch-manipulation">
+                                    <i class="fas fa-calendar-check mr-2" aria-hidden="true"></i>อนุมัติลา
+                                </a>
+                                <a href="/hr/employee_view.php?id=<?php echo (int)$row['id']; ?>&month=<?php echo urlencode($month); ?>"
+                                   class="inline-flex items-center justify-center min-h-[44px] px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] text-sm font-medium touch-manipulation">
+                                    โปรไฟล์เต็ม
+                                </a>
+                                <a href="/hr/employee_attendance.php?id=<?php echo (int)$row['id']; ?>&month=<?php echo urlencode($month); ?>"
+                                   class="inline-flex items-center justify-center min-h-[44px] px-5 py-2.5 bg-violet-500/15 hover:bg-violet-500/25 text-violet-200 rounded-[var(--tp-ios-card-radius)] text-sm font-medium touch-manipulation">
+                                    <i class="fas fa-calendar-day mr-2" aria-hidden="true"></i>ปฏิทินรายวัน
+                                </a>
+                            </div>
                         </div>
                     </td>
                 </tr>

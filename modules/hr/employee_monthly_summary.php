@@ -101,8 +101,8 @@ $defaultOffLabel = $dayNames[(int)($summary['default_day_off'] ?? 0)] ?? '-';
     </div>
     <?php endif; ?>
 
-    <div class="mb-6 pt-2 border-t border-white/10">
-        <h3 class="text-white/80 text-sm font-semibold mb-4">
+    <div class="mb-6 pt-4 border-t border-white/10">
+        <h3 class="text-white/85 text-sm font-semibold mb-5">
             <i class="fas fa-list-ul text-violet-400 mr-2" aria-hidden="true"></i>รายละเอียดรายวัน
         </h3>
         <?php
