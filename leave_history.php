@@ -28,6 +28,7 @@ $leaveTypes = $stmtTypes->fetchAll();
 // Build query
 $sql = "
     SELECT lr.*, lt.name as leave_type_name, lt.color as color_code,
+           lr.approver_1_remarks AS approver_comment,
            CONCAT(approver.first_name_th, ' ', approver.last_name_th) as approved_by_name
     FROM hr_leave_requests lr
     JOIN hr_leave_types lt ON lr.leave_type_id = lt.id

@@ -186,6 +186,7 @@ function getHistory($pdo, $user) {
     
     $sql = "
         SELECT lr.*, lt.name as leave_type_name, lt.color as color_code,
+               lr.approver_1_remarks AS approver_comment,
                CONCAT(approver.first_name_th, ' ', approver.last_name_th) as approved_by_name
         FROM hr_leave_requests lr
         JOIN hr_leave_types lt ON lr.leave_type_id = lt.id
@@ -252,6 +253,7 @@ function getDetail($pdo, $user) {
 
     $stmt = $pdo->prepare("
         SELECT lr.*, lt.name as leave_type_name, lt.color as color_code,
+               lr.approver_1_remarks AS approver_comment,
                CONCAT(approver.first_name_th, ' ', approver.last_name_th) as approved_by_name,
                CONCAT(u.first_name_th, ' ', u.last_name_th) as user_name, u.email as user_email
         FROM hr_leave_requests lr
@@ -631,14 +633,21 @@ function approveLeaveRequest($pdo, $user) {
     
     $pdo->beginTransaction();
     try {
-        // Update status
+        $actorId = (int)$user['id'];
+        // Schema: final_approved_* + approver_1_* (ไม่มี approved_by / approver_comment)
         $stmt = $pdo->prepare("
             UPDATE hr_leave_requests 
-            SET status = 'APPROVED', approved_by = ?, approved_at = NOW(), 
-                approver_comment = ?, updated_at = NOW() 
+            SET status = 'APPROVED',
+                final_approved_by = ?,
+                final_approved_at = NOW(),
+                approver_1_id = COALESCE(approver_1_id, ?),
+                approver_1_status = 'APPROVED',
+                approver_1_date = NOW(),
+                approver_1_remarks = COALESCE(NULLIF(?, ''), approver_1_remarks),
+                updated_at = NOW() 
             WHERE id = ?
         ");
-        $stmt->execute([$user['id'], $comment, $requestId]);
+        $stmt->execute([$actorId, $actorId, $comment, $requestId]);
         
         // Move from pending to used
         $stmt = $pdo->prepare("
@@ -652,9 +661,6 @@ function approveLeaveRequest($pdo, $user) {
             $request['user_id'], $request['leave_type_id'], 
             date('Y', strtotime($request['start_date']))
         ]);
-        
-        $actorName = trim(($user['first_name_th'] ?? '') . ' ' . ($user['last_name_th'] ?? '')) ?: ($user['username'] ?? 'system');
-        crm_line_sync_approved_leave_attendance($pdo, (int)$requestId, (int)$user['id'], $actorName);
 
         // Log action
         Auth::log('leave_approve', 'hr_leave_requests', $requestId, null, [
@@ -662,6 +668,13 @@ function approveLeaveRequest($pdo, $user) {
         ]);
         
         $pdo->commit();
+
+        $actorName = trim(($user['first_name_th'] ?? '') . ' ' . ($user['last_name_th'] ?? '')) ?: ($user['username'] ?? 'system');
+        try {
+            crm_line_sync_approved_leave_attendance($pdo, (int)$requestId, $actorId, $actorName);
+        } catch (Throwable $syncErr) {
+            tpHrLogException($syncErr, 'api/leave/approve-attendance-sync');
+        }
 
         crm_line_notify_leave_decision($pdo, (int)$requestId, 'APPROVED', $comment);
         
@@ -708,14 +721,20 @@ function rejectLeaveRequest($pdo, $user) {
     
     $pdo->beginTransaction();
     try {
-        // Update status
+        $actorId = (int)$user['id'];
         $stmt = $pdo->prepare("
             UPDATE hr_leave_requests 
-            SET status = 'REJECTED', approved_by = ?, approved_at = NOW(), 
-                approver_comment = ?, updated_at = NOW() 
+            SET status = 'REJECTED',
+                final_approved_by = ?,
+                final_approved_at = NOW(),
+                approver_1_id = COALESCE(approver_1_id, ?),
+                approver_1_status = 'REJECTED',
+                approver_1_date = NOW(),
+                approver_1_remarks = ?,
+                updated_at = NOW() 
             WHERE id = ?
         ");
-        $stmt->execute([$user['id'], $reason, $requestId]);
+        $stmt->execute([$actorId, $actorId, $reason, $requestId]);
         
         // Release pending days
         $stmt = $pdo->prepare("
