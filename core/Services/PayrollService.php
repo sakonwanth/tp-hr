@@ -24,13 +24,33 @@ class PayrollService
     }
 
     /**
-     * Social security (employee portion).
-     * Rate 5%, base 1,650–15,000, cap 750/month.
+     * Social security wage ceiling by payroll month.
+     * Before 2026-01: 15,000 (cap 750). From 2026-01 (BE 2569): 17,500 (cap 875).
      */
-    public function calcSocialSecurity(float $baseSalary, bool $optOut = false): float
+    public function ssWageCeiling(?string $monthFirst = null): float
+    {
+        $override = $this->getSetting('payroll_ss_max_base', '');
+        if ($override !== '' && (float)$override > 0) {
+            return (float)$override;
+        }
+        $ref = $monthFirst ?: date('Y-m-01');
+        return ($ref >= '2026-01-01') ? 17500.0 : 15000.0;
+    }
+
+    public function ssMaxContribution(?string $monthFirst = null): float
+    {
+        return round($this->ssWageCeiling($monthFirst) * 0.05, 2);
+    }
+
+    /**
+     * Social security (employee portion).
+     * Rate 5%, base 1,650–ceiling, cap per month per law.
+     */
+    public function calcSocialSecurity(float $baseSalary, bool $optOut = false, ?string $monthFirst = null): float
     {
         if (!$this->isSsEnabled() || $optOut || $baseSalary <= 0) return 0;
-        $base = max(1650, min($baseSalary, 15000));
+        $ceiling = $this->ssWageCeiling($monthFirst);
+        $base = max(1650, min($baseSalary, $ceiling));
         return round($base * 0.05, 2);
     }
 
@@ -48,11 +68,12 @@ class PayrollService
      * Thai progressive tax (monthly withholding estimate).
      * Reference: Revenue Code §40(1), 42bis, 47
      */
-    public function calcTaxMonthly(float $annualIncome, float $annualSs = 0, float $annualPf = 0): float
+    public function calcTaxMonthly(float $annualIncome, float $annualSs = 0, float $annualPf = 0, ?string $monthFirst = null): float
     {
         $expenseAllowance = min($annualIncome * 0.5, 100000);
         $personalAllowance = 60000;
-        $ssDeduction = min(max(0, $annualSs), 9000);
+        $ssAnnualCap = $this->ssMaxContribution($monthFirst) * 12;
+        $ssDeduction = min(max(0, $annualSs), $ssAnnualCap);
         $pfCap = min($annualIncome * 0.15, 500000);
         $pfDeduction = min(max(0, $annualPf), $pfCap);
         $taxable = $annualIncome - $expenseAllowance - $personalAllowance - $ssDeduction - $pfDeduction;
@@ -193,27 +214,13 @@ class PayrollService
         }
 
         foreach ($leaves as $lv) {
+            // ลาป่วยอนุมัติ: ตาม พ.ร.บ. คุ้มครองแรงงาน ไม่หักเงินเดือน (แม้ไม่มีใบรับรอง)
             if ($lv['leave_code'] === 'SICK' && (int)$lv['has_medical_cert'] !== 1) {
-                $lvStart = max($lv['start_date'], $monthStart);
-                $lvEnd = min($lv['end_date'], $monthEnd);
-                $calDays = (strtotime($lvEnd) - strtotime($lvStart)) / 86400 + 1;
-                if ($calDays <= 0) continue;
-                $totalCal = max(1, (strtotime($lv['end_date']) - strtotime($lv['start_date'])) / 86400 + 1);
-                $prorated = (float)$lv['leave_days'] * ($calDays / $totalCal);
-                $dupDays = 0;
-                for ($t = strtotime($lvStart); $t <= strtotime($lvEnd); $t += 86400) {
-                    if (!empty($absentDates[date('Y-m-d', $t)])) $dupDays++;
-                }
-                if ($dupDays > 0) $prorated = max(0, $prorated - ($prorated * $dupDays / $calDays));
-                $prorated = round(max(0, $prorated), 1);
-                if ($prorated > 0) {
-                    $result['absent_days'] += $prorated;
-                    $result['breakdown'][] = [
-                        'date' => $lvStart, 'kind' => 'sick_no_cert',
-                        'amount' => $rateAbsent * $prorated,
-                        'note' => "ลาป่วยไม่มีใบรับรองแพทย์ ({$prorated} วัน)",
-                    ];
-                }
+                $result['warnings'][] = [
+                    'kind' => 'sick_missing_cert',
+                    'leave_id' => $lv['id'],
+                    'note' => 'ลาป่วยอนุมัติแต่ยังไม่มีใบรับรองแพทย์ — ไม่หักเงินเดือน (ควรแนบใบรับรองเมื่อลา 3 วันขึ้นไป)',
+                ];
             }
             if ($lv['leave_code'] !== 'SICK' && (int)$lv['notice_days'] < $leaveAdvanceDays) {
                 $result['warnings'][] = [
@@ -396,9 +403,9 @@ class PayrollService
         $totalIncome = $gross + $bonus + $allowances + $incomeOther;
         $annualEst = $totalIncome * 12;
         $ssOptOut = $setup && !empty($setup['ss_opt_out']);
-        $ss = $this->calcSocialSecurity($gross, $ssOptOut);
+        $ss = $this->calcSocialSecurity($gross, $ssOptOut, $monthFirst);
         $pf = $setup ? (float)$setup['provident_fund'] : 0;
-        $taxBase = $this->calcTaxMonthly($annualEst, $ss * 12, $pf * 12);
+        $taxBase = $this->calcTaxMonthly($annualEst, $ss * 12, $pf * 12, $monthFirst);
         $extraTaxReq = $setup && isset($setup['additional_tax_withholding']) ? max(0, (float)$setup['additional_tax_withholding']) : 0;
 
         $giTotal = $setup['group_insurance_total_monthly'] ?? 0;

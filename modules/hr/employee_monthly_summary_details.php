@@ -136,8 +136,8 @@ $renderDayRow = static function (array $item, string $toneClass, array $metaPart
                         · <?php echo number_format((float)$lr['total_days'], 1); ?> วัน
                     </span>
                     <?php if (($lr['code'] ?? '') === 'SICK' && ($lr['status'] ?? '') === 'APPROVED'): ?>
-                    <span class="px-2.5 py-1 rounded-full text-xs font-medium <?php echo (int)($lr['has_medical_cert'] ?? 0) === 1 ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20' : 'bg-red-500/10 text-red-300 border border-red-500/25'; ?>">
-                        <?php echo (int)($lr['has_medical_cert'] ?? 0) === 1 ? 'มีใบรับรองแพทย์' : 'ไม่มีใบรับรอง — payroll หักเป็นขาด'; ?>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-medium <?php echo (int)($lr['has_medical_cert'] ?? 0) === 1 ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-200 border border-amber-500/25'; ?>">
+                        <?php echo (int)($lr['has_medical_cert'] ?? 0) === 1 ? 'มีใบรับรองแพทย์' : 'ไม่มีใบรับรอง — ไม่หักเงินเดือน'; ?>
                     </span>
                     <?php endif; ?>
                 </div>
@@ -180,7 +180,7 @@ $renderDayRow = static function (array $item, string $toneClass, array $metaPart
     <section class="<?php echo $cardClass; ?><?php echo $panelLayout ? ' xl:col-span-2' : ''; ?>">
         <h4 class="<?php echo $headClass; ?> text-orange-300">
             <i class="fas fa-file-invoice-dollar mr-2 opacity-80" aria-hidden="true"></i>
-            หักเงินเดือน (ขาด/ลาป่วยไม่มีใบรับรอง)
+            หักเงินเดือน (ขาดงาน)
             · <?php echo number_format((float)($summary['payroll_absence_deduction'] ?? 0), 0); ?> บาท
         </h4>
         <ul class="<?php echo $listClass; ?>">
@@ -201,7 +201,7 @@ $renderDayRow = static function (array $item, string $toneClass, array $metaPart
             <?php endforeach; ?>
         </ul>
         <p class="px-5 py-3 text-xs text-white/45 border-t border-white/10 leading-relaxed">
-            คำนวณตามกฎ payroll — ลาป่วยที่ไม่มีใบรับรองแพทย์จะถูกหักเป็นขาดงานบนสลิป แม้ HR อนุมัติลาแล้ว
+            คำนวณตามกฎ payroll — ลาป่วยอนุมัติไม่หักเงินเดือน (ตาม พ.ร.บ. คุ้มครองแรงงาน) แม้ไม่มีใบรับรองแพทย์
         </p>
     </section>
     <?php endif; ?>
