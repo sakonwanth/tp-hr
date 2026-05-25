@@ -59,10 +59,14 @@ class EmployeeSummaryService
         $today = date('Y-m-d');
         $lastDay = ($monthEnd <= $today) ? $monthEnd : $today;
 
+        // แก้ record ที่ backfill เป็น ABSENT ก่อนอนุมัติลา (หรือ sync ล้มเหลว)
+        $this->reconcileAbsentOverlappingApprovedLeave($userId, $monthStart, $lastDay);
+
         $defaultDayOff = $this->getDefaultDayOff($userId);
         $dayoffSwaps = $this->getApprovedDayoffSwaps($userId, $monthStart, $lastDay);
         $holidays = $this->getHolidaysInRange($monthStart, $lastDay);
         $attendanceByDate = $this->getAttendanceByDate($userId, $month);
+        $approvedLeaveByDate = $this->getApprovedLeaveDatesMap($userId, $monthStart, $lastDay);
 
         $counts = [
             'calendar_days' => 0,
@@ -118,6 +122,23 @@ class EmployeeSummaryService
                 ];
             } else {
                 $counts['expected_work_days']++;
+                $leaveOnDay = $approvedLeaveByDate[$currentDay] ?? null;
+                $att = $attendanceByDate[$currentDay] ?? null;
+
+                // ใบลาที่อนุมัติแล้วชนะ ABSENT / ไม่มี record (กรณี backfill ก่อนอนุมัติลา)
+                if ($leaveOnDay && (!$att || (string)($att['status'] ?? '') === 'ABSENT')) {
+                    $counts['leave_days']++;
+                    $details['leave_attendance'][] = [
+                        'date' => $currentDay,
+                        'day_label' => $dayLabel,
+                        'note' => trim(($leaveOnDay['leave_type_name'] ?? 'ลา') . (
+                            !empty($leaveOnDay['reason']) ? ' — ' . $leaveOnDay['reason'] : ''
+                        )),
+                    ];
+                    $currentDay = date('Y-m-d', strtotime('+1 day', strtotime($currentDay)));
+                    continue;
+                }
+
                 if ($att) {
                     $status = (string)($att['status'] ?? '');
                     $checkIn = !empty($att['check_in_time']) ? date('H:i', strtotime($att['check_in_time'])) : null;
@@ -386,6 +407,63 @@ class EmployeeSummaryService
             }
         }
         return $defaultDayOff;
+    }
+
+    /**
+     * แก้ hr_attendances ที่ status=ABSENT แต่มีใบลาอนุมัติครอบคลุมวันนั้น
+     */
+    private function reconcileAbsentOverlappingApprovedLeave(int $userId, string $monthStart, string $monthEnd): void
+    {
+        try {
+            $stmt = $this->pdo->prepare("
+                UPDATE hr_attendances a
+                INNER JOIN hr_leave_requests lr
+                  ON lr.user_id = a.user_id
+                 AND lr.status = 'APPROVED'
+                 AND a.attendance_date BETWEEN lr.start_date AND lr.end_date
+                SET a.status = 'LEAVE',
+                    a.adjustment_reason = CONCAT_WS('\n', NULLIF(a.adjustment_reason,''), ?),
+                    a.adjusted_at = NOW()
+                WHERE a.user_id = ?
+                  AND a.attendance_date BETWEEN ? AND ?
+                  AND a.status = 'ABSENT'
+            ");
+            $audit = '[auto-reconcile ' . date('Y-m-d H:i') . '] approved leave overrides ABSENT';
+            $stmt->execute([$audit, $userId, $monthStart, $monthEnd]);
+        } catch (Throwable $e) {
+            /* non-fatal */
+        }
+    }
+
+    /**
+     * @return array<string,array<string,mixed>>
+     */
+    private function getApprovedLeaveDatesMap(int $userId, string $from, string $to): array
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT lr.start_date, lr.end_date, lr.reason,
+                   lt.name AS leave_type_name, lt.code AS leave_code
+            FROM hr_leave_requests lr
+            JOIN hr_leave_types lt ON lt.id = lr.leave_type_id
+            WHERE lr.user_id = ? AND lr.status = 'APPROVED'
+              AND lr.start_date <= ? AND lr.end_date >= ?
+            ORDER BY lr.start_date ASC, lr.id ASC
+        ");
+        $stmt->execute([$userId, $to, $from]);
+        $map = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $lr) {
+            $cursor = max($lr['start_date'], $from);
+            $end = min($lr['end_date'], $to);
+            while ($cursor <= $end) {
+                $map[$cursor] = [
+                    'leave_type_name' => $lr['leave_type_name'] ?? '',
+                    'leave_code' => $lr['leave_code'] ?? '',
+                    'reason' => $lr['reason'] ?? '',
+                ];
+                $cursor = date('Y-m-d', strtotime('+1 day', strtotime($cursor)));
+            }
+        }
+        return $map;
     }
 
     private function getApprovedLeaveDaysInMonth(int $userId, string $month): float

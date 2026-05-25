@@ -120,6 +120,20 @@ class PayrollService
             $excused = (int)($log['late_excused'] ?? 0);
 
             if ($status === 'ABSENT') {
+                try {
+                    $chk = $this->pdo->prepare("
+                        SELECT 1 FROM hr_leave_requests
+                        WHERE user_id = ? AND status = 'APPROVED'
+                          AND ? BETWEEN start_date AND end_date
+                        LIMIT 1
+                    ");
+                    $chk->execute([$userId, $date]);
+                    if ($chk->fetchColumn()) {
+                        continue;
+                    }
+                } catch (Throwable $e) {
+                    /* continue with absent */
+                }
                 $result['absent_days'] += 1;
                 $absentDates[$date] = true;
                 $result['breakdown'][] = ['date' => $date, 'kind' => 'absent', 'amount' => $rateAbsent, 'note' => 'ขาดงาน'];
