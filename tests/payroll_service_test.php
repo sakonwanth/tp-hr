@@ -48,8 +48,8 @@ $pdo->exec("
 ");
 $pdo->exec("INSERT INTO system_settings (setting_key, setting_value) VALUES ('payroll_ss_enabled', '1')");
 
-$pdo->exec("INSERT INTO users (id, is_active, work_mode) VALUES (1, 1, 'OFFICE'), (2, 1, 'WFH'), (3, 0, 'OFFICE')");
-$pdo->exec("INSERT INTO hr_employee_schedules (user_id, day_off) VALUES (1, 0), (2, 0), (3, 0)");
+$pdo->exec("INSERT INTO users (id, is_active, work_mode) VALUES (1, 1, 'OFFICE'), (2, 1, 'WFH'), (3, 0, 'OFFICE'), (5, 1, 'OFFICE')");
+$pdo->exec("INSERT INTO hr_employee_schedules (user_id, day_off) VALUES (1, 0), (2, 0), (3, 0), (5, 0)");
 $pdo->exec("INSERT INTO hr_holidays (date, is_active) VALUES ('2026-04-22', 1)");
 $pdo->exec("INSERT INTO hr_leave_requests (user_id, start_date, end_date, status) VALUES (1, '2026-04-23', '2026-04-23', 'PENDING')");
 $pdo->exec("INSERT INTO hr_dayoff_requests (user_id, week_start, week_end, requested_day_off, status) VALUES (1, '2026-04-20', '2026-04-26', 5, 'APPROVED')");
@@ -107,5 +107,47 @@ assertSameValue('2026-05-25', $service->attendanceClosedScanEnd('2026-04-26', '2
 assertSameValue('', $service->attendanceClosedScanEnd('2026-05-26', '2026-06-25', '2026-05-26'), 'June period on May 26 — no false absent');
 assertSameValue('2026-05', $service->suggestPayrollMonth(25, '2026-05-26'), 'suggest May after cutover');
 assertSameValue('2026-04', $service->suggestPayrollMonth(25, '2026-05-20'), 'suggest April before cutover');
+
+$ctx = $service->buildWorkdayContext(1, '2026-05-01', '2026-05-25');
+assertSameValue(false, $service->isPayrollWorkday($ctx, '2026-05-10'), 'Sunday day_off=0 is not a payroll workday');
+assertSameValue(true, $service->isPayrollWorkday($ctx, '2026-05-11'), 'Monday is a payroll workday');
+
+$pdo->exec("
+    CREATE TABLE hr_attendances (
+        user_id INTEGER,
+        attendance_date TEXT,
+        status TEXT,
+        late_minutes INTEGER,
+        late_excused INTEGER,
+        late_notified_at TEXT,
+        remarks TEXT
+    );
+    CREATE TABLE user_profiles (
+        user_id INTEGER PRIMARY KEY,
+        hire_date TEXT
+    );
+");
+$pdo->exec("INSERT INTO system_settings (setting_key, setting_value) VALUES
+    ('payroll_attendance_enabled', '1'),
+    ('payroll_absent_rate', '600'),
+    ('payroll_late_30_rate', '150'),
+    ('payroll_late_60_rate', '300'),
+    ('payroll_late_over60_as_absent', '1')
+");
+$pdo->exec("INSERT INTO user_profiles (user_id, hire_date) VALUES (5, '2026-01-01')");
+for ($ts = strtotime('2026-04-26'); $ts <= strtotime('2026-05-25'); $ts += 86400) {
+    $d = date('Y-m-d', $ts);
+    if ((int)date('w', $ts) === 0) {
+        continue;
+    }
+    $pdo->exec("INSERT INTO hr_attendances (user_id, attendance_date, status, late_minutes, late_excused)
+        VALUES (5, '{$d}', 'PRESENT', 0, 0)");
+}
+$pdo->exec("INSERT INTO hr_attendances (user_id, attendance_date, status, late_minutes, late_excused)
+    VALUES (5, '2026-05-10', 'LATE', 605, 0)");
+
+$deductions = $service->computeAttendanceDeductions(5, '2026-05-01', 25);
+assertSameValue(0.0, $deductions['absent_days'], 'Sunday LATE 605 min must not count as absent');
+assertSameValue(0.0, $deductions['total_deduction'], 'Sunday check-in must not deduct payroll');
 
 echo "PayrollService regression fixtures passed." . PHP_EOL;

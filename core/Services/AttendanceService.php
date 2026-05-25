@@ -39,6 +39,17 @@ class AttendanceService
             ];
         }
 
+        $userId = (int)($user['id'] ?? 0);
+        $date = date('Y-m-d', strtotime($checkInAt));
+        if ($userId > 0 && !$this->isExpectedWorkday($userId, $date)) {
+            return [
+                'status' => 'PRESENT',
+                'late_minutes' => 0,
+                'effective_start_at' => null,
+                'grace_minutes' => 0,
+            ];
+        }
+
         $status = 'PRESENT';
         $lateMinutes = 0;
         $effectiveStartAt = null;
@@ -168,5 +179,13 @@ class AttendanceService
     private static function combineDateAndTime(string $date, string $time): string
     {
         return $date . ' ' . substr($time, 0, 8);
+    }
+
+    /** วันที่ควรนับเข้างาน/มาสาย (ไม่ใช่หยุดประจำ นักขัตฤกษ์ หรือลา) */
+    public function isExpectedWorkday(int $userId, string $date): bool
+    {
+        $payroll = new PayrollService($this->pdo);
+        $ctx = $payroll->buildWorkdayContext($userId, $date, $date);
+        return $payroll->isPayrollWorkday($ctx, $date);
     }
 }
