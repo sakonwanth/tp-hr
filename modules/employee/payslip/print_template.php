@@ -526,9 +526,15 @@ header('Content-Type: text/html; charset=utf-8');
                             <td>ค่ามาสาย / Late Deduction<?php
                                 $l30 = (int)($slip['late_count_30'] ?? 0);
                                 $l60 = (int)($slip['late_count_60'] ?? 0);
+                                $tier1 = 20;
+                                try {
+                                    $tier1 = (new PayrollService(Database::getInstance()->getConnection()))->lateTier1MinMinutes();
+                                } catch (Throwable $e) {
+                                    /* default */
+                                }
                                 $parts = [];
                                 if ($l30 > 0) {
-                                    $parts[] = "≤30นาที × {$l30}";
+                                    $parts[] = "{$tier1}-30นาที × {$l30}";
                                 }
                                 if ($l60 > 0) {
                                     $parts[] = "31-60นาที × {$l60}";

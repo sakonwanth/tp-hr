@@ -359,6 +359,71 @@ class PayrollService
     }
 
     /**
+     * นาทีขั้นต่ำของ tier มาสาย 150 บาท (default 20 = 20–30 นาที)
+     */
+    public function lateTier1MinMinutes(): int
+    {
+        $min = (int) $this->getSetting('payroll_late_tier1_min_minutes', '20');
+        return max(1, min(59, $min));
+    }
+
+    /** @return 'late_30'|'late_60'|'late_over60'|null */
+    public function classifyLateMinutes(int $lateMinutes): ?string
+    {
+        $tier1 = $this->lateTier1MinMinutes();
+        if ($lateMinutes < $tier1) {
+            return null;
+        }
+        if ($lateMinutes <= 30) {
+            return 'late_30';
+        }
+        if ($lateMinutes <= 60) {
+            return 'late_60';
+        }
+        return 'late_over60';
+    }
+
+    /**
+     * @param array<string,mixed> $result
+     */
+    private function applyLateMinutesDeduction(
+        array &$result,
+        string $date,
+        int $lateMin,
+        float $rateAbsent,
+        float $rateLate30,
+        float $rateLate60,
+        bool $lateOver60AsAbsent,
+        string $noteSuffix = ''
+    ): bool {
+        $tier = $this->classifyLateMinutes($lateMin);
+        if ($tier === null) {
+            return false;
+        }
+        $note = "มาสาย {$lateMin} นาที{$noteSuffix}";
+        if ($tier === 'late_30') {
+            $result['late_count_30']++;
+            $result['lateness_deduction'] += $rateLate30;
+            $result['breakdown'][] = ['date' => $date, 'kind' => 'late_30', 'amount' => $rateLate30, 'note' => $note];
+            return false;
+        }
+        if ($tier === 'late_60') {
+            $result['late_count_60']++;
+            $result['lateness_deduction'] += $rateLate60;
+            $result['breakdown'][] = ['date' => $date, 'kind' => 'late_60', 'amount' => $rateLate60, 'note' => $note];
+            return false;
+        }
+        if ($lateOver60AsAbsent) {
+            $result['absent_days'] += 1;
+            $result['breakdown'][] = ['date' => $date, 'kind' => 'late_over60_absent', 'amount' => $rateAbsent, 'note' => $note . ' (ตีเป็นขาด)'];
+            return true;
+        }
+        $result['lateness_deduction'] += $rateLate60;
+        $result['breakdown'][] = ['date' => $date, 'kind' => 'late_over60', 'amount' => $rateLate60, 'note' => $note];
+        return false;
+    }
+
+    /**
      * Compute attendance deductions (absent/late) for the payroll period.
      */
     public function computeAttendanceDeductions(int $userId, string $monthFirst, ?int $payDay = null): array
@@ -378,6 +443,8 @@ class PayrollService
         $rateLate60 = (float)$this->getSetting('payroll_late_60_rate', '300');
         $lateOver60AsAbsent = (int)$this->getSetting('payroll_late_over60_as_absent', '1') === 1;
         $leaveAdvanceDays = (int)$this->getSetting('payroll_leave_advance_days', '7');
+        $usePlannedStart = (int) $this->getSetting('payroll_use_planned_start', '1') === 1;
+        $plannedGraceMin = (int) $this->getSetting('payroll_planned_grace_minutes', '30');
 
         $period = $this->attendancePeriodBounds($monthFirst, $payDay);
         $periodStart = $period['start'];
@@ -394,14 +461,26 @@ class PayrollService
 
         try {
             $stmt = $this->pdo->prepare("
-                SELECT attendance_date, status, late_minutes, late_excused, late_notified_at, remarks
+                SELECT attendance_date, status, late_minutes, late_excused, late_notified_at, remarks,
+                       check_in_time, planned_start_time
                 FROM hr_attendances WHERE user_id = ? AND attendance_date BETWEEN ? AND ?
                 ORDER BY attendance_date
             ");
             $stmt->execute([$userId, $periodStart, $periodEnd]);
             $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            return $result;
+            try {
+                $stmt = $this->pdo->prepare("
+                    SELECT attendance_date, status, late_minutes, late_excused, late_notified_at, remarks,
+                           NULL AS check_in_time, NULL AS planned_start_time
+                    FROM hr_attendances WHERE user_id = ? AND attendance_date BETWEEN ? AND ?
+                    ORDER BY attendance_date
+                ");
+                $stmt->execute([$userId, $periodStart, $periodEnd]);
+                $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            } catch (PDOException $e2) {
+                return $result;
+            }
         }
 
         $absentDates = [];
@@ -417,6 +496,8 @@ class PayrollService
             $status = $log['status'] ?? 'PRESENT';
             $lateMin = (int)($log['late_minutes'] ?? 0);
             $excused = (int)($log['late_excused'] ?? 0);
+            $plannedStart = $log['planned_start_time'] ?? null;
+            $checkIn = $log['check_in_time'] ?? null;
 
             if ($status === 'ABSENT') {
                 try {
@@ -439,24 +520,30 @@ class PayrollService
                 continue;
             }
 
-            if (in_array($status, ['PRESENT','LATE','WFH','HALF_DAY'], true) && $lateMin > 0 && $excused !== 1) {
-                if ($lateMin <= 30) {
-                    $result['late_count_30']++;
-                    $result['lateness_deduction'] += $rateLate30;
-                    $result['breakdown'][] = ['date' => $date, 'kind' => 'late_30', 'amount' => $rateLate30, 'note' => "มาสาย {$lateMin} นาที"];
-                } elseif ($lateMin <= 60) {
-                    $result['late_count_60']++;
-                    $result['lateness_deduction'] += $rateLate60;
-                    $result['breakdown'][] = ['date' => $date, 'kind' => 'late_60', 'amount' => $rateLate60, 'note' => "มาสาย {$lateMin} นาที"];
-                } else {
-                    if ($lateOver60AsAbsent) {
-                        $result['absent_days'] += 1;
-                        $absentDates[$date] = true;
-                        $result['breakdown'][] = ['date' => $date, 'kind' => 'late_over60_absent', 'amount' => $rateAbsent, 'note' => "มาสาย {$lateMin} นาที (ตีเป็นขาด)"];
-                    } else {
-                        $result['lateness_deduction'] += $rateLate60;
-                        $result['breakdown'][] = ['date' => $date, 'kind' => 'late_over60', 'amount' => $rateLate60, 'note' => "มาสาย {$lateMin} นาที"];
+            $plannedUsed = false;
+            if ($usePlannedStart && $excused !== 1 && !empty($plannedStart) && !empty($checkIn)) {
+                $ciTs = strtotime($checkIn);
+                $psTs = strtotime($date . ' ' . $plannedStart);
+                if ($ciTs && $psTs) {
+                    $deltaMin = ($ciTs - $psTs) / 60;
+                    if ($deltaMin <= $plannedGraceMin) {
+                        $result['breakdown'][] = [
+                            'date' => $date,
+                            'kind' => 'late_planned_ok',
+                            'amount' => 0,
+                            'note' => sprintf('แจ้งเข้างานสาย %s — มาตามนัด ไม่หัก', substr((string) $plannedStart, 0, 5)),
+                        ];
+                        continue;
                     }
+                    $lateMin = (int) round($deltaMin);
+                    $plannedUsed = true;
+                }
+            }
+
+            if (in_array($status, ['PRESENT','LATE','WFH','HALF_DAY'], true) && $lateMin > 0 && $excused !== 1) {
+                $plannedLabel = $plannedUsed ? sprintf(' (แจ้งไว้ %s)', substr((string) $plannedStart, 0, 5)) : '';
+                if ($this->applyLateMinutesDeduction($result, $date, $lateMin, $rateAbsent, $rateLate30, $rateLate60, $lateOver60AsAbsent, $plannedLabel)) {
+                    $absentDates[$date] = true;
                 }
             }
         }

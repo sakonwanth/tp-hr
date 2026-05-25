@@ -112,6 +112,10 @@ $ctx = $service->buildWorkdayContext(1, '2026-05-01', '2026-05-25');
 assertSameValue(false, $service->isPayrollWorkday($ctx, '2026-05-10'), 'Sunday day_off=0 is not a payroll workday');
 assertSameValue(true, $service->isPayrollWorkday($ctx, '2026-05-11'), 'Monday is a payroll workday');
 
+assertSameValue(null, $service->classifyLateMinutes(19), '19 minutes late — no payroll tier');
+assertSameValue('late_30', $service->classifyLateMinutes(20), '20 minutes late — tier 150');
+assertSameValue('late_30', $service->classifyLateMinutes(23), '23 minutes late — tier 150');
+
 $pdo->exec("
     CREATE TABLE hr_attendances (
         user_id INTEGER,
