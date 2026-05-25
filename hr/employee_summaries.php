@@ -138,7 +138,11 @@ include dirname(__DIR__) . '/templates/header.php';
                     <div><span class="text-white/45 block">มา</span><span class="text-emerald-400 font-bold tabular-nums"><?php echo (int)$row['present_days']; ?></span></div>
                     <div><span class="text-white/45 block">สาย</span><span class="text-amber-400 font-bold tabular-nums"><?php echo (int)$row['late_days']; ?></span></div>
                     <div><span class="text-white/45 block">ลา</span><span class="text-blue-400 font-bold tabular-nums"><?php echo number_format((float)$row['approved_leave_days'], 1); ?></span></div>
-                    <div><span class="text-white/45 block">ชม.</span><span class="text-white font-bold tabular-nums"><?php echo number_format((float)$row['work_hours'], 0); ?></span></div>
+                    <div><span class="text-white/45 block" title="ชั่วโมงทำงานสะสม (เข้า-ออกครบ)">ชม.</span><span class="text-white font-bold tabular-nums"><?php
+                        echo (float)$row['work_hours'] > 0
+                            ? number_format((float)$row['work_hours'], 0)
+                            : '—';
+                    ?></span></div>
                 </div>
             </summary>
             <div class="px-4 pb-5 pt-4 border-t border-white/10 space-y-5">
@@ -171,7 +175,9 @@ include dirname(__DIR__) . '/templates/header.php';
                     <th class="px-3 py-3 text-center text-white/65 text-xs font-medium uppercase">ขาด</th>
                     <th class="px-3 py-3 text-center text-white/65 text-xs font-medium uppercase">หยุด</th>
                     <th class="px-3 py-3 text-center text-white/65 text-xs font-medium uppercase">สลับหยุด</th>
-                    <th class="px-3 py-3 text-center text-white/65 text-xs font-medium uppercase">ชม.</th>
+                    <th class="px-3 py-3 text-center text-white/65 text-xs font-medium uppercase">
+                        <span title="รวมชั่วโมงทำงานจริงจากวันที่ลงเวลาเข้า-ออกครบในเดือนนี้ (หักพัก)">ชม.ทำงาน</span>
+                    </th>
                     <th class="px-4 py-3 text-center text-white/65 text-xs font-medium uppercase"></th>
                 </tr>
             </thead>
@@ -190,7 +196,19 @@ include dirname(__DIR__) . '/templates/header.php';
                     <td class="px-3 py-3 text-center <?php echo (int)$row['absent_days'] > 0 ? 'text-red-400 font-semibold' : 'text-white/50'; ?> tabular-nums"><?php echo (int)$row['absent_days']; ?></td>
                     <td class="px-3 py-3 text-center text-white/60 tabular-nums"><?php echo (int)$row['holiday_days'] + (int)$row['scheduled_off_days']; ?></td>
                     <td class="px-3 py-3 text-center text-violet-300 tabular-nums"><?php echo (int)$row['dayoff_swap_count']; ?></td>
-                    <td class="px-3 py-3 text-center text-white tabular-nums"><?php echo number_format((float)$row['work_hours'], 1); ?></td>
+                    <td class="px-3 py-3 text-center tabular-nums">
+                        <?php if ((float)$row['work_hours'] > 0): ?>
+                        <span class="text-white font-medium"><?php echo number_format((float)$row['work_hours'], 1); ?></span>
+                        <?php if ((int)$row['days_with_work_hours'] > 0): ?>
+                        <span class="block text-[10px] text-white/40 mt-0.5"><?php echo (int)$row['days_with_work_hours']; ?> วัน</span>
+                        <?php endif; ?>
+                        <?php elseif ((int)$row['incomplete_checkout_days'] > 0): ?>
+                        <span class="text-amber-400/90 text-sm" title="มีการลงเวลาเข้าแต่ยังไม่มีเวลาออก — ชม.จะคำนวณเมื่อออกงานครบ">—</span>
+                        <span class="block text-[10px] text-amber-400/70 mt-0.5">รอออก <?php echo (int)$row['incomplete_checkout_days']; ?></span>
+                        <?php else: ?>
+                        <span class="text-white/30">—</span>
+                        <?php endif; ?>
+                    </td>
                     <td class="px-4 py-3 text-center">
                         <button type="button"
                                 class="emp-summary-toggle inline-flex items-center justify-center min-h-[40px] px-3 py-1.5 bg-violet-500/15 hover:bg-violet-500/25 text-violet-200 rounded-[var(--tp-ios-card-radius)] text-xs font-medium touch-manipulation"
@@ -229,6 +247,10 @@ include dirname(__DIR__) . '/templates/header.php';
                 <?php endforeach; ?>
             </tbody>
         </table>
+        <p class="px-4 py-3 text-white/45 text-xs border-t border-white/10 leading-relaxed">
+            <strong class="text-white/60">ชม.ทำงาน</strong> = ผลรวมเวลาทำงานจริง (เวลาออก − เวลาเข้า − พัก) เฉพาะวันที่ลงเวลาเข้าและออกครบ
+            · แสดง 「—」 หากยังไม่มีวันที่ครบคู่ หรือ 「รอออก N」 หากเข้างานแล้วแต่ยังไม่ออก
+        </p>
     </div>
     <?php else: ?>
     <div class="tp-native-empty-state text-center py-12 px-4">

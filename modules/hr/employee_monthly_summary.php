@@ -62,8 +62,14 @@ $defaultOffLabel = $dayNames[(int)($summary['default_day_off'] ?? 0)] ?? '-';
             <p class="text-red-400 text-xs tabular-nums mt-0.5">ขาด <?php echo (int)($c['absent_days'] ?? 0); ?></p>
         </div>
         <div class="stat-card tp-native-summary-card text-center py-4 min-w-0">
-            <p class="text-slate-300 text-xs">ชม.ทำงาน</p>
+            <p class="text-slate-300 text-xs" title="รวมชั่วโมงจากวันที่ลงเวลาเข้า-ออกครบ">ชม.ทำงาน</p>
             <p class="text-2xl font-bold text-white tabular-nums mt-1"><?php echo number_format((float)($summary['work_hours'] ?? 0), 1); ?></p>
+            <?php if ((int)($summary['days_with_work_hours'] ?? 0) > 0): ?>
+            <p class="text-white/45 text-xs mt-1"><?php echo (int)$summary['days_with_work_hours']; ?> วันที่มีชม.</p>
+            <?php endif; ?>
+            <?php if ((int)($summary['incomplete_checkout_days'] ?? 0) > 0): ?>
+            <p class="text-amber-400/80 text-xs mt-1">รอลงเวลาออก <?php echo (int)$summary['incomplete_checkout_days']; ?> วัน</p>
+            <?php endif; ?>
         </div>
     </div>
 

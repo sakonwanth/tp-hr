@@ -4,8 +4,45 @@
  */
 class EmployeeSummaryService
 {
+    private ?AttendanceService $attendanceService = null;
+
     public function __construct(private PDO $pdo)
     {
+    }
+
+    private function attendance(): AttendanceService
+    {
+        return $this->attendanceService ??= new AttendanceService($this->pdo);
+    }
+
+    private function isWorkStatus(string $status): bool
+    {
+        return in_array($status, ['PRESENT', 'LATE', 'WFH', 'HALF_DAY'], true);
+    }
+
+    /**
+     * ชม.ทำงานจาก record — ใช้ค่า DB หรือคำนวณจาก check_in/check_out ถ้ายังเป็น 0
+     */
+    private function resolveWorkMinutes(array $att): int
+    {
+        $stored = (int)($att['work_minutes'] ?? 0);
+        if ($stored > 0) {
+            return $stored;
+        }
+        $checkIn = $att['check_in_time'] ?? null;
+        $checkOut = $att['check_out_time'] ?? null;
+        if (!$checkIn || !$checkOut) {
+            return 0;
+        }
+        $svc = $this->attendance();
+        $shift = $svc->getShiftById((int)($att['shift_id'] ?? 0)) ?: $svc->getDefaultShift();
+        $summary = $svc->summarizeWork(
+            (string)$checkIn,
+            (string)$checkOut,
+            $shift,
+            (string)($att['attendance_date'] ?? date('Y-m-d', strtotime($checkIn)))
+        );
+        return max(0, (int)$summary['work_minutes']);
     }
 
     /**
@@ -40,6 +77,8 @@ class EmployeeSummaryService
             'missing_record_days' => 0,
             'total_work_minutes' => 0,
             'total_late_minutes' => 0,
+            'incomplete_checkout_days' => 0,
+            'days_with_work_hours' => 0,
         ];
 
         $dayNames = defined('THAI_DAY_NAMES') ? THAI_DAY_NAMES : ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
@@ -84,7 +123,7 @@ class EmployeeSummaryService
                     $checkIn = !empty($att['check_in_time']) ? date('H:i', strtotime($att['check_in_time'])) : null;
                     $checkOut = !empty($att['check_out_time']) ? date('H:i', strtotime($att['check_out_time'])) : null;
                     $lateMins = (int)($att['late_minutes'] ?? 0);
-                    $workMins = (int)($att['work_minutes'] ?? 0);
+                    $workMins = $this->isWorkStatus($status) ? $this->resolveWorkMinutes($att) : 0;
 
                     match ($status) {
                         'PRESENT', 'HALF_DAY' => $counts['present_days']++,
@@ -94,8 +133,16 @@ class EmployeeSummaryService
                         'ABSENT' => $counts['absent_days']++,
                         default => $counts['missing_record_days']++,
                     };
-                    $counts['total_work_minutes'] += $workMins;
-                    $counts['total_late_minutes'] += $lateMins;
+                    if ($this->isWorkStatus($status)) {
+                        if (!empty($att['check_in_time']) && empty($att['check_out_time'])) {
+                            $counts['incomplete_checkout_days']++;
+                        }
+                        if ($workMins > 0) {
+                            $counts['days_with_work_hours']++;
+                        }
+                        $counts['total_work_minutes'] += $workMins;
+                        $counts['total_late_minutes'] += $lateMins;
+                    }
 
                     if ($status === 'LATE' || $lateMins > 0) {
                         $details['late'][] = [
@@ -179,6 +226,8 @@ class EmployeeSummaryService
             'dayoff_swaps' => $swapsInMonth,
             'default_day_off' => $defaultDayOff,
             'work_hours' => round($counts['total_work_minutes'] / 60, 1),
+            'incomplete_checkout_days' => (int)$counts['incomplete_checkout_days'],
+            'days_with_work_hours' => (int)$counts['days_with_work_hours'],
         ];
     }
 
@@ -224,6 +273,8 @@ class EmployeeSummaryService
                 'approved_leave_days' => $summary['approved_leave_days'],
                 'dayoff_swap_count' => count($summary['dayoff_swaps']),
                 'work_hours' => $summary['work_hours'],
+                'incomplete_checkout_days' => (int)($summary['incomplete_checkout_days'] ?? 0),
+                'days_with_work_hours' => (int)($summary['days_with_work_hours'] ?? 0),
                 'pending_leaves' => $summary['pending_leave_requests'],
                 'summary' => $summary,
             ];
