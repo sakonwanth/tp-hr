@@ -824,7 +824,15 @@ class PayrollService
             throw new \RuntimeException('Run not found or not in approved status');
         }
         // หมายเหตุ: รายจ่าย ERP (erp_company_transactions) สร้างจาก TP-CRM เท่านั้น
-        // ใช้ payroll.php → mark_paid หรือ PayrollService ใน CRM หลังเปิด USE_TPHR_PAYROLL
+    }
+
+    public function cancelPaid(int $runId): void
+    {
+        $stmt = $this->pdo->prepare("UPDATE payroll_runs SET status = 'approved' WHERE id = ? AND status = 'paid'");
+        $stmt->execute([$runId]);
+        if (!$stmt->rowCount()) {
+            throw new \RuntimeException('Run not found or not in paid status');
+        }
     }
 
     public function recalculateSlip(int $runId, int $userId, string $monthFirst): bool

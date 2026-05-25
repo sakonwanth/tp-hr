@@ -10,7 +10,7 @@
  *
  *   POST /api/v1/payroll-runs/{id}/paid      scope: payroll.approve
  *
- *   POST /api/v1/payroll-runs/{id}/recalculate-slip   scope: payroll.write
+ *   POST /api/v1/payroll-runs/{id}/cancel-paid   scope: payroll.approve
  *        body: { "user_id": 5 }
  *
  *   GET  /api/v1/payroll-runs/{id}/calculate-preview  scope: payroll.read (+ payroll.read_all if key has no service_user_id)
@@ -79,6 +79,21 @@ if ($resource === 'payroll-runs') {
             ApiAuth::fail(409, $e->getMessage());
         } catch (\Throwable $e) {
             tpHrLogException($e, 'payroll_write markPaid');
+            ApiAuth::fail(500, 'Internal server error');
+        }
+    }
+
+    // POST /payroll-runs/{id}/cancel-paid
+    if ($method === 'POST' && $id > 0 && $sub === 'cancel-paid') {
+        ApiAuth::require(['payroll.approve']);
+        try {
+            $service->cancelPaid($id);
+            ApiAuth::success(['message' => 'ยกเลิกการบันทึกจ่ายแล้ว']);
+        } catch (\RuntimeException $e) {
+            tpHrLogException($e, 'payroll_write cancelPaid');
+            ApiAuth::fail(409, $e->getMessage());
+        } catch (\Throwable $e) {
+            tpHrLogException($e, 'payroll_write cancelPaid');
             ApiAuth::fail(500, 'Internal server error');
         }
     }
