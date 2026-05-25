@@ -414,6 +414,16 @@ require_once __DIR__ . '/templates/header.php';
                     <p class="text-slate-400 text-sm">ไม่มีงานรออนุมัติ</p>
                 </div>
                 <?php endif; ?>
+
+                <a href="/hr/employee_summaries.php" class="flex items-center justify-between min-h-[48px] p-3 rounded-[var(--tp-ios-card-radius)] bg-slate-800/50 hover:bg-primary-500/10 transition-colors group touch-manipulation border border-white/6 mt-2">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-12 h-12 rounded-[var(--tp-ios-card-radius)] bg-blue-500/20 border border-blue-400/25 flex items-center justify-center shrink-0">
+                            <i class="fas fa-chart-bar text-blue-400 text-xl" aria-hidden="true"></i>
+                        </div>
+                        <span class="text-white font-medium">สรุปรายพนักงาน</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-slate-600 group-hover:text-primary-400 transition-colors"></i>
+                </a>
             </div>
         </div>
         <?php endif; ?>

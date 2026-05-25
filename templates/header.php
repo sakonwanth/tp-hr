@@ -1070,6 +1070,10 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
                     <i class="fas fa-users-cog"></i>
                     <span>จัดการพนักงาน</span>
                 </a>
+                <a href="/hr/employee_summaries.php" class="nav-item <?php echo $current_page === 'hr-employee-summaries' ? 'active' : ''; ?>">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>สรุปรายพนักงาน</span>
+                </a>
                 
                 <a href="/hr/attendance.php" class="nav-item <?php echo $current_page === 'hr-attendance' ? 'active' : ''; ?>">
                     <i class="fas fa-user-clock"></i>
@@ -1232,6 +1236,10 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
                     <a href="/hr/employees.php" class="mobile-menu-tile <?php echo $current_page === 'hr-employees' ? 'active' : ''; ?>">
                         <i class="fas fa-users-cog" aria-hidden="true"></i>
                         <span>จัดการพนักงาน</span>
+                    </a>
+                    <a href="/hr/employee_summaries.php" class="mobile-menu-tile <?php echo $current_page === 'hr-employee-summaries' ? 'active' : ''; ?>">
+                        <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                        <span>สรุปรายพนักงาน</span>
                     </a>
                     <a href="/hr/attendance.php" class="mobile-menu-tile <?php echo $current_page === 'hr-attendance' ? 'active' : ''; ?>">
                         <i class="fas fa-user-clock" aria-hidden="true"></i>

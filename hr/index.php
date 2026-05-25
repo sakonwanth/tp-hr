@@ -89,21 +89,9 @@ $stmtOnLeave = $pdo->prepare("
 $stmtOnLeave->execute([$today]);
 $onLeaveToday = $stmtOnLeave->fetchAll();
 
-// Monthly attendance summary
-$stmtMonthly = $pdo->prepare("
-    SELECT 
-        COUNT(DISTINCT DATE(check_in_time)) as working_days,
-        COUNT(DISTINCT user_id) as unique_employees,
-        AVG(CASE 
-            WHEN status = 'PRESENT' THEN 1 
-            WHEN status = 'LATE' THEN 0.5 
-            ELSE 0 
-        END) * 100 as attendance_rate
-    FROM hr_attendances
-    WHERE DATE_FORMAT(check_in_time, '%Y-%m') = ?
-");
-$stmtMonthly->execute([$currentMonth]);
-$monthlyStats = $stmtMonthly->fetch();
+// Monthly org summary (EmployeeSummaryService)
+$summaryService = new EmployeeSummaryService($pdo);
+$orgMonthlyKpi = $summaryService->getOrgMonthlyKpi($currentMonth);
 
 $current_page = 'hr-dashboard';
 
@@ -181,6 +169,49 @@ include dirname(__DIR__) . '/templates/header.php';
             </div>
         </div>
         <a href="documents.php" class="text-blue-400 text-sm hover:underline mt-3 inline-block touch-manipulation font-medium">ดูทั้งหมด →</a>
+    </div>
+</div>
+
+<!-- สรุปรายเดือนองค์กร -->
+<div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 mb-6 md:mb-8 min-w-0">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5">
+        <div>
+            <h2 class="section-title mb-1 text-white text-base sm:text-lg">
+                <i class="fas fa-chart-bar text-violet-400 mr-2" aria-hidden="true"></i>
+                สรุปรายเดือน — <?php echo formatDateThai($currentMonth . '-01'); ?>
+            </h2>
+            <p class="text-white/55 text-sm">วันทำงาน การลา วันหยุด การขาด และการสลับวันหยุด ทั้งองค์กร</p>
+        </div>
+        <a href="/hr/employee_summaries.php?month=<?php echo urlencode($currentMonth); ?>"
+           class="inline-flex items-center justify-center min-h-[48px] px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] font-semibold touch-manipulation shrink-0">
+            <i class="fas fa-users mr-2" aria-hidden="true"></i>ดูรายพนักงาน
+        </a>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3">
+        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4 text-center">
+            <p class="text-white/55 text-xs">อัตราเข้างาน</p>
+            <p class="text-2xl font-bold text-emerald-400 tabular-nums mt-1"><?php echo number_format((float)$orgMonthlyKpi['attendance_rate'], 1); ?>%</p>
+        </div>
+        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4 text-center">
+            <p class="text-white/55 text-xs">มาสาย</p>
+            <p class="text-2xl font-bold text-amber-400 tabular-nums mt-1"><?php echo (int)$orgMonthlyKpi['late_days']; ?></p>
+        </div>
+        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4 text-center">
+            <p class="text-white/55 text-xs">ขาดงาน</p>
+            <p class="text-2xl font-bold text-red-400 tabular-nums mt-1"><?php echo (int)$orgMonthlyKpi['absent_days']; ?></p>
+        </div>
+        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4 text-center">
+            <p class="text-white/55 text-xs">วันลา</p>
+            <p class="text-2xl font-bold text-blue-400 tabular-nums mt-1"><?php echo number_format((float)$orgMonthlyKpi['approved_leave_days'], 1); ?></p>
+        </div>
+        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4 text-center">
+            <p class="text-white/55 text-xs">WFH</p>
+            <p class="text-2xl font-bold text-purple-400 tabular-nums mt-1"><?php echo (int)$orgMonthlyKpi['wfh_days']; ?></p>
+        </div>
+        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4 text-center">
+            <p class="text-white/55 text-xs">สลับวันหยุด</p>
+            <p class="text-2xl font-bold text-violet-300 tabular-nums mt-1"><?php echo (int)$orgMonthlyKpi['dayoff_swaps']; ?></p>
+        </div>
     </div>
 </div>
 

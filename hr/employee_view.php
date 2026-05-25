@@ -56,6 +56,16 @@ $fullNameEn = trim(($emp['first_name_en'] ?? '') . ' ' . ($emp['last_name_en'] ?
 $current_page = 'hr-employees';
 include dirname(__DIR__) . '/templates/header.php';
 
+$summaryMonth = $_GET['month'] ?? date('Y-m');
+if (!preg_match('/^\d{4}-\d{2}$/', $summaryMonth)) {
+    $summaryMonth = date('Y-m');
+}
+$summaryService = new EmployeeSummaryService($pdo);
+$monthlySummary = $summaryService->getMonthlySummary($id, $summaryMonth);
+$employeeId = $id;
+$showMonthPicker = true;
+$preserveQuery = ['id' => $id];
+
 // Helper: row output
 if (!function_exists('tp_hr_emp_view_row')) {
     function tp_hr_emp_view_row($label, $value, $icon = null) {
@@ -84,7 +94,11 @@ if (!function_exists('tp_hr_emp_view_row')) {
             <p class="tp-ios-caption-muted mt-2"><?php echo htmlspecialchars($fullName); ?></p>
         </div>
         <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto shrink-0">
-            <a href="/hr/employee_attendance.php?id=<?php echo (int)$emp['id']; ?>"
+            <a href="/hr/employee_summaries.php?month=<?php echo urlencode($summaryMonth); ?>"
+               class="inline-flex items-center justify-center min-h-[48px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] transition-colors font-medium touch-manipulation">
+                <i class="fas fa-chart-bar mr-2" aria-hidden="true"></i>สรุปทีม
+            </a>
+            <a href="/hr/employee_attendance.php?id=<?php echo (int)$emp['id']; ?>&month=<?php echo urlencode($summaryMonth); ?>"
                class="inline-flex items-center justify-center min-h-[48px] px-4 py-2 bg-violet-500/15 hover:bg-violet-500/25 border border-violet-500/25 text-violet-200 rounded-[var(--tp-ios-card-radius)] transition-colors font-medium touch-manipulation">
                 <i class="fas fa-clock mr-2" aria-hidden="true"></i>ประวัติลงเวลา
             </a>
@@ -180,6 +194,8 @@ if (!function_exists('tp_hr_emp_view_row')) {
         <p class="text-white text-lg font-bold mt-1 tabular-nums"><?php echo (int)($stats['pending_leaves'] ?? 0); ?></p>
     </div>
 </div>
+
+<?php include dirname(__DIR__) . '/modules/hr/employee_monthly_summary.php'; ?>
 
 <div class="grid grid-cols-1 xl:grid-cols-2 gap-5 md:gap-8 min-w-0 max-w-full">
     <!-- Personal -->
