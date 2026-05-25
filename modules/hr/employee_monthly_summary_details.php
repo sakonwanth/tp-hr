@@ -28,8 +28,10 @@ $hasLeaveReq = !empty($summary['leave_requests']);
 $hasHolidays = !empty($d['holidays']);
 $hasSwaps = !empty($summary['dayoff_swaps']);
 $hasPresent = !empty($d['present']);
+$payrollBreakdown = $summary['payroll_attendance_breakdown'] ?? [];
+$hasPayrollAbsence = !empty($payrollBreakdown) || (float)($summary['payroll_absence_deduction'] ?? 0) > 0;
 
-if (!$hasLate && !$hasAbsent && !$hasWfh && !$hasLeaveAtt && !$hasLeaveReq && !$hasHolidays && !$hasSwaps) {
+if (!$hasLate && !$hasAbsent && !$hasWfh && !$hasLeaveAtt && !$hasLeaveReq && !$hasHolidays && !$hasSwaps && !$hasPayrollAbsence) {
     echo '<p class="text-white/50 text-sm py-4 px-1">ไม่มีรายการพิเศษในเดือนนี้</p>';
     return;
 }
@@ -133,6 +135,11 @@ $renderDayRow = static function (array $item, string $toneClass, array $metaPart
                         <?php endif; ?>
                         · <?php echo number_format((float)$lr['total_days'], 1); ?> วัน
                     </span>
+                    <?php if (($lr['code'] ?? '') === 'SICK' && ($lr['status'] ?? '') === 'APPROVED'): ?>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-medium <?php echo (int)($lr['has_medical_cert'] ?? 0) === 1 ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20' : 'bg-red-500/10 text-red-300 border border-red-500/25'; ?>">
+                        <?php echo (int)($lr['has_medical_cert'] ?? 0) === 1 ? 'มีใบรับรองแพทย์' : 'ไม่มีใบรับรอง — payroll หักเป็นขาด'; ?>
+                    </span>
+                    <?php endif; ?>
                 </div>
                 <?php if (!empty($lr['days_in_month'])): ?>
                 <div class="flex flex-wrap gap-2">
@@ -166,6 +173,36 @@ $renderDayRow = static function (array $item, string $toneClass, array $metaPart
                 $renderDayRow($item, 'text-blue-300/90', [], null);
             endforeach; ?>
         </ul>
+    </section>
+    <?php endif; ?>
+
+    <?php if ($hasPayrollAbsence): ?>
+    <section class="<?php echo $cardClass; ?><?php echo $panelLayout ? ' xl:col-span-2' : ''; ?>">
+        <h4 class="<?php echo $headClass; ?> text-orange-300">
+            <i class="fas fa-file-invoice-dollar mr-2 opacity-80" aria-hidden="true"></i>
+            หักเงินเดือน (ขาด/ลาป่วยไม่มีใบรับรอง)
+            · <?php echo number_format((float)($summary['payroll_absence_deduction'] ?? 0), 0); ?> บาท
+        </h4>
+        <ul class="<?php echo $listClass; ?>">
+            <?php foreach ($payrollBreakdown as $pb):
+                if (!in_array($pb['kind'] ?? '', ['absent', 'sick_no_cert', 'missing_attendance_absent', 'late_over60_absent'], true)) {
+                    continue;
+                }
+            ?>
+            <li class="<?php echo $rowPad; ?>">
+                <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="min-w-0">
+                        <span class="text-white font-semibold tabular-nums text-sm"><?php echo formatDateThai($pb['date'] ?? ''); ?></span>
+                        <p class="mt-1 text-sm text-orange-200/90"><?php echo htmlspecialchars($pb['note'] ?? ''); ?></p>
+                    </div>
+                    <span class="text-orange-300 font-bold tabular-nums shrink-0"><?php echo number_format((float)($pb['amount'] ?? 0), 0); ?> บาท</span>
+                </div>
+            </li>
+            <?php endforeach; ?>
+        </ul>
+        <p class="px-5 py-3 text-xs text-white/45 border-t border-white/10 leading-relaxed">
+            คำนวณตามกฎ payroll — ลาป่วยที่ไม่มีใบรับรองแพทย์จะถูกหักเป็นขาดงานบนสลิป แม้ HR อนุมัติลาแล้ว
+        </p>
     </section>
     <?php endif; ?>
 

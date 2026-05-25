@@ -231,6 +231,13 @@ class EmployeeSummaryService
         $entitlements = $this->getLeaveEntitlements((int)date('Y', strtotime($monthStart)), $userId);
         $swapsInMonth = $this->getDayoffSwapsInMonth($userId, $month);
 
+        $payrollDeductions = ['absent_days' => 0.0, 'absence_deduction' => 0.0, 'breakdown' => [], 'warnings' => []];
+        try {
+            $payrollDeductions = (new PayrollService($this->pdo))->computeAttendanceDeductions($userId, $monthStart);
+        } catch (Throwable $e) {
+            /* payroll preview optional */
+        }
+
         return [
             'user_id' => $userId,
             'month' => $month,
@@ -249,6 +256,11 @@ class EmployeeSummaryService
             'work_hours' => round($counts['total_work_minutes'] / 60, 1),
             'incomplete_checkout_days' => (int)$counts['incomplete_checkout_days'],
             'days_with_work_hours' => (int)$counts['days_with_work_hours'],
+            'payroll_absent_days' => (float)($payrollDeductions['absent_days'] ?? 0),
+            'payroll_absence_deduction' => (float)($payrollDeductions['absence_deduction'] ?? 0),
+            'payroll_lateness_deduction' => (float)($payrollDeductions['lateness_deduction'] ?? 0),
+            'payroll_attendance_breakdown' => $payrollDeductions['breakdown'] ?? [],
+            'payroll_attendance_warnings' => $payrollDeductions['warnings'] ?? [],
         ];
     }
 
@@ -493,6 +505,7 @@ class EmployeeSummaryService
 
         $stmt = $this->pdo->prepare("
             SELECT lr.id, lr.start_date, lr.end_date, lr.total_days, lr.status, lr.reason,
+                   lr.document_path,
                    lt.code, lt.name AS leave_type_name, lt.color
             FROM hr_leave_requests lr
             JOIN hr_leave_types lt ON lt.id = lr.leave_type_id
@@ -518,6 +531,7 @@ class EmployeeSummaryService
             }
             $r['days_in_month'] = $daysInMonth;
             $r['days_in_month_count'] = count($daysInMonth);
+            $r['has_medical_cert'] = !empty($r['document_path']) ? 1 : 0;
         }
         unset($r);
 
