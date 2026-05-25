@@ -10,7 +10,7 @@ require_once dirname(__DIR__) . '/bootstrap.php';
 Auth::requireLogin();
 $user = Auth::user();
 
-if (!hr_can_access_hr_dashboard()) {
+if (!hr_can_manage_attendance()) {
     redirect('/', 302);
 }
 
@@ -163,7 +163,7 @@ include dirname(__DIR__) . '/templates/header.php';
     <div class="min-w-0 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div>
             <h1 class="tp-ios-page-title">จัดการเวลาทำงาน</h1>
-            <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">สรุปการเข้างานตามวันที่ กรองแผนกและสถานะ</p>
+            <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">สรุปการเข้างานตามวันที่ กรองแผนกและสถานะ · HR สามารถแก้ไข/ลบเวลาเข้า-ออกได้ (บันทึก audit log ทุกครั้ง)</p>
         </div>
         <?php if ($attendanceReturnUrl): ?>
         <a href="<?php echo htmlspecialchars($attendanceReturnUrl); ?>"
@@ -173,6 +173,16 @@ include dirname(__DIR__) . '/templates/header.php';
         <?php endif; ?>
     </div>
 </header>
+
+<?php if (hr_can_manage_attendance()): ?>
+<div class="native-card tp-native-card tp-native-data-card p-4 sm:p-5 mb-6 border border-sky-500/20 bg-sky-500/[0.06] text-sm text-sky-100/90">
+    <i class="fas fa-shield-halved text-sky-300 mr-2" aria-hidden="true"></i>
+    <strong class="text-sky-100">ลบ/ล้างเวลาเข้า-ออก</strong> — ใช้เมื่อลงเวลาผิดและต้องให้พนักงานลงใหม่
+    · กด <strong class="text-sky-50">ลบเวลา</strong> ที่แถวพนักงาน (แสดงเมื่อมีการลงเวลาแล้ว)
+    · เลือกได้ว่าจะลบทั้งวัน ลบเฉพาะเวลาเข้า หรือเวลาออก
+    · ทุกการดำเนินการบันทึกใน <strong class="text-sky-50">ประวัติการแก้ไข</strong> (ผู้ทำ, เวลา, เหตุผล)
+</div>
+<?php endif; ?>
 
 <!-- Stats -->
 <div class="grid grid-cols-2 md:grid-cols-5 gap-2 sm:gap-4 mb-6 min-w-0 max-w-full">
@@ -386,7 +396,7 @@ include dirname(__DIR__) . '/templates/header.php';
 
             <div class="grid grid-cols-2 gap-2 mt-4">
                 <button type="button"
-                        onclick="editAttendance(<?php echo (int)$rec['id']; ?>, '<?php echo htmlspecialchars($date, ENT_QUOTES); ?>', <?php echo $rec['attendance_id'] ?? 'null'; ?>, '<?php echo $rec['check_in_time'] ? date('H:i', strtotime($rec['check_in_time'])) : ''; ?>', '<?php echo $rec['check_out_time'] ? date('H:i', strtotime($rec['check_out_time'])) : ''; ?>')"
+                        onclick="editAttendance(<?php echo (int)$rec['id']; ?>, '<?php echo htmlspecialchars($date, ENT_QUOTES); ?>', <?php echo $rec['attendance_id'] ?? 'null'; ?>, '<?php echo $rec['check_in_time'] ? date('H:i', strtotime($rec['check_in_time'])) : ''; ?>', '<?php echo $rec['check_out_time'] ? date('H:i', strtotime($rec['check_out_time'])) : ''; ?>', '<?php echo htmlspecialchars(($rec['first_name_th'] ?? '') . ' ' . ($rec['last_name_th'] ?? ''), ENT_QUOTES); ?>')"
                         class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
                     <i class="fas fa-edit mr-2" aria-hidden="true"></i>แก้ไขเวลา
                 </button>
@@ -404,9 +414,9 @@ include dirname(__DIR__) . '/templates/header.php';
                 <?php endif; ?>
                 <?php if ($hasAttendance): ?>
                 <button type="button"
-                        onclick="deleteAttendance(<?php echo (int)$rec['id']; ?>, '<?php echo htmlspecialchars($date, ENT_QUOTES); ?>', '<?php echo htmlspecialchars(($rec['first_name_th'] ?? '') . ' ' . ($rec['last_name_th'] ?? ''), ENT_QUOTES); ?>')"
+                        onclick="deleteAttendance(<?php echo (int)$rec['id']; ?>, '<?php echo htmlspecialchars($date, ENT_QUOTES); ?>', '<?php echo htmlspecialchars(($rec['first_name_th'] ?? '') . ' ' . ($rec['last_name_th'] ?? ''), ENT_QUOTES); ?>', 'full')"
                         class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-200 text-sm font-semibold touch-manipulation">
-                    <i class="fas fa-trash mr-2" aria-hidden="true"></i>ลบข้อมูล
+                    <i class="fas fa-trash mr-2" aria-hidden="true"></i>ลบเวลา
                 </button>
                 <?php endif; ?>
             </div>
@@ -510,14 +520,14 @@ include dirname(__DIR__) . '/templates/header.php';
                             <i class="fas fa-map-marker-alt"></i>
                         </button>
                         <?php endif; ?>
-                        <button onclick="editAttendance(<?php echo $rec['id']; ?>, '<?php echo $date; ?>', <?php echo $rec['attendance_id'] ?? 'null'; ?>, '<?php echo $rec['check_in_time'] ? date('H:i', strtotime($rec['check_in_time'])) : ''; ?>', '<?php echo $rec['check_out_time'] ? date('H:i', strtotime($rec['check_out_time'])) : ''; ?>')" 
+                        <button onclick="editAttendance(<?php echo $rec['id']; ?>, '<?php echo $date; ?>', <?php echo $rec['attendance_id'] ?? 'null'; ?>, '<?php echo $rec['check_in_time'] ? date('H:i', strtotime($rec['check_in_time'])) : ''; ?>', '<?php echo $rec['check_out_time'] ? date('H:i', strtotime($rec['check_out_time'])) : ''; ?>', '<?php echo htmlspecialchars(($rec['first_name_th'] ?? '') . ' ' . ($rec['last_name_th'] ?? ''), ENT_QUOTES); ?>')" 
                                 class="px-2 py-1 bg-white/10 hover:bg-white/20 text-white text-xs rounded transition-colors" title="แก้ไข">
                             <i class="fas fa-edit"></i>
                         </button>
                         <?php if ($hasAttendance): ?>
-                        <button onclick="deleteAttendance(<?php echo $rec['id']; ?>, '<?php echo $date; ?>', '<?php echo htmlspecialchars(($rec['first_name_th'] ?? '') . ' ' . ($rec['last_name_th'] ?? ''), ENT_QUOTES); ?>')" 
-                                class="px-2 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-300 text-xs rounded transition-colors ml-1" title="ลบข้อมูลการลงเวลา">
-                            <i class="fas fa-trash"></i>
+                        <button onclick="deleteAttendance(<?php echo $rec['id']; ?>, '<?php echo $date; ?>', '<?php echo htmlspecialchars(($rec['first_name_th'] ?? '') . ' ' . ($rec['last_name_th'] ?? ''), ENT_QUOTES); ?>', 'full')" 
+                                class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-200 text-xs rounded transition-colors ml-1 font-medium" title="ลบ/ล้างเวลาเข้า-ออก">
+                            <i class="fas fa-trash" aria-hidden="true"></i><span>ลบเวลา</span>
                         </button>
                         <?php endif; ?>
                         <button onclick="viewHistory(<?php echo $rec['id']; ?>, '<?php echo $date; ?>', '<?php echo htmlspecialchars(($rec['first_name_th'] ?? '') . ' ' . ($rec['last_name_th'] ?? ''), ENT_QUOTES); ?>')" 
@@ -583,6 +593,9 @@ include dirname(__DIR__) . '/templates/header.php';
                 <label for="edit-note" class="block text-white/80 text-sm mb-2">เหตุผลการแก้ไข <span class="text-red-400" aria-hidden="true">*</span></label>
                 <textarea name="note" id="edit-note" rows="2" class="input-field tp-native-textarea" placeholder="ระบุเหตุผลการแก้ไข (จำเป็น)" required></textarea>
                 <p class="text-white/50 text-xs mt-1">การแก้ไขทั้งหมดจะถูกบันทึกใน audit log</p>
+                <button type="button" id="edit-open-delete-btn" class="mt-3 text-red-300/90 hover:text-red-200 text-xs font-medium touch-manipulation hidden">
+                    <i class="fas fa-trash mr-1" aria-hidden="true"></i>ลงเวลาผิด? ลบ/ล้างเวลาเพื่อให้ลงใหม่
+                </button>
             </div>
             
             <div class="flex flex-col sm:flex-row gap-4">
@@ -622,22 +635,38 @@ include dirname(__DIR__) . '/templates/header.php';
                     <i class="fas fa-triangle-exclamation text-xl" aria-hidden="true"></i>
                 </div>
                 <div>
-                    <h3 id="delete-modal-title" class="text-xl font-bold text-white">ลบข้อมูลการลงเวลา</h3>
+                    <h3 id="delete-modal-title" class="text-xl font-bold text-white">ลบ / ล้างเวลาเข้า-ออก</h3>
                     <p id="delete-subtitle" class="text-white/60 text-sm"></p>
                 </div>
             </div>
-            <div class="bg-red-500/10 border border-red-500/30 rounded-[var(--tp-ios-card-radius)] p-3 mb-4 text-red-200 text-sm">
-                <i class="fas fa-info-circle mr-1"></i> การลบจะลบข้อมูลทั้งหมดของวันนี้ (เวลาเข้า/ออก, รูป, พิกัด, ชั่วโมงทำงาน) และระบบจะคำนวณสถานะใหม่ตามบริบท (วันหยุด/ลา/ขาดงาน) — ไม่สามารถกู้คืนได้
+            <fieldset class="mb-4 space-y-2 border-0 p-0">
+                <legend class="text-white/80 text-sm font-medium mb-2">เลือกสิ่งที่ต้องการลบ</legend>
+                <label class="flex items-start gap-3 p-3 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 cursor-pointer touch-manipulation">
+                    <input type="radio" name="delete_scope" value="full" class="mt-1" checked>
+                    <span class="text-sm"><strong class="text-white">ลบทั้งวัน</strong> <span class="text-white/55 block mt-0.5">ลบเวลา รูป พิกัด และชั่วโมงทำงานทั้งหมด — เหมาะเมื่อต้องการลงเวลาใหม่ทั้งเข้าและออก</span></span>
+                </label>
+                <label class="flex items-start gap-3 p-3 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 cursor-pointer touch-manipulation">
+                    <input type="radio" name="delete_scope" value="check_in" class="mt-1">
+                    <span class="text-sm"><strong class="text-white">ลบเฉพาะเวลาเข้า</strong> <span class="text-white/55 block mt-0.5">ลบเวลาเข้า+รูป/พิกัดฝั่งเข้า — พนักงานลงเวลาเข้าใหม่ได้</span></span>
+                </label>
+                <label class="flex items-start gap-3 p-3 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 cursor-pointer touch-manipulation">
+                    <input type="radio" name="delete_scope" value="check_out" class="mt-1">
+                    <span class="text-sm"><strong class="text-white">ลบเฉพาะเวลาออก</strong> <span class="text-white/55 block mt-0.5">ลบเวลาออก+รูป/พิกัดฝั่งออก — พนักงานลงเวลาออกใหม่ได้</span></span>
+                </label>
+            </fieldset>
+            <div class="bg-amber-500/10 border border-amber-500/25 rounded-[var(--tp-ios-card-radius)] p-3 mb-4 text-amber-100/90 text-xs">
+                <i class="fas fa-clipboard-list mr-1" aria-hidden="true"></i>
+                บันทึก audit log: ผู้ดำเนินการ, IP, เวลา, เหตุผล, ข้อมูลก่อน/หลัง — ดูได้ที่ปุ่ม 「ประวัติ」
             </div>
             <input type="hidden" name="user_id" id="delete-user-id">
             <input type="hidden" name="attendance_date" id="delete-date">
             <div class="mb-4">
-                <label for="delete-note" class="block text-white/80 text-sm mb-2">เหตุผลการลบ <span class="text-red-400" aria-hidden="true">*</span></label>
-                <textarea name="note" id="delete-note" rows="3" class="input-field tp-native-textarea" placeholder="ระบุเหตุผลการลบข้อมูล (จำเป็น)" required></textarea>
+                <label for="delete-note" class="block text-white/80 text-sm mb-2">เหตุผล <span class="text-red-400" aria-hidden="true">*</span></label>
+                <textarea name="note" id="delete-note" rows="3" class="input-field tp-native-textarea" placeholder="เช่น ลงเวลาเข้าผิด อนุมัติให้ลบและลงใหม่" required></textarea>
             </div>
             <div class="flex flex-col sm:flex-row gap-3">
                 <button type="button" onclick="closeDeleteModal()" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation">ยกเลิก</button>
-                <button type="submit" class="flex-1 min-h-[56px] py-2 bg-red-600 hover:bg-red-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold"><i class="fas fa-trash mr-1" aria-hidden="true"></i> ยืนยันการลบ</button>
+                <button type="submit" class="flex-1 min-h-[56px] py-2 bg-red-600 hover:bg-red-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold"><i class="fas fa-trash mr-1" aria-hidden="true"></i> ยืนยัน</button>
             </div>
         </form>
     </div>
@@ -702,7 +731,7 @@ function syncEditTimeInputFromSelect(inputId) {
     });
 })();
 
-function editAttendance(userId, date, attendanceId, checkIn, checkOut) {
+function editAttendance(userId, date, attendanceId, checkIn, checkOut, empName) {
     document.getElementById('edit-user-id').value = userId;
     document.getElementById('edit-date').value = date;
     document.getElementById('edit-attendance-id').value = attendanceId || '';
@@ -711,6 +740,19 @@ function editAttendance(userId, date, attendanceId, checkIn, checkOut) {
     document.getElementById('edit-note').value = '';
     syncEditTimeSelectFromInput('edit-check-in');
     syncEditTimeSelectFromInput('edit-check-out');
+    var delLink = document.getElementById('edit-open-delete-btn');
+    if (delLink) {
+        if (attendanceId) {
+            delLink.classList.remove('hidden');
+            delLink.onclick = function () {
+                if (typeof uiCloseModal === 'function') uiCloseModal('edit-modal');
+                else document.getElementById('edit-modal').classList.add('hidden');
+                deleteAttendance(userId, date, empName || ('พนักงาน #' + userId), 'check_in');
+            };
+        } else {
+            delLink.classList.add('hidden');
+        }
+    }
     if (typeof uiOpenModal === 'function') uiOpenModal('edit-modal');
     else {
         const m = document.getElementById('edit-modal');
@@ -719,11 +761,15 @@ function editAttendance(userId, date, attendanceId, checkIn, checkOut) {
     }
 }
 
-function deleteAttendance(userId, date, empName) {
+function deleteAttendance(userId, date, empName, defaultScope) {
     document.getElementById('delete-user-id').value = userId;
     document.getElementById('delete-date').value = date;
     document.getElementById('delete-note').value = '';
     document.getElementById('delete-subtitle').textContent = empName + ' — ' + date;
+    var scope = defaultScope || 'full';
+    document.querySelectorAll('input[name="delete_scope"]').forEach(function (r) {
+        r.checked = (r.value === scope);
+    });
     if (typeof uiOpenModal === 'function') uiOpenModal('delete-modal');
     else {
         const m = document.getElementById('delete-modal');
@@ -767,7 +813,7 @@ document.getElementById('edit-form').addEventListener('submit', async function(e
     const ci = document.getElementById('edit-check-in').value;
     const co = document.getElementById('edit-check-out').value;
     if (!ci && !co) {
-        showToast('กรุณาระบุเวลาเข้าหรือเวลาออกอย่างน้อยหนึ่งช่อง หากต้องการลบข้อมูล ให้ใช้ปุ่มลบ', 'error');
+        showToast('กรุณาระบุเวลาเข้าหรือเวลาออกอย่างน้อยหนึ่งช่อง หากต้องการลบเวลา ให้ใช้ปุ่ม 「ลบเวลา」', 'error');
         return;
     }
     
@@ -798,11 +844,18 @@ document.getElementById('delete-form').addEventListener('submit', async function
     e.preventDefault();
     const note = document.getElementById('delete-note').value.trim();
     if (!note) {
-        showToast('กรุณาระบุเหตุผลการลบ', 'error');
+        showToast('กรุณาระบุเหตุผล', 'error');
         return;
     }
+    const scopeEl = document.querySelector('input[name="delete_scope"]:checked');
+    const scope = scopeEl ? scopeEl.value : 'full';
     const formData = new FormData();
-    formData.append('action', 'delete');
+    if (scope === 'full') {
+        formData.append('action', 'delete');
+    } else {
+        formData.append('action', 'clear_times');
+        formData.append('scope', scope);
+    }
     formData.append('user_id', document.getElementById('delete-user-id').value);
     formData.append('attendance_date', document.getElementById('delete-date').value);
     formData.append('note', note);
@@ -811,7 +864,8 @@ document.getElementById('delete-form').addEventListener('submit', async function
     const response = await fetch('/api/attendance.php', { method: 'POST', body: formData });
     const result = await response.json();
     if (result.success) {
-        showToast('ลบข้อมูลสำเร็จ', 'success');
+        showToast(result.message || 'ดำเนินการสำเร็จ', 'success');
+        closeDeleteModal();
         setTimeout(function () {
             if (!attendanceNavigateAfterFix()) location.reload();
         }, 700);
@@ -914,11 +968,14 @@ async function viewHistory(userId, date, empName) {
             const o = log.old_values || {};
             const n = log.new_values || {};
             const isDelete = log.action === 'ATTENDANCE_DELETE';
+            const isClear = log.action === 'ATTENDANCE_CLEAR';
             // Detect legacy entry (older format before audit refactor)
-            const isLegacy = !isDelete && (!n || Object.keys(n).length === 0 ||
+            const isLegacy = !isDelete && !isClear && (!n || Object.keys(n).length === 0 ||
                              (!('check_in_time' in n) && !('status' in n)));
             const actionBadge = isDelete
-                ? '<span class="inline-block px-2 py-0.5 rounded-full text-xs bg-red-500/20 text-red-300 ml-2"><i class="fas fa-trash"></i> ลบข้อมูล</span>'
+                ? '<span class="inline-block px-2 py-0.5 rounded-full text-xs bg-red-500/20 text-red-300 ml-2"><i class="fas fa-trash"></i> ลบทั้งวัน</span>'
+                : isClear
+                ? '<span class="inline-block px-2 py-0.5 rounded-full text-xs bg-orange-500/20 text-orange-200 ml-2"><i class="fas fa-eraser"></i> ' + (n.scope_label || 'ลบเวลา') + '</span>'
                 : '<span class="inline-block px-2 py-0.5 rounded-full text-xs bg-violet-500/20 text-violet-300 ml-2"><i class="fas fa-edit"></i> แก้ไข</span>';
             const header = `
                 <div class="flex items-center justify-between mb-3 pb-2 border-b border-white/10">

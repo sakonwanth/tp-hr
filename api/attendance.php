@@ -58,6 +58,10 @@ if ($method === 'POST') {
             handleDelete($pdo, $user, $input);
             break;
 
+        case 'clear_times':
+            handleClearTimes($pdo, $user, $input);
+            break;
+
         case 'request_late_start':
             handleLateStartRequest($pdo, $user, $input);
             break;
@@ -711,8 +715,8 @@ function applyAttendanceAdjust(
  * Handle attendance adjustment (HR only)
  */
 function handleAdjust(PDO $pdo, array $user, array $input): void {
-    if (!hr_can_access_hr_dashboard()) {
-        apiError('ไม่มีสิทธิ์ดำเนินการ', 403);
+    if (!hr_can_manage_attendance()) {
+        apiError('ไม่มีสิทธิ์ดำเนินการ — เฉพาะ HR/ผู้มีสิทธิ์จัดการเวลาเข้างาน', 403);
     }
 
     $userId = (int)($input['user_id'] ?? 0);
@@ -739,8 +743,8 @@ function handleAdjust(PDO $pdo, array $user, array $input): void {
  * Bulk attendance adjustment — same check-in/out applied to multiple dates (HR only).
  */
 function handleBulkAdjust(PDO $pdo, array $user, array $input): void {
-    if (!hr_can_access_hr_dashboard()) {
-        apiError('ไม่มีสิทธิ์ดำเนินการ', 403);
+    if (!hr_can_manage_attendance()) {
+        apiError('ไม่มีสิทธิ์ดำเนินการ — เฉพาะ HR/ผู้มีสิทธิ์จัดการเวลาเข้างาน', 403);
     }
 
     $userId = (int)($input['user_id'] ?? 0);
@@ -862,7 +866,7 @@ function getAdjustmentHistory(PDO $pdo, array $user): void {
             FROM hr_audit_logs al
             LEFT JOIN users u ON u.id = al.user_id
             WHERE al.table_name = 'hr_attendances'
-              AND al.action IN ('ATTENDANCE_ADJUST','ATTENDANCE_DELETE')
+              AND al.action IN ('ATTENDANCE_ADJUST','ATTENDANCE_DELETE','ATTENDANCE_CLEAR')
               AND (
                     al.record_id = ?
                  OR (al.new_values LIKE ? AND al.new_values LIKE ?)
@@ -878,7 +882,7 @@ function getAdjustmentHistory(PDO $pdo, array $user): void {
             FROM hr_audit_logs al
             LEFT JOIN users u ON u.id = al.user_id
             WHERE al.table_name = 'hr_attendances'
-              AND al.action IN ('ATTENDANCE_ADJUST','ATTENDANCE_DELETE')
+              AND al.action IN ('ATTENDANCE_ADJUST','ATTENDANCE_DELETE','ATTENDANCE_CLEAR')
               AND (
                     (al.new_values LIKE ? AND al.new_values LIKE ?)
                  OR (al.old_values LIKE ? AND al.old_values LIKE ?)
@@ -908,13 +912,183 @@ function getAdjustmentHistory(PDO $pdo, array $user): void {
 }
 
 /**
+ * Clear check-in and/or check-out times (HR only) — for wrong clock-in/out cases.
+ * scope: check_in | check_out | both
+ * If both times become empty after clear, deletes the row (same audit as full delete).
+ */
+function handleClearTimes(PDO $pdo, array $user, array $input): void {
+    if (!hr_can_manage_attendance()) {
+        apiError('ไม่มีสิทธิ์ดำเนินการ — เฉพาะ HR/ผู้มีสิทธิ์จัดการเวลาเข้างาน', 403);
+    }
+
+    $userId = (int)($input['user_id'] ?? 0);
+    $date = trim((string)($input['attendance_date'] ?? ''));
+    $note = trim((string)($input['note'] ?? ''));
+    $scope = trim((string)($input['scope'] ?? 'both'));
+
+    if (!$userId || $date === '') {
+        apiError('ข้อมูลไม่ครบถ้วน');
+    }
+    if ($note === '') {
+        apiError('กรุณาระบุเหตุผลการลบเวลา');
+    }
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+        apiError('รูปแบบวันที่ไม่ถูกต้อง');
+    }
+    if (!in_array($scope, ['check_in', 'check_out', 'both'], true)) {
+        apiError('ขอบเขตการลบไม่ถูกต้อง');
+    }
+
+    $stmt = $pdo->prepare('SELECT * FROM hr_attendances WHERE user_id = ? AND attendance_date = ?');
+    $stmt->execute([$userId, $date]);
+    $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$existing) {
+        apiError('ไม่พบข้อมูลการลงเวลาของวันนี้');
+    }
+
+    $clearIn = $scope === 'check_in' || $scope === 'both';
+    $clearOut = $scope === 'check_out' || $scope === 'both';
+
+    $newCheckIn = $clearIn ? null : ($existing['check_in_time'] ?? null);
+    $newCheckOut = $clearOut ? null : ($existing['check_out_time'] ?? null);
+
+    if ($newCheckIn === null && $newCheckOut === null) {
+        handleDelete($pdo, $user, $input);
+        return;
+    }
+
+    $attendanceService = new AttendanceService($pdo);
+    $targetUser = $attendanceService->getUserForAttendance($userId);
+    if (!$targetUser) {
+        apiError('ไม่พบพนักงาน');
+    }
+
+    $shift = !empty($existing['shift_id'])
+        ? $attendanceService->getShiftById((int)$existing['shift_id'])
+        : $attendanceService->getDefaultShift();
+
+    $summary = $attendanceService->summarizeAttendance(
+        $targetUser,
+        $shift,
+        $date,
+        $newCheckIn,
+        $newCheckOut,
+        $existing['planned_start_time'] ?? null,
+        $existing['status'] ?? null
+    );
+
+    try {
+        $pdo->beginTransaction();
+
+        $sql = 'UPDATE hr_attendances SET
+            check_in_time = ?,
+            check_out_time = ?,
+            check_in_type = CASE WHEN ? = 1 THEN NULL ELSE check_in_type END,
+            check_out_type = CASE WHEN ? = 1 THEN NULL ELSE check_out_type END,
+            check_in_photo = CASE WHEN ? = 1 THEN NULL ELSE check_in_photo END,
+            check_out_photo = CASE WHEN ? = 1 THEN NULL ELSE check_out_photo END,
+            check_in_latitude = CASE WHEN ? = 1 THEN NULL ELSE check_in_latitude END,
+            check_in_longitude = CASE WHEN ? = 1 THEN NULL ELSE check_in_longitude END,
+            check_out_latitude = CASE WHEN ? = 1 THEN NULL ELSE check_out_latitude END,
+            check_out_longitude = CASE WHEN ? = 1 THEN NULL ELSE check_out_longitude END,
+            work_minutes = ?,
+            break_minutes = ?,
+            late_minutes = ?,
+            early_leave_minutes = ?,
+            ot_minutes = ?,
+            status = ?,
+            adjustment_reason = ?,
+            adjusted_by = ?,
+            adjusted_at = NOW(),
+            updated_at = NOW()
+            WHERE id = ?';
+
+        $pdo->prepare($sql)->execute([
+            $newCheckIn,
+            $newCheckOut,
+            $clearIn ? 1 : 0,
+            $clearOut ? 1 : 0,
+            $clearIn ? 1 : 0,
+            $clearOut ? 1 : 0,
+            $clearIn ? 1 : 0,
+            $clearIn ? 1 : 0,
+            $clearOut ? 1 : 0,
+            $clearOut ? 1 : 0,
+            (int)$summary['work_minutes'],
+            (int)$summary['break_minutes'],
+            (int)$summary['late_minutes'],
+            (int)$summary['early_leave_minutes'],
+            (int)$summary['ot_minutes'],
+            (string)$summary['status'],
+            $note,
+            (int)$user['id'],
+            (int)$existing['id'],
+        ]);
+
+        $pdo->commit();
+
+        if ($clearIn && !empty($existing['check_in_photo'])) {
+            $rel = ltrim((string)$existing['check_in_photo'], '/');
+            if ($rel && str_starts_with($rel, 'storage/')) {
+                $full = dirname(__DIR__) . '/' . $rel;
+                if (is_file($full)) {
+                    @unlink($full);
+                }
+            }
+        }
+        if ($clearOut && !empty($existing['check_out_photo'])) {
+            $rel = ltrim((string)$existing['check_out_photo'], '/');
+            if ($rel && str_starts_with($rel, 'storage/')) {
+                $full = dirname(__DIR__) . '/' . $rel;
+                if (is_file($full)) {
+                    @unlink($full);
+                }
+            }
+        }
+
+        $scopeLabel = match ($scope) {
+            'check_in' => 'ลบเวลาเข้า',
+            'check_out' => 'ลบเวลาออก',
+            default => 'ลบเวลาเข้าและออก',
+        };
+
+        Auth::log('ATTENDANCE_CLEAR', 'hr_attendances', (int)$existing['id'], [
+            'target_user_id' => $userId,
+            'attendance_date' => $date,
+            'scope' => $scope,
+            'check_in_time' => $existing['check_in_time'] ?? null,
+            'check_out_time' => $existing['check_out_time'] ?? null,
+            'status' => $existing['status'] ?? null,
+        ], [
+            'target_user_id' => $userId,
+            'attendance_date' => $date,
+            'scope' => $scope,
+            'scope_label' => $scopeLabel,
+            'check_in_time' => $newCheckIn,
+            'check_out_time' => $newCheckOut,
+            'status' => (string)$summary['status'],
+            'adjustment_reason' => $note,
+            'adjusted_by' => (int)$user['id'],
+        ]);
+
+        apiSuccess([], $scopeLabel . ' สำเร็จ — พนักงานสามารถลงเวลาใหม่ได้');
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        tpHrLogException($e, 'api/attendance handleClearTimes');
+        apiError('เกิดข้อผิดพลาดภายในระบบ กรุณาลองใหม่', 500);
+    }
+}
+
+/**
  * Handle attendance record deletion (HR only).
  * Removes the whole hr_attendances row for (user, date), including photos, location, and minutes.
  * Status will naturally fall back to holiday/leave/day-off/absent on display.
  */
 function handleDelete(PDO $pdo, array $user, array $input): void {
-    if (!hr_can_access_hr_dashboard()) {
-        apiError('ไม่มีสิทธิ์ดำเนินการ', 403);
+    if (!hr_can_manage_attendance()) {
+        apiError('ไม่มีสิทธิ์ดำเนินการ — เฉพาะ HR/ผู้มีสิทธิ์จัดการเวลาเข้างาน', 403);
     }
 
     $userId = (int)($input['user_id'] ?? 0);

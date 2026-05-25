@@ -188,6 +188,20 @@ function hr_can_access_hr_dashboard(): bool {
     return $acl->can('hr.dashboard') || $acl->can('hr.*');
 }
 
+/**
+ * จัดการ/แก้ไข/ลบเวลาเข้า-ออกของพนักงาน (HR dashboard + attendance.manage ACL)
+ */
+function hr_can_manage_attendance(): bool {
+    if (hr_can_access_hr_dashboard()) {
+        return true;
+    }
+    $acl = Auth::acl();
+    if ($acl === null) {
+        return false;
+    }
+    return $acl->can('attendance.manage') || $acl->can('hr.attendance.manage');
+}
+
 function isCEOOrAbove(): bool {
     $user = getCurrentUser();
     if (!$user) return false;
