@@ -141,6 +141,8 @@ $filterBase = ['date' => $date];
 if ($department !== '') {
     $filterBase['department'] = $department;
 }
+$highlightUserId = (int)($_GET['user_id'] ?? 0);
+$autoOpenFix = isset($_GET['fix']) && $highlightUserId > 0;
 
 $current_page = 'hr-attendance';
 include dirname(__DIR__) . '/templates/header.php';
@@ -326,7 +328,8 @@ include dirname(__DIR__) . '/templates/header.php';
         $workHours = $rec['work_minutes'] ? number_format(((float)$rec['work_minutes']) / 60, 1) : '-';
         $otHours = ($rec['ot_minutes'] ?? 0) > 0 ? (int)floor(((int)$rec['ot_minutes']) / 60) : 0;
         ?>
-        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-5">
+        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-5<?php echo $highlightUserId === (int)$rec['id'] ? ' ring-2 ring-violet-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>"
+             id="att-row-<?php echo (int)$rec['id']; ?>">
             <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
                     <a href="/hr/employee_attendance.php?id=<?php echo (int)$rec['id']; ?>"
@@ -422,7 +425,8 @@ include dirname(__DIR__) . '/templates/header.php';
                     && (int)$rec['effective_day_off'] === $weekday;
                 $onLeave = !$hasAttendance && !empty($rec['approved_leave_name']);
                 ?>
-                <tr class="hover:bg-white/[0.04]">
+                <tr class="hover:bg-white/[0.04]<?php echo $highlightUserId === (int)$rec['id'] ? ' bg-violet-500/10 ring-1 ring-inset ring-violet-400/50' : ''; ?>"
+                    id="att-row-<?php echo (int)$rec['id']; ?>">
                     <td class="px-4 py-3">
                         <div class="flex items-center gap-3">
                             <?php if ($rec['check_in_photo']): ?>
@@ -946,5 +950,23 @@ async function viewHistory(userId, date, empName) {
     }
 }
 </script>
+
+<?php if ($highlightUserId > 0): ?>
+<script>
+(function () {
+    var uid = <?php echo (int)$highlightUserId; ?>;
+    var autoFix = <?php echo $autoOpenFix ? 'true' : 'false'; ?>;
+    var el = document.getElementById('att-row-' + uid);
+    if (!el) return;
+    setTimeout(function () {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (autoFix) {
+            var btn = el.querySelector('button[onclick*="editAttendance"]');
+            if (btn) btn.click();
+        }
+    }, 300);
+})();
+</script>
+<?php endif; ?>
 
 <?php include dirname(__DIR__) . '/templates/footer.php'; ?>

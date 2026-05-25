@@ -11,6 +11,14 @@ $d = $summary['details'] ?? [];
 $attStatus = defined('ATTENDANCE_STATUS') ? ATTENDANCE_STATUS : [];
 $leaveStatus = defined('LEAVE_STATUS') ? LEAVE_STATUS : [];
 $compact = !empty($compact);
+$employeeId = (int)($employeeId ?? $summary['user_id'] ?? 0);
+$showActions = !empty($showActions) && $employeeId > 0;
+$isCeo = function_exists('isCEOOrAbove') && isCEOOrAbove();
+
+$actionLinkClass = 'inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-white/10 hover:bg-white/20 text-violet-200 border border-white/10 touch-manipulation shrink-0 ml-auto';
+$attFixUrl = static function (int $uid, string $date) {
+    return '/hr/attendance.php?' . http_build_query(['date' => $date, 'user_id' => $uid, 'fix' => 1]);
+};
 
 $hasLate = !empty($d['late']);
 $hasAbsent = !empty($d['absent']);
@@ -53,6 +61,11 @@ $rowClass = $compact ? 'px-3 py-2 text-xs border-b border-white/5 last:border-0'
                 <?php if ((int)($item['late_minutes'] ?? 0) > 0): ?>
                 <span class="text-amber-400/80">สาย <?php echo (int)$item['late_minutes']; ?> น.</span>
                 <?php endif; ?>
+                <?php if ($showActions): ?>
+                <a href="<?php echo htmlspecialchars($attFixUrl($employeeId, $item['date'])); ?>" class="<?php echo $actionLinkClass; ?>">
+                    <i class="fas fa-edit text-[10px]" aria-hidden="true"></i>แก้ไขเวลา
+                </a>
+                <?php endif; ?>
             </li>
             <?php endforeach; ?>
         </ul>
@@ -70,6 +83,11 @@ $rowClass = $compact ? 'px-3 py-2 text-xs border-b border-white/5 last:border-0'
                 <span class="text-white font-medium tabular-nums shrink-0"><?php echo formatDateThai($item['date']); ?></span>
                 <span class="text-white/45"><?php echo htmlspecialchars($item['day_label'] ?? ''); ?></span>
                 <span class="text-red-300/90"><?php echo htmlspecialchars($item['reason'] ?? 'ขาดงาน'); ?></span>
+                <?php if ($showActions): ?>
+                <a href="<?php echo htmlspecialchars($attFixUrl($employeeId, $item['date'])); ?>" class="<?php echo $actionLinkClass; ?>" title="บันทึกเวลาเข้า-ออก หรือแก้สถานะ">
+                    <i class="fas fa-user-clock text-[10px]" aria-hidden="true"></i>แก้ไขเวลา
+                </a>
+                <?php endif; ?>
             </li>
             <?php endforeach; ?>
         </ul>
@@ -117,6 +135,11 @@ $rowClass = $compact ? 'px-3 py-2 text-xs border-b border-white/5 last:border-0'
                 <?php if (!$compact && !empty($lr['reason'])): ?>
                 <p class="text-white/45 text-xs mt-1.5"><?php echo htmlspecialchars($lr['reason']); ?></p>
                 <?php endif; ?>
+                <?php if ($showActions && ($lr['status'] ?? '') === 'PENDING'): ?>
+                <a href="/hr/leaves.php?status=pending" class="inline-flex items-center gap-1 mt-2 px-2 py-1 rounded text-xs font-medium bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 border border-amber-500/25 touch-manipulation">
+                    <i class="fas fa-check text-[10px]" aria-hidden="true"></i>ไปอนุมัติใบลา
+                </a>
+                <?php endif; ?>
             </div>
             <?php endforeach; ?>
         </div>
@@ -149,6 +172,11 @@ $rowClass = $compact ? 'px-3 py-2 text-xs border-b border-white/5 last:border-0'
                 <span class="text-white/45"><?php echo htmlspecialchars($item['day_label'] ?? ''); ?></span>
                 <?php if (!empty($item['check_in'])): ?>
                 <span class="text-purple-300/80">เข้า <?php echo htmlspecialchars($item['check_in']); ?> – ออก <?php echo htmlspecialchars($item['check_out'] ?? '-'); ?></span>
+                <?php endif; ?>
+                <?php if ($showActions): ?>
+                <a href="<?php echo htmlspecialchars($attFixUrl($employeeId, $item['date'])); ?>" class="<?php echo $actionLinkClass; ?>">
+                    <i class="fas fa-edit text-[10px]" aria-hidden="true"></i>แก้ไขเวลา
+                </a>
                 <?php endif; ?>
             </li>
             <?php endforeach; ?>
@@ -192,6 +220,13 @@ $rowClass = $compact ? 'px-3 py-2 text-xs border-b border-white/5 last:border-0'
                 <?php endif; ?>
                 <?php if (!$compact && !empty($swap['reason'])): ?>
                 <p class="text-white/45 text-xs mt-1"><?php echo htmlspecialchars($swap['reason']); ?></p>
+                <?php endif; ?>
+                <?php if ($showActions && ($swap['status'] ?? '') === 'PENDING' && $isCeo): ?>
+                <a href="/hr/dayoff_approvals.php" class="inline-flex items-center gap-1 mt-2 px-2 py-1 rounded text-xs font-medium bg-violet-500/15 hover:bg-violet-500/25 text-violet-200 border border-violet-500/25 touch-manipulation">
+                    <i class="fas fa-check text-[10px]" aria-hidden="true"></i>ไปอนุมัติสลับวันหยุด
+                </a>
+                <?php elseif ($showActions && ($swap['status'] ?? '') === 'PENDING'): ?>
+                <span class="text-white/45 text-xs mt-1 block">รอ CEO อนุมัติที่เมนู อนุมัติเปลี่ยนวันหยุด</span>
                 <?php endif; ?>
             </div>
             <?php endforeach; ?>

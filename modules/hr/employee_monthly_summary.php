@@ -105,7 +105,10 @@ $defaultOffLabel = $dayNames[(int)($summary['default_day_off'] ?? 0)] ?? '-';
         <h3 class="text-white/80 text-sm font-semibold mb-4">
             <i class="fas fa-list-ul text-violet-400 mr-2" aria-hidden="true"></i>รายละเอียดรายวัน
         </h3>
-        <?php include __DIR__ . '/employee_monthly_summary_details.php'; ?>
+        <?php
+        $showActions = !empty($employeeId);
+        include __DIR__ . '/employee_monthly_summary_details.php';
+        ?>
     </div>
 
     <?php if (!empty($summary['leave_entitlements'])): ?>
