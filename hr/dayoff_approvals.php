@@ -6,6 +6,7 @@
 
 $page_title = 'อนุมัติวันหยุด';
 require_once dirname(__DIR__) . '/bootstrap.php';
+require_once dirname(__DIR__) . '/core/CrmLineNotifierBridge.php';
 
 Auth::requireLogin();
 $user = Auth::user();
@@ -44,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Auth::log('dayoff_request_approve', 'hr_dayoff_requests', $requestId, null, [
                 'review_note' => $_POST['review_note'] ?? null,
             ]);
+            crm_line_notify_dayoff_decision($pdo, $requestId, 'APPROVED', trim((string)($_POST['review_note'] ?? '')));
         }
         flash('success', 'อนุมัติคำขอเรียบร้อยแล้ว');
     } elseif ($action === 'reject' && $requestId) {
@@ -57,6 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Auth::log('dayoff_request_reject', 'hr_dayoff_requests', $requestId, null, [
                 'review_note' => $_POST['review_note'] ?? null,
             ]);
+            crm_line_notify_dayoff_decision($pdo, $requestId, 'REJECTED', trim((string)($_POST['review_note'] ?? '')));
         }
         flash('success', 'ปฏิเสธคำขอเรียบร้อยแล้ว');
     } elseif ($action === 'approve_all') {

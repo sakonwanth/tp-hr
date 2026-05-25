@@ -10,6 +10,8 @@
  *   POST /api/v1/dayoff-requests/{id}/reject                    scope: dayoff.approve
  *        body: { reviewer_id?, note }
  */
+require_once dirname(__DIR__, 2) . '/core/CrmLineNotifierBridge.php';
+
 $method = ApiAuth::requireMethod(['GET', 'POST']);
 $pdo = getDB();
 $id = isset($segments[1]) ? (int)$segments[1] : 0;
@@ -85,7 +87,11 @@ if ($id <= 0) {
     ")->execute([$userId, $wStart, $wEnd, $orig, $req, $reason]);
 
     if (!$ok) ApiAuth::fail(500, 'Failed to create');
-    ApiAuth::success(['data' => ['id' => (int)$pdo->lastInsertId()]], 201);
+    $newId = (int)$pdo->lastInsertId();
+    if ($newId > 0 && function_exists('crm_line_notify_dayoff_requested')) {
+        crm_line_notify_dayoff_requested($pdo, $newId);
+    }
+    ApiAuth::success(['data' => ['id' => $newId]], 201);
 }
 
 // Actions: approve/reject
@@ -110,5 +116,9 @@ $pdo->prepare("
     SET status = ?, reviewed_by = ?, reviewed_at = NOW(), review_note = ?
     WHERE id = ?
 ")->execute([$newStatus, $reviewerId, $note ?: null, $id]);
+
+if (function_exists('crm_line_notify_dayoff_decision')) {
+    crm_line_notify_dayoff_decision($pdo, $id, $newStatus, $note);
+}
 
 ApiAuth::success(['data' => ['id' => $id, 'status' => $newStatus]]);

@@ -4,6 +4,10 @@
  *
  * Applies approved offsite check-in/out requests to the canonical attendance row.
  */
+if (is_file(dirname(__DIR__) . '/CrmLineNotifierBridge.php')) {
+    require_once dirname(__DIR__) . '/CrmLineNotifierBridge.php';
+}
+
 class OutsideAttendanceException extends RuntimeException
 {
     public function __construct(string $message, private int $httpStatus = 400)
@@ -58,6 +62,10 @@ class OutsideAttendanceService
             $this->markRequestReviewed($requestId, 'APPROVED', $reviewerId, $remarks, (int)$result['attendance_id']);
             $this->pdo->commit();
 
+            if (function_exists('crm_line_notify_outside_attendance_decision')) {
+                crm_line_notify_outside_attendance_decision($this->pdo, $requestId, 'APPROVED', $remarks);
+            }
+
             return $result + [
                 'id' => $requestId,
                 'status' => 'APPROVED',
@@ -94,6 +102,10 @@ class OutsideAttendanceService
 
             $this->markRequestReviewed($requestId, 'REJECTED', $reviewerId, $remarks, (int)($request['attendance_id'] ?? 0) ?: null);
             $this->pdo->commit();
+
+            if (function_exists('crm_line_notify_outside_attendance_decision')) {
+                crm_line_notify_outside_attendance_decision($this->pdo, $requestId, 'REJECTED', $remarks);
+            }
 
             return [
                 'id' => $requestId,

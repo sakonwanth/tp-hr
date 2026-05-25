@@ -275,6 +275,10 @@ function createOutsideLocationRequest(
         'attendance_id' => $attendanceId,
     ]);
 
+    if (function_exists('crm_line_notify_outside_attendance_requested')) {
+        crm_line_notify_outside_attendance_requested($pdo, $requestId);
+    }
+
     return ['request_id' => $requestId, 'photo_path' => $photoPath];
 }
 

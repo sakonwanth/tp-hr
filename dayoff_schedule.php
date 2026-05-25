@@ -6,6 +6,7 @@
 
 $page_title = 'วันหยุดประจำสัปดาห์';
 require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/core/CrmLineNotifierBridge.php';
 
 Auth::requireLogin();
 $user = Auth::user();
@@ -123,6 +124,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         status = 'PENDING', reviewed_by = NULL, reviewed_at = NULL, review_note = NULL
                     ");
                     $stmt->execute([$user['id'], $weekStart, $weekEnd, $defaultDayOff, $requestedDay, $reason ?: null]);
+                    $requestId = (int)$pdo->lastInsertId();
+                    if ($requestId <= 0) {
+                        $idStmt = $pdo->prepare("SELECT id FROM hr_dayoff_requests WHERE user_id = ? AND week_start = ? LIMIT 1");
+                        $idStmt->execute([$user['id'], $weekStart]);
+                        $requestId = (int)$idStmt->fetchColumn();
+                    }
+                    if ($requestId > 0 && function_exists('crm_line_notify_dayoff_requested')) {
+                        crm_line_notify_dayoff_requested($pdo, $requestId);
+                    }
                     $success = 'ส่งคำขอเปลี่ยนวันหยุดเรียบร้อยแล้ว รอการอนุมัติจากผู้บริหาร';
                     
                     // Reload requests
