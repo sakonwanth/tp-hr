@@ -40,22 +40,28 @@ if (!$employee) {
 
 $page_title = 'ประวัติลงเวลา - ' . $employee['first_name_th'] . ' ' . $employee['last_name_th'];
 
-// Get month filter
-$month = $_GET['month'] ?? date('Y-m');
-$monthStart = $month . '-01';
-$monthEnd = date('Y-m-t', strtotime($monthStart));
+// Get month filter (payroll month = เดือนที่จ่าย → รอบ 26 ก่อนหน้า ถึง 25 เดือนนี้)
+$month = $_GET['month'] ?? (new PayrollService($pdo))->suggestPayrollMonth();
+$payrollSvc = new PayrollService($pdo);
+$payDay = $payrollSvc->getDefaultPayDay();
+$period = $payrollSvc->attendancePeriodBounds($month . '-01', $payDay);
+$monthStart = $period['start'];
+$monthEnd = $period['end'];
 $today = date('Y-m-d');
-$lastDay = ($monthEnd <= $today) ? $monthEnd : $today;
+$lastDay = $payrollSvc->attendanceClosedScanEnd($monthStart, $monthEnd, $today);
+if ($lastDay === '') {
+    $lastDay = date('Y-m-d', strtotime($monthStart . ' -1 day'));
+}
 
 // Get attendance records
 $stmtAtt = $pdo->prepare("
     SELECT a.*, s.name as shift_name, s.start_time as shift_start, s.end_time as shift_end
     FROM hr_attendances a
     LEFT JOIN hr_work_shifts s ON a.shift_id = s.id
-    WHERE a.user_id = ? AND DATE_FORMAT(a.attendance_date, '%Y-%m') = ?
+    WHERE a.user_id = ? AND a.attendance_date BETWEEN ? AND ?
     ORDER BY a.attendance_date DESC
 ");
-$stmtAtt->execute([$employeeId, $month]);
+$stmtAtt->execute([$employeeId, $monthStart, $monthEnd]);
 $attendances = $stmtAtt->fetchAll();
 
 // Index by date
@@ -67,9 +73,9 @@ foreach ($attendances as $att) {
 // Get holidays
 $stmtHolidays = $pdo->prepare("
     SELECT date, name, type FROM hr_holidays 
-    WHERE DATE_FORMAT(date, '%Y-%m') = ? AND is_active = 1
+    WHERE date BETWEEN ? AND ? AND is_active = 1
 ");
-$stmtHolidays->execute([$month]);
+$stmtHolidays->execute([$monthStart, $monthEnd]);
 $holidays = [];
 foreach ($stmtHolidays->fetchAll() as $h) {
     $holidays[$h['date']] = $h;

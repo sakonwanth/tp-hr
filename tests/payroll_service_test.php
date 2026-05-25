@@ -101,4 +101,11 @@ assertSameValue(1.0, $hireMethod->invoke($service, '2026-03-20', '2026-03-26', '
 $partial = $hireMethod->invoke($service, '2026-04-05', '2026-03-26', '2026-04-27');
 assertSameValue(true, $partial > 0 && $partial < 1, 'mid-period hire — prorated pay');
 
+assertSameValue('2026-04-26', $service->attendancePeriodBounds('2026-05-01', 25)['start'], 'May payroll starts Apr 26');
+assertSameValue('2026-05-25', $service->attendancePeriodBounds('2026-05-01', 25)['end'], 'May payroll ends May 25');
+assertSameValue('2026-05-25', $service->attendanceClosedScanEnd('2026-04-26', '2026-05-25', '2026-05-26'), 'scan full May period on May 26');
+assertSameValue('', $service->attendanceClosedScanEnd('2026-05-26', '2026-06-25', '2026-05-26'), 'June period on May 26 — no false absent');
+assertSameValue('2026-05', $service->suggestPayrollMonth(25, '2026-05-26'), 'suggest May after cutover');
+assertSameValue('2026-04', $service->suggestPayrollMonth(25, '2026-05-20'), 'suggest April before cutover');
+
 echo "PayrollService regression fixtures passed." . PHP_EOL;

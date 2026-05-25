@@ -12,13 +12,23 @@ $user = Auth::user();
 $page_title = 'ประวัติการลงเวลา';
 $current_page = 'checkin';
 
-// Get filter parameters
-$month = $_GET['month'] ?? date('Y-m');
+// Get filter parameters (payroll month → รอบ 26 ก่อนหน้า ถึง 25 เดือนนี้)
+$payrollSvc = new PayrollService($pdo);
+$month = $_GET['month'] ?? $payrollSvc->suggestPayrollMonth();
 $status_filter = $_GET['status'] ?? '';
+$payDay = $payrollSvc->getDefaultPayDay();
+$period = $payrollSvc->attendancePeriodBounds($month . '-01', $payDay);
+$monthStart = $period['start'];
+$monthEnd = $period['end'];
+$today = date('Y-m-d');
+$lastDay = $payrollSvc->attendanceClosedScanEnd($monthStart, $monthEnd, $today);
+if ($lastDay === '') {
+    $lastDay = date('Y-m-d', strtotime($monthStart . ' -1 day'));
+}
 
 // Build query
-$where = ["a.user_id = ?", "DATE_FORMAT(a.attendance_date, '%Y-%m') = ?"];
-$params = [$user['id'], $month];
+$where = ["a.user_id = ?", "a.attendance_date BETWEEN ? AND ?"];
+$params = [$user['id'], $monthStart, $monthEnd];
 
 if ($status_filter) {
     $where[] = "a.status = ?";
@@ -49,31 +59,25 @@ $stmt = $pdo->prepare("
         SUM(COALESCE(late_minutes, 0)) as total_late_minutes,
         SUM(COALESCE(ot_minutes, 0)) as total_ot_minutes
     FROM hr_attendances 
-    WHERE user_id = ? AND DATE_FORMAT(attendance_date, '%Y-%m') = ?
+    WHERE user_id = ? AND attendance_date BETWEEN ? AND ?
 ");
-$stmt->execute([$user['id'], $month]);
+$stmt->execute([$user['id'], $monthStart, $lastDay >= $monthStart ? $lastDay : $monthStart]);
 $summary = $stmt->fetch();
 
 // Get holidays for this month
 $stmtHolidays = $pdo->prepare("
     SELECT date, name, type 
     FROM hr_holidays 
-    WHERE DATE_FORMAT(date, '%Y-%m') = ? AND is_active = 1
+    WHERE date BETWEEN ? AND ? AND is_active = 1
     ORDER BY date
 ");
-$stmtHolidays->execute([$month]);
+$stmtHolidays->execute([$monthStart, $monthEnd]);
 $holidays = [];
 foreach ($stmtHolidays->fetchAll() as $h) {
     $holidays[$h['date']] = $h;
 }
 
-// Build full calendar for the month (all days up to today or end of month)
-$monthStart = $month . '-01';
-$monthEnd = date('Y-m-t', strtotime($monthStart));
-$today = date('Y-m-d');
-$lastDay = ($monthEnd <= $today) ? $monthEnd : $today;
-
-// Index attendance records by date
+// Build full calendar for the payroll period (completed days only)
 $attendanceByDate = [];
 foreach ($attendances as $att) {
     $attendanceByDate[$att['attendance_date']] = $att;

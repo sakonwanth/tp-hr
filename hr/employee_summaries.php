@@ -13,10 +13,15 @@ if (!hr_can_access_hr_dashboard()) {
 $pdo = Database::getInstance()->getConnection();
 $summaryService = new EmployeeSummaryService($pdo);
 
-$month = $_GET['month'] ?? date('Y-m');
+$month = $_GET['month'] ?? (new PayrollService($pdo))->suggestPayrollMonth();
 if (!preg_match('/^\d{4}-\d{2}$/', $month)) {
-    $month = date('Y-m');
+    $month = (new PayrollService($pdo))->suggestPayrollMonth();
 }
+$payrollSvcForPeriod = new PayrollService($pdo);
+$payDayForPeriod = $payrollSvcForPeriod->getDefaultPayDay();
+$summaryPeriod = $payrollSvcForPeriod->attendancePeriodBounds($month . '-01', $payDayForPeriod);
+$reportFrom = $summaryPeriod['start'];
+$reportTo = $summaryPeriod['end'];
 $department = trim($_GET['department'] ?? '');
 
 $departments = $pdo->query("
@@ -53,7 +58,7 @@ include dirname(__DIR__) . '/templates/header.php';
             <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">ภาพรวมวันทำงาน การลา วันหยุด การสลับวันหยุด และการขาดงาน — กด 「รายละเอียด」แล้วใช้ปุ่ม 「แก้ไขเวลา」 เพื่อไปแก้ที่หน้าจัดการลงเวลา</p>
         </div>
         <?php if (isCEOOrAbove()): ?>
-        <a href="/hr/reports.php?report=attendance&from=<?php echo urlencode($month . '-01'); ?>&to=<?php echo urlencode(date('Y-m-t', strtotime($month . '-01'))); ?>"
+        <a href="/hr/reports.php?report=attendance&from=<?php echo urlencode($reportFrom); ?>&to=<?php echo urlencode($reportTo); ?>"
            class="inline-flex items-center justify-center min-h-[48px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] font-medium touch-manipulation shrink-0">
             <i class="fas fa-file-export mr-2" aria-hidden="true"></i>รายงาน CEO
         </a>

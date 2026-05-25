@@ -61,7 +61,10 @@ class EmployeeSummaryService
         $periodStart = $period['start'];
         $periodEnd = $period['end'];
         $today = date('Y-m-d');
-        $lastDay = min($periodEnd, $today);
+        $lastDay = $payrollSvc->attendanceClosedScanEnd($periodStart, $periodEnd, $today);
+        if ($lastDay === '') {
+            $lastDay = date('Y-m-d', strtotime($periodStart . ' -1 day'));
+        }
 
         // แก้ record ที่ backfill เป็น ABSENT ก่อนอนุมัติลา (หรือ sync ล้มเหลว)
         $this->reconcileAbsentOverlappingApprovedLeave($userId, $periodStart, $lastDay);

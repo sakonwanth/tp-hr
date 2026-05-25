@@ -321,6 +321,44 @@ class PayrollService
     }
 
     /**
+     * Last date to count absences / summaries — completed workdays only (excludes today if period open).
+     */
+    public function attendanceClosedScanEnd(string $periodStart, string $periodEnd, ?string $asOf = null): string
+    {
+        $asOf = $asOf ?? date('Y-m-d');
+        if ($asOf > $periodEnd) {
+            return $periodEnd;
+        }
+        $yesterday = date('Y-m-d', strtotime($asOf . ' -1 day'));
+        if ($yesterday < $periodStart) {
+            return '';
+        }
+        return $yesterday;
+    }
+
+    /** Payroll month (YYYY-MM) to calculate as of $asOf. After pay_day → current month; on/before → previous. */
+    public function suggestPayrollMonth(?int $payDay = null, ?string $asOf = null): string
+    {
+        if ($payDay === null) {
+            $payDay = $this->getDefaultPayDay();
+        }
+        $asOf = $asOf ?? date('Y-m-d');
+        $day = (int)date('j', strtotime($asOf));
+        $monthFirstTs = strtotime(date('Y-m-01', strtotime($asOf)));
+        if ($day > $payDay) {
+            return date('Y-m', $monthFirstTs);
+        }
+        return date('Y-m', strtotime('-1 month', $monthFirstTs));
+    }
+
+    public function isPeriodClosed(string $payrollMonth, ?int $payDay = null, ?string $asOf = null): bool
+    {
+        $period = $this->attendancePeriodBounds($payrollMonth, $payDay);
+        $asOf = $asOf ?? date('Y-m-d');
+        return $asOf > $period['end'];
+    }
+
+    /**
      * Compute attendance deductions (absent/late) for the payroll period.
      */
     public function computeAttendanceDeductions(int $userId, string $monthFirst, ?int $payDay = null): array
@@ -351,7 +389,7 @@ class PayrollService
         if ($hireDate !== null && $hireDate > $periodStart) {
             $periodStart = $hireDate;
         }
-        $missingScanEnd = min($periodEnd, date('Y-m-d'));
+        $missingScanEnd = $this->attendanceClosedScanEnd($periodStart, $periodEnd);
 
         try {
             $stmt = $this->pdo->prepare("
@@ -417,7 +455,10 @@ class PayrollService
             }
         }
 
-        foreach ($this->findMissingAbsentDates($userId, $periodStart, $missingScanEnd, $loggedDates) as $date) {
+        $missingDates = ($missingScanEnd !== '' && $missingScanEnd >= $periodStart)
+            ? $this->findMissingAbsentDates($userId, $periodStart, $missingScanEnd, $loggedDates)
+            : [];
+        foreach ($missingDates as $date) {
             if (!empty($absentDates[$date])) continue;
             $result['absent_days'] += 1;
             $absentDates[$date] = true;
