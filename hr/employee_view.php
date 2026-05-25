@@ -65,6 +65,8 @@ $monthlySummary = $summaryService->getMonthlySummary($id, $summaryMonth);
 $employeeId = $id;
 $showMonthPicker = true;
 $preserveQuery = ['id' => $id];
+$summary = $monthlySummary;
+$attendanceReturnUrl = '/hr/employee_view.php?' . http_build_query(['id' => $id, 'month' => $summaryMonth]);
 
 // Helper: row output
 if (!function_exists('tp_hr_emp_view_row')) {

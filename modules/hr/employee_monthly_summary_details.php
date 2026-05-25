@@ -16,8 +16,14 @@ $employeeId = (int)($employeeId ?? $summary['user_id'] ?? 0);
 $showActions = !empty($showActions) && $employeeId > 0;
 $isCeo = function_exists('isCEOOrAbove') && isCEOOrAbove();
 
-$attFixUrl = static function (int $uid, string $date) {
-    return '/hr/attendance.php?' . http_build_query(['date' => $date, 'user_id' => $uid, 'fix' => 1]);
+$attFixUrl = static function (int $uid, string $date) use ($attendanceReturnUrl) {
+    $q = ['date' => $date, 'user_id' => $uid, 'fix' => 1];
+    if (!empty($attendanceReturnUrl)) {
+        $return = $attendanceReturnUrl;
+        $return .= (str_contains($return, '?') ? '&' : '?') . 'expand=' . $uid;
+        $q['return'] = $return;
+    }
+    return '/hr/attendance.php?' . http_build_query($q);
 };
 
 $hasLate = !empty($d['late']);

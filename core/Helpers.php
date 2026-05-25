@@ -351,6 +351,26 @@ function checkinStorageResolveDiskPath(string $relativePath): ?string {
 /**
  * Safe filename for Content-Disposition (DB or constructed names; CRLF / path safe).
  */
+/**
+ * Allow only same-app relative paths for post-action redirects (e.g. attendance fix flow).
+ */
+function hr_safe_internal_return_url(?string $url): ?string {
+    if ($url === null || $url === '') {
+        return null;
+    }
+    $url = trim($url);
+    if ($url === '' || !str_starts_with($url, '/')) {
+        return null;
+    }
+    if (preg_match('#^/hr/[a-zA-Z0-9_./?=&%-]+$#', $url) !== 1) {
+        return null;
+    }
+    if (stripos($url, '//') !== false) {
+        return null;
+    }
+    return $url;
+}
+
 function hr_safe_content_disposition_filename(string $name, string $default = 'download'): string {
     $firstLine = preg_split('/\r\n|\r|\n/', $name, 2)[0] ?? $name;
     $base = basename(str_replace(["\0", "\r", "\n", '"', '\\'], '', $firstLine));

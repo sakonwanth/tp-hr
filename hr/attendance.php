@@ -143,6 +143,7 @@ if ($department !== '') {
 }
 $highlightUserId = (int)($_GET['user_id'] ?? 0);
 $autoOpenFix = isset($_GET['fix']) && $highlightUserId > 0;
+$attendanceReturnUrl = hr_safe_internal_return_url($_GET['return'] ?? null);
 
 $current_page = 'hr-attendance';
 include dirname(__DIR__) . '/templates/header.php';
@@ -153,11 +154,23 @@ include dirname(__DIR__) . '/templates/header.php';
     <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
         <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
         <span class="mx-2">/</span>
+        <?php if ($attendanceReturnUrl): ?>
+        <a href="<?php echo htmlspecialchars($attendanceReturnUrl); ?>" class="hover:text-white touch-manipulation">กลับหน้าก่อน</a>
+        <span class="mx-2">/</span>
+        <?php endif; ?>
         <span class="text-white">จัดการเวลาทำงาน</span>
     </nav>
-    <div class="min-w-0">
-        <h1 class="tp-ios-page-title">จัดการเวลาทำงาน</h1>
-        <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">สรุปการเข้างานตามวันที่ กรองแผนกและสถานะ</p>
+    <div class="min-w-0 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        <div>
+            <h1 class="tp-ios-page-title">จัดการเวลาทำงาน</h1>
+            <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">สรุปการเข้างานตามวันที่ กรองแผนกและสถานะ</p>
+        </div>
+        <?php if ($attendanceReturnUrl): ?>
+        <a href="<?php echo htmlspecialchars($attendanceReturnUrl); ?>"
+           class="inline-flex items-center justify-center min-h-[48px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] font-medium touch-manipulation shrink-0">
+            <i class="fas fa-arrow-left mr-2" aria-hidden="true"></i>กลับหน้าสรุป
+        </a>
+        <?php endif; ?>
     </div>
 </header>
 
@@ -656,6 +669,17 @@ include dirname(__DIR__) . '/templates/header.php';
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
+const attendanceReturnUrl = <?php echo $attendanceReturnUrl ? json_encode($attendanceReturnUrl, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT) : 'null'; ?>;
+const attendanceAutoFix = <?php echo $autoOpenFix ? 'true' : 'false'; ?>;
+
+function attendanceNavigateAfterFix() {
+    if (attendanceReturnUrl) {
+        window.location.href = attendanceReturnUrl;
+        return true;
+    }
+    return false;
+}
+
 function syncEditTimeSelectFromInput(inputId) {
     const input = document.getElementById(inputId);
     const sel = document.querySelector('select[data-ios-time-select-for="' + inputId + '"]');
@@ -717,6 +741,10 @@ function closeDeleteModal() {
 }
 
 function closeEditModal() {
+    if (attendanceReturnUrl && attendanceAutoFix) {
+        attendanceNavigateAfterFix();
+        return;
+    }
     if (typeof uiCloseModal === 'function') uiCloseModal('edit-modal');
     else {
         const m = document.getElementById('edit-modal');
@@ -758,7 +786,9 @@ document.getElementById('edit-form').addEventListener('submit', async function(e
     
     if (result.success) {
         showToast('บันทึกสำเร็จ', 'success');
-        setTimeout(() => location.reload(), 1000);
+        setTimeout(function () {
+            if (!attendanceNavigateAfterFix()) location.reload();
+        }, 700);
     } else {
         showToast(result.error || 'เกิดข้อผิดพลาด', 'error');
     }
@@ -782,7 +812,9 @@ document.getElementById('delete-form').addEventListener('submit', async function
     const result = await response.json();
     if (result.success) {
         showToast('ลบข้อมูลสำเร็จ', 'success');
-        setTimeout(() => location.reload(), 1000);
+        setTimeout(function () {
+            if (!attendanceNavigateAfterFix()) location.reload();
+        }, 700);
     } else {
         showToast(result.error || 'เกิดข้อผิดพลาด', 'error');
     }

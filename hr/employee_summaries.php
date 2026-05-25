@@ -28,6 +28,13 @@ $departments = $pdo->query("
 
 $rows = $summaryService->getOrgMonthlySummaries($month, $department !== '' ? $department : null);
 $orgKpi = $summaryService->getOrgMonthlyKpi($month);
+$expandUserId = (int)($_GET['expand'] ?? 0);
+
+$attendanceReturnQuery = ['month' => $month];
+if ($department !== '') {
+    $attendanceReturnQuery['department'] = $department;
+}
+$attendanceReturnUrl = '/hr/employee_summaries.php?' . http_build_query($attendanceReturnQuery);
 
 $current_page = 'hr-employee-summaries';
 include dirname(__DIR__) . '/templates/header.php';
@@ -82,7 +89,7 @@ include dirname(__DIR__) . '/templates/header.php';
             <i class="fas fa-chevron-down text-white/40 group-open:rotate-180 transition-transform text-xs shrink-0" aria-hidden="true"></i>
         </summary>
         <ul class="text-white/70 text-sm space-y-3 list-none mt-4 pt-4 border-t border-white/10 leading-relaxed">
-            <li><strong class="text-amber-300">มาสาย / ขาด / ไม่มีลงเวลา</strong> — กด 「แก้ไขเวลา」 ที่วันนั้น → ไปหน้า <a href="/hr/attendance.php" class="text-violet-300 hover:text-violet-200 underline">จัดการลงเวลา</a></li>
+            <li><strong class="text-amber-300">มาสาย / ขาด / ไม่มีลงเวลา</strong> — กด 「แก้ไขเวลา」 ที่วันนั้น → แก้ในหน้าจัดการลงเวลา แล้ว<strong class="text-amber-200">กลับหน้าสรุปอัตโนมัติ</strong> เพื่อแก้วันถัดไปได้ต่อเนื่อง</li>
             <li><strong class="text-blue-300">ลา</strong> — พนักงานยื่นใบลา → HR อนุมัติที่ <a href="/hr/leaves.php?status=pending" class="text-violet-300 hover:text-violet-200 underline">อนุมัติการลา</a></li>
             <li><strong class="text-violet-300">สลับวันหยุด</strong> — CEO อนุมัติที่ <a href="/hr/dayoff_approvals.php" class="text-violet-300 hover:text-violet-200 underline">อนุมัติเปลี่ยนวันหยุด</a></li>
         </ul>
@@ -120,7 +127,7 @@ include dirname(__DIR__) . '/templates/header.php';
     <?php if ($rows): ?>
     <div class="md:hidden p-4 space-y-3">
         <?php foreach ($rows as $row): ?>
-        <details class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 overflow-hidden group">
+        <details class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 overflow-hidden group" data-emp-id="<?php echo (int)$row['id']; ?>">
             <summary class="p-4 cursor-pointer list-none touch-manipulation">
                 <div class="flex items-start justify-between gap-2">
                     <div class="min-w-0 flex-1">
@@ -262,6 +269,18 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 
 <script>
+function tpHrExpandEmployeeSummary(targetId, triggerBtn) {
+    var row = document.getElementById(targetId);
+    if (!row) return;
+    row.classList.remove('hidden');
+    if (triggerBtn) {
+        triggerBtn.setAttribute('aria-expanded', 'true');
+        var chevron = triggerBtn.querySelector('.emp-summary-chevron');
+        if (chevron) chevron.classList.add('rotate-180');
+    }
+    row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
 document.querySelectorAll('.emp-summary-toggle').forEach(function (btn) {
     btn.addEventListener('click', function () {
         var id = btn.getAttribute('data-target');
@@ -273,6 +292,18 @@ document.querySelectorAll('.emp-summary-toggle').forEach(function (btn) {
         if (chevron) chevron.classList.toggle('rotate-180', open);
     });
 });
+
+(function () {
+    var expandUid = <?php echo (int)$expandUserId; ?>;
+    if (expandUid <= 0) return;
+    var mobileDetails = document.querySelector('details[data-emp-id="' + expandUid + '"]');
+    if (mobileDetails) {
+        mobileDetails.open = true;
+        mobileDetails.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    var desktopBtn = document.querySelector('.emp-summary-toggle[data-target="emp-detail-' + expandUid + '"]');
+    tpHrExpandEmployeeSummary('emp-detail-' + expandUid, desktopBtn);
+})();
 </script>
 
 <?php include dirname(__DIR__) . '/templates/footer.php'; ?>
