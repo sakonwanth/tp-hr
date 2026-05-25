@@ -59,6 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['download_payslip'] ?? '') 
         $stmt_ytd->execute([$slip['user_id'], $ytd_year, $slip['payroll_month']]);
         $ytd = $stmt_ytd->fetch(PDO::FETCH_ASSOC);
 
+        $payslip_back_url = 'payslip.php?year=' . $ytd_year;
         include __DIR__ . '/modules/employee/payslip/print_template.php';
         exit;
     }
@@ -119,11 +120,11 @@ if (!in_array($year, $availableYears)) {
     rsort($availableYears);
 }
 
-// Get single slip if requested
+// Get single slip if requested — แสดงด้วย print template เดียวกับ CRM payroll_print.php
 $slip = null;
 if ($viewSlipId > 0) {
     $stmt = $pdo->prepare("
-        SELECT ps.*, pr.payroll_month, pr.status as run_status,
+        SELECT ps.*, pr.payroll_month, pr.pay_day, pr.status as run_status,
                pr.approved_by, u.first_name_th as approver_first, u.last_name_th as approver_last,
                emp.title as emp_title, emp.first_name_th, emp.last_name_th, emp.employee_code, emp.department, emp.position
         FROM payroll_slips ps
@@ -134,6 +135,28 @@ if ($viewSlipId > 0) {
     ");
     $stmt->execute([$viewSlipId, $user['id']]);
     $slip = $stmt->fetch();
+
+    if ($slip) {
+        $ytd_year = (int)date('Y', strtotime($slip['payroll_month']));
+        $stmt_ytd = $pdo->prepare("
+            SELECT
+                COALESCE(SUM(s.total_income), 0) as ytd_income,
+                COALESCE(SUM(s.tax_withheld), 0) as ytd_tax,
+                COALESCE(SUM(s.social_security), 0) as ytd_ss,
+                COALESCE(SUM(s.provident_fund), 0) as ytd_pf,
+                COALESCE(SUM(s.total_deductions), 0) as ytd_deductions,
+                COALESCE(SUM(s.net_salary), 0) as ytd_net
+            FROM payroll_slips s
+            JOIN payroll_runs r ON s.payroll_run_id = r.id
+            WHERE s.user_id = ? AND YEAR(r.payroll_month) = ? AND r.payroll_month <= ?
+              AND r.status IN ('approved', 'paid')
+        ");
+        $stmt_ytd->execute([$slip['user_id'], $ytd_year, $slip['payroll_month']]);
+        $ytd = $stmt_ytd->fetch(PDO::FETCH_ASSOC);
+        $payslip_back_url = 'payslip.php?year=' . $ytd_year;
+        include __DIR__ . '/modules/employee/payslip/print_template.php';
+        exit;
+    }
 }
 
 // Get YTD summary (year-to-date)
@@ -160,229 +183,6 @@ include 'templates/header.php';
 ?>
 
 <div class="tp-payslip-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
-<?php if ($slip): ?>
-<?php
-// ชื่อบริษัท — ดึงจาก system_settings (เดียวกับ print_template / CRM)
-$payslipCompanyName = 'บริษัท ทีพี-แอสเสท ดีเวลลอปเม้นท์ จำกัด';
-$payslipCompanyNameEn = 'TP-ASSET DEVELOPMENT CO., LTD.';
-try {
-    $stCo = $pdo->prepare("SELECT setting_key, setting_value FROM system_settings WHERE setting_key IN ('company_name','company_name_en')");
-    $stCo->execute();
-    while ($rowCo = $stCo->fetch(PDO::FETCH_ASSOC)) {
-        $v = trim((string)($rowCo['setting_value'] ?? ''));
-        if ($v === '') {
-            continue;
-        }
-        if ($rowCo['setting_key'] === 'company_name') {
-            $payslipCompanyName = $v;
-        } elseif ($rowCo['setting_key'] === 'company_name_en') {
-            $payslipCompanyNameEn = $v;
-        }
-    }
-} catch (Throwable $e) {
-    /* ใช้ค่าเริ่มต้นด้านบน */
-}
-?>
-<!-- Slip Detail View -->
-<?php $slipYear = (int)date('Y', strtotime($slip['payroll_month'])); ?>
-<header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
-    <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
-        <a href="index.php" class="hover:text-white touch-manipulation">หน้าแรก</a>
-        <span class="mx-2">/</span>
-        <a href="payslip.php?year=<?php echo $slipYear; ?>" class="hover:text-white touch-manipulation">สลิปเงินเดือน</a>
-        <span class="mx-2">/</span>
-        <span class="text-white">รายละเอียดสลิป</span>
-    </nav>
-    <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between gap-y-4">
-        <div class="min-w-0 flex-1">
-            <h1 class="tp-ios-page-title">
-                สลิปเงินเดือน <?php echo thaiMonth(date('n', strtotime($slip['payroll_month']))); ?> <?php echo date('Y', strtotime($slip['payroll_month'])) + 543; ?>
-            </h1>
-            <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">ดูรายละเอียดรายได้ รายการหัก และเงินได้สุทธิ พิมพ์หรือดาวน์โหลดได้จากปุ่มด้านขวา</p>
-        </div>
-        <div class="flex flex-col sm:flex-row gap-2 sm:items-center shrink-0 w-full sm:w-auto">
-            <?php tp_hr_payslip_download_form((int)$slip['id'], 'w-full sm:w-auto min-h-[48px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] transition-colors inline-flex items-center justify-center touch-manipulation font-medium border-0', '<i class="fas fa-print mr-2" aria-hidden="true"></i>พิมพ์', false); ?>
-            <?php tp_hr_payslip_download_form((int)$slip['id'], 'w-full sm:w-auto min-h-[56px] px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors inline-flex items-center justify-center font-semibold touch-manipulation border-0', '<i class="fas fa-download mr-2" aria-hidden="true"></i>ดาวน์โหลด PDF', true); ?>
-        </div>
-    </div>
-</header>
-
-<!-- Payslip Card -->
-<div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 print:bg-white print:text-black min-w-0 overflow-x-auto" id="payslip-content">
-    <!-- Header -->
-    <div class="flex items-start justify-between mb-6 pb-6 border-b border-white/10 print:border-gray-200">
-        <div class="min-w-0 pr-2">
-            <h2 class="text-xl font-bold text-white print:text-black leading-snug"><?php echo htmlspecialchars($payslipCompanyName); ?></h2>
-            <?php if ($payslipCompanyNameEn !== ''): ?>
-            <p class="text-white/60 print:text-gray-600 text-sm mt-0.5"><?php echo htmlspecialchars($payslipCompanyNameEn); ?></p>
-            <?php endif; ?>
-        </div>
-        <div class="text-right">
-            <p class="text-white/60 print:text-gray-600 text-sm">ใบแสดงรายได้</p>
-            <p class="text-white print:text-black font-medium">
-                ประจำเดือน <?php echo thaiMonth(date('n', strtotime($slip['payroll_month']))); ?> <?php echo date('Y', strtotime($slip['payroll_month'])) + 543; ?>
-            </p>
-            <?php if ($slip['run_status'] === 'paid'): ?>
-            <p class="text-white/50 print:text-gray-500 text-sm">สถานะ: จ่ายแล้ว</p>
-            <?php endif; ?>
-        </div>
-    </div>
-    
-    <!-- Employee Info -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 pb-6 border-b border-white/10 print:border-gray-200">
-        <div>
-            <p class="text-white/50 print:text-gray-500 text-sm">รหัสพนักงาน</p>
-            <p class="text-white print:text-black font-medium"><?php echo htmlspecialchars($slip['employee_code'] ?? '-'); ?></p>
-        </div>
-        <div>
-            <p class="text-white/50 print:text-gray-500 text-sm">ชื่อ-นามสกุล</p>
-            <p class="text-white print:text-black font-medium"><?php echo htmlspecialchars($slip['first_name_th'] . ' ' . $slip['last_name_th']); ?></p>
-        </div>
-        <div>
-            <p class="text-white/50 print:text-gray-500 text-sm">แผนก</p>
-            <p class="text-white print:text-black"><?php echo htmlspecialchars($slip['department'] ?? '-'); ?></p>
-        </div>
-        <div>
-            <p class="text-white/50 print:text-gray-500 text-sm">ตำแหน่ง</p>
-            <p class="text-white print:text-black"><?php echo htmlspecialchars($slip['position'] ?? '-'); ?></p>
-        </div>
-    </div>
-    
-    <!-- Income & Deduction -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <!-- Income -->
-        <div>
-            <h3 class="text-lg font-semibold text-green-400 print:text-green-600 mb-4">
-                <i class="fas fa-plus-circle mr-2"></i>รายได้
-            </h3>
-            <div class="space-y-3">
-                <div class="flex justify-between">
-                    <span class="text-white/70 print:text-gray-700">เงินเดือน</span>
-                    <span class="text-white print:text-black font-medium"><?php echo number_format($slip['gross_salary'], 2); ?></span>
-                </div>
-                <?php if ($slip['bonus'] > 0): ?>
-                <div class="flex justify-between">
-                    <span class="text-white/70 print:text-gray-700">โบนัส</span>
-                    <span class="text-white print:text-black font-medium"><?php echo number_format($slip['bonus'], 2); ?></span>
-                </div>
-                <?php endif; ?>
-                <?php if ($slip['allowances'] > 0): ?>
-                <div class="flex justify-between">
-                    <span class="text-white/70 print:text-gray-700">ค่าเบี้ยเลี้ยง/สวัสดิการ</span>
-                    <span class="text-white print:text-black font-medium"><?php echo number_format($slip['allowances'], 2); ?></span>
-                </div>
-                <?php endif; ?>
-                <?php 
-                // Other income items
-                if (!empty($slip['income_other_json'])) {
-                    $otherIncomes = json_decode($slip['income_other_json'], true);
-                    if (is_array($otherIncomes)) {
-                        foreach ($otherIncomes as $item) {
-                            if ($item['amount'] > 0): ?>
-                <div class="flex justify-between">
-                    <span class="text-white/70 print:text-gray-700"><?php echo htmlspecialchars($item['label']); ?></span>
-                    <span class="text-white print:text-black font-medium"><?php echo number_format($item['amount'], 2); ?></span>
-                </div>
-                            <?php endif;
-                        }
-                    }
-                }
-                ?>
-                <div class="flex justify-between pt-3 border-t border-white/10 print:border-gray-200">
-                    <span class="text-white print:text-black font-semibold">รวมรายได้</span>
-                    <span class="text-green-400 print:text-green-600 font-bold text-lg"><?php echo number_format($slip['total_income'], 2); ?></span>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Deduction -->
-        <div>
-            <h3 class="text-lg font-semibold text-red-400 print:text-red-600 mb-4">
-                <i class="fas fa-minus-circle mr-2"></i>รายการหัก
-            </h3>
-            <div class="space-y-3">
-                <?php if ($slip['tax_withheld'] > 0): ?>
-                <div class="flex justify-between">
-                    <span class="text-white/70 print:text-gray-700">ภาษีหัก ณ ที่จ่าย</span>
-                    <span class="text-white print:text-black font-medium"><?php echo number_format($slip['tax_withheld'], 2); ?></span>
-                </div>
-                <?php endif; ?>
-                <?php if ($slip['social_security'] > 0): ?>
-                <div class="flex justify-between">
-                    <span class="text-white/70 print:text-gray-700">ประกันสังคม</span>
-                    <span class="text-white print:text-black font-medium"><?php echo number_format($slip['social_security'], 2); ?></span>
-                </div>
-                <?php endif; ?>
-                <?php if ($slip['provident_fund'] > 0): ?>
-                <div class="flex justify-between">
-                    <span class="text-white/70 print:text-gray-700">กองทุนสำรองเลี้ยงชีพ</span>
-                    <span class="text-white print:text-black font-medium"><?php echo number_format($slip['provident_fund'], 2); ?></span>
-                </div>
-                <?php endif; ?>
-                <?php if (isset($slip['group_insurance']) && (float)$slip['group_insurance'] > 0): ?>
-                <div class="flex justify-between">
-                    <span class="text-white/70 print:text-gray-700">ประกันกลุ่ม (ส่วนพนักงาน)</span>
-                    <span class="text-white print:text-black font-medium"><?php echo number_format($slip['group_insurance'], 2); ?></span>
-                </div>
-                <?php endif; ?>
-                <?php 
-                // Other deduction items
-                if (!empty($slip['deduction_other_json'])) {
-                    $otherDeds = json_decode($slip['deduction_other_json'], true);
-                    if (is_array($otherDeds)) {
-                        foreach ($otherDeds as $item) {
-                            if ($item['amount'] > 0): ?>
-                <div class="flex justify-between">
-                    <span class="text-white/70 print:text-gray-700"><?php echo htmlspecialchars($item['label']); ?></span>
-                    <span class="text-white print:text-black font-medium"><?php echo number_format($item['amount'], 2); ?></span>
-                </div>
-                            <?php endif;
-                        }
-                    }
-                }
-                ?>
-                <div class="flex justify-between pt-3 border-t border-white/10 print:border-gray-200">
-                    <span class="text-white print:text-black font-semibold">รวมรายการหัก</span>
-                    <span class="text-red-400 print:text-red-600 font-bold text-lg"><?php echo number_format($slip['total_deductions'], 2); ?></span>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Net Salary -->
-    <div class="p-6 rounded-[var(--tp-ios-card-radius)] bg-violet-600/15 border border-violet-500/35 print:bg-gray-100 print:border-gray-300">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-white/70 print:text-gray-600">เงินได้สุทธิ</p>
-                <p class="text-sm text-white/50 print:text-gray-500">Net Salary</p>
-            </div>
-            <div class="text-right">
-                <p class="text-3xl font-bold text-white print:text-black"><?php echo number_format($slip['net_salary'], 2); ?></p>
-                <p class="text-white/60 print:text-gray-600 text-sm">บาท</p>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Footer -->
-    <div class="mt-6 pt-6 border-t border-white/10 print:border-gray-200 text-center">
-        <p class="text-white/50 print:text-gray-500 text-sm">
-            เอกสารนี้ออกโดยระบบอัตโนมัติ ไม่ต้องลงลายมือชื่อ
-        </p>
-        <?php if ($slip['approver_first']): ?>
-        <p class="text-white/40 print:text-gray-400 text-xs mt-1">
-            อนุมัติโดย: <?php echo htmlspecialchars($slip['approver_first'] . ' ' . $slip['approver_last']); ?>
-        </p>
-        <?php endif; ?>
-    </div>
-</div>
-
-<div class="mt-6 min-w-0">
-    <a href="payslip.php?year=<?php echo $slipYear; ?>" class="inline-flex items-center text-white/60 hover:text-white touch-manipulation min-h-[48px]">
-        <i class="fas fa-arrow-left mr-2"></i>กลับไปรายการสลิป
-    </a>
-</div>
-
-<?php else: ?>
 <!-- Slip List View -->
 <header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
     <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
@@ -494,7 +294,6 @@ try {
     </div>
     <?php endif; ?>
 </div>
-<?php endif; ?>
 
 </div>
 

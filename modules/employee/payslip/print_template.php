@@ -44,6 +44,38 @@ $month_label_en = date('F Y', $pm);
 $period_label = date('m/Y', $pm);
 $ytd_year = (int)date('Y', $pm);
 
+// วันที่จ่ายเงินเดือน — logic เดียวกับ CRM payroll_print.php
+$pay_day_int = (int)($slip['pay_day'] ?? 25);
+if ($pay_day_int < 1) {
+    $pay_day_int = 1;
+}
+$last_day_of_month = (int)date('t', $pm);
+if ($pay_day_int > $last_day_of_month) {
+    $pay_day_int = $last_day_of_month;
+}
+$pay_date = date('Y-m-', $pm) . str_pad((string)$pay_day_int, 2, '0', STR_PAD_LEFT);
+$pay_date_th = (int)date('j', strtotime($pay_date)) . ' ' . thaiMonth((int)date('n', strtotime($pay_date))) . ' ' . ((int)date('Y', strtotime($pay_date)) + 543);
+$pay_date_en = date('j F Y', strtotime($pay_date));
+
+// ภาษีหักเพิ่มรายเดือน (แยกแสดงในสลิป — เหมือน CRM)
+$extra_tax_withheld = 0;
+if (isset($pdo)) {
+    try {
+        $m_first = date('Y-m-01', $pm);
+        $st2 = $pdo->prepare("SELECT additional_tax_withholding FROM employee_salary_setup WHERE user_id = ? AND effective_from <= ? AND (effective_to IS NULL OR effective_to >= ?) ORDER BY effective_from DESC, id DESC LIMIT 1");
+        $st2->execute([(int)$slip['user_id'], $m_first, $m_first]);
+        $r2 = $st2->fetch(PDO::FETCH_ASSOC);
+        if ($r2 && isset($r2['additional_tax_withholding'])) {
+            $extra_tax_withheld = min((float)$r2['additional_tax_withholding'], (float)($slip['tax_withheld'] ?? 0));
+        }
+    } catch (Throwable $e) {
+        /* column may not exist on legacy schema */
+    }
+}
+$base_tax_withheld = max(0, (float)($slip['tax_withheld'] ?? 0) - $extra_tax_withheld);
+
+$payslip_back_url = $payslip_back_url ?? ('payslip.php?year=' . $ytd_year);
+
 $full_name = trim(($slip['emp_title'] ?? '') . ($slip['first_name_th'] ?? '') . ' ' . ($slip['last_name_th'] ?? ''));
 $emp_code = $slip['employee_code'] ?? '';
 
@@ -316,7 +348,7 @@ header('Content-Type: text/html; charset=utf-8');
     <div class="page">
         <div class="no-print">
             <button type="button" class="btn-print" onclick="window.print();">พิมพ์ / บันทึกเป็น PDF</button>
-            <a href="payslip.php?slip_id=<?php echo (int)$slip['id']; ?>" class="link-back">← กลับรายการสลิป</a>
+            <a href="<?php echo htmlspecialchars($payslip_back_url, ENT_QUOTES, 'UTF-8'); ?>" class="link-back">← กลับรายการสลิป</a>
         </div>
 
         <header class="doc-header">
@@ -330,6 +362,7 @@ header('Content-Type: text/html; charset=utf-8');
                 <div class="tax-id" style="font-size:11px;color:#475569;margin-top:3px;font-weight:500;">เลขทะเบียนนิติบุคคล / Tax ID: <span style="font-weight:600;color:#1a365d;font-variant-numeric:tabular-nums;"><?php echo htmlspecialchars($company_tax_id); ?></span></div>
                 <?php endif; ?>
                 <div class="doc-period" style="font-size:12px;color:#475569;margin-top:3px;font-weight:600;">Period <?php echo $period_label; ?></div>
+                <div class="doc-paydate" style="font-size:11px;color:#0f766e;margin-top:3px;font-weight:700;">Pay Date <?php echo htmlspecialchars($pay_date_en); ?></div>
             </div>
         </header>
 
@@ -356,6 +389,14 @@ header('Content-Type: text/html; charset=utf-8');
                     <tr>
                         <th>ตำแหน่ง / Position</th>
                         <td><?php echo htmlspecialchars(trim($slip['position'] ?? '') !== '' ? $slip['position'] : '-'); ?></td>
+                    </tr>
+                    <tr>
+                        <th>งวดเงินเดือน / Pay Period</th>
+                        <td><?php echo htmlspecialchars($month_label_th); ?> (<?php echo htmlspecialchars($month_label_en); ?>)</td>
+                    </tr>
+                    <tr>
+                        <th>วันที่จ่ายเงินเดือน / Pay Date</th>
+                        <td style="font-weight:600;color:#0f766e;"><?php echo htmlspecialchars($pay_date_th); ?> &nbsp;<span style="color:#64748b;font-weight:500;">(<?php echo htmlspecialchars($pay_date_en); ?>)</span></td>
                     </tr>
                 </table>
             </section>
@@ -415,8 +456,14 @@ header('Content-Type: text/html; charset=utf-8');
                     <tbody>
                         <tr>
                             <td>ภาษีหัก ณ ที่จ่าย / Withholding Tax</td>
-                            <td class="amt"><?php echo number_format($slip['tax_withheld'] ?? 0, 2); ?></td>
+                            <td class="amt"><?php echo number_format($base_tax_withheld, 2); ?></td>
                         </tr>
+                        <?php if ($extra_tax_withheld > 0): ?>
+                        <tr>
+                            <td>ภาษีหักเพิ่มตามคำขอ / Additional Withholding (requested)</td>
+                            <td class="amt"><?php echo number_format($extra_tax_withheld, 2); ?></td>
+                        </tr>
+                        <?php endif; ?>
                         <?php if ((float)($slip['provident_fund'] ?? 0) != 0): ?>
                         <tr>
                             <td>กองทุนสำรองเลี้ยงชีพ / Provident Fund</td>
@@ -431,21 +478,62 @@ header('Content-Type: text/html; charset=utf-8');
                         <?php endif; ?>
                         <?php if ((float)($slip['group_insurance'] ?? 0) != 0): ?>
                         <tr>
-                            <td>ประกันกลุ่ม / Group Insurance</td>
+                            <td>ประกันกลุ่ม (ส่วนของพนักงาน) / Group Insurance (Employee Share)</td>
                             <td class="amt"><?php echo number_format($slip['group_insurance'], 2); ?></td>
                         </tr>
                         <?php endif; ?>
+                        <?php if (isset($slip['absence_deduction']) && (float)$slip['absence_deduction'] != 0): ?>
+                        <tr>
+                            <td>ค่าขาดงาน / Absence Deduction<?php
+                                $ad = (float)($slip['absent_days'] ?? 0);
+                                if ($ad > 0) {
+                                    echo ' <span style="color:#64748b;font-size:10px;">(' . rtrim(rtrim(number_format($ad, 1), '0'), '.') . ' วัน)</span>';
+                                }
+                            ?></td>
+                            <td class="amt"><?php echo number_format($slip['absence_deduction'], 2); ?></td>
+                        </tr>
+                        <?php endif; ?>
+                        <?php if (isset($slip['lateness_deduction']) && (float)$slip['lateness_deduction'] != 0): ?>
+                        <tr>
+                            <td>ค่ามาสาย / Late Deduction<?php
+                                $l30 = (int)($slip['late_count_30'] ?? 0);
+                                $l60 = (int)($slip['late_count_60'] ?? 0);
+                                $parts = [];
+                                if ($l30 > 0) {
+                                    $parts[] = "≤30นาที × {$l30}";
+                                }
+                                if ($l60 > 0) {
+                                    $parts[] = "31-60นาที × {$l60}";
+                                }
+                                if ($parts) {
+                                    echo ' <span style="color:#64748b;font-size:10px;">(' . implode(', ', $parts) . ')</span>';
+                                }
+                            ?></td>
+                            <td class="amt"><?php echo number_format($slip['lateness_deduction'], 2); ?></td>
+                        </tr>
+                        <?php endif; ?>
                         <?php
+                        $reserved_labels = ['ค่าขาดงาน', 'ค่าสาย', 'ค่ามาสาย'];
                         $deduction_other = !empty($slip['deduction_other_json']) ? json_decode($slip['deduction_other_json'], true) : [];
-                        if (is_array($deduction_other)) foreach ($deduction_other as $do):
-                            $amt = (float)($do['amount'] ?? 0);
-                            if ($amt == 0) continue;
+                        if (is_array($deduction_other)) {
+                            foreach ($deduction_other as $do):
+                                $amt = (float)($do['amount'] ?? 0);
+                                $label = trim((string)($do['label'] ?? 'หักอื่น'));
+                                if ($amt == 0) {
+                                    continue;
+                                }
+                                if (in_array($label, $reserved_labels, true)) {
+                                    continue;
+                                }
                         ?>
                         <tr>
-                            <td><?php echo htmlspecialchars(bilingual_label($do['label'] ?? 'หักอื่น', $bilingual_labels)); ?></td>
+                            <td><?php echo htmlspecialchars(bilingual_label($label, $bilingual_labels)); ?></td>
                             <td class="amt"><?php echo number_format($amt, 2); ?></td>
                         </tr>
-                        <?php endforeach; ?>
+                        <?php
+                            endforeach;
+                        }
+                        ?>
                         <tr class="total">
                             <th>รายการหักทั้งสิ้น / Total Deduction</th>
                             <td class="amt"><?php echo number_format($slip['total_deductions'] ?? 0, 2); ?></td>
