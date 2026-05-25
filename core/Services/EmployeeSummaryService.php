@@ -523,6 +523,23 @@ class EmployeeSummaryService
         foreach ($rows as &$r) {
             $r['original_day_label'] = $dayNames[(int)$r['original_day_off']] ?? '-';
             $r['requested_day_label'] = $dayNames[(int)$r['requested_day_off']] ?? '-';
+            $r['original_off_date'] = $this->findWeekDateByDayOfWeek(
+                (string)$r['week_start'],
+                (string)$r['week_end'],
+                (int)$r['original_day_off']
+            );
+            $r['requested_off_date'] = $this->findWeekDateByDayOfWeek(
+                (string)$r['week_start'],
+                (string)$r['week_end'],
+                (int)$r['requested_day_off']
+            );
+            $r['week_days'] = $this->buildDayoffSwapWeekDays(
+                (string)$r['week_start'],
+                (string)$r['week_end'],
+                (int)$r['original_day_off'],
+                (int)$r['requested_day_off'],
+                $dayNames
+            );
             $r['affected_days'] = $this->buildDayoffSwapAffectedDays(
                 (string)$r['week_start'],
                 (string)$r['week_end'],
@@ -534,6 +551,50 @@ class EmployeeSummaryService
             );
         }
         return $rows;
+    }
+
+    private function findWeekDateByDayOfWeek(string $weekStart, string $weekEnd, int $dayOfWeek): ?string
+    {
+        $cursor = $weekStart;
+        while ($cursor <= $weekEnd) {
+            if ((int)date('w', strtotime($cursor)) === $dayOfWeek) {
+                return $cursor;
+            }
+            $cursor = date('Y-m-d', strtotime('+1 day', strtotime($cursor)));
+        }
+        return null;
+    }
+
+    /**
+     * 7 วันของสัปดาห์ที่ขอเปลี่ยน — แสดงว่าวันไหนหยุด/ทำงานหลังอนุมัติ
+     *
+     * @return list<array<string,mixed>>
+     */
+    private function buildDayoffSwapWeekDays(
+        string $weekStart,
+        string $weekEnd,
+        int $originalDayOff,
+        int $requestedDayOff,
+        array $dayNames
+    ): array {
+        $days = [];
+        $cursor = $weekStart;
+        while ($cursor <= $weekEnd) {
+            $dow = (int)date('w', strtotime($cursor));
+            $wasOff = ($dow === $originalDayOff);
+            $nowOff = ($dow === $requestedDayOff);
+            $days[] = [
+                'date' => $cursor,
+                'day_label' => $dayNames[$dow] ?? '',
+                'is_off' => $nowOff,
+                'was_off' => $wasOff,
+                'changed' => $wasOff !== $nowOff,
+                'is_new_off' => $nowOff && !$wasOff,
+                'is_old_off' => $wasOff && !$nowOff,
+            ];
+            $cursor = date('Y-m-d', strtotime('+1 day', strtotime($cursor)));
+        }
+        return $days;
     }
 
     /**
