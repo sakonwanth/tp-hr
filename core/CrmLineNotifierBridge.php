@@ -232,3 +232,75 @@ function crm_line_notify_planned_late_cancelled(PDO $pdo, array $user, string $t
         error_log('crm_line_notify_planned_late_cancelled error: ' . $e->getMessage());
     }
 }
+
+function crm_line_adjustment_context(PDO $pdo, int $adjustmentId): ?array {
+    $stmt = $pdo->prepare("
+        SELECT adj.*, att.attendance_date,
+               u.id AS employee_id, u.username,
+               u.first_name, u.last_name, u.first_name_th, u.last_name_th
+        FROM hr_attendance_adjustments adj
+        JOIN hr_attendances att ON att.id = adj.attendance_id
+        JOIN users u ON u.id = adj.user_id
+        WHERE adj.id = ?
+        LIMIT 1
+    ");
+    $stmt->execute([$adjustmentId]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $row ?: null;
+}
+
+function crm_line_notify_attendance_adjustment_requested(PDO $pdo, int $adjustmentId): void {
+    if (!crm_line_bridge_load()) return;
+
+    try {
+        if (function_exists('ensureAttendanceAdjustmentNotificationEvents')) {
+            try { ensureAttendanceAdjustmentNotificationEvents($pdo); } catch (Throwable $e) { /* non-fatal */ }
+        }
+        $ctx = crm_line_adjustment_context($pdo, $adjustmentId);
+        if (!$ctx || !function_exists('hr_flex_attendance_adjustment_requested')) return;
+
+        $flex = hr_flex_attendance_adjustment_requested(
+            crm_line_user_name($ctx),
+            $ctx['attendance_date'],
+            $ctx['adjustment_type'] ?? 'both',
+            $ctx['original_check_in'] ?? null,
+            $ctx['original_check_out'] ?? null,
+            $ctx['requested_check_in'] ?? null,
+            $ctx['requested_check_out'] ?? null,
+            (string)($ctx['reason'] ?? '')
+        );
+        LineNotifier::sendEvent($pdo, 'hr.attendance_adjustment_requested', $flex, [
+            'triggering_user_id' => (int)$ctx['user_id'],
+        ]);
+    } catch (Throwable $e) {
+        error_log('crm_line_notify_attendance_adjustment_requested error: ' . $e->getMessage());
+    }
+}
+
+function crm_line_notify_attendance_adjustment_decision(PDO $pdo, int $adjustmentId, string $decision, string $note = ''): void {
+    if (!crm_line_bridge_load()) return;
+
+    try {
+        if (function_exists('ensureAttendanceAdjustmentNotificationEvents')) {
+            try { ensureAttendanceAdjustmentNotificationEvents($pdo); } catch (Throwable $e) { /* non-fatal */ }
+        }
+        $ctx = crm_line_adjustment_context($pdo, $adjustmentId);
+        if (!$ctx) return;
+
+        $type = $ctx['adjustment_type'] ?? 'both';
+        $date = $ctx['attendance_date'];
+        if ($decision === 'APPROVED' && function_exists('hr_flex_attendance_adjustment_approved')) {
+            $flex = hr_flex_attendance_adjustment_approved($date, $type, $note);
+            LineNotifier::sendEvent($pdo, 'hr.attendance_adjustment_approved', $flex, [
+                'triggering_user_id' => (int)$ctx['user_id'],
+            ]);
+        } elseif ($decision === 'REJECTED' && function_exists('hr_flex_attendance_adjustment_rejected')) {
+            $flex = hr_flex_attendance_adjustment_rejected($date, $type, $note);
+            LineNotifier::sendEvent($pdo, 'hr.attendance_adjustment_rejected', $flex, [
+                'triggering_user_id' => (int)$ctx['user_id'],
+            ]);
+        }
+    } catch (Throwable $e) {
+        error_log('crm_line_notify_attendance_adjustment_decision error: ' . $e->getMessage());
+    }
+}

@@ -4,6 +4,10 @@
  *
  * Applies employee-requested check-in/out corrections after executive review.
  */
+if (is_file(dirname(__DIR__) . '/CrmLineNotifierBridge.php')) {
+    require_once dirname(__DIR__) . '/CrmLineNotifierBridge.php';
+}
+
 class AttendanceAdjustmentException extends RuntimeException
 {
     public function __construct(string $message, private int $httpStatus = 400)
@@ -119,6 +123,10 @@ class AttendanceAdjustmentService
 
             $this->pdo->commit();
 
+            if (function_exists('crm_line_notify_attendance_adjustment_decision')) {
+                crm_line_notify_attendance_adjustment_decision($this->pdo, $requestId, 'APPROVED', $remarks);
+            }
+
             return [
                 'id' => $requestId,
                 'status' => 'APPROVED',
@@ -167,6 +175,10 @@ class AttendanceAdjustmentService
             ")->execute([$reviewerId, $remarks, $requestId]);
 
             $this->pdo->commit();
+
+            if (function_exists('crm_line_notify_attendance_adjustment_decision')) {
+                crm_line_notify_attendance_adjustment_decision($this->pdo, $requestId, 'REJECTED', $remarks);
+            }
 
             return [
                 'id' => $requestId,
