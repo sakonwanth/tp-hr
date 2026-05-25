@@ -533,22 +533,6 @@ class EmployeeSummaryService
                 (string)$r['week_end'],
                 (int)$r['requested_day_off']
             );
-            $r['week_days'] = $this->buildDayoffSwapWeekDays(
-                (string)$r['week_start'],
-                (string)$r['week_end'],
-                (int)$r['original_day_off'],
-                (int)$r['requested_day_off'],
-                $dayNames
-            );
-            $r['affected_days'] = $this->buildDayoffSwapAffectedDays(
-                (string)$r['week_start'],
-                (string)$r['week_end'],
-                (int)$r['original_day_off'],
-                (int)$r['requested_day_off'],
-                $monthStart,
-                $lastDay,
-                $dayNames
-            );
         }
         return $rows;
     }
@@ -563,70 +547,5 @@ class EmployeeSummaryService
             $cursor = date('Y-m-d', strtotime('+1 day', strtotime($cursor)));
         }
         return null;
-    }
-
-    /**
-     * 7 วันของสัปดาห์ที่ขอเปลี่ยน — แสดงว่าวันไหนหยุด/ทำงานหลังอนุมัติ
-     *
-     * @return list<array<string,mixed>>
-     */
-    private function buildDayoffSwapWeekDays(
-        string $weekStart,
-        string $weekEnd,
-        int $originalDayOff,
-        int $requestedDayOff,
-        array $dayNames
-    ): array {
-        $days = [];
-        $cursor = $weekStart;
-        while ($cursor <= $weekEnd) {
-            $dow = (int)date('w', strtotime($cursor));
-            $wasOff = ($dow === $originalDayOff);
-            $nowOff = ($dow === $requestedDayOff);
-            $days[] = [
-                'date' => $cursor,
-                'day_label' => $dayNames[$dow] ?? '',
-                'is_off' => $nowOff,
-                'was_off' => $wasOff,
-                'changed' => $wasOff !== $nowOff,
-                'is_new_off' => $nowOff && !$wasOff,
-                'is_old_off' => $wasOff && !$nowOff,
-            ];
-            $cursor = date('Y-m-d', strtotime('+1 day', strtotime($cursor)));
-        }
-        return $days;
-    }
-
-    /**
-     * @return list<array<string,mixed>>
-     */
-    private function buildDayoffSwapAffectedDays(
-        string $weekStart,
-        string $weekEnd,
-        int $originalDayOff,
-        int $requestedDayOff,
-        string $monthStart,
-        string $monthEnd,
-        array $dayNames
-    ): array {
-        $affected = [];
-        $cursor = max($weekStart, $monthStart);
-        $end = min($weekEnd, $monthEnd);
-        while ($cursor <= $end) {
-            $dow = (int)date('w', strtotime($cursor));
-            $wasOff = ($dow === $originalDayOff);
-            $nowOff = ($dow === $requestedDayOff);
-            if ($wasOff !== $nowOff) {
-                $affected[] = [
-                    'date' => $cursor,
-                    'day_label' => $dayNames[$dow] ?? '',
-                    'change' => $nowOff ? 'เป็นวันหยุด' : 'เป็นวันทำงาน',
-                    'was' => $wasOff ? 'หยุด' : 'ทำงาน',
-                    'now' => $nowOff ? 'หยุด' : 'ทำงาน',
-                ];
-            }
-            $cursor = date('Y-m-d', strtotime('+1 day', strtotime($cursor)));
-        }
-        return $affected;
     }
 }
