@@ -61,9 +61,9 @@ class PayrollService
      *
      * @param array<string,mixed>|null $setup
      */
-    public function socialSecurityWageBase(?array $setup): float
+    public function socialSecurityWageBase($setup): float
     {
-        if (!$setup) {
+        if (!is_array($setup)) {
             return 0.0;
         }
         $base = (float)($setup['base_salary'] ?? 0);
