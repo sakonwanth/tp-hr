@@ -88,6 +88,53 @@ class PayrollService
         return round(max(0, $base), 2);
     }
 
+    public function getUserSocialSecurityStartDate(int $userId): ?string
+    {
+        static $cache = [];
+        if (array_key_exists($userId, $cache)) {
+            return $cache[$userId];
+        }
+        try {
+            $stmt = $this->pdo->prepare('SELECT social_security_start_date FROM users WHERE id = ? LIMIT 1');
+            $stmt->execute([$userId]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $val = ($row && !empty($row['social_security_start_date']))
+                ? substr((string)$row['social_security_start_date'], 0, 10)
+                : null;
+            $cache[$userId] = $val;
+            return $val;
+        } catch (\Throwable $e) {
+            $cache[$userId] = null;
+            return null;
+        }
+    }
+
+    /**
+     * หัก SS เมื่อ payroll_month >= เดือนของ social_security_start_date
+     * ยังไม่ระบุวันเริ่มหัก → ไม่หัก (รอผ่านโปร)
+     */
+    public function ssAppliesForMonth(?string $ssStartDate, string $monthFirst): bool
+    {
+        if ($ssStartDate === null || $ssStartDate === '') {
+            return false;
+        }
+        $startYm = substr($ssStartDate, 0, 7);
+        $monthYm = substr($monthFirst, 0, 7);
+        if ($startYm === '' || $monthYm === '') {
+            return false;
+        }
+        return $monthYm >= $startYm;
+    }
+
+    public function calcSocialSecurityForUser(int $userId, float $wageBase, bool $optOut = false, ?string $monthFirst = null): float
+    {
+        $start = $this->getUserSocialSecurityStartDate($userId);
+        if (!$this->ssAppliesForMonth($start, $monthFirst ?: date('Y-m-01'))) {
+            return 0.0;
+        }
+        return $this->calcSocialSecurity($wageBase, $optOut, $monthFirst);
+    }
+
     /**
      * Group insurance (employee portion).
      */
@@ -487,7 +534,7 @@ class PayrollService
         $annualEst = $totalIncome * 12;
         $ssOptOut = $setup && !empty($setup['ss_opt_out']);
         $ssWageBase = $this->socialSecurityWageBase($setup);
-        $ss = $this->calcSocialSecurity($ssWageBase, $ssOptOut, $monthFirst);
+        $ss = $this->calcSocialSecurityForUser($userId, $ssWageBase, $ssOptOut, $monthFirst);
         $pf = $setup ? (float)$setup['provident_fund'] : 0;
         $taxBase = $this->calcTaxMonthly($annualEst, $ss * 12, $pf * 12, $monthFirst);
         $extraTaxReq = $setup && isset($setup['additional_tax_withholding']) ? max(0, (float)$setup['additional_tax_withholding']) : 0;

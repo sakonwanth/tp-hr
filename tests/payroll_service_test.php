@@ -87,4 +87,11 @@ assertSameValue(16000.0, $wageBase, 'SS wage base includes base salary and recur
 $ss16000 = $service->calcSocialSecurity(16000, false, '2026-05-01');
 assertSameValue(800.0, $ss16000, 'SS 5% of 16000 monthly wage base');
 
+$appliesMethod = new ReflectionMethod(PayrollService::class, 'ssAppliesForMonth');
+$appliesMethod->setAccessible(true);
+assertSameValue(false, $appliesMethod->invoke($service, null, '2026-05-01'), 'no SS start date — no deduction');
+assertSameValue(false, $appliesMethod->invoke($service, '2026-06-01', '2026-05-01'), 'payroll month before SS start — no deduction');
+assertSameValue(true, $appliesMethod->invoke($service, '2026-03-15', '2026-03-01'), 'SS start in March — March payroll deducts');
+assertSameValue(true, $appliesMethod->invoke($service, '2026-03-01', '2026-04-01'), 'SS start March — April payroll deducts');
+
 echo "PayrollService regression fixtures passed." . PHP_EOL;
