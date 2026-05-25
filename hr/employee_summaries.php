@@ -106,24 +106,35 @@ include dirname(__DIR__) . '/templates/header.php';
     <?php if ($rows): ?>
     <div class="md:hidden p-4 space-y-3">
         <?php foreach ($rows as $row): ?>
-        <a href="/hr/employee_view.php?id=<?php echo (int)$row['id']; ?>&month=<?php echo urlencode($month); ?>"
-           class="block rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4 touch-manipulation hover:bg-white/10 transition-colors">
-            <div class="flex items-start justify-between gap-2">
-                <div class="min-w-0">
-                    <p class="text-white font-semibold truncate"><?php echo htmlspecialchars($row['name']); ?></p>
-                    <p class="text-white/50 text-xs"><?php echo htmlspecialchars($row['employee_code']); ?> · <?php echo htmlspecialchars($row['department'] ?: '-'); ?></p>
+        <details class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 overflow-hidden group">
+            <summary class="p-4 cursor-pointer list-none touch-manipulation">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0 flex-1">
+                        <p class="text-white font-semibold truncate"><?php echo htmlspecialchars($row['name']); ?></p>
+                        <p class="text-white/50 text-xs"><?php echo htmlspecialchars($row['employee_code']); ?> · <?php echo htmlspecialchars($row['department'] ?: '-'); ?></p>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <?php if ((int)$row['absent_days'] > 0): ?>
+                        <span class="px-2 py-0.5 rounded text-xs bg-red-500/20 text-red-300">ขาด <?php echo (int)$row['absent_days']; ?></span>
+                        <?php endif; ?>
+                        <i class="fas fa-chevron-down text-white/40 group-open:rotate-180 transition-transform text-xs" aria-hidden="true"></i>
+                    </div>
                 </div>
-                <?php if ((int)$row['absent_days'] > 0): ?>
-                <span class="shrink-0 px-2 py-0.5 rounded text-xs bg-red-500/20 text-red-300">ขาด <?php echo (int)$row['absent_days']; ?></span>
-                <?php endif; ?>
+                <div class="grid grid-cols-4 gap-2 mt-3 text-center text-xs">
+                    <div><span class="text-white/45 block">มา</span><span class="text-emerald-400 font-bold tabular-nums"><?php echo (int)$row['present_days']; ?></span></div>
+                    <div><span class="text-white/45 block">สาย</span><span class="text-amber-400 font-bold tabular-nums"><?php echo (int)$row['late_days']; ?></span></div>
+                    <div><span class="text-white/45 block">ลา</span><span class="text-blue-400 font-bold tabular-nums"><?php echo number_format((float)$row['approved_leave_days'], 1); ?></span></div>
+                    <div><span class="text-white/45 block">ชม.</span><span class="text-white font-bold tabular-nums"><?php echo number_format((float)$row['work_hours'], 0); ?></span></div>
+                </div>
+            </summary>
+            <div class="px-4 pb-4 pt-0 border-t border-white/10">
+                <?php $summary = $row['summary']; $compact = true; $compactHidePresent = true; include dirname(__DIR__) . '/modules/hr/employee_monthly_summary_details.php'; ?>
+                <a href="/hr/employee_view.php?id=<?php echo (int)$row['id']; ?>&month=<?php echo urlencode($month); ?>"
+                   class="mt-3 inline-flex items-center justify-center min-h-[44px] w-full px-3 py-2 bg-violet-500/15 hover:bg-violet-500/25 text-violet-200 rounded-[var(--tp-ios-card-radius)] text-xs font-medium touch-manipulation">
+                    ดูโปรไฟล์เต็ม
+                </a>
             </div>
-            <div class="grid grid-cols-4 gap-2 mt-3 text-center text-xs">
-                <div><span class="text-white/45 block">มา</span><span class="text-emerald-400 font-bold tabular-nums"><?php echo (int)$row['present_days']; ?></span></div>
-                <div><span class="text-white/45 block">สาย</span><span class="text-amber-400 font-bold tabular-nums"><?php echo (int)$row['late_days']; ?></span></div>
-                <div><span class="text-white/45 block">ลา</span><span class="text-blue-400 font-bold tabular-nums"><?php echo number_format((float)$row['approved_leave_days'], 1); ?></span></div>
-                <div><span class="text-white/45 block">ชม.</span><span class="text-white font-bold tabular-nums"><?php echo number_format((float)$row['work_hours'], 0); ?></span></div>
-            </div>
-        </a>
+        </details>
         <?php endforeach; ?>
     </div>
 
@@ -161,10 +172,28 @@ include dirname(__DIR__) . '/templates/header.php';
                     <td class="px-3 py-3 text-center text-violet-300 tabular-nums"><?php echo (int)$row['dayoff_swap_count']; ?></td>
                     <td class="px-3 py-3 text-center text-white tabular-nums"><?php echo number_format((float)$row['work_hours'], 1); ?></td>
                     <td class="px-4 py-3 text-center">
-                        <a href="/hr/employee_view.php?id=<?php echo (int)$row['id']; ?>&month=<?php echo urlencode($month); ?>"
-                           class="inline-flex items-center justify-center min-h-[40px] px-3 py-1.5 bg-violet-500/15 hover:bg-violet-500/25 text-violet-200 rounded-[var(--tp-ios-card-radius)] text-xs font-medium touch-manipulation">
+                        <button type="button"
+                                class="emp-summary-toggle inline-flex items-center justify-center min-h-[40px] px-3 py-1.5 bg-violet-500/15 hover:bg-violet-500/25 text-violet-200 rounded-[var(--tp-ios-card-radius)] text-xs font-medium touch-manipulation"
+                                aria-expanded="false"
+                                data-target="emp-detail-<?php echo (int)$row['id']; ?>">
+                            <i class="fas fa-chevron-down mr-1 transition-transform emp-summary-chevron" aria-hidden="true"></i>
                             รายละเอียด
-                        </a>
+                        </button>
+                    </td>
+                </tr>
+                <tr id="emp-detail-<?php echo (int)$row['id']; ?>" class="hidden border-b border-white/5 bg-black/20">
+                    <td colspan="11" class="px-4 py-4">
+                        <?php $summary = $row['summary']; $compact = true; $compactHidePresent = true; include dirname(__DIR__) . '/modules/hr/employee_monthly_summary_details.php'; ?>
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            <a href="/hr/employee_view.php?id=<?php echo (int)$row['id']; ?>&month=<?php echo urlencode($month); ?>"
+                               class="inline-flex items-center justify-center min-h-[40px] px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] text-xs font-medium touch-manipulation">
+                                โปรไฟล์เต็ม
+                            </a>
+                            <a href="/hr/employee_attendance.php?id=<?php echo (int)$row['id']; ?>&month=<?php echo urlencode($month); ?>"
+                               class="inline-flex items-center justify-center min-h-[40px] px-3 py-1.5 bg-violet-500/15 hover:bg-violet-500/25 text-violet-200 rounded-[var(--tp-ios-card-radius)] text-xs font-medium touch-manipulation">
+                                ปฏิทินรายวัน
+                            </a>
+                        </div>
                     </td>
                 </tr>
                 <?php endforeach; ?>
@@ -179,5 +208,19 @@ include dirname(__DIR__) . '/templates/header.php';
     <?php endif; ?>
 </div>
 </div>
+
+<script>
+document.querySelectorAll('.emp-summary-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        var id = btn.getAttribute('data-target');
+        var row = document.getElementById(id);
+        if (!row) return;
+        var open = row.classList.toggle('hidden') === false;
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        var chevron = btn.querySelector('.emp-summary-chevron');
+        if (chevron) chevron.classList.toggle('rotate-180', open);
+    });
+});
+</script>
 
 <?php include dirname(__DIR__) . '/templates/footer.php'; ?>

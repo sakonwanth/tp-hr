@@ -44,3 +44,12 @@
 - [ ] `employee_view.php?id=X&month=YYYY-MM` แสดงสรุปถูกต้อง
 - [ ] HR dashboard แสดง KPI และลิงก์ "ดูรายพนักงาน"
 - [ ] ตัวเลขสอดคล้องกับ `employee_attendance.php` รายเดือนเดียวกัน
+- [ ] กด "รายละเอียด" ในตาราง → แสดงวันที่มาสาย / ลา / ขาด / สลับวันหยุด รายวัน
+- [ ] ใบลาแสดงช่วงวันที่ + chip รายวันในเดือน
+- [ ] สลับวันหยุดแสดงวันที่เปลี่ยนจากหยุด↔ทำงาน
+
+## อัปเดต 2026-05-25 (รายละเอียดรายวัน)
+
+- `EmployeeSummaryService` เพิ่ม `details` + `leave_requests` + `affected_days` สำหรับ dayoff
+- Partial ใหม่: `modules/hr/employee_monthly_summary_details.php`
+- หน้า `employee_summaries.php`: expand รายแถว (desktop) / `<details>` (mobile)

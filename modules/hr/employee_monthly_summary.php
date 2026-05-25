@@ -101,29 +101,12 @@ $defaultOffLabel = $dayNames[(int)($summary['default_day_off'] ?? 0)] ?? '-';
     </div>
     <?php endif; ?>
 
-    <?php if (!empty($summary['dayoff_swaps'])): ?>
-    <div class="mb-6">
-        <h3 class="text-white/80 text-sm font-semibold mb-3">การเปลี่ยนวันหยุดในเดือนนี้</h3>
-        <div class="space-y-2">
-            <?php foreach ($summary['dayoff_swaps'] as $swap): ?>
-            <div class="flex flex-wrap items-center gap-2 text-sm rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 px-4 py-3">
-                <span class="px-2 py-0.5 rounded text-xs font-semibold <?php
-                    echo match($swap['status'] ?? '') {
-                        'APPROVED' => 'bg-emerald-500/20 text-emerald-300',
-                        'PENDING' => 'bg-amber-500/20 text-amber-300',
-                        'REJECTED' => 'bg-red-500/20 text-red-300',
-                        default => 'bg-slate-500/20 text-slate-300',
-                    };
-                ?>"><?php echo htmlspecialchars(LEAVE_STATUS[$swap['status']] ?? ($swap['status'] ?? '-')); ?></span>
-                <span class="text-sky-300"><?php echo htmlspecialchars($swap['original_day_label'] ?? ''); ?></span>
-                <i class="fas fa-arrow-right text-white/40 text-xs" aria-hidden="true"></i>
-                <span class="text-violet-300 font-medium"><?php echo htmlspecialchars($swap['requested_day_label'] ?? ''); ?></span>
-                <span class="text-white/45 text-xs ml-auto"><?php echo formatDateThai($swap['week_start'] ?? ''); ?> – <?php echo formatDateThai($swap['week_end'] ?? ''); ?></span>
-            </div>
-            <?php endforeach; ?>
-        </div>
+    <div class="mb-6 pt-2 border-t border-white/10">
+        <h3 class="text-white/80 text-sm font-semibold mb-4">
+            <i class="fas fa-list-ul text-violet-400 mr-2" aria-hidden="true"></i>รายละเอียดรายวัน
+        </h3>
+        <?php include __DIR__ . '/employee_monthly_summary_details.php'; ?>
     </div>
-    <?php endif; ?>
 
     <?php if (!empty($summary['leave_entitlements'])): ?>
     <div>

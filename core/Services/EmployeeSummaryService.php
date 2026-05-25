@@ -42,10 +42,22 @@ class EmployeeSummaryService
             'total_late_minutes' => 0,
         ];
 
+        $dayNames = defined('THAI_DAY_NAMES') ? THAI_DAY_NAMES : ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
+        $details = [
+            'late' => [],
+            'absent' => [],
+            'wfh' => [],
+            'present' => [],
+            'leave_attendance' => [],
+            'holidays' => [],
+            'scheduled_off' => [],
+        ];
+
         $currentDay = $monthStart;
         while ($currentDay <= $lastDay) {
             $counts['calendar_days']++;
             $dow = (int)date('w', strtotime($currentDay));
+            $dayLabel = $dayNames[$dow] ?? '';
             $effectiveDayOff = $this->resolveEffectiveDayOff($currentDay, $defaultDayOff, $dayoffSwaps);
             $isScheduledOff = ($dow === $effectiveDayOff);
             $holiday = $holidays[$currentDay] ?? null;
@@ -53,12 +65,27 @@ class EmployeeSummaryService
 
             if ($holiday) {
                 $counts['holiday_days']++;
+                $details['holidays'][] = [
+                    'date' => $currentDay,
+                    'day_label' => $dayLabel,
+                    'name' => $holiday['name'] ?? '',
+                    'type' => $holiday['type'] ?? '',
+                ];
             } elseif ($isScheduledOff) {
                 $counts['scheduled_off_days']++;
+                $details['scheduled_off'][] = [
+                    'date' => $currentDay,
+                    'day_label' => $dayLabel,
+                ];
             } else {
                 $counts['expected_work_days']++;
                 if ($att) {
                     $status = (string)($att['status'] ?? '');
+                    $checkIn = !empty($att['check_in_time']) ? date('H:i', strtotime($att['check_in_time'])) : null;
+                    $checkOut = !empty($att['check_out_time']) ? date('H:i', strtotime($att['check_out_time'])) : null;
+                    $lateMins = (int)($att['late_minutes'] ?? 0);
+                    $workMins = (int)($att['work_minutes'] ?? 0);
+
                     match ($status) {
                         'PRESENT', 'HALF_DAY' => $counts['present_days']++,
                         'LATE' => $counts['late_days']++,
@@ -67,11 +94,62 @@ class EmployeeSummaryService
                         'ABSENT' => $counts['absent_days']++,
                         default => $counts['missing_record_days']++,
                     };
-                    $counts['total_work_minutes'] += (int)($att['work_minutes'] ?? 0);
-                    $counts['total_late_minutes'] += (int)($att['late_minutes'] ?? 0);
+                    $counts['total_work_minutes'] += $workMins;
+                    $counts['total_late_minutes'] += $lateMins;
+
+                    if ($status === 'LATE' || $lateMins > 0) {
+                        $details['late'][] = [
+                            'date' => $currentDay,
+                            'day_label' => $dayLabel,
+                            'check_in' => $checkIn,
+                            'check_out' => $checkOut,
+                            'late_minutes' => $lateMins,
+                            'status' => $status,
+                        ];
+                    } elseif (in_array($status, ['PRESENT', 'HALF_DAY'], true)) {
+                        $details['present'][] = [
+                            'date' => $currentDay,
+                            'day_label' => $dayLabel,
+                            'check_in' => $checkIn,
+                            'check_out' => $checkOut,
+                            'work_minutes' => $workMins,
+                            'status' => $status,
+                        ];
+                    } elseif ($status === 'WFH') {
+                        $details['wfh'][] = [
+                            'date' => $currentDay,
+                            'day_label' => $dayLabel,
+                            'check_in' => $checkIn,
+                            'check_out' => $checkOut,
+                            'work_minutes' => $workMins,
+                        ];
+                    } elseif ($status === 'LEAVE') {
+                        $details['leave_attendance'][] = [
+                            'date' => $currentDay,
+                            'day_label' => $dayLabel,
+                            'note' => $att['notes'] ?? '',
+                        ];
+                    } elseif ($status === 'ABSENT') {
+                        $details['absent'][] = [
+                            'date' => $currentDay,
+                            'day_label' => $dayLabel,
+                            'reason' => 'บันทึกขาดงาน',
+                        ];
+                    } else {
+                        $details['absent'][] = [
+                            'date' => $currentDay,
+                            'day_label' => $dayLabel,
+                            'reason' => 'สถานะไม่ชัดเจน (' . $status . ')',
+                        ];
+                    }
                 } else {
                     $counts['missing_record_days']++;
                     $counts['absent_days']++;
+                    $details['absent'][] = [
+                        'date' => $currentDay,
+                        'day_label' => $dayLabel,
+                        'reason' => 'ไม่มีการลงเวลา',
+                    ];
                 }
             }
 
@@ -80,6 +158,7 @@ class EmployeeSummaryService
 
         $approvedLeaveDays = $this->getApprovedLeaveDaysInMonth($userId, $month);
         $leaveByType = $this->getLeaveByTypeInMonth($userId, $month);
+        $leaveRequests = $this->getLeaveRequestsInMonth($userId, $month);
         $pendingLeaves = $this->getPendingLeaveCount($userId);
         $entitlements = $this->getLeaveEntitlements((int)date('Y', strtotime($monthStart)), $userId);
         $swapsInMonth = $this->getDayoffSwapsInMonth($userId, $month);
@@ -91,8 +170,10 @@ class EmployeeSummaryService
             'period_start' => $monthStart,
             'period_end' => $lastDay,
             'counts' => $counts,
+            'details' => $details,
             'approved_leave_days' => $approvedLeaveDays,
             'leave_by_type' => $leaveByType,
+            'leave_requests' => $leaveRequests,
             'pending_leave_requests' => $pendingLeaves,
             'leave_entitlements' => $entitlements,
             'dayoff_swaps' => $swapsInMonth,
@@ -273,6 +354,50 @@ class EmployeeSummaryService
     /**
      * @return list<array<string,mixed>>
      */
+    private function getLeaveRequestsInMonth(int $userId, string $month): array
+    {
+        $monthStart = $month . '-01';
+        $monthEnd = date('Y-m-t', strtotime($monthStart));
+        $today = date('Y-m-d');
+        $lastDay = ($monthEnd <= $today) ? $monthEnd : $today;
+        $dayNames = defined('THAI_DAY_NAMES') ? THAI_DAY_NAMES : ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
+
+        $stmt = $this->pdo->prepare("
+            SELECT lr.id, lr.start_date, lr.end_date, lr.total_days, lr.status, lr.reason,
+                   lt.code, lt.name AS leave_type_name, lt.color
+            FROM hr_leave_requests lr
+            JOIN hr_leave_types lt ON lt.id = lr.leave_type_id
+            WHERE lr.user_id = ?
+            AND lr.status IN ('APPROVED', 'PENDING')
+            AND lr.start_date <= ? AND lr.end_date >= ?
+            ORDER BY lr.start_date ASC, lr.id ASC
+        ");
+        $stmt->execute([$userId, $lastDay, $monthStart]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+        foreach ($rows as &$r) {
+            $daysInMonth = [];
+            $cursor = max($r['start_date'], $monthStart);
+            $end = min($r['end_date'], $lastDay);
+            while ($cursor <= $end) {
+                $dow = (int)date('w', strtotime($cursor));
+                $daysInMonth[] = [
+                    'date' => $cursor,
+                    'day_label' => $dayNames[$dow] ?? '',
+                ];
+                $cursor = date('Y-m-d', strtotime('+1 day', strtotime($cursor)));
+            }
+            $r['days_in_month'] = $daysInMonth;
+            $r['days_in_month_count'] = count($daysInMonth);
+        }
+        unset($r);
+
+        return $rows;
+    }
+
+    /**
+     * @return list<array<string,mixed>>
+     */
     private function getLeaveByTypeInMonth(int $userId, string $month): array
     {
         $monthStart = $month . '-01';
@@ -331,6 +456,8 @@ class EmployeeSummaryService
     {
         $monthStart = $month . '-01';
         $monthEnd = date('Y-m-t', strtotime($monthStart));
+        $today = date('Y-m-d');
+        $lastDay = ($monthEnd <= $today) ? $monthEnd : $today;
         $dayNames = defined('THAI_DAY_NAMES') ? THAI_DAY_NAMES : ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
 
         $stmt = $this->pdo->prepare("
@@ -345,7 +472,49 @@ class EmployeeSummaryService
         foreach ($rows as &$r) {
             $r['original_day_label'] = $dayNames[(int)$r['original_day_off']] ?? '-';
             $r['requested_day_label'] = $dayNames[(int)$r['requested_day_off']] ?? '-';
+            $r['affected_days'] = $this->buildDayoffSwapAffectedDays(
+                (string)$r['week_start'],
+                (string)$r['week_end'],
+                (int)$r['original_day_off'],
+                (int)$r['requested_day_off'],
+                $monthStart,
+                $lastDay,
+                $dayNames
+            );
         }
         return $rows;
+    }
+
+    /**
+     * @return list<array<string,mixed>>
+     */
+    private function buildDayoffSwapAffectedDays(
+        string $weekStart,
+        string $weekEnd,
+        int $originalDayOff,
+        int $requestedDayOff,
+        string $monthStart,
+        string $monthEnd,
+        array $dayNames
+    ): array {
+        $affected = [];
+        $cursor = max($weekStart, $monthStart);
+        $end = min($weekEnd, $monthEnd);
+        while ($cursor <= $end) {
+            $dow = (int)date('w', strtotime($cursor));
+            $wasOff = ($dow === $originalDayOff);
+            $nowOff = ($dow === $requestedDayOff);
+            if ($wasOff !== $nowOff) {
+                $affected[] = [
+                    'date' => $cursor,
+                    'day_label' => $dayNames[$dow] ?? '',
+                    'change' => $nowOff ? 'เป็นวันหยุด' : 'เป็นวันทำงาน',
+                    'was' => $wasOff ? 'หยุด' : 'ทำงาน',
+                    'now' => $nowOff ? 'หยุด' : 'ทำงาน',
+                ];
+            }
+            $cursor = date('Y-m-d', strtotime('+1 day', strtotime($cursor)));
+        }
+        return $affected;
     }
 }
