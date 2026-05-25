@@ -94,4 +94,11 @@ assertSameValue(false, $appliesMethod->invoke($service, '2026-06-01', '2026-05-0
 assertSameValue(true, $appliesMethod->invoke($service, '2026-03-15', '2026-03-01'), 'SS start in March — March payroll deducts');
 assertSameValue(true, $appliesMethod->invoke($service, '2026-03-01', '2026-04-01'), 'SS start March — April payroll deducts');
 
+$hireMethod = new ReflectionMethod(PayrollService::class, 'hireProrateFactor');
+$hireMethod->setAccessible(true);
+assertSameValue(0.0, $hireMethod->invoke($service, '2026-04-05', '2026-02-26', '2026-03-25'), 'hire after period end — no pay');
+assertSameValue(1.0, $hireMethod->invoke($service, '2026-03-20', '2026-03-26', '2026-04-27'), 'hire before period start — full pay');
+$partial = $hireMethod->invoke($service, '2026-04-05', '2026-03-26', '2026-04-27');
+assertSameValue(true, $partial > 0 && $partial < 1, 'mid-period hire — prorated pay');
+
 echo "PayrollService regression fixtures passed." . PHP_EOL;

@@ -135,6 +135,106 @@ class PayrollService
         return $this->calcSocialSecurity($wageBase, $optOut, $monthFirst);
     }
 
+    public function getUserHireDate(int $userId): ?string
+    {
+        static $cache = [];
+        if (array_key_exists($userId, $cache)) {
+            return $cache[$userId];
+        }
+        try {
+            $stmt = $this->pdo->prepare('SELECT hire_date FROM users WHERE id = ? LIMIT 1');
+            $stmt->execute([$userId]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $val = ($row && !empty($row['hire_date']))
+                ? substr((string)$row['hire_date'], 0, 10)
+                : null;
+            $cache[$userId] = $val;
+            return $val;
+        } catch (\Throwable $e) {
+            $cache[$userId] = null;
+            return null;
+        }
+    }
+
+    public function inclusiveDayCount(string $start, string $end): int
+    {
+        $a = strtotime($start);
+        $b = strtotime($end);
+        if (!$a || !$b || $b < $a) {
+            return 0;
+        }
+        return (int)(($b - $a) / 86400) + 1;
+    }
+
+    public function hireProrateFactor(?string $hireDate, string $periodStart, string $periodEnd): float
+    {
+        if ($hireDate === null || $hireDate === '') {
+            return 0.0;
+        }
+        if ($hireDate > $periodEnd) {
+            return 0.0;
+        }
+        if ($hireDate <= $periodStart) {
+            return 1.0;
+        }
+        $total = $this->inclusiveDayCount($periodStart, $periodEnd);
+        $employed = $this->inclusiveDayCount($hireDate, $periodEnd);
+        return $total > 0 ? round($employed / $total, 6) : 0.0;
+    }
+
+    private function scaleIncomeOtherJson(?string $json, float $factor): ?string
+    {
+        if (!$json || $factor >= 1.0) {
+            return $json;
+        }
+        if ($factor <= 0) {
+            return null;
+        }
+        $arr = json_decode($json, true);
+        if (!is_array($arr)) {
+            return $json;
+        }
+        foreach ($arr as &$item) {
+            $item['amount'] = round((float)($item['amount'] ?? 0) * $factor, 2);
+        }
+        unset($item);
+        return json_encode($arr, JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * @return float prorate factor 0–1
+     */
+    public function applyHireDateIncome(
+        int $userId,
+        string $monthFirst,
+        ?int $payDay,
+        float &$gross,
+        float &$bonus,
+        float &$allowances,
+        float &$incomeOther,
+        ?string &$incomeOtherJson
+    ): float {
+        $period = $this->attendancePeriodBounds($monthFirst, $payDay);
+        $factor = $this->hireProrateFactor(
+            $this->getUserHireDate($userId),
+            $period['start'],
+            $period['end']
+        );
+        if ($factor <= 0) {
+            $gross = $bonus = $allowances = $incomeOther = 0.0;
+            $incomeOtherJson = null;
+            return 0.0;
+        }
+        if ($factor < 1.0) {
+            $gross = round($gross * $factor, 2);
+            $bonus = round($bonus * $factor, 2);
+            $allowances = round($allowances * $factor, 2);
+            $incomeOther = round($incomeOther * $factor, 2);
+            $incomeOtherJson = $this->scaleIncomeOtherJson($incomeOtherJson, $factor);
+        }
+        return $factor;
+    }
+
     /**
      * Group insurance (employee portion).
      */
@@ -244,6 +344,13 @@ class PayrollService
         $period = $this->attendancePeriodBounds($monthFirst, $payDay);
         $periodStart = $period['start'];
         $periodEnd = $period['end'];
+        $hireDate = $this->getUserHireDate($userId);
+        if ($hireDate !== null && $hireDate > $periodEnd) {
+            return $result;
+        }
+        if ($hireDate !== null && $hireDate > $periodStart) {
+            $periodStart = $hireDate;
+        }
         $missingScanEnd = min($periodEnd, date('Y-m-d'));
 
         try {
@@ -530,10 +637,21 @@ class PayrollService
             }
         }
 
+        $hireFactor = $this->applyHireDateIncome(
+            $userId,
+            $monthFirst,
+            $payDay,
+            $gross,
+            $bonus,
+            $allowances,
+            $incomeOther,
+            $incomeOtherJson
+        );
+
         $totalIncome = $gross + $bonus + $allowances + $incomeOther;
         $annualEst = $totalIncome * 12;
         $ssOptOut = $setup && !empty($setup['ss_opt_out']);
-        $ssWageBase = $this->socialSecurityWageBase($setup);
+        $ssWageBase = round($this->socialSecurityWageBase($setup) * max(0, $hireFactor), 2);
         $ss = $this->calcSocialSecurityForUser($userId, $ssWageBase, $ssOptOut, $monthFirst);
         $pf = $setup ? (float)$setup['provident_fund'] : 0;
         $taxBase = $this->calcTaxMonthly($annualEst, $ss * 12, $pf * 12, $monthFirst);
@@ -610,14 +728,21 @@ class PayrollService
                 $runId = (int)$this->pdo->lastInsertId();
             }
 
-            $users = $this->pdo->query("SELECT id FROM users WHERE is_active = 1 AND employee_code NOT LIKE 'CR%'")
-                ->fetchAll(PDO::FETCH_COLUMN);
+            $users = $this->pdo->query("SELECT id, hire_date FROM users WHERE is_active = 1 AND employee_code NOT LIKE 'CR%'")
+                ->fetchAll(PDO::FETCH_ASSOC);
 
             $totalGross = $totalTax = $totalNet = 0;
+            $includedCount = 0;
             $ins = $this->pdo->prepare("INSERT INTO payroll_slips (payroll_run_id, user_id, gross_salary, bonus, allowances, income_other_json, total_income, tax_withheld, provident_fund, social_security, group_insurance, deduction_other_json, absent_days, late_count_30, late_count_60, absence_deduction, lateness_deduction, attendance_detail_json, total_deductions, net_salary) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
-            foreach ($users as $uid) {
-                $slip = $this->calculateSlip((int)$uid, $monthFirst, $payDay);
+            $period = $this->attendancePeriodBounds($monthFirst, $payDay);
+            foreach ($users as $userRow) {
+                $uid = (int)$userRow['id'];
+                if ($this->hireProrateFactor($userRow['hire_date'] ?? null, $period['start'], $period['end']) <= 0) {
+                    continue;
+                }
+                $includedCount++;
+                $slip = $this->calculateSlip($uid, $monthFirst, $payDay);
                 $ins->execute([
                     $runId, $uid,
                     $slip['gross_salary'], $slip['bonus'], $slip['allowances'],
@@ -634,10 +759,10 @@ class PayrollService
             }
 
             $this->pdo->prepare("UPDATE payroll_runs SET employee_count = ?, total_gross = ?, total_tax = ?, total_net = ?, status = 'calculated' WHERE id = ?")
-                ->execute([count($users), $totalGross, $totalTax, $totalNet, $runId]);
+                ->execute([$includedCount, $totalGross, $totalTax, $totalNet, $runId]);
 
             $this->pdo->commit();
-            return ['run_id' => $runId, 'employee_count' => count($users), 'total_gross' => $totalGross, 'total_net' => $totalNet, 'is_recalculation' => (bool)$existing];
+            return ['run_id' => $runId, 'employee_count' => $includedCount, 'total_gross' => $totalGross, 'total_net' => $totalNet, 'is_recalculation' => (bool)$existing];
         } catch (\Throwable $e) {
             if ($this->pdo->inTransaction()) $this->pdo->rollBack();
             throw $e;
