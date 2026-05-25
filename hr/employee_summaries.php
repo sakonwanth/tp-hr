@@ -89,7 +89,7 @@ include dirname(__DIR__) . '/templates/header.php';
             <i class="fas fa-chevron-down text-white/40 group-open:rotate-180 transition-transform text-xs shrink-0" aria-hidden="true"></i>
         </summary>
         <ul class="text-white/70 text-sm space-y-3 list-none mt-4 pt-4 border-t border-white/10 leading-relaxed">
-            <li><strong class="text-amber-300">มาสาย / ขาด / ไม่มีลงเวลา</strong> — กด 「แก้ไขเวลา」 ที่วันนั้น → แก้ในหน้าจัดการลงเวลา แล้ว<strong class="text-amber-200">กลับหน้าสรุปอัตโนมัติ</strong> เพื่อแก้วันถัดไปได้ต่อเนื่อง</li>
+            <li><strong class="text-amber-300">มาสาย / ขาด / ไม่มีลงเวลา</strong> — เลือกหลายวันแล้วกด <strong class="text-amber-200">แก้ทั้งกลุ่ม</strong> หรือ <strong class="text-amber-200">แก้ที่เลือก</strong> · หรือกด <strong class="text-amber-200">รายวัน</strong> เพื่อแก้ทีละวัน</li>
             <li><strong class="text-blue-300">ลา</strong> — พนักงานยื่นใบลา → HR อนุมัติที่ <a href="/hr/leaves.php?status=pending" class="text-violet-300 hover:text-violet-200 underline">อนุมัติการลา</a></li>
             <li><strong class="text-violet-300">สลับวันหยุด</strong> — CEO อนุมัติที่ <a href="/hr/dayoff_approvals.php" class="text-violet-300 hover:text-violet-200 underline">อนุมัติเปลี่ยนวันหยุด</a></li>
         </ul>
@@ -267,6 +267,16 @@ include dirname(__DIR__) . '/templates/header.php';
     <?php endif; ?>
 </div>
 </div>
+
+<?php
+$bulkDefaultCheckIn = substr((string)(getSetting('default_work_start', '08:45') ?? '08:45'), 0, 5);
+$bulkDefaultCheckOut = substr((string)(getSetting('default_work_end', '17:30') ?? '17:30'), 0, 5);
+$bulkReloadBase = '/hr/employee_summaries.php?' . http_build_query(array_filter([
+    'month' => $month,
+    'department' => $department !== '' ? $department : null,
+]));
+include dirname(__DIR__) . '/modules/hr/employee_summary_bulk_attendance_modal.php';
+?>
 
 <script>
 function tpHrExpandEmployeeSummary(targetId, triggerBtn) {

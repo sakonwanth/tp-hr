@@ -52,25 +52,70 @@ $headClass = $panelLayout
 $listClass = 'divide-y divide-white/[0.06]';
 $rowPad = $panelLayout ? 'px-5 py-4' : ($compact ? 'px-4 py-3.5' : 'px-5 py-4');
 $actionBtn = 'inline-flex items-center justify-center gap-1.5 min-h-[40px] px-3 py-2 rounded-[var(--tp-ios-card-radius)] text-xs font-medium bg-violet-500/12 hover:bg-violet-500/22 text-violet-200 border border-violet-500/25 touch-manipulation shrink-0 whitespace-nowrap';
+$bulkBtn = 'inline-flex items-center justify-center gap-1 min-h-[36px] px-2.5 py-1.5 rounded-[var(--tp-ios-card-radius)] text-[11px] sm:text-xs font-medium touch-manipulation whitespace-nowrap';
+$bulkGroupId = static fn(string $kind): string => 'bulk-' . $kind . '-' . $employeeId;
 
-$renderDayRow = static function (array $item, string $toneClass, array $metaParts, ?string $actionHref = null) use ($rowPad, $actionBtn, $showActions): void {
+$renderBulkToolbar = static function (string $kind, string $label, int $count) use ($bulkBtn, $bulkGroupId, $employeeId, $showActions): void {
+    if (!$showActions || $count <= 0) {
+        return;
+    }
+    $group = $bulkGroupId($kind);
+    ?>
+    <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 shrink-0">
+        <button type="button" class="<?php echo $bulkBtn; ?> bg-white/8 hover:bg-white/15 text-white/75 border border-white/10"
+                data-bulk-action="select-all" data-group="<?php echo htmlspecialchars($group); ?>">เลือกทั้งหมด</button>
+        <button type="button" class="<?php echo $bulkBtn; ?> bg-white/8 hover:bg-white/15 text-white/75 border border-white/10"
+                data-bulk-action="clear-all" data-group="<?php echo htmlspecialchars($group); ?>">ล้าง</button>
+        <button type="button" class="<?php echo $bulkBtn; ?> bg-violet-500/18 hover:bg-violet-500/28 text-violet-100 border border-violet-500/30"
+                data-bulk-action="edit-selected" data-group="<?php echo htmlspecialchars($group); ?>"
+                data-user-id="<?php echo (int)$employeeId; ?>" data-label="<?php echo htmlspecialchars($label); ?>">
+            แก้ที่เลือก (<span class="emp-bulk-count tabular-nums" data-group="<?php echo htmlspecialchars($group); ?>">0</span>)
+        </button>
+        <button type="button" class="<?php echo $bulkBtn; ?> bg-amber-500/15 hover:bg-amber-500/25 text-amber-100 border border-amber-500/25"
+                data-bulk-action="edit-group" data-group="<?php echo htmlspecialchars($group); ?>"
+                data-user-id="<?php echo (int)$employeeId; ?>" data-label="<?php echo htmlspecialchars($label); ?>">
+            แก้ทั้งกลุ่ม (<?php echo (int)$count; ?>)
+        </button>
+    </div>
+    <?php
+};
+
+$renderDayRow = static function (
+    array $item,
+    string $toneClass,
+    array $metaParts,
+    ?string $actionHref = null,
+    ?string $bulkGroup = null
+) use ($rowPad, $actionBtn, $showActions, $employeeId): void {
+    $date = $item['date'] ?? '';
     ?>
     <li class="<?php echo $rowPad; ?>">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div class="min-w-0 flex-1">
-                <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                    <span class="text-white font-semibold tabular-nums text-sm"><?php echo formatDateThai($item['date']); ?></span>
-                    <?php if (!empty($item['day_label'])): ?>
-                    <span class="text-white/45 text-xs"><?php echo htmlspecialchars($item['day_label']); ?></span>
+            <div class="flex items-start gap-3 min-w-0 flex-1">
+                <?php if ($showActions && $bulkGroup && $date): ?>
+                <label class="flex items-center pt-0.5 shrink-0 cursor-pointer touch-manipulation">
+                    <input type="checkbox" class="emp-bulk-day-cb w-4 h-4 rounded border-white/30 bg-white/10 text-violet-500 focus:ring-violet-500/50"
+                           data-group="<?php echo htmlspecialchars($bulkGroup); ?>"
+                           data-date="<?php echo htmlspecialchars($date); ?>"
+                           data-user-id="<?php echo (int)$employeeId; ?>"
+                           aria-label="เลือกวันที่ <?php echo htmlspecialchars($date); ?>">
+                </label>
+                <?php endif; ?>
+                <div class="min-w-0 flex-1">
+                    <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                        <span class="text-white font-semibold tabular-nums text-sm"><?php echo formatDateThai($item['date']); ?></span>
+                        <?php if (!empty($item['day_label'])): ?>
+                        <span class="text-white/45 text-xs"><?php echo htmlspecialchars($item['day_label']); ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <?php if ($metaParts): ?>
+                    <p class="mt-1.5 text-sm <?php echo $toneClass; ?> leading-relaxed"><?php echo implode(' · ', $metaParts); ?></p>
                     <?php endif; ?>
                 </div>
-                <?php if ($metaParts): ?>
-                <p class="mt-1.5 text-sm <?php echo $toneClass; ?> leading-relaxed"><?php echo implode(' · ', $metaParts); ?></p>
-                <?php endif; ?>
             </div>
             <?php if ($showActions && $actionHref): ?>
             <a href="<?php echo htmlspecialchars($actionHref); ?>" class="<?php echo $actionBtn; ?>">
-                <i class="fas fa-edit text-[11px]" aria-hidden="true"></i>แก้ไขเวลา
+                <i class="fas fa-edit text-[11px]" aria-hidden="true"></i>รายวัน
             </a>
             <?php endif; ?>
         </div>
@@ -82,9 +127,12 @@ $renderDayRow = static function (array $item, string $toneClass, array $metaPart
 <div class="emp-summary-details <?php echo $wrapClass; ?>">
     <?php if ($hasLate): ?>
     <section class="<?php echo $cardClass; ?>">
-        <h4 class="<?php echo $headClass; ?> text-amber-300">
-            <i class="fas fa-clock mr-2 opacity-80" aria-hidden="true"></i>มาสาย <?php echo count($d['late']); ?> วัน
-        </h4>
+        <div class="<?php echo $headClass; ?> text-amber-300 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h4 class="font-semibold">
+                <i class="fas fa-clock mr-2 opacity-80" aria-hidden="true"></i>มาสาย <?php echo count($d['late']); ?> วัน
+            </h4>
+            <?php $renderBulkToolbar('late', 'มาสาย', count($d['late'])); ?>
+        </div>
         <ul class="<?php echo $listClass; ?>">
             <?php foreach ($d['late'] as $item):
                 $meta = [];
@@ -94,7 +142,13 @@ $renderDayRow = static function (array $item, string $toneClass, array $metaPart
                 if ((int)($item['late_minutes'] ?? 0) > 0) {
                     $meta[] = 'สาย ' . (int)$item['late_minutes'] . ' นาที';
                 }
-                $renderDayRow($item, 'text-amber-300/90', $meta, $showActions ? $attFixUrl($employeeId, $item['date']) : null);
+                $renderDayRow(
+                    $item,
+                    'text-amber-300/90',
+                    $meta,
+                    $showActions ? $attFixUrl($employeeId, $item['date']) : null,
+                    $showActions ? $bulkGroupId('late') : null
+                );
             endforeach; ?>
         </ul>
     </section>
@@ -102,13 +156,22 @@ $renderDayRow = static function (array $item, string $toneClass, array $metaPart
 
     <?php if ($hasAbsent): ?>
     <section class="<?php echo $cardClass; ?>">
-        <h4 class="<?php echo $headClass; ?> text-red-300">
-            <i class="fas fa-user-times mr-2 opacity-80" aria-hidden="true"></i>ขาดงาน <?php echo count($d['absent']); ?> วัน
-        </h4>
+        <div class="<?php echo $headClass; ?> text-red-300 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h4 class="font-semibold">
+                <i class="fas fa-user-times mr-2 opacity-80" aria-hidden="true"></i>ขาดงาน <?php echo count($d['absent']); ?> วัน
+            </h4>
+            <?php $renderBulkToolbar('absent', 'ขาดงาน', count($d['absent'])); ?>
+        </div>
         <ul class="<?php echo $listClass; ?> max-h-[min(420px,50vh)] overflow-y-auto overscroll-contain">
             <?php foreach ($d['absent'] as $item):
                 $meta = [htmlspecialchars($item['reason'] ?? 'ขาดงาน')];
-                $renderDayRow($item, 'text-red-300/90', $meta, $showActions ? $attFixUrl($employeeId, $item['date']) : null);
+                $renderDayRow(
+                    $item,
+                    'text-red-300/90',
+                    $meta,
+                    $showActions ? $attFixUrl($employeeId, $item['date']) : null,
+                    $showActions ? $bulkGroupId('absent') : null
+                );
             endforeach; ?>
         </ul>
     </section>
@@ -214,16 +277,25 @@ $renderDayRow = static function (array $item, string $toneClass, array $metaPart
 
     <?php if ($hasWfh): ?>
     <section class="<?php echo $cardClass; ?>">
-        <h4 class="<?php echo $headClass; ?> text-purple-300">
-            <i class="fas fa-house-laptop mr-2 opacity-80" aria-hidden="true"></i>WFH <?php echo count($d['wfh']); ?> วัน
-        </h4>
+        <div class="<?php echo $headClass; ?> text-purple-300 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h4 class="font-semibold">
+                <i class="fas fa-house-laptop mr-2 opacity-80" aria-hidden="true"></i>WFH <?php echo count($d['wfh']); ?> วัน
+            </h4>
+            <?php $renderBulkToolbar('wfh', 'WFH', count($d['wfh'])); ?>
+        </div>
         <ul class="<?php echo $listClass; ?>">
             <?php foreach ($d['wfh'] as $item):
                 $meta = [];
                 if (!empty($item['check_in'])) {
                     $meta[] = 'เข้า ' . htmlspecialchars($item['check_in']) . ' – ออก ' . htmlspecialchars($item['check_out'] ?? '-');
                 }
-                $renderDayRow($item, 'text-purple-300/90', $meta, $showActions ? $attFixUrl($employeeId, $item['date']) : null);
+                $renderDayRow(
+                    $item,
+                    'text-purple-300/90',
+                    $meta,
+                    $showActions ? $attFixUrl($employeeId, $item['date']) : null,
+                    $showActions ? $bulkGroupId('wfh') : null
+                );
             endforeach; ?>
         </ul>
     </section>

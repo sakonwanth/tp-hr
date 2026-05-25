@@ -275,4 +275,11 @@ if (!function_exists('tp_hr_emp_view_row')) {
 </div>
 </div>
 
+<?php
+$bulkDefaultCheckIn = substr((string)(getSetting('default_work_start', '08:45') ?? '08:45'), 0, 5);
+$bulkDefaultCheckOut = substr((string)(getSetting('default_work_end', '17:30') ?? '17:30'), 0, 5);
+$bulkReloadBase = '/hr/employee_view.php?' . http_build_query(['id' => $id, 'month' => $summaryMonth]);
+include dirname(__DIR__) . '/modules/hr/employee_summary_bulk_attendance_modal.php';
+?>
+
 <?php include dirname(__DIR__) . '/templates/footer.php'; ?>

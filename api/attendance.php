@@ -49,6 +49,10 @@ if ($method === 'POST') {
         case 'adjust':
             handleAdjust($pdo, $user, $input);
             break;
+
+        case 'bulk_adjust':
+            handleBulkAdjust($pdo, $user, $input);
+            break;
             
         case 'delete':
             handleDelete($pdo, $user, $input);
@@ -550,69 +554,57 @@ function getMonthlyReport(PDO $pdo, array $user): void {
 }
 
 /**
- * Handle attendance adjustment (HR only)
+ * Apply a single attendance adjustment (shared by adjust + bulk_adjust).
+ *
+ * @return array{ok:bool,record_id?:int,error?:string}
  */
-function handleAdjust(PDO $pdo, array $user, array $input): void {
-    // Check HR permission
-    if (!hr_can_access_hr_dashboard()) {
-        apiError('ไม่มีสิทธิ์ดำเนินการ', 403);
+function applyAttendanceAdjust(
+    PDO $pdo,
+    array $actor,
+    int $userId,
+    string $date,
+    string $checkInTime,
+    string $checkOutTime,
+    string $note
+): array {
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+        return ['ok' => false, 'error' => 'รูปแบบวันที่ไม่ถูกต้อง: ' . $date];
+    }
+    if ($checkInTime === '' && $checkOutTime === '') {
+        return ['ok' => false, 'error' => 'กรุณาระบุเวลาเข้าหรือเวลาออกอย่างน้อยหนึ่งช่อง'];
     }
 
-    $userId = (int)($input['user_id'] ?? 0);
-    $date = $input['attendance_date'] ?? '';
-    $attendanceId = $input['attendance_id'] ?? '';
-    $checkInTime = trim((string)($input['check_in_time'] ?? ''));
-    $checkOutTime = trim((string)($input['check_out_time'] ?? ''));
-    $note = trim($input['note'] ?? '');
-    
-    if (!$userId || !$date) {
-        apiError('ข้อมูลไม่ครบถ้วน');
-    }
-    
-    // Require reason for any adjustment (audit compliance)
-    if ($note === '') {
-        apiError('กรุณาระบุเหตุผลการแก้ไขเวลา');
-    }
-    
-    // Must have at least one time to adjust — empty-both = delete, use /delete action instead
-    if ($checkInTime === '' && $checkOutTime === '') {
-        apiError('กรุณาระบุเวลาเข้าหรือเวลาออกอย่างน้อยหนึ่งช่อง (หากต้องการลบข้อมูล ให้ใช้ปุ่ม "ลบข้อมูลการลงเวลา")');
-    }
-    
-    // Validate date
-    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
-        apiError('รูปแบบวันที่ไม่ถูกต้อง');
-    }
-    
     $attendanceService = new AttendanceService($pdo);
     $targetUser = $attendanceService->getUserForAttendance($userId);
     if (!$targetUser) {
-        apiError('ไม่พบพนักงานที่ต้องการแก้ไข');
+        return ['ok' => false, 'error' => 'ไม่พบพนักงาน'];
     }
 
-    // Get existing attendance
-    $stmt = $pdo->prepare("SELECT * FROM hr_attendances WHERE user_id = ? AND attendance_date = ?");
+    $stmt = $pdo->prepare('SELECT * FROM hr_attendances WHERE user_id = ? AND attendance_date = ?');
     $stmt->execute([$userId, $date]);
-    $existing = $stmt->fetch();
-    
+    $existing = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+
     $shift = $existing && !empty($existing['shift_id'])
         ? $attendanceService->getShiftById((int)$existing['shift_id'])
         : $attendanceService->getDefaultShift();
-    
-    // Effective values: new value (if provided) else keep existing
-    $checkInFull  = $checkInTime  !== '' ? AttendanceService::normalizeDateTime($date, $checkInTime)  : ($existing['check_in_time']  ?? null);
-    $checkOutFull = $checkOutTime !== '' ? AttendanceService::normalizeDateTime($date, $checkOutTime) : ($existing['check_out_time'] ?? null);
-    $checkInChanged  = ($checkInTime  !== '');
+
+    $checkInFull = $checkInTime !== ''
+        ? AttendanceService::normalizeDateTime($date, $checkInTime)
+        : ($existing['check_in_time'] ?? null);
+    $checkOutFull = $checkOutTime !== ''
+        ? AttendanceService::normalizeDateTime($date, $checkOutTime)
+        : ($existing['check_out_time'] ?? null);
+    $checkInChanged = ($checkInTime !== '');
     $checkOutChanged = ($checkOutTime !== '');
-    
+
     $summary = $attendanceService->summarizeAttendance(
         $targetUser,
         $shift,
         $date,
         $checkInFull,
         $checkOutFull,
-        $existing['planned_start_time'] ?? null,
-        $existing['status'] ?? null
+        $existing ? ($existing['planned_start_time'] ?? null) : null,
+        $existing ? ($existing['status'] ?? null) : null
     );
     $workMinutes = (int)$summary['work_minutes'];
     $breakMinutes = (int)$summary['break_minutes'];
@@ -620,10 +612,9 @@ function handleAdjust(PDO $pdo, array $user, array $input): void {
     $earlyLeaveMinutes = (int)$summary['early_leave_minutes'];
     $otMinutes = (int)$summary['ot_minutes'];
     $status = (string)$summary['status'];
-    
+
     try {
         if ($existing) {
-            // Absolute update — supports explicit NULL clears
             $stmt = $pdo->prepare("
                 UPDATE hr_attendances SET
                     check_in_time = ?,
@@ -654,11 +645,10 @@ function handleAdjust(PDO $pdo, array $user, array $input): void {
                 $otMinutes,
                 $status,
                 $note,
-                $user['id'],
-                $existing['id']
+                $actor['id'],
+                $existing['id'],
             ]);
         } else {
-            // Create new
             $stmt = $pdo->prepare("
                 INSERT INTO hr_attendances (
                     user_id, attendance_date, shift_id,
@@ -669,55 +659,172 @@ function handleAdjust(PDO $pdo, array $user, array $input): void {
                 ) VALUES (?, ?, ?, ?, 'MANUAL', ?, 'MANUAL', ?, ?, ?, ?, ?, ?, ?, ?, NOW())
             ");
             $stmt->execute([
-                $userId, $date, $shift['id'] ?? null,
-                $checkInFull, $checkOutFull,
-                $workMinutes, $breakMinutes, $lateMinutes, $earlyLeaveMinutes, $otMinutes, $status, $note,
-                $user['id']
+                $userId,
+                $date,
+                $shift['id'] ?? null,
+                $checkInFull,
+                $checkOutFull,
+                $workMinutes,
+                $breakMinutes,
+                $lateMinutes,
+                $earlyLeaveMinutes,
+                $otMinutes,
+                $status,
+                $note,
+                $actor['id'],
             ]);
         }
-        // Detailed audit log: capture before/after values
+
         $recordId = (int)($existing['id'] ?? $pdo->lastInsertId());
         $oldValues = $existing ? [
-            'target_user_id'    => $userId,
-            'attendance_date'   => $date,
-            'check_in_time'     => $existing['check_in_time'] ?? null,
-            'check_out_time'    => $existing['check_out_time'] ?? null,
-            'check_in_type'     => $existing['check_in_type'] ?? null,
-            'check_out_type'    => $existing['check_out_type'] ?? null,
-            'work_minutes'      => (int)($existing['work_minutes'] ?? 0),
-            'break_minutes'     => (int)($existing['break_minutes'] ?? 0),
-            'late_minutes'      => (int)($existing['late_minutes'] ?? 0),
-            'early_leave_minutes' => (int)($existing['early_leave_minutes'] ?? 0),
-            'ot_minutes'        => (int)($existing['ot_minutes'] ?? 0),
-            'status'            => $existing['status'] ?? null,
+            'target_user_id' => $userId,
+            'attendance_date' => $date,
+            'check_in_time' => $existing['check_in_time'] ?? null,
+            'check_out_time' => $existing['check_out_time'] ?? null,
+            'status' => $existing['status'] ?? null,
             'adjustment_reason' => $existing['adjustment_reason'] ?? null,
         ] : [
-            'target_user_id'    => $userId,
-            'attendance_date'   => $date,
-            '_note'             => 'no previous record',
+            'target_user_id' => $userId,
+            'attendance_date' => $date,
+            '_note' => 'no previous record',
         ];
         $newValues = [
-            'target_user_id'    => $userId,
-            'attendance_date'   => $date,
-            'check_in_time'     => $checkInFull,
-            'check_out_time'    => $checkOutFull,
-            'check_in_type'     => $checkInFull ? 'MANUAL' : ($existing['check_in_type'] ?? null),
-            'check_out_type'    => $checkOutFull ? 'MANUAL' : ($existing['check_out_type'] ?? null),
-            'work_minutes'      => (int)$workMinutes,
-            'break_minutes'     => (int)$breakMinutes,
-            'late_minutes'      => (int)$lateMinutes,
-            'early_leave_minutes' => (int)$earlyLeaveMinutes,
-            'ot_minutes'        => (int)$otMinutes,
-            'status'            => $status,
+            'target_user_id' => $userId,
+            'attendance_date' => $date,
+            'check_in_time' => $checkInFull,
+            'check_out_time' => $checkOutFull,
+            'status' => $status,
             'adjustment_reason' => $note,
-            'adjusted_by'       => (int)$user['id'],
+            'adjusted_by' => (int)$actor['id'],
+            'bulk' => false,
         ];
         Auth::log('ATTENDANCE_ADJUST', 'hr_attendances', $recordId, $oldValues, $newValues);
-        apiSuccess([], 'บันทึกข้อมูลสำเร็จ');
+
+        return ['ok' => true, 'record_id' => $recordId];
     } catch (Exception $e) {
-        tpHrLogException($e, 'api/attendance handleAdjust');
+        tpHrLogException($e, 'api/attendance applyAttendanceAdjust');
+        return ['ok' => false, 'error' => 'เกิดข้อผิดพลาด: ' . $date];
+    }
+}
+
+/**
+ * Handle attendance adjustment (HR only)
+ */
+function handleAdjust(PDO $pdo, array $user, array $input): void {
+    if (!hr_can_access_hr_dashboard()) {
+        apiError('ไม่มีสิทธิ์ดำเนินการ', 403);
+    }
+
+    $userId = (int)($input['user_id'] ?? 0);
+    $date = $input['attendance_date'] ?? '';
+    $checkInTime = trim((string)($input['check_in_time'] ?? ''));
+    $checkOutTime = trim((string)($input['check_out_time'] ?? ''));
+    $note = trim($input['note'] ?? '');
+
+    if (!$userId || !$date) {
+        apiError('ข้อมูลไม่ครบถ้วน');
+    }
+    if ($note === '') {
+        apiError('กรุณาระบุเหตุผลการแก้ไขเวลา');
+    }
+
+    $result = applyAttendanceAdjust($pdo, $user, $userId, $date, $checkInTime, $checkOutTime, $note);
+    if (!$result['ok']) {
+        apiError($result['error'] ?? 'แก้ไขไม่สำเร็จ');
+    }
+    apiSuccess([], 'บันทึกข้อมูลสำเร็จ');
+}
+
+/**
+ * Bulk attendance adjustment — same check-in/out applied to multiple dates (HR only).
+ */
+function handleBulkAdjust(PDO $pdo, array $user, array $input): void {
+    if (!hr_can_access_hr_dashboard()) {
+        apiError('ไม่มีสิทธิ์ดำเนินการ', 403);
+    }
+
+    $userId = (int)($input['user_id'] ?? 0);
+    $note = trim($input['note'] ?? '');
+    $checkInTime = trim((string)($input['check_in_time'] ?? ''));
+    $checkOutTime = trim((string)($input['check_out_time'] ?? ''));
+    $datesRaw = $input['dates'] ?? [];
+
+    if (!$userId) {
+        apiError('ข้อมูลไม่ครบถ้วน');
+    }
+    if ($note === '') {
+        apiError('กรุณาระบุเหตุผลการแก้ไขเวลา');
+    }
+    if ($checkInTime === '' && $checkOutTime === '') {
+        apiError('กรุณาระบุเวลาเข้าหรือเวลาออกอย่างน้อยหนึ่งช่อง');
+    }
+    if (!is_array($datesRaw) || $datesRaw === []) {
+        apiError('กรุณาเลือกอย่างน้อย 1 วัน');
+    }
+
+    $dates = [];
+    foreach ($datesRaw as $d) {
+        $d = trim((string)$d);
+        if ($d !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $d)) {
+            $dates[$d] = true;
+        }
+    }
+    $dates = array_keys($dates);
+    sort($dates);
+
+    if ($dates === []) {
+        apiError('รูปแบบวันที่ไม่ถูกต้อง');
+    }
+    if (count($dates) > 31) {
+        apiError('แก้ไขได้สูงสุด 31 วันต่อครั้ง');
+    }
+
+    $attendanceService = new AttendanceService($pdo);
+    if (!$attendanceService->getUserForAttendance($userId)) {
+        apiError('ไม่พบพนักงานที่ต้องการแก้ไข');
+    }
+
+    $ok = 0;
+    $failed = [];
+    try {
+        $pdo->beginTransaction();
+        foreach ($dates as $date) {
+            $result = applyAttendanceAdjust($pdo, $user, $userId, $date, $checkInTime, $checkOutTime, $note);
+            if ($result['ok']) {
+                $ok++;
+            } else {
+                $failed[] = ['date' => $date, 'error' => $result['error'] ?? 'ล้มเหลว'];
+            }
+        }
+        if ($ok === 0) {
+            $pdo->rollBack();
+            apiError('ไม่สามารถบันทึกได้ — ' . ($failed[0]['error'] ?? 'ลองใหม่อีกครั้ง'));
+        }
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        tpHrLogException($e, 'api/attendance handleBulkAdjust');
         apiError('เกิดข้อผิดพลาดภายในระบบ กรุณาลองใหม่', 500);
     }
+
+    Auth::log('ATTENDANCE_BULK_ADJUST', 'hr_attendances', $userId, [
+        'target_user_id' => $userId,
+        'dates' => $dates,
+    ], [
+        'success_count' => $ok,
+        'failed' => $failed,
+        'check_in_time' => $checkInTime,
+        'check_out_time' => $checkOutTime,
+        'note' => $note,
+    ]);
+
+    $msg = 'บันทึกสำเร็จ ' . $ok . ' วัน';
+    if ($failed !== []) {
+        $msg .= ' (ล้มเหลว ' . count($failed) . ' วัน)';
+    }
+    apiSuccess(['success_count' => $ok, 'failed' => $failed], $msg);
 }
 
 /**
