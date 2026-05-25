@@ -41,7 +41,12 @@ $pdo->exec("
         requested_day_off INTEGER,
         status TEXT
     );
+    CREATE TABLE system_settings (
+        setting_key TEXT PRIMARY KEY,
+        setting_value TEXT
+    );
 ");
+$pdo->exec("INSERT INTO system_settings (setting_key, setting_value) VALUES ('payroll_ss_enabled', '1')");
 
 $pdo->exec("INSERT INTO users (id, is_active, work_mode) VALUES (1, 1, 'OFFICE'), (2, 1, 'WFH'), (3, 0, 'OFFICE')");
 $pdo->exec("INSERT INTO hr_employee_schedules (user_id, day_off) VALUES (1, 0), (2, 0), (3, 0)");
@@ -66,5 +71,20 @@ assertSameValue([], $wfhMissing, 'WFH user has no missing absent dates');
 
 $inactiveMissing = $method->invoke($service, 3, '2026-04-20', '2026-04-26', []);
 assertSameValue([], $inactiveMissing, 'inactive user has no missing absent dates');
+
+$wageMethod = new ReflectionMethod(PayrollService::class, 'socialSecurityWageBase');
+$wageMethod->setAccessible(true);
+$wageBase = $wageMethod->invoke($service, [
+    'base_salary' => 12000,
+    'bonus_fixed' => 0,
+    'income_other_json' => json_encode([
+        ['label' => 'ค่าตำแหน่ง', 'amount' => 3000],
+        ['label' => 'ค่าเดินทาง', 'amount' => 1000],
+    ]),
+]);
+assertSameValue(16000.0, $wageBase, 'SS wage base includes base salary and recurring monthly income');
+
+$ss16000 = $service->calcSocialSecurity(16000, false, '2026-05-01');
+assertSameValue(800.0, $ss16000, 'SS 5% of 16000 monthly wage base');
 
 echo "PayrollService regression fixtures passed." . PHP_EOL;

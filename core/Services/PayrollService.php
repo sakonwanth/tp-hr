@@ -46,12 +46,46 @@ class PayrollService
      * Social security (employee portion).
      * Rate 5%, base 1,650–ceiling, cap per month per law.
      */
-    public function calcSocialSecurity(float $baseSalary, bool $optOut = false, ?string $monthFirst = null): float
+    public function calcSocialSecurity(float $wageBase, bool $optOut = false, ?string $monthFirst = null): float
     {
-        if (!$this->isSsEnabled() || $optOut || $baseSalary <= 0) return 0;
+        if (!$this->isSsEnabled() || $optOut || $wageBase <= 0) return 0;
         $ceiling = $this->ssWageCeiling($monthFirst);
-        $base = max(1650, min($baseSalary, $ceiling));
+        $base = max(1650, min($wageBase, $ceiling));
         return round($base * 0.05, 2);
+    }
+
+    /**
+     * ฐานค่าจ้างสำหรับเงินสมทบประกันสังคม ม.33 — รวมรายได้ประจำทุกเดือน
+     * (ฐานเงินเดือน + โบนัสประจำ + เบี้ยเลี้ยง + รายได้อื่นที่จ่ายทุกเดือน)
+     * ข้ามรายการที่ตั้ง ss_exclude=1
+     *
+     * @param array<string,mixed>|null $setup
+     */
+    public function socialSecurityWageBase(?array $setup): float
+    {
+        if (!$setup) {
+            return 0.0;
+        }
+        $base = (float)($setup['base_salary'] ?? 0);
+        $base += (float)($setup['bonus_fixed'] ?? 0);
+
+        foreach (['allowance_json', 'income_other_json'] as $jsonField) {
+            if (empty($setup[$jsonField])) {
+                continue;
+            }
+            $items = json_decode((string)$setup[$jsonField], true);
+            if (!is_array($items)) {
+                continue;
+            }
+            foreach ($items as $item) {
+                if (!empty($item['ss_exclude'])) {
+                    continue;
+                }
+                $base += (float)($item['amount'] ?? 0);
+            }
+        }
+
+        return round(max(0, $base), 2);
     }
 
     /**
@@ -452,7 +486,8 @@ class PayrollService
         $totalIncome = $gross + $bonus + $allowances + $incomeOther;
         $annualEst = $totalIncome * 12;
         $ssOptOut = $setup && !empty($setup['ss_opt_out']);
-        $ss = $this->calcSocialSecurity($gross, $ssOptOut, $monthFirst);
+        $ssWageBase = $this->socialSecurityWageBase($setup);
+        $ss = $this->calcSocialSecurity($ssWageBase, $ssOptOut, $monthFirst);
         $pf = $setup ? (float)$setup['provident_fund'] : 0;
         $taxBase = $this->calcTaxMonthly($annualEst, $ss * 12, $pf * 12, $monthFirst);
         $extraTaxReq = $setup && isset($setup['additional_tax_withholding']) ? max(0, (float)$setup['additional_tax_withholding']) : 0;
