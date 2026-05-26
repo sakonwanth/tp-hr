@@ -398,6 +398,23 @@ function apiKeyResolveActorForApi(PDO $pdo, ?array $key, array $body, string $bo
     }
     $bodyVal = (int) ($body[$bodyField] ?? 0);
     $keyOwner = isset($key['created_by']) ? (int) $key['created_by'] : 0;
+    $integrationKey = apiKeyServiceUserId($key) === null;
+
+    if ($bodyVal > 0 && !userHasOneOfRoles($pdo, $bodyVal, $allowedRoleNames)) {
+        ApiAuth::fail(403, $bodyField . ' is not eligible for this action');
+    }
+
+    // CRM / machine keys (no service_user_id): body actor = logged-in user at the caller
+    if ($integrationKey) {
+        if ($bodyVal > 0) {
+            return $bodyVal;
+        }
+        if ($keyOwner > 0 && userHasOneOfRoles($pdo, $keyOwner, $allowedRoleNames)) {
+            return $keyOwner;
+        }
+        ApiAuth::fail(400, $bodyField . ' required');
+    }
+
     if ($keyOwner > 0) {
         if (!userHasOneOfRoles($pdo, $keyOwner, $allowedRoleNames)) {
             ApiAuth::fail(403, 'API key issuer is not eligible for this action; re-issue the key');
@@ -409,9 +426,6 @@ function apiKeyResolveActorForApi(PDO $pdo, ?array $key, array $body, string $bo
     }
     if ($bodyVal <= 0) {
         ApiAuth::fail(400, $bodyField . ' required (legacy key without creator)');
-    }
-    if (!userHasOneOfRoles($pdo, $bodyVal, $allowedRoleNames)) {
-        ApiAuth::fail(403, $bodyField . ' is not eligible for this action');
     }
     return $bodyVal;
 }
