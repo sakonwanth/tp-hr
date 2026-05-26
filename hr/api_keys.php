@@ -16,7 +16,7 @@ $user = Auth::user();
 $employeeOptions = $pdo->query("
     SELECT u.id, u.employee_code, u.first_name_th, u.last_name_th
     FROM users u
-    WHERE u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ") AND u.is_active = 1
+    WHERE " . tp_hr_non_system_user_condition_sql('u') . " AND u.is_active = 1
     ORDER BY u.employee_code ASC
 ")->fetchAll(PDO::FETCH_ASSOC);
 $page_title = 'External API Keys';
@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $serviceUserId = (int) ($_POST['service_user_id'] ?? 0);
             if ($serviceUserId > 0) {
-                $chk = $pdo->prepare('SELECT id FROM users WHERE id = ? AND id NOT IN (' . SYSTEM_USER_IDS_SQL . ') AND is_active = 1 LIMIT 1');
+                $chk = $pdo->prepare("SELECT id FROM users WHERE id = ? AND is_active = 1 AND " . tp_hr_non_system_user_condition_sql('') . " LIMIT 1");
                 $chk->execute([$serviceUserId]);
                 if (!$chk->fetchColumn()) {
                     throw new Exception('พนักงานสำหรับผูกคีย์ไม่ถูกต้องหรือไม่ active');

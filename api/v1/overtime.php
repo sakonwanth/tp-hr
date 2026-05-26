@@ -28,7 +28,7 @@ if ($method === 'GET') {
         'Overtime list queries require overtime.read_all (or *) or a service user bound to the API key'
     );
 
-    $where = ["u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")"];
+    $where = [tp_hr_non_system_user_condition_sql('u')];
     $params = [];
     if ($status !== '') {
         if (!in_array($status, ['pending','approved','rejected','cancelled'], true)) ApiAuth::fail(400, 'Invalid status');

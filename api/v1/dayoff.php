@@ -25,7 +25,7 @@ if ($method === 'GET') {
     $to   = $_GET['to'] ?? '';
     $userId = apiKeyResolveScopedUserId($key, isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0);
 
-    $where = ["u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")"];
+    $where = [tp_hr_non_system_user_condition_sql('u')];
     $params = [];
     if ($status !== '') {
         if (!in_array($status, ['PENDING','APPROVED','REJECTED','CANCELLED'], true)) ApiAuth::fail(400, 'Invalid status');

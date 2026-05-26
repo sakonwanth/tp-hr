@@ -64,7 +64,7 @@ if ($method === 'GET') {
     $userId = apiKeyResolveScopedUserId($key, isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0);
 
     $validStatus = ['DRAFT', 'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'];
-    $where = ["u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")"];
+    $where = [tp_hr_non_system_user_condition_sql('u')];
     $params = [];
 
     if ($status !== '') {

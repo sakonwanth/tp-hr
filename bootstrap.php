@@ -50,8 +50,9 @@ function tp_hr_sql_string_list(array $values): string {
 
 function tp_hr_non_system_user_condition_sql(string $alias = 'u'): string {
     $prefix = $alias !== '' ? $alias . '.' : '';
-    return $prefix . 'id NOT IN (' . SYSTEM_USER_IDS_SQL . ')'
-        . ' AND ' . $prefix . 'username NOT IN (' . tp_hr_sql_string_list(TP_HR_CI_TEST_USERNAMES) . ')';
+    return $prefix . "account_type = 'PERSON'"
+        . ' AND ' . $prefix . 'is_employee = 1'
+        . ' AND ' . $prefix . 'is_test_account = 0';
 }
 
 function tp_hr_payroll_employee_filter_sql(string $alias = 'u'): string {

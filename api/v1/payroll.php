@@ -35,7 +35,7 @@ $slipSelect = "
     JOIN payroll_runs r ON r.id = s.payroll_run_id
     JOIN users u ON u.id = s.user_id
     WHERE r.status IN ('approved','paid')
-      AND u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")
+      AND " . tp_hr_non_system_user_condition_sql('u') . "
 ";
 
 if ($resource === 'payroll-runs') {

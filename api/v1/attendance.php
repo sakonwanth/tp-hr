@@ -63,7 +63,7 @@ if ($method === 'GET') {
                a.status, a.is_offsite, a.offsite_status, a.adjustment_reason
         FROM hr_attendances a
         JOIN users u ON u.id = a.user_id
-        WHERE u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")
+        WHERE " . tp_hr_non_system_user_condition_sql('u') . "
         $sqlDate
         ORDER BY a.attendance_date DESC, a.user_id ASC
         LIMIT 2000

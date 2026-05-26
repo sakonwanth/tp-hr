@@ -73,7 +73,7 @@ switch ($resource) {
                    s.day_off, s.effective_date, s.notes, s.updated_at
             FROM hr_employee_schedules s
             JOIN users u ON u.id = s.user_id
-            WHERE u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")
+            WHERE " . tp_hr_non_system_user_condition_sql('u') . "
         ";
         $params = [];
         if ($userId > 0) { $sql .= " AND s.user_id = ?"; $params[] = $userId; }
@@ -110,7 +110,7 @@ switch ($resource) {
             FROM hr_leave_entitlements e
             JOIN users u ON u.id = e.user_id
             JOIN hr_leave_types lt ON lt.id = e.leave_type_id
-            WHERE e.year = ? AND u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")
+            WHERE e.year = ? AND " . tp_hr_non_system_user_condition_sql('u') . "
         ";
         $params = [$year];
         if ($userId > 0) { $sql .= " AND e.user_id = ?"; $params[] = $userId; }

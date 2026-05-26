@@ -115,7 +115,7 @@ function leaveApiResolveSubjectUserId(PDO $pdo, array $user): int {
     if ($req <= 0) {
         return $self;
     }
-    $chk = $pdo->prepare('SELECT id FROM users WHERE id = ? AND id NOT IN (' . SYSTEM_USER_IDS_SQL . ') LIMIT 1');
+    $chk = $pdo->prepare("SELECT id FROM users WHERE id = ? AND " . tp_hr_non_system_user_condition_sql('') . " LIMIT 1");
     $chk->execute([$req]);
     if (!$chk->fetchColumn()) {
         return -1;

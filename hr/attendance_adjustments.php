@@ -131,10 +131,10 @@ if (!in_array($statusFilter, ['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED', ''
 $month = trim((string)($_GET['month'] ?? ''));
 $department = trim((string)($_GET['department'] ?? ''));
 
-$stmtDepts = $pdo->query("SELECT DISTINCT department FROM users WHERE department IS NOT NULL AND department != '' AND id NOT IN (" . SYSTEM_USER_IDS_SQL . ") ORDER BY department");
+$stmtDepts = $pdo->query("SELECT DISTINCT department FROM users WHERE department IS NOT NULL AND department != '' AND " . tp_hr_non_system_user_condition_sql('') . " ORDER BY department");
 $departments = $stmtDepts->fetchAll(PDO::FETCH_COLUMN);
 
-$where = ["u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")"];
+$where = [tp_hr_non_system_user_condition_sql('u')];
 $params = [];
 if ($statusFilter !== '') {
     $where[] = "adj.status = ?";

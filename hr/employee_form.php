@@ -35,7 +35,7 @@ $success = '';
 $roles = $pdo->query("SELECT id, name, display_name FROM roles ORDER BY id")->fetchAll();
 
 // Get departments for dropdown
-$departments = $pdo->query("SELECT DISTINCT department FROM users WHERE department IS NOT NULL AND department != '' ORDER BY department")->fetchAll(PDO::FETCH_COLUMN);
+$departments = $pdo->query("SELECT DISTINCT department FROM users WHERE department IS NOT NULL AND department != '' AND " . tp_hr_non_system_user_condition_sql('') . " ORDER BY department")->fetchAll(PDO::FETCH_COLUMN);
 
 // Load employee data if editing
 if ($action === 'edit' && $id > 0) {
@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'chang
             } else {
                 try {
                     $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-                    $stmt = $pdo->prepare("UPDATE users SET password = ?, updated_at = NOW() WHERE id = ? AND id NOT IN (" . SYSTEM_USER_IDS_SQL . ")");
+                    $stmt = $pdo->prepare("UPDATE users SET password = ?, updated_at = NOW() WHERE id = ? AND " . tp_hr_non_system_user_condition_sql(''));
                     $stmt->execute([$hashedPassword, $pwUserId]);
                     if ($stmt->rowCount() < 1) {
                         $errors[] = 'ไม่พบพนักงาน หรือไม่สามารถเปลี่ยนรหัสผ่านได้';
