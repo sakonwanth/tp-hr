@@ -80,7 +80,7 @@ if ($rangeDays > $reportMaxRangeDays) {
 }
 
 // Get departments for filter
-$departments = $pdo->query("SELECT DISTINCT department FROM users WHERE department IS NOT NULL AND department != '' ORDER BY department")->fetchAll(PDO::FETCH_COLUMN);
+$departments = $pdo->query("SELECT DISTINCT department FROM users WHERE department IS NOT NULL AND department != '' AND " . tp_hr_non_system_user_condition_sql('') . " ORDER BY department")->fetchAll(PDO::FETCH_COLUMN);
 
 // Build base query conditions
 $conditions = [];
@@ -116,7 +116,7 @@ switch ($report) {
             FROM users u
             LEFT JOIN hr_attendances a ON u.id = a.user_id 
                 AND a.attendance_date BETWEEN ? AND ?
-            WHERE u.is_active = 1 AND u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")
+            WHERE u.is_active = 1 AND " . tp_hr_non_system_user_condition_sql('u') . "
             " . ($conditions ? " AND " . implode(" AND ", $conditions) : "") . "
             GROUP BY u.id
             ORDER BY u.department, u.first_name_th
@@ -147,7 +147,7 @@ switch ($report) {
             JOIN hr_leave_types lt ON lr.leave_type_id = lt.id
             WHERE lr.start_date <= ? AND lr.end_date >= ?
               AND lr.status NOT IN ('DRAFT','CANCELLED')
-              AND u.is_active = 1 AND u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")
+              AND u.is_active = 1 AND " . tp_hr_non_system_user_condition_sql('u') . "
             " . ($conditions ? " AND " . implode(" AND ", $conditions) : "") . "
             GROUP BY u.id, lt.id
             ORDER BY u.department, u.first_name_th, lt.sort_order
@@ -173,7 +173,7 @@ switch ($report) {
             JOIN users u ON u.id = lr.user_id
             WHERE lr.start_date <= ? AND lr.end_date >= ?
               AND lr.status NOT IN ('DRAFT','CANCELLED')
-              AND u.is_active = 1 AND u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")
+              AND u.is_active = 1 AND " . tp_hr_non_system_user_condition_sql('u') . "
             GROUP BY lt.id
             ORDER BY lt.sort_order
         ";
@@ -199,12 +199,11 @@ switch ($report) {
                 SUM(CASE WHEN a.status = 'LEAVE'   THEN 1 ELSE 0 END) AS on_leave,
                 SUM(CASE WHEN a.status = 'HOLIDAY' THEN 1 ELSE 0 END) AS holiday_off,
                 (SELECT COUNT(*) FROM users
-                  WHERE is_active = 1 AND id NOT IN (" . SYSTEM_USER_IDS_SQL . ")) AS total_employees
+                  WHERE is_active = 1 AND " . tp_hr_non_system_user_condition_sql('') . ") AS total_employees
             FROM hr_attendances a
             LEFT JOIN hr_holidays h ON h.date = a.attendance_date AND h.is_active = 1
             WHERE a.attendance_date BETWEEN ? AND ?
-              AND a.user_id NOT IN (" . SYSTEM_USER_IDS_SQL . ")
-              AND EXISTS (SELECT 1 FROM users u WHERE u.id = a.user_id AND u.is_active = 1)
+              AND EXISTS (SELECT 1 FROM users u WHERE u.id = a.user_id AND u.is_active = 1 AND " . tp_hr_non_system_user_condition_sql('u') . ")
             GROUP BY a.attendance_date, h.name
             ORDER BY a.attendance_date DESC
         ";

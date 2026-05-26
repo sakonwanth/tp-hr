@@ -27,7 +27,7 @@ $department = trim($_GET['department'] ?? '');
 $departments = $pdo->query("
     SELECT DISTINCT department FROM users
     WHERE is_active = 1 AND department IS NOT NULL AND department != ''
-    AND id NOT IN (" . SYSTEM_USER_IDS_SQL . ")
+    AND " . tp_hr_non_system_user_condition_sql('') . "
     ORDER BY department
 ")->fetchAll(PDO::FETCH_COLUMN);
 

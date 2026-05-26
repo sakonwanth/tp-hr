@@ -889,7 +889,7 @@ class PayrollService
                 $runId = (int)$this->pdo->lastInsertId();
             }
 
-            $users = $this->pdo->query("SELECT id, hire_date FROM users WHERE is_active = 1 AND employee_code NOT LIKE 'CR%'")
+            $users = $this->pdo->query("SELECT id, hire_date FROM users u WHERE u.is_active = 1 AND " . tp_hr_payroll_employee_filter_sql('u'))
                 ->fetchAll(PDO::FETCH_ASSOC);
 
             $totalGross = $totalTax = $totalNet = 0;
@@ -1019,7 +1019,7 @@ class PayrollService
             SELECT COUNT(*) as cnt, COALESCE(SUM(s.total_income),0) as gross,
                    COALESCE(SUM(s.tax_withheld),0) as tax, COALESCE(SUM(s.net_salary),0) as net
             FROM payroll_slips s JOIN users u ON s.user_id = u.id
-            WHERE s.payroll_run_id = ? AND u.employee_code NOT LIKE 'CR%'
+            WHERE s.payroll_run_id = ? AND " . tp_hr_payroll_employee_filter_sql('u') . "
         ");
         $stmt->execute([$runId]);
         $agg = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -1054,7 +1054,7 @@ class PayrollService
         $stmt = $this->pdo->prepare("
             SELECT s.*, u.employee_code, u.first_name_th, u.last_name_th
             FROM payroll_slips s JOIN users u ON s.user_id = u.id
-            WHERE s.payroll_run_id = ? AND u.employee_code NOT LIKE 'CR%'
+            WHERE s.payroll_run_id = ? AND " . tp_hr_payroll_employee_filter_sql('u') . "
             ORDER BY u.employee_code
         ");
         $stmt->execute([$runId]);

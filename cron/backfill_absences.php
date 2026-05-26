@@ -30,8 +30,7 @@ $users = $pdo->query("
            COALESCE(s.day_off, 0) AS day_off
     FROM users u
     LEFT JOIN hr_employee_schedules s ON s.user_id = u.id
-    WHERE u.is_active = 1 AND u.id NOT IN (1, 12)
-      AND (u.employee_code IS NULL OR u.employee_code NOT LIKE 'CR%')
+    WHERE u.is_active = 1 AND " . tp_hr_payroll_employee_filter_sql('u') . "
 ")->fetchAll(PDO::FETCH_ASSOC);
 
 // pre-load holidays

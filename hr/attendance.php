@@ -25,7 +25,7 @@ $limit = DEFAULT_PER_PAGE;
 $offset = ($page - 1) * $limit;
 
 // Get departments
-$stmtDepts = $pdo->query("SELECT DISTINCT department FROM users WHERE department IS NOT NULL AND department != '' AND id NOT IN (" . SYSTEM_USER_IDS_SQL . ") ORDER BY department");
+$stmtDepts = $pdo->query("SELECT DISTINCT department FROM users WHERE department IS NOT NULL AND department != '' AND " . tp_hr_non_system_user_condition_sql('') . " ORDER BY department");
 $departments = $stmtDepts->fetchAll(PDO::FETCH_COLUMN);
 
 // Check if selected date is a public/company holiday (used for status derivation below)
@@ -55,7 +55,7 @@ $sql = "
         JOIN hr_leave_types lt ON lt.id = lr.leave_type_id
         WHERE lr.status = 'APPROVED' AND ? BETWEEN lr.start_date AND lr.end_date
     ) lr_info ON lr_info.user_id = u.id
-    WHERE u.is_active = 1 AND u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")
+    WHERE u.is_active = 1 AND " . tp_hr_non_system_user_condition_sql('u') . "
 ";
 $params = [$date, $date, $date];
 
@@ -88,7 +88,7 @@ $records = $stmt->fetchAll();
 // Daily stats
 $stmtStats = $pdo->prepare("
     SELECT 
-        (SELECT COUNT(*) FROM users WHERE is_active = 1 AND id NOT IN (" . SYSTEM_USER_IDS_SQL . ")) as total_employees,
+        (SELECT COUNT(*) FROM users WHERE is_active = 1 AND " . tp_hr_non_system_user_condition_sql('') . ") as total_employees,
         COUNT(a.id) as checked_in,
         SUM(CASE WHEN a.late_minutes > 0 THEN 1 ELSE 0 END) as late_count,
         SUM(CASE WHEN a.check_out_time IS NOT NULL THEN 1 ELSE 0 END) as checked_out,
@@ -111,7 +111,7 @@ $stmtExcused = $pdo->prepare("
     LEFT JOIN hr_attendances a ON u.id = a.user_id AND a.attendance_date = ?
     LEFT JOIN hr_leave_requests lr ON lr.user_id = u.id
          AND lr.status = 'APPROVED' AND ? BETWEEN lr.start_date AND lr.end_date
-    WHERE u.is_active = 1 AND u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")
+    WHERE u.is_active = 1 AND " . tp_hr_non_system_user_condition_sql('u') . "
       AND a.id IS NULL
       AND (
           ? = 1 /* isHoliday flag */
@@ -131,7 +131,7 @@ $stmtDayOff = $pdo->prepare("
            SUM(CASE WHEN COALESCE(s.day_off, 0) = ? THEN 1 ELSE 0 END) AS matches
     FROM users u
     LEFT JOIN hr_employee_schedules s ON s.user_id = u.id
-    WHERE u.is_active = 1 AND u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")
+    WHERE u.is_active = 1 AND " . tp_hr_non_system_user_condition_sql('u') . "
 ");
 $stmtDayOff->execute([$weekday]);
 $dayOffStats = $stmtDayOff->fetch();

@@ -42,6 +42,23 @@ define('DOCUMENT_PATH', STORAGE_PATH . '/documents');
 // System/non-person user IDs to exclude from attendance & employee lists
 define('SYSTEM_USER_IDS', [1, 12]);
 define('SYSTEM_USER_IDS_SQL', implode(',', SYSTEM_USER_IDS));
+define('TP_HR_CI_TEST_USERNAMES', ['ci_staff', 'ci_chairman', 'ci_ceo']);
+
+function tp_hr_sql_string_list(array $values): string {
+    return "'" . implode("','", array_map(static fn($value) => str_replace("'", "''", (string)$value), $values)) . "'";
+}
+
+function tp_hr_non_system_user_condition_sql(string $alias = 'u'): string {
+    $prefix = $alias !== '' ? $alias . '.' : '';
+    return $prefix . 'id NOT IN (' . SYSTEM_USER_IDS_SQL . ')'
+        . ' AND ' . $prefix . 'username NOT IN (' . tp_hr_sql_string_list(TP_HR_CI_TEST_USERNAMES) . ')';
+}
+
+function tp_hr_payroll_employee_filter_sql(string $alias = 'u'): string {
+    $prefix = $alias !== '' ? $alias . '.' : '';
+    return '(' . $prefix . "employee_code IS NULL OR " . $prefix . "employee_code NOT LIKE 'CR%')"
+        . ' AND ' . tp_hr_non_system_user_condition_sql($alias);
+}
 
 // Load environment variables
 if (TP_COMMON_AVAILABLE) {

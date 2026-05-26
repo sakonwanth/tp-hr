@@ -26,7 +26,7 @@ $stmtAttendance = $pdo->prepare("
     SELECT 
         COUNT(DISTINCT a.user_id) as checked_in,
         SUM(CASE WHEN a.status = 'LATE' THEN 1 ELSE 0 END) as late_count,
-        (SELECT COUNT(*) FROM users WHERE is_active = 1 AND id NOT IN (" . SYSTEM_USER_IDS_SQL . ")) as total_employees
+        (SELECT COUNT(*) FROM users WHERE is_active = 1 AND " . tp_hr_non_system_user_condition_sql('') . ") as total_employees
     FROM hr_attendances a
     WHERE DATE(a.check_in_time) = ?
 ");

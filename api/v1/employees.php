@@ -23,7 +23,7 @@ $baseSelect = "
            r.name AS role_name
     FROM users u
     LEFT JOIN roles r ON u.role_id = r.id
-    WHERE u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")
+    WHERE " . tp_hr_non_system_user_condition_sql('u') . "
 ";
 
 if ($id > 0) {
@@ -67,7 +67,7 @@ $offset = ($page - 1) * $perPage;
 $activeOnly = !isset($_GET['include_inactive']) || $_GET['include_inactive'] !== '1';
 $where = $activeOnly ? " AND u.is_active = 1" : "";
 
-$cnt = $pdo->query("SELECT COUNT(*) FROM users u WHERE u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")" . $where)->fetchColumn();
+$cnt = $pdo->query("SELECT COUNT(*) FROM users u WHERE " . tp_hr_non_system_user_condition_sql('u') . $where)->fetchColumn();
 
 $stmt = $pdo->prepare($baseSelect . $where . " ORDER BY u.id ASC LIMIT ? OFFSET ?");
 $stmt->bindValue(1, $perPage, PDO::PARAM_INT);

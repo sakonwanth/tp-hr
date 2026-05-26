@@ -38,7 +38,7 @@ class WfhStamp
         $rows = $pdo->query("
             SELECT id FROM users
             WHERE is_active = 1 AND work_mode = 'WFH'
-              AND id NOT IN (" . SYSTEM_USER_IDS_SQL . ")
+              AND " . tp_hr_non_system_user_condition_sql('') . "
         ")->fetchAll(PDO::FETCH_COLUMN);
 
         $count = 0;

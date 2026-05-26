@@ -280,7 +280,7 @@ class EmployeeSummaryService
         $sql = "
             SELECT u.id, u.employee_code, u.first_name_th, u.last_name_th, u.department, u.position
             FROM users u
-            WHERE u.is_active = 1 AND u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")
+            WHERE u.is_active = 1 AND " . tp_hr_non_system_user_condition_sql('u') . "
         ";
         $params = [];
         if ($department !== null && $department !== '') {

@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['export_csv'] ?? '') === '1
     $department = trim((string)($_POST['department'] ?? ''));
     $status = (string)($_POST['status'] ?? '');
 
-    $employeeWhere = "u.id > 0 AND u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")";
+    $employeeWhere = "u.id > 0 AND " . tp_hr_non_system_user_condition_sql('u');
     $params = [];
 
     if ($search !== '') {
@@ -150,7 +150,7 @@ $page = max(1, (int)($_GET['page'] ?? 1));
 $limit = DEFAULT_PER_PAGE;
 $offset = ($page - 1) * $limit;
 
-$employeeWhere = "u.id > 0 AND u.id NOT IN (" . SYSTEM_USER_IDS_SQL . ")";
+$employeeWhere = "u.id > 0 AND " . tp_hr_non_system_user_condition_sql('u');
 $params = [];
 
 if ($search) {
@@ -174,7 +174,7 @@ if ($status === 'ACTIVE') {
 }
 
 // Get departments
-$stmtDepts = $pdo->query("SELECT DISTINCT department FROM users WHERE department IS NOT NULL AND department != '' ORDER BY department");
+$stmtDepts = $pdo->query("SELECT DISTINCT department FROM users WHERE department IS NOT NULL AND department != '' AND " . tp_hr_non_system_user_condition_sql('') . " ORDER BY department");
 $departments = $stmtDepts->fetchAll(PDO::FETCH_COLUMN);
 
 $sql = "
@@ -203,7 +203,7 @@ $stmtStats = $pdo->query("
         SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) as active,
         SUM(CASE WHEN is_active = 0 THEN 1 ELSE 0 END) as inactive
     FROM users
-    WHERE id NOT IN (" . SYSTEM_USER_IDS_SQL . ")
+    WHERE " . tp_hr_non_system_user_condition_sql('') . "
 ");
 $stats = $stmtStats->fetch();
 
