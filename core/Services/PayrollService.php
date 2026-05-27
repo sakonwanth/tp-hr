@@ -215,6 +215,87 @@ class PayrollService
         }
     }
 
+    /**
+     * @return array{probation_salary: ?float, salary: ?float, probation_passed_date: ?string}|null
+     */
+    public function getUserSalaryProfile(int $userId): ?array
+    {
+        try {
+            $stmt = $this->pdo->prepare('SELECT probation_salary, salary, probation_passed_date FROM users WHERE id = ? LIMIT 1');
+            $stmt->execute([$userId]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$row) {
+                return null;
+            }
+            $prob = ($row['probation_salary'] !== null && $row['probation_salary'] !== '')
+                ? (float)$row['probation_salary'] : null;
+            $salary = ($row['salary'] !== null && $row['salary'] !== '')
+                ? (float)$row['salary'] : null;
+            $passed = !empty($row['probation_passed_date'])
+                ? substr((string)$row['probation_passed_date'], 0, 10) : null;
+            return [
+                'probation_salary' => $prob,
+                'salary' => $salary,
+                'probation_passed_date' => $passed,
+            ];
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    /** @param array{probation_salary: ?float, salary: ?float, probation_passed_date: ?string}|null $profile */
+    public function isOnProbationForMonth(?array $profile, string $monthFirst): bool
+    {
+        if (!$profile) {
+            return false;
+        }
+        $passedDate = $profile['probation_passed_date'] ?? null;
+        if ($passedDate === null || $passedDate === '') {
+            return true;
+        }
+        $monthEnd = date('Y-m-t', strtotime($monthFirst));
+        return $passedDate > $monthEnd;
+    }
+
+    public function resolveProfileBaseSalary(int $userId, string $monthFirst): ?float
+    {
+        $profile = $this->getUserSalaryProfile($userId);
+        if (!$profile) {
+            return null;
+        }
+        $prob = $profile['probation_salary'];
+        $salary = $profile['salary'];
+        if ($this->isOnProbationForMonth($profile, $monthFirst)) {
+            if ($prob !== null && $prob > 0) {
+                return $prob;
+            }
+        } elseif ($salary !== null && $salary > 0) {
+            return $salary;
+        }
+        if ($salary !== null && $salary > 0) {
+            return $salary;
+        }
+        if ($prob !== null && $prob > 0) {
+            return $prob;
+        }
+        return null;
+    }
+
+    /**
+     * @param array<string,mixed>|null $setup
+     */
+    public function resolveBaseSalaryForMonth(int $userId, string $monthFirst, ?array $setup, bool $explicitBaseOverride = false): float
+    {
+        if ($explicitBaseOverride && is_array($setup) && array_key_exists('base_salary', $setup)) {
+            return (float)$setup['base_salary'];
+        }
+        $profileBase = $this->resolveProfileBaseSalary($userId, $monthFirst);
+        if ($profileBase !== null && $profileBase > 0) {
+            return $profileBase;
+        }
+        return is_array($setup) ? (float)($setup['base_salary'] ?? 0) : 0.0;
+    }
+
     public function inclusiveDayCount(string $start, string $end): int
     {
         $a = strtotime($start);
@@ -1282,10 +1363,16 @@ class PayrollService
             $payDay = $this->getDefaultPayDay();
         }
         $setup = $this->getSalarySetup($userId, $monthFirst);
+        $explicitBase = is_array($setupOverride) && array_key_exists('base_salary', $setupOverride);
         if ($setupOverride) {
             $setup = is_array($setup) ? array_merge($setup, $setupOverride) : $setupOverride;
         }
-        $gross = $setup ? (float)$setup['base_salary'] : 0;
+        $gross = $this->resolveBaseSalaryForMonth($userId, $monthFirst, is_array($setup) ? $setup : null, $explicitBase);
+        if (is_array($setup)) {
+            $setup['base_salary'] = $gross;
+        } elseif ($gross > 0) {
+            $setup = ['base_salary' => $gross];
+        }
         $bonus = $setup ? (float)($setup['bonus_fixed'] ?? 0) : 0;
         $allowances = 0;
         $incomeOther = 0;

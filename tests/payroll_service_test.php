@@ -165,6 +165,39 @@ $incomeJsonMar1 = null;
 $serviceFeb->applyHireDateIncome(12, '2026-03-01', 25, $grossMar1, $bonusMar1, $allowMar1, $incomeOtherMar1, $incomeJsonMar1);
 assertSameValue(12000.0, $grossMar1, 'hire on 1st of month pays full gross in first hire month');
 
+try {
+    $pdo->exec('ALTER TABLE users ADD COLUMN probation_salary REAL');
+} catch (Throwable $e) {
+    /* column exists */
+}
+try {
+    $pdo->exec('ALTER TABLE users ADD COLUMN salary REAL');
+} catch (Throwable $e) {
+    /* column exists */
+}
+try {
+    $pdo->exec('ALTER TABLE users ADD COLUMN probation_passed_date TEXT');
+} catch (Throwable $e) {
+    /* column exists */
+}
+$pdo->exec("INSERT INTO users (id, is_active, work_mode, hire_date, probation_salary, salary, probation_passed_date) VALUES (13, 1, 'OFFICE', '2026-06-01', 12000, 14000, NULL)");
+$pdo->exec("INSERT OR REPLACE INTO hr_employee_schedules (user_id, day_off) VALUES (13, 0)");
+try {
+    $pdo->exec('CREATE TABLE employee_salary_setup (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, effective_from TEXT, effective_to TEXT, base_salary REAL, bonus_fixed REAL DEFAULT 0, provident_fund REAL DEFAULT 0, social_security REAL DEFAULT 0)');
+} catch (Throwable $e) {
+    /* table exists */
+}
+$pdo->exec("INSERT INTO employee_salary_setup (user_id, effective_from, base_salary) VALUES (13, '2026-06-01', 99999)");
+$serviceProb = new PayrollService($pdo);
+$slipJun = $serviceProb->calculateSlip(13, '2026-06-01', 25);
+assertSameValue(12000.0, $slipJun['gross_salary'], 'profile probation_salary overrides setup base');
+
+$pdo->exec("UPDATE users SET probation_passed_date = '2026-08-15' WHERE id = 13");
+$slipAug = $serviceProb->calculateSlip(13, '2026-08-01', 25);
+assertSameValue(14000.0, $slipAug['gross_salary'], 'after probation passed uses salary from profile');
+$slipJul = $serviceProb->calculateSlip(13, '2026-07-01', 25);
+assertSameValue(12000.0, $slipJul['gross_salary'], 'still on probation in July uses probation_salary');
+
 $marBounds = $service->effectivePeriodBounds('2026-03-01', 25, '2026-02-05');
 assertSameValue('2026-03-01', $marBounds['start'], 'transition month skips overlap with first hire month');
 assertSameValue('2026-03-25', $marBounds['end'], 'transition month keeps standard period end');
