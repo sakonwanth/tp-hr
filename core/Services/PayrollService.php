@@ -250,6 +250,16 @@ class PayrollService
         return substr($hireDate, 0, 7) === substr($payrollMonth, 0, 7);
     }
 
+    /** เริ่มงานวันที่ 1 ของเดือน → จ่ายเต็มเดือน (ไม่ใช้ ÷30) */
+    public function isHireOnMonthFirstDay(?string $hireDate, string $payrollMonth): bool
+    {
+        if ($hireDate === null || $hireDate === '') {
+            return false;
+        }
+
+        return $hireDate === substr($payrollMonth, 0, 7) . '-01';
+    }
+
     /**
      * Effective payroll period per hire date — first calendar month: hire_date→month-end; then normal pay cycle without overlap.
      *
@@ -419,6 +429,10 @@ class PayrollService
         $period = $this->effectivePeriodBounds($monthFirst, $payDay, $hireDate);
 
         if (!empty($period['is_first_hire_month']) && $hireDate !== null && $hireDate !== '') {
+            if ($this->isHireOnMonthFirstDay($hireDate, $monthFirst)) {
+                return 1.0;
+            }
+
             $originalGross = $gross;
             $originalAllowances = $allowances;
             $payableDays = $this->firstHirePayableDays($userId, $period, $hireDate);

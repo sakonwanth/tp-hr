@@ -155,6 +155,16 @@ $serviceFeb->applyHireDateIncome(10, '2026-02-01', 25, $gross, $bonus, $allowanc
 assertSameValue(8000.0, $gross, 'first hire gross = 20 days × (12000/30)');
 assertSameValue(1000.0, $bonus, 'first hire bonus paid in full');
 
+$pdo->exec("INSERT INTO users (id, is_active, work_mode, hire_date) VALUES (12, 1, 'OFFICE', '2026-03-01')");
+$pdo->exec("INSERT OR REPLACE INTO hr_employee_schedules (user_id, day_off) VALUES (12, 0)");
+$grossMar1 = 12000.0;
+$bonusMar1 = 0.0;
+$allowMar1 = 0.0;
+$incomeOtherMar1 = 0.0;
+$incomeJsonMar1 = null;
+$serviceFeb->applyHireDateIncome(12, '2026-03-01', 25, $grossMar1, $bonusMar1, $allowMar1, $incomeOtherMar1, $incomeJsonMar1);
+assertSameValue(12000.0, $grossMar1, 'hire on 1st of month pays full gross in first hire month');
+
 $marBounds = $service->effectivePeriodBounds('2026-03-01', 25, '2026-02-05');
 assertSameValue('2026-03-01', $marBounds['start'], 'transition month skips overlap with first hire month');
 assertSameValue('2026-03-25', $marBounds['end'], 'transition month keeps standard period end');
