@@ -813,31 +813,46 @@ class PayrollService
         return ($raw >= 1 && $raw <= 31) ? $raw : 25;
     }
 
+    /** Payroll cycle cutoff day (default 25) — period runs (cutoff+1) prev month through cutoff. */
+    public function getCutoffDay(): int
+    {
+        $raw = (int)$this->getSetting('payroll_cutoff_day', '25');
+        return ($raw >= 1 && $raw <= 31) ? $raw : 25;
+    }
+
     /**
-     * Payroll calculation period = full calendar month of payroll_month (1st through last day).
-     * pay_day is payment date only and does not affect attendance/income calculation bounds.
+     * Normal calculation period: (cutoff+1) of previous month → cutoff of payroll month.
+     * pay_day (payment date) does not affect bounds.
      *
-     * @return array{start: string, end: string, pay_day: int}
+     * @return array{start: string, end: string, cutoff_day: int, pay_day: int}
      */
     public function attendancePeriodBounds(string $payrollMonth, ?int $payDay = null): array
     {
-        $payDay = ($payDay !== null && $payDay >= 1 && $payDay <= 31)
-            ? $payDay
-            : $this->getDefaultPayDay();
+        $cutoff = $this->getCutoffDay();
 
         $ts = strtotime($payrollMonth);
         if (!$ts) {
             $today = date('Y-m-d');
-            return ['start' => $today, 'end' => $today, 'pay_day' => $payDay];
+            return ['start' => $today, 'end' => $today, 'cutoff_day' => $cutoff, 'pay_day' => $cutoff];
         }
 
-        $monthFirstTs = strtotime(date('Y-m-01', $ts));
+        $lastDay = (int)date('t', $ts);
+        $endDay = min($cutoff, $lastDay);
+        $periodEnd = date('Y-m-', $ts) . str_pad((string)$endDay, 2, '0', STR_PAD_LEFT);
 
-        return [
-            'start' => date('Y-m-01', $monthFirstTs),
-            'end' => date('Y-m-t', $monthFirstTs),
-            'pay_day' => $payDay,
-        ];
+        $monthFirstTs = strtotime(date('Y-m-01', $ts));
+        $prevTs = strtotime('-1 month', $monthFirstTs);
+        $prevLast = (int)date('t', $prevTs);
+        $prevCutoff = min($cutoff, $prevLast);
+        $startDay = $prevCutoff + 1;
+
+        if ($startDay > $prevLast) {
+            $periodStart = date('Y-m-01', $monthFirstTs);
+        } else {
+            $periodStart = date('Y-m-', $prevTs) . str_pad((string)$startDay, 2, '0', STR_PAD_LEFT);
+        }
+
+        return ['start' => $periodStart, 'end' => $periodEnd, 'cutoff_day' => $cutoff, 'pay_day' => $cutoff];
     }
 
     /**
@@ -856,17 +871,14 @@ class PayrollService
         return $yesterday;
     }
 
-    /** Payroll month (YYYY-MM) to calculate as of $asOf — last completed calendar month. pay_day ignored. */
+    /** Payroll month (YYYY-MM) to calculate as of $asOf — after cutoff day → current month. */
     public function suggestPayrollMonth(?int $payDay = null, ?string $asOf = null): string
     {
+        $cutoff = $this->getCutoffDay();
         $asOf = $asOf ?? date('Y-m-d');
-        $ts = strtotime($asOf);
-        if (!$ts) {
-            return date('Y-m');
-        }
-        $monthFirstTs = strtotime(date('Y-m-01', $ts));
-        $monthEnd = date('Y-m-t', $ts);
-        if ($asOf >= $monthEnd) {
+        $day = (int)date('j', strtotime($asOf));
+        $monthFirstTs = strtotime(date('Y-m-01', strtotime($asOf)));
+        if ($day > $cutoff) {
             return date('Y-m', $monthFirstTs);
         }
         return date('Y-m', strtotime('-1 month', $monthFirstTs));
@@ -874,13 +886,9 @@ class PayrollService
 
     public function isPeriodClosed(string $payrollMonth, ?int $payDay = null, ?string $asOf = null): bool
     {
+        $period = $this->attendancePeriodBounds($payrollMonth);
         $asOf = $asOf ?? date('Y-m-d');
-        $ts = strtotime($payrollMonth);
-        if (!$ts) {
-            return false;
-        }
-        $periodEnd = date('Y-m-t', $ts);
-        return $asOf > $periodEnd;
+        return $asOf > $period['end'];
     }
 
     /**
