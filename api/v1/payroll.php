@@ -26,7 +26,7 @@ $sub = $segments[2] ?? '';
 $slipSelect = "
     SELECT s.id, s.payroll_run_id, s.user_id, u.employee_code, u.first_name_th, u.last_name_th,
            s.gross_salary, s.bonus, s.allowances, s.total_income,
-           s.tax_withheld, s.provident_fund, s.social_security, s.group_insurance,
+           s.tax_withheld, s.provident_fund, s.social_security, s.group_insurance, s.health_insurance,
            s.total_deductions, s.net_salary,
            s.absent_days, s.late_count_30, s.late_count_60,
            s.absence_deduction, s.lateness_deduction,

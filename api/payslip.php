@@ -361,6 +361,8 @@ function getYTD($pdo, $user) {
             SUM(ps.tax_withheld) as ytd_tax,
             SUM(ps.social_security) as ytd_ss,
             SUM(ps.provident_fund) as ytd_pf,
+            SUM(ps.group_insurance) as ytd_gi,
+            SUM(ps.health_insurance) as ytd_hi,
             SUM(ps.net_salary) as ytd_net,
             COUNT(*) as slip_count
         FROM payroll_slips ps

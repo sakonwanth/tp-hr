@@ -616,6 +616,18 @@ header('Content-Type: text/html; charset=utf-8');
                             <td class="amt"><?php echo number_format($ytd['ytd_pf'], 2); ?></td>
                         </tr>
                         <?php endif; ?>
+                        <?php if ((float)($ytd['ytd_gi'] ?? 0) > 0): ?>
+                        <tr>
+                            <td>ประกันกลุ่มสะสม / Cumulative Group Insurance</td>
+                            <td class="amt"><?php echo number_format($ytd['ytd_gi'], 2); ?></td>
+                        </tr>
+                        <?php endif; ?>
+                        <?php if ((float)($ytd['ytd_hi'] ?? 0) > 0): ?>
+                        <tr>
+                            <td>ประกันสุขภาพสะสม / Cumulative Health Insurance</td>
+                            <td class="amt"><?php echo number_format($ytd['ytd_hi'], 2); ?></td>
+                        </tr>
+                        <?php endif; ?>
                         <tr class="total">
                             <th>เงินได้สุทธิสะสม / Cumulative Net Income</th>
                             <td class="amt"><?php echo number_format($ytd['ytd_net'] ?? 0, 2); ?></td>

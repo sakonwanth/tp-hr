@@ -50,6 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['download_payslip'] ?? '') 
                 COALESCE(SUM(s.tax_withheld), 0) as ytd_tax,
                 COALESCE(SUM(s.social_security), 0) as ytd_ss,
                 COALESCE(SUM(s.provident_fund), 0) as ytd_pf,
+                COALESCE(SUM(s.group_insurance), 0) as ytd_gi,
+                COALESCE(SUM(s.health_insurance), 0) as ytd_hi,
                 COALESCE(SUM(s.total_deductions), 0) as ytd_deductions,
                 COALESCE(SUM(s.net_salary), 0) as ytd_net
             FROM payroll_slips s
@@ -144,6 +146,8 @@ if ($viewSlipId > 0) {
                 COALESCE(SUM(s.tax_withheld), 0) as ytd_tax,
                 COALESCE(SUM(s.social_security), 0) as ytd_ss,
                 COALESCE(SUM(s.provident_fund), 0) as ytd_pf,
+                COALESCE(SUM(s.group_insurance), 0) as ytd_gi,
+                COALESCE(SUM(s.health_insurance), 0) as ytd_hi,
                 COALESCE(SUM(s.total_deductions), 0) as ytd_deductions,
                 COALESCE(SUM(s.net_salary), 0) as ytd_net
             FROM payroll_slips s
@@ -166,6 +170,8 @@ $stmtYTD = $pdo->prepare("
         SUM(ps.tax_withheld) as ytd_tax,
         SUM(ps.social_security) as ytd_ss,
         SUM(ps.provident_fund) as ytd_pf,
+        SUM(ps.group_insurance) as ytd_gi,
+        SUM(ps.health_insurance) as ytd_hi,
         SUM(ps.net_salary) as ytd_net,
         COUNT(*) as slip_count
     FROM payroll_slips ps
@@ -212,6 +218,18 @@ include 'templates/header.php';
         <p class="text-white/50 text-sm truncate">กองทุนสำรองฯ สะสม</p>
         <p class="text-lg sm:text-xl font-bold text-blue-400 mt-1 tabular-nums"><?php echo number_format($ytd['ytd_pf'] ?? 0, 2); ?></p>
     </div>
+    <?php if ((float)($ytd['ytd_gi'] ?? 0) > 0): ?>
+    <div class="native-card tp-native-card tp-native-data-card min-w-0">
+        <p class="text-white/50 text-sm truncate">ประกันกลุ่มสะสม</p>
+        <p class="text-lg sm:text-xl font-bold text-cyan-400 mt-1 tabular-nums"><?php echo number_format($ytd['ytd_gi'], 2); ?></p>
+    </div>
+    <?php endif; ?>
+    <?php if ((float)($ytd['ytd_hi'] ?? 0) > 0): ?>
+    <div class="native-card tp-native-card tp-native-data-card min-w-0">
+        <p class="text-white/50 text-sm truncate">ประกันสุขภาพสะสม</p>
+        <p class="text-lg sm:text-xl font-bold text-rose-400 mt-1 tabular-nums"><?php echo number_format($ytd['ytd_hi'], 2); ?></p>
+    </div>
+    <?php endif; ?>
     <div class="native-card tp-native-card tp-native-data-card min-w-0 sm:col-span-2 lg:col-span-1">
         <p class="text-white/50 text-sm truncate">รายได้สุทธิสะสม</p>
         <p class="text-lg sm:text-xl font-bold text-violet-400 mt-1 tabular-nums"><?php echo number_format($ytd['ytd_net'] ?? 0, 2); ?></p>
