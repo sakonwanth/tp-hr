@@ -159,17 +159,6 @@ if ($resource === 'salary-setup') {
         $userId = (int)($input['user_id'] ?? 0);
         if ($userId <= 0) ApiAuth::fail(400, 'user_id required');
         $result = $service->saveSalarySetup($userId, $input);
-
-        // Auto-recalculate open runs
-        $effMonth = substr($input['effective_from'] ?? '', 0, 7) . '-01';
-        if ($effMonth !== '-01') {
-            $rr = $pdo->prepare("SELECT id, payroll_month FROM payroll_runs WHERE status IN ('draft','calculated') AND payroll_month >= ?");
-            $rr->execute([$effMonth]);
-            while ($ar = $rr->fetch(PDO::FETCH_ASSOC)) {
-                $service->recalculateSlip((int)$ar['id'], $userId, $ar['payroll_month']);
-                $service->updateRunTotals((int)$ar['id']);
-            }
-        }
         ApiAuth::success(['data' => $result]);
     }
 
@@ -186,6 +175,22 @@ if ($resource === 'salary-setup') {
         $setup = $service->getSalarySetup($id, $month);
         ApiAuth::success(['data' => $setup]);
     }
+}
+
+// ── payroll-preview (draft calc — no run id required) ──
+if ($resource === 'payroll-preview' && $method === 'POST') {
+    ApiAuth::require(['payroll.read']);
+    apiKeyForbidServiceScoped('Employee-scoped keys cannot preview payroll for other users');
+    $input = ApiAuth::input();
+    $userId = (int)($input['user_id'] ?? 0);
+    $month = trim((string)($input['month'] ?? ''));
+    if ($userId <= 0 || !preg_match('/^\d{4}-\d{2}$/', $month)) {
+        ApiAuth::fail(400, 'user_id and month (YYYY-MM) required');
+    }
+    $payDay = isset($input['pay_day']) ? (int)$input['pay_day'] : null;
+    $override = is_array($input['setup_override'] ?? null) ? $input['setup_override'] : null;
+    $slip = $service->calculateSlip($userId, $month . '-01', $payDay, $override);
+    ApiAuth::success(['data' => $slip]);
 }
 
 ApiAuth::fail(404, 'Endpoint not found');

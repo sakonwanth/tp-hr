@@ -1010,6 +1010,15 @@ class PayrollService
         return $raw !== '' ? $raw : null;
     }
 
+    private function closePriorSalarySetupVersions(int $userId, string $effectiveFrom): void
+    {
+        $prevEnd = date('Y-m-d', strtotime($effectiveFrom . ' -1 day'));
+        $this->pdo->prepare(
+            'UPDATE employee_salary_setup SET effective_to = ?
+             WHERE user_id = ? AND effective_from < ? AND (effective_to IS NULL OR effective_to >= ?)'
+        )->execute([$prevEnd, $userId, $effectiveFrom, $effectiveFrom]);
+    }
+
     /**
      * @param array<string,mixed> $setup
      */
@@ -1033,6 +1042,8 @@ class PayrollService
                 ->execute([...array_map(fn($c) => $setup[$c] ?? null, $cols), $existing['id']]);
             return ['action' => 'updated', 'id' => (int)$existing['id']];
         }
+
+        $this->closePriorSalarySetupVersions($userId, $effectiveFrom);
 
         $ph = implode(',', array_fill(0, count($cols) + 2, '?'));
         $this->pdo->prepare('INSERT INTO employee_salary_setup (user_id, effective_from, ' . implode(',', $cols) . ") VALUES ($ph)")
@@ -1087,12 +1098,15 @@ class PayrollService
      * Calculate a single employee's payroll for a given month.
      * Returns the full slip data array without persisting.
      */
-    public function calculateSlip(int $userId, string $monthFirst, ?int $payDay = null): array
+    public function calculateSlip(int $userId, string $monthFirst, ?int $payDay = null, ?array $setupOverride = null): array
     {
         if ($payDay === null) {
             $payDay = $this->getDefaultPayDay();
         }
         $setup = $this->getSalarySetup($userId, $monthFirst);
+        if ($setupOverride) {
+            $setup = is_array($setup) ? array_merge($setup, $setupOverride) : $setupOverride;
+        }
         $gross = $setup ? (float)$setup['base_salary'] : 0;
         $bonus = $setup ? (float)($setup['bonus_fixed'] ?? 0) : 0;
         $allowances = 0;
