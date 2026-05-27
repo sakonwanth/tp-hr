@@ -61,6 +61,16 @@ function tp_hr_payroll_employee_filter_sql(string $alias = 'u'): string {
         . ' AND ' . tp_hr_non_system_user_condition_sql($alias);
 }
 
+/** วันลาออกต้องเป็นสิ้นเดือนปฏิทิน (ใช้คู่กับ payroll resignation tail) */
+function tp_hr_is_month_end_date(?string $date): bool
+{
+    if ($date === null || $date === '') {
+        return false;
+    }
+    $monthEnd = date('Y-m-t', strtotime(substr($date, 0, 7) . '-01'));
+    return $date === $monthEnd;
+}
+
 // Load environment variables
 if (TP_COMMON_AVAILABLE) {
     \TpCommon\Env\Env::load(BASE_PATH . '/.env');

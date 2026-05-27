@@ -482,6 +482,15 @@ class PayrollService
         return $hireDate === substr($payrollMonth, 0, 7) . '-01';
     }
 
+    public function isMonthEndDate(?string $date): bool
+    {
+        if ($date === null || $date === '') {
+            return false;
+        }
+        $monthEnd = date('Y-m-t', strtotime(substr($date, 0, 7) . '-01'));
+        return $date === $monthEnd;
+    }
+
     public function getUserTerminationDate(int $userId): ?string
     {
         static $cache = [];
@@ -504,7 +513,7 @@ class PayrollService
     }
 
     /**
-     * @return array{start: string, end: string, cutoff_day: int, pay_day: int, is_first_hire_month?: bool, is_hire_transition?: bool, is_termination_period?: bool, is_terminated_before_period?: bool, standard_start?: string, standard_end?: string}
+     * @return array{start: string, end: string, cutoff_day: int, pay_day: int, is_first_hire_month?: bool, is_hire_transition?: bool, is_resignation_month_end?: bool, is_terminated_before_period?: bool, standard_start?: string, standard_end?: string}
      */
     public function effectivePeriodBounds(string $payrollMonth, ?int $payDay, ?string $hireDate, ?string $terminationDate = null): array
     {
@@ -529,15 +538,18 @@ class PayrollService
             }
         }
 
-        if ($terminationDate !== null && $terminationDate !== '') {
-            if ($terminationDate < $bounds['start']) {
+        if ($terminationDate !== null && $terminationDate !== '' && $this->isMonthEndDate($terminationDate)) {
+            $termYm = substr($terminationDate, 0, 7);
+            $payrollYm = substr($payrollMonth, 0, 7);
+
+            if ($termYm < $payrollYm) {
                 $bounds['is_terminated_before_period'] = true;
-            } elseif ($terminationDate < $bounds['end']) {
+            } elseif ($termYm === $payrollYm) {
                 if (!isset($bounds['standard_end'])) {
                     $bounds['standard_end'] = $bounds['end'];
                 }
                 $bounds['end'] = $terminationDate;
-                $bounds['is_termination_period'] = true;
+                $bounds['is_resignation_month_end'] = true;
             }
         }
 
@@ -545,7 +557,7 @@ class PayrollService
     }
 
     /**
-     * @param array{start: string, end: string, standard_end?: string, is_first_hire_month?: bool, is_terminated_before_period?: bool} $period
+     * @param array{start: string, end: string, standard_end?: string, is_first_hire_month?: bool, is_resignation_month_end?: bool, is_terminated_before_period?: bool} $period
      */
     public function cycleEmploymentFactor(?string $hireDate, array $period): float
     {
@@ -555,6 +567,9 @@ class PayrollService
         if (!empty($period['is_first_hire_month'])) {
             return $this->hireIncomeProrateFactor($hireDate, $period);
         }
+        if (!empty($period['is_resignation_month_end'])) {
+            return 1.0;
+        }
 
         $standardStart = $period['start'];
         $standardEnd = $period['standard_end'] ?? $period['end'];
@@ -562,7 +577,7 @@ class PayrollService
         if ($hireDate !== null && $hireDate !== '' && $hireDate > $effectiveStart) {
             $effectiveStart = $hireDate;
         }
-        $effectiveEnd = $period['end'];
+        $effectiveEnd = $standardEnd;
 
         if ($hireDate !== null && $hireDate !== '' && $hireDate > $effectiveEnd) {
             return 0.0;
@@ -574,6 +589,44 @@ class PayrollService
         }
         $employed = $this->inclusiveDayCount($effectiveStart, $effectiveEnd);
         return round($employed / $total, 6);
+    }
+
+    /**
+     * @param array{end: string, standard_end?: string, is_resignation_month_end?: bool} $period
+     * @return array{gross_add: float, allowances_add: float, tail_days: int}
+     */
+    public function resignationTailIncomeAdd(?string $terminationDate, array $period, float $baseGross, float $baseAllowances): array
+    {
+        $empty = ['gross_add' => 0.0, 'allowances_add' => 0.0, 'tail_days' => 0];
+        if (empty($period['is_resignation_month_end']) || $terminationDate === null || $terminationDate === '') {
+            return $empty;
+        }
+        if (!$this->isMonthEndDate($terminationDate)) {
+            return $empty;
+        }
+
+        $standardEnd = $period['standard_end'] ?? null;
+        if ($standardEnd === null || $standardEnd === '') {
+            return $empty;
+        }
+
+        $tailStart = date('Y-m-d', strtotime($standardEnd . ' +1 day'));
+        $tailEnd = $period['end'];
+        if ($tailStart > $tailEnd) {
+            return $empty;
+        }
+
+        $tailDays = $this->inclusiveDayCount($tailStart, $tailEnd);
+        if ($tailDays <= 0) {
+            return $empty;
+        }
+
+        $divisor = $this->getFirstHireDailyDivisor();
+        return [
+            'gross_add' => $baseGross > 0 ? round($tailDays * ($baseGross / $divisor), 2) : 0.0,
+            'allowances_add' => $baseAllowances > 0 ? round($tailDays * ($baseAllowances / $divisor), 2) : 0.0,
+            'tail_days' => $tailDays,
+        ];
     }
 
     /**
@@ -744,6 +797,8 @@ class PayrollService
             return round($payableDays / $divisor, 6);
         }
 
+        $originalGross = $gross;
+        $originalAllowances = $allowances;
         $factor = $this->cycleEmploymentFactor($hireDate, $period);
         if ($factor <= 0) {
             $gross = $bonus = $allowances = $incomeOther = 0.0;
@@ -757,6 +812,21 @@ class PayrollService
             $incomeOther = round($incomeOther * $factor, 2);
             $incomeOtherJson = $this->scaleIncomeOtherJson($incomeOtherJson, $factor);
         }
+
+        if (!empty($period['is_resignation_month_end'])) {
+            $tail = $this->resignationTailIncomeAdd($terminationDate, $period, $originalGross, $originalAllowances);
+            if ($tail['gross_add'] > 0) {
+                $gross = round($gross + $tail['gross_add'], 2);
+            }
+            if ($tail['allowances_add'] > 0) {
+                $allowances = round($allowances + $tail['allowances_add'], 2);
+            }
+            if ($originalGross > 0) {
+                return round($gross / $originalGross, 6);
+            }
+            return 1.0;
+        }
+
         return $factor;
     }
 

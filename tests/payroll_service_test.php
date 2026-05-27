@@ -245,10 +245,20 @@ assertSameValue('', $service->attendanceClosedScanEnd('2026-05-26', '2026-06-25'
 assertSameValue('2026-05', $service->suggestPayrollMonth(null, '2026-05-26'), 'suggest May after cutover');
 assertSameValue('2026-04', $service->suggestPayrollMonth(null, '2026-05-20'), 'suggest April before cutover');
 
-$termBounds = $service->effectivePeriodBounds('2026-05-01', 31, '2026-01-01', '2026-05-10');
-assertSameValue('2026-04-26', $termBounds['start'], 'termination caps end not start');
-assertSameValue('2026-05-10', $termBounds['end'], 'termination ends on last working day');
-assertSameValue(0.5, $service->cycleEmploymentFactor('2026-01-01', $termBounds), 'May 10 termination prorates 15/30 days');
+$termBounds = $service->effectivePeriodBounds('2026-05-01', 31, '2026-01-01', '2026-05-31');
+assertSameValue('2026-04-26', $termBounds['start'], 'resignation month keeps cycle start');
+assertSameValue('2026-05-31', $termBounds['end'], 'resignation extends to month end');
+assertSameValue('2026-05-25', $termBounds['standard_end'], 'standard cycle ends on cutoff');
+assertSameValue(1.0, $service->cycleEmploymentFactor('2026-01-01', $termBounds), 'May 31 resignation pays full cycle');
+$tail = $service->resignationTailIncomeAdd('2026-05-31', $termBounds, 30000.0, 0.0);
+assertSameValue(6, $tail['tail_days'], 'May tail is 26-31 = 6 days');
+assertSameValue(6000.0, $tail['gross_add'], 'tail gross = 6 * (30000/30)');
+
+$juneAfterResign = $service->effectivePeriodBounds('2026-06-01', 31, '2026-01-01', '2026-05-31');
+assertSameValue(true, !empty($juneAfterResign['is_terminated_before_period']), 'June run excludes May 31 resignee');
+
+$midTerm = $service->effectivePeriodBounds('2026-05-01', 31, '2026-01-01', '2026-05-10');
+assertSameValue('2026-05-25', $midTerm['end'], 'mid-month termination ignored (must be month end)');
 
 $ctx = $service->buildWorkdayContext(1, '2026-05-01', '2026-05-25');
 assertSameValue(false, $service->isPayrollWorkday($ctx, '2026-05-10'), 'Sunday day_off=0 is not a payroll workday');

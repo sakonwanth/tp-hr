@@ -223,6 +223,9 @@ if (!function_exists('tp_hr_emp_view_row')) {
         <h3 class="section-title mb-4 text-white text-base sm:text-lg"><i class="fas fa-briefcase text-emerald-400 mr-2 text-xl" aria-hidden="true"></i>ข้อมูลการจ้างงาน</h3>
         <?php
         tp_hr_emp_view_row('วันที่เริ่มงาน', !empty($emp['hire_date']) ? formatDateThai($emp['hire_date']) : null, 'calendar');
+        if (!empty($emp['termination_date'])) {
+            tp_hr_emp_view_row('วันลาออก', formatDateThai($emp['termination_date']), 'door-open');
+        }
         tp_hr_emp_view_row('ประเภทการจ้าง', $empTypeLabel[$emp['employment_type'] ?? ''] ?? null);
         tp_hr_emp_view_row('รูปแบบการทำงาน', (($emp['work_mode'] ?? 'OFFICE') === 'WFH') ? 'ทำงานที่บ้าน (WFH)' : 'ทำงานที่ออฟฟิศ (Office)', 'laptop-house');
         tp_hr_emp_view_row('วันหยุดประจำสัปดาห์', isset($emp['scheduled_day_off']) ? ('วัน' . ($dayNames[(int)$emp['scheduled_day_off']] ?? '-')) : null);

@@ -148,6 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'chang
             'position' => trim($_POST['position'] ?? ''),
             'role_id' => (int)($_POST['role_id'] ?? 5),
             'hire_date' => $_POST['hire_date'] ?? null,
+            'termination_date' => trim($_POST['termination_date'] ?? '') ?: null,
             'employment_type' => $_POST['employment_type'] ?? 'PROBATION',
             'work_mode' => in_array($_POST['work_mode'] ?? '', ['OFFICE','WFH'], true) ? $_POST['work_mode'] : 'OFFICE',
             'probation_days' => (int)($_POST['probation_days'] ?? (int)getSetting('default_probation_days', 120)),
@@ -211,6 +212,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'chang
         if (empty($formData['last_name_th'])) {
             $errors[] = 'กรุณากรอกนามสกุล (ภาษาไทย)';
         }
+
+        if ($formData['termination_date'] !== null) {
+            if (!tp_hr_is_month_end_date($formData['termination_date'])) {
+                $errors[] = 'วันลาออกต้องเป็นวันสิ้นเดือนปฏิทินเท่านั้น (เช่น 31 พ.ค.) — ระบบคำนวณเงินเดือนรอบสุดท้ายเป็น รอบ 26→25 + วัน 26 ถึงสิ้นเดือน';
+            } elseif (!empty($formData['hire_date']) && $formData['termination_date'] < $formData['hire_date']) {
+                $errors[] = 'วันลาออกต้องไม่ก่อนวันเริ่มงาน';
+            }
+        }
         
         // Validate password confirmation for new employee
         if ($action === 'add') {
@@ -252,7 +261,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'chang
                         id_card = ?, id_card_expiry = ?,
                         nationality = ?, address = ?, registered_address = ?,
                         department = ?, position = ?, role_id = ?,
-                        hire_date = ?, employment_type = ?,
+                        hire_date = ?, termination_date = ?, employment_type = ?,
                         work_mode = ?,
                         probation_days = ?, probation_end_date = ?, probation_passed_date = ?,
                         social_security_id = ?, social_security_start_date = ?, tax_withholding_start_date = ?, health_insurance_start_date = ?, group_insurance_start_date = ?, social_security_hospital = ?,
@@ -271,7 +280,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'chang
                         $formData['id_card'] ?: null, $formData['id_card_expiry'] ?: null,
                         $formData['nationality'] ?: null, $formData['address'] ?: null, $formData['registered_address'] ?: null,
                         $formData['department'] ?: null, $formData['position'] ?: null, $formData['role_id'],
-                        $formData['hire_date'] ?: null, $formData['employment_type'],
+                        $formData['hire_date'] ?: null, $formData['termination_date'],
+                        $formData['employment_type'],
                         $formData['work_mode'],
                         $formData['probation_days'], $formData['probation_end_date'] ?: null, $formData['probation_passed_date'] ?: null,
                         $formData['social_security_id'] ?: null, $formData['social_security_start_date'] ?: null, $formData['tax_withholding_start_date'] ?: null, $formData['health_insurance_start_date'] ?: null, $formData['group_insurance_start_date'] ?: null, $formData['social_security_hospital'] ?: null,
@@ -385,13 +395,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'chang
                              phone, birth_date, gender, marital_status, blood_type, religion, military_status,
                              id_card, id_card_expiry, nationality, address, registered_address,
                              department, position, role_id,
-                             hire_date, employment_type, probation_days, probation_end_date, probation_passed_date,
+                             hire_date, termination_date, employment_type, probation_days, probation_end_date, probation_passed_date,
                              work_mode,
                              social_security_id, social_security_start_date, tax_withholding_start_date, health_insurance_start_date, group_insurance_start_date, social_security_hospital,
                              bank_name, bank_account, salary, probation_salary,
                              emergency_contact_name, emergency_contact_phone, emergency_contact_relation,
                              is_active, created_at)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
                         
                         $stmt = $pdo->prepare($insertSql);
                         $stmt->execute([
@@ -402,7 +412,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'chang
                             $formData['marital_status'] ?: null, $formData['blood_type'] ?: null, $formData['religion'] ?: null, $formData['military_status'] ?: null,
                             $formData['id_card'] ?: null, $formData['id_card_expiry'] ?: null, $formData['nationality'] ?: null, $formData['address'] ?: null, $formData['registered_address'] ?: null,
                             $formData['department'] ?: null, $formData['position'] ?: null, $formData['role_id'],
-                            $formData['hire_date'] ?: null, $formData['employment_type'],
+                            $formData['hire_date'] ?: null, $formData['termination_date'],
+                            $formData['employment_type'],
                             $formData['probation_days'], $formData['probation_end_date'] ?: null, $formData['probation_passed_date'] ?: null,
                             $formData['work_mode'],
                             $formData['social_security_id'] ?: null, $formData['social_security_start_date'] ?: null, $formData['tax_withholding_start_date'] ?: null, $formData['health_insurance_start_date'] ?: null, $formData['group_insurance_start_date'] ?: null, $formData['social_security_hospital'] ?: null,
@@ -505,7 +516,7 @@ include dirname(__DIR__) . '/templates/header.php';
 </div>
 <?php endif; ?>
 
-<form method="POST" class="space-y-6 min-w-0 max-w-full">
+<form method="POST" id="employee-main-form" class="space-y-6 min-w-0 max-w-full">
     <?php echo csrfField(); ?>
     
     <!-- Tab Navigation -->
@@ -885,6 +896,16 @@ include dirname(__DIR__) . '/templates/header.php';
                     <option value="WFH" <?php echo (($employee['work_mode'] ?? '') === 'WFH') ? 'selected' : ''; ?>>ทำงานที่บ้าน (WFH) — ระบบแสตมป์อัตโนมัติ</option>
                 </select>
                 <p class="text-white/40 text-xs mt-1">พนักงาน WFH ไม่ต้องลงเวลา ระบบจะแสตมป์สถานะ WFH ให้อัตโนมัติในวันทำงาน</p>
+            </div>
+            <div>
+                <label class="block text-white/70 text-sm mb-1">
+                    <i class="fas fa-door-open text-rose-400 mr-1"></i>วันลาออก (สิ้นเดือน)
+                </label>
+                <input type="date" name="termination_date" id="termination_date"
+                       value="<?php echo htmlspecialchars($employee['termination_date'] ?? ''); ?>"
+                       class="input-field tp-native-input" onchange="validateTerminationDate()" onblur="validateTerminationDate()">
+                <p id="termination_date_hint" class="text-white/40 text-xs mt-1">ต้องเป็นวันสิ้นเดือนปฏิทินเท่านั้น — ใช้คำนวณเงินเดือนรอบสุดท้าย (รอบ 26→25 + วัน 26 ถึงสิ้นเดือน)</p>
+                <p id="termination_date_error" class="text-rose-400 text-xs mt-1 hidden"></p>
             </div>
             <div class="flex items-center pt-6">
                 <?php if ($canEditSensitive): ?>
@@ -1576,6 +1597,42 @@ function calcProbationEnd() {
         document.getElementById('probation_end_date').value = d.toISOString().split('T')[0];
     }
 }
+
+function validateTerminationDate() {
+    const el = document.getElementById('termination_date');
+    const err = document.getElementById('termination_date_error');
+    if (!el || !err) return true;
+    const value = (el.value || '').trim();
+    if (!value) {
+        err.classList.add('hidden');
+        err.textContent = '';
+        el.classList.remove('ring-2', 'ring-rose-500');
+        return true;
+    }
+    const parts = value.split('-');
+    if (parts.length !== 3) return true;
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const day = parseInt(parts[2], 10);
+    const lastDay = new Date(year, month + 1, 0).getDate();
+    if (day !== lastDay) {
+        err.textContent = 'วันลาออกต้องเป็นสิ้นเดือน (เช่น ' + lastDay + '/' + (month + 1) + '/' + year + ')';
+        err.classList.remove('hidden');
+        el.classList.add('ring-2', 'ring-rose-500');
+        return false;
+    }
+    err.classList.add('hidden');
+    err.textContent = '';
+    el.classList.remove('ring-2', 'ring-rose-500');
+    return true;
+}
+
+document.getElementById('employee-main-form')?.addEventListener('submit', function(e) {
+    if (!validateTerminationDate()) {
+        e.preventDefault();
+        document.getElementById('termination_date')?.focus();
+    }
+});
 
 function onProbationPassed() {
     const passedDate = document.getElementById('probation_passed_date').value;
