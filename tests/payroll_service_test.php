@@ -245,6 +245,11 @@ assertSameValue('', $service->attendanceClosedScanEnd('2026-05-26', '2026-06-25'
 assertSameValue('2026-05', $service->suggestPayrollMonth(null, '2026-05-26'), 'suggest May after cutover');
 assertSameValue('2026-04', $service->suggestPayrollMonth(null, '2026-05-20'), 'suggest April before cutover');
 
+$termBounds = $service->effectivePeriodBounds('2026-05-01', 31, '2026-01-01', '2026-05-10');
+assertSameValue('2026-04-26', $termBounds['start'], 'termination caps end not start');
+assertSameValue('2026-05-10', $termBounds['end'], 'termination ends on last working day');
+assertSameValue(0.5, $service->cycleEmploymentFactor('2026-01-01', $termBounds), 'May 10 termination prorates 15/30 days');
+
 $ctx = $service->buildWorkdayContext(1, '2026-05-01', '2026-05-25');
 assertSameValue(false, $service->isPayrollWorkday($ctx, '2026-05-10'), 'Sunday day_off=0 is not a payroll workday');
 assertSameValue(true, $service->isPayrollWorkday($ctx, '2026-05-11'), 'Monday is a payroll workday');

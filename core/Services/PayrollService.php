@@ -482,41 +482,98 @@ class PayrollService
         return $hireDate === substr($payrollMonth, 0, 7) . '-01';
     }
 
+    public function getUserTerminationDate(int $userId): ?string
+    {
+        static $cache = [];
+        if (array_key_exists($userId, $cache)) {
+            return $cache[$userId];
+        }
+        try {
+            $stmt = $this->pdo->prepare('SELECT termination_date FROM users WHERE id = ? LIMIT 1');
+            $stmt->execute([$userId]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $val = ($row && !empty($row['termination_date']))
+                ? substr((string)$row['termination_date'], 0, 10)
+                : null;
+            $cache[$userId] = $val;
+            return $val;
+        } catch (\Throwable $e) {
+            $cache[$userId] = null;
+            return null;
+        }
+    }
+
     /**
-     * Effective payroll period per hire date — first calendar month: hire_date→month-end; later months = full calendar month.
-     * pay_day does not affect calculation bounds (payment date only).
-     *
-     * @return array{start: string, end: string, pay_day: int, is_first_hire_month?: bool, is_hire_transition?: bool, standard_start?: string, standard_end?: string}
+     * @return array{start: string, end: string, cutoff_day: int, pay_day: int, is_first_hire_month?: bool, is_hire_transition?: bool, is_termination_period?: bool, is_terminated_before_period?: bool, standard_start?: string, standard_end?: string}
      */
-    public function effectivePeriodBounds(string $payrollMonth, ?int $payDay, ?string $hireDate): array
+    public function effectivePeriodBounds(string $payrollMonth, ?int $payDay, ?string $hireDate, ?string $terminationDate = null): array
     {
         $bounds = $this->attendancePeriodBounds($payrollMonth);
-        if ($hireDate === null || $hireDate === '') {
-            return $bounds;
+        if ($hireDate !== null && $hireDate !== '') {
+            $hireYm = substr($hireDate, 0, 7);
+            $payrollYm = substr($payrollMonth, 0, 7);
+            $hireMonthEnd = date('Y-m-t', strtotime($hireYm . '-01'));
+
+            if ($hireYm === $payrollYm) {
+                $bounds['start'] = $hireDate;
+                $bounds['end'] = $hireMonthEnd;
+                $bounds['is_first_hire_month'] = true;
+            } elseif ($payrollYm > $hireYm && $bounds['start'] <= $hireMonthEnd) {
+                $dayAfterHireMonth = date('Y-m-d', strtotime($hireMonthEnd . ' +1 day'));
+                if ($bounds['start'] < $dayAfterHireMonth) {
+                    $bounds['standard_start'] = $bounds['start'];
+                    $bounds['standard_end'] = $bounds['end'];
+                    $bounds['start'] = $dayAfterHireMonth;
+                    $bounds['is_hire_transition'] = true;
+                }
+            }
         }
 
-        $hireYm = substr($hireDate, 0, 7);
-        $payrollYm = substr($payrollMonth, 0, 7);
-        $hireMonthEnd = date('Y-m-t', strtotime($hireYm . '-01'));
-
-        if ($hireYm === $payrollYm) {
-            $bounds['start'] = $hireDate;
-            $bounds['end'] = $hireMonthEnd;
-            $bounds['is_first_hire_month'] = true;
-            return $bounds;
-        }
-
-        if ($payrollYm > $hireYm && $bounds['start'] <= $hireMonthEnd) {
-            $dayAfterHireMonth = date('Y-m-d', strtotime($hireMonthEnd . ' +1 day'));
-            if ($bounds['start'] < $dayAfterHireMonth) {
-                $bounds['standard_start'] = $bounds['start'];
-                $bounds['standard_end'] = $bounds['end'];
-                $bounds['start'] = $dayAfterHireMonth;
-                $bounds['is_hire_transition'] = true;
+        if ($terminationDate !== null && $terminationDate !== '') {
+            if ($terminationDate < $bounds['start']) {
+                $bounds['is_terminated_before_period'] = true;
+            } elseif ($terminationDate < $bounds['end']) {
+                if (!isset($bounds['standard_end'])) {
+                    $bounds['standard_end'] = $bounds['end'];
+                }
+                $bounds['end'] = $terminationDate;
+                $bounds['is_termination_period'] = true;
             }
         }
 
         return $bounds;
+    }
+
+    /**
+     * @param array{start: string, end: string, standard_end?: string, is_first_hire_month?: bool, is_terminated_before_period?: bool} $period
+     */
+    public function cycleEmploymentFactor(?string $hireDate, array $period): float
+    {
+        if (!empty($period['is_terminated_before_period'])) {
+            return 0.0;
+        }
+        if (!empty($period['is_first_hire_month'])) {
+            return $this->hireIncomeProrateFactor($hireDate, $period);
+        }
+
+        $standardStart = $period['start'];
+        $standardEnd = $period['standard_end'] ?? $period['end'];
+        $effectiveStart = $standardStart;
+        if ($hireDate !== null && $hireDate !== '' && $hireDate > $effectiveStart) {
+            $effectiveStart = $hireDate;
+        }
+        $effectiveEnd = $period['end'];
+
+        if ($hireDate !== null && $hireDate !== '' && $hireDate > $effectiveEnd) {
+            return 0.0;
+        }
+
+        $total = $this->inclusiveDayCount($standardStart, $standardEnd);
+        if ($total <= 0) {
+            return 0.0;
+        }
+        $employed = $this->inclusiveDayCount($effectiveStart, $effectiveEnd);
+        return round($employed / $total, 6);
     }
 
     /**
@@ -608,12 +665,16 @@ class PayrollService
             return false;
         }
 
-        $period = $this->effectivePeriodBounds($payrollMonth, $payDay, $hireDate);
+        $terminationDate = $this->getUserTerminationDate($userId);
+        $period = $this->effectivePeriodBounds($payrollMonth, $payDay, $hireDate, $terminationDate);
+        if (!empty($period['is_terminated_before_period'])) {
+            return false;
+        }
         if (!empty($period['is_first_hire_month'])) {
             return $this->firstHirePayableDays($userId, $period, $hireDate) > 0;
         }
 
-        return $this->hireIncomeProrateFactor($hireDate, $period) > 0;
+        return $this->cycleEmploymentFactor($hireDate, $period) > 0;
     }
 
     private function scaleIncomeOtherJson(?string $json, float $factor): ?string
@@ -649,7 +710,8 @@ class PayrollService
         ?string &$incomeOtherJson
     ): float {
         $hireDate = $this->getUserHireDate($userId);
-        $period = $this->effectivePeriodBounds($monthFirst, $payDay, $hireDate);
+        $terminationDate = $this->getUserTerminationDate($userId);
+        $period = $this->effectivePeriodBounds($monthFirst, $payDay, $hireDate, $terminationDate);
 
         if (!empty($period['is_first_hire_month']) && $hireDate !== null && $hireDate !== '') {
             if ($this->isHireOnMonthFirstDay($hireDate, $monthFirst)) {
@@ -682,7 +744,7 @@ class PayrollService
             return round($payableDays / $divisor, 6);
         }
 
-        $factor = $this->hireIncomeProrateFactor($hireDate, $period);
+        $factor = $this->cycleEmploymentFactor($hireDate, $period);
         if ($factor <= 0) {
             $gross = $bonus = $allowances = $incomeOther = 0.0;
             $incomeOtherJson = null;
@@ -980,13 +1042,20 @@ class PayrollService
         $plannedGraceMin = (int) $this->getSetting('payroll_planned_grace_minutes', '30');
 
         $hireDate = $this->getUserHireDate($userId);
-        $period = $this->effectivePeriodBounds($monthFirst, $payDay, $hireDate);
+        $terminationDate = $this->getUserTerminationDate($userId);
+        $period = $this->effectivePeriodBounds($monthFirst, $payDay, $hireDate, $terminationDate);
         $periodStart = $period['start'];
         $periodEnd = $period['end'];
         if ($hireDate !== null && $hireDate > $periodEnd) {
             return $result;
         }
+        if (!empty($period['is_terminated_before_period'])) {
+            return $result;
+        }
         $missingScanEnd = $this->attendanceClosedScanEnd($periodStart, $periodEnd);
+        if ($terminationDate !== null && $terminationDate !== '' && ($missingScanEnd === '' || $terminationDate < $missingScanEnd)) {
+            $missingScanEnd = $terminationDate;
+        }
         $workdayCtx = $this->buildWorkdayContext($userId, $periodStart, $periodEnd);
 
         try {
