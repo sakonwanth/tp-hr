@@ -269,6 +269,9 @@ if (!function_exists('tp_hr_emp_view_row')) {
         tp_hr_emp_view_row('เลขบัญชี', $emp['bank_account'] ?? null);
         tp_hr_emp_view_row('เลขประกันสังคม', $emp['social_security_id'] ?? null);
         tp_hr_emp_view_row('วันที่เริ่มประกันสังคม', !empty($emp['social_security_start_date']) ? formatDateThai($emp['social_security_start_date']) : null);
+        tp_hr_emp_view_row('วันเริ่มหักภาษี ณ ที่จ่าย', !empty($emp['tax_withholding_start_date']) ? formatDateThai($emp['tax_withholding_start_date']) : null);
+        tp_hr_emp_view_row('วันเริ่มหักประกันกลุ่ม', !empty($emp['group_insurance_start_date']) ? formatDateThai($emp['group_insurance_start_date']) : null);
+        tp_hr_emp_view_row('วันเริ่มหักประกันสุขภาพ', !empty($emp['health_insurance_start_date']) ? formatDateThai($emp['health_insurance_start_date']) : null);
         tp_hr_emp_view_row('โรงพยาบาลประกันสังคม', $emp['social_security_hospital'] ?? null);
         ?>
     </div>

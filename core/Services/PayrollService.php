@@ -23,6 +23,24 @@ class PayrollService
         return ($val === '1' || $val === 1 || $val === true);
     }
 
+    public function isTaxEnabled(): bool
+    {
+        $val = $this->getSetting('payroll_tax_enabled', '1');
+        return ($val === '1' || $val === 1 || $val === true);
+    }
+
+    public function isHealthInsuranceEnabled(): bool
+    {
+        $val = $this->getSetting('payroll_health_insurance_enabled', '0');
+        return ($val === '1' || $val === 1 || $val === true);
+    }
+
+    public function isGroupInsuranceEnabled(): bool
+    {
+        $val = $this->getSetting('payroll_group_insurance_enabled', '1');
+        return ($val === '1' || $val === 1 || $val === true);
+    }
+
     /**
      * Social security wage ceiling by payroll month.
      * Before 2026-01: 15,000 (cap 750). From 2026-01 (BE 2569): 17,500 (cap 875).
@@ -90,23 +108,72 @@ class PayrollService
 
     public function getUserSocialSecurityStartDate(int $userId): ?string
     {
+        return $this->getUserDateColumn($userId, 'social_security_start_date');
+    }
+
+    public function getUserTaxWithholdingStartDate(int $userId): ?string
+    {
+        return $this->getUserDateColumn($userId, 'tax_withholding_start_date');
+    }
+
+    public function getUserHealthInsuranceStartDate(int $userId): ?string
+    {
+        return $this->getUserDateColumn($userId, 'health_insurance_start_date');
+    }
+
+    public function getUserGroupInsuranceStartDate(int $userId): ?string
+    {
+        return $this->getUserDateColumn($userId, 'group_insurance_start_date');
+    }
+
+    private function getUserDateColumn(int $userId, string $column): ?string
+    {
         static $cache = [];
-        if (array_key_exists($userId, $cache)) {
-            return $cache[$userId];
+        $key = $userId . ':' . $column;
+        if (array_key_exists($key, $cache)) {
+            return $cache[$key];
         }
-        try {
-            $stmt = $this->pdo->prepare('SELECT social_security_start_date FROM users WHERE id = ? LIMIT 1');
-            $stmt->execute([$userId]);
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            $val = ($row && !empty($row['social_security_start_date']))
-                ? substr((string)$row['social_security_start_date'], 0, 10)
-                : null;
-            $cache[$userId] = $val;
-            return $val;
-        } catch (\Throwable $e) {
-            $cache[$userId] = null;
+        $allowed = [
+            'social_security_start_date',
+            'tax_withholding_start_date',
+            'health_insurance_start_date',
+            'group_insurance_start_date',
+        ];
+        if (!in_array($column, $allowed, true)) {
             return null;
         }
+        try {
+            $stmt = $this->pdo->prepare("SELECT {$column} FROM users WHERE id = ? LIMIT 1");
+            $stmt->execute([$userId]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $val = ($row && !empty($row[$column]))
+                ? substr((string)$row[$column], 0, 10)
+                : null;
+            $cache[$key] = $val;
+            return $val;
+        } catch (\Throwable $e) {
+            $cache[$key] = null;
+            return null;
+        }
+    }
+
+    /**
+     * หักเมื่อ payroll_month >= เดือนของ start_date
+     *
+     * @param bool $requireStartDate true = ยังไม่ระบุวันเริ่มหัก → ไม่หัก (SS/ประกันสุขภาพ)
+     *                               false = ยังไม่ระบุ → หักได้ทันที (ภาษี/ประกันกลุ่ม backward compat)
+     */
+    public function benefitAppliesForMonth(?string $startDate, string $monthFirst, bool $requireStartDate = true): bool
+    {
+        if ($startDate === null || $startDate === '') {
+            return !$requireStartDate;
+        }
+        $startYm = substr($startDate, 0, 7);
+        $monthYm = substr($monthFirst, 0, 7);
+        if ($startYm === '' || $monthYm === '') {
+            return false;
+        }
+        return $monthYm >= $startYm;
     }
 
     /**
@@ -115,15 +182,7 @@ class PayrollService
      */
     public function ssAppliesForMonth(?string $ssStartDate, string $monthFirst): bool
     {
-        if ($ssStartDate === null || $ssStartDate === '') {
-            return false;
-        }
-        $startYm = substr($ssStartDate, 0, 7);
-        $monthYm = substr($monthFirst, 0, 7);
-        if ($startYm === '' || $monthYm === '') {
-            return false;
-        }
-        return $monthYm >= $startYm;
+        return $this->benefitAppliesForMonth($ssStartDate, $monthFirst, true);
     }
 
     public function calcSocialSecurityForUser(int $userId, float $wageBase, bool $optOut = false, ?string $monthFirst = null): float
@@ -236,13 +295,71 @@ class PayrollService
     }
 
     /**
-     * Group insurance (employee portion).
+     * Split benefit premium (group insurance / health insurance) — employee portion.
      */
-    public function calcGroupInsurance(float $totalMonthly, float $employerPct): float
+    public function calcBenefitEmployeeShare(float $totalMonthly, float $employerPct): float
     {
         if ($totalMonthly <= 0) return 0;
         $employerPct = max(0, min(100, $employerPct));
         return round($totalMonthly * (100 - $employerPct) / 100, 2);
+    }
+
+    /** @deprecated use calcBenefitEmployeeShare */
+    public function calcGroupInsurance(float $totalMonthly, float $employerPct): float
+    {
+        return $this->calcBenefitEmployeeShare($totalMonthly, $employerPct);
+    }
+
+    public function calcTaxForUser(
+        int $userId,
+        float $annualIncome,
+        float $annualSs = 0,
+        float $annualPf = 0,
+        ?string $monthFirst = null,
+        bool $optOut = false
+    ): float {
+        if (!$this->isTaxEnabled() || $optOut || $annualIncome <= 0) {
+            return 0.0;
+        }
+        $monthFirst = $monthFirst ?: date('Y-m-01');
+        if (!$this->benefitAppliesForMonth($this->getUserTaxWithholdingStartDate($userId), $monthFirst, false)) {
+            return 0.0;
+        }
+        return $this->calcTaxMonthly($annualIncome, $annualSs, $annualPf, $monthFirst);
+    }
+
+    public function calcHealthInsuranceForUser(
+        int $userId,
+        float $totalMonthly,
+        float $employerPct,
+        bool $optOut = false,
+        ?string $monthFirst = null
+    ): float {
+        if (!$this->isHealthInsuranceEnabled() || $optOut || $totalMonthly <= 0) {
+            return 0.0;
+        }
+        $monthFirst = $monthFirst ?: date('Y-m-01');
+        if (!$this->benefitAppliesForMonth($this->getUserHealthInsuranceStartDate($userId), $monthFirst, true)) {
+            return 0.0;
+        }
+        return $this->calcBenefitEmployeeShare($totalMonthly, $employerPct);
+    }
+
+    public function calcGroupInsuranceForUser(
+        int $userId,
+        float $totalMonthly,
+        float $employerPct,
+        bool $optOut = false,
+        ?string $monthFirst = null
+    ): float {
+        if (!$this->isGroupInsuranceEnabled() || $optOut || $totalMonthly <= 0) {
+            return 0.0;
+        }
+        $monthFirst = $monthFirst ?: date('Y-m-01');
+        if (!$this->benefitAppliesForMonth($this->getUserGroupInsuranceStartDate($userId), $monthFirst, false)) {
+            return 0.0;
+        }
+        return $this->calcBenefitEmployeeShare($totalMonthly, $employerPct);
     }
 
     /**
@@ -745,7 +862,9 @@ class PayrollService
 
         $cols = ['base_salary', 'bonus_fixed', 'provident_fund', 'social_security',
             'group_insurance_total_monthly', 'group_insurance_employer_pct',
-            'ss_opt_out', 'additional_tax_withholding',
+            'health_insurance_total_monthly', 'health_insurance_employer_pct',
+            'ss_opt_out', 'tax_opt_out', 'hi_opt_out', 'gi_opt_out',
+            'additional_tax_withholding',
             'allowance_json', 'income_other_json', 'deduction_other_json', 'notes', 'created_by'];
 
         if ($existing) {
@@ -814,15 +933,22 @@ class PayrollService
         $totalIncome = $gross + $bonus + $allowances + $incomeOther;
         $annualEst = $totalIncome * 12;
         $ssOptOut = $setup && !empty($setup['ss_opt_out']);
+        $taxOptOut = $setup && !empty($setup['tax_opt_out']);
+        $hiOptOut = $setup && !empty($setup['hi_opt_out']);
+        $giOptOut = $setup && !empty($setup['gi_opt_out']);
         $ssWageBase = round($this->socialSecurityWageBase($setup) * max(0, $hireFactor), 2);
         $ss = $this->calcSocialSecurityForUser($userId, $ssWageBase, $ssOptOut, $monthFirst);
         $pf = $setup ? (float)$setup['provident_fund'] : 0;
-        $taxBase = $this->calcTaxMonthly($annualEst, $ss * 12, $pf * 12, $monthFirst);
+        $taxBase = $this->calcTaxForUser($userId, $annualEst, $ss * 12, $pf * 12, $monthFirst, $taxOptOut);
         $extraTaxReq = $setup && isset($setup['additional_tax_withholding']) ? max(0, (float)$setup['additional_tax_withholding']) : 0;
 
         $giTotal = $setup['group_insurance_total_monthly'] ?? 0;
         $giEmpPct = $setup['group_insurance_employer_pct'] ?? 50;
-        $groupInsurance = $this->calcGroupInsurance((float)$giTotal, (float)$giEmpPct);
+        $groupInsurance = $this->calcGroupInsuranceForUser($userId, (float)$giTotal, (float)$giEmpPct, $giOptOut, $monthFirst);
+
+        $hiTotal = $setup['health_insurance_total_monthly'] ?? 0;
+        $hiEmpPct = $setup['health_insurance_employer_pct'] ?? 50;
+        $healthInsurance = $this->calcHealthInsuranceForUser($userId, (float)$hiTotal, (float)$hiEmpPct, $hiOptOut, $monthFirst);
 
         $att = $this->computeAttendanceDeductions($userId, $monthFirst, $payDay);
         $absenceDed = (float)$att['absence_deduction'];
@@ -831,10 +957,10 @@ class PayrollService
             ? json_encode(['breakdown' => $att['breakdown'], 'warnings' => $att['warnings']], JSON_UNESCAPED_UNICODE)
             : null;
 
-        $maxExtra = max(0, $totalIncome - ($taxBase + $pf + $ss + $groupInsurance + $dedOther + $absenceDed + $latenessDed));
+        $maxExtra = max(0, $totalIncome - ($taxBase + $pf + $ss + $groupInsurance + $healthInsurance + $dedOther + $absenceDed + $latenessDed));
         $extraTax = min($extraTaxReq, $maxExtra);
         $tax = $taxBase + $extraTax;
-        $totalDed = $tax + $pf + $ss + $groupInsurance + $dedOther + $absenceDed + $latenessDed;
+        $totalDed = $tax + $pf + $ss + $groupInsurance + $healthInsurance + $dedOther + $absenceDed + $latenessDed;
         $net = max(0, $totalIncome - $totalDed);
 
         return [
@@ -848,6 +974,7 @@ class PayrollService
             'provident_fund' => $pf,
             'social_security' => $ss,
             'group_insurance' => $groupInsurance,
+            'health_insurance' => $healthInsurance,
             'deduction_other_json' => $dedOtherJson,
             'absent_days' => $att['absent_days'],
             'late_count_30' => $att['late_count_30'],
@@ -894,7 +1021,7 @@ class PayrollService
 
             $totalGross = $totalTax = $totalNet = 0;
             $includedCount = 0;
-            $ins = $this->pdo->prepare("INSERT INTO payroll_slips (payroll_run_id, user_id, gross_salary, bonus, allowances, income_other_json, total_income, tax_withheld, provident_fund, social_security, group_insurance, deduction_other_json, absent_days, late_count_30, late_count_60, absence_deduction, lateness_deduction, attendance_detail_json, total_deductions, net_salary) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+            $ins = $this->pdo->prepare("INSERT INTO payroll_slips (payroll_run_id, user_id, gross_salary, bonus, allowances, income_other_json, total_income, tax_withheld, provident_fund, social_security, group_insurance, health_insurance, deduction_other_json, absent_days, late_count_30, late_count_60, absence_deduction, lateness_deduction, attendance_detail_json, total_deductions, net_salary) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
             $period = $this->attendancePeriodBounds($monthFirst, $payDay);
             foreach ($users as $userRow) {
@@ -909,7 +1036,7 @@ class PayrollService
                     $slip['gross_salary'], $slip['bonus'], $slip['allowances'],
                     $slip['income_other_json'], $slip['total_income'],
                     $slip['tax_withheld'], $slip['provident_fund'], $slip['social_security'],
-                    $slip['group_insurance'], $slip['deduction_other_json'],
+                    $slip['group_insurance'], $slip['health_insurance'], $slip['deduction_other_json'],
                     $slip['absent_days'], $slip['late_count_30'], $slip['late_count_60'],
                     $slip['absence_deduction'], $slip['lateness_deduction'],
                     $slip['attendance_detail_json'], $slip['total_deductions'], $slip['net_salary'],
@@ -999,12 +1126,12 @@ class PayrollService
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$row) return false;
 
-        $this->pdo->prepare("UPDATE payroll_slips SET gross_salary=?, bonus=?, allowances=?, income_other_json=?, total_income=?, tax_withheld=?, provident_fund=?, social_security=?, group_insurance=?, deduction_other_json=?, absent_days=?, late_count_30=?, late_count_60=?, absence_deduction=?, lateness_deduction=?, attendance_detail_json=?, total_deductions=?, net_salary=? WHERE id=?")
+        $this->pdo->prepare("UPDATE payroll_slips SET gross_salary=?, bonus=?, allowances=?, income_other_json=?, total_income=?, tax_withheld=?, provident_fund=?, social_security=?, group_insurance=?, health_insurance=?, deduction_other_json=?, absent_days=?, late_count_30=?, late_count_60=?, absence_deduction=?, lateness_deduction=?, attendance_detail_json=?, total_deductions=?, net_salary=? WHERE id=?")
             ->execute([
                 $slip['gross_salary'], $slip['bonus'], $slip['allowances'],
                 $slip['income_other_json'], $slip['total_income'],
                 $slip['tax_withheld'], $slip['provident_fund'], $slip['social_security'],
-                $slip['group_insurance'], $slip['deduction_other_json'],
+                $slip['group_insurance'], $slip['health_insurance'], $slip['deduction_other_json'],
                 $slip['absent_days'], $slip['late_count_30'], $slip['late_count_60'],
                 $slip['absence_deduction'], $slip['lateness_deduction'],
                 $slip['attendance_detail_json'], $slip['total_deductions'], $slip['net_salary'],

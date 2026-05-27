@@ -94,6 +94,26 @@ assertSameValue(false, $appliesMethod->invoke($service, '2026-06-01', '2026-05-0
 assertSameValue(true, $appliesMethod->invoke($service, '2026-03-15', '2026-03-01'), 'SS start in March — March payroll deducts');
 assertSameValue(true, $appliesMethod->invoke($service, '2026-03-01', '2026-04-01'), 'SS start March — April payroll deducts');
 
+$benefitMethod = new ReflectionMethod(PayrollService::class, 'benefitAppliesForMonth');
+$benefitMethod->setAccessible(true);
+assertSameValue(true, $benefitMethod->invoke($service, null, '2026-05-01', false), 'tax/group — empty start date applies immediately');
+assertSameValue(false, $benefitMethod->invoke($service, null, '2026-05-01', true), 'health/SS — empty start date does not apply');
+assertSameValue(false, $benefitMethod->invoke($service, '2026-07-01', '2026-05-01', false), 'future start date — no deduction yet');
+
+$pdo->exec("ALTER TABLE users ADD COLUMN tax_withholding_start_date TEXT");
+$pdo->exec("ALTER TABLE users ADD COLUMN health_insurance_start_date TEXT");
+$pdo->exec("ALTER TABLE users ADD COLUMN group_insurance_start_date TEXT");
+$pdo->exec("INSERT INTO system_settings (setting_key, setting_value) VALUES ('payroll_tax_enabled', '1')");
+$pdo->exec("UPDATE users SET tax_withholding_start_date = '2026-06-01' WHERE id = 1");
+
+$taxBeforeStart = $service->calcTaxForUser(1, 600000, 0, 0, '2026-05-01', false);
+assertSameValue(0.0, $taxBeforeStart, 'tax withheld only from configured start month');
+$taxAfterStart = $service->calcTaxForUser(1, 600000, 0, 0, '2026-06-01', false);
+assertSameValue(true, $taxAfterStart > 0, 'tax applies from start month');
+
+$taxOptOut = $service->calcTaxForUser(1, 600000, 0, 0, '2026-06-01', true);
+assertSameValue(0.0, $taxOptOut, 'tax opt-out returns zero');
+
 $hireMethod = new ReflectionMethod(PayrollService::class, 'hireProrateFactor');
 $hireMethod->setAccessible(true);
 assertSameValue(0.0, $hireMethod->invoke($service, '2026-04-05', '2026-02-26', '2026-03-25'), 'hire after period end — no pay');

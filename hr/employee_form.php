@@ -155,6 +155,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'chang
             'probation_passed_date' => $_POST['probation_passed_date'] ?? null,
             'social_security_id' => trim($_POST['social_security_id'] ?? ''),
             'social_security_start_date' => $_POST['social_security_start_date'] ?? null,
+            'tax_withholding_start_date' => $_POST['tax_withholding_start_date'] ?? null,
+            'health_insurance_start_date' => $_POST['health_insurance_start_date'] ?? null,
+            'group_insurance_start_date' => $_POST['group_insurance_start_date'] ?? null,
             'social_security_hospital' => trim($_POST['social_security_hospital'] ?? ''),
             'bank_name' => trim($_POST['bank_name'] ?? ''),
             'bank_account' => trim($_POST['bank_account'] ?? ''),
@@ -175,6 +178,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'chang
             $formData['id_card_expiry'] = $employee['id_card_expiry'] ?? null;
             $formData['social_security_id'] = trim((string)($employee['social_security_id'] ?? ''));
             $formData['social_security_start_date'] = $employee['social_security_start_date'] ?? null;
+            $formData['tax_withholding_start_date'] = $employee['tax_withholding_start_date'] ?? null;
+            $formData['health_insurance_start_date'] = $employee['health_insurance_start_date'] ?? null;
+            $formData['group_insurance_start_date'] = $employee['group_insurance_start_date'] ?? null;
             $formData['social_security_hospital'] = trim((string)($employee['social_security_hospital'] ?? ''));
             $formData['bank_name'] = trim((string)($employee['bank_name'] ?? ''));
             $formData['bank_account'] = trim((string)($employee['bank_account'] ?? ''));
@@ -249,7 +255,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'chang
                         hire_date = ?, employment_type = ?,
                         work_mode = ?,
                         probation_days = ?, probation_end_date = ?, probation_passed_date = ?,
-                        social_security_id = ?, social_security_start_date = ?, social_security_hospital = ?,
+                        social_security_id = ?, social_security_start_date = ?, tax_withholding_start_date = ?, health_insurance_start_date = ?, group_insurance_start_date = ?, social_security_hospital = ?,
                         bank_name = ?, bank_account = ?, salary = ?, probation_salary = ?,
                         emergency_contact_name = ?, emergency_contact_phone = ?, emergency_contact_relation = ?,
                         is_active = ?, updated_at = NOW()
@@ -268,7 +274,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'chang
                         $formData['hire_date'] ?: null, $formData['employment_type'],
                         $formData['work_mode'],
                         $formData['probation_days'], $formData['probation_end_date'] ?: null, $formData['probation_passed_date'] ?: null,
-                        $formData['social_security_id'] ?: null, $formData['social_security_start_date'] ?: null, $formData['social_security_hospital'] ?: null,
+                        $formData['social_security_id'] ?: null, $formData['social_security_start_date'] ?: null, $formData['tax_withholding_start_date'] ?: null, $formData['health_insurance_start_date'] ?: null, $formData['group_insurance_start_date'] ?: null, $formData['social_security_hospital'] ?: null,
                         $formData['bank_name'] ?: null, $formData['bank_account'] ?: null, $formData['salary'] ?: null, $formData['probation_salary'] !== null && $formData['probation_salary'] !== '' ? $formData['probation_salary'] : null,
                         $formData['emergency_contact_name'] ?: null, $formData['emergency_contact_phone'] ?: null, $formData['emergency_contact_relation'] ?: null,
                         $formData['is_active'], $id
@@ -381,11 +387,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'chang
                              department, position, role_id,
                              hire_date, employment_type, probation_days, probation_end_date, probation_passed_date,
                              work_mode,
-                             social_security_id, social_security_start_date, social_security_hospital,
+                             social_security_id, social_security_start_date, tax_withholding_start_date, health_insurance_start_date, group_insurance_start_date, social_security_hospital,
                              bank_name, bank_account, salary, probation_salary,
                              emergency_contact_name, emergency_contact_phone, emergency_contact_relation,
                              is_active, created_at)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
                         
                         $stmt = $pdo->prepare($insertSql);
                         $stmt->execute([
@@ -399,7 +405,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'chang
                             $formData['hire_date'] ?: null, $formData['employment_type'],
                             $formData['probation_days'], $formData['probation_end_date'] ?: null, $formData['probation_passed_date'] ?: null,
                             $formData['work_mode'],
-                            $formData['social_security_id'] ?: null, $formData['social_security_start_date'] ?: null, $formData['social_security_hospital'] ?: null,
+                            $formData['social_security_id'] ?: null, $formData['social_security_start_date'] ?: null, $formData['tax_withholding_start_date'] ?: null, $formData['health_insurance_start_date'] ?: null, $formData['group_insurance_start_date'] ?: null, $formData['social_security_hospital'] ?: null,
                             $formData['bank_name'] ?: null, $formData['bank_account'] ?: null, $formData['salary'] ?: null, $formData['probation_salary'] !== null && $formData['probation_salary'] !== '' ? $formData['probation_salary'] : null,
                             $formData['emergency_contact_name'] ?: null, $formData['emergency_contact_phone'] ?: null, $formData['emergency_contact_relation'] ?: null,
                             $formData['is_active']
@@ -1067,6 +1073,51 @@ include dirname(__DIR__) . '/templates/header.php';
                 <?php endif; ?>
                 <?php if (!$lockWelfare): ?>
                 <p class="text-white/40 text-xs mt-1">ปกติจะเริ่มหักหลังผ่านโปร</p>
+                <?php endif; ?>
+            </div>
+            <div>
+                <label class="block text-white/70 text-sm mb-1">วันเริ่มหักภาษี ณ ที่จ่าย</label>
+                <?php if ($lockWelfare): ?>
+                <input type="hidden" name="tax_withholding_start_date" value="<?php echo htmlspecialchars($employee['tax_withholding_start_date'] ?? ''); ?>">
+                <input type="date" value="<?php echo htmlspecialchars($employee['tax_withholding_start_date'] ?? ''); ?>"
+                       class="input-field tp-native-input bg-white/5 cursor-not-allowed" readonly>
+                <?php else: ?>
+                <input type="date" name="tax_withholding_start_date"
+                       value="<?php echo htmlspecialchars($employee['tax_withholding_start_date'] ?? ''); ?>"
+                       class="input-field tp-native-input">
+                <?php endif; ?>
+                <?php if (!$lockWelfare): ?>
+                <p class="text-white/40 text-xs mt-1">ว่างไว้ = หักทันทีเมื่อเปิดใช้ภาษีที่บริษัท</p>
+                <?php endif; ?>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div>
+                <label class="block text-white/70 text-sm mb-1">วันเริ่มหักประกันกลุ่ม</label>
+                <?php if ($lockWelfare): ?>
+                <input type="hidden" name="group_insurance_start_date" value="<?php echo htmlspecialchars($employee['group_insurance_start_date'] ?? ''); ?>">
+                <input type="date" value="<?php echo htmlspecialchars($employee['group_insurance_start_date'] ?? ''); ?>"
+                       class="input-field tp-native-input bg-white/5 cursor-not-allowed" readonly>
+                <?php else: ?>
+                <input type="date" name="group_insurance_start_date"
+                       value="<?php echo htmlspecialchars($employee['group_insurance_start_date'] ?? ''); ?>"
+                       class="input-field tp-native-input">
+                <?php endif; ?>
+            </div>
+            <div>
+                <label class="block text-white/70 text-sm mb-1">วันเริ่มหักประกันสุขภาพ</label>
+                <?php if ($lockWelfare): ?>
+                <input type="hidden" name="health_insurance_start_date" value="<?php echo htmlspecialchars($employee['health_insurance_start_date'] ?? ''); ?>">
+                <input type="date" value="<?php echo htmlspecialchars($employee['health_insurance_start_date'] ?? ''); ?>"
+                       class="input-field tp-native-input bg-white/5 cursor-not-allowed" readonly>
+                <?php else: ?>
+                <input type="date" name="health_insurance_start_date"
+                       value="<?php echo htmlspecialchars($employee['health_insurance_start_date'] ?? ''); ?>"
+                       class="input-field tp-native-input">
+                <?php endif; ?>
+                <?php if (!$lockWelfare): ?>
+                <p class="text-white/40 text-xs mt-1">ว่างไว้ = ยังไม่หักจนกว่าจะระบุ</p>
                 <?php endif; ?>
             </div>
         </div>

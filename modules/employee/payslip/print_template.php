@@ -510,6 +510,12 @@ header('Content-Type: text/html; charset=utf-8');
                             <td class="amt"><?php echo number_format($slip['group_insurance'], 2); ?></td>
                         </tr>
                         <?php endif; ?>
+                        <?php if ((float)($slip['health_insurance'] ?? 0) != 0): ?>
+                        <tr>
+                            <td>ประกันสุขภาพ (ส่วนของพนักงาน) / Health Insurance (Employee Share)</td>
+                            <td class="amt"><?php echo number_format($slip['health_insurance'], 2); ?></td>
+                        </tr>
+                        <?php endif; ?>
                         <?php if (isset($slip['absence_deduction']) && (float)$slip['absence_deduction'] != 0): ?>
                         <tr>
                             <td>ค่าขาดงาน / Absence Deduction<?php
