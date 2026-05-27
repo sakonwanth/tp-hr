@@ -129,6 +129,17 @@ assertSameValue(1.0, $hireMethod->invoke($service, '2026-03-20', '2026-03-26', '
 $partial = $hireMethod->invoke($service, '2026-04-05', '2026-03-26', '2026-04-27');
 assertSameValue(true, $partial > 0 && $partial < 1, 'mid-period hire — prorated pay');
 
+$febBounds = $service->effectivePeriodBounds('2026-02-01', 25, '2026-02-05');
+assertSameValue('2026-02-05', $febBounds['start'], 'first hire month starts on hire date');
+assertSameValue('2026-02-28', $febBounds['end'], 'first hire month ends on calendar month end');
+assertSameValue(true, !empty($febBounds['is_first_hire_month']), 'first hire month flag');
+assertSameValue(round(24 / 28, 6), $service->hireIncomeProrateFactor('2026-02-05', $febBounds), 'first hire month prorates by calendar days');
+
+$marBounds = $service->effectivePeriodBounds('2026-03-01', 25, '2026-02-05');
+assertSameValue('2026-03-01', $marBounds['start'], 'transition month skips overlap with first hire month');
+assertSameValue('2026-03-25', $marBounds['end'], 'transition month keeps standard period end');
+assertSameValue(true, $service->shouldIncludeEmployeeInRun('2026-02-28', '2026-02-01', 25), 'late-month hire included in first payroll month');
+
 assertSameValue('2026-04-26', $service->attendancePeriodBounds('2026-05-01', 25)['start'], 'May payroll starts Apr 26');
 assertSameValue('2026-05-25', $service->attendancePeriodBounds('2026-05-01', 25)['end'], 'May payroll ends May 25');
 assertSameValue('2026-05-25', $service->attendanceClosedScanEnd('2026-04-26', '2026-05-25', '2026-05-26'), 'scan full May period on May 26');

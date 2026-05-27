@@ -241,6 +241,94 @@ class PayrollService
         return $total > 0 ? round($employed / $total, 6) : 0.0;
     }
 
+    public function isFirstHirePayrollMonth(?string $hireDate, string $payrollMonth): bool
+    {
+        if ($hireDate === null || $hireDate === '') {
+            return false;
+        }
+
+        return substr($hireDate, 0, 7) === substr($payrollMonth, 0, 7);
+    }
+
+    /**
+     * Effective payroll period per hire date — first calendar month: hire_date→month-end; then normal pay cycle without overlap.
+     *
+     * @return array{start: string, end: string, pay_day: int, is_first_hire_month?: bool, is_hire_transition?: bool, standard_start?: string, standard_end?: string}
+     */
+    public function effectivePeriodBounds(string $payrollMonth, ?int $payDay, ?string $hireDate): array
+    {
+        $bounds = $this->attendancePeriodBounds($payrollMonth, $payDay);
+        if ($hireDate === null || $hireDate === '') {
+            return $bounds;
+        }
+
+        $hireYm = substr($hireDate, 0, 7);
+        $payrollYm = substr($payrollMonth, 0, 7);
+        $hireMonthEnd = date('Y-m-t', strtotime($hireYm . '-01'));
+
+        if ($hireYm === $payrollYm) {
+            $bounds['start'] = $hireDate;
+            $bounds['end'] = $hireMonthEnd;
+            $bounds['is_first_hire_month'] = true;
+            return $bounds;
+        }
+
+        if ($payrollYm > $hireYm && $bounds['start'] <= $hireMonthEnd) {
+            $dayAfterHireMonth = date('Y-m-d', strtotime($hireMonthEnd . ' +1 day'));
+            if ($bounds['start'] < $dayAfterHireMonth) {
+                $bounds['standard_start'] = $bounds['start'];
+                $bounds['standard_end'] = $bounds['end'];
+                $bounds['start'] = $dayAfterHireMonth;
+                $bounds['is_hire_transition'] = true;
+            }
+        }
+
+        return $bounds;
+    }
+
+    /**
+     * @param array{start: string, end: string, is_first_hire_month?: bool, is_hire_transition?: bool, standard_start?: string, standard_end?: string} $period
+     */
+    public function hireIncomeProrateFactor(?string $hireDate, array $period): float
+    {
+        if ($hireDate === null || $hireDate === '') {
+            return 0.0;
+        }
+        if ($hireDate > $period['end']) {
+            return 0.0;
+        }
+
+        if (!empty($period['is_first_hire_month'])) {
+            $monthStart = substr($hireDate, 0, 7) . '-01';
+            $monthEnd = date('Y-m-t', strtotime($monthStart));
+            $total = $this->inclusiveDayCount($monthStart, $monthEnd);
+            $employed = $this->inclusiveDayCount($period['start'], $period['end']);
+            return $total > 0 ? round($employed / $total, 6) : 0.0;
+        }
+
+        if (!empty($period['is_hire_transition'])
+            && !empty($period['standard_start'])
+            && !empty($period['standard_end'])) {
+            $stdTotal = $this->inclusiveDayCount($period['standard_start'], $period['standard_end']);
+            $actual = $this->inclusiveDayCount($period['start'], $period['end']);
+            if ($stdTotal > 0 && $actual < $stdTotal) {
+                return round($actual / $stdTotal, 6);
+            }
+        }
+
+        return $this->hireProrateFactor($hireDate, $period['start'], $period['end']);
+    }
+
+    public function shouldIncludeEmployeeInRun(?string $hireDate, string $payrollMonth, ?int $payDay): bool
+    {
+        if ($hireDate === null || $hireDate === '') {
+            return false;
+        }
+
+        $period = $this->effectivePeriodBounds($payrollMonth, $payDay, $hireDate);
+        return $this->hireIncomeProrateFactor($hireDate, $period) > 0;
+    }
+
     private function scaleIncomeOtherJson(?string $json, float $factor): ?string
     {
         if (!$json || $factor >= 1.0) {
@@ -273,12 +361,9 @@ class PayrollService
         float &$incomeOther,
         ?string &$incomeOtherJson
     ): float {
-        $period = $this->attendancePeriodBounds($monthFirst, $payDay);
-        $factor = $this->hireProrateFactor(
-            $this->getUserHireDate($userId),
-            $period['start'],
-            $period['end']
-        );
+        $hireDate = $this->getUserHireDate($userId);
+        $period = $this->effectivePeriodBounds($monthFirst, $payDay, $hireDate);
+        $factor = $this->hireIncomeProrateFactor($hireDate, $period);
         if ($factor <= 0) {
             $gross = $bonus = $allowances = $incomeOther = 0.0;
             $incomeOtherJson = null;
@@ -563,15 +648,12 @@ class PayrollService
         $usePlannedStart = (int) $this->getSetting('payroll_use_planned_start', '1') === 1;
         $plannedGraceMin = (int) $this->getSetting('payroll_planned_grace_minutes', '30');
 
-        $period = $this->attendancePeriodBounds($monthFirst, $payDay);
+        $hireDate = $this->getUserHireDate($userId);
+        $period = $this->effectivePeriodBounds($monthFirst, $payDay, $hireDate);
         $periodStart = $period['start'];
         $periodEnd = $period['end'];
-        $hireDate = $this->getUserHireDate($userId);
         if ($hireDate !== null && $hireDate > $periodEnd) {
             return $result;
-        }
-        if ($hireDate !== null && $hireDate > $periodStart) {
-            $periodStart = $hireDate;
         }
         $missingScanEnd = $this->attendanceClosedScanEnd($periodStart, $periodEnd);
         $workdayCtx = $this->buildWorkdayContext($userId, $periodStart, $periodEnd);
@@ -1241,10 +1323,9 @@ class PayrollService
             $includedCount = 0;
             $ins = $this->pdo->prepare("INSERT INTO payroll_slips (payroll_run_id, user_id, gross_salary, bonus, allowances, income_other_json, total_income, tax_withheld, provident_fund, social_security, group_insurance, health_insurance, deduction_other_json, absent_days, late_count_30, late_count_60, absence_deduction, lateness_deduction, attendance_detail_json, total_deductions, net_salary) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
-            $period = $this->attendancePeriodBounds($monthFirst, $payDay);
             foreach ($users as $userRow) {
                 $uid = (int)$userRow['id'];
-                if ($this->hireProrateFactor($userRow['hire_date'] ?? null, $period['start'], $period['end']) <= 0) {
+                if (!$this->shouldIncludeEmployeeInRun($userRow['hire_date'] ?? null, $monthFirst, $payDay)) {
                     continue;
                 }
                 $includedCount++;
