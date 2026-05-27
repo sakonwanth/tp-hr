@@ -306,16 +306,6 @@ class PayrollService
             return $total > 0 ? round($employed / $total, 6) : 0.0;
         }
 
-        if (!empty($period['is_hire_transition'])
-            && !empty($period['standard_start'])
-            && !empty($period['standard_end'])) {
-            $stdTotal = $this->inclusiveDayCount($period['standard_start'], $period['standard_end']);
-            $actual = $this->inclusiveDayCount($period['start'], $period['end']);
-            if ($stdTotal > 0 && $actual < $stdTotal) {
-                return round($actual / $stdTotal, 6);
-            }
-        }
-
         return $this->hireProrateFactor($hireDate, $period['start'], $period['end']);
     }
 

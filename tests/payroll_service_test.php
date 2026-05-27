@@ -158,6 +158,7 @@ assertSameValue(1000.0, $bonus, 'first hire bonus paid in full');
 $marBounds = $service->effectivePeriodBounds('2026-03-01', 25, '2026-02-05');
 assertSameValue('2026-03-01', $marBounds['start'], 'transition month skips overlap with first hire month');
 assertSameValue('2026-03-25', $marBounds['end'], 'transition month keeps standard period end');
+assertSameValue(1.0, $service->hireIncomeProrateFactor('2026-02-05', $marBounds), 'transition month pays full income');
 assertSameValue(true, $serviceFeb->shouldIncludeEmployeeInRun(10, '2026-02-05', '2026-02-01', 25), 'Feb hire included in first payroll month');
 $pdo->exec("INSERT INTO users (id, is_active, work_mode, hire_date) VALUES (11, 1, 'OFFICE', '2026-02-28')");
 $pdo->exec("INSERT OR REPLACE INTO hr_employee_schedules (user_id, day_off) VALUES (11, 0)");
