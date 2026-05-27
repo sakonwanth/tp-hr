@@ -100,16 +100,46 @@ assertSameValue(true, $benefitMethod->invoke($service, null, '2026-05-01', false
 assertSameValue(false, $benefitMethod->invoke($service, null, '2026-05-01', true), 'health/SS — empty start date does not apply');
 assertSameValue(false, $benefitMethod->invoke($service, '2026-07-01', '2026-05-01', false), 'future start date — no deduction yet');
 
-$pdo->exec("ALTER TABLE users ADD COLUMN tax_withholding_start_date TEXT");
-$pdo->exec("ALTER TABLE users ADD COLUMN health_insurance_start_date TEXT");
-$pdo->exec("ALTER TABLE users ADD COLUMN group_insurance_start_date TEXT");
+try {
+    $pdo->exec('ALTER TABLE users ADD COLUMN tax_withholding_start_date TEXT');
+} catch (Throwable $e) {
+    /* column exists */
+}
+try {
+    $pdo->exec('ALTER TABLE users ADD COLUMN health_insurance_start_date TEXT');
+} catch (Throwable $e) {
+    /* column exists */
+}
+try {
+    $pdo->exec('ALTER TABLE users ADD COLUMN group_insurance_start_date TEXT');
+} catch (Throwable $e) {
+    /* column exists */
+}
 $pdo->exec("INSERT INTO system_settings (setting_key, setting_value) VALUES ('payroll_tax_enabled', '1')");
 $pdo->exec("UPDATE users SET tax_withholding_start_date = '2026-06-01' WHERE id = 1");
+$service = new PayrollService($pdo);
 
 $taxBeforeStart = $service->calcTaxForUser(1, 600000, 0, 0, '2026-05-01', false);
 assertSameValue(0.0, $taxBeforeStart, 'tax withheld only from configured start month');
 $taxAfterStart = $service->calcTaxForUser(1, 600000, 0, 0, '2026-06-01', false);
 assertSameValue(true, $taxAfterStart > 0, 'tax applies from start month');
+
+$effectiveMethod = new ReflectionMethod(PayrollService::class, 'effectiveWithholdingApplies');
+$effectiveMethod->setAccessible(true);
+assertSameValue(false, $effectiveMethod->invoke($service, '2026-07-01', '2026-06-01', '2026-06-01', false), 'company July blocks employee June tax');
+assertSameValue(true, $effectiveMethod->invoke($service, '2026-06-01', '2026-06-01', '2026-07-01', false), 'company June allows when employee July not required alone');
+assertSameValue(true, $effectiveMethod->invoke($service, null, '2026-06-01', '2026-06-01', false), 'employee June when company immediate');
+assertSameValue(false, $effectiveMethod->invoke($service, '2026-07-01', '2026-04-01', '2026-05-01', true), 'SS effective max company July vs employee April');
+
+$pdo->exec("INSERT INTO system_settings (setting_key, setting_value) VALUES ('payroll_tax_enabled_from', '2026-07') ON CONFLICT(setting_key) DO UPDATE SET setting_value = excluded.setting_value");
+$serviceTaxCompanyJuly = new PayrollService($pdo);
+$taxJuneBlocked = $serviceTaxCompanyJuly->calcTaxForUser(1, 600000, 0, 0, '2026-06-01', false);
+assertSameValue(0.0, $taxJuneBlocked, 'company tax start July blocks June even if employee starts June');
+$taxJulyAllowed = $serviceTaxCompanyJuly->calcTaxForUser(1, 600000, 0, 0, '2026-07-01', false);
+assertSameValue(true, $taxJulyAllowed > 0, 'company+employee tax from July');
+
+$pdo->exec("DELETE FROM system_settings WHERE setting_key = 'payroll_tax_enabled_from'");
+$service = new PayrollService($pdo);
 
 $taxOptOut = $service->calcTaxForUser(1, 600000, 0, 0, '2026-06-01', true);
 assertSameValue(0.0, $taxOptOut, 'tax opt-out returns zero');

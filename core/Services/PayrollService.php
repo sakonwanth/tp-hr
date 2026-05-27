@@ -41,6 +41,130 @@ class PayrollService
         return ($val === '1' || $val === 1 || $val === true);
     }
 
+    /** @return string|null YYYY-MM-01 */
+    public function getCompanyBenefitStart(string $settingKey): ?string
+    {
+        $val = trim((string)$this->getSetting($settingKey, ''));
+        if ($val === '') {
+            return null;
+        }
+        if (preg_match('/^(\d{4}-\d{2})(-\d{2})?$/', $val, $m)) {
+            return $m[1] . '-01';
+        }
+        return null;
+    }
+
+    public function normalizeSettingMonth(?string $date): ?string
+    {
+        if ($date === null || $date === '') {
+            return null;
+        }
+        if (preg_match('/^(\d{4}-\d{2})/', trim($date), $m)) {
+            return $m[1];
+        }
+        return null;
+    }
+
+    /**
+     * Effective withholding month = max(company start, employee start) when both apply.
+     */
+    public function effectiveWithholdingApplies(
+        ?string $companyStartDate,
+        ?string $employeeStartDate,
+        string $monthFirst,
+        bool $requireEmployeeStartDate
+    ): bool {
+        $monthYm = $this->normalizeSettingMonth($monthFirst);
+        if ($monthYm === null) {
+            return false;
+        }
+
+        $companyYm = $this->normalizeSettingMonth($companyStartDate);
+        $employeeYm = $this->normalizeSettingMonth($employeeStartDate);
+
+        if ($requireEmployeeStartDate && $employeeYm === null) {
+            return false;
+        }
+
+        $effectiveYm = null;
+        if ($requireEmployeeStartDate) {
+            $effectiveYm = $employeeYm;
+            if ($companyYm !== null && ($effectiveYm === null || $companyYm > $effectiveYm)) {
+                $effectiveYm = $companyYm;
+            }
+        } elseif ($employeeYm !== null && $companyYm !== null) {
+            $effectiveYm = max($employeeYm, $companyYm);
+        } elseif ($employeeYm !== null) {
+            $effectiveYm = $employeeYm;
+        } elseif ($companyYm !== null) {
+            $effectiveYm = $companyYm;
+        } else {
+            return true;
+        }
+
+        if ($effectiveYm === null) {
+            return !$requireEmployeeStartDate;
+        }
+
+        return $monthYm >= $effectiveYm;
+    }
+
+    public function isSsEnabledForMonth(?string $monthFirst = null): bool
+    {
+        if (!$this->isSsEnabled()) {
+            return false;
+        }
+        $monthFirst = $monthFirst ?: date('Y-m-01');
+        return $this->effectiveWithholdingApplies(
+            $this->getCompanyBenefitStart('payroll_ss_enabled_from'),
+            null,
+            $monthFirst,
+            false
+        );
+    }
+
+    public function isTaxEnabledForMonth(?string $monthFirst = null): bool
+    {
+        if (!$this->isTaxEnabled()) {
+            return false;
+        }
+        $monthFirst = $monthFirst ?: date('Y-m-01');
+        return $this->effectiveWithholdingApplies(
+            $this->getCompanyBenefitStart('payroll_tax_enabled_from'),
+            null,
+            $monthFirst,
+            false
+        );
+    }
+
+    public function isHealthInsuranceEnabledForMonth(?string $monthFirst = null): bool
+    {
+        if (!$this->isHealthInsuranceEnabled()) {
+            return false;
+        }
+        $monthFirst = $monthFirst ?: date('Y-m-01');
+        return $this->effectiveWithholdingApplies(
+            $this->getCompanyBenefitStart('payroll_health_insurance_enabled_from'),
+            null,
+            $monthFirst,
+            false
+        );
+    }
+
+    public function isGroupInsuranceEnabledForMonth(?string $monthFirst = null): bool
+    {
+        if (!$this->isGroupInsuranceEnabled()) {
+            return false;
+        }
+        $monthFirst = $monthFirst ?: date('Y-m-01');
+        return $this->effectiveWithholdingApplies(
+            $this->getCompanyBenefitStart('payroll_group_insurance_enabled_from'),
+            null,
+            $monthFirst,
+            false
+        );
+    }
+
     /**
      * Social security wage ceiling by payroll month.
      * Before 2026-01: 15,000 (cap 750). From 2026-01 (BE 2569): 17,500 (cap 875).
@@ -66,7 +190,7 @@ class PayrollService
      */
     public function calcSocialSecurity(float $wageBase, bool $optOut = false, ?string $monthFirst = null): float
     {
-        if (!$this->isSsEnabled() || $optOut || $wageBase <= 0) return 0;
+        if (!$this->isSsEnabledForMonth($monthFirst) || $optOut || $wageBase <= 0) return 0;
         $ceiling = $this->ssWageCeiling($monthFirst);
         $base = max(1650, min($wageBase, $ceiling));
         return round($base * 0.05, 2);
@@ -183,7 +307,23 @@ class PayrollService
      */
     public function ssAppliesForMonth(?string $ssStartDate, string $monthFirst): bool
     {
-        return $this->benefitAppliesForMonth($ssStartDate, $monthFirst, true);
+        return $this->effectiveWithholdingApplies(
+            $this->getCompanyBenefitStart('payroll_ss_enabled_from'),
+            $ssStartDate,
+            $monthFirst,
+            true
+        );
+    }
+
+    /** ว่างพนักงาน = หักได้ทันทีเมื่อเปิด tax · มีวันที่ = หักเมื่อ payroll_month >= max(บริษัท, พนักงาน) */
+    public function taxAppliesForMonth(?string $taxStartDate, string $monthFirst): bool
+    {
+        return $this->effectiveWithholdingApplies(
+            $this->getCompanyBenefitStart('payroll_tax_enabled_from'),
+            $taxStartDate,
+            $monthFirst,
+            false
+        );
     }
 
     public function calcSocialSecurityForUser(int $userId, float $wageBase, bool $optOut = false, ?string $monthFirst = null): float
@@ -581,11 +721,11 @@ class PayrollService
         ?string $monthFirst = null,
         bool $optOut = false
     ): float {
-        if (!$this->isTaxEnabled() || $optOut || $annualIncome <= 0) {
+        if (!$this->isTaxEnabledForMonth($monthFirst) || $optOut || $annualIncome <= 0) {
             return 0.0;
         }
         $monthFirst = $monthFirst ?: date('Y-m-01');
-        if (!$this->benefitAppliesForMonth($this->getUserTaxWithholdingStartDate($userId), $monthFirst, false)) {
+        if (!$this->taxAppliesForMonth($this->getUserTaxWithholdingStartDate($userId), $monthFirst)) {
             return 0.0;
         }
         return $this->calcTaxMonthly($annualIncome, $annualSs, $annualPf, $monthFirst);
@@ -598,11 +738,16 @@ class PayrollService
         bool $optOut = false,
         ?string $monthFirst = null
     ): float {
-        if (!$this->isHealthInsuranceEnabled() || $optOut || $totalMonthly <= 0) {
+        if (!$this->isHealthInsuranceEnabledForMonth($monthFirst) || $optOut || $totalMonthly <= 0) {
             return 0.0;
         }
         $monthFirst = $monthFirst ?: date('Y-m-01');
-        if (!$this->benefitAppliesForMonth($this->getUserHealthInsuranceStartDate($userId), $monthFirst, true)) {
+        if (!$this->effectiveWithholdingApplies(
+            $this->getCompanyBenefitStart('payroll_health_insurance_enabled_from'),
+            $this->getUserHealthInsuranceStartDate($userId),
+            $monthFirst,
+            true
+        )) {
             return 0.0;
         }
         return $this->calcBenefitEmployeeShare($totalMonthly, $employerPct);
@@ -615,11 +760,16 @@ class PayrollService
         bool $optOut = false,
         ?string $monthFirst = null
     ): float {
-        if (!$this->isGroupInsuranceEnabled() || $optOut || $totalMonthly <= 0) {
+        if (!$this->isGroupInsuranceEnabledForMonth($monthFirst) || $optOut || $totalMonthly <= 0) {
             return 0.0;
         }
         $monthFirst = $monthFirst ?: date('Y-m-01');
-        if (!$this->benefitAppliesForMonth($this->getUserGroupInsuranceStartDate($userId), $monthFirst, false)) {
+        if (!$this->effectiveWithholdingApplies(
+            $this->getCompanyBenefitStart('payroll_group_insurance_enabled_from'),
+            $this->getUserGroupInsuranceStartDate($userId),
+            $monthFirst,
+            false
+        )) {
             return 0.0;
         }
         return $this->calcBenefitEmployeeShare($totalMonthly, $employerPct);
@@ -1118,9 +1268,9 @@ class PayrollService
      *
      * @param array<string,mixed>|null $setup
      */
-    public function resolveExtraTaxRequest(?array $setup, bool $taxOptOut = false): float
+    public function resolveExtraTaxRequest(?array $setup, bool $taxOptOut = false, ?string $monthFirst = null): float
     {
-        if ($taxOptOut || !$this->isTaxEnabled()) {
+        if ($taxOptOut || !$this->isTaxEnabledForMonth($monthFirst)) {
             return 0.0;
         }
         if (!$setup || !isset($setup['additional_tax_withholding'])) {
@@ -1421,7 +1571,7 @@ class PayrollService
         $ss = $this->calcSocialSecurityForUser($userId, $ssWageBase, $ssOptOut, $monthFirst);
         $pf = $setup ? (float)$setup['provident_fund'] : 0;
         $taxBase = $this->calcTaxForUser($userId, $annualEst, $ss * 12, $pf * 12, $monthFirst, $taxOptOut);
-        $extraTaxReq = $this->resolveExtraTaxRequest($setup, $taxOptOut);
+        $extraTaxReq = $this->resolveExtraTaxRequest($setup, $taxOptOut, $monthFirst);
 
         $giTotal = (float)(is_array($setup) ? ($setup['group_insurance_total_monthly'] ?? 0) : 0);
         $giEmpPct = (float)(is_array($setup) ? ($setup['group_insurance_employer_pct'] ?? 50) : 50);
