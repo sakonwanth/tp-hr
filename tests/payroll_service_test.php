@@ -133,12 +133,36 @@ $febBounds = $service->effectivePeriodBounds('2026-02-01', 25, '2026-02-05');
 assertSameValue('2026-02-05', $febBounds['start'], 'first hire month starts on hire date');
 assertSameValue('2026-02-28', $febBounds['end'], 'first hire month ends on calendar month end');
 assertSameValue(true, !empty($febBounds['is_first_hire_month']), 'first hire month flag');
-assertSameValue(round(24 / 28, 6), $service->hireIncomeProrateFactor('2026-02-05', $febBounds), 'first hire month prorates by calendar days');
+
+$dayOffCtx = ['day_off' => 0, 'dayoff_requests' => [], 'holidays' => [], 'leave_dates' => []];
+assertSameValue(4, $service->countDayOffDaysInCalendarMonth($dayOffCtx, '2026-02'), 'Feb 2026 has 4 Sundays');
+assertSameValue(20, $service->inclusiveDayCount('2026-02-05', '2026-02-28') - 4, 'first hire payable days = period days minus month day-offs');
+
+try {
+    $pdo->exec('ALTER TABLE users ADD COLUMN hire_date TEXT');
+} catch (Throwable $e) {
+    /* column exists */
+}
+$pdo->exec("INSERT INTO users (id, is_active, work_mode, hire_date) VALUES (10, 1, 'OFFICE', '2026-02-05')");
+$pdo->exec("INSERT OR REPLACE INTO hr_employee_schedules (user_id, day_off) VALUES (10, 0)");
+$serviceFeb = new PayrollService($pdo);
+$gross = 12000.0;
+$bonus = 1000.0;
+$allowances = 0.0;
+$incomeOther = 0.0;
+$incomeJson = null;
+$serviceFeb->applyHireDateIncome(10, '2026-02-01', 25, $gross, $bonus, $allowances, $incomeOther, $incomeJson);
+assertSameValue(8000.0, $gross, 'first hire gross = 20 days × (12000/30)');
+assertSameValue(1000.0, $bonus, 'first hire bonus paid in full');
 
 $marBounds = $service->effectivePeriodBounds('2026-03-01', 25, '2026-02-05');
 assertSameValue('2026-03-01', $marBounds['start'], 'transition month skips overlap with first hire month');
 assertSameValue('2026-03-25', $marBounds['end'], 'transition month keeps standard period end');
-assertSameValue(true, $service->shouldIncludeEmployeeInRun('2026-02-28', '2026-02-01', 25), 'late-month hire included in first payroll month');
+assertSameValue(true, $serviceFeb->shouldIncludeEmployeeInRun(10, '2026-02-05', '2026-02-01', 25), 'Feb hire included in first payroll month');
+$pdo->exec("INSERT INTO users (id, is_active, work_mode, hire_date) VALUES (11, 1, 'OFFICE', '2026-02-28')");
+$pdo->exec("INSERT OR REPLACE INTO hr_employee_schedules (user_id, day_off) VALUES (11, 0)");
+$serviceLate = new PayrollService($pdo);
+assertSameValue(true, $serviceLate->shouldIncludeEmployeeInRun(11, '2026-02-28', '2026-02-01', 25), 'late-month hire included in first payroll month');
 
 assertSameValue('2026-04-26', $service->attendancePeriodBounds('2026-05-01', 25)['start'], 'May payroll starts Apr 26');
 assertSameValue('2026-05-25', $service->attendancePeriodBounds('2026-05-01', 25)['end'], 'May payroll ends May 25');

@@ -319,13 +319,77 @@ class PayrollService
         return $this->hireProrateFactor($hireDate, $period['start'], $period['end']);
     }
 
-    public function shouldIncludeEmployeeInRun(?string $hireDate, string $payrollMonth, ?int $payDay): bool
+    public function getFirstHireDailyDivisor(): int
+    {
+        $v = (int)$this->getSetting('payroll_first_hire_daily_divisor', '30');
+        return max(1, min(31, $v));
+    }
+
+    public function effectiveDayOffForDate(array $ctx, string $date): int
+    {
+        $effectiveDayOff = (int)($ctx['day_off'] ?? 0);
+        foreach ($ctx['dayoff_requests'] ?? [] as $request) {
+            if ($date >= $request['week_start'] && $date <= $request['week_end']) {
+                $effectiveDayOff = (int)$request['requested_day_off'];
+                break;
+            }
+        }
+        return $effectiveDayOff;
+    }
+
+    public function isScheduledDayOff(array $ctx, string $date): bool
+    {
+        return (int)date('w', strtotime($date)) === $this->effectiveDayOffForDate($ctx, $date);
+    }
+
+    public function countDayOffDaysInCalendarMonth(array $ctx, string $monthYm): int
+    {
+        $monthStart = $monthYm . '-01';
+        $monthEnd = date('Y-m-t', strtotime($monthStart));
+        $count = 0;
+        for ($ts = strtotime($monthStart); $ts !== false && $ts <= strtotime($monthEnd); $ts += 86400) {
+            if ($this->isScheduledDayOff($ctx, date('Y-m-d', $ts))) {
+                $count++;
+            }
+        }
+        return $count;
+    }
+
+    /**
+     * @param array{start: string, end: string, is_first_hire_month?: bool} $period
+     */
+    public function firstHirePayableDays(int $userId, array $period, string $hireDate): int
+    {
+        $ctx = $this->buildWorkdayContext($userId, $period['start'], $period['end']);
+        $calendarInPeriod = $this->inclusiveDayCount($period['start'], $period['end']);
+        $dayOffInMonth = $this->countDayOffDaysInCalendarMonth($ctx, substr($hireDate, 0, 7));
+        $payable = $calendarInPeriod - $dayOffInMonth;
+
+        if ($payable <= 0 && $calendarInPeriod > 0) {
+            $workdaysInPeriod = 0;
+            for ($ts = strtotime($period['start']); $ts !== false && $ts <= strtotime($period['end']); $ts += 86400) {
+                $date = date('Y-m-d', $ts);
+                if (!$this->isScheduledDayOff($ctx, $date)) {
+                    $workdaysInPeriod++;
+                }
+            }
+            return $workdaysInPeriod;
+        }
+
+        return max(0, $payable);
+    }
+
+    public function shouldIncludeEmployeeInRun(int $userId, ?string $hireDate, string $payrollMonth, ?int $payDay): bool
     {
         if ($hireDate === null || $hireDate === '') {
             return false;
         }
 
         $period = $this->effectivePeriodBounds($payrollMonth, $payDay, $hireDate);
+        if (!empty($period['is_first_hire_month'])) {
+            return $this->firstHirePayableDays($userId, $period, $hireDate) > 0;
+        }
+
         return $this->hireIncomeProrateFactor($hireDate, $period) > 0;
     }
 
@@ -363,6 +427,34 @@ class PayrollService
     ): float {
         $hireDate = $this->getUserHireDate($userId);
         $period = $this->effectivePeriodBounds($monthFirst, $payDay, $hireDate);
+
+        if (!empty($period['is_first_hire_month']) && $hireDate !== null && $hireDate !== '') {
+            $originalGross = $gross;
+            $originalAllowances = $allowances;
+            $payableDays = $this->firstHirePayableDays($userId, $period, $hireDate);
+            $divisor = $this->getFirstHireDailyDivisor();
+
+            if ($payableDays <= 0) {
+                $gross = $bonus = $allowances = $incomeOther = 0.0;
+                $incomeOtherJson = null;
+                return 0.0;
+            }
+
+            if ($originalGross > 0) {
+                $gross = round($payableDays * ($originalGross / $divisor), 2);
+            } else {
+                $gross = 0.0;
+            }
+            if ($originalAllowances > 0) {
+                $allowances = round($payableDays * ($originalAllowances / $divisor), 2);
+            }
+
+            if ($originalGross > 0) {
+                return round($gross / $originalGross, 6);
+            }
+            return round($payableDays / $divisor, 6);
+        }
+
         $factor = $this->hireIncomeProrateFactor($hireDate, $period);
         if ($factor <= 0) {
             $gross = $bonus = $allowances = $incomeOther = 0.0;
@@ -1325,7 +1417,7 @@ class PayrollService
 
             foreach ($users as $userRow) {
                 $uid = (int)$userRow['id'];
-                if (!$this->shouldIncludeEmployeeInRun($userRow['hire_date'] ?? null, $monthFirst, $payDay)) {
+                if (!$this->shouldIncludeEmployeeInRun($uid, $userRow['hire_date'] ?? null, $monthFirst, $payDay)) {
                     continue;
                 }
                 $includedCount++;
