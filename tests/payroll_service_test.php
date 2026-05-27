@@ -229,21 +229,22 @@ $slipJul = $serviceProb->calculateSlip(13, '2026-07-01', 25);
 assertSameValue(12000.0, $slipJul['gross_salary'], 'still on probation in July uses probation_salary');
 
 $marBounds = $service->effectivePeriodBounds('2026-03-01', 25, '2026-02-05');
-assertSameValue('2026-03-01', $marBounds['start'], 'transition month skips overlap with first hire month');
-assertSameValue('2026-03-25', $marBounds['end'], 'transition month keeps standard period end');
-assertSameValue(1.0, $service->hireIncomeProrateFactor('2026-02-05', $marBounds), 'transition month pays full income');
+assertSameValue('2026-03-01', $marBounds['start'], 'March payroll starts on calendar month 1st');
+assertSameValue('2026-03-31', $marBounds['end'], 'March payroll ends on calendar month last day');
+assertSameValue(1.0, $service->hireIncomeProrateFactor('2026-02-05', $marBounds), 'March pays full income after first hire month');
 assertSameValue(true, $serviceFeb->shouldIncludeEmployeeInRun(10, '2026-02-05', '2026-02-01', 25), 'Feb hire included in first payroll month');
 $pdo->exec("INSERT INTO users (id, is_active, work_mode, hire_date) VALUES (11, 1, 'OFFICE', '2026-02-28')");
 $pdo->exec("INSERT OR REPLACE INTO hr_employee_schedules (user_id, day_off) VALUES (11, 0)");
 $serviceLate = new PayrollService($pdo);
 assertSameValue(true, $serviceLate->shouldIncludeEmployeeInRun(11, '2026-02-28', '2026-02-01', 25), 'late-month hire included in first payroll month');
 
-assertSameValue('2026-04-26', $service->attendancePeriodBounds('2026-05-01', 25)['start'], 'May payroll starts Apr 26');
-assertSameValue('2026-05-25', $service->attendancePeriodBounds('2026-05-01', 25)['end'], 'May payroll ends May 25');
-assertSameValue('2026-05-25', $service->attendanceClosedScanEnd('2026-04-26', '2026-05-25', '2026-05-26'), 'scan full May period on May 26');
-assertSameValue('', $service->attendanceClosedScanEnd('2026-05-26', '2026-06-25', '2026-05-26'), 'June period on May 26 — no false absent');
-assertSameValue('2026-05', $service->suggestPayrollMonth(25, '2026-05-26'), 'suggest May after cutover');
-assertSameValue('2026-04', $service->suggestPayrollMonth(25, '2026-05-20'), 'suggest April before cutover');
+assertSameValue('2026-05-01', $service->attendancePeriodBounds('2026-05-01', 25)['start'], 'May payroll starts May 1');
+assertSameValue('2026-05-31', $service->attendancePeriodBounds('2026-05-01', 25)['end'], 'May payroll ends May 31');
+assertSameValue('2026-05-31', $service->attendanceClosedScanEnd('2026-05-01', '2026-05-31', '2026-06-01'), 'scan full May period on Jun 1');
+assertSameValue('', $service->attendanceClosedScanEnd('2026-06-01', '2026-06-30', '2026-05-31'), 'June period on May 31 — no false absent');
+assertSameValue('2026-05', $service->suggestPayrollMonth(null, '2026-05-31'), 'suggest May after month ends');
+assertSameValue('2026-05', $service->suggestPayrollMonth(null, '2026-06-01'), 'suggest May on first day of June');
+assertSameValue('2026-04', $service->suggestPayrollMonth(null, '2026-05-20'), 'suggest April before May ends');
 
 $ctx = $service->buildWorkdayContext(1, '2026-05-01', '2026-05-25');
 assertSameValue(false, $service->isPayrollWorkday($ctx, '2026-05-10'), 'Sunday day_off=0 is not a payroll workday');
