@@ -853,10 +853,170 @@ class PayrollService
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
+    /**
+     * Extra monthly WHT (ล.ย.01) — zero when tax opt-out or company tax disabled.
+     *
+     * @param array<string,mixed>|null $setup
+     */
+    public function resolveExtraTaxRequest(?array $setup, bool $taxOptOut = false): float
+    {
+        if ($taxOptOut || !$this->isTaxEnabled()) {
+            return 0.0;
+        }
+        if (!$setup || !isset($setup['additional_tax_withholding'])) {
+            return 0.0;
+        }
+        return max(0, (float)$setup['additional_tax_withholding']);
+    }
+
     public function saveSalarySetup(int $userId, array $data): array
     {
-        $effectiveFrom = $data['effective_from'];
-        $chk = $this->pdo->prepare("SELECT id FROM employee_salary_setup WHERE user_id = ? AND effective_from = ? ORDER BY id DESC LIMIT 1");
+        $bundle = $this->prepareSalarySetupBundle($userId, $data);
+
+        $this->pdo->beginTransaction();
+        try {
+            $setupResult = $this->persistSalarySetupRow($userId, $bundle['setup']);
+            $this->updateUserBenefitProfile($userId, $bundle['profile']);
+            $recalcCount = $this->recalculateOpenRunsForUser($userId, $bundle['setup']['effective_from']);
+            $this->pdo->commit();
+
+            return array_merge($setupResult, [
+                'recalculated_runs' => $recalcCount,
+                'warnings' => $bundle['warnings'],
+            ]);
+        } catch (\Throwable $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $e;
+        }
+    }
+
+    /**
+     * @return array{setup: array<string,mixed>, profile: array<string,mixed>, warnings: list<string>}
+     */
+    public function prepareSalarySetupBundle(int $userId, array $data): array
+    {
+        $effectiveFrom = $this->normalizeEffectiveMonth($data['effective_from'] ?? '');
+        if ($effectiveFrom === '') {
+            throw new \InvalidArgumentException('เดือนที่มีผลไม่ถูกต้อง');
+        }
+
+        $baseSalary = (float)($data['base_salary'] ?? 0);
+        if ($baseSalary < 0) {
+            throw new \InvalidArgumentException('ฐานเงินเดือนต้องไม่ต่ำกว่า 0');
+        }
+
+        $bonusFixed = max(0, (float)($data['bonus_fixed'] ?? 0));
+        $providentFund = max(0, (float)($data['provident_fund'] ?? 0));
+        $groupInsuranceTotal = max(0, (float)($data['group_insurance_total_monthly'] ?? 0));
+        $groupInsuranceEmployerPct = max(0, min(100, (float)($data['group_insurance_employer_pct'] ?? 50)));
+        $healthInsuranceTotal = max(0, (float)($data['health_insurance_total_monthly'] ?? 0));
+        $healthInsuranceEmployerPct = max(0, min(100, (float)($data['health_insurance_employer_pct'] ?? 50)));
+
+        $ssOptOut = !empty($data['ss_opt_out']) ? 1 : 0;
+        $taxOptOut = !empty($data['tax_opt_out']) ? 1 : 0;
+        $hiOptOut = !empty($data['hi_opt_out']) ? 1 : 0;
+        $giOptOut = !empty($data['gi_opt_out']) ? 1 : 0;
+
+        $additionalTax = max(0, (float)($data['additional_tax_withholding'] ?? 0));
+        if ($taxOptOut) {
+            $additionalTax = 0.0;
+        } elseif ($additionalTax > $baseSalary && $baseSalary > 0) {
+            throw new \InvalidArgumentException(
+                'จำนวนภาษีหักเพิ่มรายเดือนต้องไม่เกินฐานเงินเดือน (' . number_format($baseSalary, 2) . ' บาท)'
+            );
+        }
+
+        $allowanceJson = $data['allowance_json'] ?? null;
+        $incomeOtherJson = $data['income_other_json'] ?? null;
+        $deductionOtherJson = $data['deduction_other_json'] ?? null;
+
+        $ssWageBase = $this->socialSecurityWageBase([
+            'base_salary' => $baseSalary,
+            'bonus_fixed' => $bonusFixed,
+            'allowance_json' => $allowanceJson,
+            'income_other_json' => $incomeOtherJson,
+        ]);
+        $socialSecurity = $this->calcSocialSecurityForUser(
+            $userId,
+            $ssWageBase,
+            (bool)$ssOptOut,
+            $effectiveFrom
+        );
+
+        $profile = [
+            'has_other_employer_income' => !empty($data['has_other_employer_income']) ? 1 : 0,
+            'social_security_start_date' => $this->normalizeOptionalDate($data['social_security_start_date'] ?? null),
+            'tax_withholding_start_date' => $this->normalizeOptionalDate($data['tax_withholding_start_date'] ?? null),
+            'health_insurance_start_date' => $this->normalizeOptionalDate($data['health_insurance_start_date'] ?? null),
+            'group_insurance_start_date' => $this->normalizeOptionalDate($data['group_insurance_start_date'] ?? null),
+        ];
+
+        $warnings = [];
+        if (
+            $this->isHealthInsuranceEnabled()
+            && !$hiOptOut
+            && $healthInsuranceTotal > 0
+            && empty($profile['health_insurance_start_date'])
+        ) {
+            $warnings[] = 'hi_missing_start_date';
+        }
+
+        $notes = trim((string)($data['notes'] ?? ''));
+        $setup = [
+            'effective_from' => $effectiveFrom,
+            'base_salary' => $baseSalary,
+            'bonus_fixed' => $bonusFixed,
+            'provident_fund' => $providentFund,
+            'social_security' => $socialSecurity,
+            'group_insurance_total_monthly' => $groupInsuranceTotal,
+            'group_insurance_employer_pct' => $groupInsuranceEmployerPct,
+            'health_insurance_total_monthly' => $healthInsuranceTotal,
+            'health_insurance_employer_pct' => $healthInsuranceEmployerPct,
+            'ss_opt_out' => $ssOptOut,
+            'tax_opt_out' => $taxOptOut,
+            'hi_opt_out' => $hiOptOut,
+            'gi_opt_out' => $giOptOut,
+            'additional_tax_withholding' => $additionalTax,
+            'allowance_json' => $allowanceJson,
+            'income_other_json' => $incomeOtherJson,
+            'deduction_other_json' => $deductionOtherJson,
+            'notes' => $notes !== '' ? $notes : null,
+            'created_by' => isset($data['created_by']) ? (int)$data['created_by'] : null,
+        ];
+
+        return ['setup' => $setup, 'profile' => $profile, 'warnings' => $warnings];
+    }
+
+    private function normalizeEffectiveMonth($raw): string
+    {
+        $raw = trim((string)$raw);
+        if ($raw === '') {
+            return '';
+        }
+        if (preg_match('/^\d{4}-\d{2}$/', $raw)) {
+            return $raw . '-01';
+        }
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $raw)) {
+            return substr($raw, 0, 7) . '-01';
+        }
+        return '';
+    }
+
+    private function normalizeOptionalDate($raw): ?string
+    {
+        $raw = trim((string)($raw ?? ''));
+        return $raw !== '' ? $raw : null;
+    }
+
+    /**
+     * @param array<string,mixed> $setup
+     */
+    private function persistSalarySetupRow(int $userId, array $setup): array
+    {
+        $effectiveFrom = $setup['effective_from'];
+        $chk = $this->pdo->prepare('SELECT id FROM employee_salary_setup WHERE user_id = ? AND effective_from = ? ORDER BY id DESC LIMIT 1');
         $chk->execute([$userId, $effectiveFrom]);
         $existing = $chk->fetch(PDO::FETCH_ASSOC);
 
@@ -870,14 +1030,55 @@ class PayrollService
         if ($existing) {
             $sets = implode(', ', array_map(fn($c) => "$c = ?", $cols)) . ', updated_at = NOW()';
             $this->pdo->prepare("UPDATE employee_salary_setup SET $sets WHERE id = ?")
-                ->execute([...array_map(fn($c) => $data[$c] ?? null, $cols), $existing['id']]);
+                ->execute([...array_map(fn($c) => $setup[$c] ?? null, $cols), $existing['id']]);
             return ['action' => 'updated', 'id' => (int)$existing['id']];
         }
 
         $ph = implode(',', array_fill(0, count($cols) + 2, '?'));
-        $this->pdo->prepare("INSERT INTO employee_salary_setup (user_id, effective_from, " . implode(',', $cols) . ") VALUES ($ph)")
-            ->execute([$userId, $effectiveFrom, ...array_map(fn($c) => $data[$c] ?? null, $cols)]);
+        $this->pdo->prepare('INSERT INTO employee_salary_setup (user_id, effective_from, ' . implode(',', $cols) . ") VALUES ($ph)")
+            ->execute([$userId, $effectiveFrom, ...array_map(fn($c) => $setup[$c] ?? null, $cols)]);
         return ['action' => 'created', 'id' => (int)$this->pdo->lastInsertId()];
+    }
+
+    /**
+     * @param array<string,mixed> $profile
+     */
+    private function updateUserBenefitProfile(int $userId, array $profile): void
+    {
+        try {
+            $this->pdo->prepare('UPDATE users SET has_other_employer_income = ?, social_security_start_date = ?, tax_withholding_start_date = ?, health_insurance_start_date = ?, group_insurance_start_date = ? WHERE id = ?')
+                ->execute([
+                    $profile['has_other_employer_income'] ?? 0,
+                    $profile['social_security_start_date'],
+                    $profile['tax_withholding_start_date'],
+                    $profile['health_insurance_start_date'],
+                    $profile['group_insurance_start_date'],
+                    $userId,
+                ]);
+        } catch (\Throwable $e) {
+            try {
+                $this->pdo->prepare('UPDATE users SET has_other_employer_income = ? WHERE id = ?')
+                    ->execute([$profile['has_other_employer_income'] ?? 0, $userId]);
+            } catch (\Throwable $e2) {
+                /* legacy schema */
+            }
+        }
+    }
+
+    public function recalculateOpenRunsForUser(int $userId, string $effectiveFrom): int
+    {
+        $effMonth = substr($effectiveFrom, 0, 7) . '-01';
+        $stmt = $this->pdo->prepare("SELECT id, payroll_month FROM payroll_runs WHERE status IN ('draft','calculated') AND payroll_month >= ?");
+        $stmt->execute([$effMonth]);
+        $count = 0;
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $runId = (int)$row['id'];
+            if ($this->recalculateSlip($runId, $userId, $row['payroll_month'])) {
+                $this->updateRunTotals($runId);
+                $count++;
+            }
+        }
+        return $count;
     }
 
     // ──────────────── Slip Calculation ────────────────
@@ -940,14 +1141,14 @@ class PayrollService
         $ss = $this->calcSocialSecurityForUser($userId, $ssWageBase, $ssOptOut, $monthFirst);
         $pf = $setup ? (float)$setup['provident_fund'] : 0;
         $taxBase = $this->calcTaxForUser($userId, $annualEst, $ss * 12, $pf * 12, $monthFirst, $taxOptOut);
-        $extraTaxReq = $setup && isset($setup['additional_tax_withholding']) ? max(0, (float)$setup['additional_tax_withholding']) : 0;
+        $extraTaxReq = $this->resolveExtraTaxRequest($setup, $taxOptOut);
 
-        $giTotal = $setup['group_insurance_total_monthly'] ?? 0;
-        $giEmpPct = $setup['group_insurance_employer_pct'] ?? 50;
+        $giTotal = (float)(is_array($setup) ? ($setup['group_insurance_total_monthly'] ?? 0) : 0);
+        $giEmpPct = (float)(is_array($setup) ? ($setup['group_insurance_employer_pct'] ?? 50) : 50);
         $groupInsurance = $this->calcGroupInsuranceForUser($userId, (float)$giTotal, (float)$giEmpPct, $giOptOut, $monthFirst);
 
-        $hiTotal = $setup['health_insurance_total_monthly'] ?? 0;
-        $hiEmpPct = $setup['health_insurance_employer_pct'] ?? 50;
+        $hiTotal = (float)(is_array($setup) ? ($setup['health_insurance_total_monthly'] ?? 0) : 0);
+        $hiEmpPct = (float)(is_array($setup) ? ($setup['health_insurance_employer_pct'] ?? 50) : 50);
         $healthInsurance = $this->calcHealthInsuranceForUser($userId, (float)$hiTotal, (float)$hiEmpPct, $hiOptOut, $monthFirst);
 
         $att = $this->computeAttendanceDeductions($userId, $monthFirst, $payDay);

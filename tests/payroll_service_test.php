@@ -114,6 +114,14 @@ assertSameValue(true, $taxAfterStart > 0, 'tax applies from start month');
 $taxOptOut = $service->calcTaxForUser(1, 600000, 0, 0, '2026-06-01', true);
 assertSameValue(0.0, $taxOptOut, 'tax opt-out returns zero');
 
+$setupWithExtra = ['additional_tax_withholding' => 1500.0];
+assertSameValue(1500.0, $service->resolveExtraTaxRequest($setupWithExtra, false), 'extra tax applies when not opted out');
+assertSameValue(0.0, $service->resolveExtraTaxRequest($setupWithExtra, true), 'extra tax zero when tax opt-out');
+$pdo->exec("UPDATE system_settings SET setting_value = '0' WHERE setting_key = 'payroll_tax_enabled'");
+$serviceTaxOff = new PayrollService($pdo);
+assertSameValue(0.0, $serviceTaxOff->resolveExtraTaxRequest($setupWithExtra, false), 'extra tax zero when company tax disabled');
+$pdo->exec("UPDATE system_settings SET setting_value = '1' WHERE setting_key = 'payroll_tax_enabled'");
+
 $hireMethod = new ReflectionMethod(PayrollService::class, 'hireProrateFactor');
 $hireMethod->setAccessible(true);
 assertSameValue(0.0, $hireMethod->invoke($service, '2026-04-05', '2026-02-26', '2026-03-25'), 'hire after period end — no pay');
