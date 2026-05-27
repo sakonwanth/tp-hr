@@ -134,6 +134,7 @@ class PayrollService
             return $cache[$key];
         }
         $allowed = [
+            'probation_passed_date',
             'social_security_start_date',
             'tax_withholding_start_date',
             'health_insurance_start_date',
@@ -1206,7 +1207,10 @@ class PayrollService
 
         $profile = [
             'has_other_employer_income' => !empty($data['has_other_employer_income']) ? 1 : 0,
-            'social_security_start_date' => $this->normalizeOptionalDate($data['social_security_start_date'] ?? null),
+            'social_security_start_date' => $this->inferSsStartFromProbation(
+                $this->getUserDateColumn($userId, 'probation_passed_date'),
+                $this->normalizeOptionalDate($data['social_security_start_date'] ?? null)
+            ),
             'tax_withholding_start_date' => $this->normalizeOptionalDate($data['tax_withholding_start_date'] ?? null),
             'health_insurance_start_date' => $this->normalizeOptionalDate($data['health_insurance_start_date'] ?? null),
             'group_insurance_start_date' => $this->normalizeOptionalDate($data['group_insurance_start_date'] ?? null),
@@ -1261,6 +1265,19 @@ class PayrollService
             return substr($raw, 0, 7) . '-01';
         }
         return '';
+    }
+
+    private function inferSsStartFromProbation(?string $probationPassedDate, ?string $existingSsStart = null): ?string
+    {
+        $passed = $this->normalizeOptionalDate($probationPassedDate);
+        $existing = $this->normalizeOptionalDate($existingSsStart);
+        if ($passed === null) {
+            return $existing;
+        }
+        if ($existing !== null) {
+            return $existing;
+        }
+        return $passed;
     }
 
     private function normalizeOptionalDate($raw): ?string

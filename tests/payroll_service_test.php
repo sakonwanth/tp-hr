@@ -198,6 +198,12 @@ assertSameValue(14000.0, $slipAug['gross_salary'], 'after probation passed uses 
 $slipJul = $serviceProb->calculateSlip(13, '2026-07-01', 25);
 assertSameValue(12000.0, $slipJul['gross_salary'], 'still on probation in July uses probation_salary');
 
+$pdo->exec("INSERT INTO users (id, is_active, work_mode, hire_date, probation_passed_date, social_security_start_date) VALUES (14, 1, 'OFFICE', '2026-01-01', '2026-05-01', NULL)");
+$inferred = (new ReflectionMethod(PayrollService::class, 'inferSsStartFromProbation'));
+$inferred->setAccessible(true);
+assertSameValue('2026-05-01', $inferred->invoke($serviceProb, '2026-05-01', null), 'infer SS start from probation passed');
+assertSameValue('2026-04-01', $inferred->invoke($serviceProb, '2026-05-01', '2026-04-01'), 'keep explicit SS start over probation');
+
 $marBounds = $service->effectivePeriodBounds('2026-03-01', 25, '2026-02-05');
 assertSameValue('2026-03-01', $marBounds['start'], 'transition month skips overlap with first hire month');
 assertSameValue('2026-03-25', $marBounds['end'], 'transition month keeps standard period end');

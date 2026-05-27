@@ -194,6 +194,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'chang
         if (!empty($formData['hire_date']) && $formData['probation_days'] > 0 && empty($formData['probation_end_date'])) {
             $formData['probation_end_date'] = date('Y-m-d', strtotime($formData['hire_date'] . ' + ' . $formData['probation_days'] . ' days'));
         }
+
+        $formData['social_security_start_date'] = inferSsStartFromProbation(
+            $formData['probation_passed_date'] ?: null,
+            $formData['social_security_start_date'] ?: null
+        );
         
         // Validation
         if (empty($formData['employee_code'])) {
@@ -1581,6 +1586,10 @@ function onProbationPassed() {
     const passedDate = document.getElementById('probation_passed_date').value;
     if (passedDate) {
         document.getElementById('employment_type').value = 'PERMANENT';
+        const ssInput = document.querySelector('input[name="social_security_start_date"]');
+        if (ssInput && !ssInput.value) {
+            ssInput.value = passedDate;
+        }
     }
 }
 
