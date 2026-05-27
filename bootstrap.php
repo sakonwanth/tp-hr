@@ -459,21 +459,6 @@ function getEffectiveSalary(array $user): float {
     return $salary ?? ($probSalary ?? 0.0);
 }
 
-/** ตั้งวันเริ่มหักประกันสังคมจากวันผ่านโปร — ไม่ทับค่าที่ระบุไว้แล้ว */
-function inferSsStartFromProbation(?string $probationPassedDate, ?string $existingSsStart = null): ?string {
-    $passed = ($probationPassedDate !== null && trim($probationPassedDate) !== '')
-        ? substr(trim($probationPassedDate), 0, 10) : null;
-    $existing = ($existingSsStart !== null && trim($existingSsStart) !== '')
-        ? substr(trim($existingSsStart), 0, 10) : null;
-    if ($passed === null) {
-        return $existing;
-    }
-    if ($existing !== null) {
-        return $existing;
-    }
-    return $passed;
-}
-
 function flash(string $key, ?string $message = null) {
     if ($message !== null) {
         $_SESSION['flash'][$key] = $message;

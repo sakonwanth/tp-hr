@@ -194,11 +194,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'chang
         if (!empty($formData['hire_date']) && $formData['probation_days'] > 0 && empty($formData['probation_end_date'])) {
             $formData['probation_end_date'] = date('Y-m-d', strtotime($formData['hire_date'] . ' + ' . $formData['probation_days'] . ' days'));
         }
-
-        $formData['social_security_start_date'] = inferSsStartFromProbation(
-            $formData['probation_passed_date'] ?: null,
-            $formData['social_security_start_date'] ?: null
-        );
         
         // Validation
         if (empty($formData['employee_code'])) {
@@ -1029,7 +1024,7 @@ include dirname(__DIR__) . '/templates/header.php';
         <div class="rounded-[var(--tp-ios-card-radius)] p-3 mt-4 bg-blue-500/10 border border-blue-500/25">
             <p class="text-blue-300 text-sm leading-relaxed">
                 <i class="fas fa-lightbulb mr-2 text-amber-300" aria-hidden="true"></i>
-                เมื่อพนักงานผ่านโปร ระบบจะเริ่มหักประกันสังคมตามข้อมูลด้านล่าง
+                วันเริ่มหักประกันสังคมกำหนดแยกจากวันผ่านโปร — HR ระบุเองว่าจะเริ่มหักเดือนใด
             </p>
         </div>
     </div>
@@ -1077,7 +1072,7 @@ include dirname(__DIR__) . '/templates/header.php';
                        class="input-field tp-native-input">
                 <?php endif; ?>
                 <?php if (!$lockWelfare): ?>
-                <p class="text-white/40 text-xs mt-1">ปกติจะเริ่มหักหลังผ่านโปร</p>
+                <p class="text-white/40 text-xs mt-1">ปกติจะเริ่มหักหลังผ่านโปร — กำหนดวันเอง (ไม่ผูกอัตโนมัติจากวันผ่านโปร)</p>
                 <?php endif; ?>
             </div>
             <div>
@@ -1586,10 +1581,6 @@ function onProbationPassed() {
     const passedDate = document.getElementById('probation_passed_date').value;
     if (passedDate) {
         document.getElementById('employment_type').value = 'PERMANENT';
-        const ssInput = document.querySelector('input[name="social_security_start_date"]');
-        if (ssInput && !ssInput.value) {
-            ssInput.value = passedDate;
-        }
     }
 }
 
