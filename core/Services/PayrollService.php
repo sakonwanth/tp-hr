@@ -1429,11 +1429,15 @@ class PayrollService
         try {
             $setupResult = $this->persistSalarySetupRow($userId, $bundle['setup']);
             $this->updateUserBenefitProfile($userId, $bundle['profile']);
-            $recalcCount = $this->recalculateOpenRunsForUser($userId, $bundle['setup']['effective_from']);
+            $recalcCount = !empty($bundle['setup']['month_scoped'])
+                ? $this->recalculateRunMonthForUser($userId, $bundle['setup']['effective_from'])
+                : $this->recalculateOpenRunsForUser($userId, $bundle['setup']['effective_from']);
             $this->pdo->commit();
 
             return array_merge($setupResult, [
                 'recalculated_runs' => $recalcCount,
+                'month_scoped' => !empty($bundle['setup']['month_scoped']),
+                'scope_month' => !empty($bundle['setup']['month_scoped']) ? substr($bundle['setup']['effective_from'], 0, 7) : null,
                 'warnings' => $bundle['warnings'],
             ]);
         } catch (\Throwable $e) {
@@ -1449,7 +1453,16 @@ class PayrollService
      */
     public function prepareSalarySetupBundle(int $userId, array $data): array
     {
-        $effectiveFrom = $this->normalizeEffectiveMonth($data['effective_from'] ?? '');
+        $scopeBounds = $this->monthScopeBounds($data['scope_month'] ?? null);
+        $monthScoped = $scopeBounds !== null;
+
+        if ($monthScoped) {
+            $effectiveFrom = $scopeBounds['from'];
+            $effectiveTo = $scopeBounds['to'];
+        } else {
+            $effectiveFrom = $this->normalizeEffectiveMonth($data['effective_from'] ?? '');
+            $effectiveTo = null;
+        }
         if ($effectiveFrom === '') {
             throw new \InvalidArgumentException('เดือนที่มีผลไม่ถูกต้อง');
         }
@@ -1518,6 +1531,8 @@ class PayrollService
         $notes = trim((string)($data['notes'] ?? ''));
         $setup = [
             'effective_from' => $effectiveFrom,
+            'effective_to' => $effectiveTo,
+            'month_scoped' => $monthScoped,
             'base_salary' => $baseSalary,
             'bonus_fixed' => $bonusFixed,
             'provident_fund' => $providentFund,
@@ -1562,6 +1577,24 @@ class PayrollService
         return $raw !== '' ? $raw : null;
     }
 
+    /** @return array{from: string, to: string}|null */
+    private function monthScopeBounds($raw): ?array
+    {
+        $raw = trim((string)($raw ?? ''));
+        if ($raw === '') {
+            return null;
+        }
+        if (preg_match('/^\d{4}-\d{2}$/', $raw)) {
+            $from = $raw . '-01';
+            return ['from' => $from, 'to' => date('Y-m-t', strtotime($from))];
+        }
+        if (preg_match('/^(\d{4}-\d{2})-\d{2}$/', $raw, $m)) {
+            $from = $m[1] . '-01';
+            return ['from' => $from, 'to' => date('Y-m-t', strtotime($from))];
+        }
+        return null;
+    }
+
     private function closePriorSalarySetupVersions(int $userId, string $effectiveFrom): void
     {
         $prevEnd = date('Y-m-d', strtotime($effectiveFrom . ' -1 day'));
@@ -1577,8 +1610,20 @@ class PayrollService
     private function persistSalarySetupRow(int $userId, array $setup): array
     {
         $effectiveFrom = $setup['effective_from'];
-        $chk = $this->pdo->prepare('SELECT id FROM employee_salary_setup WHERE user_id = ? AND effective_from = ? ORDER BY id DESC LIMIT 1');
-        $chk->execute([$userId, $effectiveFrom]);
+        $effectiveTo = $setup['effective_to'] ?? null;
+        $monthScoped = !empty($setup['month_scoped']);
+
+        if ($monthScoped && $effectiveTo) {
+            $chk = $this->pdo->prepare(
+                'SELECT id FROM employee_salary_setup
+                 WHERE user_id = ? AND effective_from = ? AND effective_to = ?
+                 ORDER BY id DESC LIMIT 1'
+            );
+            $chk->execute([$userId, $effectiveFrom, $effectiveTo]);
+        } else {
+            $chk = $this->pdo->prepare('SELECT id FROM employee_salary_setup WHERE user_id = ? AND effective_from = ? ORDER BY id DESC LIMIT 1');
+            $chk->execute([$userId, $effectiveFrom]);
+        }
         $existing = $chk->fetch(PDO::FETCH_ASSOC);
 
         $cols = ['base_salary', 'bonus_fixed', 'provident_fund', 'social_security',
@@ -1589,17 +1634,19 @@ class PayrollService
             'allowance_json', 'income_other_json', 'deduction_other_json', 'notes', 'created_by'];
 
         if ($existing) {
-            $sets = implode(', ', array_map(fn($c) => "$c = ?", $cols)) . ', updated_at = NOW()';
+            $sets = 'effective_to = ?, ' . implode(', ', array_map(fn($c) => "$c = ?", $cols)) . ', updated_at = NOW()';
             $this->pdo->prepare("UPDATE employee_salary_setup SET $sets WHERE id = ?")
-                ->execute([...array_map(fn($c) => $setup[$c] ?? null, $cols), $existing['id']]);
+                ->execute([$effectiveTo, ...array_map(fn($c) => $setup[$c] ?? null, $cols), $existing['id']]);
             return ['action' => 'updated', 'id' => (int)$existing['id']];
         }
 
-        $this->closePriorSalarySetupVersions($userId, $effectiveFrom);
+        if (!$monthScoped) {
+            $this->closePriorSalarySetupVersions($userId, $effectiveFrom);
+        }
 
-        $ph = implode(',', array_fill(0, count($cols) + 2, '?'));
-        $this->pdo->prepare('INSERT INTO employee_salary_setup (user_id, effective_from, ' . implode(',', $cols) . ") VALUES ($ph)")
-            ->execute([$userId, $effectiveFrom, ...array_map(fn($c) => $setup[$c] ?? null, $cols)]);
+        $ph = implode(',', array_fill(0, count($cols) + 3, '?'));
+        $this->pdo->prepare('INSERT INTO employee_salary_setup (user_id, effective_from, effective_to, ' . implode(',', $cols) . ") VALUES ($ph)")
+            ->execute([$userId, $effectiveFrom, $effectiveTo, ...array_map(fn($c) => $setup[$c] ?? null, $cols)]);
         return ['action' => 'created', 'id' => (int)$this->pdo->lastInsertId()];
     }
 
@@ -1642,6 +1689,23 @@ class PayrollService
             }
         }
         return $count;
+    }
+
+    public function recalculateRunMonthForUser(int $userId, string $monthFirst): int
+    {
+        $monthFirst = preg_match('/^\d{4}-\d{2}-\d{2}$/', $monthFirst) ? $monthFirst : (substr($monthFirst, 0, 7) . '-01');
+        $stmt = $this->pdo->prepare("SELECT id, payroll_month FROM payroll_runs WHERE status IN ('draft','calculated') AND payroll_month = ? LIMIT 1");
+        $stmt->execute([$monthFirst]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) {
+            return 0;
+        }
+        $runId = (int)$row['id'];
+        if ($this->recalculateSlip($runId, $userId, $row['payroll_month'])) {
+            $this->updateRunTotals($runId);
+            return 1;
+        }
+        return 0;
     }
 
     // ──────────────── Slip Calculation ────────────────
