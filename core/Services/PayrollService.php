@@ -1695,6 +1695,30 @@ class PayrollService
             return ['action' => 'updated', 'id' => (int)$existing['id']];
         }
 
+        // Month overlay shares effective_from with open-ended permanent row → split future permanent first
+        if ($monthScoped && $effectiveTo) {
+            $conflictStmt = $this->pdo->prepare(
+                'SELECT * FROM employee_salary_setup WHERE user_id = ? AND effective_from = ? ORDER BY id DESC LIMIT 1'
+            );
+            $conflictStmt->execute([$userId, $effectiveFrom]);
+            $conflict = $conflictStmt->fetch(PDO::FETCH_ASSOC);
+            if ($conflict && empty($conflict['effective_to'])) {
+                $nextMonthStart = date('Y-m-d', strtotime($effectiveTo . ' +1 day'));
+                $ph = implode(',', array_fill(0, count($cols) + 3, '?'));
+                $this->pdo->prepare('INSERT INTO employee_salary_setup (user_id, effective_from, effective_to, ' . implode(',', $cols) . ") VALUES ($ph)")
+                    ->execute([
+                        $userId,
+                        $nextMonthStart,
+                        null,
+                        ...array_map(fn($c) => $conflict[$c] ?? null, $cols),
+                    ]);
+                $sets = 'effective_to = ?, ' . implode(', ', array_map(fn($c) => "$c = ?", $cols)) . ', updated_at = NOW()';
+                $this->pdo->prepare("UPDATE employee_salary_setup SET $sets WHERE id = ?")
+                    ->execute([$effectiveTo, ...array_map(fn($c) => $setup[$c] ?? null, $cols), $conflict['id']]);
+                return ['action' => 'split_overlay', 'id' => (int)$conflict['id']];
+            }
+        }
+
         if (!$monthScoped) {
             $this->closePriorSalarySetupVersions($userId, $effectiveFrom);
         }
