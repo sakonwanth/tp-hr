@@ -1771,21 +1771,15 @@ class PayrollService
         $effectiveFrom = $setup['effective_from'];
         $effectiveTo = $setup['effective_to'] ?? null;
         $monthScoped = !empty($setup['month_scoped']);
+        $cols = $this->salarySetupPersistCols();
 
         if ($monthScoped && $effectiveTo) {
-            $chk = $this->pdo->prepare(
-                'SELECT id FROM employee_salary_setup
-                 WHERE user_id = ? AND effective_from = ? AND effective_to = ?
-                 ORDER BY id DESC LIMIT 1'
-            );
-            $chk->execute([$userId, $effectiveFrom, $effectiveTo]);
-        } else {
-            $chk = $this->pdo->prepare('SELECT id FROM employee_salary_setup WHERE user_id = ? AND effective_from = ? ORDER BY id DESC LIMIT 1');
-            $chk->execute([$userId, $effectiveFrom]);
+            return $this->persistMonthScopedSalarySetup($userId, $setup, $cols);
         }
-        $existing = $chk->fetch(PDO::FETCH_ASSOC);
 
-        $cols = $this->salarySetupPersistCols();
+        $chk = $this->pdo->prepare('SELECT id FROM employee_salary_setup WHERE user_id = ? AND effective_from = ? ORDER BY id DESC LIMIT 1');
+        $chk->execute([$userId, $effectiveFrom]);
+        $existing = $chk->fetch(PDO::FETCH_ASSOC);
 
         if ($existing) {
             $sets = 'effective_to = ?, ' . implode(', ', array_map(fn($c) => "$c = ?", $cols)) . ', updated_at = NOW()';
@@ -1794,44 +1788,89 @@ class PayrollService
             return ['action' => 'updated', 'id' => (int)$existing['id']];
         }
 
-        // Month overlay shares effective_from with open-ended permanent row → split future permanent first
-        if ($monthScoped && $effectiveTo) {
-            $conflictStmt = $this->pdo->prepare(
-                'SELECT * FROM employee_salary_setup WHERE user_id = ? AND effective_from = ? ORDER BY id DESC LIMIT 1'
-            );
-            $conflictStmt->execute([$userId, $effectiveFrom]);
-            $conflict = $conflictStmt->fetch(PDO::FETCH_ASSOC);
-            if ($conflict && empty($conflict['effective_to'])) {
-                $nextMonthStart = date('Y-m-d', strtotime($effectiveTo . ' +1 day'));
-                $futureStmt = $this->pdo->prepare(
-                    'SELECT id FROM employee_salary_setup WHERE user_id = ? AND effective_from = ? ORDER BY id DESC LIMIT 1'
-                );
-                $futureStmt->execute([$userId, $nextMonthStart]);
-                if (!$futureStmt->fetch(PDO::FETCH_ASSOC)) {
-                    $ph = implode(',', array_fill(0, count($cols) + 3, '?'));
-                    $this->pdo->prepare('INSERT INTO employee_salary_setup (user_id, effective_from, effective_to, ' . implode(',', $cols) . ") VALUES ($ph)")
-                        ->execute([
-                            $userId,
-                            $nextMonthStart,
-                            null,
-                            ...array_map(fn($c) => $conflict[$c] ?? null, $cols),
-                        ]);
-                }
-                $sets = 'effective_to = ?, ' . implode(', ', array_map(fn($c) => "$c = ?", $cols)) . ', updated_at = NOW()';
-                $this->pdo->prepare("UPDATE employee_salary_setup SET $sets WHERE id = ?")
-                    ->execute([$effectiveTo, ...array_map(fn($c) => $setup[$c] ?? null, $cols), $conflict['id']]);
-                return ['action' => 'split_overlay', 'id' => (int)$conflict['id']];
-            }
+        $this->closePriorSalarySetupVersions($userId, $effectiveFrom);
+
+        $ph = implode(',', array_fill(0, count($cols) + 3, '?'));
+        $this->pdo->prepare('INSERT INTO employee_salary_setup (user_id, effective_from, effective_to, ' . implode(',', $cols) . ") VALUES ($ph)")
+            ->execute([$userId, $effectiveFrom, $effectiveTo, ...array_map(fn($c) => $setup[$c] ?? null, $cols)]);
+        return ['action' => 'created', 'id' => (int)$this->pdo->lastInsertId()];
+    }
+
+    /**
+     * @param array<string,mixed> $setup
+     * @param list<string> $cols
+     * @return array{action: string, id: int}
+     */
+    private function persistMonthScopedSalarySetup(int $userId, array $setup, array $cols): array
+    {
+        $effectiveFrom = $setup['effective_from'];
+        $effectiveTo = $setup['effective_to'];
+
+        $exactStmt = $this->pdo->prepare(
+            'SELECT id FROM employee_salary_setup
+             WHERE user_id = ? AND effective_from = ? AND effective_to = ?
+             ORDER BY id DESC LIMIT 1'
+        );
+        $exactStmt->execute([$userId, $effectiveFrom, $effectiveTo]);
+        $exact = $exactStmt->fetch(PDO::FETCH_ASSOC);
+        if ($exact) {
+            $sets = 'effective_to = ?, ' . implode(', ', array_map(fn($c) => "$c = ?", $cols)) . ', updated_at = NOW()';
+            $this->pdo->prepare("UPDATE employee_salary_setup SET $sets WHERE id = ?")
+                ->execute([$effectiveTo, ...array_map(fn($c) => $setup[$c] ?? null, $cols), $exact['id']]);
+            return ['action' => 'updated', 'id' => (int)$exact['id']];
         }
 
-        if (!$monthScoped) {
-            $this->closePriorSalarySetupVersions($userId, $effectiveFrom);
+        $atFromStmt = $this->pdo->prepare(
+            'SELECT * FROM employee_salary_setup WHERE user_id = ? AND effective_from = ? ORDER BY id DESC LIMIT 1'
+        );
+        $atFromStmt->execute([$userId, $effectiveFrom]);
+        $atFrom = $atFromStmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($atFrom) {
+            $action = 'overlay_update';
+            if ($this->salarySetupRowIsOpenEnded($atFrom['effective_to'] ?? null)) {
+                $this->clonePermanentSalaryToNextMonthIfAbsent($userId, $atFrom, $effectiveTo, $cols);
+                $action = 'split_overlay';
+            }
+            $sets = 'effective_to = ?, ' . implode(', ', array_map(fn($c) => "$c = ?", $cols)) . ', updated_at = NOW()';
+            $this->pdo->prepare("UPDATE employee_salary_setup SET $sets WHERE id = ?")
+                ->execute([$effectiveTo, ...array_map(fn($c) => $setup[$c] ?? null, $cols), $atFrom['id']]);
+            return ['action' => $action, 'id' => (int)$atFrom['id']];
         }
 
         $ph = implode(',', array_fill(0, count($cols) + 3, '?'));
         $this->pdo->prepare('INSERT INTO employee_salary_setup (user_id, effective_from, effective_to, ' . implode(',', $cols) . ") VALUES ($ph)")
             ->execute([$userId, $effectiveFrom, $effectiveTo, ...array_map(fn($c) => $setup[$c] ?? null, $cols)]);
         return ['action' => 'created', 'id' => (int)$this->pdo->lastInsertId()];
+    }
+
+    private function salarySetupRowIsOpenEnded(?string $effectiveTo): bool
+    {
+        return $effectiveTo === null || trim($effectiveTo) === '';
+    }
+
+    /**
+     * @param array<string,mixed> $permanentRow
+     * @param list<string> $cols
+     */
+    private function clonePermanentSalaryToNextMonthIfAbsent(int $userId, array $permanentRow, string $overlayEnd, array $cols): void
+    {
+        $nextMonthStart = date('Y-m-d', strtotime($overlayEnd . ' +1 day'));
+        $futureStmt = $this->pdo->prepare(
+            'SELECT id FROM employee_salary_setup WHERE user_id = ? AND effective_from = ? ORDER BY id DESC LIMIT 1'
+        );
+        $futureStmt->execute([$userId, $nextMonthStart]);
+        if ($futureStmt->fetch(PDO::FETCH_ASSOC)) {
+            return;
+        }
+        $ph = implode(',', array_fill(0, count($cols) + 3, '?'));
+        $this->pdo->prepare('INSERT INTO employee_salary_setup (user_id, effective_from, effective_to, ' . implode(',', $cols) . ") VALUES ($ph)")
+            ->execute([
+                $userId,
+                $nextMonthStart,
+                null,
+                ...array_map(fn($c) => $permanentRow[$c] ?? null, $cols),
+            ]);
     }
 
     /**
