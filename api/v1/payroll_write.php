@@ -158,8 +158,17 @@ if ($resource === 'salary-setup') {
         $input = ApiAuth::input();
         $userId = (int)($input['user_id'] ?? 0);
         if ($userId <= 0) ApiAuth::fail(400, 'user_id required');
-        $result = $service->saveSalarySetup($userId, $input);
-        ApiAuth::success(['data' => $result]);
+        try {
+            $result = $service->saveSalarySetup($userId, $input);
+            ApiAuth::success(['data' => $result]);
+        } catch (\InvalidArgumentException $e) {
+            ApiAuth::fail(400, $e->getMessage());
+        } catch (\RuntimeException $e) {
+            ApiAuth::fail(400, $e->getMessage());
+        } catch (\Throwable $e) {
+            tpHrLogException($e, 'api/v1/salary-setup');
+            ApiAuth::fail(500, 'Internal server error');
+        }
     }
 
     // GET /salary-setup/{user_id}

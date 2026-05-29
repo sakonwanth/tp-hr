@@ -1521,7 +1521,9 @@ class PayrollService
 
     public function saveSalarySetup(int $userId, array $data): array
     {
-        $this->assertSocialSecurityManualSchema($data);
+        if (!empty($data['social_security_manual'])) {
+            $this->ensureSocialSecurityManualColumn();
+        }
         $bundle = $this->prepareSalarySetupBundle($userId, $data);
 
         $this->pdo->beginTransaction();
@@ -1703,22 +1705,33 @@ class PayrollService
         )->execute([$prevEnd, $userId, $effectiveFrom, $effectiveFrom]);
     }
 
-    /**
-     * @param array<string,mixed> $data
-     */
-    private function assertSocialSecurityManualSchema(array $data): void
+    private function ensureSocialSecurityManualColumn(): void
     {
-        if (empty($data['social_security_manual'])) {
+        static $done = false;
+        if ($done) {
             return;
         }
+        $done = true;
+
         $chk = $this->pdo->prepare(
             "SELECT 1 FROM information_schema.COLUMNS
              WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'employee_salary_setup' AND COLUMN_NAME = 'social_security_manual'"
         );
         $chk->execute();
-        if (!$chk->fetchColumn()) {
+        if ($chk->fetchColumn()) {
+            return;
+        }
+
+        try {
+            $this->pdo->exec(
+                "ALTER TABLE employee_salary_setup
+                 ADD COLUMN social_security_manual TINYINT(1) NOT NULL DEFAULT 0
+                 COMMENT '1=ใช้ยอด social_security ที่กำหนดเอง, 0=คำนวณอัตโนมัติ'"
+            );
+        } catch (\Throwable $e) {
+            error_log('[PayrollService] social_security_manual column ensure failed: ' . $e->getMessage());
             throw new \InvalidArgumentException(
-                'ฟีเจอร์กำหนดยอดประกันสังคมเองยังไม่พร้อมในฐานข้อมูล — กรุณารอระบบอัปเดตสักครู่แล้วลองใหม่ หรือแจ้งผู้ดูแลระบบ'
+                'ไม่สามารถอัปเดตฐานข้อมูลสำหรับกำหนดยอดประกันสังคมเองได้ — กรุณาแจ้งผู้ดูแลระบบ'
             );
         }
     }
