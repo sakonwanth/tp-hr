@@ -99,6 +99,15 @@ assertSameValue(16000.0, $wageVariable, 'SS wage base excludes commission and wo
 $ss16000 = $service->calcSocialSecurity(16000, false, '2026-05-01');
 assertSameValue(800.0, $ss16000, 'SS 5% of 16000 monthly wage base');
 
+$resolveSs = new ReflectionMethod(PayrollService::class, 'resolveSocialSecurityAmount');
+$resolveSs->setAccessible(true);
+assertSameValue(750.0, $resolveSs->invoke($service, [
+    'social_security_manual' => 1,
+    'social_security' => 750.0,
+    'ss_opt_out' => 0,
+], $ss16000), 'manual SS override uses stored amount');
+assertSameValue($ss16000, $resolveSs->invoke($service, ['social_security_manual' => 0], $ss16000), 'auto SS when manual flag off');
+
 $appliesMethod = new ReflectionMethod(PayrollService::class, 'ssAppliesForMonth');
 $appliesMethod->setAccessible(true);
 assertSameValue(false, $appliesMethod->invoke($service, null, '2026-05-01'), 'no SS start date — no deduction');

@@ -285,6 +285,49 @@ class PayrollService
         return $this->defaultSsIncludeForLabel($category, (string)($item['label'] ?? '')) === 0;
     }
 
+    /**
+     * @param array<string,mixed>|null $setup
+     */
+    public function resolveSocialSecurityAmount($setup, float $autoAmount): float
+    {
+        if (!is_array($setup) || empty($setup['social_security_manual'])) {
+            return round(max(0, $autoAmount), 2);
+        }
+        if (!empty($setup['ss_opt_out'])) {
+            return 0.0;
+        }
+        return round(max(0, (float)($setup['social_security'] ?? 0)), 2);
+    }
+
+    /**
+     * @param array<string,mixed> $data
+     * @return array{social_security: float, social_security_manual: int}
+     */
+    private function resolveSocialSecurityForSave(int $userId, array $data, string $effectiveFrom): array
+    {
+        $ssOptOut = !empty($data['ss_opt_out']);
+        $manual = !empty($data['social_security_manual']);
+        $auto = $this->calcSocialSecurityForUser(
+            $userId,
+            $this->socialSecurityWageBase([
+                'base_salary' => (float)($data['base_salary'] ?? 0),
+                'bonus_fixed' => max(0, (float)($data['bonus_fixed'] ?? 0)),
+                'allowance_json' => $data['allowance_json'] ?? null,
+                'income_other_json' => $data['income_other_json'] ?? null,
+            ]),
+            $ssOptOut,
+            $effectiveFrom
+        );
+        if (!$manual) {
+            return ['social_security' => $auto, 'social_security_manual' => 0];
+        }
+        $amount = $ssOptOut ? 0.0 : max(0, (float)($data['social_security'] ?? 0));
+        if (!$ssOptOut && $this->isSsEnabledForMonth($effectiveFrom)) {
+            $amount = min($amount, $this->ssMaxContribution($effectiveFrom));
+        }
+        return ['social_security' => round($amount, 2), 'social_security_manual' => 1];
+    }
+
     public function getUserSocialSecurityStartDate(int $userId): ?string
     {
         return $this->getUserDateColumn($userId, 'social_security_start_date');
@@ -1552,18 +1595,17 @@ class PayrollService
         $incomeOtherJson = $data['income_other_json'] ?? null;
         $deductionOtherJson = $data['deduction_other_json'] ?? null;
 
-        $ssWageBase = $this->socialSecurityWageBase([
+        $ssResolved = $this->resolveSocialSecurityForSave($userId, [
             'base_salary' => $baseSalary,
             'bonus_fixed' => $bonusFixed,
             'allowance_json' => $allowanceJson,
             'income_other_json' => $incomeOtherJson,
-        ]);
-        $socialSecurity = $this->calcSocialSecurityForUser(
-            $userId,
-            $ssWageBase,
-            (bool)$ssOptOut,
-            $effectiveFrom
-        );
+            'ss_opt_out' => $ssOptOut,
+            'social_security_manual' => !empty($data['social_security_manual']),
+            'social_security' => $data['social_security'] ?? 0,
+        ], $effectiveFrom);
+        $socialSecurity = $ssResolved['social_security'];
+        $socialSecurityManual = $ssResolved['social_security_manual'];
 
         $profile = [
             'has_other_employer_income' => !empty($data['has_other_employer_income']) ? 1 : 0,
@@ -1592,6 +1634,7 @@ class PayrollService
             'bonus_fixed' => $bonusFixed,
             'provident_fund' => $providentFund,
             'social_security' => $socialSecurity,
+            'social_security_manual' => $socialSecurityManual,
             'group_insurance_total_monthly' => $groupInsuranceTotal,
             'group_insurance_employer_pct' => $groupInsuranceEmployerPct,
             'health_insurance_total_monthly' => $healthInsuranceTotal,
@@ -1681,7 +1724,7 @@ class PayrollService
         }
         $existing = $chk->fetch(PDO::FETCH_ASSOC);
 
-        $cols = ['base_salary', 'bonus_fixed', 'provident_fund', 'social_security',
+        $cols = ['base_salary', 'bonus_fixed', 'provident_fund', 'social_security', 'social_security_manual',
             'group_insurance_total_monthly', 'group_insurance_employer_pct',
             'health_insurance_total_monthly', 'health_insurance_employer_pct',
             'ss_opt_out', 'tax_opt_out', 'hi_opt_out', 'gi_opt_out',
@@ -1853,7 +1896,8 @@ class PayrollService
         $hiOptOut = $setup && !empty($setup['hi_opt_out']);
         $giOptOut = $setup && !empty($setup['gi_opt_out']);
         $ssWageBase = round($this->socialSecurityWageBase($setup) * max(0, $hireFactor), 2);
-        $ss = $this->calcSocialSecurityForUser($userId, $ssWageBase, $ssOptOut, $monthFirst);
+        $ssAuto = $this->calcSocialSecurityForUser($userId, $ssWageBase, $ssOptOut, $monthFirst);
+        $ss = $this->resolveSocialSecurityAmount($setup, $ssAuto);
         $pf = $setup ? (float)$setup['provident_fund'] : 0;
         $taxBase = $this->calcTaxForUser($userId, $annualEst, $ss * 12, $pf * 12, $monthFirst, $taxOptOut);
         $extraTaxReq = $this->resolveExtraTaxRequest($setup, $taxOptOut, $monthFirst);
