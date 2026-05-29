@@ -944,6 +944,34 @@ class PayrollService
         return $this->calcBenefitEmployeeShare($totalMonthly, $employerPct);
     }
 
+    /** Prorate fixed monthly deductions (PF/GI/HI) when employment factor is partial (< 1). */
+    public function benefitProrationFactor(float $hireFactor): float
+    {
+        if ($hireFactor <= 0) {
+            return 0.0;
+        }
+        if ($hireFactor >= 1.0) {
+            return 1.0;
+        }
+        return $hireFactor;
+    }
+
+    public function userHasOtherEmployerIncome(int $userId): bool
+    {
+        static $cache = [];
+        if (array_key_exists($userId, $cache)) {
+            return $cache[$userId];
+        }
+        try {
+            $stmt = $this->pdo->prepare('SELECT COALESCE(has_other_employer_income, 0) FROM users WHERE id = ? LIMIT 1');
+            $stmt->execute([$userId]);
+            $cache[$userId] = (int)$stmt->fetchColumn() === 1;
+        } catch (\Throwable $e) {
+            $cache[$userId] = false;
+        }
+        return $cache[$userId];
+    }
+
     public function calcTaxForUser(
         int $userId,
         float $annualIncome,
@@ -959,7 +987,8 @@ class PayrollService
         if (!$this->taxAppliesForMonth($this->getUserTaxWithholdingStartDate($userId), $monthFirst)) {
             return 0.0;
         }
-        return $this->calcTaxMonthly($annualIncome, $annualSs, $annualPf, $monthFirst);
+        $skipPersonal = $this->userHasOtherEmployerIncome($userId);
+        return $this->calcTaxMonthly($annualIncome, $annualSs, $annualPf, $monthFirst, $skipPersonal);
     }
 
     public function calcHealthInsuranceForUser(
@@ -1010,10 +1039,10 @@ class PayrollService
      * Thai progressive tax (monthly withholding estimate).
      * Reference: Revenue Code §40(1), 42bis, 47
      */
-    public function calcTaxMonthly(float $annualIncome, float $annualSs = 0, float $annualPf = 0, ?string $monthFirst = null): float
+    public function calcTaxMonthly(float $annualIncome, float $annualSs = 0, float $annualPf = 0, ?string $monthFirst = null, bool $skipPersonalAllowance = false): float
     {
         $expenseAllowance = min($annualIncome * 0.5, 100000);
-        $personalAllowance = 60000;
+        $personalAllowance = $skipPersonalAllowance ? 0 : 60000;
         $ssAnnualCap = $this->ssMaxContribution($monthFirst) * 12;
         $ssDeduction = min(max(0, $annualSs), $ssAnnualCap);
         $pfCap = min($annualIncome * 0.15, 500000);
@@ -1999,17 +2028,18 @@ class PayrollService
         $ssWageBase = round($this->socialSecurityWageBase($setup) * max(0, $hireFactor), 2);
         $ssAuto = $this->calcSocialSecurityForUser($userId, $ssWageBase, $ssOptOut, $monthFirst);
         $ss = $this->resolveSocialSecurityAmount($setup, $ssAuto);
-        $pf = $setup ? (float)$setup['provident_fund'] : 0;
+        $benefitFactor = $this->benefitProrationFactor($hireFactor);
+        $pf = $setup ? round((float)$setup['provident_fund'] * $benefitFactor, 2) : 0;
         $taxBase = $this->calcTaxForUser($userId, $annualEst, $ss * 12, $pf * 12, $monthFirst, $taxOptOut);
         $extraTaxReq = $this->resolveExtraTaxRequest($setup, $taxOptOut, $monthFirst);
 
         $giTotal = (float)(is_array($setup) ? ($setup['group_insurance_total_monthly'] ?? 0) : 0);
         $giEmpPct = (float)(is_array($setup) ? ($setup['group_insurance_employer_pct'] ?? 50) : 50);
-        $groupInsurance = $this->calcGroupInsuranceForUser($userId, (float)$giTotal, (float)$giEmpPct, $giOptOut, $monthFirst);
+        $groupInsurance = $this->calcGroupInsuranceForUser($userId, round($giTotal * $benefitFactor, 2), (float)$giEmpPct, $giOptOut, $monthFirst);
 
         $hiTotal = (float)(is_array($setup) ? ($setup['health_insurance_total_monthly'] ?? 0) : 0);
         $hiEmpPct = (float)(is_array($setup) ? ($setup['health_insurance_employer_pct'] ?? 50) : 50);
-        $healthInsurance = $this->calcHealthInsuranceForUser($userId, (float)$hiTotal, (float)$hiEmpPct, $hiOptOut, $monthFirst);
+        $healthInsurance = $this->calcHealthInsuranceForUser($userId, round($hiTotal * $benefitFactor, 2), (float)$hiEmpPct, $hiOptOut, $monthFirst);
 
         $att = $this->computeAttendanceDeductions($userId, $monthFirst, $payDay);
         $absenceDed = (float)$att['absence_deduction'];
@@ -2187,7 +2217,21 @@ class PayrollService
         $stmt = $this->pdo->prepare("SELECT id FROM payroll_slips WHERE payroll_run_id = ? AND user_id = ?");
         $stmt->execute([$runId, $userId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$row) return false;
+        if (!$row) {
+            $this->pdo->prepare("INSERT INTO payroll_slips (payroll_run_id, user_id, gross_salary, bonus, allowances, income_other_json, total_income, tax_withheld, provident_fund, social_security, group_insurance, health_insurance, deduction_other_json, absent_days, late_count_30, late_count_60, absence_deduction, lateness_deduction, attendance_detail_json, total_deductions, net_salary) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+                ->execute([
+                    $runId, $userId,
+                    $slip['gross_salary'], $slip['bonus'], $slip['allowances'],
+                    $slip['income_other_json'], $slip['total_income'],
+                    $slip['tax_withheld'], $slip['provident_fund'], $slip['social_security'],
+                    $slip['group_insurance'], $slip['health_insurance'], $slip['deduction_other_json'],
+                    $slip['absent_days'], $slip['late_count_30'], $slip['late_count_60'],
+                    $slip['absence_deduction'], $slip['lateness_deduction'],
+                    $slip['attendance_detail_json'], $slip['total_deductions'], $slip['net_salary'],
+                ]);
+            $this->updateRunTotals($runId);
+            return true;
+        }
 
         $this->pdo->prepare("UPDATE payroll_slips SET gross_salary=?, bonus=?, allowances=?, income_other_json=?, total_income=?, tax_withheld=?, provident_fund=?, social_security=?, group_insurance=?, health_insurance=?, deduction_other_json=?, absent_days=?, late_count_30=?, late_count_60=?, absence_deduction=?, lateness_deduction=?, attendance_detail_json=?, total_deductions=?, net_salary=? WHERE id=?")
             ->execute([
@@ -2200,6 +2244,7 @@ class PayrollService
                 $slip['attendance_detail_json'], $slip['total_deductions'], $slip['net_salary'],
                 $row['id'],
             ]);
+        $this->updateRunTotals($runId);
         return true;
     }
 

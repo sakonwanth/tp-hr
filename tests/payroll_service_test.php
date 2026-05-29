@@ -327,4 +327,10 @@ $deductions = $service->computeAttendanceDeductions(5, '2026-05-01', 25);
 assertSameValue(0.0, $deductions['absent_days'], 'Sunday LATE 605 min must not count as absent');
 assertSameValue(0.0, $deductions['total_deduction'], 'Sunday check-in must not deduct payroll');
 
+assertSameValue(0.5, $service->benefitProrationFactor(0.5), 'partial month prorates benefits');
+assertSameValue(1.0, $service->benefitProrationFactor(1.2), 'resignation tail does not inflate benefit factor');
+$taxWithPersonal = $service->calcTaxMonthly(600000, 0, 0, '2026-05-01', false);
+$taxWithoutPersonal = $service->calcTaxMonthly(600000, 0, 0, '2026-05-01', true);
+assertSameValue(true, $taxWithoutPersonal > $taxWithPersonal, 'secondary employment skips personal allowance');
+
 echo "PayrollService regression fixtures passed." . PHP_EOL;
