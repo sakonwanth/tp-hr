@@ -1521,6 +1521,7 @@ class PayrollService
 
     public function saveSalarySetup(int $userId, array $data): array
     {
+        $this->assertSocialSecurityManualSchema($data);
         $bundle = $this->prepareSalarySetupBundle($userId, $data);
 
         $this->pdo->beginTransaction();
@@ -1703,6 +1704,53 @@ class PayrollService
     }
 
     /**
+     * @param array<string,mixed> $data
+     */
+    private function assertSocialSecurityManualSchema(array $data): void
+    {
+        if (empty($data['social_security_manual'])) {
+            return;
+        }
+        $chk = $this->pdo->prepare(
+            "SELECT 1 FROM information_schema.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'employee_salary_setup' AND COLUMN_NAME = 'social_security_manual'"
+        );
+        $chk->execute();
+        if (!$chk->fetchColumn()) {
+            throw new \InvalidArgumentException(
+                'ฟีเจอร์กำหนดยอดประกันสังคมเองยังไม่พร้อมในฐานข้อมูล — กรุณารอระบบอัปเดตสักครู่แล้วลองใหม่ หรือแจ้งผู้ดูแลระบบ'
+            );
+        }
+    }
+
+    /** @return list<string> */
+    private function salarySetupPersistCols(): array
+    {
+        static $cols = null;
+        if ($cols !== null) {
+            return $cols;
+        }
+        $all = [
+            'base_salary', 'bonus_fixed', 'provident_fund', 'social_security', 'social_security_manual',
+            'group_insurance_total_monthly', 'group_insurance_employer_pct',
+            'health_insurance_total_monthly', 'health_insurance_employer_pct',
+            'ss_opt_out', 'tax_opt_out', 'hi_opt_out', 'gi_opt_out',
+            'additional_tax_withholding',
+            'allowance_json', 'income_other_json', 'deduction_other_json', 'notes', 'created_by',
+        ];
+        $chk = $this->pdo->prepare(
+            "SELECT 1 FROM information_schema.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'employee_salary_setup' AND COLUMN_NAME = 'social_security_manual'"
+        );
+        $chk->execute();
+        if (!$chk->fetchColumn()) {
+            $all = array_values(array_filter($all, static fn(string $c): bool => $c !== 'social_security_manual'));
+        }
+        $cols = $all;
+        return $cols;
+    }
+
+    /**
      * @param array<string,mixed> $setup
      */
     private function persistSalarySetupRow(int $userId, array $setup): array
@@ -1724,12 +1772,7 @@ class PayrollService
         }
         $existing = $chk->fetch(PDO::FETCH_ASSOC);
 
-        $cols = ['base_salary', 'bonus_fixed', 'provident_fund', 'social_security', 'social_security_manual',
-            'group_insurance_total_monthly', 'group_insurance_employer_pct',
-            'health_insurance_total_monthly', 'health_insurance_employer_pct',
-            'ss_opt_out', 'tax_opt_out', 'hi_opt_out', 'gi_opt_out',
-            'additional_tax_withholding',
-            'allowance_json', 'income_other_json', 'deduction_other_json', 'notes', 'created_by'];
+        $cols = $this->salarySetupPersistCols();
 
         if ($existing) {
             $sets = 'effective_to = ?, ' . implode(', ', array_map(fn($c) => "$c = ?", $cols)) . ', updated_at = NOW()';
