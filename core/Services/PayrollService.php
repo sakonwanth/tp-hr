@@ -2029,7 +2029,7 @@ class PayrollService
         $ssAuto = $this->calcSocialSecurityForUser($userId, $ssWageBase, $ssOptOut, $monthFirst);
         $ss = $this->resolveSocialSecurityAmount($setup, $ssAuto);
         $benefitFactor = $this->benefitProrationFactor($hireFactor);
-        $pf = $setup ? round((float)$setup['provident_fund'] * $benefitFactor, 2) : 0;
+        $pf = $setup ? round((float)($setup['provident_fund'] ?? 0) * $benefitFactor, 2) : 0;
         $taxBase = $this->calcTaxForUser($userId, $annualEst, $ss * 12, $pf * 12, $monthFirst, $taxOptOut);
         $extraTaxReq = $this->resolveExtraTaxRequest($setup, $taxOptOut, $monthFirst);
 
