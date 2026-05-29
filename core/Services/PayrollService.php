@@ -197,9 +197,8 @@ class PayrollService
     }
 
     /**
-     * ฐานค่าจ้างสำหรับเงินสมทบประกันสังคม ม.33 — รวมรายได้ประจำทุกเดือน
-     * (ฐานเงินเดือน + โบนัสประจำ + เบี้ยเลี้ยง + รายได้อื่นที่จ่ายทุกเดือน)
-     * ข้ามรายการที่ตั้ง ss_exclude=1
+     * ฐานค่าจ้างสำหรับเงินสมทบประกันสังคม ม.33 — รวมเฉพาะรายได้ประจำทุกเดือน
+     * ข้ามรายการ ss_exclude=1 และรายได้ไม่ประจำตามชื่อ preset
      *
      * @param array<string,mixed>|null $setup
      */
@@ -209,9 +208,12 @@ class PayrollService
             return 0.0;
         }
         $base = (float)($setup['base_salary'] ?? 0);
-        $base += (float)($setup['bonus_fixed'] ?? 0);
 
-        foreach (['allowance_json', 'income_other_json'] as $jsonField) {
+        $jsonCategories = [
+            'allowance_json' => 'allowance',
+            'income_other_json' => 'income',
+        ];
+        foreach ($jsonCategories as $jsonField => $category) {
             if (empty($setup[$jsonField])) {
                 continue;
             }
@@ -220,7 +222,7 @@ class PayrollService
                 continue;
             }
             foreach ($items as $item) {
-                if (!empty($item['ss_exclude'])) {
+                if (!is_array($item) || $this->itemSsExcluded($item, $category)) {
                     continue;
                 }
                 $base += (float)($item['amount'] ?? 0);
@@ -228,6 +230,59 @@ class PayrollService
         }
 
         return round(max(0, $base), 2);
+    }
+
+    /** @return list<string> */
+    private function ssVariableIncomeLabels(): array
+    {
+        return [
+            'เบี้ยขยัน',
+            'ค่าคอมมิชชั่น',
+            'ค่าล่วงเวลา (OT)',
+            'เงินชดเชยวันทำงาน',
+            'ค่าบริการ',
+            'OT',
+        ];
+    }
+
+    /** @return list<string> */
+    private function ssFixedIncomeLabels(): array
+    {
+        return [
+            'ค่าตำแหน่ง',
+            'ค่าเดินทาง',
+            'ค่าครองชีพ',
+        ];
+    }
+
+    private function defaultSsIncludeForLabel(string $category, string $label): int
+    {
+        $label = trim($label);
+        if ($label === '') {
+            return $category === 'allowance' ? 1 : 0;
+        }
+        if ($category === 'allowance') {
+            return 1;
+        }
+        if ($category === 'income') {
+            if (in_array($label, $this->ssFixedIncomeLabels(), true)) {
+                return 1;
+            }
+            if (in_array($label, $this->ssVariableIncomeLabels(), true)) {
+                return 0;
+            }
+            return 0;
+        }
+        return 0;
+    }
+
+    /** @param array<string,mixed> $item */
+    private function itemSsExcluded(array $item, string $category): bool
+    {
+        if (array_key_exists('ss_exclude', $item)) {
+            return !empty($item['ss_exclude']);
+        }
+        return $this->defaultSsIncludeForLabel($category, (string)($item['label'] ?? '')) === 0;
     }
 
     public function getUserSocialSecurityStartDate(int $userId): ?string

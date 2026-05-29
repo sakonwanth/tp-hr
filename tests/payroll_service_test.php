@@ -84,6 +84,18 @@ $wageBase = $wageMethod->invoke($service, [
 ]);
 assertSameValue(16000.0, $wageBase, 'SS wage base includes base salary and recurring monthly income');
 
+$wageVariable = $wageMethod->invoke($service, [
+    'base_salary' => 12000,
+    'bonus_fixed' => 0,
+    'income_other_json' => json_encode([
+        ['label' => 'ค่าตำแหน่ง', 'amount' => 3000],
+        ['label' => 'ค่าเดินทาง', 'amount' => 1000],
+        ['label' => 'ค่าคอมมิชชั่น', 'amount' => 2942.52],
+        ['label' => 'เงินชดเชยวันทำงาน', 'amount' => 3091.67],
+    ]),
+]);
+assertSameValue(16000.0, $wageVariable, 'SS wage base excludes commission and work compensation');
+
 $ss16000 = $service->calcSocialSecurity(16000, false, '2026-05-01');
 assertSameValue(800.0, $ss16000, 'SS 5% of 16000 monthly wage base');
 
