@@ -2027,7 +2027,11 @@ class PayrollService
         $giOptOut = $setup && !empty($setup['gi_opt_out']);
         $ssWageBase = round($this->socialSecurityWageBase($setup) * max(0, $hireFactor), 2);
         $ssAuto = $this->calcSocialSecurityForUser($userId, $ssWageBase, $ssOptOut, $monthFirst);
-        $ss = $this->resolveSocialSecurityAmount($setup, $ssAuto);
+        $ssStart = $this->getUserSocialSecurityStartDate($userId);
+        $ssApplies = $this->ssAppliesForMonth($ssStart, $monthFirst)
+            && $this->isSsEnabledForMonth($monthFirst)
+            && !$ssOptOut;
+        $ss = $ssApplies ? $this->resolveSocialSecurityAmount($setup, $ssAuto) : 0.0;
         $benefitFactor = $this->benefitProrationFactor($hireFactor);
         $pf = $setup ? round((float)($setup['provident_fund'] ?? 0) * $benefitFactor, 2) : 0;
         $taxBase = $this->calcTaxForUser($userId, $annualEst, $ss * 12, $pf * 12, $monthFirst, $taxOptOut);
