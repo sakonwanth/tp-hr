@@ -1,9 +1,10 @@
 /**
  * TP-HR — Native component system (iOS 26–inspired).
+ * v17: Holidays page — IOS26 toolbar, segmented control, calendar cells, grouped list.
  * v16: HR dashboard secondary `<details>` accordion (below `xl`) — chevron + marker reset.
  * v15: Liquid Glass chrome — floating inset tab strip + gradient scrim · glass sticky CTA slab (`tp-ios-sticky-cta-slab`) · typography caps (page title max 28px · section ~19px · card title ~17px).
  * v14: token ladder + scroll buffer 160 · primary 58 · input 56 · textarea 120.
- * Headers: `/assets/css/native-shell.css?v=16`.
+ * Headers: `/assets/css/native-shell.css?v=17`.
  */
 
 html {
@@ -765,4 +766,562 @@ body.tp-native-app .section-title i {
 
 .hr-dashboard-secondary-accordion[open] .hr-dashboard-secondary-accordion__chevron {
   transform: rotate(180deg);
+}
+
+/* ---------- Holidays page (IOS26 grouped surfaces) ---------- */
+.tp-holidays-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tp-space-20);
+  padding: var(--tp-card-pad);
+  margin-bottom: var(--tp-space-24);
+  border-radius: var(--tp-ios-card-radius);
+  background: var(--tp-surface-card-bg);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: var(--tp-surface-card-shadow);
+  backdrop-filter: blur(var(--tp-surface-card-blur));
+  -webkit-backdrop-filter: blur(var(--tp-surface-card-blur));
+}
+
+.tp-holidays-year-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--tp-space-12);
+}
+
+.tp-holidays-year-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--tp-native-touch-min);
+  min-height: var(--tp-native-touch-min);
+  border-radius: var(--tp-radius-control);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.92);
+  transition: background 0.15s ease;
+}
+
+.tp-holidays-year-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tp-holidays-year-btn:active {
+  transform: scale(0.97);
+}
+
+.tp-holidays-year-display {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+
+.tp-holidays-year-display .tp-holidays-year-number {
+  font-size: var(--tp-font-hero-number);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: #f8fafc;
+}
+
+.tp-holidays-year-display .tp-holidays-year-sub {
+  margin-top: var(--tp-space-8);
+  font-size: var(--tp-font-caption);
+  color: rgba(255, 255, 255, 0.52);
+}
+
+.tp-holidays-year-select {
+  margin-top: var(--tp-space-8);
+  max-width: 11rem;
+  margin-inline: auto;
+  min-height: var(--tp-native-touch-min);
+  text-align: center;
+}
+
+.tp-holidays-manage-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tp-space-8);
+  min-height: var(--tp-native-touch-min);
+  padding: 0 var(--tp-space-16);
+  border-radius: var(--tp-radius-control);
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  background: rgba(124, 58, 237, 0.18);
+  color: rgb(233, 225, 255);
+  font-size: var(--tp-font-body);
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+
+.tp-holidays-manage-btn:hover {
+  background: rgba(124, 58, 237, 0.28);
+}
+
+.tp-holidays-segment {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--tp-space-4);
+  padding: var(--tp-space-4);
+  border-radius: var(--tp-radius-control);
+  background: rgba(0, 0, 0, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tp-holidays-segment__item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tp-space-8);
+  min-height: var(--tp-native-touch-min);
+  padding: 0 var(--tp-space-12);
+  border-radius: calc(var(--tp-radius-control) - 4px);
+  font-size: var(--tp-font-body);
+  font-weight: 600;
+  color: var(--tp-ios-tab-label-muted);
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.tp-holidays-segment__item[aria-selected='true'] {
+  background: var(--tp-ios-tab-fill-selected);
+  color: var(--tp-ios-tab-label-selected);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.tp-holidays-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border-radius: var(--tp-radius-control);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tp-holidays-metric {
+  padding: var(--tp-space-12) var(--tp-space-8);
+  text-align: center;
+  background: var(--tp-surface-well-bg);
+}
+
+.tp-holidays-metric__label {
+  font-size: var(--tp-font-caption);
+  color: rgba(255, 255, 255, 0.52);
+  line-height: 1.3;
+}
+
+.tp-holidays-metric__value {
+  margin-top: var(--tp-space-4);
+  font-size: clamp(1.25rem, 4vw, 1.5rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #f8fafc;
+  line-height: 1.1;
+}
+
+.tp-holidays-metric__value.is-muted {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.tp-holidays-metric__value.is-accent {
+  color: rgb(167, 243, 208);
+}
+
+.tp-holidays-month-scroll {
+  display: flex;
+  gap: var(--tp-space-8);
+  overflow-x: auto;
+  padding-bottom: var(--tp-space-4);
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+}
+
+.tp-holidays-month-chip {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 3.25rem;
+  min-height: var(--tp-native-touch-min);
+  padding: var(--tp-space-8) var(--tp-space-12);
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.45);
+  font-size: var(--tp-font-caption);
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.tp-holidays-month-chip.has-holidays {
+  border-color: rgba(167, 139, 250, 0.35);
+  background: rgba(124, 58, 237, 0.2);
+  color: rgb(237, 233, 255);
+}
+
+.tp-holidays-month-chip.is-current {
+  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.45);
+}
+
+.tp-holidays-month-chip__count {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
+.tp-holidays-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--tp-space-24);
+}
+
+@media (min-width: 1280px) {
+  .tp-holidays-layout {
+    grid-template-columns: minmax(0, 1.65fr) minmax(280px, 1fr);
+    align-items: start;
+  }
+
+  .tp-holidays-aside {
+    position: sticky;
+    top: var(--tp-space-24);
+  }
+}
+
+.tp-holidays-main-card {
+  padding: var(--tp-card-pad);
+  border-radius: var(--tp-ios-card-radius);
+  background: var(--tp-surface-card-bg);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: var(--tp-surface-card-shadow);
+}
+
+.tp-holidays-calendar-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--tp-space-16);
+}
+
+@media (min-width: 640px) {
+  .tp-holidays-calendar-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--tp-space-16);
+  }
+}
+
+.tp-holidays-month {
+  padding: var(--tp-space-16);
+  border-radius: var(--tp-radius-control);
+  background: var(--tp-surface-well-bg);
+  box-shadow: var(--tp-surface-well-inset);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  scroll-margin-top: 6rem;
+}
+
+.tp-holidays-month.is-current {
+  border-color: rgba(167, 139, 250, 0.28);
+}
+
+.tp-holidays-month__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--tp-space-8);
+  margin-bottom: var(--tp-space-12);
+}
+
+.tp-holidays-month__title {
+  font-size: var(--tp-font-card-title);
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.tp-holidays-month__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 var(--tp-space-8);
+  border-radius: 999px;
+  background: rgba(124, 58, 237, 0.22);
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: rgb(233, 225, 255);
+}
+
+.tp-holidays-cal-weekdays,
+.tp-holidays-cal-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--tp-space-4);
+}
+
+.tp-holidays-cal-weekdays {
+  margin-bottom: var(--tp-space-4);
+}
+
+.tp-holidays-cal-weekday {
+  text-align: center;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.38);
+  padding: var(--tp-space-4) 0;
+}
+
+.tp-holidays-cal-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 2.5rem;
+  margin-inline: auto;
+  width: 100%;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.tp-holidays-cal-day.is-past:not(.tp-holidays-cal-day--holiday) {
+  color: rgba(255, 255, 255, 0.28);
+}
+
+.tp-holidays-cal-day--holiday {
+  background: linear-gradient(160deg, rgba(124, 58, 237, 0.62), rgba(167, 139, 250, 0.38));
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.tp-holidays-cal-day--holiday.is-past {
+  opacity: 0.5;
+}
+
+.tp-holidays-cal-day--today:not(.tp-holidays-cal-day--holiday) {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.55);
+  color: #fff;
+}
+
+.tp-holidays-cal-day--today.tp-holidays-cal-day--holiday {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
+}
+
+.tp-holidays-list-section {
+  scroll-margin-top: 6rem;
+}
+
+.tp-holidays-list-section + .tp-holidays-list-section {
+  margin-top: var(--tp-space-24);
+}
+
+.tp-holidays-list-section__head {
+  display: flex;
+  align-items: center;
+  gap: var(--tp-space-8);
+  margin-bottom: var(--tp-space-8);
+  padding-inline: var(--tp-space-4);
+}
+
+.tp-holidays-list-section__title {
+  font-size: var(--tp-font-caption);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.48);
+}
+
+.tp-holidays-list-group {
+  border-radius: var(--tp-ios-card-radius);
+  overflow: hidden;
+  background: var(--tp-surface-well-bg);
+  box-shadow: var(--tp-surface-well-inset);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tp-holidays-list-row {
+  display: flex;
+  align-items: center;
+  gap: var(--tp-space-12);
+  min-height: 3.75rem;
+  padding: var(--tp-space-12) var(--tp-space-16);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tp-holidays-list-row:last-child {
+  border-bottom: none;
+}
+
+.tp-holidays-list-row.is-past {
+  opacity: 0.72;
+}
+
+.tp-holidays-list-row.is-today {
+  background: rgba(124, 58, 237, 0.1);
+}
+
+.tp-holidays-list-date {
+  flex: 0 0 2.75rem;
+  text-align: center;
+}
+
+.tp-holidays-list-date__day {
+  font-size: 1.125rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: #f8fafc;
+}
+
+.tp-holidays-list-date__mon {
+  margin-top: 2px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.tp-holidays-list-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.tp-holidays-list-body__title {
+  font-size: var(--tp-font-body);
+  font-weight: 600;
+  color: #f8fafc;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.tp-holidays-list-body__meta {
+  margin-top: 2px;
+  font-size: var(--tp-font-caption);
+  color: rgba(255, 255, 255, 0.48);
+  line-height: 1.35;
+}
+
+.tp-holidays-list-type {
+  flex-shrink: 0;
+  max-width: 5.5rem;
+  text-align: right;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: rgba(167, 139, 250, 0.95);
+}
+
+.tp-holidays-next-card {
+  padding: var(--tp-card-pad);
+  border-radius: var(--tp-ios-card-radius);
+  background: linear-gradient(145deg, rgba(124, 58, 237, 0.28), rgba(30, 27, 75, 0.55));
+  border: 1px solid rgba(167, 139, 250, 0.28);
+  box-shadow: var(--tp-surface-card-shadow);
+}
+
+.tp-holidays-next-card__label {
+  font-size: var(--tp-font-caption);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(233, 225, 255, 0.72);
+}
+
+.tp-holidays-next-card__body {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--tp-space-16);
+  margin-top: var(--tp-space-12);
+}
+
+.tp-holidays-next-card__countdown {
+  margin-top: var(--tp-space-12);
+  font-size: clamp(1.75rem, 5vw, 2.25rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  line-height: 1;
+}
+
+.tp-holidays-link-group {
+  border-radius: var(--tp-ios-card-radius);
+  overflow: hidden;
+  background: var(--tp-surface-well-bg);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: var(--tp-surface-well-inset);
+}
+
+.tp-holidays-link-row {
+  display: flex;
+  align-items: center;
+  gap: var(--tp-space-12);
+  min-height: 3.75rem;
+  padding: var(--tp-space-12) var(--tp-space-16);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: inherit;
+  transition: background 0.15s ease;
+}
+
+.tp-holidays-link-row:last-child {
+  border-bottom: none;
+}
+
+.tp-holidays-link-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tp-holidays-link-row__icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--tp-radius-small-control);
+  background: rgba(124, 58, 237, 0.16);
+  border: 1px solid rgba(167, 139, 250, 0.22);
+  color: rgb(196, 181, 253);
+}
+
+.tp-holidays-link-row__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.tp-holidays-link-row__title {
+  font-size: var(--tp-font-body);
+  font-weight: 600;
+  color: #f8fafc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tp-holidays-link-row__sub {
+  margin-top: 2px;
+  font-size: var(--tp-font-caption);
+  color: rgba(255, 255, 255, 0.45);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tp-holidays-aside-block + .tp-holidays-aside-block {
+  margin-top: var(--tp-space-16);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tp-holidays-year-btn:active {
+    transform: none;
+  }
 }
