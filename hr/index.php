@@ -48,6 +48,21 @@ $stmtOutside = $pdo->prepare("SELECT COUNT(*) FROM hr_attendance_outside_request
 $stmtOutside->execute();
 $pendingOutside = $stmtOutside->fetchColumn();
 
+$pendingDayoff = 0;
+$pendingHolidayWork = 0;
+if (isCEOOrAbove()) {
+    try {
+        $pendingDayoff = (int) $pdo->query("SELECT COUNT(*) FROM hr_dayoff_requests WHERE status = 'PENDING'")->fetchColumn();
+    } catch (Throwable) {
+        $pendingDayoff = 0;
+    }
+    try {
+        $pendingHolidayWork = (int) $pdo->query("SELECT COUNT(*) FROM hr_holiday_work_exceptions WHERE status = 'PENDING'")->fetchColumn();
+    } catch (Throwable) {
+        $pendingHolidayWork = 0;
+    }
+}
+
 // Recent leaves to approve
 $stmtRecentLeaves = $pdo->prepare("
     SELECT lr.*, lt.name as leave_type_name, lt.color as color_code,
@@ -344,6 +359,28 @@ include dirname(__DIR__) . '/templates/header.php';
                 </div>
                 <span class="text-white font-semibold text-center text-sm sm:text-base leading-snug">พนักงาน</span>
             </a>
+
+            <?php if (isCEOOrAbove()): ?>
+            <a href="dayoff_approvals.php" class="quick-action tp-native-quick-action-card group relative min-h-[96px] sm:min-h-[116px] touch-manipulation border-violet-500/20">
+                <div class="quick-action-icon bg-violet-500/15 border border-violet-400/25 group-hover:bg-violet-500/25">
+                    <i class="fas fa-calendar-day text-violet-400 text-2xl" aria-hidden="true"></i>
+                </div>
+                <span class="text-white font-semibold text-center text-sm sm:text-base leading-snug">อนุมัติเปลี่ยนวันหยุด</span>
+                <?php if ($pendingDayoff > 0): ?>
+                <span class="absolute top-2 right-2 min-w-[1.5rem] h-6 px-1.5 rounded-full bg-amber-500 text-white text-xs font-bold flex items-center justify-center"><?php echo (int) $pendingDayoff; ?></span>
+                <?php endif; ?>
+            </a>
+
+            <a href="holiday_work_approvals.php" class="quick-action tp-native-quick-action-card group relative min-h-[96px] sm:min-h-[116px] touch-manipulation border-orange-500/20">
+                <div class="quick-action-icon bg-orange-500/15 border border-orange-400/25 group-hover:bg-orange-500/25">
+                    <i class="fas fa-briefcase text-orange-400 text-2xl" aria-hidden="true"></i>
+                </div>
+                <span class="text-white font-semibold text-center text-sm sm:text-base leading-snug">อนุมัติทำงานวันหยุด</span>
+                <?php if ($pendingHolidayWork > 0): ?>
+                <span class="absolute top-2 right-2 min-w-[1.5rem] h-6 px-1.5 rounded-full bg-amber-500 text-white text-xs font-bold flex items-center justify-center"><?php echo (int) $pendingHolidayWork; ?></span>
+                <?php endif; ?>
+            </a>
+            <?php endif; ?>
         </div>
     </div>
 </div>

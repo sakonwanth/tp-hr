@@ -37,6 +37,9 @@ try {
         case 'dayoff-requests':
             require __DIR__ . '/dayoff.php';
             break;
+        case 'holiday-work-requests':
+            require __DIR__ . '/holiday_work.php';
+            break;
         case 'overtime':
             require __DIR__ . '/overtime.php';
             break;

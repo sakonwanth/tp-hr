@@ -143,6 +143,13 @@ $scopeGroups = [
         'dayoff.write_all' => 'สร้างคำขอแทนผู้อื่น',
         'dayoff.approve'   => 'อนุมัติ/ปฏิเสธ',
     ],
+    'มาทำงานวันหยุด / หยุดชดเชย' => [
+        'holiday_work.read'      => 'อ่านคำขอ (ผูกพนักงาน หรือ + read_all)',
+        'holiday_work.read_all'  => 'อ่านคำขอทุกคน',
+        'holiday_work.write'     => 'สร้างคำขอ (ผูกพนักงาน หรือ + write_all)',
+        'holiday_work.write_all' => 'สร้างคำขอแทนผู้อื่น',
+        'holiday_work.approve'   => 'อนุมัติ/ปฏิเสธ',
+    ],
     'OT' => [
         'overtime.read'      => 'อ่านคำขอ OT (ผูกพนักงาน หรือ + read_all)',
         'overtime.read_all'  => 'อ่านทุกคน',
