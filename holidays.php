@@ -116,6 +116,27 @@ $yearQuery = static function (int $year, string $viewMode): string {
 };
 
 $canManageHolidays = function_exists('isCEOOrAbove') && isCEOOrAbove();
+$dayNames = THAI_DAY_NAMES;
+
+$holidaysForJs = [];
+foreach ($holidays as $holiday) {
+    $dow = (int) date('w', strtotime($holiday['date']));
+    $holidaysForJs[(int) $holiday['id']] = [
+        'id' => (int) $holiday['id'],
+        'date' => $holiday['date'],
+        'name' => $holiday['name'],
+        'name_en' => $holiday['name_en'] ?? '',
+        'type' => $holiday['type'],
+        'type_label' => $holidayTypeLabel((string) $holiday['type']),
+        'description' => $holiday['description'] ?? '',
+        'date_th' => formatDateThai($holiday['date']),
+        'dow' => 'วัน' . ($dayNames[$dow] ?? ''),
+        'month_short' => thaiMonthShort((int) date('n', strtotime($holiday['date']))),
+        'day' => (int) date('j', strtotime($holiday['date'])),
+        'is_today' => $holiday['date'] === $today,
+        'is_past' => $holiday['date'] < $today,
+    ];
+}
 
 require_once __DIR__ . '/templates/header.php';
 ?>
@@ -200,28 +221,24 @@ require_once __DIR__ . '/templates/header.php';
         </div>
         <?php endif; ?>
 
-        <?php if ($holidayCount > 0 && $view === 'list'): ?>
-        <div class="tp-holidays-month-scroll" aria-label="ข้ามไปเดือน">
-            <?php for ($m = 1; $m <= 12; $m++):
-                if (empty($holidaysByMonth[$m])) {
-                    continue;
-                }
-                $monthCount = count($holidaysByMonth[$m]);
-                $isCurrentMonth = $isCurrentYear && $m === (int) date('n');
-                $chipClass = 'tp-holidays-month-chip has-holidays touch-manipulation';
-                if ($isCurrentMonth) {
-                    $chipClass .= ' is-current';
-                }
-            ?>
-            <a href="#holiday-month-<?php echo $m; ?>" class="<?php echo $chipClass; ?>">
-                <span><?php echo thaiMonthShort($m); ?></span>
-                <span class="tp-holidays-month-chip__count"><?php echo (int) $monthCount; ?></span>
+        <?php if ($holidayCount > 0): ?>
+        <div class="tp-holidays-toolbar-actions">
+            <a href="holidays_print.php?year=<?php echo (int) $holidayYear; ?>"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="tp-holidays-export-btn touch-manipulation">
+                <i class="fas fa-file-pdf" aria-hidden="true"></i>
+                <span>PDF</span>
             </a>
-            <?php endfor; ?>
+            <?php if ($canManageHolidays): ?>
+            <a href="/hr/settings.php?tab=holidays&amp;year=<?php echo (int) $holidayYear; ?>"
+               class="tp-holidays-manage-btn touch-manipulation">
+                <i class="fas fa-cog" aria-hidden="true"></i>
+                <span>จัดการวันหยุด</span>
+            </a>
+            <?php endif; ?>
         </div>
-        <?php endif; ?>
-
-        <?php if ($canManageHolidays): ?>
+        <?php elseif ($canManageHolidays): ?>
         <a href="/hr/settings.php?tab=holidays&amp;year=<?php echo (int) $holidayYear; ?>"
            class="tp-holidays-manage-btn w-full sm:w-auto touch-manipulation">
             <i class="fas fa-cog" aria-hidden="true"></i>
@@ -233,6 +250,10 @@ require_once __DIR__ . '/templates/header.php';
     <div class="tp-holidays-layout min-w-0">
         <div class="tp-holidays-main min-w-0">
             <div class="tp-holidays-main-card min-w-0">
+                <?php if ($holidayCount > 0): ?>
+                <?php include __DIR__ . '/modules/employee/holidays/sticky_month_nav.php'; ?>
+                <?php endif; ?>
+
                 <?php if ($view === 'calendar'): ?>
                 <h2 class="section-title mb-4">
                     <i class="fas fa-calendar-alt text-violet-400" aria-hidden="true"></i>
@@ -271,7 +292,11 @@ require_once __DIR__ . '/templates/header.php';
 
         <aside class="tp-holidays-aside min-w-0">
             <?php if ($nextHoliday && $isCurrentYear): ?>
-            <div class="tp-holidays-aside-block tp-holidays-next-card">
+            <div class="tp-holidays-aside-block tp-holidays-next-card tp-holidays-next-card--clickable touch-manipulation"
+                 role="button"
+                 tabindex="0"
+                 data-holiday-id="<?php echo (int) $nextHoliday['id']; ?>"
+                 aria-label="ดูรายละเอียดวันหยุดถัดไป">
                 <p class="tp-holidays-next-card__label">วันหยุดถัดไป</p>
                 <div class="tp-holidays-next-card__body">
                     <div class="w-14 h-14 shrink-0 rounded-[var(--tp-ios-card-radius)] bg-white/10 ring-1 ring-white/15 flex flex-col items-center justify-center text-white">
@@ -339,5 +364,148 @@ require_once __DIR__ . '/templates/header.php';
         </aside>
     </div>
 </div>
+
+<?php include __DIR__ . '/modules/employee/holidays/detail_modal.php'; ?>
+
+<script>
+window.tpHolidaysById = <?php echo json_encode($holidaysForJs, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP); ?>;
+window.tpHolidaysToday = <?php echo json_encode($today); ?>;
+
+function tpHolidaysOpenDetail(id) {
+    var data = window.tpHolidaysById && window.tpHolidaysById[id];
+    if (!data) return;
+
+    document.getElementById('tp-holiday-detail-type').textContent = data.type_label || '';
+    document.getElementById('tp-holiday-detail-title').textContent = data.name || '';
+    var nameEn = document.getElementById('tp-holiday-detail-name-en');
+    if (data.name_en) {
+        nameEn.textContent = data.name_en;
+        nameEn.classList.remove('hidden');
+    } else {
+        nameEn.classList.add('hidden');
+    }
+    document.getElementById('tp-holiday-detail-mon').textContent = data.month_short || '';
+    document.getElementById('tp-holiday-detail-day').textContent = data.day || '';
+    document.getElementById('tp-holiday-detail-date-th').textContent = data.date_th || '';
+    document.getElementById('tp-holiday-detail-dow').textContent = data.dow || '';
+
+    var countdown = document.getElementById('tp-holiday-detail-countdown');
+    if (!data.is_past && data.date) {
+        var diff = Math.round((new Date(data.date + 'T00:00:00') - new Date(window.tpHolidaysToday + 'T00:00:00')) / 86400000);
+        if (diff === 0) {
+            countdown.textContent = 'วันนี้';
+            countdown.classList.remove('hidden');
+        } else if (diff > 0) {
+            countdown.textContent = 'อีก ' + diff + ' วัน';
+            countdown.classList.remove('hidden');
+        } else {
+            countdown.classList.add('hidden');
+        }
+    } else {
+        countdown.classList.add('hidden');
+    }
+
+    var descWrap = document.getElementById('tp-holiday-detail-desc-wrap');
+    var desc = document.getElementById('tp-holiday-detail-desc');
+    if (data.description) {
+        desc.textContent = data.description;
+        descWrap.classList.remove('hidden');
+    } else {
+        descWrap.classList.add('hidden');
+    }
+
+    if (typeof uiOpenModal === 'function') uiOpenModal('tp-holiday-detail-modal');
+    else document.getElementById('tp-holiday-detail-modal').classList.remove('hidden');
+}
+
+function tpHolidaysCloseDetail() {
+    if (typeof uiCloseModal === 'function') uiCloseModal('tp-holiday-detail-modal');
+    else document.getElementById('tp-holiday-detail-modal').classList.add('hidden');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('[data-holiday-id]').forEach(function(el) {
+        el.addEventListener('click', function() {
+            var id = parseInt(el.getAttribute('data-holiday-id'), 10);
+            if (id) tpHolidaysOpenDetail(id);
+        });
+        if (el.getAttribute('role') === 'button' && !el.hasAttribute('data-holiday-id-listener')) {
+            el.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    var id = parseInt(el.getAttribute('data-holiday-id'), 10);
+                    if (id) tpHolidaysOpenDetail(id);
+                }
+            });
+        }
+    });
+
+    var modal = document.getElementById('tp-holiday-detail-modal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) tpHolidaysCloseDetail();
+        });
+    }
+
+    var sections = document.querySelectorAll('[data-holiday-month]');
+    var labelEl = document.getElementById('tp-holidays-sticky-label');
+    var chips = document.querySelectorAll('#tp-holidays-sticky-chips [data-month]');
+    if (!sections.length || !labelEl) return;
+
+    function setActiveMonth(month, monthLabel) {
+        if (monthLabel) labelEl.textContent = monthLabel;
+        chips.forEach(function(chip) {
+            var isActive = chip.getAttribute('data-month') === String(month);
+            chip.classList.toggle('is-active', isActive);
+            if (isActive) {
+                chip.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+        });
+    }
+
+    chips.forEach(function(chip) {
+        chip.addEventListener('click', function() {
+            var anchorId = chip.getAttribute('data-anchor');
+            var target = anchorId ? document.getElementById(anchorId) : null;
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            setActiveMonth(chip.getAttribute('data-month'), chip.getAttribute('data-label'));
+        });
+    });
+
+    if ('IntersectionObserver' in window) {
+        var visible = new Map();
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                var month = entry.target.getAttribute('data-holiday-month');
+                if (entry.isIntersecting) {
+                    visible.set(month, entry.intersectionRatio);
+                } else {
+                    visible.delete(month);
+                }
+            });
+            if (!visible.size) return;
+            var bestMonth = null;
+            var bestRatio = -1;
+            visible.forEach(function(ratio, month) {
+                if (ratio > bestRatio) {
+                    bestRatio = ratio;
+                    bestMonth = month;
+                }
+            });
+            if (bestMonth) {
+                var section = document.querySelector('[data-holiday-month="' + bestMonth + '"]');
+                var monthLabel = section ? section.getAttribute('data-month-label') : '';
+                setActiveMonth(bestMonth, monthLabel);
+            }
+        }, { root: null, rootMargin: '-30% 0px -55% 0px', threshold: [0, 0.15, 0.35, 0.55] });
+
+        sections.forEach(function(section) { observer.observe(section); });
+    } else if (sections[0]) {
+        setActiveMonth(sections[0].getAttribute('data-holiday-month'), sections[0].getAttribute('data-month-label'));
+    }
+});
+</script>
 
 <?php require_once __DIR__ . '/templates/footer.php'; ?>

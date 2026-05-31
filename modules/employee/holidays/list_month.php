@@ -12,7 +12,11 @@
  */
 $isCurrentMonth = $isCurrentYear && $m === (int) date('n');
 ?>
-<section class="tp-holidays-list-section scroll-mt-24" id="holiday-month-<?php echo $m; ?>" aria-labelledby="holiday-month-<?php echo $m; ?>-title">
+<section class="tp-holidays-list-section scroll-mt-24"
+         id="holiday-month-<?php echo $m; ?>"
+         data-holiday-month="<?php echo $m; ?>"
+         data-month-label="<?php echo htmlspecialchars(thaiMonth($m) . ' ' . $holidayYearTh); ?>"
+         aria-labelledby="holiday-month-<?php echo $m; ?>-title">
     <div class="tp-holidays-list-section__head">
         <h3 id="holiday-month-<?php echo $m; ?>-title" class="tp-holidays-list-section__title">
             <?php echo thaiMonth($m); ?> <?php echo (int) $holidayYearTh; ?>
@@ -33,7 +37,10 @@ $isCurrentMonth = $isCurrentYear && $m === (int) date('n');
                 $rowClass .= ' is-today';
             }
         ?>
-        <article class="<?php echo $rowClass; ?>">
+        <button type="button"
+                class="<?php echo $rowClass; ?>"
+                data-holiday-id="<?php echo (int) $holiday['id']; ?>"
+                aria-label="ดูรายละเอียด <?php echo htmlspecialchars($holiday['name']); ?>">
             <div class="tp-holidays-list-date" aria-hidden="true">
                 <div class="tp-holidays-list-date__day"><?php echo (int) date('j', strtotime($holiday['date'])); ?></div>
                 <div class="tp-holidays-list-date__mon"><?php echo thaiMonthShort($m); ?></div>
@@ -47,7 +54,8 @@ $isCurrentMonth = $isCurrentYear && $m === (int) date('n');
                 </p>
             </div>
             <span class="tp-holidays-list-type"><?php echo htmlspecialchars($holidayTypeLabel((string) $holiday['type'])); ?></span>
-        </article>
+            <i class="fas fa-chevron-right text-white/25 shrink-0 text-xs ml-1" aria-hidden="true"></i>
+        </button>
         <?php endforeach; ?>
     </div>
 </section>

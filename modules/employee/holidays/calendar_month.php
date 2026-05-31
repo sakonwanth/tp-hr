@@ -14,6 +14,8 @@ $dayNamesGrid = ['จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.', 'อา.'];
 ?>
 <section id="cal-month-<?php echo $m; ?>"
          class="tp-holidays-month <?php echo $isCurrentMonth ? 'is-current' : ''; ?>"
+         data-holiday-month="<?php echo $m; ?>"
+         data-month-label="<?php echo htmlspecialchars(thaiMonth($m) . ' ' . ($holidayYear + 543)); ?>"
          aria-labelledby="cal-month-title-<?php echo $m; ?>">
     <header class="tp-holidays-month__head">
         <h3 id="cal-month-title-<?php echo $m; ?>" class="tp-holidays-month__title"><?php echo thaiMonth($m); ?></h3>
@@ -39,11 +41,21 @@ $dayNamesGrid = ['จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.', 'อา.'];
                 ? ($holiday['name'] . ' — ' . formatDateThai($cell['date']))
                 : formatDateThai($cell['date']);
         ?>
+        <?php if ($holiday): ?>
+        <button type="button"
+                class="<?php echo $cellClass; ?>"
+                title="<?php echo htmlspecialchars($title); ?>"
+                data-holiday-id="<?php echo (int) $holiday['id']; ?>"
+                aria-label="<?php echo htmlspecialchars($holiday['name'] . ' ' . formatDateThai($cell['date'])); ?>">
+            <?php echo (int) $cell['day']; ?>
+        </button>
+        <?php else: ?>
         <div class="<?php echo $cellClass; ?>"
              title="<?php echo htmlspecialchars($title); ?>"
-             <?php if ($holiday): ?>role="img" aria-label="<?php echo htmlspecialchars($holiday['name']); ?>"<?php endif; ?>>
+             aria-hidden="true">
             <?php echo (int) $cell['day']; ?>
         </div>
+        <?php endif; ?>
         <?php endif; ?>
         <?php endforeach; ?>
     </div>
