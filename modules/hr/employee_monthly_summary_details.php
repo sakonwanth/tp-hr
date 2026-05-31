@@ -33,11 +33,12 @@ $hasLeaveAtt = !empty($d['leave_attendance']);
 $hasLeaveReq = !empty($summary['leave_requests']);
 $hasHolidays = !empty($d['holidays']);
 $hasSwaps = !empty($summary['dayoff_swaps']);
+$hasHolidayWork = !empty($summary['holiday_work_exceptions']);
 $hasPresent = !empty($d['present']);
 $payrollBreakdown = $summary['payroll_attendance_breakdown'] ?? [];
 $hasPayrollAbsence = !empty($payrollBreakdown) || (float)($summary['payroll_absence_deduction'] ?? 0) > 0;
 
-if (!$hasLate && !$hasAbsent && !$hasWfh && !$hasLeaveAtt && !$hasLeaveReq && !$hasHolidays && !$hasSwaps && !$hasPayrollAbsence) {
+if (!$hasLate && !$hasAbsent && !$hasWfh && !$hasLeaveAtt && !$hasLeaveReq && !$hasHolidays && !$hasSwaps && !$hasHolidayWork && !$hasPayrollAbsence) {
     echo '<p class="text-white/50 text-sm py-4 px-1">ไม่มีรายการพิเศษในเดือนนี้</p>';
     return;
 }
@@ -364,6 +365,57 @@ $renderDayRow = static function (
                     </div>
                     <?php if ($showActions && ($swap['status'] ?? '') === 'PENDING' && $isCeo): ?>
                     <a href="/hr/dayoff_approvals.php" class="<?php echo $actionBtn; ?>">อนุมัติ</a>
+                    <?php endif; ?>
+                </div>
+            </li>
+            <?php endforeach; ?>
+        </ul>
+    </section>
+    <?php endif; ?>
+
+    <?php if ($hasHolidayWork): ?>
+    <section class="<?php echo $cardClass; ?>">
+        <h4 class="<?php echo $headClass; ?> text-orange-300">
+            <i class="fas fa-briefcase mr-2 opacity-80" aria-hidden="true"></i>มาทำงานวันหยุด / หยุดชดเชย <?php echo count($summary['holiday_work_exceptions']); ?> รายการ
+        </h4>
+        <p class="px-5 py-3 text-xs text-white/55 bg-white/[0.03] border-b border-white/10 leading-relaxed">
+            วันหยุดที่อนุมัติให้มาทำงานจะนับเป็น<strong class="text-white/70">วันทำงาน</strong>
+            · วันหยุดชดเชยจะนับเป็น<strong class="text-white/70">วันหยุด</strong>
+        </p>
+        <ul class="<?php echo $listClass; ?>">
+            <?php foreach ($summary['holiday_work_exceptions'] as $hw):
+                $st = (string)($hw['status'] ?? '');
+            ?>
+            <li class="<?php echo $rowPad; ?>">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="min-w-0 flex-1">
+                        <div class="flex flex-wrap items-center gap-2 text-xs mb-1">
+                            <span class="px-2 py-0.5 rounded font-semibold <?php
+                                echo match ($st) {
+                                    'APPROVED' => 'bg-emerald-500/15 text-emerald-300',
+                                    'PENDING' => 'bg-amber-500/15 text-amber-300',
+                                    'REJECTED' => 'bg-red-500/15 text-red-300',
+                                    default => 'bg-slate-500/15 text-slate-300',
+                                };
+                            ?>"><?php echo htmlspecialchars($leaveStatus[$st] ?? $st); ?></span>
+                        </div>
+                        <p class="text-sm text-white/90 leading-snug">
+                            มาทำงาน: <span class="text-orange-200 font-medium"><?php echo formatDateThai($hw['holiday_date'] ?? ''); ?></span>
+                            <?php if (!empty($hw['holiday_name'])): ?>
+                            <span class="text-white/45 text-xs">(<?php echo htmlspecialchars($hw['holiday_name']); ?>)</span>
+                            <?php endif; ?>
+                        </p>
+                        <?php if (!empty($hw['comp_date'])): ?>
+                        <p class="text-sm text-violet-200/90 mt-1">
+                            หยุดชดเชย: <?php echo formatDateThai($hw['comp_date']); ?>
+                        </p>
+                        <?php endif; ?>
+                        <?php if (!$compact && !empty($hw['reason'])): ?>
+                        <p class="text-white/40 text-xs mt-1 truncate"><?php echo htmlspecialchars($hw['reason']); ?></p>
+                        <?php endif; ?>
+                    </div>
+                    <?php if ($showActions && $st === 'PENDING' && $isCeo): ?>
+                    <a href="/hr/holiday_work_approvals.php" class="<?php echo $actionBtn; ?>">อนุมัติ</a>
                     <?php endif; ?>
                 </div>
             </li>

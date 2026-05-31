@@ -141,6 +141,7 @@ include dirname(__DIR__) . '/templates/header.php';
             <li><strong class="text-amber-300">มาสาย / ขาด / ไม่มีลงเวลา</strong> — เลือกหลายวันแล้วกด <strong class="text-amber-200">แก้ทั้งกลุ่ม</strong> หรือ <strong class="text-amber-200">แก้ที่เลือก</strong> · หรือกด <strong class="text-amber-200">รายวัน</strong> เพื่อแก้ทีละวัน</li>
             <li><strong class="text-blue-300">ลา</strong> — พนักงานยื่นใบลา → HR อนุมัติที่ <a href="/hr/leaves.php?status=pending" class="text-violet-300 hover:text-violet-200 underline">อนุมัติการลา</a></li>
             <li><strong class="text-violet-300">สลับวันหยุด</strong> — CEO อนุมัติที่ <a href="/hr/dayoff_approvals.php" class="text-violet-300 hover:text-violet-200 underline">อนุมัติเปลี่ยนวันหยุด</a></li>
+            <li><strong class="text-orange-300">มาทำงานวันหยุด / หยุดชดเชย</strong> — CEO อนุมัติที่ <a href="/hr/holiday_work_approvals.php" class="text-orange-300 hover:text-orange-200 underline">อนุมัติทำงานวันหยุด</a></li>
         </ul>
     </details>
 </div>
@@ -169,6 +170,10 @@ include dirname(__DIR__) . '/templates/header.php';
     <div class="stat-card tp-native-summary-card text-center py-4">
         <p class="text-slate-300 text-xs">สลับวันหยุด</p>
         <p class="text-2xl font-bold text-violet-400 tabular-nums mt-1"><?php echo (int)$orgKpi['dayoff_swaps']; ?></p>
+    </div>
+    <div class="stat-card tp-native-summary-card text-center py-4">
+        <p class="text-slate-300 text-xs">มาทำงานวันหยุด</p>
+        <p class="text-2xl font-bold text-orange-400 tabular-nums mt-1"><?php echo (int)($orgKpi['holiday_work_count'] ?? 0); ?></p>
     </div>
 </div>
 
@@ -231,6 +236,7 @@ include dirname(__DIR__) . '/templates/header.php';
                     <th class="px-3 py-3 text-center text-white/65 text-xs font-medium uppercase">ขาด</th>
                     <th class="px-3 py-3 text-center text-white/65 text-xs font-medium uppercase">หยุด</th>
                     <th class="px-3 py-3 text-center text-white/65 text-xs font-medium uppercase">สลับหยุด</th>
+                    <th class="px-3 py-3 text-center text-white/65 text-xs font-medium uppercase">ทำงานวันหยุด</th>
                     <th class="px-3 py-3 text-center text-white/65 text-xs font-medium uppercase">
                         <span title="รวมชั่วโมงทำงานจริงจากวันที่ลงเวลาเข้า-ออกครบในเดือนนี้ (หักพัก)">ชม.ทำงาน</span>
                     </th>
@@ -252,6 +258,7 @@ include dirname(__DIR__) . '/templates/header.php';
                     <td class="px-3 py-3 text-center <?php echo (int)$row['absent_days'] > 0 ? 'text-red-400 font-semibold' : 'text-white/50'; ?> tabular-nums"><?php echo (int)$row['absent_days']; ?></td>
                     <td class="px-3 py-3 text-center text-white/60 tabular-nums"><?php echo (int)$row['holiday_days'] + (int)$row['scheduled_off_days']; ?></td>
                     <td class="px-3 py-3 text-center text-violet-300 tabular-nums"><?php echo (int)$row['dayoff_swap_count']; ?></td>
+                    <td class="px-3 py-3 text-center text-orange-300 tabular-nums"><?php echo (int)($row['holiday_work_count'] ?? 0); ?></td>
                     <td class="px-3 py-3 text-center tabular-nums">
                         <?php if ((float)$row['work_hours'] > 0): ?>
                         <span class="text-white font-medium"><?php echo number_format((float)$row['work_hours'], 1); ?></span>

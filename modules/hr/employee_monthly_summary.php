@@ -93,6 +93,10 @@ $defaultOffLabel = $dayNames[(int)($summary['default_day_off'] ?? 0)] ?? '-';
             <p class="text-white/55 text-xs">สลับวันหยุด / รออนุมัติ</p>
             <p class="text-white font-semibold tabular-nums mt-1"><?php echo count($summary['dayoff_swaps'] ?? []); ?> / <?php echo (int)($summary['pending_leave_requests'] ?? 0); ?></p>
         </div>
+        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 px-4 py-3 min-w-0">
+            <p class="text-white/55 text-xs">มาทำงานวันหยุด / หยุดชดเชย</p>
+            <p class="text-white font-semibold tabular-nums mt-1"><?php echo count($summary['holiday_work_exceptions'] ?? []); ?> รายการ</p>
+        </div>
     </div>
 
     <?php if (!empty($summary['leave_by_type'])): ?>

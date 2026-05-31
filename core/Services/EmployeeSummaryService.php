@@ -72,6 +72,15 @@ class EmployeeSummaryService
 
         $defaultDayOff = $this->getDefaultDayOff($userId);
         $dayoffSwaps = $this->getApprovedDayoffSwaps($userId, $periodStart, $lastDay);
+        $holidayWorkExceptions = $this->getApprovedHolidayWorkExceptions($userId, $periodStart, $lastDay);
+        $holidayWorkDates = [];
+        $compDates = [];
+        foreach ($holidayWorkExceptions as $ex) {
+            $holidayWorkDates[(string)$ex['holiday_date']] = $ex;
+            if (!empty($ex['comp_date'])) {
+                $compDates[(string)$ex['comp_date']] = $ex;
+            }
+        }
         $holidays = $this->getHolidaysInRange($periodStart, $lastDay);
         $attendanceByDate = $this->getAttendanceByDateRange($userId, $periodStart, $lastDay);
         $approvedLeaveByDate = $this->getApprovedLeaveDatesMap($userId, $periodStart, $lastDay);
@@ -86,6 +95,8 @@ class EmployeeSummaryService
             'absent_days' => 0,
             'holiday_days' => 0,
             'scheduled_off_days' => 0,
+            'comp_days' => 0,
+            'holiday_work_days' => 0,
             'missing_record_days' => 0,
             'total_work_minutes' => 0,
             'total_late_minutes' => 0,
@@ -102,6 +113,8 @@ class EmployeeSummaryService
             'leave_attendance' => [],
             'holidays' => [],
             'scheduled_off' => [],
+            'comp_days' => [],
+            'holiday_work' => [],
         ];
 
         $currentDay = $periodStart;
@@ -112,9 +125,23 @@ class EmployeeSummaryService
             $effectiveDayOff = $this->resolveEffectiveDayOff($currentDay, $defaultDayOff, $dayoffSwaps);
             $isScheduledOff = ($dow === $effectiveDayOff);
             $holiday = $holidays[$currentDay] ?? null;
+            $holidayWorkEx = $holidayWorkDates[$currentDay] ?? null;
             $att = $attendanceByDate[$currentDay] ?? null;
 
-            if ($holiday) {
+            if (isset($compDates[$currentDay])) {
+                $ex = $compDates[$currentDay];
+                $counts['comp_days']++;
+                $details['comp_days'][] = [
+                    'date' => $currentDay,
+                    'day_label' => $dayLabel,
+                    'holiday_date' => $ex['holiday_date'] ?? '',
+                    'holiday_name' => $ex['holiday_name'] ?? '',
+                ];
+                $currentDay = date('Y-m-d', strtotime('+1 day', strtotime($currentDay)));
+                continue;
+            }
+
+            if ($holiday && !$holidayWorkEx) {
                 $counts['holiday_days']++;
                 $details['holidays'][] = [
                     'date' => $currentDay,
@@ -122,13 +149,22 @@ class EmployeeSummaryService
                     'name' => $holiday['name'] ?? '',
                     'type' => $holiday['type'] ?? '',
                 ];
-            } elseif ($isScheduledOff) {
+            } elseif ($isScheduledOff && !$holidayWorkEx) {
                 $counts['scheduled_off_days']++;
                 $details['scheduled_off'][] = [
                     'date' => $currentDay,
                     'day_label' => $dayLabel,
                 ];
             } else {
+                if ($holidayWorkEx) {
+                    $counts['holiday_work_days']++;
+                    $details['holiday_work'][] = [
+                        'date' => $currentDay,
+                        'day_label' => $dayLabel,
+                        'name' => $holidayWorkEx['holiday_name'] ?? ($holiday['name'] ?? 'วันหยุด'),
+                        'comp_date' => $holidayWorkEx['comp_date'] ?? null,
+                    ];
+                }
                 $counts['expected_work_days']++;
                 $leaveOnDay = $approvedLeaveByDate[$currentDay] ?? null;
                 $att = $attendanceByDate[$currentDay] ?? null;
@@ -247,6 +283,7 @@ class EmployeeSummaryService
         $pendingLeaves = $this->getPendingLeaveCount($userId);
         $entitlements = $this->getLeaveEntitlements((int)date('Y', strtotime($monthStart)), $userId);
         $swapsInMonth = $this->getDayoffSwapsInRange($userId, $periodStart, $lastDay);
+        $holidayWorkInMonth = $this->getHolidayWorkExceptionsInRange($userId, $periodStart, $lastDay);
 
         $payrollDeductions = ['absent_days' => 0.0, 'absence_deduction' => 0.0, 'breakdown' => [], 'warnings' => []];
         try {
@@ -272,6 +309,7 @@ class EmployeeSummaryService
             'pending_leave_requests' => $pendingLeaves,
             'leave_entitlements' => $entitlements,
             'dayoff_swaps' => $swapsInMonth,
+            'holiday_work_exceptions' => $holidayWorkInMonth,
             'default_day_off' => $defaultDayOff,
             'work_hours' => round($counts['total_work_minutes'] / 60, 1),
             'incomplete_checkout_days' => (int)$counts['incomplete_checkout_days'],
@@ -325,6 +363,7 @@ class EmployeeSummaryService
                 'scheduled_off_days' => $c['scheduled_off_days'],
                 'approved_leave_days' => $summary['approved_leave_days'],
                 'dayoff_swap_count' => count($summary['dayoff_swaps']),
+                'holiday_work_count' => count($summary['holiday_work_exceptions']),
                 'work_hours' => $summary['work_hours'],
                 'incomplete_checkout_days' => (int)($summary['incomplete_checkout_days'] ?? 0),
                 'days_with_work_hours' => (int)($summary['days_with_work_hours'] ?? 0),
@@ -354,6 +393,7 @@ class EmployeeSummaryService
             'wfh_days' => 0,
             'approved_leave_days' => 0.0,
             'dayoff_swaps' => 0,
+            'holiday_work_count' => 0,
         ];
         foreach ($rows as $row) {
             $totals['expected_work_days'] += (int)$row['expected_work_days'];
@@ -364,6 +404,7 @@ class EmployeeSummaryService
             $totals['wfh_days'] += (int)$row['wfh_days'];
             $totals['approved_leave_days'] += (float)$row['approved_leave_days'];
             $totals['dayoff_swaps'] += (int)$row['dayoff_swap_count'];
+            $totals['holiday_work_count'] += (int)$row['holiday_work_count'];
         }
         $denom = max(1, (int)$totals['expected_work_days']);
         $totals['attendance_rate'] = round(
@@ -395,6 +436,52 @@ class EmployeeSummaryService
         ");
         $stmt->execute([$userId, $to, $from]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    /**
+     * @return list<array<string,mixed>>
+     */
+    private function getApprovedHolidayWorkExceptions(int $userId, string $from, string $to): array
+    {
+        try {
+            $stmt = $this->pdo->prepare("
+                SELECT id, holiday_date, comp_date, holiday_name, reason, status, created_at
+                FROM hr_holiday_work_exceptions
+                WHERE user_id = ? AND status = 'APPROVED'
+                  AND (
+                    (holiday_date BETWEEN ? AND ?)
+                    OR (comp_date IS NOT NULL AND comp_date BETWEEN ? AND ?)
+                  )
+                ORDER BY holiday_date ASC
+            ");
+            $stmt->execute([$userId, $from, $to, $from, $to]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        } catch (Throwable) {
+            return [];
+        }
+    }
+
+    /**
+     * @return list<array<string,mixed>>
+     */
+    private function getHolidayWorkExceptionsInRange(int $userId, string $from, string $to): array
+    {
+        try {
+            $stmt = $this->pdo->prepare("
+                SELECT id, holiday_date, comp_date, holiday_name, reason, status, created_at
+                FROM hr_holiday_work_exceptions
+                WHERE user_id = ?
+                  AND (
+                    (holiday_date BETWEEN ? AND ?)
+                    OR (comp_date IS NOT NULL AND comp_date BETWEEN ? AND ?)
+                  )
+                ORDER BY holiday_date DESC
+            ");
+            $stmt->execute([$userId, $from, $to, $from, $to]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        } catch (Throwable) {
+            return [];
+        }
     }
 
     /**

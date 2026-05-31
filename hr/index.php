@@ -202,7 +202,7 @@ include dirname(__DIR__) . '/templates/header.php';
             <i class="fas fa-users mr-2" aria-hidden="true"></i>ดูรายพนักงาน
         </a>
     </div>
-    <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3">
+    <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-7 gap-3">
         <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4 text-center">
             <p class="text-white/55 text-xs">อัตราเข้างาน</p>
             <p class="text-2xl font-bold text-emerald-400 tabular-nums mt-1"><?php echo number_format((float)$orgMonthlyKpi['attendance_rate'], 1); ?>%</p>
@@ -226,6 +226,10 @@ include dirname(__DIR__) . '/templates/header.php';
         <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4 text-center">
             <p class="text-white/55 text-xs">สลับวันหยุด</p>
             <p class="text-2xl font-bold text-violet-300 tabular-nums mt-1"><?php echo (int)$orgMonthlyKpi['dayoff_swaps']; ?></p>
+        </div>
+        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-4 text-center">
+            <p class="text-white/55 text-xs">มาทำงานวันหยุด</p>
+            <p class="text-2xl font-bold text-orange-300 tabular-nums mt-1"><?php echo (int)($orgMonthlyKpi['holiday_work_count'] ?? 0); ?></p>
         </div>
     </div>
 </div>
