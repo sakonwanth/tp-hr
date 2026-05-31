@@ -22,6 +22,8 @@
             $chipClass = 'tp-holidays-month-chip touch-manipulation';
             if ($hasHoliday) {
                 $chipClass .= ' has-holidays';
+            } else {
+                $chipClass .= ' is-empty-month';
             }
             if ($isCurrentMonth) {
                 $chipClass .= ' is-current';

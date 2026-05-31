@@ -1,11 +1,12 @@
 /**
  * TP-HR — Native component system (iOS 26–inspired).
+ * v19: Holidays mobile QA — next-card balance, layout order, hidden month scrollbars, touch targets.
  * v18: Holidays fine-tune — sticky month nav, detail modal triggers, export PDF, interactive rows/cells.
  * v17: Holidays page — IOS26 toolbar, segmented control, calendar cells, grouped list.
  * v16: HR dashboard secondary `<details>` accordion (below `xl`) — chevron + marker reset.
  * v15: Liquid Glass chrome — floating inset tab strip + gradient scrim · glass sticky CTA slab (`tp-ios-sticky-cta-slab`) · typography caps (page title max 28px · section ~19px · card title ~17px).
  * v14: token ladder + scroll buffer 160 · primary 58 · input 56 · textarea 120.
- * Headers: `/assets/css/native-shell.css?v=18`.
+ * Headers: `/assets/css/native-shell.css?v=19`.
  */
 
 html {
@@ -939,6 +940,12 @@ body.tp-native-app .section-title i {
   padding-bottom: var(--tp-space-4);
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tp-holidays-month-scroll::-webkit-scrollbar {
+  display: none;
 }
 
 .tp-holidays-month-chip {
@@ -968,13 +975,24 @@ body.tp-native-app .section-title i {
   color: rgb(237, 233, 255);
 }
 
-.tp-holidays-month-chip.is-current {
-  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.45);
+.tp-holidays-month-chip.is-empty-month:not(.has-holidays) {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.tp-holidays-month-chip.is-current:not(.is-active) {
+  box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.4);
 }
 
 .tp-holidays-month-chip.is-active {
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.55);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
   background: rgba(124, 58, 237, 0.38);
+  color: #fff;
+}
+
+.tp-holidays-month-chip.is-active.is-current {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
 }
 
 button.tp-holidays-month-chip {
@@ -989,6 +1007,23 @@ button.tp-holidays-month-chip {
   flex-wrap: wrap;
   align-items: center;
   gap: var(--tp-space-12);
+}
+
+@media (max-width: 639px) {
+  .tp-holidays-toolbar-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tp-holidays-export-btn,
+  .tp-holidays-manage-btn {
+    width: 100%;
+  }
+
+  .tp-holidays-month-chip {
+    min-width: 3.5rem;
+    padding-inline: var(--tp-space-14);
+  }
 }
 
 .tp-holidays-export-btn {
@@ -1059,10 +1094,22 @@ button.tp-holidays-month-chip {
 @media (min-width: 1280px) {
   .tp-holidays-layout {
     grid-template-columns: minmax(0, 1.65fr) minmax(280px, 1fr);
+    grid-template-areas:
+      'main next'
+      'main aside';
     align-items: start;
   }
 
+  .tp-holidays-main {
+    grid-area: main;
+  }
+
+  .tp-holidays-next-slot {
+    grid-area: next;
+  }
+
   .tp-holidays-aside {
+    grid-area: aside;
     position: sticky;
     top: var(--tp-space-24);
   }
@@ -1082,7 +1129,7 @@ button.tp-holidays-month-chip {
   gap: var(--tp-space-16);
 }
 
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .tp-holidays-calendar-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--tp-space-16);
@@ -1156,14 +1203,23 @@ button.tp-holidays-month-chip {
   display: flex;
   align-items: center;
   justify-content: center;
-  max-width: 2.5rem;
+  max-width: 2.75rem;
   margin-inline: auto;
   width: 100%;
+  min-height: 2.75rem;
   font-size: 0.8125rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   border-radius: 999px;
   color: rgba(255, 255, 255, 0.68);
+}
+
+@media (max-width: 639px) {
+  .tp-holidays-cal-day {
+    max-width: none;
+    min-height: var(--tp-native-touch-min);
+    font-size: 0.875rem;
+  }
 }
 
 button.tp-holidays-cal-day {
@@ -1181,7 +1237,8 @@ button.tp-holidays-cal-day.tp-holidays-cal-day--holiday:hover {
 
 button.tp-holidays-cal-day:focus-visible,
 button.tp-holidays-list-row:focus-visible,
-button.tp-holidays-month-chip:focus-visible {
+button.tp-holidays-month-chip:focus-visible,
+button.tp-holidays-next-card:focus-visible {
   outline: 2px solid rgba(167, 139, 250, 0.85);
   outline-offset: 2px;
 }
@@ -1331,11 +1388,18 @@ button.tp-holidays-list-row:hover {
 }
 
 .tp-holidays-next-card {
-  padding: var(--tp-card-pad);
+  display: block;
+  width: 100%;
+  padding: var(--tp-space-16);
   border-radius: var(--tp-ios-card-radius);
   background: linear-gradient(145deg, rgba(124, 58, 237, 0.28), rgba(30, 27, 75, 0.55));
   border: 1px solid rgba(167, 139, 250, 0.28);
   box-shadow: var(--tp-surface-card-shadow);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .tp-holidays-next-card--clickable {
@@ -1348,12 +1412,24 @@ button.tp-holidays-list-row:hover {
   border-color: rgba(167, 139, 250, 0.42);
 }
 
+.tp-holidays-next-card--clickable:active {
+  transform: scale(0.99);
+}
+
 .tp-holidays-next-card--clickable:focus-visible {
   outline: 2px solid rgba(167, 139, 250, 0.85);
   outline-offset: 2px;
 }
 
+.tp-holidays-next-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--tp-space-12);
+}
+
 .tp-holidays-next-card__label {
+  margin: 0;
   font-size: var(--tp-font-caption);
   font-weight: 600;
   letter-spacing: 0.06em;
@@ -1361,20 +1437,77 @@ button.tp-holidays-list-row:hover {
   color: rgba(233, 225, 255, 0.72);
 }
 
+.tp-holidays-next-card__badge {
+  flex-shrink: 0;
+  padding: var(--tp-space-4) var(--tp-space-12);
+  border-radius: 999px;
+  font-size: var(--tp-font-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #fff;
+  white-space: nowrap;
+}
+
 .tp-holidays-next-card__body {
   display: flex;
-  align-items: flex-start;
-  gap: var(--tp-space-16);
+  align-items: center;
+  gap: var(--tp-space-12);
   margin-top: var(--tp-space-12);
 }
 
-.tp-holidays-next-card__countdown {
-  margin-top: var(--tp-space-12);
-  font-size: clamp(1.75rem, 5vw, 2.25rem);
+.tp-holidays-next-card__date {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: var(--tp-radius-control);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.tp-holidays-next-card__date-mon {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.2;
+}
+
+.tp-holidays-next-card__date-day {
+  font-size: 1.25rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: #fff;
   line-height: 1;
+  color: #fff;
+}
+
+.tp-holidays-next-card__info {
+  min-width: 0;
+  flex: 1;
+}
+
+.tp-holidays-next-card__name {
+  margin: 0;
+  font-size: var(--tp-font-body);
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.35;
+}
+
+.tp-holidays-next-card__meta {
+  margin: var(--tp-space-4) 0 0;
+  font-size: var(--tp-font-caption);
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.tp-holidays-next-card__chevron {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.45);
 }
 
 .tp-holidays-link-group {

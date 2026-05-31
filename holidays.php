@@ -248,6 +248,37 @@ require_once __DIR__ . '/templates/header.php';
     </div>
 
     <div class="tp-holidays-layout min-w-0">
+        <?php if ($nextHoliday && $isCurrentYear): ?>
+        <div class="tp-holidays-next-slot min-w-0">
+            <button type="button"
+                    class="tp-holidays-next-card tp-holidays-next-card--clickable touch-manipulation w-full text-left"
+                    data-holiday-id="<?php echo (int) $nextHoliday['id']; ?>"
+                    aria-label="ดูรายละเอียดวันหยุดถัดไป <?php echo htmlspecialchars($nextHoliday['name']); ?>">
+                <div class="tp-holidays-next-card__top">
+                    <p class="tp-holidays-next-card__label">วันหยุดถัดไป</p>
+                    <span class="tp-holidays-next-card__badge">
+                        <?php if ($daysUntilNext === 0): ?>
+                        วันนี้
+                        <?php else: ?>
+                        อีก <?php echo (int) $daysUntilNext; ?> วัน
+                        <?php endif; ?>
+                    </span>
+                </div>
+                <div class="tp-holidays-next-card__body">
+                    <div class="tp-holidays-next-card__date" aria-hidden="true">
+                        <span class="tp-holidays-next-card__date-mon"><?php echo thaiMonthShort((int) date('n', strtotime($nextHoliday['date']))); ?></span>
+                        <span class="tp-holidays-next-card__date-day"><?php echo (int) date('j', strtotime($nextHoliday['date'])); ?></span>
+                    </div>
+                    <div class="tp-holidays-next-card__info min-w-0 flex-1">
+                        <p class="tp-holidays-next-card__name"><?php echo htmlspecialchars($nextHoliday['name']); ?></p>
+                        <p class="tp-holidays-next-card__meta"><?php echo formatDateThai($nextHoliday['date']); ?></p>
+                    </div>
+                    <i class="fas fa-chevron-right tp-holidays-next-card__chevron" aria-hidden="true"></i>
+                </div>
+            </button>
+        </div>
+        <?php endif; ?>
+
         <div class="tp-holidays-main min-w-0">
             <div class="tp-holidays-main-card min-w-0">
                 <?php if ($holidayCount > 0): ?>
@@ -291,33 +322,6 @@ require_once __DIR__ . '/templates/header.php';
         </div>
 
         <aside class="tp-holidays-aside min-w-0">
-            <?php if ($nextHoliday && $isCurrentYear): ?>
-            <div class="tp-holidays-aside-block tp-holidays-next-card tp-holidays-next-card--clickable touch-manipulation"
-                 role="button"
-                 tabindex="0"
-                 data-holiday-id="<?php echo (int) $nextHoliday['id']; ?>"
-                 aria-label="ดูรายละเอียดวันหยุดถัดไป">
-                <p class="tp-holidays-next-card__label">วันหยุดถัดไป</p>
-                <div class="tp-holidays-next-card__body">
-                    <div class="w-14 h-14 shrink-0 rounded-[var(--tp-ios-card-radius)] bg-white/10 ring-1 ring-white/15 flex flex-col items-center justify-center text-white">
-                        <span class="text-[11px] font-medium opacity-80"><?php echo thaiMonthShort((int) date('n', strtotime($nextHoliday['date']))); ?></span>
-                        <span class="text-xl font-bold tabular-nums leading-none"><?php echo (int) date('j', strtotime($nextHoliday['date'])); ?></span>
-                    </div>
-                    <div class="min-w-0 flex-1">
-                        <p class="text-white font-semibold text-base leading-snug break-words"><?php echo htmlspecialchars($nextHoliday['name']); ?></p>
-                        <p class="text-white/55 text-sm mt-1"><?php echo formatDateThai($nextHoliday['date']); ?></p>
-                    </div>
-                </div>
-                <p class="tp-holidays-next-card__countdown">
-                    <?php if ($daysUntilNext === 0): ?>
-                    วันนี้
-                    <?php else: ?>
-                    <?php echo (int) $daysUntilNext; ?><span class="text-base font-semibold text-white/65 ml-1">วัน</span>
-                    <?php endif; ?>
-                </p>
-            </div>
-            <?php endif; ?>
-
             <div class="tp-holidays-aside-block">
                 <h2 class="section-title mb-3 px-1">
                     <i class="fas fa-link text-violet-400" aria-hidden="true"></i>
