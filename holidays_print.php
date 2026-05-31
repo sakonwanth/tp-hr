@@ -1,6 +1,6 @@
 <?php
 /**
- * Annual holidays — print / save as PDF (single A4, month-card calendar layout).
+ * Annual holidays — print / save as PDF (single A4, balanced 2-column month cards).
  */
 
 require_once __DIR__ . '/bootstrap.php';
@@ -32,6 +32,22 @@ $monthsWithHolidays = [];
 for ($m = 1; $m <= 12; $m++) {
     if (!empty($holidaysByMonth[$m])) {
         $monthsWithHolidays[] = $m;
+    }
+}
+
+/** Balance months into two columns by holiday count (not CSS grid row order). */
+$leftMonths = [];
+$rightMonths = [];
+$leftWeight = 0;
+$rightWeight = 0;
+foreach ($monthsWithHolidays as $m) {
+    $weight = count($holidaysByMonth[$m]) + 1;
+    if ($leftWeight <= $rightWeight) {
+        $leftMonths[] = $m;
+        $leftWeight += $weight;
+    } else {
+        $rightMonths[] = $m;
+        $rightWeight += $weight;
     }
 }
 
@@ -74,24 +90,25 @@ try {
 
 $holidayTypeLabel = static function (string $type): string {
     return match ($type) {
-        'PUBLIC' => 'วันหยุดราชการ',
-        'COMPANY' => 'วันหยุดบริษัท',
-        'SPECIAL' => 'วันหยุดพิเศษ',
-        'SUBSTITUTE' => 'วันหยุดชดเชย',
-        default => 'วันหยุด',
+        'PUBLIC' => 'ราชการ',
+        'COMPANY' => 'บริษัท',
+        'SPECIAL' => 'พิเศษ',
+        'SUBSTITUTE' => 'ชดเชย',
+        default => 'อื่นๆ',
     };
 };
 
-$holidayTypeDotClass = static function (string $type): string {
+$holidayTypeClass = static function (string $type): string {
     return match ($type) {
-        'PUBLIC' => 'dot-public',
-        'COMPANY' => 'dot-company',
-        'SPECIAL' => 'dot-special',
-        'SUBSTITUTE' => 'dot-substitute',
-        default => 'dot-default',
+        'PUBLIC' => 'type-public',
+        'COMPANY' => 'type-company',
+        'SPECIAL' => 'type-special',
+        'SUBSTITUTE' => 'type-substitute',
+        default => 'type-default',
     };
 };
 
+$monthCardThemes = ['theme-sky', 'theme-violet', 'theme-amber'];
 $printedAt = formatDateThai(date('Y-m-d'));
 $docRef = sprintf('HOL-%d/%d', $holidayYear, $holidayYearTh);
 $logoSrc = tp_hr_brand_logo_url('LOGO TP-ASSET - 6.png');
@@ -104,8 +121,40 @@ foreach ($holidays as $holiday) {
     $typeCounts[$label] = ($typeCounts[$label] ?? 0) + 1;
 }
 
-$yearRangeLabel = '1 ม.ค. ' . $holidayYearTh . ' – 31 ธ.ค. ' . $holidayYearTh;
-$monthCardIndex = 0;
+$renderMonthCard = static function (int $m, int $themeIndex) use ($holidaysByMonth, $holidayYearTh, $holidayTypeLabel, $holidayTypeClass, $monthCardThemes): void {
+    $theme = $monthCardThemes[$themeIndex % 3];
+    $monthCount = count($holidaysByMonth[$m]);
+    ?>
+    <article class="month-card <?php echo $theme; ?>">
+        <header class="month-card__head">
+            <div class="month-card__title">
+                <span class="month-card__name"><?php echo thaiMonth($m); ?></span>
+                <span class="month-card__year"><?php echo (int) $holidayYearTh; ?></span>
+            </div>
+            <span class="month-card__count"><?php echo (int) $monthCount; ?> วัน</span>
+        </header>
+        <ul class="month-card__list">
+            <?php foreach ($holidaysByMonth[$m] as $holiday):
+                $dayNum = (int) date('j', strtotime($holiday['date']));
+                $nameEn = trim((string) ($holiday['name_en'] ?? ''));
+                $typeClass = $holidayTypeClass((string) $holiday['type']);
+                $typeLabel = $holidayTypeLabel((string) $holiday['type']);
+            ?>
+            <li class="holiday-item">
+                <span class="date-dot" aria-hidden="true"><?php echo $dayNum; ?></span>
+                <div class="holiday-item__body">
+                    <p class="name-th"><?php echo htmlspecialchars($holiday['name']); ?></p>
+                    <?php if ($nameEn !== ''): ?>
+                    <p class="name-en"><?php echo htmlspecialchars($nameEn); ?></p>
+                    <?php endif; ?>
+                </div>
+                <span class="type-tag <?php echo htmlspecialchars($typeClass); ?>"><?php echo htmlspecialchars($typeLabel); ?></span>
+            </li>
+            <?php endforeach; ?>
+        </ul>
+    </article>
+    <?php
+};
 ?>
 <!DOCTYPE html>
 <html lang="th">
@@ -121,25 +170,22 @@ $monthCardIndex = 0;
         :root {
             --a4-w: 210mm;
             --a4-h: 297mm;
-            --margin-y: 10mm;
-            --margin-x: 11mm;
+            --margin-y: 9mm;
+            --margin-x: 10mm;
             --sheet-h: calc(var(--a4-h) - (var(--margin-y) * 2));
             --ink: #1a365d;
-            --violet: #6d28d9;
             --ink-soft: #475569;
             --ink-muted: #94a3b8;
             --gold: #c8a951;
             --line: #e8edf2;
-            --wash: #f7f9fc;
-            --card-bg: #fafbfc;
         }
 
         html { -webkit-text-size-adjust: 100%; }
 
         body {
             font-family: 'Sarabun', sans-serif;
-            font-size: 11px;
-            line-height: 1.4;
+            font-size: 12px;
+            line-height: 1.45;
             color: #1e293b;
             background: #fff;
         }
@@ -164,7 +210,7 @@ $monthCardIndex = 0;
                 background: rgba(15, 23, 42, 0.82);
                 font-family: system-ui, sans-serif;
             }
-            .toolbar-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+            .toolbar-actions { display: flex; gap: 8px; }
             .toolbar a, .toolbar button {
                 min-height: 48px;
                 padding: 0 18px;
@@ -179,16 +225,9 @@ $monthCardIndex = 0;
                 text-decoration: none;
                 cursor: pointer;
             }
-            .toolbar .btn-print {
-                background: var(--ink);
-                color: #fff;
-                font-weight: 600;
-            }
+            .toolbar .btn-print { background: var(--ink); color: #fff; font-weight: 600; }
             .toolbar-note { font-size: 11px; color: rgba(226, 232, 240, 0.55); }
-            .a4-sheet {
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
-                border-radius: 2px;
-            }
+            .a4-sheet { box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35); border-radius: 3px; }
         }
 
         .a4-sheet {
@@ -198,7 +237,7 @@ $monthCardIndex = 0;
             max-width: var(--a4-w);
             margin: 0 auto;
             overflow: hidden;
-            background: #fff;
+            background: linear-gradient(180deg, #fff 0%, #fcfdfe 100%);
         }
 
         .a4-content {
@@ -220,245 +259,206 @@ $monthCardIndex = 0;
             justify-content: center;
             pointer-events: none;
         }
-        .watermark img { width: 28%; opacity: 0.025; filter: grayscale(100%); }
+        .watermark img { width: 26%; opacity: 0.022; filter: grayscale(100%); }
 
-        /* ---- Header ---- */
         .doc-header {
-            position: relative;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            padding-bottom: 8px;
-            margin-bottom: 10px;
-            border-bottom: 2px solid var(--ink);
+            padding-bottom: 9px;
+            margin-bottom: 12px;
+            border-bottom: 1.5px solid var(--ink);
         }
-        .doc-header::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            right: 0;
-            bottom: -4px;
-            height: 1px;
-            background: var(--gold);
-        }
-        .doc-header img { height: 44px; width: auto; display: block; }
+        .doc-header img { height: 48px; width: auto; display: block; }
         .doc-header-meta { text-align: right; max-width: 58%; }
-        .doc-header-meta .co-th { font-size: 11.5px; font-weight: 700; color: var(--ink); line-height: 1.25; }
-        .doc-header-meta .co-en { font-size: 8.5px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-soft); margin-top: 1px; }
-        .doc-header-meta .co-tax { font-size: 8.5px; color: var(--ink-muted); margin-top: 2px; }
+        .doc-header-meta .co-th { font-size: 12px; font-weight: 700; color: var(--ink); line-height: 1.3; }
+        .doc-header-meta .co-en { font-size: 9px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-soft); margin-top: 2px; }
+        .doc-header-meta .co-tax { font-size: 9px; color: var(--ink-muted); margin-top: 3px; }
 
-        /* ---- Hero title ---- */
-        .doc-hero { text-align: center; margin-bottom: 10px; }
+        .doc-hero {
+            text-align: center;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--line);
+        }
         .doc-hero h1 {
-            font-size: 17px;
+            font-size: 19px;
             font-weight: 700;
             color: var(--ink);
             line-height: 1.2;
-        }
-        .doc-hero .tagline {
-            display: inline-block;
-            margin-top: 5px;
-            padding: 3px 12px;
-            border-radius: 999px;
-            font-size: 9px;
-            font-weight: 600;
-            color: var(--ink);
-            background: linear-gradient(90deg, #eef2ff, #faf5ff);
-            border: 1px solid #e2e8f0;
         }
         .doc-hero .sub {
             margin-top: 4px;
-            font-size: 9.5px;
+            font-size: 10px;
             color: var(--ink-soft);
-            letter-spacing: 0.03em;
         }
-        .doc-hero .range {
-            margin-top: 3px;
+        .doc-hero .meta {
+            margin-top: 6px;
             font-size: 9px;
             color: var(--ink-muted);
         }
-        .doc-hero .meta {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 4px 14px;
-            margin-top: 6px;
-            font-size: 8.5px;
-            color: var(--ink-muted);
-        }
-        .doc-hero .meta b { color: var(--ink-soft); font-weight: 600; }
 
-        /* ---- Stats (full width) ---- */
         .stat-row {
             display: flex;
-            gap: 6px;
-            margin-bottom: 10px;
+            gap: 8px;
+            margin-bottom: 12px;
         }
         .stat-chip {
-            flex: 1 1 0;
-            min-width: 0;
-            padding: 6px 8px;
+            flex: 1;
+            padding: 8px 10px;
             text-align: center;
-            border-radius: 8px;
-            background: var(--wash);
+            border-radius: 12px;
+            background: #fff;
             border: 1px solid var(--line);
+            box-shadow: 0 1px 4px rgba(26, 54, 93, 0.05);
         }
         .stat-chip .num {
             display: block;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
             color: var(--ink);
             line-height: 1;
-            font-variant-numeric: tabular-nums;
         }
         .stat-chip .lbl {
             display: block;
-            margin-top: 2px;
-            font-size: 7.5px;
+            margin-top: 3px;
+            font-size: 8.5px;
             font-weight: 500;
             color: var(--ink-soft);
-            line-height: 1.2;
         }
 
-        /* ---- Month card grid (2 columns) ---- */
-        .calendar-grid {
+        /* Balanced 2 columns (PHP split, not grid rows) */
+        .calendar-columns {
             flex: 1 1 auto;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 7px 8px;
-            align-content: start;
-            width: 100%;
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+            min-height: 0;
+        }
+        .calendar-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .month-card {
-            break-inside: avoid;
-            page-break-inside: avoid;
-            border-radius: 9px;
-            overflow: hidden;
-            background: var(--card-bg);
+            flex: 0 0 auto;
+            border-radius: 12px;
+            background: #fff;
             border: 1px solid var(--line);
-            box-shadow: 0 1px 3px rgba(26, 54, 93, 0.04);
+            box-shadow: 0 2px 8px rgba(26, 54, 93, 0.06);
+            overflow: hidden;
         }
 
         .month-card__head {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 6px;
-            padding: 5px 9px;
-            font-size: 9.5px;
-            font-weight: 700;
-            color: #fff;
-            letter-spacing: 0.02em;
+            gap: 8px;
+            padding: 7px 11px;
         }
-        .month-card.is-navy .month-card__head { background: linear-gradient(135deg, #1a365d, #234876); }
-        .month-card.is-violet .month-card__head { background: linear-gradient(135deg, #6d28d9, #7c3aed); }
+        .month-card__title { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+        .month-card__name { font-size: 11px; font-weight: 700; line-height: 1.2; }
+        .month-card__year { font-size: 9px; font-weight: 600; opacity: 0.75; }
         .month-card__count {
-            font-size: 8px;
+            font-size: 8.5px;
             font-weight: 600;
-            opacity: 0.88;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.65);
             white-space: nowrap;
         }
 
+        .theme-sky .month-card__head { background: #dbeafe; color: #1e40af; }
+        .theme-sky .date-dot { background: #3b82f6; color: #fff; }
+        .theme-violet .month-card__head { background: #ede9fe; color: #6d28d9; }
+        .theme-violet .date-dot { background: #8b5cf6; color: #fff; }
+        .theme-amber .month-card__head { background: #fef3c7; color: #b45309; }
+        .theme-amber .date-dot { background: #f59e0b; color: #fff; }
+
         .month-card__list {
             list-style: none;
-            padding: 4px 7px 5px;
+            padding: 6px 10px 8px;
         }
 
         .holiday-item {
             display: flex;
-            align-items: center;
-            gap: 7px;
-            padding: 4px 0;
-            min-height: 0;
+            align-items: flex-start;
+            gap: 9px;
+            padding: 6px 0;
         }
         .holiday-item + .holiday-item {
-            border-top: 1px solid #eef2f6;
+            border-top: 1px dashed #eef2f6;
         }
 
         .date-dot {
             flex-shrink: 0;
-            width: 21px;
-            height: 21px;
+            width: 24px;
+            height: 24px;
+            margin-top: 1px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 9.5px;
+            font-size: 10.5px;
             font-weight: 700;
-            color: #fff;
             font-variant-numeric: tabular-nums;
             line-height: 1;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
         }
-        .month-card.is-navy .date-dot { background: var(--ink); }
-        .month-card.is-violet .date-dot { background: var(--violet); }
 
-        .holiday-item__body {
-            flex: 1;
-            min-width: 0;
-            line-height: 1.3;
-        }
+        .holiday-item__body { flex: 1; min-width: 0; }
         .holiday-item__body .name-th {
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 600;
             color: #0f172a;
+            line-height: 1.35;
         }
         .holiday-item__body .name-en {
-            font-size: 8px;
-            font-weight: 400;
+            margin-top: 1px;
+            font-size: 9px;
             color: var(--ink-muted);
+            line-height: 1.3;
         }
 
-        .type-dot {
+        .type-tag {
             flex-shrink: 0;
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
+            margin-top: 2px;
+            font-size: 7.5px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 999px;
+            line-height: 1.2;
         }
-        .type-dot.dot-public { background: #6366f1; }
-        .type-dot.dot-company { background: #22c55e; }
-        .type-dot.dot-special { background: #a855f7; }
-        .type-dot.dot-substitute { background: #f59e0b; }
-        .type-dot.dot-default { background: #94a3b8; }
+        .type-tag.type-public { background: #eef2ff; color: #4338ca; }
+        .type-tag.type-company { background: #ecfdf5; color: #047857; }
+        .type-tag.type-special { background: #faf5ff; color: #7e22ce; }
+        .type-tag.type-substitute { background: #fffbeb; color: #b45309; }
+        .type-tag.type-default { background: #f1f5f9; color: #64748b; }
 
-        /* ---- Footer + legend ---- */
         .doc-footer {
             margin-top: auto;
-            padding-top: 8px;
+            padding-top: 10px;
             border-top: 1px solid var(--line);
-            font-size: 7.5px;
+            font-size: 8px;
             color: var(--ink-muted);
-            line-height: 1.45;
+            line-height: 1.5;
         }
-        .legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px 10px;
-            margin-bottom: 4px;
-        }
-        .legend-item {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .legend-item .type-dot { width: 6px; height: 6px; }
 
         .empty-state {
             flex: 1;
-            grid-column: 1 / -1;
             display: flex;
             align-items: center;
             justify-content: center;
-            text-align: center;
             color: var(--ink-soft);
-            font-size: 12px;
-            padding: 24px;
+            font-size: 13px;
+            padding: 32px;
         }
 
         @media print {
             @page { size: 210mm 297mm; margin: 0; }
-
             html, body {
                 width: var(--a4-w);
                 height: var(--a4-h);
@@ -469,7 +469,6 @@ $monthCardIndex = 0;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
-
             .screen-wrap, .a4-sheet {
                 width: var(--a4-w);
                 height: var(--a4-h);
@@ -477,15 +476,9 @@ $monthCardIndex = 0;
                 overflow: hidden;
                 box-shadow: none;
                 page-break-after: avoid;
-                break-inside: avoid;
             }
-
             .toolbar { display: none !important; }
-
-            .month-card__head,
-            .date-dot,
-            .stat-chip,
-            .doc-hero .tagline {
+            .month-card__head, .date-dot, .type-tag, .stat-chip {
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
@@ -522,13 +515,8 @@ $monthCardIndex = 0;
 
             <div class="doc-hero">
                 <h1>วันหยุดประจำปี พ.ศ. <?php echo (int) $holidayYearTh; ?></h1>
-                <p class="tagline">วางแผนล่วงหน้าได้ตลอดทั้งปี</p>
-                <p class="sub">Annual Holiday Schedule · <?php echo (int) $holidayYear; ?></p>
-                <p class="range"><?php echo htmlspecialchars($yearRangeLabel); ?></p>
-                <p class="meta">
-                    <span><?php echo htmlspecialchars($docRef); ?></span>
-                    <span>พิมพ์ <?php echo htmlspecialchars($printedAt); ?></span>
-                </p>
+                <p class="sub">Annual Holiday Schedule · <?php echo (int) $holidayYear; ?> · 1 ม.ค. – 31 ธ.ค. <?php echo (int) $holidayYearTh; ?></p>
+                <p class="meta"><?php echo htmlspecialchars($docRef); ?> · พิมพ์ <?php echo htmlspecialchars($printedAt); ?></p>
             </div>
 
             <?php if ($holidayCount > 0): ?>
@@ -545,53 +533,24 @@ $monthCardIndex = 0;
                 <?php endforeach; ?>
             </div>
 
-            <div class="calendar-grid">
-                <?php foreach ($monthsWithHolidays as $m):
-                    $monthCardIndex++;
-                    $cardTheme = ($monthCardIndex % 2 === 1) ? 'is-navy' : 'is-violet';
-                    $monthCount = count($holidaysByMonth[$m]);
-                ?>
-                <article class="month-card <?php echo $cardTheme; ?>">
-                    <header class="month-card__head">
-                        <span><?php echo thaiMonth($m); ?> <?php echo (int) $holidayYearTh; ?></span>
-                        <span class="month-card__count"><?php echo (int) $monthCount; ?> วัน</span>
-                    </header>
-                    <ul class="month-card__list">
-                        <?php foreach ($holidaysByMonth[$m] as $holiday):
-                            $dayNum = (int) date('j', strtotime($holiday['date']));
-                            $nameEn = trim((string) ($holiday['name_en'] ?? ''));
-                            $dotClass = $holidayTypeDotClass((string) $holiday['type']);
-                            $typeLabel = $holidayTypeLabel((string) $holiday['type']);
-                        ?>
-                        <li class="holiday-item">
-                            <span class="date-dot" aria-hidden="true"><?php echo $dayNum; ?></span>
-                            <div class="holiday-item__body">
-                                <span class="name-th"><?php echo htmlspecialchars($holiday['name']); ?></span>
-                                <?php if ($nameEn !== ''): ?>
-                                <span class="name-en"> · <?php echo htmlspecialchars($nameEn); ?></span>
-                                <?php endif; ?>
-                            </div>
-                            <span class="type-dot <?php echo htmlspecialchars($dotClass); ?>"
-                                  title="<?php echo htmlspecialchars($typeLabel); ?>"
-                                  aria-label="<?php echo htmlspecialchars($typeLabel); ?>"></span>
-                        </li>
-                        <?php endforeach; ?>
-                    </ul>
-                </article>
-                <?php endforeach; ?>
+            <div class="calendar-columns">
+                <div class="calendar-col">
+                    <?php foreach ($leftMonths as $i => $m) {
+                        $renderMonthCard($m, $i);
+                    } ?>
+                </div>
+                <div class="calendar-col">
+                    <?php foreach ($rightMonths as $i => $m) {
+                        $renderMonthCard($m, $i + count($leftMonths));
+                    } ?>
+                </div>
             </div>
             <?php else: ?>
             <div class="empty-state">ยังไม่มีข้อมูลวันหยุดสำหรับปี พ.ศ. <?php echo (int) $holidayYearTh; ?></div>
             <?php endif; ?>
 
             <footer class="doc-footer">
-                <div class="legend" aria-label="ประเภทวันหยุด">
-                    <span class="legend-item"><span class="type-dot dot-public"></span> วันหยุดราชการ</span>
-                    <span class="legend-item"><span class="type-dot dot-company"></span> วันหยุดบริษัท</span>
-                    <span class="legend-item"><span class="type-dot dot-substitute"></span> วันหยุดชดเชย</span>
-                    <span class="legend-item"><span class="type-dot dot-special"></span> วันหยุดพิเศษ</span>
-                </div>
-                <p>หมายเหตุ: วันหยุดประจำสัปดาห์ของพนักงานแต่ละคนอาจแตกต่างกัน · <?php echo htmlspecialchars($companyName); ?> · TP-HR</p>
+                หมายเหตุ: วันหยุดประจำสัปดาห์ของพนักงานแต่ละคนอาจแตกต่างกัน · <?php echo htmlspecialchars($companyName); ?> · TP-HR
             </footer>
         </div>
     </div>
@@ -599,7 +558,9 @@ $monthCardIndex = 0;
 
 <script>
 (function() {
-    var USABLE_MM_H = 297 - 20;
+    var USABLE_MM_H = 297 - 18;
+    var MIN_FILL = 0.9;
+    var MAX_UPSCALE = 1.14;
 
     function mmToPx(mm) {
         var probe = document.createElement('div');
@@ -613,14 +574,23 @@ $monthCardIndex = 0;
     window.tpHolidayFitA4 = function() {
         var content = document.getElementById('a4-content');
         if (!content) return;
+
         content.style.transform = 'none';
         content.style.width = '';
+
         var maxH = mmToPx(USABLE_MM_H);
         var h = content.scrollHeight;
+        var scale = 1;
+
         if (h > maxH) {
-            var s = maxH / h;
-            content.style.transform = 'scale(' + s + ')';
-            content.style.width = (100 / s).toFixed(4) + '%';
+            scale = maxH / h;
+        } else if (h < maxH * MIN_FILL) {
+            scale = Math.min(MAX_UPSCALE, (maxH * 0.96) / h);
+        }
+
+        if (Math.abs(scale - 1) > 0.008) {
+            content.style.transform = 'scale(' + scale + ')';
+            content.style.width = (100 / scale).toFixed(4) + '%';
         }
     };
 
