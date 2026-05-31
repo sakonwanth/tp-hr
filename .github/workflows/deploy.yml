@@ -107,6 +107,11 @@ jobs:
               $COMPOSER_BIN install --no-interaction --no-dev 2>&1 || echo "composer install skipped"
             fi
 
+            if [ -n "$PHP_BIN" ] && [ -f scripts/ensure_company_holidays.php ]; then
+              echo "📅 Ensuring company holidays (2026) if empty..."
+              $PHP_BIN scripts/ensure_company_holidays.php --year=2026 2>&1 || echo "   holiday ensure skipped"
+            fi
+
             chown -R tpasset:psacln . 2>/dev/null || true
             find . -type d -exec chmod 755 {} \; 2>/dev/null || true
             find . -type f -exec chmod 644 {} \; 2>/dev/null || true

@@ -1027,6 +1027,11 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
                 <i class="fas fa-calendar-alt"></i>
                 <span>การลา</span>
             </a>
+
+            <a href="/holidays.php" class="nav-item <?php echo $current_page === 'holidays' ? 'active' : ''; ?>">
+                <i class="fas fa-calendar-day"></i>
+                <span>วันหยุดประจำปี</span>
+            </a>
             
             <a href="/payslip.php" class="nav-item <?php echo $current_page === 'payslip' ? 'active' : ''; ?>">
                 <i class="fas fa-file-invoice-dollar"></i>
@@ -1197,6 +1202,10 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
                 <a href="/leave.php" class="mobile-menu-tile <?php echo $current_page === 'leave' ? 'active' : ''; ?>">
                     <i class="fas fa-calendar-alt" aria-hidden="true"></i>
                     <span>การลา</span>
+                </a>
+                <a href="/holidays.php" class="mobile-menu-tile <?php echo $current_page === 'holidays' ? 'active' : ''; ?>">
+                    <i class="fas fa-calendar-day" aria-hidden="true"></i>
+                    <span>วันหยุดประจำปี</span>
                 </a>
                 <a href="/payslip.php" class="mobile-menu-tile <?php echo $current_page === 'payslip' ? 'active' : ''; ?>">
                     <i class="fas fa-file-invoice-dollar" aria-hidden="true"></i>
