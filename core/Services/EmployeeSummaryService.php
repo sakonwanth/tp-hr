@@ -61,7 +61,8 @@ class EmployeeSummaryService
         $periodStart = $period['start'];
         $periodEnd = $period['end'];
         $today = date('Y-m-d');
-        $lastDay = $payrollSvc->attendanceClosedScanEnd($periodStart, $periodEnd, $today);
+        $summaryScanEnd = $payrollSvc->attendanceClosedScanEnd($periodStart, $periodEnd, $today);
+        $lastDay = $summaryScanEnd;
         if ($lastDay === '') {
             $lastDay = date('Y-m-d', strtotime($periodStart . ' -1 day'));
         }
@@ -205,26 +206,35 @@ class EmployeeSummaryService
                             'note' => $att['notes'] ?? '',
                         ];
                     } elseif ($status === 'ABSENT') {
-                        $details['absent'][] = [
-                            'date' => $currentDay,
-                            'day_label' => $dayLabel,
-                            'reason' => 'บันทึกขาดงาน',
-                        ];
+                        $details['absent'][] = $this->buildAbsentDetailRow(
+                            $currentDay,
+                            $dayLabel,
+                            'บันทึกขาดงาน',
+                            $defaultDayOff,
+                            $dayoffSwaps,
+                            $dayNames
+                        );
                     } else {
-                        $details['absent'][] = [
-                            'date' => $currentDay,
-                            'day_label' => $dayLabel,
-                            'reason' => 'สถานะไม่ชัดเจน (' . $status . ')',
-                        ];
+                        $details['absent'][] = $this->buildAbsentDetailRow(
+                            $currentDay,
+                            $dayLabel,
+                            'สถานะไม่ชัดเจน (' . $status . ')',
+                            $defaultDayOff,
+                            $dayoffSwaps,
+                            $dayNames
+                        );
                     }
                 } else {
                     $counts['missing_record_days']++;
                     $counts['absent_days']++;
-                    $details['absent'][] = [
-                        'date' => $currentDay,
-                        'day_label' => $dayLabel,
-                        'reason' => 'ไม่มีการลงเวลา',
-                    ];
+                    $details['absent'][] = $this->buildAbsentDetailRow(
+                        $currentDay,
+                        $dayLabel,
+                        'ไม่มีการลงเวลา',
+                        $defaultDayOff,
+                        $dayoffSwaps,
+                        $dayNames
+                    );
                 }
             }
 
@@ -251,6 +261,8 @@ class EmployeeSummaryService
             'month_label' => formatDateThai($periodStart) . ' – ' . formatDateThai($periodEnd),
             'period_start' => $periodStart,
             'period_end' => $periodEnd,
+            'summary_scan_end' => $summaryScanEnd !== '' ? $summaryScanEnd : null,
+            'summary_includes_today' => false,
             'pay_day' => $payDay,
             'counts' => $counts,
             'details' => $details,
@@ -429,11 +441,69 @@ class EmployeeSummaryService
     private function resolveEffectiveDayOff(string $date, int $defaultDayOff, array $swaps): int
     {
         foreach ($swaps as $swap) {
+            if (($swap['status'] ?? '') !== 'APPROVED') {
+                continue;
+            }
             if ($date >= $swap['week_start'] && $date <= $swap['week_end']) {
                 return (int)$swap['requested_day_off'];
             }
         }
         return $defaultDayOff;
+    }
+
+    /**
+     * @return array{date: string, day_label: string, reason: string, swap_note?: string}
+     */
+    private function buildAbsentDetailRow(
+        string $date,
+        string $dayLabel,
+        string $reason,
+        int $defaultDayOff,
+        array $swaps,
+        array $dayNames
+    ): array {
+        $row = [
+            'date' => $date,
+            'day_label' => $dayLabel,
+            'reason' => $reason,
+        ];
+        $swapNote = $this->dayOffSwapNoteForDate($date, $defaultDayOff, $swaps, $dayNames);
+        if ($swapNote !== null) {
+            $row['swap_note'] = $swapNote;
+        }
+        return $row;
+    }
+
+    /**
+     * คำอธิบายเมื่อวันนั้นเป็นวันทำงาน/หยุดเพราะสลับวันหยุด (ไม่ใช่ตารางปกติ)
+     */
+    private function dayOffSwapNoteForDate(string $date, int $defaultDayOff, array $swaps, array $dayNames): ?string
+    {
+        $dow = (int)date('w', strtotime($date));
+        foreach ($swaps as $swap) {
+            if (($swap['status'] ?? '') !== 'APPROVED') {
+                continue;
+            }
+            if ($date < ($swap['week_start'] ?? '') || $date > ($swap['week_end'] ?? '')) {
+                continue;
+            }
+            $orig = (int)($swap['original_day_off'] ?? $defaultDayOff);
+            $req = (int)($swap['requested_day_off'] ?? $defaultDayOff);
+            if ($orig === $req) {
+                continue;
+            }
+            $origLabel = $dayNames[$orig] ?? (string)$orig;
+            $reqLabel = $dayNames[$req] ?? (string)$req;
+            $weekLabel = formatDateThai($swap['week_start'] ?? $date) . ' – ' . formatDateThai($swap['week_end'] ?? $date);
+
+            if ($dow === $orig) {
+                return "วันทำงานในสัปดาห์นี้ — สลับหยุดจาก{$origLabel}เป็น{$reqLabel} ({$weekLabel})";
+            }
+            if ($dow === $req) {
+                return "วันหยุดในสัปดาห์นี้ — สลับหยุดจาก{$origLabel}เป็น{$reqLabel} ({$weekLabel})";
+            }
+        }
+        return null;
     }
 
     /**

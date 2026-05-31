@@ -22,6 +22,12 @@ $payDayForPeriod = $payrollSvcForPeriod->getDefaultPayDay();
 $summaryPeriod = $payrollSvcForPeriod->attendancePeriodBounds($month . '-01', $payDayForPeriod);
 $reportFrom = $summaryPeriod['start'];
 $reportTo = $summaryPeriod['end'];
+$today = date('Y-m-d');
+$summaryScanEnd = $payrollSvcForPeriod->attendanceClosedScanEnd($reportFrom, $reportTo, $today);
+$summaryPeriodOpen = ($today <= $reportTo);
+$summaryMonthNum = (int)substr($month, 5, 2);
+$summaryMonthLabel = function_exists('thaiMonth') ? thaiMonth($summaryMonthNum) : $month;
+$summaryYearBe = (int)substr($month, 0, 4) + 543;
 $department = trim($_GET['department'] ?? '');
 
 $departments = $pdo->query("
@@ -85,6 +91,44 @@ include dirname(__DIR__) . '/templates/header.php';
             </select>
         </div>
     </form>
+</div>
+
+<div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 mb-6 min-w-0 border border-violet-500/20 bg-violet-500/[0.06]" role="status" aria-live="polite">
+    <div class="flex items-start gap-3 sm:gap-4">
+        <div class="w-10 h-10 rounded-xl bg-violet-500/15 border border-violet-500/25 flex items-center justify-center shrink-0" aria-hidden="true">
+            <i class="fas fa-calendar-range text-violet-300"></i>
+        </div>
+        <div class="min-w-0 flex-1 space-y-2">
+            <p class="text-white font-semibold text-sm sm:text-base">
+                รอบเงินเดือน <?php echo htmlspecialchars($summaryMonthLabel . ' ' . $summaryYearBe); ?>
+                <span class="text-white/45 font-normal text-xs sm:text-sm ml-1">(เลือก <?php echo htmlspecialchars($month); ?>)</span>
+            </p>
+            <p class="text-white/75 text-sm leading-relaxed">
+                ช่วงสรุปเข้างาน
+                <strong class="text-violet-200 font-medium"><?php echo formatDateThai($reportFrom); ?></strong>
+                –
+                <strong class="text-violet-200 font-medium"><?php echo formatDateThai($reportTo); ?></strong>
+                · ไม่ใช่ปฏิทิน 1–30 ของเดือน
+            </p>
+            <?php if ($summaryScanEnd !== ''): ?>
+            <p class="text-white/65 text-sm leading-relaxed">
+                ตัวเลขในตารางสรุปถึง
+                <strong class="text-white/90"><?php echo formatDateThai($summaryScanEnd); ?></strong>
+                <?php if ($summaryPeriodOpen && $today > $summaryScanEnd): ?>
+                <span class="text-white/45">· ยังไม่รวมวันนี้ (<?php echo formatDateThai($today); ?>) จนกว่าจะจบวันทำงาน</span>
+                <?php elseif ($summaryPeriodOpen && $today === $summaryScanEnd): ?>
+                <span class="text-white/45">· วันนี้ยังไม่ถูกนับเป็นขาด/มาสายจนกว่าจะจบวัน</span>
+                <?php endif; ?>
+            </p>
+            <?php else: ?>
+            <p class="text-amber-200/90 text-sm">รอบนี้ยังไม่เริ่ม — ยังไม่มีวันที่สรุปในตาราง</p>
+            <?php endif; ?>
+            <p class="text-white/45 text-xs leading-relaxed pt-1 border-t border-white/10">
+                <i class="fas fa-shuffle text-violet-400/80 mr-1" aria-hidden="true"></i>
+                หากพนักงาน<strong class="text-white/60">สลับวันหยุด</strong> วันที่เคยหยุดประจำอาจกลายเป็นวันทำงาน (และนับขาดถ้าไม่ลงเวลา) — ดูคำอธิบายในรายละเอียดแต่ละคน
+            </p>
+        </div>
+    </div>
 </div>
 
 <div class="native-card tp-native-card tp-native-data-card p-5 sm:p-6 mb-6 min-w-0 border border-sky-500/15 bg-sky-500/[0.04]">

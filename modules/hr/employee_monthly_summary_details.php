@@ -162,9 +162,26 @@ $renderDayRow = static function (
             </h4>
             <?php $renderBulkToolbar('absent', 'ขาดงาน', count($d['absent'])); ?>
         </div>
+        <?php
+        $absentHasSwapNote = false;
+        foreach ($d['absent'] as $_ab) {
+            if (!empty($_ab['swap_note'])) {
+                $absentHasSwapNote = true;
+                break;
+            }
+        }
+        if ($absentHasSwapNote): ?>
+        <p class="px-5 py-3 text-xs text-violet-200/90 bg-violet-500/[0.08] border-b border-white/10 leading-relaxed">
+            <i class="fas fa-shuffle mr-1.5 text-violet-300/80" aria-hidden="true"></i>
+            บางวันที่ขาดเป็นวันทำงานตาม<strong class="text-violet-100">คำขอสลับวันหยุด</strong> (วันหยุดประจำถูกเลื่อนไปวันอื่นในสัปดาห์นั้น)
+        </p>
+        <?php endif; ?>
         <ul class="<?php echo $listClass; ?> max-h-[min(420px,50vh)] overflow-y-auto overscroll-contain">
             <?php foreach ($d['absent'] as $item):
                 $meta = [htmlspecialchars($item['reason'] ?? 'ขาดงาน')];
+                if (!empty($item['swap_note'])) {
+                    $meta[] = '<span class="text-violet-300/95">' . htmlspecialchars($item['swap_note']) . '</span>';
+                }
                 $renderDayRow(
                     $item,
                     'text-red-300/90',
@@ -306,6 +323,10 @@ $renderDayRow = static function (
         <h4 class="<?php echo $headClass; ?> text-violet-300">
             <i class="fas fa-calendar-day mr-2 opacity-80" aria-hidden="true"></i>เปลี่ยนวันหยุด <?php echo count($summary['dayoff_swaps']); ?> ครั้ง
         </h4>
+        <p class="px-5 py-3 text-xs text-white/55 bg-white/[0.03] border-b border-white/10 leading-relaxed">
+            สัปดาห์ที่อนุมัติแล้ว: วันหยุดประจำเดิมจะ<strong class="text-white/70">ไม่หยุด</strong> และย้ายไปหยุดวันใหม่แทน
+            · วันที่เคยเป็นวันหยุดอาจกลายเป็นวันทำงานและนับขาดถ้าไม่ลงเวลา
+        </p>
         <ul class="<?php echo $listClass; ?>">
             <?php foreach ($summary['dayoff_swaps'] as $swap): ?>
             <li class="<?php echo $rowPad; ?>">

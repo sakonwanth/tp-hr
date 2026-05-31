@@ -23,6 +23,9 @@ $defaultOffLabel = $dayNames[(int)($summary['default_day_off'] ?? 0)] ?? '-';
                 ช่วง <?php echo formatDateThai($summary['period_start'] ?? ''); ?>
                 – <?php echo formatDateThai($summary['period_end'] ?? ''); ?>
                 · วันหยุดประจำ: <?php echo htmlspecialchars($defaultOffLabel); ?>
+                <?php if (!empty($summary['summary_scan_end'])): ?>
+                · สรุปถึง <?php echo formatDateThai($summary['summary_scan_end']); ?>
+                <?php endif; ?>
             </p>
         </div>
         <?php if (!empty($showMonthPicker)): ?>
