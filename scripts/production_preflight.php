@@ -206,7 +206,7 @@ $requiredTables = [
     'users', 'roles', 'system_settings', 'hr_settings',
     'hr_work_shifts', 'hr_checkin_locations',
     'hr_attendances', 'hr_attendance_adjustments', 'hr_attendance_outside_requests',
-    'hr_employee_schedules', 'hr_dayoff_requests',
+    'hr_employee_schedules', 'hr_dayoff_requests', 'hr_holiday_work_exceptions',
     'hr_leave_types', 'hr_leave_entitlements', 'hr_leave_requests',
     'hr_document_templates', 'hr_document_requests', 'hr_issued_documents',
     'hr_employee_family', 'hr_emergency_contacts', 'hr_employee_education', 'hr_employee_work_history',
@@ -262,6 +262,13 @@ pf_require_columns($pdo, 'hr_dayoff_requests', [
     'user_id', 'week_start', 'week_end', 'original_day_off',
     'requested_day_off', 'reason', 'status', 'reviewed_by', 'reviewed_at', 'review_note',
 ]);
+
+pf_require_columns($pdo, 'hr_holiday_work_exceptions', [
+    'user_id', 'holiday_date', 'comp_date', 'holiday_name', 'reason',
+    'status', 'reviewed_by', 'reviewed_at', 'review_note',
+]);
+
+pf_require_index($pdo, 'hr_holiday_work_exceptions', 'uk_user_holiday', 'user_id,holiday_date', true);
 
 pf_require_columns($pdo, 'hr_holidays', ['date', 'name', 'type', 'is_active']);
 

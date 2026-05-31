@@ -336,6 +336,14 @@ require_once __DIR__ . '/templates/header.php';
                         </span>
                         <i class="fas fa-chevron-right text-white/28 shrink-0 text-xs" aria-hidden="true"></i>
                     </a>
+                    <a href="holiday_work_request.php" class="tp-holidays-link-row touch-manipulation">
+                        <span class="tp-holidays-link-row__icon"><i class="fas fa-briefcase" aria-hidden="true"></i></span>
+                        <span class="tp-holidays-link-row__text">
+                            <span class="tp-holidays-link-row__title">ทำงานวันหยุด / หยุดชดเชย</span>
+                            <span class="tp-holidays-link-row__sub">ขอมาทำงานวันหยุดประจำปีและหยุดวันอื่นแทน</span>
+                        </span>
+                        <i class="fas fa-chevron-right text-white/28 shrink-0 text-xs" aria-hidden="true"></i>
+                    </a>
                     <a href="leave.php" class="tp-holidays-link-row touch-manipulation">
                         <span class="tp-holidays-link-row__icon"><i class="fas fa-calendar-alt" aria-hidden="true"></i></span>
                         <span class="tp-holidays-link-row__text">

@@ -1105,6 +1105,11 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
                     <i class="fas fa-calendar-day"></i>
                     <span>อนุมัติเปลี่ยนวันหยุด</span>
                 </a>
+
+                <a href="/hr/holiday_work_approvals.php" class="nav-item <?php echo $current_page === 'hr-holiday-work' ? 'active' : ''; ?>">
+                    <i class="fas fa-briefcase"></i>
+                    <span>อนุมัติทำงานวันหยุด</span>
+                </a>
                 <?php endif; ?>
                 
                 <a href="/hr/documents.php" class="nav-item <?php echo $current_page === 'hr-documents' ? 'active' : ''; ?>">
@@ -1270,6 +1275,10 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
                     <a href="/hr/dayoff_approvals.php" class="mobile-menu-tile <?php echo $current_page === 'hr-dayoff' ? 'active' : ''; ?>">
                         <i class="fas fa-calendar-day" aria-hidden="true"></i>
                         <span>อนุมัติเปลี่ยนวันหยุด</span>
+                    </a>
+                    <a href="/hr/holiday_work_approvals.php" class="mobile-menu-tile <?php echo $current_page === 'hr-holiday-work' ? 'active' : ''; ?>">
+                        <i class="fas fa-briefcase" aria-hidden="true"></i>
+                        <span>อนุมัติทำงานวันหยุด</span>
                     </a>
                     <?php endif; ?>
                     <a href="/hr/documents.php" class="mobile-menu-tile <?php echo $current_page === 'hr-documents' ? 'active' : ''; ?>">

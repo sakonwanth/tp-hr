@@ -354,6 +354,62 @@ function crm_line_notify_dayoff_decision(PDO $pdo, int $requestId, string $decis
     }
 }
 
+function crm_line_holiday_work_context(PDO $pdo, int $requestId): ?array {
+    $stmt = $pdo->prepare("
+        SELECT r.*, u.username, u.first_name, u.last_name, u.first_name_th, u.last_name_th
+        FROM hr_holiday_work_exceptions r
+        JOIN users u ON u.id = r.user_id
+        WHERE r.id = ?
+        LIMIT 1
+    ");
+    $stmt->execute([$requestId]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $row ?: null;
+}
+
+function crm_line_notify_holiday_work_requested(PDO $pdo, int $requestId): void {
+    if (!crm_line_bridge_load()) {
+        return;
+    }
+    try {
+        $ctx = crm_line_holiday_work_context($pdo, $requestId);
+        if (!$ctx || !function_exists('hr_flex_holiday_work_requested')) {
+            return;
+        }
+        $flex = hr_flex_holiday_work_requested(
+            crm_line_user_name($ctx),
+            $ctx['holiday_date'],
+            $ctx['comp_date'] ?? null,
+            (string) ($ctx['holiday_name'] ?? ''),
+            (string) ($ctx['reason'] ?? '')
+        );
+        LineNotifier::sendEvent($pdo, 'hr.holiday_work_requested', $flex, ['triggering_user_id' => (int) $ctx['user_id']]);
+    } catch (Throwable $e) {
+        error_log('crm_line_notify_holiday_work_requested error: ' . $e->getMessage());
+    }
+}
+
+function crm_line_notify_holiday_work_decision(PDO $pdo, int $requestId, string $decision, string $note = ''): void {
+    if (!crm_line_bridge_load()) {
+        return;
+    }
+    try {
+        $ctx = crm_line_holiday_work_context($pdo, $requestId);
+        if (!$ctx) {
+            return;
+        }
+        if ($decision === 'APPROVED' && function_exists('hr_flex_holiday_work_approved')) {
+            $flex = hr_flex_holiday_work_approved($ctx['holiday_date'], $ctx['comp_date'] ?? null, $note);
+            LineNotifier::sendEvent($pdo, 'hr.holiday_work_approved', $flex, ['triggering_user_id' => (int) $ctx['user_id']]);
+        } elseif ($decision === 'REJECTED' && function_exists('hr_flex_holiday_work_rejected')) {
+            $flex = hr_flex_holiday_work_rejected($ctx['holiday_date'], $note);
+            LineNotifier::sendEvent($pdo, 'hr.holiday_work_rejected', $flex, ['triggering_user_id' => (int) $ctx['user_id']]);
+        }
+    } catch (Throwable $e) {
+        error_log('crm_line_notify_holiday_work_decision error: ' . $e->getMessage());
+    }
+}
+
 function crm_line_outside_context(PDO $pdo, int $requestId): ?array {
     $stmt = $pdo->prepare("
         SELECT r.*, u.username, u.first_name, u.last_name, u.first_name_th, u.last_name_th
