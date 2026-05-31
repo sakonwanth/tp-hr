@@ -112,6 +112,11 @@ jobs:
               $PHP_BIN scripts/ensure_company_holidays.php --year=2026 2>&1 || echo "   holiday ensure skipped"
             fi
 
+            if [ -n "$PHP_BIN" ] && [ -f scripts/ensure_holiday_work_schema.php ]; then
+              echo "📋 Ensuring holiday work exceptions schema..."
+              $PHP_BIN scripts/ensure_holiday_work_schema.php 2>&1 || echo "   holiday work schema skipped"
+            fi
+
             chown -R tpasset:psacln . 2>/dev/null || true
             find . -type d -exec chmod 755 {} \; 2>/dev/null || true
             find . -type f -exec chmod 644 {} \; 2>/dev/null || true
