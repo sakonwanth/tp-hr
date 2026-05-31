@@ -60,8 +60,8 @@ try {
     }
     if (function_exists('lateRequestCutoffHour'))  $late_start_cutoff_hour       = lateRequestCutoffHour($pdo);
     if (function_exists('canRequestLateStart'))   {
-        $late_start_can_today_request    = canRequestLateStart($pdo, $ls_today);
-        $late_start_can_tomorrow_request = canRequestLateStart($pdo, $ls_tomorrow);
+        $late_start_can_today_request    = canRequestLateStart($pdo, $ls_today, null, (int)$user['id']);
+        $late_start_can_tomorrow_request = canRequestLateStart($pdo, $ls_tomorrow, null, (int)$user['id']);
     }
 } catch (Throwable $e) {
     error_log('tp-hr checkin.php late-start load: ' . $e->getMessage());

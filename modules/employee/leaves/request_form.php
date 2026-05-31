@@ -258,55 +258,51 @@ function updateLeaveInfo() {
     endDateInput.min = startDateInput.value || '<?php echo $min_leave_date; ?>';
 }
 
-// Calculate total days
-function calculateDays() {
+// Calculate total days (server-side workday rules via API)
+let leaveCountTimer = null;
+async function calculateDays() {
     const startDate = document.getElementById('start_date').value;
     const endDate = document.getElementById('end_date').value;
     const startPeriod = document.getElementById('start_period').value;
     const endPeriod = document.getElementById('end_period').value;
-    
+    const totalEl = document.getElementById('total-days');
+    const totalInput = document.getElementById('total_days_input');
+
     if (!startDate || !endDate) {
-        document.getElementById('total-days').textContent = '0';
-        document.getElementById('total_days_input').value = '0';
+        totalEl.textContent = '0';
+        totalInput.value = '0';
         return;
     }
-    
-    // Calculate working days (exclude weekends)
+
     const start = new Date(startDate);
     const end = new Date(endDate);
-    
     if (end < start) {
         document.getElementById('end_date').value = startDate;
         return calculateDays();
     }
-
     document.getElementById('end_date').min = startDate;
-    
-    let days = 0;
-    let current = new Date(start);
-    
-    while (current <= end) {
-        const dayOfWeek = current.getDay();
-        if (dayOfWeek !== 0 && dayOfWeek !== 6) { // Exclude weekends
-            days++;
+
+    clearTimeout(leaveCountTimer);
+    leaveCountTimer = setTimeout(async () => {
+        try {
+            const params = new URLSearchParams({
+                action: 'count_days',
+                start_date: startDate,
+                end_date: endDate,
+                start_period: startPeriod,
+                end_period: endPeriod,
+            });
+            const response = await fetch('/api/leave.php?' + params.toString());
+            const result = await response.json();
+            const days = result.success ? parseFloat(result.total_days) || 0 : 0;
+            totalEl.textContent = days.toFixed(1);
+            totalInput.value = String(days);
+        } catch (err) {
+            console.error('count_days failed', err);
+            totalEl.textContent = '0';
+            totalInput.value = '0';
         }
-        current.setDate(current.getDate() + 1);
-    }
-    
-    // Adjust for half days
-    if (startDate === endDate) {
-        if (startPeriod !== 'FULL' || endPeriod !== 'FULL') {
-            days = 0.5;
-        }
-    } else {
-        if (startPeriod !== 'FULL') days -= 0.5;
-        if (endPeriod !== 'FULL') days -= 0.5;
-    }
-    
-    days = Math.max(0, days);
-    
-    document.getElementById('total-days').textContent = days.toFixed(1);
-    document.getElementById('total_days_input').value = days;
+    }, 200);
 }
 
 // Form submission

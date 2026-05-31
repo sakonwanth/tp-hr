@@ -774,7 +774,7 @@ if (!function_exists('canRequestLateStart')) {
     /**
      * @return array { ok: bool, reason: string, message: string, fallback: ?string }
      */
-    function canRequestLateStart(PDO $pdo, string $target_date, ?int $now_ts = null): array {
+    function canRequestLateStart(PDO $pdo, string $target_date, ?int $now_ts = null, ?int $userId = null): array {
         $now      = $now_ts ?? time();
         $today    = date('Y-m-d', $now);
         $valid_dt = preg_match('/^\d{4}-\d{2}-\d{2}$/', $target_date) === 1;
@@ -790,6 +790,27 @@ if (!function_exists('canRequestLateStart')) {
                 'message'  => 'ไม่สามารถแจ้งเข้างานสายย้อนหลังได้ — กรุณาใช้แบบฟอร์ม "ขอแก้ไขเวลาเข้างาน" แทน',
                 'fallback' => 'request_adjustment',
             ];
+        }
+
+        if ($userId === null && class_exists('Auth', false) && method_exists('Auth', 'user')) {
+            $authUser = Auth::user();
+            $userId = (int)($authUser['id'] ?? 0);
+        }
+        if ($userId > 0) {
+            $isWorkday = true;
+            if (class_exists(\TpCommon\Hr\WorkdayCalculator::class)) {
+                $isWorkday = \TpCommon\Hr\WorkdayCalculator::isExpectedWorkdayForUser($pdo, $userId, $target_date);
+            } elseif (function_exists('isWorkingDay')) {
+                $isWorkday = isWorkingDay($target_date, $userId);
+            }
+            if (!$isWorkday) {
+                return [
+                    'ok'       => false,
+                    'reason'   => 'non_workday',
+                    'message'  => 'วันที่เลือกเป็นวันหยุด — ไม่ต้องแจ้งเข้างานสาย',
+                    'fallback' => null,
+                ];
+            }
         }
 
         if ($target_date === $today) {

@@ -1209,7 +1209,7 @@ function handleLateStartRequest(PDO $pdo, array $user, array $input): void {
         apiError('ระบบแจ้งเข้างานสายยังไม่พร้อมใช้งาน', 503);
     }
 
-    $canRequest = canRequestLateStart($pdo, $target_date);
+    $canRequest = canRequestLateStart($pdo, $target_date, null, (int)$user['id']);
     if (!$canRequest['ok']) {
         header('Content-Type: application/json');
         http_response_code(400);
@@ -1321,7 +1321,7 @@ function cancelLateStartRequest(PDO $pdo, array $user, array $input): void {
     }
 
     if (function_exists('canRequestLateStart')) {
-        $canRequest = canRequestLateStart($pdo, $target_date);
+        $canRequest = canRequestLateStart($pdo, $target_date, null, (int)$user['id']);
         if (!$canRequest['ok']) {
             apiError($canRequest['message']);
         }

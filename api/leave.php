@@ -63,6 +63,10 @@ function handleGet($pdo, $user, $action) {
         case 'calendar':
             getCalendar($pdo, $user);
             break;
+
+        case 'count_days':
+            getLeaveDayCount($pdo, $user);
+            break;
             
         default:
             getEntitlements($pdo, $user);
@@ -305,6 +309,60 @@ function getPending($pdo, $user) {
         'success' => true,
         'requests' => $requests
     ]);
+}
+
+/**
+ * Preview leave day count (workday-aware, matches server create validation).
+ */
+function getLeaveDayCount($pdo, $user) {
+    $startDate = trim((string)($_GET['start_date'] ?? ''));
+    $endDate = trim((string)($_GET['end_date'] ?? ''));
+    $startPeriod = strtoupper(trim((string)($_GET['start_period'] ?? 'FULL')));
+    $endPeriod = strtoupper(trim((string)($_GET['end_period'] ?? 'FULL')));
+
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $startDate) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $endDate)) {
+        echo json_encode(['success' => false, 'error' => 'วันที่ไม่ถูกต้อง']);
+        return;
+    }
+    if (strtotime($endDate) < strtotime($startDate)) {
+        echo json_encode(['success' => false, 'error' => 'วันที่สิ้นสุดต้องไม่น้อยกว่าวันที่เริ่มต้น']);
+        return;
+    }
+    if (!in_array($startPeriod, ['FULL', 'AM', 'PM'], true) || !in_array($endPeriod, ['FULL', 'AM', 'PM'], true)) {
+        echo json_encode(['success' => false, 'error' => 'ช่วงเวลาไม่ถูกต้อง']);
+        return;
+    }
+
+    $totalDays = 0.0;
+    if (class_exists(\TpCommon\Hr\WorkdayCalculator::class)) {
+        $totalDays = \TpCommon\Hr\WorkdayCalculator::countLeaveDays(
+            $pdo,
+            (int)$user['id'],
+            $startDate,
+            $endDate,
+            $startPeriod,
+            $endPeriod
+        );
+    } elseif (function_exists('calculateWorkingDays')) {
+        $totalDays = (float)calculateWorkingDays($startDate, $endDate, (int)$user['id']);
+        if ($startDate === $endDate) {
+            if ($startPeriod !== 'FULL' || $endPeriod !== 'FULL') {
+                $totalDays = min($totalDays, 0.5);
+            } else {
+                $totalDays = min($totalDays, 1.0);
+            }
+        } else {
+            if ($startPeriod !== 'FULL') {
+                $totalDays -= 0.5;
+            }
+            if ($endPeriod !== 'FULL') {
+                $totalDays -= 0.5;
+            }
+        }
+        $totalDays = max(0.0, $totalDays);
+    }
+
+    echo json_encode(['success' => true, 'total_days' => round($totalDays, 1)]);
 }
 
 /**
