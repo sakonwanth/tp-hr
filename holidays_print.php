@@ -1,6 +1,6 @@
 <?php
 /**
- * Annual holidays — print / save as PDF (single A4 portrait page).
+ * Annual holidays — print / save as PDF (single A4, month-card calendar layout).
  */
 
 require_once __DIR__ . '/bootstrap.php';
@@ -21,6 +21,19 @@ $stmt = $pdo->prepare("
 ");
 $stmt->execute([$holidayYear]);
 $holidays = $stmt->fetchAll();
+
+$holidaysByMonth = [];
+foreach ($holidays as $holiday) {
+    $month = (int) date('n', strtotime($holiday['date']));
+    $holidaysByMonth[$month][] = $holiday;
+}
+
+$monthsWithHolidays = [];
+for ($m = 1; $m <= 12; $m++) {
+    if (!empty($holidaysByMonth[$m])) {
+        $monthsWithHolidays[] = $m;
+    }
+}
 
 $companyName = 'บริษัท ทีพี-แอสเสท ดีเวลลอปเม้นท์ จำกัด';
 $companyNameEn = 'TP-ASSET DEVELOPMENT CO., LTD.';
@@ -69,17 +82,16 @@ $holidayTypeLabel = static function (string $type): string {
     };
 };
 
-$holidayTypeClass = static function (string $type): string {
+$holidayTypeDotClass = static function (string $type): string {
     return match ($type) {
-        'PUBLIC' => 'is-public',
-        'COMPANY' => 'is-company',
-        'SPECIAL' => 'is-special',
-        'SUBSTITUTE' => 'is-substitute',
-        default => 'is-default',
+        'PUBLIC' => 'dot-public',
+        'COMPANY' => 'dot-company',
+        'SPECIAL' => 'dot-special',
+        'SUBSTITUTE' => 'dot-substitute',
+        default => 'dot-default',
     };
 };
 
-$dayNames = THAI_DAY_NAMES;
 $printedAt = formatDateThai(date('Y-m-d'));
 $docRef = sprintf('HOL-%d/%d', $holidayYear, $holidayYearTh);
 $logoSrc = tp_hr_brand_logo_url('LOGO TP-ASSET - 6.png');
@@ -91,13 +103,16 @@ foreach ($holidays as $holiday) {
     $label = $holidayTypeLabel((string) $holiday['type']);
     $typeCounts[$label] = ($typeCounts[$label] ?? 0) + 1;
 }
+
+$yearRangeLabel = '1 ม.ค. ' . $holidayYearTh . ' – 31 ธ.ค. ' . $holidayYearTh;
+$monthCardIndex = 0;
 ?>
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>ตารางวันหยุดประจำปี <?php echo (int) $holidayYearTh; ?></title>
+    <title>วันหยุดประจำปี <?php echo (int) $holidayYearTh; ?></title>
     <link rel="icon" type="image/svg+xml" href="/assets/icons/tphr-app-icon.svg">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -106,23 +121,25 @@ foreach ($holidays as $holiday) {
         :root {
             --a4-w: 210mm;
             --a4-h: 297mm;
-            --margin-y: 11mm;
-            --margin-x: 13mm;
+            --margin-y: 10mm;
+            --margin-x: 11mm;
             --sheet-h: calc(var(--a4-h) - (var(--margin-y) * 2));
             --ink: #1a365d;
+            --violet: #6d28d9;
             --ink-soft: #475569;
             --ink-muted: #94a3b8;
             --gold: #c8a951;
             --line: #e8edf2;
             --wash: #f7f9fc;
+            --card-bg: #fafbfc;
         }
 
         html { -webkit-text-size-adjust: 100%; }
 
         body {
             font-family: 'Sarabun', sans-serif;
-            font-size: 12px;
-            line-height: 1.45;
+            font-size: 11px;
+            line-height: 1.4;
             color: #1e293b;
             background: #fff;
         }
@@ -145,7 +162,6 @@ foreach ($holidays as $holiday) {
                 border-radius: 14px;
                 border: 1px solid rgba(255, 255, 255, 0.08);
                 background: rgba(15, 23, 42, 0.82);
-                backdrop-filter: blur(12px);
                 font-family: system-ui, sans-serif;
             }
             .toolbar-actions { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -154,7 +170,6 @@ foreach ($holidays as $holiday) {
                 padding: 0 18px;
                 display: inline-flex;
                 align-items: center;
-                gap: 8px;
                 border-radius: 10px;
                 border: 1px solid rgba(255, 255, 255, 0.12);
                 background: rgba(255, 255, 255, 0.06);
@@ -163,19 +178,15 @@ foreach ($holidays as $holiday) {
                 font-size: 13px;
                 text-decoration: none;
                 cursor: pointer;
-                transition: background 0.15s ease;
             }
-            .toolbar a:hover { background: rgba(255, 255, 255, 0.1); }
             .toolbar .btn-print {
                 background: var(--ink);
-                border-color: rgba(255, 255, 255, 0.15);
                 color: #fff;
                 font-weight: 600;
             }
-            .toolbar .btn-print:hover { background: #234876; }
-            .toolbar-note { font-size: 11px; color: rgba(226, 232, 240, 0.55); line-height: 1.4; }
+            .toolbar-note { font-size: 11px; color: rgba(226, 232, 240, 0.55); }
             .a4-sheet {
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.06);
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
                 border-radius: 2px;
             }
         }
@@ -209,7 +220,7 @@ foreach ($holidays as $holiday) {
             justify-content: center;
             pointer-events: none;
         }
-        .watermark img { width: 36%; opacity: 0.028; filter: grayscale(100%); }
+        .watermark img { width: 28%; opacity: 0.025; filter: grayscale(100%); }
 
         /* ---- Header ---- */
         .doc-header {
@@ -217,9 +228,9 @@ foreach ($holidays as $holiday) {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 16px;
-            padding-bottom: 12px;
-            margin-bottom: 16px;
+            gap: 12px;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
             border-bottom: 2px solid var(--ink);
         }
         .doc-header::after {
@@ -227,88 +238,75 @@ foreach ($holidays as $holiday) {
             position: absolute;
             left: 0;
             right: 0;
-            bottom: -5px;
+            bottom: -4px;
             height: 1px;
             background: var(--gold);
         }
-        .doc-header img { height: 52px; width: auto; display: block; }
+        .doc-header img { height: 44px; width: auto; display: block; }
         .doc-header-meta { text-align: right; max-width: 58%; }
-        .doc-header-meta .co-th {
-            font-size: 13px;
+        .doc-header-meta .co-th { font-size: 11.5px; font-weight: 700; color: var(--ink); line-height: 1.25; }
+        .doc-header-meta .co-en { font-size: 8.5px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-soft); margin-top: 1px; }
+        .doc-header-meta .co-tax { font-size: 8.5px; color: var(--ink-muted); margin-top: 2px; }
+
+        /* ---- Hero title ---- */
+        .doc-hero { text-align: center; margin-bottom: 10px; }
+        .doc-hero h1 {
+            font-size: 17px;
             font-weight: 700;
             color: var(--ink);
-            line-height: 1.3;
+            line-height: 1.2;
         }
-        .doc-header-meta .co-en {
-            margin-top: 2px;
-            font-size: 9.5px;
+        .doc-hero .tagline {
+            display: inline-block;
+            margin-top: 5px;
+            padding: 3px 12px;
+            border-radius: 999px;
+            font-size: 9px;
             font-weight: 600;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            color: var(--ink-soft);
+            color: var(--ink);
+            background: linear-gradient(90deg, #eef2ff, #faf5ff);
+            border: 1px solid #e2e8f0;
         }
-        .doc-header-meta .co-tax {
+        .doc-hero .sub {
             margin-top: 4px;
             font-size: 9.5px;
+            color: var(--ink-soft);
+            letter-spacing: 0.03em;
+        }
+        .doc-hero .range {
+            margin-top: 3px;
+            font-size: 9px;
             color: var(--ink-muted);
         }
-
-        /* ---- Title ---- */
-        .doc-headline {
-            text-align: center;
-            margin-bottom: 14px;
-        }
-        .doc-headline h1 {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--ink);
-            letter-spacing: 0.01em;
-            line-height: 1.25;
-        }
-        .doc-headline .sub {
-            margin-top: 4px;
-            font-size: 10.5px;
-            font-weight: 500;
-            color: var(--ink-soft);
-            letter-spacing: 0.05em;
-        }
-        .doc-headline .accent {
-            width: 52px;
-            height: 2px;
-            margin: 10px auto 0;
-            border-radius: 99px;
-            background: linear-gradient(90deg, transparent, var(--gold) 30%, var(--gold) 70%, transparent);
-        }
-        .doc-meta {
+        .doc-hero .meta {
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
-            gap: 6px 20px;
-            margin-top: 10px;
-            font-size: 9.5px;
+            gap: 4px 14px;
+            margin-top: 6px;
+            font-size: 8.5px;
             color: var(--ink-muted);
         }
-        .doc-meta b { color: var(--ink-soft); font-weight: 600; }
+        .doc-hero .meta b { color: var(--ink-soft); font-weight: 600; }
 
-        /* ---- Stats ---- */
+        /* ---- Stats (full width) ---- */
         .stat-row {
             display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 16px;
+            gap: 6px;
+            margin-bottom: 10px;
         }
         .stat-chip {
-            min-width: 88px;
-            padding: 8px 14px;
+            flex: 1 1 0;
+            min-width: 0;
+            padding: 6px 8px;
             text-align: center;
-            border-radius: 10px;
+            border-radius: 8px;
             background: var(--wash);
             border: 1px solid var(--line);
         }
         .stat-chip .num {
             display: block;
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 700;
             color: var(--ink);
             line-height: 1;
@@ -316,140 +314,146 @@ foreach ($holidays as $holiday) {
         }
         .stat-chip .lbl {
             display: block;
-            margin-top: 3px;
-            font-size: 9px;
-            font-weight: 500;
-            color: var(--ink-soft);
-            line-height: 1.25;
-        }
-
-        /* ---- Schedule table ---- */
-        .schedule-wrap { flex: 1 1 auto; }
-
-        table.schedule {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-        }
-        table.schedule thead th {
-            padding: 0 6px 9px;
-            font-size: 9px;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--ink-muted);
-            text-align: left;
-            border: none;
-            border-bottom: 1.5px solid var(--ink);
-            vertical-align: bottom;
-        }
-        table.schedule thead th.col-no { width: 6%; text-align: center; }
-        table.schedule thead th.col-date { width: 14%; }
-        table.schedule thead th.col-name { width: 58%; }
-        table.schedule thead th.col-type { width: 22%; text-align: right; }
-
-        table.schedule tbody td {
-            padding: 9px 6px;
-            vertical-align: middle;
-            border: none;
-            border-bottom: 1px solid var(--line);
-        }
-        table.schedule tbody tr:last-child td { border-bottom: none; }
-
-        .cell-no {
-            text-align: center;
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--ink-muted);
-            font-variant-numeric: tabular-nums;
-        }
-
-        .date-chip {
-            display: inline-flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-width: 44px;
-            padding: 5px 7px;
-            border-radius: 9px;
-            background: linear-gradient(180deg, #fff 0%, var(--wash) 100%);
-            border: 1px solid var(--line);
-            box-shadow: 0 1px 2px rgba(26, 54, 93, 0.04);
-        }
-        .date-chip .num {
-            font-size: 17px;
-            font-weight: 700;
-            color: var(--ink);
-            line-height: 1;
-            font-variant-numeric: tabular-nums;
-        }
-        .date-chip .mon {
             margin-top: 2px;
-            font-size: 8.5px;
-            font-weight: 600;
+            font-size: 7.5px;
+            font-weight: 500;
             color: var(--ink-soft);
             line-height: 1.2;
         }
-        .date-chip .dow {
-            margin-top: 1px;
-            font-size: 8px;
-            color: var(--ink-muted);
+
+        /* ---- Month card grid (2 columns) ---- */
+        .calendar-grid {
+            flex: 1 1 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 7px 8px;
+            align-content: start;
+            width: 100%;
         }
 
-        .cell-name .name-th {
-            font-size: 12.5px;
-            font-weight: 600;
-            color: #0f172a;
-            line-height: 1.35;
-        }
-        .cell-name .name-en {
-            margin-top: 2px;
-            font-size: 10px;
-            font-weight: 400;
-            color: var(--ink-muted);
-            line-height: 1.3;
+        .month-card {
+            break-inside: avoid;
+            page-break-inside: avoid;
+            border-radius: 9px;
+            overflow: hidden;
+            background: var(--card-bg);
+            border: 1px solid var(--line);
+            box-shadow: 0 1px 3px rgba(26, 54, 93, 0.04);
         }
 
-        .type-pill {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 999px;
+        .month-card__head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            padding: 5px 9px;
             font-size: 9.5px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.02em;
+        }
+        .month-card.is-navy .month-card__head { background: linear-gradient(135deg, #1a365d, #234876); }
+        .month-card.is-violet .month-card__head { background: linear-gradient(135deg, #6d28d9, #7c3aed); }
+        .month-card__count {
+            font-size: 8px;
             font-weight: 600;
-            line-height: 1.3;
+            opacity: 0.88;
             white-space: nowrap;
         }
-        .type-pill.is-public { background: #eef2ff; color: #4338ca; }
-        .type-pill.is-company { background: #f0fdf4; color: #15803d; }
-        .type-pill.is-special { background: #fdf4ff; color: #9333ea; }
-        .type-pill.is-substitute { background: #fffbeb; color: #b45309; }
-        .type-pill.is-default { background: var(--wash); color: var(--ink-soft); }
 
-        .cell-type { text-align: right; }
+        .month-card__list {
+            list-style: none;
+            padding: 4px 7px 5px;
+        }
 
-        /* ---- Footer ---- */
+        .holiday-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 4px 0;
+            min-height: 0;
+        }
+        .holiday-item + .holiday-item {
+            border-top: 1px solid #eef2f6;
+        }
+
+        .date-dot {
+            flex-shrink: 0;
+            width: 21px;
+            height: 21px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9.5px;
+            font-weight: 700;
+            color: #fff;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+        }
+        .month-card.is-navy .date-dot { background: var(--ink); }
+        .month-card.is-violet .date-dot { background: var(--violet); }
+
+        .holiday-item__body {
+            flex: 1;
+            min-width: 0;
+            line-height: 1.3;
+        }
+        .holiday-item__body .name-th {
+            font-size: 10px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+        .holiday-item__body .name-en {
+            font-size: 8px;
+            font-weight: 400;
+            color: var(--ink-muted);
+        }
+
+        .type-dot {
+            flex-shrink: 0;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+        }
+        .type-dot.dot-public { background: #6366f1; }
+        .type-dot.dot-company { background: #22c55e; }
+        .type-dot.dot-special { background: #a855f7; }
+        .type-dot.dot-substitute { background: #f59e0b; }
+        .type-dot.dot-default { background: #94a3b8; }
+
+        /* ---- Footer + legend ---- */
         .doc-footer {
             margin-top: auto;
-            padding-top: 12px;
+            padding-top: 8px;
             border-top: 1px solid var(--line);
-            font-size: 9px;
+            font-size: 7.5px;
             color: var(--ink-muted);
-            line-height: 1.55;
+            line-height: 1.45;
         }
-        .doc-footer .note-label {
-            font-weight: 600;
-            color: var(--ink-soft);
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 10px;
+            margin-bottom: 4px;
         }
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .legend-item .type-dot { width: 6px; height: 6px; }
 
         .empty-state {
             flex: 1;
+            grid-column: 1 / -1;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
             color: var(--ink-soft);
-            font-size: 13px;
-            padding: 32px;
+            font-size: 12px;
+            padding: 24px;
         }
 
         @media print {
@@ -478,12 +482,10 @@ foreach ($holidays as $holiday) {
 
             .toolbar { display: none !important; }
 
-            .date-chip {
-                box-shadow: none;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            .type-pill, .stat-chip {
+            .month-card__head,
+            .date-dot,
+            .stat-chip,
+            .doc-hero .tagline {
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
@@ -498,7 +500,7 @@ foreach ($holidays as $holiday) {
             <button type="button" class="btn-print" onclick="tpHolidayPrint()">พิมพ์ / บันทึกเป็น PDF</button>
             <a href="holidays.php?year=<?php echo (int) $holidayYear; ?>">← กลับ</a>
         </div>
-        <p class="toolbar-note">A4 แนวตั้ง · 1 หน้า</p>
+        <p class="toolbar-note">A4 · 1 หน้า</p>
     </div>
 
     <div class="a4-sheet" id="a4-sheet">
@@ -518,13 +520,14 @@ foreach ($holidays as $holiday) {
                 </div>
             </header>
 
-            <div class="doc-headline">
-                <h1>ตารางวันหยุดประจำปี พ.ศ. <?php echo (int) $holidayYearTh; ?></h1>
+            <div class="doc-hero">
+                <h1>วันหยุดประจำปี พ.ศ. <?php echo (int) $holidayYearTh; ?></h1>
+                <p class="tagline">วางแผนล่วงหน้าได้ตลอดทั้งปี</p>
                 <p class="sub">Annual Holiday Schedule · <?php echo (int) $holidayYear; ?></p>
-                <div class="accent" aria-hidden="true"></div>
-                <p class="doc-meta">
-                    <span>เลขที่เอกสาร <b><?php echo htmlspecialchars($docRef); ?></b></span>
-                    <span>พิมพ์เมื่อ <b><?php echo htmlspecialchars($printedAt); ?></b></span>
+                <p class="range"><?php echo htmlspecialchars($yearRangeLabel); ?></p>
+                <p class="meta">
+                    <span><?php echo htmlspecialchars($docRef); ?></span>
+                    <span>พิมพ์ <?php echo htmlspecialchars($printedAt); ?></span>
                 </p>
             </div>
 
@@ -542,56 +545,53 @@ foreach ($holidays as $holiday) {
                 <?php endforeach; ?>
             </div>
 
-            <div class="schedule-wrap">
-                <table class="schedule">
-                    <thead>
-                        <tr>
-                            <th class="col-no">ลำดับ</th>
-                            <th class="col-date">วันที่</th>
-                            <th class="col-name">รายการวันหยุด</th>
-                            <th class="col-type">ประเภท</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($holidays as $i => $holiday):
-                            $dow = (int) date('w', strtotime($holiday['date']));
-                            $m = (int) date('n', strtotime($holiday['date']));
+            <div class="calendar-grid">
+                <?php foreach ($monthsWithHolidays as $m):
+                    $monthCardIndex++;
+                    $cardTheme = ($monthCardIndex % 2 === 1) ? 'is-navy' : 'is-violet';
+                    $monthCount = count($holidaysByMonth[$m]);
+                ?>
+                <article class="month-card <?php echo $cardTheme; ?>">
+                    <header class="month-card__head">
+                        <span><?php echo thaiMonth($m); ?> <?php echo (int) $holidayYearTh; ?></span>
+                        <span class="month-card__count"><?php echo (int) $monthCount; ?> วัน</span>
+                    </header>
+                    <ul class="month-card__list">
+                        <?php foreach ($holidaysByMonth[$m] as $holiday):
                             $dayNum = (int) date('j', strtotime($holiday['date']));
                             $nameEn = trim((string) ($holiday['name_en'] ?? ''));
-                            $typeClass = $holidayTypeClass((string) $holiday['type']);
+                            $dotClass = $holidayTypeDotClass((string) $holiday['type']);
+                            $typeLabel = $holidayTypeLabel((string) $holiday['type']);
                         ?>
-                        <tr>
-                            <td class="cell-no"><?php echo $i + 1; ?></td>
-                            <td class="cell-date">
-                                <div class="date-chip">
-                                    <span class="num"><?php echo $dayNum; ?></span>
-                                    <span class="mon"><?php echo thaiMonthShort($m); ?> <?php echo $holidayYearTh; ?></span>
-                                    <span class="dow"><?php echo htmlspecialchars($dayNames[$dow] ?? ''); ?></span>
-                                </div>
-                            </td>
-                            <td class="cell-name">
-                                <div class="name-th"><?php echo htmlspecialchars($holiday['name']); ?></div>
+                        <li class="holiday-item">
+                            <span class="date-dot" aria-hidden="true"><?php echo $dayNum; ?></span>
+                            <div class="holiday-item__body">
+                                <span class="name-th"><?php echo htmlspecialchars($holiday['name']); ?></span>
                                 <?php if ($nameEn !== ''): ?>
-                                <div class="name-en"><?php echo htmlspecialchars($nameEn); ?></div>
+                                <span class="name-en"> · <?php echo htmlspecialchars($nameEn); ?></span>
                                 <?php endif; ?>
-                            </td>
-                            <td class="cell-type">
-                                <span class="type-pill <?php echo htmlspecialchars($typeClass); ?>">
-                                    <?php echo htmlspecialchars($holidayTypeLabel((string) $holiday['type'])); ?>
-                                </span>
-                            </td>
-                        </tr>
+                            </div>
+                            <span class="type-dot <?php echo htmlspecialchars($dotClass); ?>"
+                                  title="<?php echo htmlspecialchars($typeLabel); ?>"
+                                  aria-label="<?php echo htmlspecialchars($typeLabel); ?>"></span>
+                        </li>
                         <?php endforeach; ?>
-                    </tbody>
-                </table>
+                    </ul>
+                </article>
+                <?php endforeach; ?>
             </div>
             <?php else: ?>
             <div class="empty-state">ยังไม่มีข้อมูลวันหยุดสำหรับปี พ.ศ. <?php echo (int) $holidayYearTh; ?></div>
             <?php endif; ?>
 
             <footer class="doc-footer">
-                <p><span class="note-label">หมายเหตุ</span> ตารางนี้แสดงวันหยุดนักขัตฤกษ์และวันหยุดบริษัทในระบบ TP-HR — วันหยุดประจำสัปดาห์ของพนักงานแต่ละคนอาจแตกต่างกัน</p>
-                <p><?php echo htmlspecialchars($companyName); ?> · เอกสารจากระบบ TP-HR · <?php echo htmlspecialchars($printedAt); ?></p>
+                <div class="legend" aria-label="ประเภทวันหยุด">
+                    <span class="legend-item"><span class="type-dot dot-public"></span> วันหยุดราชการ</span>
+                    <span class="legend-item"><span class="type-dot dot-company"></span> วันหยุดบริษัท</span>
+                    <span class="legend-item"><span class="type-dot dot-substitute"></span> วันหยุดชดเชย</span>
+                    <span class="legend-item"><span class="type-dot dot-special"></span> วันหยุดพิเศษ</span>
+                </div>
+                <p>หมายเหตุ: วันหยุดประจำสัปดาห์ของพนักงานแต่ละคนอาจแตกต่างกัน · <?php echo htmlspecialchars($companyName); ?> · TP-HR</p>
             </footer>
         </div>
     </div>
@@ -599,7 +599,7 @@ foreach ($holidays as $holiday) {
 
 <script>
 (function() {
-    var USABLE_MM_H = 297 - 22;
+    var USABLE_MM_H = 297 - 20;
 
     function mmToPx(mm) {
         var probe = document.createElement('div');
