@@ -492,8 +492,8 @@ class PayrollService
         if ($passedDate === null || $passedDate === '') {
             return true;
         }
-        $monthEnd = date('Y-m-t', strtotime($monthFirst));
-        return $passedDate > $monthEnd;
+        $periodEnd = $this->attendancePeriodBounds($monthFirst)['end'];
+        return $passedDate > $periodEnd;
     }
 
     public function resolveProfileBaseSalary(int $userId, string $monthFirst): ?float

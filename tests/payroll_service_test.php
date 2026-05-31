@@ -249,6 +249,10 @@ assertSameValue(14000.0, $slipAug['gross_salary'], 'after probation passed uses 
 $slipJul = $serviceProb->calculateSlip(13, '2026-07-01', 25);
 assertSameValue(12000.0, $slipJul['gross_salary'], 'still on probation in July uses probation_salary');
 
+$pdo->exec("UPDATE users SET probation_passed_date = '2026-06-28' WHERE id = 13");
+$slipJunPassed = $serviceProb->calculateSlip(13, '2026-06-01', 25);
+assertSameValue(12000.0, $slipJunPassed['gross_salary'], 'passed after period end (Jun 28) still probation for June run');
+
 $marBounds = $service->effectivePeriodBounds('2026-03-01', 25, '2026-02-05');
 assertSameValue('2026-03-01', $marBounds['start'], 'transition month skips overlap with first hire month');
 assertSameValue('2026-03-25', $marBounds['end'], 'transition month keeps standard period end');
