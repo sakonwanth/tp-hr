@@ -792,19 +792,12 @@ class PayrollService
     public function firstHirePayableDays(int $userId, array $period, string $hireDate): int
     {
         $ctx = $this->buildWorkdayContext($userId, $period['start'], $period['end']);
-        $calendarInPeriod = $this->inclusiveDayCount($period['start'], $period['end']);
-        $dayOffInMonth = $this->countDayOffDaysInCalendarMonth($ctx, substr($hireDate, 0, 7));
-        $payable = $calendarInPeriod - $dayOffInMonth;
-
-        if ($payable <= 0 && $calendarInPeriod > 0) {
-            $workdaysInPeriod = 0;
-            for ($ts = strtotime($period['start']); $ts !== false && $ts <= strtotime($period['end']); $ts += 86400) {
-                $date = date('Y-m-d', $ts);
-                if (!$this->isScheduledDayOff($ctx, $date)) {
-                    $workdaysInPeriod++;
-                }
+        $payable = 0;
+        for ($ts = strtotime($period['start']); $ts !== false && $ts <= strtotime($period['end']); $ts += 86400) {
+            $date = date('Y-m-d', $ts);
+            if ($this->isPayrollWorkday($ctx, $date)) {
+                $payable++;
             }
-            return $workdaysInPeriod;
         }
 
         return max(0, $payable);
@@ -1404,96 +1397,12 @@ class PayrollService
      */
     public function buildWorkdayContext(int $userId, string $periodStart, string $periodEnd): array
     {
-        $ctx = [
-            'day_off' => 0,
-            'skip_missing' => false,
-            'holidays' => [],
-            'leave_dates' => [],
-            'dayoff_requests' => [],
-        ];
-
-        try {
-            $stmt = $this->pdo->prepare("
-                SELECT u.work_mode, COALESCE(s.day_off, 0) AS day_off
-                FROM users u
-                LEFT JOIN hr_employee_schedules s ON s.user_id = u.id
-                WHERE u.id = ? AND u.is_active = 1
-                LIMIT 1
-            ");
-            $stmt->execute([$userId]);
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
-            if (!$user) {
-                $ctx['skip_missing'] = true;
-                return $ctx;
-            }
-            $ctx['day_off'] = (int)($user['day_off'] ?? 0);
-            if (($user['work_mode'] ?? 'OFFICE') === 'WFH') {
-                $ctx['skip_missing'] = true;
-            }
-        } catch (Throwable $e) {
-            $ctx['skip_missing'] = true;
-            return $ctx;
-        }
-
-        try {
-            $stmt = $this->pdo->prepare("SELECT date FROM hr_holidays WHERE is_active = 1 AND date BETWEEN ? AND ?");
-            $stmt->execute([$periodStart, $periodEnd]);
-            foreach ($stmt->fetchAll(PDO::FETCH_COLUMN) as $date) {
-                $ctx['holidays'][$date] = true;
-            }
-        } catch (Throwable $e) {
-            /* ignore */
-        }
-
-        try {
-            $stmt = $this->pdo->prepare("
-                SELECT start_date, end_date
-                FROM hr_leave_requests
-                WHERE user_id = ?
-                  AND status NOT IN ('REJECTED','CANCELLED')
-                  AND start_date <= ? AND end_date >= ?
-            ");
-            $stmt->execute([$userId, $periodEnd, $periodStart]);
-            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $leave) {
-                $start = max($periodStart, (string)$leave['start_date']);
-                $end = min($periodEnd, (string)$leave['end_date']);
-                for ($ts = strtotime($start); $ts !== false && $ts <= strtotime($end); $ts += 86400) {
-                    $ctx['leave_dates'][date('Y-m-d', $ts)] = true;
-                }
-            }
-        } catch (Throwable $e) {
-            /* ignore */
-        }
-
-        try {
-            $stmt = $this->pdo->prepare("
-                SELECT week_start, week_end, requested_day_off
-                FROM hr_dayoff_requests
-                WHERE user_id = ? AND status = 'APPROVED'
-                  AND week_start <= ? AND week_end >= ?
-            ");
-            $stmt->execute([$userId, $periodEnd, $periodStart]);
-            $ctx['dayoff_requests'] = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        } catch (Throwable $e) {
-            $ctx['dayoff_requests'] = [];
-        }
-
-        return $ctx;
+        return \TpCommon\Hr\WorkdayCalculator::buildContext($this->pdo, $userId, $periodStart, $periodEnd);
     }
 
     public function isPayrollWorkday(array $ctx, string $date): bool
     {
-        if (!empty($ctx['holidays'][$date]) || !empty($ctx['leave_dates'][$date])) {
-            return false;
-        }
-        $effectiveDayOff = (int)($ctx['day_off'] ?? 0);
-        foreach ($ctx['dayoff_requests'] ?? [] as $request) {
-            if ($date >= $request['week_start'] && $date <= $request['week_end']) {
-                $effectiveDayOff = (int)$request['requested_day_off'];
-                break;
-            }
-        }
-        return (int)date('w', strtotime($date)) !== $effectiveDayOff;
+        return \TpCommon\Hr\WorkdayCalculator::isExpectedWorkday($ctx, $date);
     }
 
     /**

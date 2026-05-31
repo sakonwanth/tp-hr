@@ -380,6 +380,22 @@ function createLeaveRequest($pdo, $user) {
         echo json_encode(['success' => false, 'error' => 'จำนวนวันลาไม่ถูกต้อง']);
         return;
     }
+
+    if (class_exists(\TpCommon\Hr\WorkdayCalculator::class)) {
+        $serverTotalDays = \TpCommon\Hr\WorkdayCalculator::countLeaveDays(
+            $pdo,
+            (int)$user['id'],
+            $startDate,
+            $endDate,
+            $startPeriod,
+            $endPeriod
+        );
+        if ($serverTotalDays <= 0) {
+            echo json_encode(['success' => false, 'error' => 'ไม่มีวันทำงานในช่วงวันที่เลือก (ข้ามวันหยุดและวันหยุดประจำ)']);
+            return;
+        }
+        $totalDays = $serverTotalDays;
+    }
     
     // Validate dates
     $start = new DateTime($startDate);

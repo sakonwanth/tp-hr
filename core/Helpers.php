@@ -480,6 +480,9 @@ function calculateYearsOfService(string $hireDate): array {
  */
 function isHoliday(string $date): bool {
     $pdo = getDB();
+    if (class_exists(\TpCommon\Hr\WorkdayCalculator::class)) {
+        return \TpCommon\Hr\WorkdayCalculator::isCompanyHoliday($pdo, $date);
+    }
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM hr_holidays WHERE date = ? AND is_active = 1");
     $stmt->execute([$date]);
     return $stmt->fetchColumn() > 0;

@@ -651,6 +651,10 @@ function getUserFullName(array $user): string {
 }
 
 function calculateWorkingDays(string $startDate, string $endDate, ?int $userId = null): float {
+    if ($userId !== null && class_exists(\TpCommon\Hr\WorkdayCalculator::class)) {
+        return (float)\TpCommon\Hr\WorkdayCalculator::countWorkingDaysInRange(getDB(), $userId, $startDate, $endDate);
+    }
+
     $pdo = getDB();
 
     $stmt = $pdo->prepare("SELECT date FROM hr_holidays WHERE date BETWEEN ? AND ? AND is_active = 1");

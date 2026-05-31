@@ -115,7 +115,11 @@ if ($id <= 0) {
     if (strtotime($end) < strtotime($start)) ApiAuth::fail(400, 'end_date before start_date');
     if (!in_array($startPeriod, ['FULL','AM','PM'], true)) ApiAuth::fail(400, 'start_period invalid');
     if (!in_array($endPeriod, ['FULL','AM','PM'], true)) ApiAuth::fail(400, 'end_period invalid');
-    if ($totalDays <= 0 || $totalDays > 365) ApiAuth::fail(400, 'total_days invalid');
+
+    if (class_exists(\TpCommon\Hr\WorkdayCalculator::class)) {
+        $totalDays = \TpCommon\Hr\WorkdayCalculator::countLeaveDays($pdo, $userId, $start, $end, $startPeriod, $endPeriod);
+    }
+    if ($totalDays <= 0 || $totalDays > 365) ApiAuth::fail(400, 'total_days invalid (no working days in range)');
 
     // Generate unique request number (retry on collision)
     $reqNum = null;
