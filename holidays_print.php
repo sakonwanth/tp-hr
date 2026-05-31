@@ -311,7 +311,6 @@ $renderMonthCard = static function (int $m, int $themeIndex) use ($holidaysByMon
             border-radius: 12px;
             background: #fff;
             border: 1px solid var(--line);
-            box-shadow: 0 1px 4px rgba(26, 54, 93, 0.05);
         }
         .stat-chip .num {
             display: block;
@@ -347,8 +346,7 @@ $renderMonthCard = static function (int $m, int $themeIndex) use ($holidaysByMon
             flex: 0 0 auto;
             border-radius: 12px;
             background: #fff;
-            border: 1px solid var(--line);
-            box-shadow: 0 2px 8px rgba(26, 54, 93, 0.06);
+            border: 1px solid #dde4ec;
             overflow: hidden;
         }
 
@@ -406,7 +404,6 @@ $renderMonthCard = static function (int $m, int $themeIndex) use ($holidaysByMon
             font-weight: 700;
             font-variant-numeric: tabular-nums;
             line-height: 1;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
         }
 
         .holiday-item__body { flex: 1; min-width: 0; }
@@ -478,6 +475,13 @@ $renderMonthCard = static function (int $m, int $themeIndex) use ($holidaysByMon
                 page-break-after: avoid;
             }
             .toolbar { display: none !important; }
+            .month-card,
+            .stat-chip,
+            .date-dot,
+            .a4-sheet {
+                box-shadow: none !important;
+                filter: none !important;
+            }
             .month-card__head, .date-dot, .type-tag, .stat-chip {
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
