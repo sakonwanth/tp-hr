@@ -33,6 +33,15 @@ jobs:
             cd "$DEPLOY_PATH"
             git fetch origin main
             git reset --hard origin/main
+            CRM_PATH=""
+            if [ -f .env ]; then
+              CRM_PATH=$(grep -E '^TP_CRM_PATH=' .env | tail -1 | cut -d= -f2- | tr -d '"' | tr -d "'")
+            fi
+            if [ -n "$CRM_PATH" ] && [ -d "$CRM_PATH/.git" ]; then
+              echo "Sync tp-crm at $CRM_PATH"
+              cd "$CRM_PATH" && git fetch origin main && git reset --hard origin/main
+              cd "$DEPLOY_PATH"
+            fi
             MODE="${{ inputs.mode }}"
             if [ "$MODE" = "cleanup" ]; then
               echo "=== Cleanup AUTO_TEST holiday work rows ==="
