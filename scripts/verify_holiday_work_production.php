@@ -209,6 +209,30 @@ vw_assert(
     'holidays.php missing link to holiday work request'
 );
 
+require_once $root . '/core/CrmLineNotifierBridge.php';
+if (crm_line_bridge_load()) {
+    vw_ok('CRM LINE bridge loads on server');
+    if (function_exists('hr_flex_public_base_url')) {
+        $flexBase = hr_flex_public_base_url();
+        vw_assert(
+            !preg_match('#localhost|127\.0\.0\.1#i', $flexBase),
+            "Flex logo base is public ({$flexBase})",
+            'Flex logo base is localhost — set CRM_BASE_URL=https://crm.tp-asset.com in tp-hr .env'
+        );
+        $flexHost = (string) (parse_url($flexBase, PHP_URL_HOST) ?: '');
+        if ($flexHost !== '' && str_contains($flexHost, 'crm.')) {
+            vw_ok("Flex logo uses CRM host ({$flexBase})");
+        } elseif (defined('APP_ENV') && APP_ENV === 'production') {
+            vw_ok("Flex logo base {$flexBase} (recommend CRM_BASE_URL=https://crm.tp-asset.com in .env)");
+        }
+    }
+    if (class_exists('LineNotifier')) {
+        vw_ok('LineNotifier class available via bridge');
+    }
+} else {
+    vw_fail('CRM LINE bridge failed to load — check TP_CRM_PATH');
+}
+
 echo "\n--- Result ---\n";
 echo 'Passed: ' . count($oks) . ' | Failed: ' . count($failures) . "\n";
 if ($failures) {
