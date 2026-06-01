@@ -57,4 +57,12 @@ test.describe('API — unauthenticated', () => {
     expect(ct).toContain('application/json');
     assertV1UnauthorizedBody(await res.json());
   });
+
+  test('GET api/v1/holiday-work-requests returns 401 JSON when no Bearer API key', async ({ request }) => {
+    const res = await request.get('api/v1/holiday-work-requests');
+    expect(res.status()).toBe(401);
+    const ct = (res.headers()['content-type'] || '').toLowerCase();
+    expect(ct).toContain('application/json');
+    assertV1UnauthorizedBody(await res.json());
+  });
 });

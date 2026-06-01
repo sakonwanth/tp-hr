@@ -4,8 +4,12 @@ name: Test holiday work flow (production DB)
 on:
   workflow_dispatch:
     inputs:
+      mode:
+        description: 'cleanup | verify | test (default test = flow test + optional cleanup)'
+        required: false
+        default: 'test'
       cleanup:
-        description: 'Remove test rows after run (1=yes)'
+        description: 'After test mode: remove test rows (1=yes)'
         required: false
         default: '1'
 
@@ -29,9 +33,23 @@ jobs:
             cd "$DEPLOY_PATH"
             git fetch origin main
             git reset --hard origin/main
+            MODE="${{ inputs.mode }}"
+            if [ "$MODE" = "cleanup" ]; then
+              echo "=== Cleanup AUTO_TEST holiday work rows ==="
+              $PHP_BIN scripts/test_holiday_work_flow.php --cleanup
+              $PHP_BIN scripts/verify_holiday_work_production.php --cleanup
+              exit 0
+            fi
+            if [ "$MODE" = "verify" ]; then
+              echo "=== Production holiday work verify ==="
+              $PHP_BIN scripts/verify_holiday_work_production.php --cleanup
+              exit $?
+            fi
             echo "=== Production DB holiday work flow test ==="
+            RC=0
             $PHP_BIN scripts/test_holiday_work_flow.php || RC=$?
             if [ "${{ inputs.cleanup }}" = "1" ]; then
               $PHP_BIN scripts/test_holiday_work_flow.php --cleanup || true
             fi
-            exit ${RC:-0}
+            $PHP_BIN scripts/verify_holiday_work_production.php --cleanup || RC=1
+            exit $RC

@@ -52,6 +52,16 @@ test.describe('Authenticated session', () => {
     await expect(page).toHaveTitle(/วันหยุดประจำสัปดาห์/);
   });
 
+  test('holiday work request page title', async ({ page }) => {
+    await page.goto('holiday_work_request.php', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveTitle(/ทำงานวันหยุด/);
+  });
+
+  test('holidays page links to holiday work request', async ({ page }) => {
+    await page.goto('holidays.php', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('a[href="holiday_work_request.php"]')).toBeVisible();
+  });
+
   test('hr admin index (requires HR-capable account)', async ({ page }) => {
     test.skip(
       process.env.PLAYWRIGHT_HR_EXPECT_ADMIN !== '1',
@@ -167,6 +177,15 @@ test.describe('Authenticated session', () => {
     );
     await page.goto('hr/dayoff_approvals.php', { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveTitle(/อนุมัติวันหยุด/);
+  });
+
+  test('hr holiday work approvals (requires CEO-level account)', async ({ page }) => {
+    test.skip(
+      process.env.PLAYWRIGHT_HR_EXPECT_CEO !== '1',
+      'Set PLAYWRIGHT_HR_EXPECT_CEO=1 and use PLAYWRIGHT_HR_USER that passes isCEOOrAbove() (see hr/holiday_work_approvals.php).',
+    );
+    await page.goto('hr/holiday_work_approvals.php', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveTitle(/อนุมัติทำงานวันหยุด/);
   });
 
   test('hr api keys (requires CEO-level account)', async ({ page }) => {
