@@ -6,7 +6,8 @@
  * settings.php?tab=line_notifications
  *
  * Deployment: set TP_CRM_PATH in .env to the filesystem path of tp-crm when it is not
- * a sibling directory (../tp-crm). See config/app.php.
+ * a sibling directory (../tp-crm). LINE Messaging API keys are read automatically from
+ * tp-crm/.env (LINE_* / TP_CRM_LINE_* keys) when the bridge loads.
  */
 
 function crm_line_bridge_path(): ?string {
@@ -39,6 +40,73 @@ function crm_line_bridge_warn_missing_path(): void {
     );
 }
 
+/**
+ * Load tp-crm/.env into $_ENV so LINE_* keys resolve when HR bootstrap already loaded tp-hr/.env.
+ * LINE keys from CRM always win (Messaging API token lives in CRM .env on production).
+ */
+function crm_line_bridge_ingest_crm_env(string $crmPath): bool {
+    static $ingested = false;
+    if ($ingested) {
+        return true;
+    }
+    $envFile = $crmPath . DIRECTORY_SEPARATOR . '.env';
+    if (!is_readable($envFile)) {
+        return false;
+    }
+    $ingested = true;
+    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if ($lines === false) {
+        return false;
+    }
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if ($line === '' || $line[0] === '#') {
+            continue;
+        }
+        if (!str_contains($line, '=')) {
+            continue;
+        }
+        [$key, $value] = explode('=', $line, 2);
+        $key = trim($key);
+        $value = trim($value);
+        if (preg_match('/^(["\'])(.*)\\1$/', $value, $m)) {
+            $value = $m[2];
+        }
+        $isLineKey = str_starts_with($key, 'LINE_') || str_starts_with($key, 'TP_CRM_LINE_');
+        if ($isLineKey || !array_key_exists($key, $_ENV)) {
+            $_ENV[$key] = $value;
+            putenv("{$key}={$value}");
+        }
+    }
+    return true;
+}
+
+function crm_line_bridge_env_value(string $key, mixed $default = null): mixed {
+    if (defined('TP_COMMON_AVAILABLE') && TP_COMMON_AVAILABLE && class_exists(\TpCommon\Env\Env::class)) {
+        $val = \TpCommon\Env\Env::get($key, $default);
+        return $val === null ? $default : $val;
+    }
+    $aliases = [
+        'LINE_CHANNEL_ACCESS_TOKEN' => ['TP_CRM_LINE_CHANNEL_ACCESS_TOKEN'],
+        'LINE_CHANNEL_ID' => ['TP_CRM_LINE_CHANNEL_ID'],
+        'LINE_CHANNEL_SECRET' => ['TP_CRM_LINE_CHANNEL_SECRET'],
+        'LINE_LIFF_ID' => ['TP_CRM_LINE_LIFF_ID'],
+        'LINE_LOGIN_CHANNEL_ID' => ['TP_CRM_LINE_LOGIN_CHANNEL_ID'],
+        'LINE_LOGIN_CHANNEL_SECRET' => ['TP_CRM_LINE_LOGIN_CHANNEL_SECRET'],
+    ];
+    $keys = [$key];
+    if (isset($aliases[$key])) {
+        $keys = array_merge($keys, $aliases[$key]);
+    }
+    foreach ($keys as $k) {
+        $value = $_ENV[$k] ?? getenv($k);
+        if ($value !== false && $value !== null && $value !== '') {
+            return $value;
+        }
+    }
+    return $default;
+}
+
 function crm_line_bridge_load(): bool {
     static $loadedOk = false;
     if ($loadedOk) {
@@ -55,10 +123,10 @@ function crm_line_bridge_load(): bool {
         if (!defined('TP_CRM_PATH')) {
             define('TP_CRM_PATH', $crmPath);
         }
+        crm_line_bridge_ingest_crm_env($crmPath);
         if (!function_exists('env_value')) {
             function env_value($key, $default = null) {
-                $value = $_ENV[$key] ?? getenv($key);
-                return ($value === false || $value === null || $value === '') ? $default : $value;
+                return crm_line_bridge_env_value($key, $default);
             }
         }
         require_once $crmPath . '/config/line.php';

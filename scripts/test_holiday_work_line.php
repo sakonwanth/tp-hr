@@ -132,6 +132,11 @@ $crmPath = crm_line_bridge_path();
 tl_assert($crmPath !== null, 'TP-CRM path resolved: ' . ($crmPath ?? 'n/a'), 'tp-crm path not found — set TP_CRM_PATH in .env');
 tl_assert(crm_line_bridge_load(), 'CRM LINE bridge loaded', 'CRM LINE bridge failed to load');
 
+$crmEnvLoaded = crm_line_bridge_ingest_crm_env((string) crm_line_bridge_path());
+if ($crmEnvLoaded) {
+    tl_ok('Ingested LINE keys from tp-crm/.env');
+}
+
 if (!class_exists('LineNotifier')) {
     tl_fail('LineNotifier class missing after bridge load');
     exit(1);
