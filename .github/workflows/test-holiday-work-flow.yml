@@ -1,0 +1,36 @@
+# Manual E2E test on production DB via SSH (same host as deploy)
+name: Test holiday work flow (production DB)
+
+on:
+  workflow_dispatch:
+    inputs:
+      cleanup:
+        description: 'Remove test rows after run (1=yes)'
+        required: false
+        default: '1'
+
+jobs:
+  test:
+    name: Run test_holiday_work_flow.php on server
+    runs-on: ubuntu-latest
+    if: vars.SELF_DEPLOY_ENABLED == 'true'
+    steps:
+      - uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          command_timeout: 5m
+          script: |
+            set -e
+            DEPLOY_PATH="${{ secrets.SSH_PATH }}"
+            PHP_BIN=$(which php 2>/dev/null || find /opt/plesk/php -name "php" -type f 2>/dev/null | sort -rV | head -1 || echo php)
+            cd "$DEPLOY_PATH"
+            git fetch origin main
+            git reset --hard origin/main
+            echo "=== Production DB holiday work flow test ==="
+            $PHP_BIN scripts/test_holiday_work_flow.php
+            if [ "${{ inputs.cleanup }}" = "1" ]; then
+              $PHP_BIN scripts/test_holiday_work_flow.php --cleanup
+            fi
