@@ -1,0 +1,44 @@
+# Guest Playwright smoke against production HR (no credentials required).
+name: E2E production UI (guest)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'holiday_work_request.php'
+      - 'hr/holiday_work_approvals.php'
+      - 'tests/e2e/**'
+      - '.github/workflows/e2e-production-ui.yml'
+
+jobs:
+  playwright-guest:
+    name: Playwright guest smoke (hr.tp-asset.com)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium
+
+      - name: Run guest E2E against production
+        env:
+          PLAYWRIGHT_BASE_URL: https://hr.tp-asset.com/
+          PLAYWRIGHT_SKIP_TABLET: '1'
+          CI: '1'
+        run: |
+          npx playwright test \
+            tests/e2e/health.spec.cjs \
+            tests/e2e/login.spec.cjs \
+            tests/e2e/protected-routes.spec.cjs \
+            tests/e2e/holiday-work-ui.spec.cjs \
+            --project=chromium
