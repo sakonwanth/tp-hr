@@ -139,10 +139,24 @@ $hol->execute([$holidayDate]);
 $holidayName = (string) ($hol->fetchColumn() ?: 'วันหยุด');
 
 if ($compDate === '') {
-    $compDate = date('Y-m-d', strtotime($holidayDate . ' -1 day'));
-    if ($compDate === $holidayDate) {
-        $compDate = date('Y-m-d', strtotime($holidayDate . ' +1 day'));
+    $compDate = tw_pick_comp_date($pdo, $userId, $holidayDate);
+}
+
+function tw_pick_comp_date(PDO $pdo, int $userId, string $holidayDate): string
+{
+    for ($i = 1; $i <= 21; $i++) {
+        $candidate = date('Y-m-d', strtotime($holidayDate . " +{$i} days"));
+        if (WorkdayCalculator::isExpectedWorkdayForUser($pdo, $userId, $candidate)) {
+            return $candidate;
+        }
     }
+    for ($i = 1; $i <= 21; $i++) {
+        $candidate = date('Y-m-d', strtotime($holidayDate . " -{$i} days"));
+        if (WorkdayCalculator::isExpectedWorkdayForUser($pdo, $userId, $candidate)) {
+            return $candidate;
+        }
+    }
+    return date('Y-m-d', strtotime($holidayDate . ' +1 day'));
 }
 
 echo "Holiday work date: {$holidayDate} ({$holidayName})\n";
@@ -189,13 +203,20 @@ $month = substr($holidayDate, 0, 7);
 if (class_exists('EmployeeSummaryService')) {
     $svc = new EmployeeSummaryService($pdo);
     $summary = $svc->getMonthlySummary($userId, $month);
+    $scanEnd = (string) ($summary['summary_scan_end'] ?? date('Y-m-d'));
     $hwCount = count($summary['holiday_work_exceptions'] ?? []);
     $hwDays = (int) ($summary['counts']['holiday_work_days'] ?? 0);
     $compDays = (int) ($summary['counts']['comp_days'] ?? 0);
     tw_assert($hwCount >= 1, "Summary month {$month}: holiday_work_exceptions >= 1 (got {$hwCount})", 'Summary missing holiday_work_exceptions');
-    tw_assert($hwDays >= 1, "Summary month {$month}: holiday_work_days >= 1 (got {$hwDays})", 'Summary missing holiday_work_days count');
-    if ($compDate !== '' && str_starts_with($compDate, $month)) {
+    if ($holidayDate <= $scanEnd) {
+        tw_assert($hwDays >= 1, "Summary month {$month}: holiday_work_days >= 1 (got {$hwDays}, scan_end {$scanEnd})", 'Summary missing holiday_work_days count');
+    } else {
+        tw_ok("Summary skip holiday_work_days (holiday {$holidayDate} after scan_end {$scanEnd})");
+    }
+    if ($compDate !== '' && str_starts_with($compDate, $month) && $compDate <= $scanEnd) {
         tw_assert($compDays >= 1, "Summary month {$month}: comp_days >= 1 (got {$compDays})", 'Summary missing comp_days count');
+    } elseif ($compDate !== '' && str_starts_with($compDate, $month)) {
+        tw_ok("Summary skip comp_days (comp {$compDate} after scan_end {$scanEnd})");
     }
 }
 

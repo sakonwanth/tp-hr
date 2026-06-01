@@ -30,7 +30,8 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             echo "=== Production DB holiday work flow test ==="
-            $PHP_BIN scripts/test_holiday_work_flow.php
+            $PHP_BIN scripts/test_holiday_work_flow.php || RC=$?
             if [ "${{ inputs.cleanup }}" = "1" ]; then
-              $PHP_BIN scripts/test_holiday_work_flow.php --cleanup
+              $PHP_BIN scripts/test_holiday_work_flow.php --cleanup || true
             fi
+            exit ${RC:-0}
