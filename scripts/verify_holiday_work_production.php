@@ -87,6 +87,12 @@ if ($tableExists) {
 
 vw_assert(class_exists(WorkdayCalculator::class), 'WorkdayCalculator loaded from tp-common', 'WorkdayCalculator missing — composer update tpasset/tp-common');
 
+$logTable = (int) $pdo->query("
+    SELECT COUNT(*) FROM information_schema.tables
+    WHERE table_schema = DATABASE() AND table_name = 'line_notification_log'
+")->fetchColumn();
+vw_assert($logTable > 0, 'Table line_notification_log exists', 'Missing line_notification_log — run scripts/ensure_line_notification_log.php');
+
 $lineEvents = ['hr.holiday_work_requested', 'hr.holiday_work_approved', 'hr.holiday_work_rejected'];
 try {
     $placeholders = implode(',', array_fill(0, count($lineEvents), '?'));

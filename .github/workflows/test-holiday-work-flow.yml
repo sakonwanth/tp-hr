@@ -53,6 +53,7 @@ jobs:
             fi
             if [ "$MODE" = "line-send" ]; then
               echo "=== Holiday work LINE live send ==="
+              $PHP_BIN scripts/ensure_line_notification_log.php 2>&1 || true
               RC=0
               $PHP_BIN scripts/test_holiday_work_line.php --send || RC=$?
               $PHP_BIN scripts/test_holiday_work_line.php --cleanup || true

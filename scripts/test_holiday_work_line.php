@@ -273,6 +273,15 @@ $pdo->prepare('DELETE FROM hr_holiday_work_exceptions WHERE user_id = ? AND holi
     ->execute([$userId, $holidayDate, '%' . $marker . '%']);
 
 $logBefore = tl_latest_log_id($pdo);
+$logTable = (int) $pdo->query("
+    SELECT COUNT(*) FROM information_schema.tables
+    WHERE table_schema = DATABASE() AND table_name = 'line_notification_log'
+")->fetchColumn();
+if ($logTable <= 0) {
+    tl_fail('Missing table line_notification_log — run scripts/ensure_line_notification_log.php');
+} else {
+    tl_ok('Table line_notification_log exists');
+}
 
 $pdo->prepare("
     INSERT INTO hr_holiday_work_exceptions
@@ -290,7 +299,7 @@ tl_assert($requestId > 0, "Created PENDING request #{$requestId}", 'Failed to in
 
 crm_line_notify_holiday_work_requested($pdo, $requestId);
 $reqLogs = tl_logs_since($pdo, $logBefore, 'holiday_work_requested');
-if ($lineEnabled) {
+if ($lineEnabled && $logTable > 0) {
     tl_assert($reqLogs !== [], 'line_notification_log: holiday_work_requested entry created', 'No log entry for holiday_work_requested');
 } else {
     tl_ok('LINE off — skipped log assertion for holiday_work_requested (enable LINE to test live push)');
@@ -318,7 +327,7 @@ $pdo->prepare("
 
 crm_line_notify_holiday_work_decision($pdo, $requestId, 'APPROVED', $marker . ' approved');
 $apprLogs = tl_logs_since($pdo, $logMid, 'holiday_work_approved');
-if ($lineEnabled) {
+if ($lineEnabled && $logTable > 0) {
     tl_assert($apprLogs !== [], 'line_notification_log: holiday_work_approved entry created', 'No log entry for holiday_work_approved');
 } else {
     tl_ok('LINE off — skipped log assertion for holiday_work_approved');

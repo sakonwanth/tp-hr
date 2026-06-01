@@ -117,6 +117,11 @@ jobs:
               $PHP_BIN scripts/ensure_holiday_work_schema.php 2>&1 || echo "   holiday work schema skipped"
             fi
 
+            if [ -n "$PHP_BIN" ] && [ -f scripts/ensure_line_notification_log.php ]; then
+              echo "📬 Ensuring line_notification_log table..."
+              $PHP_BIN scripts/ensure_line_notification_log.php 2>&1 || echo "   line notification log skipped"
+            fi
+
             chown -R tpasset:psacln . 2>/dev/null || true
             find . -type d -exec chmod 755 {} \; 2>/dev/null || true
             find . -type f -exec chmod 644 {} \; 2>/dev/null || true

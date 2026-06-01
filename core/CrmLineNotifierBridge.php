@@ -155,6 +155,14 @@ function crm_line_setting(PDO $pdo, string $key, string $default = ''): string {
     }
 }
 
+/** Immediate workflow LINE events bypass schedule/holiday gates. */
+function crm_line_event_context(int $triggeringUserId): array {
+    return [
+        'triggering_user_id' => $triggeringUserId,
+        'bypass_schedule' => true,
+    ];
+}
+
 function crm_line_user_name(array $user): string {
     $name = trim(($user['first_name_th'] ?? '') . ' ' . ($user['last_name_th'] ?? ''));
     if ($name !== '') return $name;
@@ -200,7 +208,7 @@ function crm_line_notify_new_leave(PDO $pdo, int $requestId): void {
             $belowThreshold,
             $threshold
         );
-        LineNotifier::sendEvent($pdo, 'hr.new_leave', $flex, ['triggering_user_id' => (int)$ctx['user_id']]);
+        LineNotifier::sendEvent($pdo, 'hr.new_leave', $flex, crm_line_event_context((int)$ctx['user_id']));
     } catch (Throwable $e) {
         error_log('crm_line_notify_new_leave error: ' . $e->getMessage());
     }
@@ -216,10 +224,10 @@ function crm_line_notify_leave_decision(PDO $pdo, int $requestId, string $decisi
         $leaveName = $ctx['leave_type_name'] ?? $ctx['leave_code'] ?? 'ลา';
         if ($decision === 'APPROVED') {
             $flex = hr_flex_leave_approved($leaveName, $ctx['start_date'], $ctx['end_date'], (float)$ctx['total_days'], $note);
-            LineNotifier::sendEvent($pdo, 'hr.leave_approved', $flex, ['triggering_user_id' => (int)$ctx['user_id']]);
+            LineNotifier::sendEvent($pdo, 'hr.leave_approved', $flex, crm_line_event_context((int)$ctx['user_id']));
         } elseif ($decision === 'REJECTED') {
             $flex = hr_flex_leave_rejected($leaveName, $ctx['start_date'], $ctx['end_date'], $note);
-            LineNotifier::sendEvent($pdo, 'hr.leave_rejected', $flex, ['triggering_user_id' => (int)$ctx['user_id']]);
+            LineNotifier::sendEvent($pdo, 'hr.leave_rejected', $flex, crm_line_event_context((int)$ctx['user_id']));
         }
     } catch (Throwable $e) {
         error_log('crm_line_notify_leave_decision error: ' . $e->getMessage());
@@ -266,7 +274,7 @@ function crm_line_notify_planned_late_request(PDO $pdo, array $user, string $tar
         // 1) HR + Admin + Chairman + CEO
         if (function_exists('hr_flex_planned_late_request')) {
             $flex = hr_flex_planned_late_request($employeeName, $targetDate, $plannedTime, mb_substr($reason, 0, 200), $requestedAt);
-            LineNotifier::sendEvent($pdo, 'hr.new_planned_late', $flex, ['triggering_user_id' => (int)$user['id']]);
+            LineNotifier::sendEvent($pdo, 'hr.new_planned_late', $flex, crm_line_event_context((int)$user['id']));
         }
 
         // 2) Confirmation Flex → พนักงาน
@@ -274,7 +282,7 @@ function crm_line_notify_planned_late_request(PDO $pdo, array $user, string $tar
             $graceMin = (int)crm_line_setting($pdo, 'payroll_planned_grace_minutes', '30');
 
             $flex2 = hr_flex_planned_late_confirmed($targetDate, $plannedTime, $graceMin);
-            LineNotifier::sendEvent($pdo, 'hr.planned_late_confirmed', $flex2, ['triggering_user_id' => (int)$user['id']]);
+            LineNotifier::sendEvent($pdo, 'hr.planned_late_confirmed', $flex2, crm_line_event_context((int)$user['id']));
         }
     } catch (Throwable $e) {
         error_log('crm_line_notify_planned_late_request error: ' . $e->getMessage());
@@ -294,7 +302,7 @@ function crm_line_notify_planned_late_cancelled(PDO $pdo, array $user, string $t
 
         if (function_exists('hr_flex_planned_late_cancelled')) {
             $flex = hr_flex_planned_late_cancelled(crm_line_user_name($user), $targetDate, $previousTime);
-            LineNotifier::sendEvent($pdo, 'hr.cancel_planned_late', $flex, ['triggering_user_id' => (int)$user['id']]);
+            LineNotifier::sendEvent($pdo, 'hr.cancel_planned_late', $flex, crm_line_event_context((int)$user['id']));
         }
     } catch (Throwable $e) {
         error_log('crm_line_notify_planned_late_cancelled error: ' . $e->getMessage());
@@ -337,9 +345,7 @@ function crm_line_notify_attendance_adjustment_requested(PDO $pdo, int $adjustme
             $ctx['requested_check_out'] ?? null,
             (string)($ctx['reason'] ?? '')
         );
-        LineNotifier::sendEvent($pdo, 'hr.attendance_adjustment_requested', $flex, [
-            'triggering_user_id' => (int)$ctx['user_id'],
-        ]);
+        LineNotifier::sendEvent($pdo, 'hr.attendance_adjustment_requested', $flex, crm_line_event_context((int)$ctx['user_id']));
     } catch (Throwable $e) {
         error_log('crm_line_notify_attendance_adjustment_requested error: ' . $e->getMessage());
     }
@@ -359,14 +365,10 @@ function crm_line_notify_attendance_adjustment_decision(PDO $pdo, int $adjustmen
         $date = $ctx['attendance_date'];
         if ($decision === 'APPROVED' && function_exists('hr_flex_attendance_adjustment_approved')) {
             $flex = hr_flex_attendance_adjustment_approved($date, $type, $note);
-            LineNotifier::sendEvent($pdo, 'hr.attendance_adjustment_approved', $flex, [
-                'triggering_user_id' => (int)$ctx['user_id'],
-            ]);
+            LineNotifier::sendEvent($pdo, 'hr.attendance_adjustment_approved', $flex, crm_line_event_context((int)$ctx['user_id']));
         } elseif ($decision === 'REJECTED' && function_exists('hr_flex_attendance_adjustment_rejected')) {
             $flex = hr_flex_attendance_adjustment_rejected($date, $type, $note);
-            LineNotifier::sendEvent($pdo, 'hr.attendance_adjustment_rejected', $flex, [
-                'triggering_user_id' => (int)$ctx['user_id'],
-            ]);
+            LineNotifier::sendEvent($pdo, 'hr.attendance_adjustment_rejected', $flex, crm_line_event_context((int)$ctx['user_id']));
         }
     } catch (Throwable $e) {
         error_log('crm_line_notify_attendance_adjustment_decision error: ' . $e->getMessage());
@@ -399,7 +401,7 @@ function crm_line_notify_dayoff_requested(PDO $pdo, int $requestId): void {
             (int)$ctx['requested_day_off'],
             (string)($ctx['reason'] ?? '')
         );
-        LineNotifier::sendEvent($pdo, 'hr.dayoff_requested', $flex, ['triggering_user_id' => (int)$ctx['user_id']]);
+        LineNotifier::sendEvent($pdo, 'hr.dayoff_requested', $flex, crm_line_event_context((int)$ctx['user_id']));
     } catch (Throwable $e) {
         error_log('crm_line_notify_dayoff_requested error: ' . $e->getMessage());
     }
@@ -412,10 +414,10 @@ function crm_line_notify_dayoff_decision(PDO $pdo, int $requestId, string $decis
         if (!$ctx) return;
         if ($decision === 'APPROVED' && function_exists('hr_flex_dayoff_approved')) {
             $flex = hr_flex_dayoff_approved($ctx['week_start'], $ctx['week_end'], (int)$ctx['requested_day_off'], $note);
-            LineNotifier::sendEvent($pdo, 'hr.dayoff_approved', $flex, ['triggering_user_id' => (int)$ctx['user_id']]);
+            LineNotifier::sendEvent($pdo, 'hr.dayoff_approved', $flex, crm_line_event_context((int)$ctx['user_id']));
         } elseif ($decision === 'REJECTED' && function_exists('hr_flex_dayoff_rejected')) {
             $flex = hr_flex_dayoff_rejected($ctx['week_start'], $ctx['week_end'], $note);
-            LineNotifier::sendEvent($pdo, 'hr.dayoff_rejected', $flex, ['triggering_user_id' => (int)$ctx['user_id']]);
+            LineNotifier::sendEvent($pdo, 'hr.dayoff_rejected', $flex, crm_line_event_context((int)$ctx['user_id']));
         }
     } catch (Throwable $e) {
         error_log('crm_line_notify_dayoff_decision error: ' . $e->getMessage());
@@ -451,7 +453,7 @@ function crm_line_notify_holiday_work_requested(PDO $pdo, int $requestId): void 
             (string) ($ctx['holiday_name'] ?? ''),
             (string) ($ctx['reason'] ?? '')
         );
-        LineNotifier::sendEvent($pdo, 'hr.holiday_work_requested', $flex, ['triggering_user_id' => (int) $ctx['user_id']]);
+        LineNotifier::sendEvent($pdo, 'hr.holiday_work_requested', $flex, crm_line_event_context((int) $ctx['user_id']));
     } catch (Throwable $e) {
         error_log('crm_line_notify_holiday_work_requested error: ' . $e->getMessage());
     }
@@ -468,10 +470,10 @@ function crm_line_notify_holiday_work_decision(PDO $pdo, int $requestId, string 
         }
         if ($decision === 'APPROVED' && function_exists('hr_flex_holiday_work_approved')) {
             $flex = hr_flex_holiday_work_approved($ctx['holiday_date'], $ctx['comp_date'] ?? null, $note);
-            LineNotifier::sendEvent($pdo, 'hr.holiday_work_approved', $flex, ['triggering_user_id' => (int) $ctx['user_id']]);
+            LineNotifier::sendEvent($pdo, 'hr.holiday_work_approved', $flex, crm_line_event_context((int) $ctx['user_id']));
         } elseif ($decision === 'REJECTED' && function_exists('hr_flex_holiday_work_rejected')) {
             $flex = hr_flex_holiday_work_rejected($ctx['holiday_date'], $note);
-            LineNotifier::sendEvent($pdo, 'hr.holiday_work_rejected', $flex, ['triggering_user_id' => (int) $ctx['user_id']]);
+            LineNotifier::sendEvent($pdo, 'hr.holiday_work_rejected', $flex, crm_line_event_context((int) $ctx['user_id']));
         }
     } catch (Throwable $e) {
         error_log('crm_line_notify_holiday_work_decision error: ' . $e->getMessage());
@@ -503,7 +505,7 @@ function crm_line_notify_outside_attendance_requested(PDO $pdo, int $requestId):
             $ctx['request_time'] ?? null,
             (string)($ctx['reason'] ?? '')
         );
-        LineNotifier::sendEvent($pdo, 'hr.outside_attendance_requested', $flex, ['triggering_user_id' => (int)$ctx['user_id']]);
+        LineNotifier::sendEvent($pdo, 'hr.outside_attendance_requested', $flex, crm_line_event_context((int)$ctx['user_id']));
     } catch (Throwable $e) {
         error_log('crm_line_notify_outside_attendance_requested error: ' . $e->getMessage());
     }
@@ -518,10 +520,10 @@ function crm_line_notify_outside_attendance_decision(PDO $pdo, int $requestId, s
         $date = (string)$ctx['request_date'];
         if ($decision === 'APPROVED' && function_exists('hr_flex_outside_attendance_approved')) {
             $flex = hr_flex_outside_attendance_approved($date, $type, $remarks);
-            LineNotifier::sendEvent($pdo, 'hr.outside_attendance_approved', $flex, ['triggering_user_id' => (int)$ctx['user_id']]);
+            LineNotifier::sendEvent($pdo, 'hr.outside_attendance_approved', $flex, crm_line_event_context((int)$ctx['user_id']));
         } elseif ($decision === 'REJECTED' && function_exists('hr_flex_outside_attendance_rejected')) {
             $flex = hr_flex_outside_attendance_rejected($date, $type, $remarks);
-            LineNotifier::sendEvent($pdo, 'hr.outside_attendance_rejected', $flex, ['triggering_user_id' => (int)$ctx['user_id']]);
+            LineNotifier::sendEvent($pdo, 'hr.outside_attendance_rejected', $flex, crm_line_event_context((int)$ctx['user_id']));
         }
     } catch (Throwable $e) {
         error_log('crm_line_notify_outside_attendance_decision error: ' . $e->getMessage());
