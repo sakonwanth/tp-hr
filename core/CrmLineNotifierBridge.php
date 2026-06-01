@@ -166,15 +166,20 @@ function crm_line_event_context(int $triggeringUserId): array {
 function crm_line_user_name(array $user): string {
     $name = trim(($user['first_name_th'] ?? '') . ' ' . ($user['last_name_th'] ?? ''));
     if ($name !== '') return $name;
+    $name = trim(($user['first_name_en'] ?? '') . ' ' . ($user['last_name_en'] ?? ''));
+    if ($name !== '') return $name;
     $name = trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? ''));
     return $name !== '' ? $name : ($user['username'] ?? 'พนักงาน');
+}
+
+function crm_line_user_select_sql(string $alias = 'u'): string {
+    return "{$alias}.username, {$alias}.first_name_th, {$alias}.last_name_th, {$alias}.first_name_en, {$alias}.last_name_en";
 }
 
 function crm_line_leave_context(PDO $pdo, int $requestId): ?array {
     $stmt = $pdo->prepare("
         SELECT lr.*, lt.code AS leave_code, lt.name AS leave_type_name,
-               u.id AS employee_id, u.username,
-               u.first_name, u.last_name, u.first_name_th, u.last_name_th
+               u.id AS employee_id, " . crm_line_user_select_sql('u') . "
         FROM hr_leave_requests lr
         JOIN hr_leave_types lt ON lr.leave_type_id = lt.id
         JOIN users u ON lr.user_id = u.id
@@ -312,8 +317,7 @@ function crm_line_notify_planned_late_cancelled(PDO $pdo, array $user, string $t
 function crm_line_adjustment_context(PDO $pdo, int $adjustmentId): ?array {
     $stmt = $pdo->prepare("
         SELECT adj.*, att.attendance_date,
-               u.id AS employee_id, u.username,
-               u.first_name, u.last_name, u.first_name_th, u.last_name_th
+               u.id AS employee_id, " . crm_line_user_select_sql('u') . "
         FROM hr_attendance_adjustments adj
         JOIN hr_attendances att ON att.id = adj.attendance_id
         JOIN users u ON u.id = adj.user_id
@@ -377,7 +381,7 @@ function crm_line_notify_attendance_adjustment_decision(PDO $pdo, int $adjustmen
 
 function crm_line_dayoff_context(PDO $pdo, int $requestId): ?array {
     $stmt = $pdo->prepare("
-        SELECT d.*, u.username, u.first_name, u.last_name, u.first_name_th, u.last_name_th
+        SELECT d.*, " . crm_line_user_select_sql('u') . "
         FROM hr_dayoff_requests d
         JOIN users u ON u.id = d.user_id
         WHERE d.id = ?
@@ -426,7 +430,7 @@ function crm_line_notify_dayoff_decision(PDO $pdo, int $requestId, string $decis
 
 function crm_line_holiday_work_context(PDO $pdo, int $requestId): ?array {
     $stmt = $pdo->prepare("
-        SELECT r.*, u.username, u.first_name, u.last_name, u.first_name_th, u.last_name_th
+        SELECT r.*, " . crm_line_user_select_sql('u') . "
         FROM hr_holiday_work_exceptions r
         JOIN users u ON u.id = r.user_id
         WHERE r.id = ?
@@ -482,7 +486,7 @@ function crm_line_notify_holiday_work_decision(PDO $pdo, int $requestId, string 
 
 function crm_line_outside_context(PDO $pdo, int $requestId): ?array {
     $stmt = $pdo->prepare("
-        SELECT r.*, u.username, u.first_name, u.last_name, u.first_name_th, u.last_name_th
+        SELECT r.*, " . crm_line_user_select_sql('u') . "
         FROM hr_attendance_outside_requests r
         JOIN users u ON u.id = r.user_id
         WHERE r.id = ?
