@@ -300,6 +300,10 @@ if ($logTable <= 0) {
     tl_ok('Table line_notification_log exists');
 }
 
+if (function_exists('hr_flex_public_base_url')) {
+    tl_ok('Flex logo base URL: ' . hr_flex_public_base_url());
+}
+
 $pdo->prepare("
     INSERT INTO hr_holiday_work_exceptions
         (user_id, holiday_date, comp_date, holiday_name, reason, status)
