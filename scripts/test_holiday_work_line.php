@@ -99,6 +99,17 @@ function tl_count_role_line_recipients(PDO $pdo, array $roles): int
     return (int) $stmt->fetchColumn();
 }
 
+function tl_setting(PDO $pdo, string $key): string
+{
+    try {
+        $stmt = $pdo->prepare('SELECT setting_value FROM system_settings WHERE setting_key = ? LIMIT 1');
+        $stmt->execute([$key]);
+        return (string) ($stmt->fetchColumn() ?: '');
+    } catch (Throwable) {
+        return '';
+    }
+}
+
 echo "=== Holiday work LINE test ===\n";
 echo 'Environment: ' . (defined('APP_ENV') ? APP_ENV : '?') . "\n";
 echo 'Mode: ' . ($send ? 'SEND (real LINE)' : 'dry-run') . "\n\n";
@@ -133,7 +144,23 @@ tl_assert(
 );
 
 $lineEnabled = LineNotifier::enabled();
+$tokenDefined = defined('LINE_CHANNEL_ACCESS_TOKEN') && (string) LINE_CHANNEL_ACCESS_TOKEN !== '';
+$lineNotif = tl_setting($pdo, 'line_notifications_enabled');
+$hrLine = tl_setting($pdo, 'hr_line_notifications_enabled');
 tl_ok('LineNotifier::enabled() = ' . ($lineEnabled ? 'true' : 'false'));
+if (!$lineEnabled) {
+    $parts = [];
+    if (!$tokenDefined) {
+        $parts[] = 'LINE_CHANNEL_ACCESS_TOKEN missing';
+    }
+    if ($lineNotif === '0' || $hrLine === '0') {
+        $parts[] = 'master switch off';
+    }
+    if ($parts === []) {
+        $parts[] = 'check tp-crm/config/line.php on server';
+    }
+    tl_ok('LINE disabled: ' . implode('; ', $parts) . " (line_notifications_enabled={$lineNotif}, hr_line_notifications_enabled={$hrLine})");
+}
 
 $events = [
     'hr.holiday_work_requested' => ['flex_fn' => 'hr_flex_holiday_work_requested', 'expect_mode' => 'roles'],
@@ -258,7 +285,11 @@ tl_assert($requestId > 0, "Created PENDING request #{$requestId}", 'Failed to in
 
 crm_line_notify_holiday_work_requested($pdo, $requestId);
 $reqLogs = tl_logs_since($pdo, $logBefore, 'holiday_work_requested');
-tl_assert($reqLogs !== [], 'line_notification_log: holiday_work_requested entry created', 'No log entry for holiday_work_requested');
+if ($lineEnabled) {
+    tl_assert($reqLogs !== [], 'line_notification_log: holiday_work_requested entry created', 'No log entry for holiday_work_requested');
+} else {
+    tl_ok('LINE off — skipped log assertion for holiday_work_requested (enable LINE to test live push)');
+}
 
 $sentReq = 0;
 foreach ($reqLogs as $row) {
@@ -282,7 +313,11 @@ $pdo->prepare("
 
 crm_line_notify_holiday_work_decision($pdo, $requestId, 'APPROVED', $marker . ' approved');
 $apprLogs = tl_logs_since($pdo, $logMid, 'holiday_work_approved');
-tl_assert($apprLogs !== [], 'line_notification_log: holiday_work_approved entry created', 'No log entry for holiday_work_approved');
+if ($lineEnabled) {
+    tl_assert($apprLogs !== [], 'line_notification_log: holiday_work_approved entry created', 'No log entry for holiday_work_approved');
+} else {
+    tl_ok('LINE off — skipped log assertion for holiday_work_approved');
+}
 
 $sentAppr = 0;
 foreach ($apprLogs as $row) {
@@ -317,5 +352,10 @@ if ($failures) {
     exit(1);
 }
 
-echo "LINE smoke test complete. Check LINE app on CEO + employee devices.\n";
+echo "LINE smoke test complete.";
+if ($lineEnabled) {
+    echo " Check LINE app on CEO + employee devices.\n";
+} else {
+    echo " Enable LINE in CRM settings (line_notifications_enabled) to deliver messages.\n";
+}
 exit(0);
