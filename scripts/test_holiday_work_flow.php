@@ -116,9 +116,10 @@ if ($reviewerId <= 0) {
 }
 
 if ($holidayDate === '') {
+    // Prefer strictly past holidays so summary KPI scan window includes the date (today's holiday is often outside scan_end).
     $holidayDate = (string) $pdo->query("
         SELECT date FROM hr_holidays
-        WHERE is_active = 1 AND date <= CURDATE()
+        WHERE is_active = 1 AND date < CURDATE()
         ORDER BY date DESC LIMIT 1
     ")->fetchColumn();
     if ($holidayDate === '') {
@@ -207,7 +208,11 @@ if (class_exists('EmployeeSummaryService')) {
     $hwCount = count($summary['holiday_work_exceptions'] ?? []);
     $hwDays = (int) ($summary['counts']['holiday_work_days'] ?? 0);
     $compDays = (int) ($summary['counts']['comp_days'] ?? 0);
-    tw_assert($hwCount >= 1, "Summary month {$month}: holiday_work_exceptions >= 1 (got {$hwCount})", 'Summary missing holiday_work_exceptions');
+    if ($holidayDate <= $scanEnd) {
+        tw_assert($hwCount >= 1, "Summary month {$month}: holiday_work_exceptions >= 1 (got {$hwCount})", 'Summary missing holiday_work_exceptions');
+    } else {
+        tw_ok("Summary skip holiday_work_exceptions (holiday {$holidayDate} after scan_end {$scanEnd})");
+    }
     if ($holidayDate <= $scanEnd) {
         tw_assert($hwDays >= 1, "Summary month {$month}: holiday_work_days >= 1 (got {$hwDays}, scan_end {$scanEnd})", 'Summary missing holiday_work_days count');
     } else {
