@@ -129,6 +129,8 @@ $routes = [
     'api/v1/holiday-work-requests' => '401',
 ];
 
+$checkinBase = rtrim(getenv('CHECKIN_PUBLIC_URL') ?: 'https://checkin.tp-asset.com', '/');
+
 echo "\nHTTP smoke ({$baseUrl}):\n";
 foreach ($routes as $path => $expect) {
     $url = $baseUrl . '/' . ltrim($path, '/');
@@ -161,6 +163,36 @@ foreach ($routes as $path => $expect) {
     } elseif ($expect === '401') {
         vw_assert($code === 401, "HTTP {$path} requires auth (401)", "HTTP {$path} expected 401, got {$code}");
     }
+}
+
+$checkinUrl = $checkinBase . '/history.php';
+$ch = curl_init($checkinUrl);
+curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_FOLLOWLOCATION => false,
+    CURLOPT_TIMEOUT => 20,
+    CURLOPT_SSL_VERIFYPEER => true,
+]);
+curl_exec($ch);
+$checkinCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$checkinErr = curl_error($ch);
+curl_close($ch);
+if ($checkinErr !== '') {
+    vw_fail("HTTP checkin/history.php: curl error — {$checkinErr}");
+} else {
+    vw_assert(in_array($checkinCode, [200, 302, 303], true), "HTTP checkin/history.php reachable ({$checkinCode})", "HTTP checkin/history.php status {$checkinCode}");
+}
+
+$checkinHelpers = dirname(__DIR__, 2) . '/tp-checkin/core/Helpers.php';
+if (is_file($checkinHelpers)) {
+    $helpersSrc = (string) file_get_contents($checkinHelpers);
+    vw_assert(
+        str_contains($helpersSrc, 'hr_holiday_work_exceptions') && str_contains($helpersSrc, 'หยุดชดเชย'),
+        'tp-checkin Helpers.php has holiday work comp labels',
+        'tp-checkin Helpers.php missing holiday work labels'
+    );
+} else {
+    vw_ok('tp-checkin Helpers.php skip (not co-deployed on this host)');
 }
 
 $holidaysPath = $root . '/holidays.php';

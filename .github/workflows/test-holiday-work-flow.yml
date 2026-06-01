@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: 'cleanup | verify | test (default test = flow test + optional cleanup)'
+        description: 'cleanup | verify | line | line-send | test'
         required: false
         default: 'test'
       cleanup:
@@ -43,7 +43,20 @@ jobs:
             if [ "$MODE" = "verify" ]; then
               echo "=== Production holiday work verify ==="
               $PHP_BIN scripts/verify_holiday_work_production.php --cleanup
+              $PHP_BIN scripts/test_holiday_work_line.php
               exit $?
+            fi
+            if [ "$MODE" = "line" ]; then
+              echo "=== Holiday work LINE dry-run ==="
+              $PHP_BIN scripts/test_holiday_work_line.php
+              exit $?
+            fi
+            if [ "$MODE" = "line-send" ]; then
+              echo "=== Holiday work LINE live send ==="
+              RC=0
+              $PHP_BIN scripts/test_holiday_work_line.php --send || RC=$?
+              $PHP_BIN scripts/test_holiday_work_line.php --cleanup || true
+              exit $RC
             fi
             echo "=== Production DB holiday work flow test ==="
             RC=0
@@ -52,4 +65,5 @@ jobs:
               $PHP_BIN scripts/test_holiday_work_flow.php --cleanup || true
             fi
             $PHP_BIN scripts/verify_holiday_work_production.php --cleanup || RC=1
+            $PHP_BIN scripts/test_holiday_work_line.php || RC=1
             exit $RC
