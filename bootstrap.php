@@ -49,10 +49,14 @@ function tp_hr_sql_string_list(array $values): string {
 }
 
 function tp_hr_non_system_user_condition_sql(string $alias = 'u'): string {
+    if (class_exists(\TpCommon\User\TestAccountScope::class)) {
+        return \TpCommon\User\TestAccountScope::productionPersonFilterSql($alias);
+    }
     $prefix = $alias !== '' ? $alias . '.' : '';
     return $prefix . "account_type = 'PERSON'"
         . ' AND ' . $prefix . 'is_employee = 1'
-        . ' AND ' . $prefix . 'is_test_account = 0';
+        . ' AND ' . $prefix . 'is_test_account = 0'
+        . ' AND (' . $prefix . 'employee_code IS NULL OR ' . $prefix . "employee_code NOT LIKE 'QAE-%')";
 }
 
 function tp_hr_payroll_employee_filter_sql(string $alias = 'u'): string {
