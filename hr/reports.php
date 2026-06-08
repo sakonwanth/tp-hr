@@ -198,12 +198,12 @@ switch ($report) {
                 SUM(CASE WHEN a.status = 'ABSENT'  THEN 1 ELSE 0 END) AS absent,
                 SUM(CASE WHEN a.status = 'LEAVE'   THEN 1 ELSE 0 END) AS on_leave,
                 SUM(CASE WHEN a.status = 'HOLIDAY' THEN 1 ELSE 0 END) AS holiday_off,
-                (SELECT COUNT(*) FROM users
-                  WHERE is_active = 1 AND " . tp_hr_non_system_user_condition_sql('') . ") AS total_employees
+                (SELECT COUNT(*) FROM users u
+                  WHERE " . tp_hr_attendance_scope_filter_sql('u') . ") AS total_employees
             FROM hr_attendances a
             LEFT JOIN hr_holidays h ON h.date = a.attendance_date AND h.is_active = 1
             WHERE a.attendance_date BETWEEN ? AND ?
-              AND EXISTS (SELECT 1 FROM users u WHERE u.id = a.user_id AND u.is_active = 1 AND " . tp_hr_non_system_user_condition_sql('u') . ")
+              AND EXISTS (SELECT 1 FROM users u WHERE u.id = a.user_id AND u.is_active = 1 AND " . tp_hr_attendance_scope_filter_sql('u') . ")
             GROUP BY a.attendance_date, h.name
             ORDER BY a.attendance_date DESC
         ";

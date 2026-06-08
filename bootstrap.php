@@ -61,6 +61,17 @@ function tp_hr_payroll_employee_filter_sql(string $alias = 'u'): string {
         . ' AND ' . tp_hr_non_system_user_condition_sql($alias);
 }
 
+/** Daily attendance / check-in scope: active TPE* payroll staff only */
+function tp_hr_attendance_scope_filter_sql(string $alias = 'u'): string {
+    if (class_exists(\TpCommon\Hr\AttendanceScope::class)) {
+        return \TpCommon\Hr\AttendanceScope::userFilterSql($alias);
+    }
+    $prefix = $alias !== '' ? $alias . '.' : '';
+    return $prefix . 'is_active = 1'
+        . ' AND ' . $prefix . "employee_code LIKE 'TPE%'"
+        . ' AND ' . tp_hr_non_system_user_condition_sql($alias);
+}
+
 /** วันลาออกต้องเป็นสิ้นเดือนปฏิทิน (ใช้คู่กับ payroll resignation tail) */
 function tp_hr_is_month_end_date(?string $date): bool
 {
