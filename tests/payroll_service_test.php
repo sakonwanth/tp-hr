@@ -267,6 +267,9 @@ assertSameValue('2026-04-26', $service->attendancePeriodBounds('2026-05-01', 31)
 assertSameValue('2026-05-25', $service->attendancePeriodBounds('2026-05-01', 31)['end'], 'May payroll ends May 25');
 assertSameValue('2026-05-25', $service->attendanceClosedScanEnd('2026-04-26', '2026-05-25', '2026-05-26'), 'scan full May period on May 26');
 assertSameValue('', $service->attendanceClosedScanEnd('2026-05-26', '2026-06-25', '2026-05-26'), 'June period on May 26 — no false absent');
+assertSameValue('2026-06-07', $service->attendanceClosedScanEnd('2026-05-26', '2026-06-25', '2026-06-08'), 'Jun 8 as_of scans through Jun 7');
+assertSameValue(true, $service->isAttendanceDeductibleDate('2026-06-04', '2026-06-07'), 'Jun 4 deductible when scan end Jun 7');
+assertSameValue(false, $service->isAttendanceDeductibleDate('2026-06-08', '2026-06-07'), 'Jun 8 not deductible before day closes');
 assertSameValue('2026-05', $service->suggestPayrollMonth(null, '2026-05-26'), 'suggest May after cutover');
 assertSameValue('2026-04', $service->suggestPayrollMonth(null, '2026-05-20'), 'suggest April before cutover');
 

@@ -1123,6 +1123,15 @@ class PayrollService
         return $yesterday;
     }
 
+    /** วันนี้ปิดรอบแล้วหรือยัง — ใช้กรองหักขาด/มาสายจาก hr_attendances */
+    public function isAttendanceDeductibleDate(string $date, string $missingScanEnd): bool
+    {
+        if ($missingScanEnd === '') {
+            return false;
+        }
+        return $date <= $missingScanEnd;
+    }
+
     /** Payroll month (YYYY-MM) to calculate as of $asOf — after cutoff day → current month. */
     public function suggestPayrollMonth(?int $payDay = null, ?string $asOf = null): string
     {
@@ -1279,6 +1288,10 @@ class PayrollService
             $loggedDates[$date] = true;
 
             if (!$this->isPayrollWorkday($workdayCtx, $date)) {
+                continue;
+            }
+
+            if (!$this->isAttendanceDeductibleDate($date, $missingScanEnd)) {
                 continue;
             }
 
