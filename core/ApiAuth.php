@@ -119,7 +119,9 @@ class ApiAuth {
         self::start(); // ensure Content-Type is set even for pre-auth failures
         self::log($status, $message);
         http_response_code($status);
-        echo json_encode(['success' => false, 'error' => $message], JSON_UNESCAPED_UNICODE);
+        // ADR-0003 alignment: emit `message` (standard envelope) alongside `error`
+        // (transitional/back-compat — TpCommon\Http\Client reads error ?? message).
+        echo json_encode(['success' => false, 'message' => $message, 'error' => $message], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
