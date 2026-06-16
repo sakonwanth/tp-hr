@@ -11,16 +11,20 @@ declare(strict_types=1);
 require_once __DIR__ . '/../bootstrap.php';
 
 $name = $argv[1] ?? 'tp-crm integration';
-$scopes = [
-    'payroll.read',
-    'payroll.read_all',
-    'payroll.write',
-    'payroll.approve',
-    'employees.read',
-    'attendance.read',
-    'attendance.write',
-    'attendance.write_all',
-];
+// Optional arg 2: comma-separated scopes (least-privilege per consumer; default = full
+// cross-system set). e.g. "attendance.read,attendance.write,attendance.write_all" for tp-checkin.
+$scopes = isset($argv[2]) && trim($argv[2]) !== ''
+    ? array_values(array_filter(array_map('trim', explode(',', $argv[2]))))
+    : [
+        'payroll.read',
+        'payroll.read_all',
+        'payroll.write',
+        'payroll.approve',
+        'employees.read',
+        'attendance.read',
+        'attendance.write',
+        'attendance.write_all',
+    ];
 
 $issued = ApiAuth::issue([
     'name' => $name,
