@@ -107,6 +107,40 @@ if ($action === 'excuse-late') {
     ApiAuth::success(['data' => ['id' => $attendanceId, 'late_excused' => $excused, 'affected' => $stmt->rowCount()]]);
 }
 
+// Admin: reclassify an attendance row's status (Phase 2.1 — verbatim from CRM admin_reclassify).
+// Caller computes the final status + builds the audit tag, and supplies actor_id.
+if ($action === 'reclassify') {
+    $body = ApiAuth::input();
+    $key = ApiAuth::currentKey();
+    apiKeyRequireServiceUserOrReadAllScope(
+        $key,
+        'attendance.write_all',
+        'Reclassify via API requires attendance.write_all (or *) or a service user bound to the API key'
+    );
+    $attendanceId = (int)($body['attendance_id'] ?? 0);
+    $status = strtoupper(trim((string)($body['status'] ?? '')));
+    $audit  = trim((string)($body['audit'] ?? ''));
+    $actorId = (int)($body['actor_id'] ?? 0);
+    if ($attendanceId <= 0) ApiAuth::fail(400, 'attendance_id required');
+    if (!in_array($status, ['PRESENT','ABSENT','LEAVE','HOLIDAY','LATE','WFH','HALF_DAY','PENDING'], true)) {
+        ApiAuth::fail(400, 'invalid status');
+    }
+    try {
+        // SQL byte-identical to the CRM direct path (parity by construction).
+        $stmt = $pdo->prepare("UPDATE hr_attendances
+            SET status=?,
+                adjustment_reason=CONCAT_WS(\"\\n\", NULLIF(adjustment_reason,''), ?),
+                adjusted_by=?, adjusted_at=NOW(),
+                approved_by=?, approved_at=NOW()
+            WHERE id=?");
+        $stmt->execute([$status, $audit, $actorId ?: null, $actorId ?: null, $attendanceId]);
+    } catch (Throwable $e) {
+        tpHrLogException($e, 'api/v1/attendance reclassify');
+        ApiAuth::fail(500, 'Internal server error');
+    }
+    ApiAuth::success(['data' => ['id' => $attendanceId, 'status' => $status, 'affected' => $stmt->rowCount()]]);
+}
+
 if (!in_array($action, ['checkin', 'checkout'], true)) ApiAuth::fail(404, 'Unknown action');
 
 $body = ApiAuth::input();
