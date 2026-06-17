@@ -211,6 +211,48 @@ if ($action === 'manual-log') {
     ApiAuth::success(['data' => ['user_id' => $userId, 'attendance_date' => $date, 'status' => $status]]);
 }
 
+// Plan-late: admin sets a planned (excused) late start for a user+date (Phase 2.1 — from CRM
+// admin_plan_late). Caller validates business rules (no existing check-in, not a past date) +
+// supplies shift_id + audit. Upsert is result-equivalent to the CRM insert/update branches.
+if ($action === 'plan-late') {
+    $body = ApiAuth::input();
+    $key = ApiAuth::currentKey();
+    $userId = apiKeyResolveScopedUserId($key, (int)($body['user_id'] ?? 0));
+    apiKeyRequireServiceUserOrReadAllScope(
+        $key,
+        'attendance.write_all',
+        'Plan-late via API requires attendance.write_all (or *) or a service user bound to the API key'
+    );
+    $date = trim((string)($body['date'] ?? ''));
+    $plannedStart = trim((string)($body['planned_start'] ?? ''));
+    $reason = trim((string)($body['reason'] ?? ''));
+    $plannedBy = (int)($body['planned_by'] ?? 0);
+    $shiftId = isset($body['shift_id']) && $body['shift_id'] !== '' ? (int)$body['shift_id'] : null;
+    $audit = trim((string)($body['audit'] ?? ''));
+    if ($userId <= 0) ApiAuth::fail(400, 'user_id required');
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) ApiAuth::fail(400, 'invalid date');
+    if (!preg_match('/^\d{2}:\d{2}:\d{2}$/', $plannedStart)) ApiAuth::fail(400, 'invalid planned_start (HH:MM:SS)');
+    try {
+        // Result-equivalent to the CRM insert-or-update branches (planned_* + audit).
+        $stmt = $pdo->prepare("INSERT INTO hr_attendances
+                (user_id, attendance_date, shift_id, planned_start_time, planned_reason,
+                 planned_requested_at, planned_requested_by, adjustment_reason, adjusted_by, adjusted_at, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, NOW(), ?, ?, ?, NOW(), NOW(), NOW())
+            ON DUPLICATE KEY UPDATE
+                planned_start_time=VALUES(planned_start_time),
+                planned_reason=VALUES(planned_reason),
+                planned_requested_at=NOW(),
+                planned_requested_by=VALUES(planned_requested_by),
+                adjustment_reason=CONCAT_WS(\"\\n\", NULLIF(adjustment_reason,''), VALUES(adjustment_reason)),
+                updated_at=NOW()");
+        $stmt->execute([$userId, $date, $shiftId, $plannedStart, $reason, $plannedBy ?: null, $audit, $plannedBy ?: null]);
+    } catch (Throwable $e) {
+        tpHrLogException($e, 'api/v1/attendance plan-late');
+        ApiAuth::fail(500, 'Internal server error');
+    }
+    ApiAuth::success(['data' => ['user_id' => $userId, 'attendance_date' => $date, 'planned_start_time' => $plannedStart]]);
+}
+
 if (!in_array($action, ['checkin', 'checkout'], true)) ApiAuth::fail(404, 'Unknown action');
 
 $body = ApiAuth::input();
