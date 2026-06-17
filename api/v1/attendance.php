@@ -173,6 +173,44 @@ if ($action === 'notify-late') {
     ApiAuth::success(['data' => ['user_id' => $userId, 'attendance_date' => $date, 'late_excused' => 1]]);
 }
 
+// Manual-log: admin upsert of an attendance status for a user+date (Phase 2.1 — verbatim
+// from CRM admin_create_log). Caller computes the final status + audit + actor_id.
+if ($action === 'manual-log') {
+    $body = ApiAuth::input();
+    $key = ApiAuth::currentKey();
+    $userId = apiKeyResolveScopedUserId($key, (int)($body['user_id'] ?? 0));
+    apiKeyRequireServiceUserOrReadAllScope(
+        $key,
+        'attendance.write_all',
+        'Manual-log via API requires attendance.write_all (or *) or a service user bound to the API key'
+    );
+    $date = trim((string)($body['date'] ?? ''));
+    $status = strtoupper(trim((string)($body['status'] ?? '')));
+    $audit = trim((string)($body['audit'] ?? ''));
+    $actorId = (int)($body['actor_id'] ?? 0);
+    if ($userId <= 0) ApiAuth::fail(400, 'user_id required');
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) ApiAuth::fail(400, 'invalid date');
+    if (!in_array($status, ['PRESENT','ABSENT','LEAVE','HOLIDAY','LATE','WFH','HALF_DAY','PENDING'], true)) {
+        ApiAuth::fail(400, 'invalid status');
+    }
+    try {
+        // SQL byte-identical to the CRM direct path (parity by construction).
+        $stmt = $pdo->prepare("INSERT INTO hr_attendances
+                (user_id, attendance_date, status, adjustment_reason, adjusted_by, adjusted_at, approved_by, approved_at)
+            VALUES (?, ?, ?, ?, ?, NOW(), ?, NOW())
+            ON DUPLICATE KEY UPDATE
+                status=VALUES(status),
+                adjustment_reason=CONCAT_WS(\"\\n\", NULLIF(adjustment_reason,''), VALUES(adjustment_reason)),
+                adjusted_by=VALUES(adjusted_by), adjusted_at=NOW(),
+                approved_by=VALUES(approved_by), approved_at=NOW()");
+        $stmt->execute([$userId, $date, $status, $audit, $actorId ?: null, $actorId ?: null]);
+    } catch (Throwable $e) {
+        tpHrLogException($e, 'api/v1/attendance manual-log');
+        ApiAuth::fail(500, 'Internal server error');
+    }
+    ApiAuth::success(['data' => ['user_id' => $userId, 'attendance_date' => $date, 'status' => $status]]);
+}
+
 if (!in_array($action, ['checkin', 'checkout'], true)) ApiAuth::fail(404, 'Unknown action');
 
 $body = ApiAuth::input();
