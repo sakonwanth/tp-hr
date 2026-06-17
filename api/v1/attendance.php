@@ -73,8 +73,40 @@ if ($method === 'GET') {
     ApiAuth::success(['data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
 }
 
-// POST checkin/checkout
+// POST checkin/checkout/excuse-late
 ApiAuth::require(['attendance.write']);
+
+// Admin: toggle late-excused on an existing attendance row (Phase 2.1 — migrated verbatim
+// from tp-crm modules/hr/actions.php admin_toggle_excused). Caller builds the audit tag.
+if ($action === 'excuse-late') {
+    $body = ApiAuth::input();
+    $key = ApiAuth::currentKey();
+    apiKeyRequireServiceUserOrReadAllScope(
+        $key,
+        'attendance.write_all',
+        'Excuse-late via API requires attendance.write_all (or *) or a service user bound to the API key'
+    );
+    $attendanceId = (int)($body['attendance_id'] ?? 0);
+    $excused = !empty($body['excused']) ? 1 : 0;
+    $reason  = trim((string)($body['reason'] ?? ''));
+    $audit   = trim((string)($body['audit'] ?? ''));
+    if ($attendanceId <= 0) ApiAuth::fail(400, 'attendance_id required');
+    try {
+        // SQL byte-identical to the CRM direct path (parity by construction).
+        $stmt = $pdo->prepare("UPDATE hr_attendances
+            SET late_excused = ?,
+                late_excused_reason = CASE WHEN ? <> '' THEN ? ELSE late_excused_reason END,
+                late_notified_at = COALESCE(late_notified_at, NOW()),
+                adjustment_reason = CONCAT_WS(\"\\n\", NULLIF(adjustment_reason,''), ?)
+            WHERE id = ?");
+        $stmt->execute([$excused, $reason, $reason, $audit, $attendanceId]);
+    } catch (Throwable $e) {
+        tpHrLogException($e, 'api/v1/attendance excuse-late');
+        ApiAuth::fail(500, 'Internal server error');
+    }
+    ApiAuth::success(['data' => ['id' => $attendanceId, 'late_excused' => $excused, 'affected' => $stmt->rowCount()]]);
+}
+
 if (!in_array($action, ['checkin', 'checkout'], true)) ApiAuth::fail(404, 'Unknown action');
 
 $body = ApiAuth::input();
