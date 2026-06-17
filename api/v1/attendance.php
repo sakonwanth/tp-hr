@@ -253,6 +253,35 @@ if ($action === 'plan-late') {
     ApiAuth::success(['data' => ['user_id' => $userId, 'attendance_date' => $date, 'planned_start_time' => $plannedStart]]);
 }
 
+// Cancel-plan-late: clear a planned late start on an attendance row (Phase 2.1 — verbatim
+// from CRM admin_cancel_planned_late). Caller validates (row exists, has planned, no check-in).
+if ($action === 'cancel-plan-late') {
+    $body = ApiAuth::input();
+    $key = ApiAuth::currentKey();
+    apiKeyRequireServiceUserOrReadAllScope(
+        $key,
+        'attendance.write_all',
+        'Cancel-plan-late via API requires attendance.write_all (or *) or a service user bound to the API key'
+    );
+    $attendanceId = (int)($body['attendance_id'] ?? 0);
+    $audit = trim((string)($body['audit'] ?? ''));
+    if ($attendanceId <= 0) ApiAuth::fail(400, 'attendance_id required');
+    try {
+        // SQL byte-identical to the CRM direct path (parity by construction).
+        $stmt = $pdo->prepare("UPDATE hr_attendances
+            SET planned_start_time=NULL, planned_reason=NULL,
+                planned_requested_at=NULL, planned_requested_by=NULL,
+                adjustment_reason=CONCAT_WS(\"\\n\", NULLIF(adjustment_reason,''), ?),
+                updated_at=NOW()
+            WHERE id=?");
+        $stmt->execute([$audit, $attendanceId]);
+    } catch (Throwable $e) {
+        tpHrLogException($e, 'api/v1/attendance cancel-plan-late');
+        ApiAuth::fail(500, 'Internal server error');
+    }
+    ApiAuth::success(['data' => ['id' => $attendanceId, 'planned_start_time' => null, 'affected' => $stmt->rowCount()]]);
+}
+
 if (!in_array($action, ['checkin', 'checkout'], true)) ApiAuth::fail(404, 'Unknown action');
 
 $body = ApiAuth::input();
