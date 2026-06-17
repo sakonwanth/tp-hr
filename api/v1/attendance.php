@@ -141,6 +141,38 @@ if ($action === 'reclassify') {
     ApiAuth::success(['data' => ['id' => $attendanceId, 'status' => $status, 'affected' => $stmt->rowCount()]]);
 }
 
+// Notify-late: upsert late-excused for a user+date (Phase 2.1 — from CRM notify_late /
+// admin_plan-late excuse flow). Result-equivalent to the CRM find-then-insert/update.
+if ($action === 'notify-late') {
+    $body = ApiAuth::input();
+    $key = ApiAuth::currentKey();
+    $userId = apiKeyResolveScopedUserId($key, (int)($body['user_id'] ?? 0));
+    apiKeyRequireServiceUserOrReadAllScope(
+        $key,
+        'attendance.write_all',
+        'Notify-late via API requires attendance.write_all (or *) or a service user bound to the API key'
+    );
+    $date   = trim((string)($body['date'] ?? ''));
+    $reason = trim((string)($body['reason'] ?? ''));
+    if ($userId <= 0) ApiAuth::fail(400, 'user_id required');
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) ApiAuth::fail(400, 'invalid date');
+    try {
+        // Upsert: insert PENDING+excused, or set excused/reason/notified_at on the existing row.
+        $stmt = $pdo->prepare("INSERT INTO hr_attendances
+                (user_id, attendance_date, status, late_excused, late_excused_reason, late_notified_at)
+            VALUES (?, ?, 'PENDING', 1, ?, NOW())
+            ON DUPLICATE KEY UPDATE
+                late_excused = 1,
+                late_excused_reason = VALUES(late_excused_reason),
+                late_notified_at = NOW()");
+        $stmt->execute([$userId, $date, $reason]);
+    } catch (Throwable $e) {
+        tpHrLogException($e, 'api/v1/attendance notify-late');
+        ApiAuth::fail(500, 'Internal server error');
+    }
+    ApiAuth::success(['data' => ['user_id' => $userId, 'attendance_date' => $date, 'late_excused' => 1]]);
+}
+
 if (!in_array($action, ['checkin', 'checkout'], true)) ApiAuth::fail(404, 'Unknown action');
 
 $body = ApiAuth::input();
