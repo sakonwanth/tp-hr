@@ -29,102 +29,40 @@ class AttendanceService
 
     public function determineCheckIn(array $user, ?array $shift, string $checkInAt, ?string $plannedStartTime = null): array
     {
+        // Calc lives in TpCommon\Hr\WorkdayCalculator (single source shared with tp-checkin).
+        // This method still owns HR-side inputs: work_mode, workday lookup, shift defaults.
         $workMode = strtoupper((string)($user['work_mode'] ?? 'OFFICE'));
         if ($workMode === 'WFH') {
-            return [
-                'status' => 'WFH',
-                'late_minutes' => 0,
-                'effective_start_at' => null,
-                'grace_minutes' => 0,
-            ];
+            return \TpCommon\Hr\WorkdayCalculator::computeCheckIn('WFH', true, $shift, $checkInAt, $plannedStartTime, 0);
         }
 
         $userId = (int)($user['id'] ?? 0);
         $date = date('Y-m-d', strtotime($checkInAt));
-        if ($userId > 0 && !$this->isExpectedWorkday($userId, $date)) {
-            return [
-                'status' => 'PRESENT',
-                'late_minutes' => 0,
-                'effective_start_at' => null,
-                'grace_minutes' => 0,
-            ];
-        }
+        // Original semantics: non-workday short-circuits only when we have a real user id.
+        $isExpectedWorkday = ($userId <= 0) ? true : $this->isExpectedWorkday($userId, $date);
+        $defaults = getShiftDefaults($shift);
 
-        $status = 'PRESENT';
-        $lateMinutes = 0;
-        $effectiveStartAt = null;
-        $graceMinutes = 0;
-
-        if ($shift) {
-            $date = date('Y-m-d', strtotime($checkInAt));
-            $defaults = getShiftDefaults($shift);
-            $shiftGrace = (int)$defaults['grace_period_minutes'];
-            $plannedGrace = 30;
-            $graceMinutes = $shiftGrace;
-
-            if ($plannedStartTime !== null && $plannedStartTime !== '') {
-                $effectiveStartAt = self::combineDateAndTime($date, $plannedStartTime);
-                $graceMinutes = max($shiftGrace, $plannedGrace);
-            } else {
-                $effectiveStartAt = self::combineDateAndTime($date, (string)$shift['start_time']);
-            }
-
-            $checkInTs = strtotime($checkInAt);
-            $startTs = strtotime($effectiveStartAt);
-            if ($checkInTs !== false && $startTs !== false && $checkInTs > ($startTs + ($graceMinutes * 60))) {
-                $lateMinutes = (int)floor(($checkInTs - $startTs) / 60);
-                $status = 'LATE';
-            }
-        }
-
-        return [
-            'status' => $status,
-            'late_minutes' => $lateMinutes,
-            'effective_start_at' => $effectiveStartAt,
-            'grace_minutes' => $graceMinutes,
-        ];
+        return \TpCommon\Hr\WorkdayCalculator::computeCheckIn(
+            $workMode,
+            $isExpectedWorkday,
+            $shift,
+            $checkInAt,
+            $plannedStartTime,
+            (int)$defaults['grace_period_minutes']
+        );
     }
 
     public function summarizeWork(?string $checkInAt, ?string $checkOutAt, ?array $shift, ?string $date = null): array
     {
         $defaults = getShiftDefaults($shift);
-        $breakMinutes = (int)$defaults['break_minutes'];
-        $workMinutes = 0;
-        $otMinutes = 0;
-        $earlyLeaveMinutes = 0;
-
-        if ($checkInAt && $checkOutAt) {
-            $checkInTs = strtotime($checkInAt);
-            $checkOutTs = strtotime($checkOutAt);
-            if ($checkInTs !== false && $checkOutTs !== false) {
-                $workMinutes = (int)floor(($checkOutTs - $checkInTs) / 60) - $breakMinutes;
-                if ($workMinutes < 0) $workMinutes = 0;
-            }
-        }
-
-        if ($shift) {
-            $expectedWorkMinutes = (int)round(((float)$defaults['work_hours_per_day']) * 60);
-            if ($workMinutes > $expectedWorkMinutes) {
-                $otMinutes = $workMinutes - $expectedWorkMinutes;
-            }
-
-            if ($checkOutAt && !empty($shift['end_time'])) {
-                $shiftDate = $date ?: date('Y-m-d', strtotime($checkOutAt));
-                $shiftEndAt = self::combineDateAndTime($shiftDate, (string)$shift['end_time']);
-                $checkOutTs = strtotime($checkOutAt);
-                $shiftEndTs = strtotime($shiftEndAt);
-                if ($checkOutTs !== false && $shiftEndTs !== false && $checkOutTs < $shiftEndTs) {
-                    $earlyLeaveMinutes = (int)floor(($shiftEndTs - $checkOutTs) / 60);
-                }
-            }
-        }
-
-        return [
-            'work_minutes' => $workMinutes,
-            'break_minutes' => $breakMinutes,
-            'ot_minutes' => $otMinutes,
-            'early_leave_minutes' => $earlyLeaveMinutes,
-        ];
+        return \TpCommon\Hr\WorkdayCalculator::computeWork(
+            $checkInAt,
+            $checkOutAt,
+            $shift,
+            $date,
+            (int)$defaults['break_minutes'],
+            (float)$defaults['work_hours_per_day']
+        );
     }
 
     public function summarizeAttendance(
