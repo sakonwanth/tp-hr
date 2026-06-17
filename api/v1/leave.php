@@ -149,12 +149,30 @@ if ($id <= 0) {
 
 // Actions (require at least read scope to probe; real scope enforced per-action below)
 ApiAuth::require(['leave.read']);
-if (!in_array($action, ['approve', 'reject', 'cancel'], true)) ApiAuth::fail(404, 'Unknown action');
+if (!in_array($action, ['approve', 'reject', 'cancel', 'set-document'], true)) ApiAuth::fail(404, 'Unknown action');
 
 $stmt = $pdo->prepare("SELECT * FROM hr_leave_requests WHERE id = ? LIMIT 1");
 $stmt->execute([$id]);
 $cur = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$cur) ApiAuth::fail(404, 'Not found');
+
+// Toggle the medical-cert document marker (Phase 2.1 — verbatim from CRM admin_set_medical_cert).
+if ($action === 'set-document') {
+    ApiAuth::require(['leave.write']);
+    $key = ApiAuth::currentKey();
+    apiKeyRequireServiceUserOrReadAllScope(
+        $key,
+        'leave.write_all',
+        'Set-document via API requires leave.write_all (or *) or a service user bound to the API key'
+    );
+    $has = !empty($body['has']);
+    if ($has) {
+        $pdo->prepare("UPDATE hr_leave_requests SET document_path=COALESCE(document_path,'crm-admin-confirmed') WHERE id=?")->execute([$id]);
+    } else {
+        $pdo->prepare("UPDATE hr_leave_requests SET document_path=NULL WHERE id=?")->execute([$id]);
+    }
+    ApiAuth::success(['data' => ['id' => $id, 'has_document' => $has ? 1 : 0]]);
+}
 
 if ($action === 'cancel') {
     ApiAuth::require(['leave.write']);
