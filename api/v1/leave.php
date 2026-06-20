@@ -177,7 +177,7 @@ if ($id <= 0) {
 
 // Actions (require at least read scope to probe; real scope enforced per-action below)
 ApiAuth::require(['leave.read']);
-if (!in_array($action, ['approve', 'reject', 'cancel', 'set-document'], true)) ApiAuth::fail(404, 'Unknown action');
+if (!in_array($action, ['approve', 'reject', 'cancel', 'set-document', 'crm-decide'], true)) ApiAuth::fail(404, 'Unknown action');
 
 $stmt = $pdo->prepare("SELECT * FROM hr_leave_requests WHERE id = ? LIMIT 1");
 $stmt->execute([$id]);
@@ -200,6 +200,54 @@ if ($action === 'set-document') {
         $pdo->prepare("UPDATE hr_leave_requests SET document_path=NULL WHERE id=?")->execute([$id]);
     }
     ApiAuth::success(['data' => ['id' => $id, 'has_document' => $has ? 1 : 0]]);
+}
+
+// CRM single-step approve/reject (Phase 2.1 — verbatim from CRM admin_approve_leave).
+// approve: txn UPDATE leave + UPSERT LEAVE attendance per day. Caller supplies actor_id/audit; LINE stays in CRM.
+if ($action === 'crm-decide') {
+    ApiAuth::require(['leave.write']);
+    $key = ApiAuth::currentKey();
+    apiKeyRequireServiceUserOrReadAllScope(
+        $key,
+        'leave.write_all',
+        'crm-decide via API requires leave.write_all (or *) or a service user bound to the API key'
+    );
+    $decision = trim((string)($body['decision'] ?? ''));
+    $note = trim((string)($body['note'] ?? ''));
+    $actorId = (int)($body['actor_id'] ?? 0);
+    $audit = trim((string)($body['audit'] ?? ''));
+    if (!in_array($decision, ['approve', 'reject'], true)) ApiAuth::fail(400, 'decision must be approve|reject');
+    try {
+        if ($decision === 'approve') {
+            $pdo->beginTransaction();
+            $pdo->prepare("UPDATE hr_leave_requests
+                SET status='APPROVED', final_approved_by=?, final_approved_at=NOW(),
+                    approver_1_id=?, approver_1_status='APPROVED', approver_1_date=NOW(), approver_1_remarks=?
+                WHERE id=?")->execute([$actorId ?: null, $actorId ?: null, $note, $id]);
+            $sync = $pdo->prepare("INSERT INTO hr_attendances (user_id, attendance_date, status, adjustment_reason, adjusted_by, adjusted_at, approved_by, approved_at)
+                VALUES (?, ?, 'LEAVE', ?, ?, NOW(), ?, NOW())
+                ON DUPLICATE KEY UPDATE
+                    status='LEAVE',
+                    adjustment_reason=CONCAT_WS(\"\\n\", NULLIF(adjustment_reason,''), VALUES(adjustment_reason)),
+                    adjusted_by=VALUES(adjusted_by), adjusted_at=NOW(),
+                    approved_by=VALUES(approved_by), approved_at=NOW()");
+            $ts = strtotime((string)$cur['start_date']);
+            $te = strtotime((string)$cur['end_date']);
+            for ($t = $ts; $t <= $te; $t += 86400) {
+                $sync->execute([(int)$cur['user_id'], date('Y-m-d', $t), $audit, $actorId ?: null, $actorId ?: null]);
+            }
+            $pdo->commit();
+        } else {
+            $pdo->prepare("UPDATE hr_leave_requests
+                SET status='REJECTED', cancel_reason=?, approver_1_id=?, approver_1_status='REJECTED', approver_1_date=NOW(), approver_1_remarks=?
+                WHERE id=?")->execute([$note, $actorId ?: null, $note, $id]);
+        }
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        tpHrLogException($e, 'api/v1/leave crm-decide');
+        ApiAuth::fail(500, 'Internal server error');
+    }
+    ApiAuth::success(['data' => ['id' => $id, 'status' => $decision === 'approve' ? 'APPROVED' : 'REJECTED']]);
 }
 
 if ($action === 'cancel') {
