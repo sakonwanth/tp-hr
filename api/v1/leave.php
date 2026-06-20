@@ -98,6 +98,34 @@ if ($id <= 0) {
         'leave.write_all',
         'Creating leave for users via API requires leave.write_all (or *) or a service user bound to the API key'
     );
+
+    // Verbatim CRM submit (Phase 2.1): preserve CRM's request_number / total_days (as passed,
+    // no working-day recompute) / document_path; no LINE here (CRM sends its own event).
+    if (($body['op'] ?? '') === 'crm-submit') {
+        $u = apiKeyResolveScopedUserId($key, (int)($body['user_id'] ?? 0));
+        $reqNum = trim((string)($body['request_number'] ?? ''));
+        $typeId = (int)($body['leave_type_id'] ?? 0);
+        $start = trim((string)($body['start_date'] ?? ''));
+        $end = trim((string)($body['end_date'] ?? ''));
+        $days = (float)($body['total_days'] ?? 0);
+        $reason = trim((string)($body['reason'] ?? ''));
+        $docPath = isset($body['document_path']) && $body['document_path'] !== '' ? (string)$body['document_path'] : null;
+        if ($u <= 0) ApiAuth::fail(400, 'user_id required');
+        if ($reqNum === '') ApiAuth::fail(400, 'request_number required');
+        if ($typeId <= 0) ApiAuth::fail(400, 'leave_type_id required');
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $start) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $end)) ApiAuth::fail(400, 'invalid dates');
+        try {
+            $pdo->prepare("INSERT INTO hr_leave_requests
+                    (request_number, user_id, leave_type_id, start_date, end_date, total_days, reason, document_path, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PENDING')")
+                ->execute([$reqNum, $u, $typeId, $start, $end, $days, $reason ?: null, $docPath]);
+        } catch (Throwable $e) {
+            tpHrLogException($e, 'api/v1/leave crm-submit');
+            ApiAuth::fail(500, 'Internal server error');
+        }
+        ApiAuth::success(['data' => ['id' => (int)$pdo->lastInsertId(), 'request_number' => $reqNum]], 201);
+    }
+
     $userId = apiKeyResolveScopedUserId($key, (int)($body['user_id'] ?? 0));
     $typeId = (int)($body['leave_type_id'] ?? 0);
     $start = trim($body['start_date'] ?? '');
