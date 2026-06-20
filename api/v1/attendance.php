@@ -351,6 +351,39 @@ if ($action === 'crm-checkout') {
     ApiAuth::success(['data' => ['id' => $attendanceId, 'work_minutes' => $workMin, 'affected' => $stmt->rowCount()]]);
 }
 
+// Auto-absent cron mark (Phase 2.1 op #12 — verbatim from CRM cron_hr_auto_absent).
+// CASE upsert preserves already-set statuses / excused / planned-late rows; only blanks → ABSENT.
+if ($action === 'auto-absent') {
+    $body = ApiAuth::input();
+    $key = ApiAuth::currentKey();
+    apiKeyRequireServiceUserOrReadAllScope(
+        $key,
+        'attendance.write_all',
+        'auto-absent via API requires attendance.write_all (or *) or a service user bound to the API key'
+    );
+    $uid = (int)($body['user_id'] ?? 0);
+    $date = trim((string)($body['date'] ?? ''));
+    $audit = trim((string)($body['audit'] ?? ''));
+    if ($uid <= 0 || $date === '') ApiAuth::fail(400, 'user_id, date required');
+    try {
+        $stmt = $pdo->prepare("INSERT INTO hr_attendances (user_id, attendance_date, status, adjustment_reason, adjusted_by, adjusted_at)
+            VALUES (?, ?, 'ABSENT', ?, NULL, NOW())
+            ON DUPLICATE KEY UPDATE
+                status = CASE
+                    WHEN status IN ('PRESENT','LATE','WFH','HALF_DAY','LEAVE','HOLIDAY') THEN status
+                    WHEN late_excused = 1 THEN status
+                    WHEN planned_start_time IS NOT NULL AND planned_start_time <> '' THEN status
+                    ELSE 'ABSENT' END,
+                adjustment_reason = CONCAT_WS(\"\\n\", NULLIF(adjustment_reason,''), VALUES(adjustment_reason)),
+                adjusted_at = NOW()");
+        $stmt->execute([$uid, $date, $audit]);
+    } catch (Throwable $e) {
+        tpHrLogException($e, 'api/v1/attendance auto-absent');
+        ApiAuth::fail(500, 'Internal server error');
+    }
+    ApiAuth::success(['data' => ['user_id' => $uid, 'date' => $date, 'affected' => $stmt->rowCount()]]);
+}
+
 if (!in_array($action, ['checkin', 'checkout'], true)) ApiAuth::fail(404, 'Unknown action');
 
 $body = ApiAuth::input();
