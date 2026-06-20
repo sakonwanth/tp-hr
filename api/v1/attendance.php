@@ -282,6 +282,75 @@ if ($action === 'cancel-plan-late') {
     ApiAuth::success(['data' => ['id' => $attendanceId, 'planned_start_time' => null, 'affected' => $stmt->rowCount()]]);
 }
 
+// CRM self-service web check-in (Phase 2.1 — verbatim from CRM check_in).
+// CRM computes late_minutes/status/remarks; the endpoint persists. Upsert mirrors CRM's
+// INSERT-new (sets remarks) vs UPDATE-existing (appends remarks) on the (user_id, date) key.
+if ($action === 'crm-checkin') {
+    $body = ApiAuth::input();
+    $key = ApiAuth::currentKey();
+    apiKeyRequireServiceUserOrReadAllScope(
+        $key,
+        'attendance.write_all',
+        'crm-checkin via API requires attendance.write_all (or *) or a service user bound to the API key'
+    );
+    $uid = (int)($body['user_id'] ?? 0);
+    $date = trim((string)($body['date'] ?? ''));
+    $datetime = trim((string)($body['datetime'] ?? ''));
+    $lat = $body['lat'] ?? null;
+    $lng = $body['lng'] ?? null;
+    $ip = $body['ip'] ?? null;
+    $remarks = (string)($body['remarks'] ?? '');
+    $lateMin = (int)($body['late_min'] ?? 0);
+    $status = trim((string)($body['status'] ?? ''));
+    if ($uid <= 0 || $date === '' || $datetime === '' || $status === '') ApiAuth::fail(400, 'user_id, date, datetime, status required');
+    try {
+        $stmt = $pdo->prepare("INSERT INTO hr_attendances
+            (user_id, attendance_date, check_in_time, check_in_type, check_in_latitude, check_in_longitude, check_in_ip, remarks, late_minutes, status)
+            VALUES (?, ?, ?, 'MANUAL', ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                check_in_time=VALUES(check_in_time), check_in_type='MANUAL',
+                check_in_latitude=VALUES(check_in_latitude), check_in_longitude=VALUES(check_in_longitude), check_in_ip=VALUES(check_in_ip),
+                remarks=CONCAT_WS(' | ', NULLIF(remarks,''), VALUES(remarks)),
+                late_minutes=VALUES(late_minutes), status=VALUES(status)");
+        $stmt->execute([$uid, $date, $datetime, $lat, $lng, $ip, $remarks, $lateMin, $status]);
+    } catch (Throwable $e) {
+        tpHrLogException($e, 'api/v1/attendance crm-checkin');
+        ApiAuth::fail(500, 'Internal server error');
+    }
+    ApiAuth::success(['data' => ['user_id' => $uid, 'date' => $date, 'late_minutes' => $lateMin, 'status' => $status]]);
+}
+
+// CRM self-service web check-out (Phase 2.1 — verbatim from CRM check_out).
+// CRM computes work_minutes + the "[checkout] ..." remark; the endpoint persists by row id.
+if ($action === 'crm-checkout') {
+    $body = ApiAuth::input();
+    $key = ApiAuth::currentKey();
+    apiKeyRequireServiceUserOrReadAllScope(
+        $key,
+        'attendance.write_all',
+        'crm-checkout via API requires attendance.write_all (or *) or a service user bound to the API key'
+    );
+    $attendanceId = (int)($body['attendance_id'] ?? 0);
+    $datetime = trim((string)($body['datetime'] ?? ''));
+    $ip = $body['ip'] ?? null;
+    $checkoutRemark = $body['checkout_remark'] ?? null;
+    if ($checkoutRemark === '') $checkoutRemark = null;
+    $workMin = (int)($body['work_min'] ?? 0);
+    if ($attendanceId <= 0 || $datetime === '') ApiAuth::fail(400, 'attendance_id, datetime required');
+    try {
+        $stmt = $pdo->prepare("UPDATE hr_attendances
+            SET check_out_time=?, check_out_type='MANUAL', check_out_ip=?,
+                remarks=CONCAT_WS(' | ', NULLIF(remarks,''), ?),
+                work_minutes=?
+            WHERE id=?");
+        $stmt->execute([$datetime, $ip, $checkoutRemark, $workMin, $attendanceId]);
+    } catch (Throwable $e) {
+        tpHrLogException($e, 'api/v1/attendance crm-checkout');
+        ApiAuth::fail(500, 'Internal server error');
+    }
+    ApiAuth::success(['data' => ['id' => $attendanceId, 'work_minutes' => $workMin, 'affected' => $stmt->rowCount()]]);
+}
+
 if (!in_array($action, ['checkin', 'checkout'], true)) ApiAuth::fail(404, 'Unknown action');
 
 $body = ApiAuth::input();
