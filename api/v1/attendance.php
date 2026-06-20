@@ -384,6 +384,33 @@ if ($action === 'auto-absent') {
     ApiAuth::success(['data' => ['user_id' => $uid, 'date' => $date, 'affected' => $stmt->rowCount()]]);
 }
 
+// Recompute-late backfill (Phase 2.1 op #13 — verbatim from CRM audit_attendance_late_minutes).
+// Sets late_minutes + flips PRESENT/WFH/HALF_DAY↔LATE per the recomputed value. Caller computes.
+if ($action === 'recompute-late') {
+    $body = ApiAuth::input();
+    $key = ApiAuth::currentKey();
+    apiKeyRequireServiceUserOrReadAllScope(
+        $key,
+        'attendance.write_all',
+        'recompute-late via API requires attendance.write_all (or *) or a service user bound to the API key'
+    );
+    $attendanceId = (int)($body['attendance_id'] ?? 0);
+    $lateMinutes = (int)($body['late_minutes'] ?? 0);
+    if ($attendanceId <= 0) ApiAuth::fail(400, 'attendance_id required');
+    try {
+        $stmt = $pdo->prepare("UPDATE hr_attendances SET late_minutes = ?, status = CASE
+            WHEN ? > 0 AND status IN ('PRESENT','WFH','HALF_DAY') THEN 'LATE'
+            WHEN ? = 0 AND status = 'LATE' THEN 'PRESENT'
+            ELSE status END
+          WHERE id = ?");
+        $stmt->execute([$lateMinutes, $lateMinutes, $lateMinutes, $attendanceId]);
+    } catch (Throwable $e) {
+        tpHrLogException($e, 'api/v1/attendance recompute-late');
+        ApiAuth::fail(500, 'Internal server error');
+    }
+    ApiAuth::success(['data' => ['id' => $attendanceId, 'late_minutes' => $lateMinutes, 'affected' => $stmt->rowCount()]]);
+}
+
 if (!in_array($action, ['checkin', 'checkout'], true)) ApiAuth::fail(404, 'Unknown action');
 
 $body = ApiAuth::input();
