@@ -1,0 +1,66 @@
+name: Cutover — grant CRM HR key write scopes (guarded, reversible)
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "grant (add write scopes) or revert (remove them)"
+        required: true
+        default: "grant"
+
+jobs:
+  cutover:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Grant/revert write_all scopes on the tp-crm key (guarded by prefix)
+        uses: appleboy/ssh-action@v1.2.5
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          command_timeout: 4m
+          envs: ACTION
+          script: |
+            set +e
+            ACTION="${{ github.event.inputs.action }}"
+            DEPLOY_PATH="${{ secrets.SSH_PATH }}"
+            cd "$DEPLOY_PATH" || exit 1
+            PHP_BIN=$(which php 2>/dev/null || find /opt/plesk/php -name php -type f 2>/dev/null | sort -rV | head -1)
+            TMP="$DEPLOY_PATH/cutover_key_$$.php"
+            cat > "$TMP" <<PHPEOF
+            <?php
+            \$ACTION = '${{ github.event.inputs.action }}';
+            require __DIR__ . '/bootstrap.php';
+            \$pdo = Database::getInstance()->getConnection();
+            // Guarded: only the tp-crm payroll integration key (by prefix).
+            \$PREFIX = 'tphr_3c1636a';
+            \$ADD = ['attendance.write_all', 'leave.read', 'leave.write_all'];
+
+            \$row = \$pdo->prepare("SELECT id, name, scopes FROM hr_api_keys WHERE key_prefix = ? LIMIT 1");
+            \$row->execute([\$PREFIX]);
+            \$k = \$row->fetch(PDO::FETCH_ASSOC);
+            if (!\$k) { echo "KEY NOT FOUND for prefix {\$PREFIX}\n"; exit(1); }
+            \$cur = json_decode(\$k['scopes'] ?? '[]', true) ?: [];
+            echo "Key #{\$k['id']} ({\$k['name']})\n  before: " . json_encode(\$cur) . "\n";
+
+            if (\$ACTION === 'revert') {
+                \$new = array_values(array_diff(\$cur, \$ADD));
+            } else {
+                \$new = array_values(array_unique(array_merge(\$cur, \$ADD)));
+            }
+            sort(\$new); \$tmp = \$cur; sort(\$tmp);
+            if (\$new === \$tmp) { echo "  no change needed\n"; exit(0); }
+
+            \$pdo->prepare("UPDATE hr_api_keys SET scopes = ? WHERE key_prefix = ?")
+                ->execute([json_encode(array_values(\$new)), \$PREFIX]);
+
+            \$row->execute([\$PREFIX]); \$after = json_decode(\$row->fetch(PDO::FETCH_ASSOC)['scopes'], true);
+            echo "  after:  " . json_encode(\$after) . "\n";
+            \$ok = \$ACTION === 'revert'
+                ? !in_array('attendance.write_all', \$after, true)
+                : (in_array('attendance.write_all', \$after, true) && in_array('leave.write_all', \$after, true));
+            echo \$ok ? "OK — {\$ACTION} applied\n" : "WARN — unexpected scope state\n";
+            PHPEOF
+            "$PHP_BIN" "$TMP" 2>&1
+            rm -f "$TMP"
