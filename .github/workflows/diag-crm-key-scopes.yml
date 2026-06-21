@@ -1,0 +1,41 @@
+name: Diag — CRM HR key scopes (read-only)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: List api_keys + scopes (read-only)
+        uses: appleboy/ssh-action@v1.2.5
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          command_timeout: 4m
+          script: |
+            set +e
+            DEPLOY_PATH="${{ secrets.SSH_PATH }}"
+            cd "$DEPLOY_PATH" || exit 1
+            PHP_BIN=$(which php 2>/dev/null || find /opt/plesk/php -name php -type f 2>/dev/null | sort -rV | head -1)
+            TMP="$DEPLOY_PATH/diag_keys_$$.php"
+            cat > "$TMP" <<'PHPEOF'
+            <?php
+            require __DIR__ . '/bootstrap.php';
+            $pdo = Database::getInstance()->getConnection();
+            $rows = $pdo->query("SELECT id, name, key_prefix, scopes, is_active, service_user_id, last_used_at FROM api_keys ORDER BY id")->fetchAll(PDO::FETCH_ASSOC);
+            echo "api_keys: " . count($rows) . "\n";
+            foreach ($rows as $r) {
+                $sc = json_decode($r['scopes'] ?? '[]', true) ?: [];
+                $hasAtt = in_array('attendance.write_all', $sc, true) || in_array('*', $sc, true);
+                $hasLv  = in_array('leave.write_all', $sc, true) || in_array('*', $sc, true);
+                echo sprintf("  #%s name=%-22s prefix=%-10s active=%s svc_user=%s att.write_all=%s leave.write_all=%s\n",
+                    $r['id'], $r['name'], $r['key_prefix'], $r['is_active'], $r['service_user_id'] ?? '-',
+                    $hasAtt?'Y':'N', $hasLv?'Y':'N');
+                echo "      scopes=" . json_encode($sc, JSON_UNESCAPED_SLASHES) . "\n";
+            }
+            PHPEOF
+            "$PHP_BIN" "$TMP" 2>&1
+            rm -f "$TMP"
