@@ -36,6 +36,14 @@ jobs:
                     $hasAtt?'Y':'N', $hasLv?'Y':'N');
                 echo "      scopes=" . json_encode($sc, JSON_UNESCAPED_SLASHES) . "\n";
             }
+
+            // recent requests from the tp-crm key (#2) to write endpoints — confirm cutover effective
+            $log = $pdo->query("SELECT l.path, l.method, l.status_code, l.created_at
+                FROM hr_api_request_logs l JOIN hr_api_keys k ON k.id = l.api_key_id
+                WHERE k.key_prefix='tphr_3c1636a' AND (l.path LIKE '%attendance%' OR l.path LIKE '%leave%')
+                ORDER BY l.id DESC LIMIT 12")->fetchAll(PDO::FETCH_ASSOC);
+            echo "Recent tp-crm-key write-endpoint calls: " . count($log) . "\n";
+            foreach ($log as $e) echo "  {$e['created_at']} {$e['method']} {$e['path']} -> {$e['status_code']}\n";
             PHPEOF
             "$PHP_BIN" "$TMP" 2>&1
             rm -f "$TMP"
