@@ -26,6 +26,7 @@ const PROTECTED_ROUTES = [
   { name: 'hr document templates', path: 'hr/document_templates.php' },
   { name: 'hr api keys', path: 'hr/api_keys.php' },
   { name: 'hr reports', path: 'hr/reports.php' },
+  { name: 'hr salary report', path: 'hr/salary_report.php' },
   { name: 'hr settings', path: 'hr/settings.php' },
   { name: 'hr day-off approvals', path: 'hr/dayoff_approvals.php' },
   { name: 'hr holiday work approvals', path: 'hr/holiday_work_approvals.php' },

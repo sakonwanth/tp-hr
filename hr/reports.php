@@ -315,6 +315,9 @@ require_once __DIR__ . '/../templates/header.php';
     <a href="?report=leave-summary" role="tab" aria-selected="<?php echo $report === 'leave-summary' ? 'true' : 'false'; ?>" class="inline-flex min-h-[48px] shrink-0 items-center px-4 py-2 rounded-[var(--tp-ios-card-radius)] whitespace-nowrap touch-manipulation transition-colors <?php echo $report === 'leave-summary' ? 'bg-violet-600 text-white shadow-sm' : 'bg-white/10 text-white/70 hover:text-white hover:bg-white/15'; ?>">
         <i class="fas fa-chart-pie mr-2" aria-hidden="true"></i>สรุปการลา
     </a>
+    <a href="/hr/salary_report.php" role="tab" aria-selected="false" class="inline-flex min-h-[48px] shrink-0 items-center px-4 py-2 rounded-[var(--tp-ios-card-radius)] whitespace-nowrap touch-manipulation transition-colors bg-white/10 text-white/70 hover:text-white hover:bg-white/15">
+        <i class="fas fa-money-check-dollar mr-2" aria-hidden="true"></i>รายงานเงินเดือน
+    </a>
 </div>
 
 <!-- Filters -->
