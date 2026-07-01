@@ -61,16 +61,21 @@ function hr_salary_scalar_float($value): float
 /**
  * Read ค่าตำแหน่ง/ค่าครองชีพ/ค่าเดินทาง/ค่าบริหาร/ชดเชยวันหยุด from whichever of
  * allowance_json / income_other_json tp-crm's payroll.php put them in — production
- * data shows both fields are used interchangeably for these labels.
+ * data shows both fields are used interchangeably for these labels. Items with a
+ * label that doesn't match a known bucket still count toward total_income (the
+ * engine sums them regardless) but are returned separately as "unmatched" so the
+ * page can flag them — a new label upstream would otherwise inflate the total
+ * without ever appearing in a named column.
  *
- * @return array<string,float>
+ * @return array{buckets: array<string,float>, unmatched: list<array{label: string, amount: float}>}
  */
 function hr_salary_extract_income_buckets(?array $setup): array
 {
     $out = array_fill_keys(array_keys(HR_SALARY_EXACT_LABEL_BUCKETS), 0.0);
     $out['holiday_compensation'] = 0.0;
+    $unmatched = [];
     if (!$setup) {
-        return $out;
+        return ['buckets' => $out, 'unmatched' => $unmatched];
     }
     $items = [];
     foreach (['allowance_json', 'income_other_json'] as $field) {
@@ -92,9 +97,33 @@ function hr_salary_extract_income_buckets(?array $setup): array
             $out[$bucketKey] += $amount;
         } elseif (in_array($label, HR_SALARY_HOLIDAY_COMP_LABELS, true)) {
             $out['holiday_compensation'] += $amount;
+        } else {
+            $unmatched[] = ['label' => $label !== '' ? $label : '(ไม่มีชื่อรายการ)', 'amount' => $amount];
         }
     }
-    return $out;
+    return ['buckets' => $out, 'unmatched' => $unmatched];
+}
+
+/** Deduction items other than กยศ. that PayrollService still sums into total_deductions but this report has no named column for. */
+function hr_salary_extract_unmatched_deductions(?array $setup): array
+{
+    $unmatched = [];
+    if ($setup && !empty($setup['deduction_other_json'])) {
+        $decoded = json_decode((string)$setup['deduction_other_json'], true);
+        if (is_array($decoded)) {
+            foreach ($decoded as $item) {
+                if (!is_array($item)) {
+                    continue;
+                }
+                $label = trim((string)($item['label'] ?? ''));
+                if ($label === 'กยศ.') {
+                    continue;
+                }
+                $unmatched[] = ['label' => $label !== '' ? $label : '(ไม่มีชื่อรายการ)', 'amount' => (float)($item['amount'] ?? 0)];
+            }
+        }
+    }
+    return $unmatched;
 }
 
 /** Build one report row: live PayrollService calc + CRM-sourced items + manual กยศ. */
@@ -102,7 +131,9 @@ function hr_salary_build_row(PayrollService $service, array $employee, string $m
 {
     $userId = (int)$employee['id'];
     $setup = $service->getSalarySetup($userId, $monthFirst);
-    $buckets = hr_salary_extract_income_buckets($setup);
+    $incomeResult = hr_salary_extract_income_buckets($setup);
+    $buckets = $incomeResult['buckets'];
+    $unmatchedItems = array_merge($incomeResult['unmatched'], hr_salary_extract_unmatched_deductions($setup));
     $studentLoan = (float)($manual['student_loan_deduction'] ?? 0);
     $override = [];
     if ($studentLoan != 0.0) {
@@ -140,6 +171,7 @@ function hr_salary_build_row(PayrollService $service, array $employee, string $m
         'student_loan' => $studentLoan,
         'total_deductions' => (float)$slip['total_deductions'],
         'net_salary' => (float)$slip['net_salary'],
+        'unmatched_items' => $unmatchedItems,
     ];
 }
 
@@ -420,6 +452,14 @@ require_once __DIR__ . '/../templates/header.php';
             <p class="text-white/55 text-sm" role="status">พนักงาน <?php echo count($rows); ?> คน</p>
         </div>
 
+        <?php $rowsWithUnmatched = array_filter($rows, static fn($r) => !empty($r['unmatched_items'])); ?>
+        <?php if ($rowsWithUnmatched): ?>
+        <div class="mb-4 rounded-[var(--tp-ios-card-radius)] border border-amber-500/35 bg-amber-500/15 px-4 py-3 text-amber-100 text-sm" role="status">
+            <i class="fas fa-triangle-exclamation mr-2" aria-hidden="true"></i>
+            พบ <?php echo count($rowsWithUnmatched); ?> คนที่มีรายการรายรับ/รายจ่ายจาก CRM ที่ยังไม่รู้จัก (ดูไอคอน <i class="fas fa-triangle-exclamation" aria-hidden="true"></i> ในตาราง) — ยอด "รวมรายรับ"/"รวมรายจ่าย" นับรวมให้ถูกต้องแล้ว แต่จำนวนนี้ยังไม่ถูกแยกเข้าคอลัมน์ไหน ต้องแจ้งให้เพิ่ม label เข้าไปในโค้ด
+        </div>
+        <?php endif; ?>
+
         <?php if ($rows): ?>
         <div class="hidden md:block tp-native-table-shell overflow-x-auto min-w-0 max-w-full overscroll-x-contain -mx-1 px-1 pb-px">
             <table class="w-full text-sm" style="min-width:1700px">
@@ -448,7 +488,17 @@ require_once __DIR__ . '/../templates/header.php';
                     <?php foreach ($rows as $i => $row): ?>
                     <tr class="hover:bg-white/[0.04]">
                         <td class="px-3 py-2 text-white/60"><?php echo $i + 1; ?></td>
-                        <td class="px-3 py-2 text-white"><?php echo htmlspecialchars($row['full_name']); ?></td>
+                        <td class="px-3 py-2 text-white">
+                            <?php echo htmlspecialchars($row['full_name']); ?>
+                            <?php if (!empty($row['unmatched_items'])):
+                                $tip = 'รายการที่ยังไม่รู้จัก: ' . implode(', ', array_map(
+                                    static fn($u) => $u['label'] . ' ' . number_format($u['amount'], 2),
+                                    $row['unmatched_items']
+                                ));
+                            ?>
+                            <i class="fas fa-triangle-exclamation text-amber-400 ml-1" aria-hidden="true" title="<?php echo htmlspecialchars($tip); ?>"></i>
+                            <?php endif; ?>
+                        </td>
                         <td class="px-3 py-2 text-white/60"><?php echo htmlspecialchars($row['position']); ?></td>
                         <td class="px-3 py-2 text-right text-white/80"><?php echo number_format($row['base_salary'], 2); ?></td>
                         <td class="px-3 py-2 text-right text-white/80"><?php echo number_format($row['allowance_position'], 2); ?></td>
