@@ -1,8 +1,11 @@
 <?php
 /**
  * HR Salary Report - Monthly payroll report matching the manual Excel template
- * CEO level only. Live-calculated via PayrollService; ค่าบริหาร/ชดเชยวันหยุด/กยศ.
- * are entered manually per employee per month (no formula exists for them).
+ * CEO level only. Live-calculated via PayrollService, reading ค่าตำแหน่ง/ค่าครองชีพ/
+ * ค่าเดินทาง/ค่าบริหาร/ชดเชยวันหยุด from employee_salary_setup — the same shared
+ * tp_crm row tp-crm's payroll.php already maintains, so those columns are
+ * read-only here. Only กยศ. has no source anywhere yet, so it stays a manual
+ * entry per employee per month.
  */
 
 require_once __DIR__ . '/../bootstrap.php';
@@ -30,7 +33,24 @@ $service = new PayrollService($pdo);
 $page_title = 'รายงานเงินเดือน';
 $current_page = 'hr-salary-report';
 
-const HR_SALARY_ALLOWANCE_LABELS = ['ค่าตำแหน่ง', 'ค่าครองชีพ', 'ค่าเดินทาง'];
+// Exact-label buckets. ค่าตำแหน่ง/ค่าครองชีพ/ค่าเดินทาง/ค่าบริหาร are entered
+// consistently in tp-crm's payroll.php (checked against production data).
+const HR_SALARY_EXACT_LABEL_BUCKETS = [
+    'allowance_position' => 'ค่าตำแหน่ง',
+    'allowance_col' => 'ค่าครองชีพ',
+    'allowance_transport' => 'ค่าเดินทาง',
+    'admin_fee' => 'ค่าบริหาร',
+];
+
+// "ชดเชยวันหยุด" has no single consistent label upstream — tp-crm users have
+// typed it 3 different ways so far. Fuzzy-match all known variants and sum
+// them; add new variants here as they turn up in production data.
+const HR_SALARY_HOLIDAY_COMP_LABELS = [
+    'ชดเชยวันหยุด',
+    'เงินชดเชยวันทำงาน',
+    'เงินชดเชยเวลาทำงาน',
+    'ชดเชยวันทำงาน / Additional workday compensation',
+];
 
 /** Safe float cast — rejects arrays/objects that could slip in via malformed POST field names. */
 function hr_salary_scalar_float($value): float
@@ -38,82 +58,66 @@ function hr_salary_scalar_float($value): float
     return is_scalar($value) ? (float)$value : 0.0;
 }
 
-/** @return array<string,float> label => amount */
-function hr_salary_extract_allowances(?array $setup): array
+/**
+ * Read ค่าตำแหน่ง/ค่าครองชีพ/ค่าเดินทาง/ค่าบริหาร/ชดเชยวันหยุด from whichever of
+ * allowance_json / income_other_json tp-crm's payroll.php put them in — production
+ * data shows both fields are used interchangeably for these labels.
+ *
+ * @return array<string,float>
+ */
+function hr_salary_extract_income_buckets(?array $setup): array
 {
-    $out = array_fill_keys(HR_SALARY_ALLOWANCE_LABELS, 0.0);
-    if ($setup && !empty($setup['allowance_json'])) {
-        $items = json_decode((string)$setup['allowance_json'], true);
-        if (is_array($items)) {
-            foreach ($items as $item) {
-                $label = trim((string)($item['label'] ?? ''));
-                if (isset($out[$label])) {
-                    $out[$label] += (float)($item['amount'] ?? 0);
-                }
+    $out = array_fill_keys(array_keys(HR_SALARY_EXACT_LABEL_BUCKETS), 0.0);
+    $out['holiday_compensation'] = 0.0;
+    if (!$setup) {
+        return $out;
+    }
+    $items = [];
+    foreach (['allowance_json', 'income_other_json'] as $field) {
+        if (!empty($setup[$field])) {
+            $decoded = json_decode((string)$setup[$field], true);
+            if (is_array($decoded)) {
+                $items = array_merge($items, $decoded);
             }
+        }
+    }
+    foreach ($items as $item) {
+        if (!is_array($item)) {
+            continue;
+        }
+        $label = trim((string)($item['label'] ?? ''));
+        $amount = (float)($item['amount'] ?? 0);
+        $bucketKey = array_search($label, HR_SALARY_EXACT_LABEL_BUCKETS, true);
+        if ($bucketKey !== false) {
+            $out[$bucketKey] += $amount;
+        } elseif (in_array($label, HR_SALARY_HOLIDAY_COMP_LABELS, true)) {
+            $out['holiday_compensation'] += $amount;
         }
     }
     return $out;
 }
 
-/**
- * Merge the manually-entered ค่าบริหาร/ชดเชยวันหยุด/กยศ. on top of whatever
- * income_other_json/deduction_other_json the employee already has configured,
- * as a PayrollService::calculateSlip() $setupOverride.
- */
-/** Remove any existing items whose label matches one we're about to set, so re-saving never double-counts. */
-function hr_salary_strip_labels(array $items, array $labels): array
+/** Build one report row: live PayrollService calc + CRM-sourced items + manual กยศ. */
+function hr_salary_build_row(PayrollService $service, array $employee, string $monthFirst, int $payDay, array $manual): array
 {
-    return array_values(array_filter($items, static function ($item) use ($labels) {
-        return !is_array($item) || !in_array(trim((string)($item['label'] ?? '')), $labels, true);
-    }));
-}
-
-function hr_salary_build_override(?array $setup, float $adminFee, float $holidayComp, float $studentLoan): array
-{
+    $userId = (int)$employee['id'];
+    $setup = $service->getSalarySetup($userId, $monthFirst);
+    $buckets = hr_salary_extract_income_buckets($setup);
+    $studentLoan = (float)($manual['student_loan_deduction'] ?? 0);
     $override = [];
-    if ($adminFee != 0.0 || $holidayComp != 0.0) {
-        $items = [];
-        if ($setup && !empty($setup['income_other_json'])) {
-            $decoded = json_decode((string)$setup['income_other_json'], true);
-            if (is_array($decoded)) {
-                $items = $decoded;
-            }
-        }
-        $items = hr_salary_strip_labels($items, ['ค่าบริหาร', 'เงินชดเชยวันทำงาน']);
-        if ($adminFee != 0.0) {
-            $items[] = ['label' => 'ค่าบริหาร', 'amount' => round($adminFee, 2), 'ss_exclude' => 1];
-        }
-        if ($holidayComp != 0.0) {
-            $items[] = ['label' => 'เงินชดเชยวันทำงาน', 'amount' => round($holidayComp, 2), 'ss_exclude' => 1];
-        }
-        $override['income_other_json'] = json_encode($items, JSON_UNESCAPED_UNICODE);
-    }
     if ($studentLoan != 0.0) {
         $items = [];
         if ($setup && !empty($setup['deduction_other_json'])) {
             $decoded = json_decode((string)$setup['deduction_other_json'], true);
             if (is_array($decoded)) {
-                $items = $decoded;
+                $items = array_values(array_filter($decoded, static function ($item) {
+                    return !is_array($item) || trim((string)($item['label'] ?? '')) !== 'กยศ.';
+                }));
             }
         }
-        $items = hr_salary_strip_labels($items, ['กยศ.']);
         $items[] = ['label' => 'กยศ.', 'amount' => round($studentLoan, 2)];
         $override['deduction_other_json'] = json_encode($items, JSON_UNESCAPED_UNICODE);
     }
-    return $override;
-}
-
-/** Build one report row: live PayrollService calc + manual entries. */
-function hr_salary_build_row(PayrollService $service, array $employee, string $monthFirst, int $payDay, array $manual): array
-{
-    $userId = (int)$employee['id'];
-    $setup = $service->getSalarySetup($userId, $monthFirst);
-    $allowances = hr_salary_extract_allowances($setup);
-    $adminFee = (float)($manual['admin_fee'] ?? 0);
-    $holidayComp = (float)($manual['holiday_compensation'] ?? 0);
-    $studentLoan = (float)($manual['student_loan_deduction'] ?? 0);
-    $override = hr_salary_build_override($setup, $adminFee, $holidayComp, $studentLoan);
     $slip = $service->calculateSlip($userId, $monthFirst, $payDay, $override ?: null);
 
     return [
@@ -123,12 +127,12 @@ function hr_salary_build_row(PayrollService $service, array $employee, string $m
         'position' => $employee['position'] ?? '',
         'bank_name' => $employee['bank_name'] ?? '',
         'base_salary' => (float)$slip['gross_salary'],
-        'allowance_position' => $allowances['ค่าตำแหน่ง'],
-        'allowance_col' => $allowances['ค่าครองชีพ'],
-        'allowance_transport' => $allowances['ค่าเดินทาง'],
+        'allowance_position' => $buckets['allowance_position'],
+        'allowance_col' => $buckets['allowance_col'],
+        'allowance_transport' => $buckets['allowance_transport'],
         'bonus' => (float)$slip['bonus'],
-        'admin_fee' => $adminFee,
-        'holiday_compensation' => $holidayComp,
+        'admin_fee' => $buckets['admin_fee'],
+        'holiday_compensation' => $buckets['holiday_compensation'],
         'total_income' => (float)$slip['total_income'],
         'social_security' => (float)$slip['social_security'],
         'leave_deduction' => (float)$slip['absence_deduction'],
@@ -191,23 +195,18 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         redirect($redirectQuery(), 302);
     }
     $action = (string)($_POST['action'] ?? 'save');
-    $postAdminFee = $_POST['admin_fee'] ?? [];
-    $postHolidayComp = $_POST['holiday_compensation'] ?? [];
     $postStudentLoan = $_POST['student_loan'] ?? [];
 
     $upsert = $pdo->prepare("
-        INSERT INTO hr_payroll_manual_items (user_id, period_month, admin_fee, holiday_compensation, student_loan_deduction, updated_by)
-        VALUES (?, ?, ?, ?, ?, ?)
-        ON DUPLICATE KEY UPDATE admin_fee = VALUES(admin_fee), holiday_compensation = VALUES(holiday_compensation),
-            student_loan_deduction = VALUES(student_loan_deduction), updated_by = VALUES(updated_by)
+        INSERT INTO hr_payroll_manual_items (user_id, period_month, student_loan_deduction, updated_by)
+        VALUES (?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE student_loan_deduction = VALUES(student_loan_deduction), updated_by = VALUES(updated_by)
     ");
     $pdo->beginTransaction();
     try {
         foreach ($employeeIds as $empId) {
-            $adminFee = round(hr_salary_scalar_float($postAdminFee[$empId] ?? 0), 2);
-            $holidayComp = round(hr_salary_scalar_float($postHolidayComp[$empId] ?? 0), 2);
             $studentLoan = round(hr_salary_scalar_float($postStudentLoan[$empId] ?? 0), 2);
-            $upsert->execute([$empId, $monthFirst, $adminFee, $holidayComp, $studentLoan, (int)$user['id']]);
+            $upsert->execute([$empId, $monthFirst, $studentLoan, (int)$user['id']]);
         }
         $pdo->commit();
     } catch (Throwable $e) {
@@ -220,8 +219,6 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         $manualByUser = [];
         foreach ($employeeIds as $empId) {
             $manualByUser[$empId] = [
-                'admin_fee' => round(hr_salary_scalar_float($postAdminFee[$empId] ?? 0), 2),
-                'holiday_compensation' => round(hr_salary_scalar_float($postHolidayComp[$empId] ?? 0), 2),
                 'student_loan_deduction' => round(hr_salary_scalar_float($postStudentLoan[$empId] ?? 0), 2),
             ];
         }
@@ -342,7 +339,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 }
 
 // --- GET: load manual entries + build rows for on-screen review ---
-$manualStmt = $pdo->prepare("SELECT user_id, admin_fee, holiday_compensation, student_loan_deduction FROM hr_payroll_manual_items WHERE period_month = ?");
+$manualStmt = $pdo->prepare("SELECT user_id, student_loan_deduction FROM hr_payroll_manual_items WHERE period_month = ?");
 $manualStmt->execute([$monthFirst]);
 $manualByUser = [];
 foreach ($manualStmt->fetchAll(PDO::FETCH_ASSOC) as $m) {
@@ -385,7 +382,7 @@ require_once __DIR__ . '/../templates/header.php';
             <i class="fas fa-money-check-dollar text-violet-400 shrink-0" aria-hidden="true"></i>
             <span>รายงานเงินเดือนพนักงาน</span>
         </h1>
-        <p class="tp-ios-caption-muted max-w-[42rem]">คำนวณสดจากฐานเงินเดือน/ค่าเผื่อ/ประกันสังคม/ภาษี ปัจจุบัน — ค่าบริหาร ชดเชยวันหยุด และ กยศ. กรอกเองรายเดือน แล้วดาวน์โหลดเป็นไฟล์ Excel</p>
+        <p class="tp-ios-caption-muted max-w-[42rem]">คำนวณสดจากฐานเงินเดือน/ค่าเผื่อ/ค่าบริหาร/ชดเชยวันหยุด (ข้อมูลเดียวกับที่กรอกไว้ใน CRM)/ประกันสังคม/ภาษี ปัจจุบัน — กรอกเฉพาะ กยศ. เพิ่มเติมรายเดือน แล้วดาวน์โหลดเป็นไฟล์ Excel</p>
     </div>
 </header>
 
@@ -436,8 +433,8 @@ require_once __DIR__ . '/../templates/header.php';
                         <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-white/60 uppercase">ค่าครองชีพ</th>
                         <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-white/60 uppercase">ค่าเดินทาง</th>
                         <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-white/60 uppercase">โบนัส</th>
-                        <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-amber-300/90 uppercase">ค่าบริหาร<span class="block normal-case text-[10px] text-amber-300/70">กรอกเอง</span></th>
-                        <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-amber-300/90 uppercase">ชดเชยวันหยุด<span class="block normal-case text-[10px] text-amber-300/70">กรอกเอง</span></th>
+                        <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-white/60 uppercase" title="ข้อมูลจาก employee_salary_setup — แก้ไขได้ที่ CRM payroll.php">ค่าบริหาร<span class="block normal-case text-[10px] text-white/40">จาก CRM</span></th>
+                        <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-white/60 uppercase" title="ข้อมูลจาก employee_salary_setup — แก้ไขได้ที่ CRM payroll.php">ชดเชยวันหยุด<span class="block normal-case text-[10px] text-white/40">จาก CRM</span></th>
                         <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-white/60 uppercase">รวมรายรับ</th>
                         <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-white/60 uppercase">ประกันสังคม</th>
                         <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-white/60 uppercase">ลางาน</th>
@@ -458,12 +455,8 @@ require_once __DIR__ . '/../templates/header.php';
                         <td class="px-3 py-2 text-right text-white/80"><?php echo number_format($row['allowance_col'], 2); ?></td>
                         <td class="px-3 py-2 text-right text-white/80"><?php echo number_format($row['allowance_transport'], 2); ?></td>
                         <td class="px-3 py-2 text-right text-white/80"><?php echo number_format($row['bonus'], 2); ?></td>
-                        <td class="px-3 py-2 text-right">
-                            <input type="number" step="0.01" name="admin_fee[<?php echo (int)$row['user_id']; ?>]" value="<?php echo htmlspecialchars((string)$row['admin_fee']); ?>" class="input-field tp-native-input w-28 text-right min-h-[48px]">
-                        </td>
-                        <td class="px-3 py-2 text-right">
-                            <input type="number" step="0.01" name="holiday_compensation[<?php echo (int)$row['user_id']; ?>]" value="<?php echo htmlspecialchars((string)$row['holiday_compensation']); ?>" class="input-field tp-native-input w-28 text-right min-h-[48px]">
-                        </td>
+                        <td class="px-3 py-2 text-right text-white/80"><?php echo number_format($row['admin_fee'], 2); ?></td>
+                        <td class="px-3 py-2 text-right text-white/80"><?php echo number_format($row['holiday_compensation'], 2); ?></td>
                         <td class="px-3 py-2 text-right text-white font-medium"><?php echo number_format($row['total_income'], 2); ?></td>
                         <td class="px-3 py-2 text-right text-white/80"><?php echo number_format($row['social_security'], 2); ?></td>
                         <td class="px-3 py-2 text-right text-white/80"><?php echo number_format($row['leave_deduction'], 2); ?></td>
