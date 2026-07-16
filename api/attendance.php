@@ -177,6 +177,23 @@ function handleCheckIn(PDO $pdo, array $user, array $input): void {
         $photoPath = savePhoto($photo, $user['id'], 'checkin');
     }
 
+    // Re-read under a write lock immediately before persisting. The earlier read is
+    // only for UX/calculation; two simultaneous requests must never overwrite time.
+    $pdo->beginTransaction();
+    try {
+        $lockedStmt = $pdo->prepare("SELECT * FROM hr_attendances WHERE user_id = ? AND attendance_date = CURDATE() LIMIT 1 FOR UPDATE");
+        $lockedStmt->execute([(int)$user['id']]);
+        $existing = $lockedStmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        if ($existing && !empty($existing['check_in_time'])) {
+            $pdo->rollBack();
+            apiError('คุณได้ลงเวลาเข้างานวันนี้แล้ว', 409);
+        }
+
+        // planned_start_time may have changed since the initial validation read.
+        $checkInSummary = $attendanceService->determineCheckIn($user, $shift, $checkInAt, $existing['planned_start_time'] ?? null);
+        $lateMinutes = (int)$checkInSummary['late_minutes'];
+        $status = (string)$checkInSummary['status'];
+
     if ($existing) {
         $stmt = $pdo->prepare("
             UPDATE hr_attendances SET
@@ -205,6 +222,23 @@ function handleCheckIn(PDO $pdo, array $user, array $input): void {
         ");
         $stmt->execute([$user['id'], $shift['id'] ?? null, $checkInAt, $latitude, $longitude, $locationId, $photoPath, $_SERVER['REMOTE_ADDR'] ?? '', $lateMinutes, $status]);
         $attId = (int)$pdo->lastInsertId();
+    }
+
+        $pdo->commit();
+    } catch (PDOException $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        // A concurrent insert can win when today's row did not exist at lock time.
+        if ((int)($e->errorInfo[1] ?? 0) === 1062) {
+            apiError('คุณได้ลงเวลาเข้างานวันนี้แล้ว', 409);
+        }
+        throw $e;
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $e;
     }
 
     Auth::log('CHECK_IN', 'hr_attendances', $attId);
@@ -360,19 +394,7 @@ function handleCheckOut(PDO $pdo, array $user, array $input): void {
         apiError('คุณได้ลงเวลาออกงานวันนี้แล้ว');
     }
 
-    $attendanceService = new AttendanceService($pdo);
-    $shift = $attendanceService->getShiftById((int)($attendance['shift_id'] ?? 0));
     $checkOutAt = date('Y-m-d H:i:s');
-    $workSummary = $attendanceService->summarizeWork(
-        $attendance['check_in_time'],
-        $checkOutAt,
-        $shift,
-        (string)$attendance['attendance_date']
-    );
-    $workMinutes = (int)$workSummary['work_minutes'];
-    $breakMinutes = (int)$workSummary['break_minutes'];
-    $otMinutes = (int)$workSummary['ot_minutes'];
-    $earlyLeaveMinutes = (int)$workSummary['early_leave_minutes'];
 
     // Location enforcement — mirror ของ handleCheckIn
     $enforceLocation      = getHrBoolSetting($pdo, 'enforce_location_checkin', true);
@@ -418,7 +440,30 @@ function handleCheckOut(PDO $pdo, array $user, array $input): void {
         $photoPath = savePhoto($photo, $user['id'], 'checkout');
     }
     
-    // Update attendance record
+    // Lock and validate again at the write boundary so repeated/concurrent checkout
+    // requests cannot overwrite the first recorded checkout time.
+    $pdo->beginTransaction();
+    try {
+        $lockedStmt = $pdo->prepare("SELECT * FROM hr_attendances WHERE id = ? AND user_id = ? FOR UPDATE");
+        $lockedStmt->execute([(int)$attendance['id'], (int)$user['id']]);
+        $attendance = $lockedStmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        if (!$attendance || empty($attendance['check_in_time'])) {
+            $pdo->rollBack();
+            apiError('คุณยังไม่ได้ลงเวลาเข้างานวันนี้', 409);
+        }
+        if (!empty($attendance['check_out_time'])) {
+            $pdo->rollBack();
+            apiError('คุณได้ลงเวลาออกงานวันนี้แล้ว', 409);
+        }
+
+        $attendanceService = new AttendanceService($pdo);
+        $shift = $attendanceService->getShiftById((int)($attendance['shift_id'] ?? 0));
+        $workSummary = $attendanceService->summarizeWork($attendance['check_in_time'], $checkOutAt, $shift, (string)$attendance['attendance_date']);
+        $workMinutes = (int)$workSummary['work_minutes'];
+        $breakMinutes = (int)$workSummary['break_minutes'];
+        $otMinutes = (int)$workSummary['ot_minutes'];
+        $earlyLeaveMinutes = (int)$workSummary['early_leave_minutes'];
+
     $stmt = $pdo->prepare("
         UPDATE hr_attendances SET
             check_out_time = ?,
@@ -448,6 +493,13 @@ function handleCheckOut(PDO $pdo, array $user, array $input): void {
         $earlyLeaveMinutes,
         $attendance['id']
     ]);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $e;
+    }
     
     // Log action
     Auth::log('CHECK_OUT', 'hr_attendances', $attendance['id']);
