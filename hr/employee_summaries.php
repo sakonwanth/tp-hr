@@ -210,11 +210,11 @@ include dirname(__DIR__) . '/templates/header.php';
                 <?php $summary = $row['summary']; $panelLayout = true; $compact = false; $compactHidePresent = true; $showActions = true; $employeeId = (int)$row['id']; include dirname(__DIR__) . '/modules/hr/employee_monthly_summary_details.php'; ?>
                 <div class="flex flex-col sm:flex-row flex-wrap gap-3 pt-2 border-t border-white/10">
                     <a href="/hr/attendance.php?date=<?php echo urlencode($month . '-01'); ?>&user_id=<?php echo (int)$row['id']; ?>"
-                       class="inline-flex items-center justify-center min-h-[44px] px-4 py-2.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 rounded-[var(--tp-ios-card-radius)] text-sm font-medium touch-manipulation">
+                       class="inline-flex items-center justify-center min-h-[48px] px-4 py-2.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 rounded-[var(--tp-ios-card-radius)] text-sm font-medium touch-manipulation">
                         <i class="fas fa-user-clock mr-2" aria-hidden="true"></i>จัดการเวลา
                     </a>
                     <a href="/hr/employee_view.php?id=<?php echo (int)$row['id']; ?>&month=<?php echo urlencode($month); ?>"
-                       class="inline-flex items-center justify-center min-h-[44px] px-4 py-2.5 bg-violet-500/15 hover:bg-violet-500/25 text-violet-200 rounded-[var(--tp-ios-card-radius)] text-sm font-medium touch-manipulation">
+                       class="inline-flex items-center justify-center min-h-[48px] px-4 py-2.5 bg-violet-500/15 hover:bg-violet-500/25 text-violet-200 rounded-[var(--tp-ios-card-radius)] text-sm font-medium touch-manipulation">
                         ดูโปรไฟล์เต็ม
                     </a>
                 </div>
@@ -274,7 +274,7 @@ include dirname(__DIR__) . '/templates/header.php';
                     </td>
                     <td class="px-4 py-3 text-center">
                         <button type="button"
-                                class="emp-summary-toggle inline-flex items-center justify-center min-h-[40px] px-3 py-1.5 bg-violet-500/15 hover:bg-violet-500/25 text-violet-200 rounded-[var(--tp-ios-card-radius)] text-xs font-medium touch-manipulation"
+                                class="emp-summary-toggle inline-flex items-center justify-center min-h-[48px] px-3 py-1.5 bg-violet-500/15 hover:bg-violet-500/25 text-violet-200 rounded-[var(--tp-ios-card-radius)] text-xs font-medium touch-manipulation"
                                 aria-expanded="false"
                                 data-target="emp-detail-<?php echo (int)$row['id']; ?>">
                             <i class="fas fa-chevron-down mr-1 transition-transform emp-summary-chevron" aria-hidden="true"></i>
@@ -288,19 +288,19 @@ include dirname(__DIR__) . '/templates/header.php';
                             <?php $summary = $row['summary']; $panelLayout = true; $compact = false; $compactHidePresent = true; $showActions = true; $employeeId = (int)$row['id']; include dirname(__DIR__) . '/modules/hr/employee_monthly_summary_details.php'; ?>
                             <div class="mt-8 pt-6 border-t border-white/10 flex flex-wrap gap-3">
                                 <a href="/hr/attendance.php?date=<?php echo urlencode($month . '-01'); ?>&user_id=<?php echo (int)$row['id']; ?>"
-                                   class="inline-flex items-center justify-center min-h-[44px] px-5 py-2.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 rounded-[var(--tp-ios-card-radius)] text-sm font-medium touch-manipulation">
+                                   class="inline-flex items-center justify-center min-h-[48px] px-5 py-2.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 rounded-[var(--tp-ios-card-radius)] text-sm font-medium touch-manipulation">
                                     <i class="fas fa-user-clock mr-2" aria-hidden="true"></i>จัดการเวลา
                                 </a>
                                 <a href="/hr/leaves.php?status=pending"
-                                   class="inline-flex items-center justify-center min-h-[44px] px-5 py-2.5 bg-blue-500/15 hover:bg-blue-500/25 text-blue-200 rounded-[var(--tp-ios-card-radius)] text-sm font-medium touch-manipulation">
+                                   class="inline-flex items-center justify-center min-h-[48px] px-5 py-2.5 bg-blue-500/15 hover:bg-blue-500/25 text-blue-200 rounded-[var(--tp-ios-card-radius)] text-sm font-medium touch-manipulation">
                                     <i class="fas fa-calendar-check mr-2" aria-hidden="true"></i>อนุมัติลา
                                 </a>
                                 <a href="/hr/employee_view.php?id=<?php echo (int)$row['id']; ?>&month=<?php echo urlencode($month); ?>"
-                                   class="inline-flex items-center justify-center min-h-[44px] px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] text-sm font-medium touch-manipulation">
+                                   class="inline-flex items-center justify-center min-h-[48px] px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] text-sm font-medium touch-manipulation">
                                     โปรไฟล์เต็ม
                                 </a>
                                 <a href="/hr/employee_attendance.php?id=<?php echo (int)$row['id']; ?>&month=<?php echo urlencode($month); ?>"
-                                   class="inline-flex items-center justify-center min-h-[44px] px-5 py-2.5 bg-violet-500/15 hover:bg-violet-500/25 text-violet-200 rounded-[var(--tp-ios-card-radius)] text-sm font-medium touch-manipulation">
+                                   class="inline-flex items-center justify-center min-h-[48px] px-5 py-2.5 bg-violet-500/15 hover:bg-violet-500/25 text-violet-200 rounded-[var(--tp-ios-card-radius)] text-sm font-medium touch-manipulation">
                                     <i class="fas fa-calendar-day mr-2" aria-hidden="true"></i>ปฏิทินรายวัน
                                 </a>
                             </div>

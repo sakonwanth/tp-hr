@@ -52,8 +52,8 @@ $headClass = $panelLayout
     : ($compact ? 'px-4 py-3 text-sm font-semibold bg-white/[0.03] border-b border-white/10' : 'px-5 py-4 text-sm font-semibold bg-white/[0.03] border-b border-white/10');
 $listClass = 'divide-y divide-white/[0.06]';
 $rowPad = $panelLayout ? 'px-5 py-4' : ($compact ? 'px-4 py-3.5' : 'px-5 py-4');
-$actionBtn = 'inline-flex items-center justify-center gap-1.5 min-h-[40px] px-3 py-2 rounded-[var(--tp-ios-card-radius)] text-xs font-medium bg-violet-500/12 hover:bg-violet-500/22 text-violet-200 border border-violet-500/25 touch-manipulation shrink-0 whitespace-nowrap';
-$bulkBtn = 'inline-flex items-center justify-center gap-1 min-h-[36px] px-2.5 py-1.5 rounded-[var(--tp-ios-card-radius)] text-[11px] sm:text-xs font-medium touch-manipulation whitespace-nowrap';
+$actionBtn = 'inline-flex items-center justify-center gap-1.5 min-h-[48px] px-3 py-2 rounded-[var(--tp-ios-card-radius)] text-xs font-medium bg-violet-500/12 hover:bg-violet-500/22 text-violet-200 border border-violet-500/25 touch-manipulation shrink-0 whitespace-nowrap';
+$bulkBtn = 'inline-flex items-center justify-center gap-1 min-h-[48px] px-2.5 py-1.5 rounded-[var(--tp-ios-card-radius)] text-[11px] sm:text-xs font-medium touch-manipulation whitespace-nowrap';
 $bulkGroupId = static fn(string $kind): string => 'bulk-' . $kind . '-' . $employeeId;
 
 $renderBulkToolbar = static function (string $kind, string $label, int $count) use ($bulkBtn, $bulkGroupId, $employeeId, $showActions): void {
@@ -242,7 +242,7 @@ $renderDayRow = static function (
                 <p class="text-white/45 text-sm mt-3 leading-relaxed"><?php echo htmlspecialchars($lr['reason']); ?></p>
                 <?php endif; ?>
                 <?php if ($showActions && ($lr['status'] ?? '') === 'PENDING'): ?>
-                <a href="/hr/leaves.php?status=pending" class="inline-flex items-center gap-1.5 mt-4 min-h-[40px] px-3 py-2 rounded-[var(--tp-ios-card-radius)] text-xs font-medium bg-amber-500/12 hover:bg-amber-500/22 text-amber-200 border border-amber-500/25 touch-manipulation">
+                <a href="/hr/leaves.php?status=pending" class="inline-flex items-center gap-1.5 mt-4 min-h-[48px] px-3 py-2 rounded-[var(--tp-ios-card-radius)] text-xs font-medium bg-amber-500/12 hover:bg-amber-500/22 text-amber-200 border border-amber-500/25 touch-manipulation">
                     <i class="fas fa-check text-[11px]" aria-hidden="true"></i>ไปอนุมัติใบลา
                 </a>
                 <?php endif; ?>

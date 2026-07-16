@@ -362,11 +362,11 @@ require_once __DIR__ . '/templates/header.php';
                     คำอธิบาย
                 </h2>
                 <ul class="space-y-2 text-xs text-white/60 leading-relaxed">
-                    <li class="flex items-center gap-3 min-h-[40px]">
+                    <li class="flex items-center gap-3 min-h-[48px]">
                         <span class="inline-flex h-4 w-4 shrink-0 rounded-full bg-violet-500/70 ring-1 ring-violet-300/40" aria-hidden="true"></span>
                         วันหยุดนักขัตฤกษ์ / บริษัท
                     </li>
-                    <li class="flex items-center gap-3 min-h-[40px]">
+                    <li class="flex items-center gap-3 min-h-[48px]">
                         <span class="inline-flex h-4 w-4 shrink-0 rounded-full bg-white/12 ring-2 ring-violet-400/55" aria-hidden="true"></span>
                         วันนี้
                     </li>

@@ -490,7 +490,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 <div class="flex flex-wrap items-center gap-3 text-sm">
                     <span class="text-white/45">ส่งคำขอ <?php echo htmlspecialchars(hrOutsideDateTime($req['created_at'] ?? null)); ?></span>
                     <?php if ($photoUrl !== ''): ?>
-                    <a href="<?php echo htmlspecialchars($photoUrl); ?>" target="_blank" rel="noopener" class="inline-flex min-h-[44px] items-center gap-2 rounded-[var(--tp-ios-card-radius)] bg-white/10 px-3 text-white hover:bg-white/15 touch-manipulation">
+                    <a href="<?php echo htmlspecialchars($photoUrl); ?>" target="_blank" rel="noopener" class="inline-flex min-h-[48px] items-center gap-2 rounded-[var(--tp-ios-card-radius)] bg-white/10 px-3 text-white hover:bg-white/15 touch-manipulation">
                         <i class="fas fa-image" aria-hidden="true"></i>
                         <span>ดูรูปถ่าย</span>
                     </a>

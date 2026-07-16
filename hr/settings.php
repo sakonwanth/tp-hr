@@ -522,13 +522,13 @@ foreach ($workShifts as $_ws) {
                         </p>
                     </div>
                     <?php if ((int)($sourceHoliday['is_selected'] ?? 0) === 1): ?>
-                    <span class="inline-flex min-h-[40px] shrink-0 items-center justify-center rounded-[var(--tp-ios-card-radius)] border border-emerald-500/30 bg-emerald-500/15 px-3 text-sm text-emerald-100">ใช้อยู่</span>
+                    <span class="inline-flex min-h-[48px] shrink-0 items-center justify-center rounded-[var(--tp-ios-card-radius)] border border-emerald-500/30 bg-emerald-500/15 px-3 text-sm text-emerald-100">ใช้อยู่</span>
                     <?php else: ?>
                     <form method="POST" class="shrink-0">
                         <input type="hidden" name="csrf_token" value="<?php echo csrfToken(); ?>">
                         <input type="hidden" name="action" value="use_thai_holiday">
                         <input type="hidden" name="source_holiday_id" value="<?php echo (int)$sourceHoliday['id']; ?>">
-                        <button type="submit" class="inline-flex min-h-[40px] w-full sm:w-auto items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 px-3 text-sm font-semibold text-white hover:bg-violet-700 touch-manipulation gap-2">
+                        <button type="submit" class="inline-flex min-h-[48px] w-full sm:w-auto items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 px-3 text-sm font-semibold text-white hover:bg-violet-700 touch-manipulation gap-2">
                             <i class="fas fa-plus" aria-hidden="true"></i>เลือกใช้
                         </button>
                     </form>

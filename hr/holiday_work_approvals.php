@@ -287,8 +287,8 @@ include dirname(__DIR__) . '/templates/header.php';
                     <td class="px-4 py-3 text-center">
                         <?php if ($req['status'] === 'PENDING'): ?>
                         <div class="flex justify-center gap-2">
-                            <button type="button" onclick="openApproveOneModal(<?php echo (int) $req['id']; ?>)" class="min-h-[44px] px-3 bg-emerald-600 text-white rounded-[var(--tp-ios-card-radius)] text-sm touch-manipulation">อนุมัติ</button>
-                            <button type="button" data-emp-label="<?php echo htmlspecialchars(trim($req['first_name_th'] . ' ' . $req['last_name_th']), ENT_QUOTES); ?>" onclick="openRejectModal(event, <?php echo (int) $req['id']; ?>)" class="min-h-[44px] px-3 bg-red-500/15 text-red-200 rounded-[var(--tp-ios-card-radius)] text-sm touch-manipulation">ไม่อนุมัติ</button>
+                            <button type="button" onclick="openApproveOneModal(<?php echo (int) $req['id']; ?>)" class="min-h-[48px] px-3 bg-emerald-600 text-white rounded-[var(--tp-ios-card-radius)] text-sm touch-manipulation">อนุมัติ</button>
+                            <button type="button" data-emp-label="<?php echo htmlspecialchars(trim($req['first_name_th'] . ' ' . $req['last_name_th']), ENT_QUOTES); ?>" onclick="openRejectModal(event, <?php echo (int) $req['id']; ?>)" class="min-h-[48px] px-3 bg-red-500/15 text-red-200 rounded-[var(--tp-ios-card-radius)] text-sm touch-manipulation">ไม่อนุมัติ</button>
                         </div>
                         <?php else: ?>
                         <span class="text-white/40 text-xs">—</span>
