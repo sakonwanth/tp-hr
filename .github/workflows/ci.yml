@@ -40,4 +40,4 @@ jobs:
           npm ci
           npm run verify:static-ui
           npx playwright install chromium
-          npx playwright test --list
+          npx playwright test --list --reporter=list
