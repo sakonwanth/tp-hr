@@ -238,6 +238,7 @@ pf_require_columns($pdo, 'hr_attendances', [
     'check_in_time', 'check_out_time', 'work_minutes', 'break_minutes',
     'late_minutes', 'late_excused', 'late_excused_reason', 'late_notified_at',
     'early_leave_minutes', 'ot_minutes', 'is_offsite', 'offsite_status',
+    'check_in_outside_status', 'check_outside_status',
     'offsite_reason', 'offsite_approved_by', 'offsite_approved_at', 'offsite_remarks',
     'status', 'adjustment_reason', 'approved_by', 'approved_at',
 ]);

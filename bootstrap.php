@@ -87,6 +87,14 @@ function tp_hr_is_attendance_exempt(array $user): bool {
     return in_array((string)($user['role_name'] ?? ''), ['CEO', 'Chairman'], true);
 }
 
+function tp_hr_user_is_attendance_exempt(PDO $pdo, int $userId): bool {
+    if ($userId <= 0) return false;
+    $stmt = $pdo->prepare('SELECT r.name AS role_name FROM users u LEFT JOIN roles r ON r.id=u.role_id WHERE u.id=? LIMIT 1');
+    $stmt->execute([$userId]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $row ? tp_hr_is_attendance_exempt($row) : false;
+}
+
 /** วันลาออกต้องเป็นสิ้นเดือนปฏิทิน (ใช้คู่กับ payroll resignation tail) */
 function tp_hr_is_month_end_date(?string $date): bool
 {

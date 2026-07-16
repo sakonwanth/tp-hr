@@ -192,7 +192,7 @@ assertSameValue(true, !empty($febBounds['is_first_hire_month']), 'first hire mon
 
 $dayOffCtx = ['day_off' => 0, 'dayoff_requests' => [], 'holidays' => [], 'leave_dates' => []];
 assertSameValue(4, $service->countDayOffDaysInCalendarMonth($dayOffCtx, '2026-02'), 'Feb 2026 has 4 Sundays');
-assertSameValue(20, $service->inclusiveDayCount('2026-02-05', '2026-02-28') - 4, 'first hire payable days = period days minus month day-offs');
+assertSameValue(21, $service->inclusiveDayCount('2026-02-05', '2026-02-28') - 3, 'first hire payable days exclude only day-offs inside employed period');
 
 try {
     $pdo->exec('ALTER TABLE users ADD COLUMN hire_date TEXT');
@@ -208,7 +208,7 @@ $allowances = 0.0;
 $incomeOther = 0.0;
 $incomeJson = null;
 $serviceFeb->applyHireDateIncome(10, '2026-02-01', 25, $gross, $bonus, $allowances, $incomeOther, $incomeJson);
-assertSameValue(8000.0, $gross, 'first hire gross = 20 days × (12000/30)');
+assertSameValue(8400.0, $gross, 'first hire gross = 21 days × (12000/30)');
 assertSameValue(1000.0, $bonus, 'first hire bonus paid in full');
 
 $pdo->exec("INSERT INTO users (id, is_active, work_mode, hire_date) VALUES (12, 1, 'OFFICE', '2026-03-01')");

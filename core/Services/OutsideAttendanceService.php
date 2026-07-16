@@ -49,6 +49,9 @@ class OutsideAttendanceService
             if (!$targetUser) {
                 throw new OutsideAttendanceException('ไม่พบพนักงานหรือพนักงานไม่ active', 404);
             }
+            if (function_exists('tp_hr_is_attendance_exempt') && tp_hr_is_attendance_exempt($targetUser)) {
+                throw new OutsideAttendanceException('ตำแหน่งนี้ได้รับการยกเว้น ไม่จำเป็นต้องลงเวลาเข้า-ออกงาน', 409);
+            }
 
             $type = strtoupper((string)$request['request_type']);
             if ($type === 'CHECK_IN') {
@@ -174,6 +177,7 @@ class OutsideAttendanceService
                     is_offsite = 1,
                     offsite_reason = ?,
                     offsite_status = 'APPROVED',
+                    check_in_outside_status = 'APPROVED',
                     offsite_approved_by = ?,
                     offsite_approved_at = NOW(),
                     offsite_remarks = ?,
@@ -201,8 +205,9 @@ class OutsideAttendanceService
                     check_in_location_id, check_in_photo, check_in_ip,
                     late_minutes, status,
                     is_offsite, offsite_reason, offsite_status,
+                    check_in_outside_status,
                     offsite_approved_by, offsite_approved_at, offsite_remarks
-                ) VALUES (?, ?, ?, ?, 'GPS', ?, ?, NULL, ?, ?, ?, ?, 1, ?, 'APPROVED', ?, NOW(), ?)
+                ) VALUES (?, ?, ?, ?, 'GPS', ?, ?, NULL, ?, ?, ?, ?, 1, ?, 'APPROVED', 'APPROVED', ?, NOW(), ?)
             ")->execute([
                 (int)$request['user_id'],
                 $date,
@@ -266,6 +271,7 @@ class OutsideAttendanceService
                 is_offsite = 1,
                 offsite_reason = ?,
                 offsite_status = 'APPROVED',
+                check_outside_status = 'APPROVED',
                 offsite_approved_by = ?,
                 offsite_approved_at = NOW(),
                 offsite_remarks = ?,
@@ -362,13 +368,13 @@ class OutsideAttendanceService
         $type = strtoupper((string)$request['request_type']);
 
         if ($type === 'CHECK_OUT' && $this->sameCapturedTime($attendance['check_out_time'] ?? null, $capturedAt)) {
-            $this->pdo->prepare("UPDATE hr_attendances SET check_out_time=NULL, check_out_type=NULL, check_out_latitude=NULL, check_out_longitude=NULL, check_out_location_id=NULL, check_out_photo=NULL, check_out_ip=NULL, work_minutes=0, break_minutes=0, ot_minutes=0, early_leave_minutes=0, offsite_status='REJECTED', updated_at=NOW() WHERE id=?")
+            $this->pdo->prepare("UPDATE hr_attendances SET check_out_time=NULL, check_out_type=NULL, check_out_latitude=NULL, check_out_longitude=NULL, check_out_location_id=NULL, check_out_photo=NULL, check_out_ip=NULL, work_minutes=0, break_minutes=0, ot_minutes=0, early_leave_minutes=0, check_outside_status='REJECTED', offsite_status=CASE WHEN check_in_outside_status='APPROVED' THEN 'APPROVED' ELSE 'REJECTED' END, updated_at=NOW() WHERE id=?")
                 ->execute([(int)$attendance['id']]);
             return;
         }
 
         if ($type === 'CHECK_IN' && $this->sameCapturedTime($attendance['check_in_time'] ?? null, $capturedAt)) {
-            $this->pdo->prepare("UPDATE hr_attendances SET check_in_time=NULL, check_in_type=NULL, check_in_latitude=NULL, check_in_longitude=NULL, check_in_location_id=NULL, check_in_photo=NULL, check_in_ip=NULL, late_minutes=0, status=NULL, offsite_status='REJECTED', updated_at=NOW() WHERE id=?")
+            $this->pdo->prepare("UPDATE hr_attendances SET check_in_time=NULL, check_in_type=NULL, check_in_latitude=NULL, check_in_longitude=NULL, check_in_location_id=NULL, check_in_photo=NULL, check_in_ip=NULL, late_minutes=0, status=NULL, check_in_outside_status='REJECTED', offsite_status='REJECTED', updated_at=NOW() WHERE id=?")
                 ->execute([(int)$attendance['id']]);
         }
     }

@@ -286,6 +286,9 @@ function createOutsideLocationRequest(
     $pdo->commit();
     } catch (Throwable $e) {
         if ($pdo->inTransaction()) $pdo->rollBack();
+        if ($e instanceof PDOException && (string)$e->getCode() === '23000') {
+            apiError('มีคำขอที่รออนุมัติอยู่แล้วสำหรับรายการนี้', 409);
+        }
         throw $e;
     }
     Auth::log('OUTSIDE_LOCATION_REQUEST', 'hr_attendance_outside_requests', $requestId, [
@@ -315,19 +318,19 @@ function stampPendingOutsideAttendance(
     if ($requestType === 'CHECK_IN') {
         if ($attendance && !empty($attendance['check_in_time'])) apiError('คุณได้ลงเวลาเข้างานวันนี้แล้ว', 409);
         if ($attendance) {
-            $pdo->prepare("UPDATE hr_attendances SET check_in_time=?, check_in_type='GPS', check_in_latitude=?, check_in_longitude=?, check_in_location_id=NULL, check_in_photo=?, check_in_ip=?, is_offsite=1, offsite_status='PENDING', offsite_reason=?, status='PENDING', updated_at=NOW() WHERE id=?")
+            $pdo->prepare("UPDATE hr_attendances SET check_in_time=?, check_in_type='GPS', check_in_latitude=?, check_in_longitude=?, check_in_location_id=NULL, check_in_photo=?, check_in_ip=?, is_offsite=1, offsite_status='PENDING', check_in_outside_status='PENDING', offsite_reason=?, status='PENDING', updated_at=NOW() WHERE id=?")
                 ->execute([$requestTime, $latitude, $longitude, $photoPath, $_SERVER['REMOTE_ADDR'] ?? '', $reason, (int)$attendance['id']]);
             return (int)$attendance['id'];
         }
         $shift = $pdo->query("SELECT id FROM hr_work_shifts WHERE is_default=1 AND is_active=1 LIMIT 1")->fetch(PDO::FETCH_ASSOC);
-        $pdo->prepare("INSERT INTO hr_attendances (user_id,attendance_date,shift_id,check_in_time,check_in_type,check_in_latitude,check_in_longitude,check_in_photo,check_in_ip,is_offsite,offsite_status,offsite_reason,status) VALUES (?,?,?,?,'GPS',?,?,?,?,1,'PENDING',?,'PENDING')")
+        $pdo->prepare("INSERT INTO hr_attendances (user_id,attendance_date,shift_id,check_in_time,check_in_type,check_in_latitude,check_in_longitude,check_in_photo,check_in_ip,is_offsite,offsite_status,check_in_outside_status,offsite_reason,status) VALUES (?,?,?,?,'GPS',?,?,?,?,1,'PENDING','PENDING',?,'PENDING')")
             ->execute([(int)$user['id'], $requestDate, $shift['id'] ?? null, $requestTime, $latitude, $longitude, $photoPath, $_SERVER['REMOTE_ADDR'] ?? '', $reason]);
         return (int)$pdo->lastInsertId();
     }
 
     if (!$attendance || empty($attendance['check_in_time'])) apiError('คุณยังไม่ได้ลงเวลาเข้างานวันนี้', 409);
     if (!empty($attendance['check_out_time'])) apiError('คุณได้ลงเวลาออกงานวันนี้แล้ว', 409);
-    $pdo->prepare("UPDATE hr_attendances SET check_out_time=?, check_out_type='GPS', check_out_latitude=?, check_out_longitude=?, check_out_location_id=NULL, check_out_photo=?, check_out_ip=?, is_offsite=1, offsite_status='PENDING', offsite_reason=?, updated_at=NOW() WHERE id=?")
+    $pdo->prepare("UPDATE hr_attendances SET check_out_time=?, check_out_type='GPS', check_out_latitude=?, check_out_longitude=?, check_out_location_id=NULL, check_out_photo=?, check_out_ip=?, is_offsite=1, offsite_status='PENDING', check_outside_status='PENDING', offsite_reason=?, updated_at=NOW() WHERE id=?")
         ->execute([$requestTime, $latitude, $longitude, $photoPath, $_SERVER['REMOTE_ADDR'] ?? '', $reason, (int)$attendance['id']]);
     return (int)$attendance['id'];
 }

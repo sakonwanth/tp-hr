@@ -9,6 +9,19 @@ require_once dirname(__DIR__) . '/bootstrap.php';
 $pdo = getDB();
 $dbName = defined('DB_NAME') ? DB_NAME : (string)$pdo->query('SELECT DATABASE()')->fetchColumn();
 
+foreach (['check_in_outside_status', 'check_outside_status'] as $statusColumn) {
+    $statusCheck = $pdo->prepare("SELECT 1 FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=? AND TABLE_NAME='hr_attendances' AND COLUMN_NAME=?");
+    $statusCheck->execute([$dbName, $statusColumn]);
+    if (!$statusCheck->fetchColumn()) {
+        $after = $statusColumn === 'check_in_outside_status' ? 'offsite_status' : 'check_in_outside_status';
+        $pdo->exec("ALTER TABLE hr_attendances ADD COLUMN {$statusColumn} ENUM('PENDING','APPROVED','REJECTED') NULL AFTER {$after}");
+        echo "Added {$statusColumn}.\n";
+    }
+}
+
+$pdo->exec("UPDATE hr_attendances SET check_in_outside_status=COALESCE((SELECT o.status FROM hr_attendance_outside_requests o WHERE o.attendance_id=hr_attendances.id AND o.request_type='CHECK_IN' AND o.status IN ('PENDING','APPROVED','REJECTED') ORDER BY o.id DESC LIMIT 1),offsite_status) WHERE is_offsite=1 AND check_in_outside_status IS NULL");
+$pdo->exec("UPDATE hr_attendances SET check_outside_status=COALESCE((SELECT o.status FROM hr_attendance_outside_requests o WHERE o.attendance_id=hr_attendances.id AND o.request_type='CHECK_OUT' AND o.status IN ('PENDING','APPROVED','REJECTED') ORDER BY o.id DESC LIMIT 1),offsite_status) WHERE is_offsite=1 AND check_outside_status IS NULL");
+
 $column = $pdo->prepare("SELECT 1 FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=? AND TABLE_NAME='hr_attendance_outside_requests' AND COLUMN_NAME='pending_request_key'");
 $column->execute([$dbName]);
 if (!$column->fetchColumn()) {

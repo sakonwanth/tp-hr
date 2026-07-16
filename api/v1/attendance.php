@@ -60,7 +60,9 @@ if ($method === 'GET') {
                a.check_in_latitude, a.check_in_longitude,
                a.check_out_latitude, a.check_out_longitude,
                a.work_minutes, a.late_minutes, a.early_leave_minutes, a.ot_minutes,
-               a.status, a.is_offsite, a.offsite_status, a.adjustment_reason
+               a.status, a.is_offsite, a.offsite_status,
+               a.check_in_outside_status, a.check_outside_status,
+               a.adjustment_reason
         FROM hr_attendances a
         JOIN users u ON u.id = a.user_id
         WHERE " . tp_hr_non_system_user_condition_sql('u') . "
@@ -303,6 +305,7 @@ if ($action === 'crm-checkin') {
     $lateMin = (int)($body['late_min'] ?? 0);
     $status = trim((string)($body['status'] ?? ''));
     if ($uid <= 0 || $date === '' || $datetime === '' || $status === '') ApiAuth::fail(400, 'user_id, date, datetime, status required');
+    if (tp_hr_user_is_attendance_exempt($pdo, $uid)) ApiAuth::fail(403, 'Executive is exempt from attendance');
     try {
         $stmt = $pdo->prepare("INSERT INTO hr_attendances
             (user_id, attendance_date, check_in_time, check_in_type, check_in_latitude, check_in_longitude, check_in_ip, remarks, late_minutes, status)
@@ -337,6 +340,12 @@ if ($action === 'crm-checkout') {
     if ($checkoutRemark === '') $checkoutRemark = null;
     $workMin = (int)($body['work_min'] ?? 0);
     if ($attendanceId <= 0 || $datetime === '') ApiAuth::fail(400, 'attendance_id, datetime required');
+    $attendanceOwner = $pdo->prepare('SELECT user_id FROM hr_attendances WHERE id=? LIMIT 1');
+    $attendanceOwner->execute([$attendanceId]);
+    $attendanceOwnerId = (int)$attendanceOwner->fetchColumn();
+    if ($attendanceOwnerId > 0 && tp_hr_user_is_attendance_exempt($pdo, $attendanceOwnerId)) {
+        ApiAuth::fail(403, 'Executive is exempt from attendance');
+    }
     try {
         $stmt = $pdo->prepare("UPDATE hr_attendances
             SET check_out_time=?, check_out_type='MANUAL', check_out_ip=?,
@@ -365,6 +374,7 @@ if ($action === 'auto-absent') {
     $date = trim((string)($body['date'] ?? ''));
     $audit = trim((string)($body['audit'] ?? ''));
     if ($uid <= 0 || $date === '') ApiAuth::fail(400, 'user_id, date required');
+    if (tp_hr_user_is_attendance_exempt($pdo, $uid)) ApiAuth::fail(403, 'Executive is exempt from attendance');
     try {
         $stmt = $pdo->prepare("INSERT INTO hr_attendances (user_id, attendance_date, status, adjustment_reason, adjusted_by, adjusted_at)
             VALUES (?, ?, 'ABSENT', ?, NULL, NOW())
@@ -447,6 +457,9 @@ try {
     $targetUser = $attendanceService->getUserForAttendance($userId);
     if (!$targetUser) {
         ApiAuth::fail(404, 'User not found or inactive');
+    }
+    if (tp_hr_is_attendance_exempt($targetUser)) {
+        ApiAuth::fail(403, 'Executive is exempt from attendance');
     }
 
     $pdo->beginTransaction();
