@@ -27,7 +27,10 @@ define('MIN_PASSWORD_LENGTH', 8);
 define('CRM_BASE_URL', $_ENV['CRM_BASE_URL'] ?? 'http://localhost/tp-crm');
 
 /** Public base URL of TP-Checkin (รูปลงเวลาเก็บใต้ {CHECKIN}/storage/photos/...) */
-define('CHECKIN_APP_URL', $_ENV['CHECKIN_APP_URL'] ?? '');
+$checkinDefaultUrl = (defined('APP_ENV') && strtolower((string)APP_ENV) === 'production')
+    ? 'https://checkin.tp-asset.com'
+    : '';
+define('CHECKIN_APP_URL', $_ENV['CHECKIN_APP_URL'] ?? $checkinDefaultUrl);
 
 /**
  * Absolute path to TP-Checkin `storage` directory on this server (e.g. .../tp-checkin/storage).
