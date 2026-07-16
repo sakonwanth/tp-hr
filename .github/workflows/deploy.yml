@@ -107,6 +107,11 @@ jobs:
               $COMPOSER_BIN install --no-interaction --no-dev 2>&1 || echo "composer install skipped"
             fi
 
+            if [ -n "$PHP_BIN" ] && [ -f scripts/ensure_outside_attendance_schema.php ]; then
+              echo "📍 Ensuring offsite attendance request schema..."
+              $PHP_BIN scripts/ensure_outside_attendance_schema.php
+            fi
+
             if [ -n "$PHP_BIN" ] && [ -f scripts/ensure_company_holidays.php ]; then
               echo "📅 Ensuring company holidays (2026) if empty..."
               $PHP_BIN scripts/ensure_company_holidays.php --year=2026 2>&1 || echo "   holiday ensure skipped"
