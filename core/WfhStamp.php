@@ -19,10 +19,10 @@ class WfhStamp
         $date = $date ?: date('Y-m-d');
         $pdo = getDB();
 
-        $u = $pdo->prepare("SELECT id, work_mode, is_active FROM users WHERE id = ? LIMIT 1");
+        $u = $pdo->prepare("SELECT u.id, u.work_mode, u.is_active, r.name AS role_name FROM users u LEFT JOIN roles r ON r.id = u.role_id WHERE u.id = ? LIMIT 1");
         $u->execute([$userId]);
         $user = $u->fetch(PDO::FETCH_ASSOC);
-        if (!$user || (int)$user['is_active'] !== 1 || $user['work_mode'] !== 'WFH') return false;
+        if (!$user || (int)$user['is_active'] !== 1 || $user['work_mode'] !== 'WFH' || tp_hr_is_attendance_exempt($user)) return false;
 
         return self::stamp($pdo, $userId, $date);
     }
@@ -36,9 +36,11 @@ class WfhStamp
         $date = $date ?: date('Y-m-d');
         $pdo = getDB();
         $rows = $pdo->query("
-            SELECT id FROM users
-            WHERE is_active = 1 AND work_mode = 'WFH'
-              AND " . tp_hr_non_system_user_condition_sql('') . "
+            SELECT u.id FROM users u
+            LEFT JOIN roles attendance_role ON attendance_role.id = u.role_id
+            WHERE u.is_active = 1 AND u.work_mode = 'WFH'
+              AND COALESCE(attendance_role.name, '') NOT IN ('CEO', 'Chairman')
+              AND " . tp_hr_non_system_user_condition_sql('u') . "
         ")->fetchAll(PDO::FETCH_COLUMN);
 
         $count = 0;

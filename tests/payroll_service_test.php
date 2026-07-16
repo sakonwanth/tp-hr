@@ -1,5 +1,10 @@
 <?php
 
+$autoload = dirname(__DIR__) . '/vendor/autoload.php';
+if (is_file($autoload)) require_once $autoload;
+if (!class_exists(\TpCommon\Hr\WorkdayCalculator::class)) {
+    require_once dirname(__DIR__, 2) . '/tp-common/src/Hr/WorkdayCalculator.php';
+}
 require_once dirname(__DIR__) . '/core/Services/SettingsService.php';
 require_once dirname(__DIR__) . '/core/Services/PayrollService.php';
 

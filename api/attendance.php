@@ -37,6 +37,10 @@ if ($method === 'POST') {
 
     $action = $input['action'] ?? '';
 
+    if (in_array($action, ['check_in', 'check_out', 'request_late_start'], true) && tp_hr_is_attendance_exempt($user)) {
+        apiError('ตำแหน่งของคุณได้รับการยกเว้น ไม่จำเป็นต้องลงเวลาเข้า-ออกงาน', 403);
+    }
+
     switch ($action) {
         case 'check_in':
             handleCheckIn($pdo, $user, $input);
@@ -158,6 +162,8 @@ function handleCheckIn(PDO $pdo, array $user, array $input): void {
                 apiSuccess([
                     'pending_approval' => true,
                     'request_id'       => $pending['request_id'],
+                    'attendance_id'    => $pending['attendance_id'],
+                    'check_in_time'    => date('H:i:s'),
                 ], 'ส่งคำขอลงเวลาเข้างานนอกสถานที่เรียบร้อยแล้ว รอผู้อนุมัติ');
             }
             apiError('คุณไม่ได้อยู่ในพื้นที่ที่อนุญาตให้ลงเวลา กรุณาตรวจสอบตำแหน่งของคุณ');
@@ -251,6 +257,8 @@ function createOutsideLocationRequest(
         $photoPath = savePhoto($photo, $user['id'], strtolower($requestType) . '_outside');
     }
 
+    $pdo->beginTransaction();
+    try {
     $stmt = $pdo->prepare("
         INSERT INTO hr_attendance_outside_requests (
             user_id, attendance_id, request_type,
@@ -269,6 +277,17 @@ function createOutsideLocationRequest(
     ]);
 
     $requestId = (int)$pdo->lastInsertId();
+    $attendanceId = stampPendingOutsideAttendance(
+        $pdo, $user, $requestType, $attendanceId, $requestDate, $requestTime,
+        $latitude, $longitude, $photoPath, $reason
+    );
+    $pdo->prepare("UPDATE hr_attendance_outside_requests SET attendance_id = ? WHERE id = ?")
+        ->execute([$attendanceId, $requestId]);
+    $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        throw $e;
+    }
     Auth::log('OUTSIDE_LOCATION_REQUEST', 'hr_attendance_outside_requests', $requestId, [
         'request_type'  => $requestType,
         'request_date'  => $requestDate,
@@ -279,7 +298,38 @@ function createOutsideLocationRequest(
         crm_line_notify_outside_attendance_requested($pdo, $requestId);
     }
 
-    return ['request_id' => $requestId, 'photo_path' => $photoPath];
+    return ['request_id' => $requestId, 'attendance_id' => $attendanceId, 'photo_path' => $photoPath];
+}
+
+/** Stamp the captured request time immediately; approval only validates that stamp later. */
+function stampPendingOutsideAttendance(
+    PDO $pdo, array $user, string $requestType, ?int $attendanceId,
+    string $requestDate, string $requestTime, ?float $latitude, ?float $longitude,
+    ?string $photoPath, string $reason
+): int {
+    $requestType = strtoupper($requestType);
+    $stmt = $pdo->prepare("SELECT * FROM hr_attendances WHERE user_id = ? AND attendance_date = ? LIMIT 1 FOR UPDATE");
+    $stmt->execute([(int)$user['id'], $requestDate]);
+    $attendance = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+
+    if ($requestType === 'CHECK_IN') {
+        if ($attendance && !empty($attendance['check_in_time'])) apiError('คุณได้ลงเวลาเข้างานวันนี้แล้ว', 409);
+        if ($attendance) {
+            $pdo->prepare("UPDATE hr_attendances SET check_in_time=?, check_in_type='GPS', check_in_latitude=?, check_in_longitude=?, check_in_location_id=NULL, check_in_photo=?, check_in_ip=?, is_offsite=1, offsite_status='PENDING', offsite_reason=?, status='PENDING', updated_at=NOW() WHERE id=?")
+                ->execute([$requestTime, $latitude, $longitude, $photoPath, $_SERVER['REMOTE_ADDR'] ?? '', $reason, (int)$attendance['id']]);
+            return (int)$attendance['id'];
+        }
+        $shift = $pdo->query("SELECT id FROM hr_work_shifts WHERE is_default=1 AND is_active=1 LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+        $pdo->prepare("INSERT INTO hr_attendances (user_id,attendance_date,shift_id,check_in_time,check_in_type,check_in_latitude,check_in_longitude,check_in_photo,check_in_ip,is_offsite,offsite_status,offsite_reason,status) VALUES (?,?,?,?,'GPS',?,?,?,?,1,'PENDING',?,'PENDING')")
+            ->execute([(int)$user['id'], $requestDate, $shift['id'] ?? null, $requestTime, $latitude, $longitude, $photoPath, $_SERVER['REMOTE_ADDR'] ?? '', $reason]);
+        return (int)$pdo->lastInsertId();
+    }
+
+    if (!$attendance || empty($attendance['check_in_time'])) apiError('คุณยังไม่ได้ลงเวลาเข้างานวันนี้', 409);
+    if (!empty($attendance['check_out_time'])) apiError('คุณได้ลงเวลาออกงานวันนี้แล้ว', 409);
+    $pdo->prepare("UPDATE hr_attendances SET check_out_time=?, check_out_type='GPS', check_out_latitude=?, check_out_longitude=?, check_out_location_id=NULL, check_out_photo=?, check_out_ip=?, is_offsite=1, offsite_status='PENDING', offsite_reason=?, updated_at=NOW() WHERE id=?")
+        ->execute([$requestTime, $latitude, $longitude, $photoPath, $_SERVER['REMOTE_ADDR'] ?? '', $reason, (int)$attendance['id']]);
+    return (int)$attendance['id'];
 }
 
 /**
@@ -297,6 +347,11 @@ function handleCheckOut(PDO $pdo, array $user, array $input): void {
 
     if (!$attendance || !$attendance['check_in_time']) {
         apiError('คุณยังไม่ได้ลงเวลาเข้างานวันนี้');
+    }
+    $pendingCheckIn = $pdo->prepare("SELECT 1 FROM hr_attendance_outside_requests WHERE user_id=? AND request_date=CURDATE() AND request_type='CHECK_IN' AND status='PENDING' LIMIT 1");
+    $pendingCheckIn->execute([(int)$user['id']]);
+    if ($pendingCheckIn->fetchColumn()) {
+        apiError('คำขอลงเวลาเข้างานนอกสถานที่ยังรออนุมัติ จึงยังลงเวลาออกไม่ได้', 409);
     }
     if ($attendance['check_out_time']) {
         apiError('คุณได้ลงเวลาออกงานวันนี้แล้ว');
@@ -345,6 +400,8 @@ function handleCheckOut(PDO $pdo, array $user, array $input): void {
                 apiSuccess([
                     'pending_approval' => true,
                     'request_id'       => $pending['request_id'],
+                    'attendance_id'    => $pending['attendance_id'],
+                    'check_out_time'   => date('H:i:s'),
                 ], 'ส่งคำขอลงเวลาออกงานนอกสถานที่เรียบร้อยแล้ว รอผู้อนุมัติ');
             }
             apiError('คุณไม่ได้อยู่ในพื้นที่ที่อนุญาตให้ลงเวลา กรุณาตรวจสอบตำแหน่งของคุณ');

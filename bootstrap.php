@@ -73,7 +73,18 @@ function tp_hr_attendance_scope_filter_sql(string $alias = 'u'): string {
     $prefix = $alias !== '' ? $alias . '.' : '';
     return $prefix . 'is_active = 1'
         . ' AND ' . $prefix . "employee_code LIKE 'TPE%'"
-        . ' AND ' . tp_hr_non_system_user_condition_sql($alias);
+        . ' AND ' . tp_hr_non_system_user_condition_sql($alias)
+        . ' AND NOT EXISTS (SELECT 1 FROM roles attendance_role'
+        . ' WHERE attendance_role.id = ' . $prefix . 'role_id'
+        . " AND attendance_role.name IN ('CEO','Chairman'))";
+}
+
+/** CEO and Chairman are salaried staff but are exempt from clocking in/out. */
+function tp_hr_is_attendance_exempt(array $user): bool {
+    if (class_exists(\TpCommon\Hr\AttendanceScope::class)) {
+        return \TpCommon\Hr\AttendanceScope::isRoleExempt($user['role_name'] ?? null);
+    }
+    return in_array((string)($user['role_name'] ?? ''), ['CEO', 'Chairman'], true);
 }
 
 /** วันลาออกต้องเป็นสิ้นเดือนปฏิทิน (ใช้คู่กับ payroll resignation tail) */

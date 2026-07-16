@@ -100,6 +100,8 @@ class OutsideAttendanceService
                 throw new OutsideAttendanceException('คำขอนี้ถูกดำเนินการแล้ว', 409);
             }
 
+            $this->rollbackPendingStamp($request);
+
             $this->markRequestReviewed($requestId, 'REJECTED', $reviewerId, $remarks, (int)($request['attendance_id'] ?? 0) ?: null);
             $this->pdo->commit();
 
@@ -128,7 +130,8 @@ class OutsideAttendanceService
         $checkInAt = AttendanceService::normalizeDateTime($date, (string)$request['request_time']);
         $attendance = $this->lockAttendanceByUserDate((int)$request['user_id'], $date);
 
-        if ($attendance && !empty($attendance['check_in_time'])) {
+        if ($attendance && !empty($attendance['check_in_time'])
+            && !$this->sameCapturedTime($attendance['check_in_time'], $checkInAt)) {
             throw new OutsideAttendanceException('พนักงานมีเวลาเข้างานของวันนี้แล้ว', 409);
         }
 
@@ -234,7 +237,8 @@ class OutsideAttendanceService
         if (!$attendance || empty($attendance['check_in_time'])) {
             throw new OutsideAttendanceException('ยังไม่มีเวลาเข้างาน จึงไม่สามารถอนุมัติเวลาออกงานได้', 409);
         }
-        if (!empty($attendance['check_out_time'])) {
+        if (!empty($attendance['check_out_time'])
+            && !$this->sameCapturedTime($attendance['check_out_time'], $checkOutAt)) {
             throw new OutsideAttendanceException('พนักงานมีเวลาออกงานของวันนี้แล้ว', 409);
         }
 
@@ -342,5 +346,30 @@ class OutsideAttendanceService
             $remarks !== '' ? $remarks : null,
             $requestId,
         ]);
+    }
+
+    private function sameCapturedTime(mixed $actual, string $expected): bool
+    {
+        return $actual !== null && strtotime((string)$actual) === strtotime($expected);
+    }
+
+    /** Remove only the timestamp still matching this request; never overwrite later HR edits. */
+    private function rollbackPendingStamp(array $request): void
+    {
+        $attendance = $this->lockAttendanceForCheckout($request);
+        if (!$attendance) return;
+        $capturedAt = AttendanceService::normalizeDateTime((string)$request['request_date'], (string)$request['request_time']);
+        $type = strtoupper((string)$request['request_type']);
+
+        if ($type === 'CHECK_OUT' && $this->sameCapturedTime($attendance['check_out_time'] ?? null, $capturedAt)) {
+            $this->pdo->prepare("UPDATE hr_attendances SET check_out_time=NULL, check_out_type=NULL, check_out_latitude=NULL, check_out_longitude=NULL, check_out_location_id=NULL, check_out_photo=NULL, check_out_ip=NULL, work_minutes=0, break_minutes=0, ot_minutes=0, early_leave_minutes=0, offsite_status='REJECTED', updated_at=NOW() WHERE id=?")
+                ->execute([(int)$attendance['id']]);
+            return;
+        }
+
+        if ($type === 'CHECK_IN' && $this->sameCapturedTime($attendance['check_in_time'] ?? null, $capturedAt)) {
+            $this->pdo->prepare("UPDATE hr_attendances SET check_in_time=NULL, check_in_type=NULL, check_in_latitude=NULL, check_in_longitude=NULL, check_in_location_id=NULL, check_in_photo=NULL, check_in_ip=NULL, late_minutes=0, status=NULL, offsite_status='REJECTED', updated_at=NOW() WHERE id=?")
+                ->execute([(int)$attendance['id']]);
+        }
     }
 }

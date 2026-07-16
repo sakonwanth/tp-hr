@@ -9,6 +9,11 @@ Auth::requireLogin();
 
 $pdo = getDB();
 $user = Auth::user();
+$attendance_exempt = tp_hr_is_attendance_exempt($user);
+if ($attendance_exempt) {
+    flash('info', 'ตำแหน่งของคุณได้รับการยกเว้น ไม่จำเป็นต้องลงเวลาเข้า-ออกงาน');
+    redirect('/', 302);
+}
 $page_title = 'ลงเวลาเข้า-ออก';
 $current_page = 'checkin';
 
@@ -425,6 +430,16 @@ require_once __DIR__ . '/templates/header.php';
                             <span class="text-lg font-bold whitespace-nowrap">ลงเวลาเข้า</span>
                         </button>
                         
+                    <?php elseif ($pending_in): ?>
+                        <div class="tp-checkin-primary-action--done text-amber-200 flex items-center justify-center gap-3">
+                            <i class="fas fa-hourglass-half text-4xl" aria-hidden="true"></i>
+                            <span class="text-base font-semibold text-center px-2">รออนุมัติเวลาเข้างานนอกสถานที่</span>
+                        </div>
+                    <?php elseif ($pending_out): ?>
+                        <div class="tp-checkin-primary-action--done text-amber-200 flex items-center justify-center gap-3">
+                            <i class="fas fa-hourglass-half text-4xl" aria-hidden="true"></i>
+                            <span class="text-base font-semibold text-center px-2">รออนุมัติเวลาออกงานนอกสถานที่</span>
+                        </div>
                     <?php elseif (!$today_attendance['check_out_time']): ?>
                         <!-- Check-out Button -->
                         <button id="btn-checkout" type="button"

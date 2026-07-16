@@ -29,8 +29,11 @@ $users = $pdo->query("
     SELECT u.id, u.employee_code, u.first_name_th, u.last_name_th, u.work_mode,
            COALESCE(s.day_off, 0) AS day_off
     FROM users u
+    LEFT JOIN roles attendance_role ON attendance_role.id = u.role_id
     LEFT JOIN hr_employee_schedules s ON s.user_id = u.id
-    WHERE u.is_active = 1 AND " . tp_hr_payroll_employee_filter_sql('u') . "
+    WHERE u.is_active = 1
+      AND COALESCE(attendance_role.name, '') NOT IN ('CEO', 'Chairman')
+      AND " . tp_hr_payroll_employee_filter_sql('u') . "
 ")->fetchAll(PDO::FETCH_ASSOC);
 
 // pre-load holidays
