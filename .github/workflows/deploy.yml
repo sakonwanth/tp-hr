@@ -15,7 +15,7 @@ jobs:
     name: Validate PHP & shell cache bump
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ env.PHP_VERSION }}
@@ -25,9 +25,9 @@ jobs:
           find . -name "*.php" -not -path "./vendor/*" -print0 | xargs -0 -n1 php -l
           echo "OK"
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
       - name: npm ci — static UI guards (native-shell ?v= + IOS26 page shells)
         run: |
@@ -40,7 +40,7 @@ jobs:
     needs: [validate]
     if: success() && vars.SELF_DEPLOY_ENABLED == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
