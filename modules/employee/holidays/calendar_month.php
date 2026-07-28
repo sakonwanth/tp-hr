@@ -59,4 +59,20 @@ $dayNamesGrid = ['จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.', 'อา.'];
         <?php endif; ?>
         <?php endforeach; ?>
     </div>
+
+    <?php if ($monthHolidayCount > 0): ?>
+    <ul class="tp-holidays-month__names">
+        <?php foreach ($holidaysByMonth[$m] as $holiday): ?>
+        <li>
+            <button type="button"
+                    class="tp-holidays-month__name-row touch-manipulation"
+                    data-holiday-id="<?php echo (int) $holiday['id']; ?>"
+                    aria-label="ดูรายละเอียด <?php echo htmlspecialchars($holiday['name']); ?>">
+                <span class="tp-holidays-month__name-day"><?php echo (int) date('j', strtotime($holiday['date'])); ?></span>
+                <span class="tp-holidays-month__name-text"><?php echo htmlspecialchars($holiday['name']); ?></span>
+            </button>
+        </li>
+        <?php endforeach; ?>
+    </ul>
+    <?php endif; ?>
 </section>

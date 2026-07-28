@@ -329,7 +329,7 @@ foreach ($workShifts as $_ws) {
 
 <?php elseif ($tab === 'holidays'): ?>
 <!-- Holidays -->
-<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <div class="space-y-6 min-w-0">
         <!-- Add Holiday Form -->
         <div class="native-card tp-native-card overflow-hidden rounded-[var(--tp-ios-card-radius)] p-5 sm:p-6 min-w-0 border border-white/10">
@@ -391,7 +391,7 @@ foreach ($workShifts as $_ws) {
     </div>
     
     <!-- Holiday List -->
-    <div class="xl:col-span-2 native-card tp-native-card tp-native-data-card overflow-hidden rounded-[var(--tp-ios-card-radius)] p-5 sm:p-6 min-w-0 border border-white/10">
+    <div class="lg:col-span-2 native-card tp-native-card tp-native-data-card overflow-hidden rounded-[var(--tp-ios-card-radius)] p-5 sm:p-6 min-w-0 border border-white/10">
         <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div class="min-w-0">
                 <h2 class="text-lg font-semibold text-white">รายการวันหยุด <?php echo (int)$holidayYearTh; ?></h2>
@@ -399,14 +399,28 @@ foreach ($workShifts as $_ws) {
                     <?php echo (int)$holidayCount; ?>/13 วันขั้นต่ำตามกฎหมาย
                 </p>
             </div>
-            <form method="GET" class="flex shrink-0 items-center gap-2">
-                <input type="hidden" name="tab" value="holidays">
-                <label class="sr-only" for="holiday-year-filter">ปี ค.ศ.</label>
-                <input id="holiday-year-filter" type="number" name="year" min="2000" max="2100" value="<?php echo (int)$holidayYear; ?>" class="input-field tp-native-input w-28 min-h-[48px]">
-                <button type="submit" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/15 touch-manipulation">
-                    ดูปี
-                </button>
-            </form>
+            <div class="flex shrink-0 flex-wrap items-center gap-2">
+                <form method="GET" class="flex shrink-0 items-center gap-2">
+                    <input type="hidden" name="tab" value="holidays">
+                    <label class="sr-only" for="holiday-year-filter">ปี ค.ศ.</label>
+                    <input id="holiday-year-filter" type="number" name="year" min="2000" max="2100" value="<?php echo (int)$holidayYear; ?>" class="input-field tp-native-input w-28 min-h-[48px]">
+                    <button type="submit" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/15 touch-manipulation">
+                        ดูปี
+                    </button>
+                </form>
+                <?php if (!empty($holidays)): ?>
+                <a href="/holidays_print.php?year=<?php echo (int)$holidayYear; ?>&amp;auto=pdf"
+                   target="_blank" rel="noopener noreferrer"
+                   class="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[var(--tp-ios-card-radius)] border border-white/12 bg-white/[0.06] px-4 text-sm font-semibold text-white hover:bg-white/12 touch-manipulation">
+                    <i class="fas fa-file-pdf" aria-hidden="true"></i>PDF
+                </a>
+                <a href="/holidays_print.php?year=<?php echo (int)$holidayYear; ?>&amp;auto=png"
+                   target="_blank" rel="noopener noreferrer"
+                   class="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[var(--tp-ios-card-radius)] border border-white/12 bg-white/[0.06] px-4 text-sm font-semibold text-white hover:bg-white/12 touch-manipulation">
+                    <i class="fas fa-file-image" aria-hidden="true"></i>PNG
+                </a>
+                <?php endif; ?>
+            </div>
         </div>
 
         <div class="md:hidden space-y-3">

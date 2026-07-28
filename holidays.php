@@ -141,7 +141,7 @@ foreach ($holidays as $holiday) {
 require_once __DIR__ . '/templates/header.php';
 ?>
 
-<div class="tp-holidays-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<div class="tp-holidays-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(1200px,100%)] mx-auto min-w-0">
     <header class="tp-ios-large-title-block mb-5 md:mb-6">
         <nav class="mb-2 text-sm text-white/55" aria-label="Breadcrumb">
             <a href="index.php" class="hover:text-white touch-manipulation">หน้าแรก</a>
@@ -156,10 +156,10 @@ require_once __DIR__ . '/templates/header.php';
     </header>
 
     <div class="tp-holidays-toolbar native-card tp-native-card min-w-0">
-        <form method="GET">
-            <input type="hidden" name="view" value="<?php echo htmlspecialchars($view); ?>">
+        <div class="tp-holidays-toolbar__row">
+            <form method="GET" class="tp-holidays-year-row">
+                <input type="hidden" name="view" value="<?php echo htmlspecialchars($view); ?>">
 
-            <div class="tp-holidays-year-row">
                 <a href="<?php echo $yearQuery($prevYear, $view); ?>"
                    class="tp-holidays-year-btn touch-manipulation"
                    aria-label="ปี <?php echo (int) ($prevYear + 543); ?>">
@@ -167,11 +167,14 @@ require_once __DIR__ . '/templates/header.php';
                 </a>
 
                 <div class="tp-holidays-year-display">
-                    <p class="tp-holidays-year-number"><?php echo (int) $holidayYearTh; ?></p>
+                    <p class="tp-holidays-year-number">
+                        <?php echo (int) $holidayYearTh; ?>
+                        <i class="fas fa-chevron-down tp-holidays-year-caret" aria-hidden="true"></i>
+                    </p>
                     <p class="tp-holidays-year-sub">พ.ศ. · ค.ศ. <?php echo (int) $holidayYear; ?></p>
                     <label for="holiday-year-select" class="tp-visually-hidden">เลือกปี</label>
                     <select id="holiday-year-select" name="year"
-                            class="input-field tp-native-select tp-holidays-year-select touch-manipulation"
+                            class="tp-holidays-year-select touch-manipulation"
                             onchange="this.form.submit()">
                         <?php for ($y = (int) date('Y') + 1; $y >= 2000; $y--): ?>
                         <option value="<?php echo $y; ?>" <?php echo $y === $holidayYear ? 'selected' : ''; ?>>
@@ -186,22 +189,50 @@ require_once __DIR__ . '/templates/header.php';
                    aria-label="ปี <?php echo (int) ($nextYear + 543); ?>">
                     <i class="fas fa-chevron-right" aria-hidden="true"></i>
                 </a>
-            </div>
-        </form>
+            </form>
 
-        <div class="tp-holidays-segment" role="tablist" aria-label="มุมมองวันหยุด">
-            <a href="<?php echo $yearQuery($holidayYear, 'calendar'); ?>"
-               role="tab"
-               aria-selected="<?php echo $view === 'calendar' ? 'true' : 'false'; ?>"
-               class="tp-holidays-segment__item touch-manipulation">
-                <i class="fas fa-th-large" aria-hidden="true"></i><span>ปฏิทิน</span>
-            </a>
-            <a href="<?php echo $yearQuery($holidayYear, 'list'); ?>"
-               role="tab"
-               aria-selected="<?php echo $view === 'list' ? 'true' : 'false'; ?>"
-               class="tp-holidays-segment__item touch-manipulation">
-                <i class="fas fa-list-ul" aria-hidden="true"></i><span>รายการ</span>
-            </a>
+            <div class="tp-holidays-toolbar__controls min-w-0">
+                <div class="tp-holidays-segment" role="tablist" aria-label="มุมมองวันหยุด">
+                    <a href="<?php echo $yearQuery($holidayYear, 'calendar'); ?>"
+                       role="tab"
+                       aria-selected="<?php echo $view === 'calendar' ? 'true' : 'false'; ?>"
+                       class="tp-holidays-segment__item touch-manipulation">
+                        <i class="fas fa-th-large" aria-hidden="true"></i><span>ปฏิทิน</span>
+                    </a>
+                    <a href="<?php echo $yearQuery($holidayYear, 'list'); ?>"
+                       role="tab"
+                       aria-selected="<?php echo $view === 'list' ? 'true' : 'false'; ?>"
+                       class="tp-holidays-segment__item touch-manipulation">
+                        <i class="fas fa-list-ul" aria-hidden="true"></i><span>รายการ</span>
+                    </a>
+                </div>
+
+                <div class="tp-holidays-toolbar-actions">
+                    <?php if ($holidayCount > 0): ?>
+                    <a href="holidays_print.php?year=<?php echo (int) $holidayYear; ?>&amp;auto=pdf"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="tp-holidays-export-btn touch-manipulation">
+                        <i class="fas fa-file-pdf" aria-hidden="true"></i>
+                        <span>PDF</span>
+                    </a>
+                    <a href="holidays_print.php?year=<?php echo (int) $holidayYear; ?>&amp;auto=png"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="tp-holidays-export-btn touch-manipulation">
+                        <i class="fas fa-file-image" aria-hidden="true"></i>
+                        <span>PNG</span>
+                    </a>
+                    <?php endif; ?>
+                    <?php if ($canManageHolidays): ?>
+                    <a href="/hr/settings.php?tab=holidays&amp;year=<?php echo (int) $holidayYear; ?>"
+                       class="tp-holidays-manage-btn touch-manipulation">
+                        <i class="fas fa-cog" aria-hidden="true"></i>
+                        <span>จัดการวันหยุด</span>
+                    </a>
+                    <?php endif; ?>
+                </div>
+            </div>
         </div>
 
         <?php if ($holidayCount > 0): ?>
@@ -219,31 +250,6 @@ require_once __DIR__ . '/templates/header.php';
                 <p class="tp-holidays-metric__value is-accent"><?php echo (int) $upcomingCount; ?></p>
             </div>
         </div>
-        <?php endif; ?>
-
-        <?php if ($holidayCount > 0): ?>
-        <div class="tp-holidays-toolbar-actions">
-            <a href="holidays_print.php?year=<?php echo (int) $holidayYear; ?>"
-               target="_blank"
-               rel="noopener noreferrer"
-               class="tp-holidays-export-btn touch-manipulation">
-                <i class="fas fa-file-pdf" aria-hidden="true"></i>
-                <span>PDF</span>
-            </a>
-            <?php if ($canManageHolidays): ?>
-            <a href="/hr/settings.php?tab=holidays&amp;year=<?php echo (int) $holidayYear; ?>"
-               class="tp-holidays-manage-btn touch-manipulation">
-                <i class="fas fa-cog" aria-hidden="true"></i>
-                <span>จัดการวันหยุด</span>
-            </a>
-            <?php endif; ?>
-        </div>
-        <?php elseif ($canManageHolidays): ?>
-        <a href="/hr/settings.php?tab=holidays&amp;year=<?php echo (int) $holidayYear; ?>"
-           class="tp-holidays-manage-btn w-full sm:w-auto touch-manipulation">
-            <i class="fas fa-cog" aria-hidden="true"></i>
-            <span>จัดการวันหยุด</span>
-        </a>
         <?php endif; ?>
     </div>
 
@@ -286,13 +292,29 @@ require_once __DIR__ . '/templates/header.php';
                 <?php endif; ?>
 
                 <?php if ($view === 'calendar'): ?>
-                <h2 class="section-title mb-4">
-                    <i class="fas fa-calendar-alt text-violet-400" aria-hidden="true"></i>
-                    ปฏิทิน <?php echo (int) $holidayYearTh; ?>
-                </h2>
+                <div class="tp-holidays-main-head">
+                    <h2 class="section-title">
+                        <i class="fas fa-calendar-alt text-violet-400" aria-hidden="true"></i>
+                        ปฏิทิน <?php echo (int) $holidayYearTh; ?>
+                    </h2>
+                    <?php if ($holidays): ?>
+                    <div class="tp-holidays-pager-nav" id="tp-holidays-pager-nav" hidden>
+                        <button type="button" class="tp-holidays-year-btn touch-manipulation"
+                                data-pager-step="-1" aria-label="เดือนก่อนหน้า">
+                            <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="tp-holidays-pager-all touch-manipulation"
+                                id="tp-holidays-pager-toggle" aria-pressed="false">ดูทั้งปี</button>
+                        <button type="button" class="tp-holidays-year-btn touch-manipulation"
+                                data-pager-step="1" aria-label="เดือนถัดไป">
+                            <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <?php endif; ?>
+                </div>
 
                 <?php if ($holidays): ?>
-                <div class="tp-holidays-calendar-grid">
+                <div class="tp-holidays-calendar-grid" id="tp-holidays-calendar-grid">
                     <?php for ($m = 1; $m <= 12; $m++):
                         include __DIR__ . '/modules/employee/holidays/calendar_month.php';
                     endfor; ?>
@@ -308,12 +330,14 @@ require_once __DIR__ . '/templates/header.php';
                 </h2>
 
                 <?php if ($holidays): ?>
-                <?php for ($m = 1; $m <= 12; $m++):
-                    if (empty($holidaysByMonth[$m])) {
-                        continue;
-                    }
-                    include __DIR__ . '/modules/employee/holidays/list_month.php';
-                endfor; ?>
+                <div class="tp-holidays-list-grid">
+                    <?php for ($m = 1; $m <= 12; $m++):
+                        if (empty($holidaysByMonth[$m])) {
+                            continue;
+                        }
+                        include __DIR__ . '/modules/employee/holidays/list_month.php';
+                    endfor; ?>
+                </div>
                 <?php else: ?>
                 <?php include __DIR__ . '/modules/employee/holidays/empty_state.php'; ?>
                 <?php endif; ?>
@@ -475,14 +499,94 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    /* ---- Phone month pager --------------------------------------------------
+       Twelve mini-grids stacked is ~7000px of scroll on a phone. Below 640px the
+       calendar shows one month at a time (chips + arrows switch it); "ดูทั้งปี"
+       restores the full stack. No-JS and >=640px keep the full grid. */
+    var calGrid = document.getElementById('tp-holidays-calendar-grid');
+    var pagerNav = document.getElementById('tp-holidays-pager-nav');
+    var pagerToggle = document.getElementById('tp-holidays-pager-toggle');
+    var monthSections = calGrid ? calGrid.querySelectorAll('[data-holiday-month]') : [];
+    var phoneMq = window.matchMedia('(max-width: 639px)');
+    var pagerOn = false;
+    var pagerExpanded = false;
+    var pagerMonth = <?php echo (int) ($isCurrentYear ? (int) date('n') : (($holidays[0] ?? null) ? (int) date('n', strtotime($holidays[0]['date'])) : 1)); ?>;
+
+    function monthSectionFor(month) {
+        for (var i = 0; i < monthSections.length; i++) {
+            if (monthSections[i].getAttribute('data-holiday-month') === String(month)) return monthSections[i];
+        }
+        return null;
+    }
+
+    function renderPager() {
+        if (!calGrid) return;
+        var single = pagerOn && !pagerExpanded;
+        calGrid.classList.toggle('is-pager', single);
+        for (var i = 0; i < monthSections.length; i++) {
+            var isSel = monthSections[i].getAttribute('data-holiday-month') === String(pagerMonth);
+            monthSections[i].classList.toggle('is-pager-visible', isSel);
+        }
+        if (pagerNav) pagerNav.hidden = !pagerOn;
+        if (pagerToggle) {
+            pagerToggle.textContent = pagerExpanded ? 'ดูทีละเดือน' : 'ดูทั้งปี';
+            pagerToggle.setAttribute('aria-pressed', pagerExpanded ? 'true' : 'false');
+        }
+        if (single) {
+            var sec = monthSectionFor(pagerMonth);
+            setActiveMonth(pagerMonth, sec ? sec.getAttribute('data-month-label') : '');
+        }
+    }
+
+    function setPagerMonth(month, scrollIntoView) {
+        month = Math.min(12, Math.max(1, parseInt(month, 10) || 1));
+        pagerMonth = month;
+        renderPager();
+        if (scrollIntoView && calGrid) {
+            calGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    function syncPagerMode() {
+        pagerOn = !!calGrid && phoneMq.matches;
+        if (!pagerOn) pagerExpanded = false;
+        renderPager();
+    }
+
+    if (pagerNav) {
+        pagerNav.querySelectorAll('[data-pager-step]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var step = parseInt(btn.getAttribute('data-pager-step'), 10) || 0;
+                setPagerMonth(pagerMonth + step, false);
+            });
+        });
+    }
+    if (pagerToggle) {
+        pagerToggle.addEventListener('click', function() {
+            pagerExpanded = !pagerExpanded;
+            renderPager();
+        });
+    }
+    if (phoneMq.addEventListener) {
+        phoneMq.addEventListener('change', syncPagerMode);
+    } else if (phoneMq.addListener) {
+        phoneMq.addListener(syncPagerMode);
+    }
+    syncPagerMode();
+
     chips.forEach(function(chip) {
         chip.addEventListener('click', function() {
+            var month = chip.getAttribute('data-month');
+            if (pagerOn && !pagerExpanded) {
+                setPagerMonth(month, true);
+                return;
+            }
             var anchorId = chip.getAttribute('data-anchor');
             var target = anchorId ? document.getElementById(anchorId) : null;
             if (target) {
                 target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
-            setActiveMonth(chip.getAttribute('data-month'), chip.getAttribute('data-label'));
+            setActiveMonth(month, chip.getAttribute('data-label'));
         });
     });
 

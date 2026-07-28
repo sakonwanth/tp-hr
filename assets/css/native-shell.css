@@ -785,11 +785,53 @@ body.tp-native-app .section-title i {
   -webkit-backdrop-filter: blur(var(--tp-surface-card-blur));
 }
 
+.tp-holidays-toolbar__row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tp-space-16);
+}
+
+.tp-holidays-toolbar__controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tp-space-12);
+}
+
+@media (min-width: 768px) {
+  .tp-holidays-toolbar__row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--tp-space-24);
+  }
+
+  .tp-holidays-toolbar__controls {
+    flex: 1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: var(--tp-space-12);
+  }
+
+  .tp-holidays-toolbar__controls .tp-holidays-segment {
+    flex: 0 0 auto;
+    width: 15rem;
+  }
+}
+
 .tp-holidays-year-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--tp-space-12);
+}
+
+@media (min-width: 768px) {
+  .tp-holidays-year-row {
+    flex: 0 0 auto;
+    justify-content: flex-start;
+  }
 }
 
 .tp-holidays-year-btn {
@@ -814,9 +856,25 @@ body.tp-native-app .section-title i {
 }
 
 .tp-holidays-year-display {
+  position: relative;
   flex: 1;
   min-width: 0;
   text-align: center;
+}
+
+/* The whole year block is the picker — a visible <select> underneath repeated the
+   year a third time. */
+.tp-holidays-year-display:has(.tp-holidays-year-select:focus-visible) {
+  outline: 2px solid rgba(167, 139, 250, 0.85);
+  outline-offset: 4px;
+  border-radius: var(--tp-radius-control);
+}
+
+.tp-holidays-year-caret {
+  margin-left: var(--tp-space-8);
+  font-size: 0.5em;
+  vertical-align: middle;
+  color: rgba(255, 255, 255, 0.45);
 }
 
 .tp-holidays-year-display .tp-holidays-year-number {
@@ -835,11 +893,25 @@ body.tp-native-app .section-title i {
 }
 
 .tp-holidays-year-select {
-  margin-top: var(--tp-space-8);
-  max-width: 11rem;
-  margin-inline: auto;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   min-height: var(--tp-native-touch-min);
-  text-align: center;
+  opacity: 0;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  background: transparent;
+  font: inherit;
+}
+
+@media (min-width: 768px) {
+  .tp-holidays-year-display {
+    flex: 0 0 auto;
+    text-align: left;
+  }
 }
 
 .tp-holidays-manage-btn {
@@ -1010,14 +1082,14 @@ button.tp-holidays-month-chip {
 }
 
 @media (max-width: 639px) {
+  /* Export pair sits on one row; manage spans the full width beneath it. */
   .tp-holidays-toolbar-actions {
-    flex-direction: column;
-    align-items: stretch;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .tp-holidays-export-btn,
-  .tp-holidays-manage-btn {
-    width: 100%;
+  .tp-holidays-toolbar-actions .tp-holidays-manage-btn {
+    grid-column: 1 / -1;
   }
 
   .tp-holidays-month-chip {
@@ -1085,33 +1157,26 @@ button.tp-holidays-month-chip {
   opacity: 0.85;
 }
 
+/* Single-column stack: the year grid gets the full content width at every size,
+   so no rail can strand an empty half-screen next to it. */
 .tp-holidays-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: var(--tp-space-24);
+  min-width: 0;
 }
 
-@media (min-width: 1280px) {
-  .tp-holidays-layout {
-    grid-template-columns: minmax(0, 1.65fr) minmax(280px, 1fr);
-    grid-template-areas:
-      'main next'
-      'main aside';
-    align-items: start;
-  }
+.tp-holidays-aside {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--tp-space-16);
+  align-items: start;
+}
 
-  .tp-holidays-main {
-    grid-area: main;
-  }
-
-  .tp-holidays-next-slot {
-    grid-area: next;
-  }
-
+@media (min-width: 768px) {
   .tp-holidays-aside {
-    grid-area: aside;
-    position: sticky;
-    top: var(--tp-space-24);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--tp-space-24);
   }
 }
 
@@ -1123,15 +1188,66 @@ button.tp-holidays-month-chip {
   box-shadow: var(--tp-surface-card-shadow);
 }
 
+/* Year-at-a-glance: densify as width allows — 12 months should read as one block,
+   not as a 12-screen scroll. */
+/* auto-fill on the real available width — correct with or without the desktop rail,
+   instead of viewport breakpoints that ignore the sidebar. */
 .tp-holidays-calendar-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--tp-space-16);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+  gap: var(--tp-space-12);
+  align-items: start;
+}
+
+.tp-holidays-calendar-grid.is-pager > .tp-holidays-month:not(.is-pager-visible) {
+  display: none;
+}
+
+.tp-holidays-main-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--tp-space-12);
+  margin-bottom: var(--tp-space-16);
+}
+
+.tp-holidays-main-head .section-title {
+  margin-bottom: 0;
+}
+
+.tp-holidays-pager-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--tp-space-8);
+}
+
+.tp-holidays-pager-nav[hidden] {
+  display: none;
+}
+
+.tp-holidays-pager-all {
+  min-height: var(--tp-native-touch-min);
+  padding: 0 var(--tp-space-12);
+  border-radius: var(--tp-radius-control);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: var(--tp-font-caption);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.tp-holidays-pager-all[aria-pressed='true'] {
+  border-color: rgba(167, 139, 250, 0.35);
+  background: rgba(124, 58, 237, 0.22);
+  color: rgb(233, 225, 255);
 }
 
 @media (min-width: 768px) {
   .tp-holidays-calendar-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--tp-space-16);
   }
 }
@@ -1198,6 +1314,8 @@ button.tp-holidays-month-chip {
   padding: var(--tp-space-4) 0;
 }
 
+/* Square cells that track the column width. No min-height above mobile — a fixed
+   44px floor against a ~34px column produced the stretched ovals in the year grid. */
 .tp-holidays-cal-day {
   aspect-ratio: 1;
   display: flex;
@@ -1206,7 +1324,6 @@ button.tp-holidays-month-chip {
   max-width: 2.75rem;
   margin-inline: auto;
   width: 100%;
-  min-height: 2.75rem;
   font-size: 0.8125rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
@@ -1267,12 +1384,86 @@ button.tp-holidays-next-card:focus-visible {
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
 }
 
-.tp-holidays-list-section {
-  scroll-margin-top: 6rem;
+/* Named holidays under each mini month — the grid alone only showed an unlabeled dot. */
+.tp-holidays-month__names {
+  list-style: none;
+  margin: var(--tp-space-12) 0 0;
+  padding: var(--tp-space-8) 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
 }
 
-.tp-holidays-list-section + .tp-holidays-list-section {
-  margin-top: var(--tp-space-24);
+.tp-holidays-month__name-row {
+  display: flex;
+  align-items: center;
+  gap: var(--tp-space-8);
+  width: 100%;
+  min-height: 2rem;
+  padding: var(--tp-space-4) var(--tp-space-4);
+  border: none;
+  border-radius: var(--tp-radius-control);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: background 0.15s ease;
+}
+
+@media (max-width: 639px) {
+  .tp-holidays-month__name-row {
+    min-height: var(--tp-native-touch-min);
+  }
+}
+
+.tp-holidays-month__name-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tp-holidays-month__name-row:focus-visible {
+  outline: 2px solid rgba(167, 139, 250, 0.85);
+  outline-offset: 2px;
+}
+
+.tp-holidays-month__name-day {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: rgba(124, 58, 237, 0.3);
+  border: 1px solid rgba(167, 139, 250, 0.32);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: rgb(233, 225, 255);
+}
+
+.tp-holidays-month__name-text {
+  min-width: 0;
+  flex: 1;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.82);
+  overflow-wrap: anywhere;
+}
+
+/* Same density rule as the calendar — full-width rows on a 1200px card left the
+   type label stranded far from the holiday name. */
+.tp-holidays-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr));
+  gap: var(--tp-space-24);
+  align-items: start;
+}
+
+.tp-holidays-list-section {
+  scroll-margin-top: 6rem;
+  min-width: 0;
 }
 
 .tp-holidays-list-section__head {
