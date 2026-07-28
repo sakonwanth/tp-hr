@@ -294,7 +294,7 @@ function signerName(array $s, bool $isEn): string {
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title><?php echo htmlspecialchars($page_title); ?></title>
 <link rel="icon" type="image/svg+xml" href="/assets/icons/tphr-app-icon.svg">
-<link rel="stylesheet" href="/assets/css/native-shell.css?v=20">
+<link rel="stylesheet" href="/assets/css/native-shell.css?v=21">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ---------- Reset / Base (cloned from CRM payroll_print design system) ---------- */

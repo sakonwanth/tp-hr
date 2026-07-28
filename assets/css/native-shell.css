@@ -1020,51 +1020,53 @@ body.tp-native-app .section-title i {
   display: none;
 }
 
+/* Rounded-rect tabs, not circles: a 999px pill forced the label and the count to
+   stack inside a ~52px round, which cramped the Thai abbreviations and made the
+   count read as decoration. Laid out on one line, the count sits beside the month
+   as a real badge and the chip width follows the label. */
 .tp-holidays-month-chip {
   flex: 0 0 auto;
-  scroll-snap-align: start;
+  scroll-snap-align: center;
   display: inline-flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  min-width: 3.25rem;
+  gap: var(--tp-space-8);
   min-height: var(--tp-native-touch-min);
-  padding: var(--tp-space-8) var(--tp-space-12);
-  border-radius: 999px;
+  padding: 0 var(--tp-space-12);
+  border-radius: var(--tp-radius-control);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.45);
-  font-size: var(--tp-font-caption);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: var(--tp-font-body);
   font-weight: 600;
+  line-height: 1;
   white-space: nowrap;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+/* Months with no holidays stay legible but recede — they are still jump targets. */
+.tp-holidays-month-chip.is-empty-month:not(.has-holidays) {
+  color: rgba(255, 255, 255, 0.42);
 }
 
 .tp-holidays-month-chip.has-holidays {
-  border-color: rgba(167, 139, 250, 0.35);
-  background: rgba(124, 58, 237, 0.2);
+  border-color: rgba(167, 139, 250, 0.28);
+  background: rgba(124, 58, 237, 0.14);
   color: rgb(237, 233, 255);
 }
 
-.tp-holidays-month-chip.is-empty-month:not(.has-holidays) {
-  border-color: rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.58);
-}
-
 .tp-holidays-month-chip.is-current:not(.is-active) {
-  box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.4);
-}
-
-.tp-holidays-month-chip.is-active {
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
-  background: rgba(124, 58, 237, 0.38);
+  border-color: rgba(167, 139, 250, 0.55);
   color: #fff;
 }
 
+.tp-holidays-month-chip.is-active,
 .tp-holidays-month-chip.is-active.is-current {
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+  border-color: transparent;
+  background: rgb(124, 58, 237);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(124, 58, 237, 0.38);
 }
 
 button.tp-holidays-month-chip {
@@ -1093,7 +1095,6 @@ button.tp-holidays-month-chip {
   }
 
   .tp-holidays-month-chip {
-    min-width: 3.5rem;
     padding-inline: var(--tp-space-14);
   }
 }
@@ -1146,15 +1147,52 @@ button.tp-holidays-month-chip {
   color: rgba(255, 255, 255, 0.48);
 }
 
+/* Bleed to the card edges and fade in the gutter, so a chip scrolled past the edge
+   trails off instead of being sliced by a hard line. */
 .tp-holidays-sticky-nav__chips {
   padding-bottom: var(--tp-space-4);
+  margin-inline: calc(-1 * var(--tp-card-pad));
+  padding-inline: var(--tp-card-pad);
+  scroll-padding-inline: var(--tp-card-pad);
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 var(--tp-card-pad),
+    #000 calc(100% - var(--tp-card-pad)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 var(--tp-card-pad),
+    #000 calc(100% - var(--tp-card-pad)),
+    transparent 100%
+  );
 }
 
 .tp-holidays-month-chip__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 var(--tp-space-4);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
   font-size: 0.6875rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  opacity: 0.85;
+  line-height: 1;
+}
+
+.tp-holidays-month-chip.has-holidays .tp-holidays-month-chip__count {
+  background: rgba(167, 139, 250, 0.3);
+  color: rgb(243, 240, 255);
+}
+
+.tp-holidays-month-chip.is-active .tp-holidays-month-chip__count {
+  background: rgba(255, 255, 255, 0.24);
+  color: #fff;
 }
 
 /* Single-column stack: the year grid gets the full content width at every size,
