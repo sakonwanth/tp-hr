@@ -112,6 +112,11 @@ jobs:
               $PHP_BIN scripts/ensure_outside_attendance_schema.php
             fi
 
+            if [ -n "$PHP_BIN" ] && [ -f scripts/ensure_attendance_exemption_schema.php ]; then
+              echo "👤 Ensuring attendance exemption schema..."
+              $PHP_BIN scripts/ensure_attendance_exemption_schema.php
+            fi
+
             if [ -n "$PHP_BIN" ] && [ -f scripts/ensure_company_holidays.php ]; then
               echo "📅 Ensuring company holidays (2026) if empty..."
               $PHP_BIN scripts/ensure_company_holidays.php --year=2026 2>&1 || echo "   holiday ensure skipped"
