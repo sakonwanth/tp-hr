@@ -305,7 +305,7 @@ if ($action === 'crm-checkin') {
     $lateMin = (int)($body['late_min'] ?? 0);
     $status = trim((string)($body['status'] ?? ''));
     if ($uid <= 0 || $date === '' || $datetime === '' || $status === '') ApiAuth::fail(400, 'user_id, date, datetime, status required');
-    if (tp_hr_user_is_attendance_exempt($pdo, $uid)) ApiAuth::fail(403, 'Executive is exempt from attendance');
+    if (tp_hr_user_is_attendance_exempt($pdo, $uid)) ApiAuth::fail(403, 'User is exempt from attendance');
     try {
         $stmt = $pdo->prepare("INSERT INTO hr_attendances
             (user_id, attendance_date, check_in_time, check_in_type, check_in_latitude, check_in_longitude, check_in_ip, remarks, late_minutes, status)
@@ -344,7 +344,7 @@ if ($action === 'crm-checkout') {
     $attendanceOwner->execute([$attendanceId]);
     $attendanceOwnerId = (int)$attendanceOwner->fetchColumn();
     if ($attendanceOwnerId > 0 && tp_hr_user_is_attendance_exempt($pdo, $attendanceOwnerId)) {
-        ApiAuth::fail(403, 'Executive is exempt from attendance');
+        ApiAuth::fail(403, 'User is exempt from attendance');
     }
     try {
         $stmt = $pdo->prepare("UPDATE hr_attendances
@@ -374,7 +374,7 @@ if ($action === 'auto-absent') {
     $date = trim((string)($body['date'] ?? ''));
     $audit = trim((string)($body['audit'] ?? ''));
     if ($uid <= 0 || $date === '') ApiAuth::fail(400, 'user_id, date required');
-    if (tp_hr_user_is_attendance_exempt($pdo, $uid)) ApiAuth::fail(403, 'Executive is exempt from attendance');
+    if (tp_hr_user_is_attendance_exempt($pdo, $uid)) ApiAuth::fail(403, 'User is exempt from attendance');
     try {
         $stmt = $pdo->prepare("INSERT INTO hr_attendances (user_id, attendance_date, status, adjustment_reason, adjusted_by, adjusted_at)
             VALUES (?, ?, 'ABSENT', ?, NULL, NOW())
@@ -459,7 +459,7 @@ try {
         ApiAuth::fail(404, 'User not found or inactive');
     }
     if (tp_hr_is_attendance_exempt($targetUser)) {
-        ApiAuth::fail(403, 'Executive is exempt from attendance');
+        ApiAuth::fail(403, 'User is exempt from attendance');
     }
 
     $pdo->beginTransaction();

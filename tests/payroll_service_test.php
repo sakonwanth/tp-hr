@@ -2,6 +2,9 @@
 
 $autoload = dirname(__DIR__) . '/vendor/autoload.php';
 if (is_file($autoload)) require_once $autoload;
+if (!class_exists(\TpCommon\Hr\AttendanceScope::class)) {
+    require_once dirname(__DIR__, 2) . '/tp-common/src/Hr/AttendanceScope.php';
+}
 if (!class_exists(\TpCommon\Hr\WorkdayCalculator::class)) {
     require_once dirname(__DIR__, 2) . '/tp-common/src/Hr/WorkdayCalculator.php';
 }
@@ -23,8 +26,11 @@ $pdo->exec("
     CREATE TABLE users (
         id INTEGER PRIMARY KEY,
         is_active INTEGER NOT NULL DEFAULT 1,
-        work_mode TEXT DEFAULT 'OFFICE'
+        work_mode TEXT DEFAULT 'OFFICE',
+        attendance_exempt INTEGER NOT NULL DEFAULT 0,
+        role_id INTEGER
     );
+    CREATE TABLE roles (id INTEGER PRIMARY KEY, name TEXT);
     CREATE TABLE hr_employee_schedules (
         user_id INTEGER PRIMARY KEY,
         day_off INTEGER NOT NULL
@@ -53,7 +59,8 @@ $pdo->exec("
 ");
 $pdo->exec("INSERT INTO system_settings (setting_key, setting_value) VALUES ('payroll_ss_enabled', '1')");
 
-$pdo->exec("INSERT INTO users (id, is_active, work_mode) VALUES (1, 1, 'OFFICE'), (2, 1, 'WFH'), (3, 0, 'OFFICE'), (5, 1, 'OFFICE')");
+$pdo->exec("INSERT INTO roles (id, name) VALUES (1, 'Staff'), (2, 'CEO'), (3, 'Chairman')");
+$pdo->exec("INSERT INTO users (id, is_active, work_mode, role_id) VALUES (1, 1, 'OFFICE', 1), (2, 1, 'WFH', 1), (3, 0, 'OFFICE', 1), (5, 1, 'OFFICE', 1)");
 $pdo->exec("INSERT INTO hr_employee_schedules (user_id, day_off) VALUES (1, 0), (2, 0), (3, 0), (5, 0)");
 $pdo->exec("INSERT INTO hr_holidays (date, is_active) VALUES ('2026-04-22', 1)");
 $pdo->exec("INSERT INTO hr_leave_requests (user_id, start_date, end_date, status) VALUES (1, '2026-04-23', '2026-04-23', 'PENDING')");
@@ -338,6 +345,13 @@ $pdo->exec("INSERT INTO hr_attendances (user_id, attendance_date, status, late_m
 $deductions = $service->computeAttendanceDeductions(5, '2026-05-01', 25);
 assertSameValue(0.0, $deductions['absent_days'], 'Sunday LATE 605 min must not count as absent');
 assertSameValue(0.0, $deductions['total_deduction'], 'Sunday check-in must not deduct payroll');
+
+$pdo->exec("INSERT INTO users (id, is_active, work_mode, attendance_exempt, role_id) VALUES (20, 1, 'OFFICE', 1, 1)");
+$pdo->exec("INSERT INTO hr_attendances (user_id, attendance_date, status, late_minutes, late_excused)
+    VALUES (20, '2026-05-05', 'ABSENT', 0, 0)");
+$exemptDeductions = $service->computeAttendanceDeductions(20, '2026-05-01', 25);
+assertSameValue(0.0, $exemptDeductions['absent_days'], 'personal exemption ignores historical ABSENT records');
+assertSameValue(0.0, $exemptDeductions['total_deduction'], 'personal exemption never deducts attendance payroll');
 
 assertSameValue(0.5, $service->benefitProrationFactor(0.5), 'partial month prorates benefits');
 assertSameValue(1.0, $service->benefitProrationFactor(1.2), 'resignation tail does not inflate benefit factor');

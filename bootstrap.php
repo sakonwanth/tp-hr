@@ -74,6 +74,7 @@ function tp_hr_attendance_scope_filter_sql(string $alias = 'u'): string {
     return $prefix . 'is_active = 1'
         . ' AND ' . $prefix . "employee_code LIKE 'TPE%'"
         . ' AND ' . tp_hr_non_system_user_condition_sql($alias)
+        . ' AND COALESCE(' . $prefix . 'attendance_exempt, 0) = 0'
         . ' AND NOT EXISTS (SELECT 1 FROM roles attendance_role'
         . ' WHERE attendance_role.id = ' . $prefix . 'role_id'
         . " AND attendance_role.name IN ('CEO','Chairman'))";
@@ -82,14 +83,15 @@ function tp_hr_attendance_scope_filter_sql(string $alias = 'u'): string {
 /** CEO and Chairman are salaried staff but are exempt from clocking in/out. */
 function tp_hr_is_attendance_exempt(array $user): bool {
     if (class_exists(\TpCommon\Hr\AttendanceScope::class)) {
-        return \TpCommon\Hr\AttendanceScope::isRoleExempt($user['role_name'] ?? null);
+        return \TpCommon\Hr\AttendanceScope::isUserExempt($user);
     }
-    return in_array((string)($user['role_name'] ?? ''), ['CEO', 'Chairman'], true);
+    return (int)($user['attendance_exempt'] ?? 0) === 1
+        || in_array((string)($user['role_name'] ?? ''), ['CEO', 'Chairman'], true);
 }
 
 function tp_hr_user_is_attendance_exempt(PDO $pdo, int $userId): bool {
     if ($userId <= 0) return false;
-    $stmt = $pdo->prepare('SELECT r.name AS role_name FROM users u LEFT JOIN roles r ON r.id=u.role_id WHERE u.id=? LIMIT 1');
+    $stmt = $pdo->prepare('SELECT u.attendance_exempt, r.name AS role_name FROM users u LEFT JOIN roles r ON r.id=u.role_id WHERE u.id=? LIMIT 1');
     $stmt->execute([$userId]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     return $row ? tp_hr_is_attendance_exempt($row) : false;

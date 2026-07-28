@@ -39,6 +39,7 @@ if (!$employee) {
 }
 
 $page_title = 'ประวัติลงเวลา - ' . $employee['first_name_th'] . ' ' . $employee['last_name_th'];
+$attendanceExempt = tp_hr_is_attendance_exempt($employee);
 
 // Get month filter (payroll month = เดือนที่จ่าย → รอบ 26 ก่อนหน้า ถึง 25 เดือนนี้)
 $month = $_GET['month'] ?? (new PayrollService($pdo))->suggestPayrollMonth();
@@ -138,6 +139,16 @@ $stmtSummary = $pdo->prepare("
 ");
 $stmtSummary->execute([$employeeId, $month]);
 $summary = $stmtSummary->fetch();
+if ($attendanceExempt) {
+    $summary = [
+        'present_days' => 0,
+        'late_days' => 0,
+        'absent_days' => 0,
+        'leave_days' => 0,
+        'total_work_minutes' => 0,
+        'total_late_minutes' => 0,
+    ];
+}
 
 // Month options
 $monthOptions = [];
@@ -165,6 +176,9 @@ include dirname(__DIR__) . '/templates/header.php';
         <div class="min-w-0 flex-1">
             <h1 class="tp-ios-page-title">ประวัติลงเวลารายบุคคล</h1>
             <p class="tp-ios-caption-muted mt-2 max-w-[42rem]"><?php echo htmlspecialchars($empFullNameTh); ?></p>
+            <?php if ($attendanceExempt): ?>
+            <p class="inline-flex mt-2 px-3 py-1 rounded-lg bg-sky-500/15 border border-sky-500/25 text-sky-200 text-sm">ยกเว้นการลงเวลาเข้า-ออกงาน</p>
+            <?php endif; ?>
         </div>
         <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto shrink-0">
             <a href="/hr/employee_view.php?id=<?php echo (int)$employeeId; ?>" class="inline-flex items-center justify-center min-h-[48px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] transition-colors font-medium touch-manipulation">
@@ -276,6 +290,9 @@ include dirname(__DIR__) . '/templates/header.php';
         } elseif ($isDayOff) {
             $statusLabel = 'วันหยุด';
             $statusClass = 'bg-blue-500/15 border border-blue-500/30 text-blue-200';
+        } elseif ($attendanceExempt) {
+            $statusLabel = 'ยกเว้นลงเวลา';
+            $statusClass = 'bg-sky-500/15 border border-sky-500/30 text-sky-200';
         } elseif ($att) {
             $statusLabel = ATTENDANCE_STATUS[$att['status']] ?? $att['status'];
             $statusClass = match($att['status']) {
@@ -442,6 +459,8 @@ include dirname(__DIR__) . '/templates/header.php';
                             </span>
                             <?php elseif ($isDayOff): ?>
                             <span class="px-2 py-1 text-xs rounded-[var(--tp-ios-card-radius)] bg-blue-500/20 text-blue-300 border border-blue-500/25">วันหยุด</span>
+                            <?php elseif ($attendanceExempt): ?>
+                            <span class="px-2 py-1 text-xs rounded-[var(--tp-ios-card-radius)] bg-sky-500/20 text-sky-200 border border-sky-500/25">ยกเว้นลงเวลา</span>
                             <?php elseif ($att): ?>
                             <span class="px-2 py-1 text-xs rounded-[var(--tp-ios-card-radius)] border border-white/10 <?php 
                                 echo match($att['status']) {

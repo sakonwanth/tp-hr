@@ -116,7 +116,7 @@ switch ($report) {
             FROM users u
             LEFT JOIN hr_attendances a ON u.id = a.user_id 
                 AND a.attendance_date BETWEEN ? AND ?
-            WHERE u.is_active = 1 AND " . tp_hr_non_system_user_condition_sql('u') . "
+            WHERE " . tp_hr_attendance_scope_filter_sql('u') . "
             " . ($conditions ? " AND " . implode(" AND ", $conditions) : "") . "
             GROUP BY u.id
             ORDER BY u.department, u.first_name_th

@@ -1228,6 +1228,12 @@ class PayrollService
             'total_deduction' => 0.0, 'breakdown' => [], 'warnings' => [],
         ];
 
+        // Role-based and approved per-person exemptions must ignore both missing
+        // days and historical ABSENT rows so attendance never reduces payroll.
+        if (\TpCommon\Hr\AttendanceScope::isUserExemptById($this->pdo, $userId)) {
+            return $result;
+        }
+
         if ((int)$this->getSetting('payroll_attendance_enabled', '1') !== 1) {
             return $result;
         }

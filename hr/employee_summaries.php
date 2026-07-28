@@ -189,6 +189,9 @@ include dirname(__DIR__) . '/templates/header.php';
                         <p class="text-white/50 text-xs"><?php echo htmlspecialchars($row['employee_code']); ?> · <?php echo htmlspecialchars($row['department'] ?: '-'); ?></p>
                     </div>
                     <div class="flex items-center gap-2 shrink-0">
+                        <?php if (!empty($row['attendance_exempt'])): ?>
+                        <span class="px-2 py-0.5 rounded text-xs bg-sky-500/20 text-sky-200">ยกเว้นลงเวลา</span>
+                        <?php endif; ?>
                         <?php if ((int)$row['absent_days'] > 0): ?>
                         <span class="px-2 py-0.5 rounded text-xs bg-red-500/20 text-red-300">ขาด <?php echo (int)$row['absent_days']; ?></span>
                         <?php endif; ?>
@@ -249,6 +252,9 @@ include dirname(__DIR__) . '/templates/header.php';
                     <td class="px-4 py-3 min-w-0">
                         <div class="text-white font-medium truncate"><?php echo htmlspecialchars($row['name']); ?></div>
                         <div class="text-white/50 text-xs truncate"><?php echo htmlspecialchars($row['employee_code']); ?> · <?php echo htmlspecialchars($row['department'] ?: '-'); ?></div>
+                        <?php if (!empty($row['attendance_exempt'])): ?>
+                        <span class="inline-flex mt-1 px-2 py-0.5 rounded text-[11px] bg-sky-500/20 text-sky-200">ยกเว้นการลงเวลา</span>
+                        <?php endif; ?>
                     </td>
                     <td class="px-3 py-3 text-center text-white/80 tabular-nums"><?php echo (int)$row['expected_work_days']; ?></td>
                     <td class="px-3 py-3 text-center text-emerald-400 tabular-nums font-medium"><?php echo (int)$row['present_days']; ?></td>

@@ -38,7 +38,7 @@ if ($method === 'POST') {
     $action = $input['action'] ?? '';
 
     if (in_array($action, ['check_in', 'check_out', 'request_late_start'], true) && tp_hr_is_attendance_exempt($user)) {
-        apiError('ตำแหน่งของคุณได้รับการยกเว้น ไม่จำเป็นต้องลงเวลาเข้า-ออกงาน', 403);
+        apiError('บัญชีของคุณได้รับการยกเว้น ไม่จำเป็นต้องลงเวลาเข้า-ออกงาน', 403);
     }
 
     switch ($action) {

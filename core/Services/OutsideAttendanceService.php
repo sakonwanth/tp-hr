@@ -50,7 +50,7 @@ class OutsideAttendanceService
                 throw new OutsideAttendanceException('ไม่พบพนักงานหรือพนักงานไม่ active', 404);
             }
             if (function_exists('tp_hr_is_attendance_exempt') && tp_hr_is_attendance_exempt($targetUser)) {
-                throw new OutsideAttendanceException('ตำแหน่งนี้ได้รับการยกเว้น ไม่จำเป็นต้องลงเวลาเข้า-ออกงาน', 409);
+                throw new OutsideAttendanceException('บัญชีนี้ได้รับการยกเว้น ไม่จำเป็นต้องลงเวลาเข้า-ออกงาน', 409);
             }
 
             $type = strtoupper((string)$request['request_type']);

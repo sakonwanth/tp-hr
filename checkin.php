@@ -11,7 +11,7 @@ $pdo = getDB();
 $user = Auth::user();
 $attendance_exempt = tp_hr_is_attendance_exempt($user);
 if ($attendance_exempt) {
-    flash('info', 'ตำแหน่งของคุณได้รับการยกเว้น ไม่จำเป็นต้องลงเวลาเข้า-ออกงาน');
+    flash('info', 'บัญชีของคุณได้รับการยกเว้น ไม่จำเป็นต้องลงเวลาเข้า-ออกงาน');
     redirect('/', 302);
 }
 $page_title = 'ลงเวลาเข้า-ออก';

@@ -67,8 +67,12 @@ class EmployeeSummaryService
             $lastDay = date('Y-m-d', strtotime($periodStart . ' -1 day'));
         }
 
+        $attendanceExempt = \TpCommon\Hr\AttendanceScope::isUserExemptById($this->pdo, $userId);
+
         // แก้ record ที่ backfill เป็น ABSENT ก่อนอนุมัติลา (หรือ sync ล้มเหลว)
-        $this->reconcileAbsentOverlappingApprovedLeave($userId, $periodStart, $lastDay);
+        if (!$attendanceExempt) {
+            $this->reconcileAbsentOverlappingApprovedLeave($userId, $periodStart, $lastDay);
+        }
 
         $defaultDayOff = $this->getDefaultDayOff($userId);
         $dayoffSwaps = $this->getApprovedDayoffSwaps($userId, $periodStart, $lastDay);
@@ -155,6 +159,9 @@ class EmployeeSummaryService
                     'date' => $currentDay,
                     'day_label' => $dayLabel,
                 ];
+            } elseif ($attendanceExempt) {
+                // Exempt employees remain visible in the organization summary, but
+                // have no expected attendance days and no absence classification.
             } else {
                 if ($holidayWorkEx) {
                     $counts['holiday_work_days']++;
@@ -300,6 +307,7 @@ class EmployeeSummaryService
             'period_end' => $periodEnd,
             'summary_scan_end' => $summaryScanEnd !== '' ? $summaryScanEnd : null,
             'summary_includes_today' => false,
+            'attendance_exempt' => $attendanceExempt,
             'pay_day' => $payDay,
             'counts' => $counts,
             'details' => $details,
@@ -353,6 +361,7 @@ class EmployeeSummaryService
                 'name' => trim(($emp['first_name_th'] ?? '') . ' ' . ($emp['last_name_th'] ?? '')),
                 'department' => $emp['department'] ?? '',
                 'position' => $emp['position'] ?? '',
+                'attendance_exempt' => !empty($summary['attendance_exempt']),
                 'expected_work_days' => $c['expected_work_days'],
                 'present_days' => $c['present_days'],
                 'late_days' => $c['late_days'],
