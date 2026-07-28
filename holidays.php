@@ -488,16 +488,59 @@ document.addEventListener('DOMContentLoaded', function() {
     var chips = document.querySelectorAll('#tp-holidays-sticky-chips [data-month]');
     if (!sections.length || !labelEl) return;
 
+    /* An explicit chip pick wins over scroll tracking for a moment. Jumping to a
+       month near the end of the list cannot scroll it to the top, so the observer
+       would immediately relabel to whichever later month fills the viewport. */
+    var pickLockUntil = 0;
+
     function setActiveMonth(month, monthLabel) {
         if (monthLabel) labelEl.textContent = monthLabel;
         chips.forEach(function(chip) {
             var isActive = chip.getAttribute('data-month') === String(month);
             chip.classList.toggle('is-active', isActive);
-            if (isActive) {
+            /* Centring only applies to the horizontal strip. In the phone grid the
+               same call would drag the whole page to the chip. */
+            if (isActive && !isMonthGrid()) {
                 chip.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
             }
         });
     }
+
+    /* ---- Phone month picker -------------------------------------------------
+       Below 640px the chip strip becomes a collapsed disclosure that opens into a
+       3-column grid of all twelve months, instead of a horizontal scroller that
+       kept most of them off-screen. */
+    var pickerToggle = document.getElementById('tp-holidays-month-picker-toggle');
+    var chipPanel = document.getElementById('tp-holidays-sticky-chips');
+    var gridMq = window.matchMedia('(max-width: 639px)');
+
+    function isMonthGrid() {
+        return gridMq.matches;
+    }
+
+    function setPickerOpen(open) {
+        if (!chipPanel || !pickerToggle) return;
+        chipPanel.hidden = isMonthGrid() ? !open : false;
+        pickerToggle.setAttribute('aria-expanded', chipPanel.hidden ? 'false' : 'true');
+    }
+
+    function syncPicker() {
+        /* Open on wide screens, collapsed on phones. */
+        setPickerOpen(!isMonthGrid());
+    }
+
+    if (pickerToggle) {
+        pickerToggle.addEventListener('click', function() {
+            if (!isMonthGrid()) return;
+            setPickerOpen(chipPanel.hidden);
+        });
+    }
+    if (gridMq.addEventListener) {
+        gridMq.addEventListener('change', syncPicker);
+    } else if (gridMq.addListener) {
+        gridMq.addListener(syncPicker);
+    }
+    syncPicker();
 
     /* ---- Phone month pager --------------------------------------------------
        Twelve mini-grids stacked is ~7000px of scroll on a phone. Below 640px the
@@ -577,6 +620,8 @@ document.addEventListener('DOMContentLoaded', function() {
     chips.forEach(function(chip) {
         chip.addEventListener('click', function() {
             var month = chip.getAttribute('data-month');
+            if (isMonthGrid()) setPickerOpen(false); /* picking a month closes the sheet */
+
             if (pagerOn && !pagerExpanded) {
                 setPagerMonth(month, true);
                 return;
@@ -584,6 +629,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var anchorId = chip.getAttribute('data-anchor');
             var target = anchorId ? document.getElementById(anchorId) : null;
             if (target) {
+                pickLockUntil = new Date().getTime() + 1200;
                 target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
             setActiveMonth(month, chip.getAttribute('data-label'));
@@ -593,6 +639,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if ('IntersectionObserver' in window) {
         var visible = new Map();
         var observer = new IntersectionObserver(function(entries) {
+            if (new Date().getTime() < pickLockUntil) return;
             entries.forEach(function(entry) {
                 var month = entry.target.getAttribute('data-holiday-month');
                 if (entry.isIntersecting) {

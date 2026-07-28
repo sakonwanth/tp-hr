@@ -1139,16 +1139,54 @@ button.tp-holidays-month-chip {
 }
 
 .tp-holidays-sticky-nav__label {
+  display: flex;
+  align-items: center;
+  gap: var(--tp-space-8);
+  width: 100%;
   margin: 0 0 var(--tp-space-8);
+  padding: 0;
+  border: none;
+  background: transparent;
+  font: inherit;
   font-size: var(--tp-font-caption);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.48);
+  text-align: left;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
-/* Bleed to the card edges and fade in the gutter, so a chip scrolled past the edge
-   trails off instead of being sliced by a hard line. */
+.tp-holidays-sticky-nav__caret {
+  font-size: 0.625rem;
+  transition: transform 0.18s ease;
+}
+
+.tp-holidays-sticky-nav__label[aria-expanded='true'] {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.tp-holidays-sticky-nav__label[aria-expanded='true'] .tp-holidays-sticky-nav__caret {
+  transform: rotate(180deg);
+}
+
+/* The disclosure only exists on phones; above that the chip row is always open and
+   the label is not interactive. */
+@media (min-width: 640px) {
+  .tp-holidays-sticky-nav__label {
+    pointer-events: none;
+  }
+
+  /* Scoped through the label so this outweighs Font Awesome's own `.fas { display }`,
+     which is same-specificity and loads later. */
+  .tp-holidays-sticky-nav__label .tp-holidays-sticky-nav__caret {
+    display: none;
+  }
+}
+
+/* >=640px the 12 chips fit on one row. Bleed to the card edges and fade in the
+   gutter so a chip scrolled past the edge trails off rather than being sliced. */
 .tp-holidays-sticky-nav__chips {
   padding-bottom: var(--tp-space-4);
   margin-inline: calc(-1 * var(--tp-card-pad));
@@ -1168,6 +1206,32 @@ button.tp-holidays-month-chip {
     #000 calc(100% - var(--tp-card-pad)),
     transparent 100%
   );
+}
+
+/* Phone: a horizontal scroller inside a vertically-scrolling page hid 7 of the 12
+   months behind an imprecise sideways swipe, and held ~70px of sticky height to do
+   it. Collapsed by default; opens as a grid with every month visible at once. */
+@media (max-width: 639px) {
+  .tp-holidays-sticky-nav__chips {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--tp-space-8);
+    overflow: visible;
+    margin-inline: 0;
+    padding-inline: 0;
+    padding-top: var(--tp-space-4);
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .tp-holidays-sticky-nav__chips[hidden] {
+    display: none;
+  }
+
+  .tp-holidays-month-chip {
+    justify-content: space-between;
+    width: 100%;
+  }
 }
 
 .tp-holidays-month-chip__count {

@@ -8,8 +8,18 @@
  * @var string $view
  */
 ?>
-<div class="tp-holidays-sticky-nav" id="tp-holidays-sticky-nav" aria-live="polite">
-    <p class="tp-holidays-sticky-nav__label" id="tp-holidays-sticky-label"><?php echo thaiMonth((int) date('n')); ?> <?php echo (int) $holidayYearTh; ?></p>
+<div class="tp-holidays-sticky-nav" id="tp-holidays-sticky-nav">
+    <?php /* Phone: a disclosure that opens a 12-month grid. >=640px: an inert label
+             above the chip row, which fits there without horizontal scrolling. */ ?>
+    <button type="button"
+            class="tp-holidays-sticky-nav__label touch-manipulation"
+            id="tp-holidays-month-picker-toggle"
+            aria-expanded="false"
+            aria-controls="tp-holidays-sticky-chips">
+        <span id="tp-holidays-sticky-label" aria-live="polite"><?php echo thaiMonth((int) date('n')); ?> <?php echo (int) $holidayYearTh; ?></span>
+        <i class="fas fa-chevron-down tp-holidays-sticky-nav__caret" aria-hidden="true"></i>
+        <span class="tp-visually-hidden">เลือกเดือน</span>
+    </button>
     <div class="tp-holidays-month-scroll tp-holidays-sticky-nav__chips" id="tp-holidays-sticky-chips" role="navigation" aria-label="ข้ามเดือน">
         <?php for ($m = 1; $m <= 12; $m++):
             $monthCount = count($holidaysByMonth[$m] ?? []);
