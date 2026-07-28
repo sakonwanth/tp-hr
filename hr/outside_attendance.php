@@ -95,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'request_type' => $result['request_type'] ?? null,
                 'review_remarks' => $reviewRemarks ?: null,
             ]);
-            flash('success', 'อนุมัติคำขอนอกสถานที่และบันทึกเวลาเรียบร้อยแล้ว');
+            flash('success', 'อนุมัติคำขอนอกสถานที่และยืนยันเวลาที่พนักงานส่งคำขอเรียบร้อยแล้ว');
         } elseif ($action === 'reject' && $requestId > 0) {
             $result = $service->reject($requestId, (int)$user['id'], $reviewRemarks);
             Auth::log('outside_attendance_reject', 'hr_attendance_outside_requests', $requestId, null, [
@@ -476,12 +476,18 @@ include dirname(__DIR__) . '/templates/header.php';
                     <?php endif; ?>
                 </div>
                 <div class="tp-outside-meta-tile rounded-[var(--tp-ios-card-radius)] px-3 py-3">
-                    <p class="text-white/50 text-[11px]">ผลในประวัติลงเวลา</p>
-                    <?php if ($st === 'APPROVED'): ?>
-                    <p class="text-emerald-300 mt-1">เข้า <?php echo hrOutsideTime($req['check_in_time'] ?? null); ?></p>
-                    <p class="text-sky-300">ออก <?php echo hrOutsideTime($req['check_out_time'] ?? null); ?></p>
+                    <p class="text-white/50 text-[11px]">เวลาที่พนักงานขอ</p>
+                    <p class="text-white font-semibold tabular-nums mt-1">
+                        <?php echo $type === 'CHECK_IN' ? 'เข้า ' : 'ออก '; ?><?php echo hrOutsideTime($req['request_time'] ?? null); ?>
+                    </p>
+                    <?php if ($st === 'PENDING'): ?>
+                    <p class="text-amber-300 text-xs mt-1">บันทึกเวลาคำขอแล้ว · รอผู้อนุมัติยืนยัน</p>
+                    <?php elseif ($st === 'APPROVED'): ?>
+                    <p class="text-emerald-300 text-xs mt-1">ยืนยันเวลาเดิมในประวัติลงเวลาแล้ว</p>
+                    <?php elseif ($st === 'REJECTED'): ?>
+                    <p class="text-red-300 text-xs mt-1">ไม่อนุมัติ · ถอนเวลาของคำขอนี้แล้ว</p>
                     <?php else: ?>
-                    <p class="text-white/50 mt-1">ยังไม่บันทึกเวลา</p>
+                    <p class="text-white/50 text-xs mt-1">ยกเลิกคำขอแล้ว</p>
                     <?php endif; ?>
                 </div>
             </div>
@@ -496,7 +502,12 @@ include dirname(__DIR__) . '/templates/header.php';
                     </a>
                     <?php endif; ?>
                     <?php if ($st !== 'PENDING' && !empty($req['reviewer_first_name'])): ?>
-                    <span class="text-white/45">โดย <?php echo htmlspecialchars(trim(($req['reviewer_first_name'] ?? '') . ' ' . ($req['reviewer_last_name'] ?? ''))); ?></span>
+                    <span class="text-white/45">
+                        ผู้ดำเนินการ <?php echo htmlspecialchars(trim(($req['reviewer_first_name'] ?? '') . ' ' . ($req['reviewer_last_name'] ?? ''))); ?>
+                        <?php if (!empty($req['reviewed_at'])): ?>
+                        · <?php echo htmlspecialchars(hrOutsideDateTime($req['reviewed_at'])); ?>
+                        <?php endif; ?>
+                    </span>
                     <?php endif; ?>
                 </div>
                 <?php if ($st === 'PENDING'): ?>

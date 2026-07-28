@@ -32,6 +32,21 @@ if [[ -d "$ROOT/hr" ]]; then
   done < <(find "$ROOT/hr" -maxdepth 1 -type f -name '*.php' -print0)
 fi
 
+# Offsite approval must distinguish the captured employee request time from the
+# later review time. This wording guards against implying that attendance is
+# first recorded when an approver acts.
+OUTSIDE_PAGE="$ROOT/hr/outside_attendance.php"
+for phrase in 'เวลาที่พนักงานขอ' 'บันทึกเวลาคำขอแล้ว' 'รอผู้อนุมัติยืนยัน' 'reviewed_at'; do
+  if ! grep -Fq "$phrase" "$OUTSIDE_PAGE"; then
+    echo "MISSING offsite timestamp lifecycle text: $phrase" >&2
+    FAIL=1
+  fi
+done
+if grep -Fq 'ยังไม่บันทึกเวลา' "$OUTSIDE_PAGE"; then
+  echo "MISLEADING offsite timestamp lifecycle text: ยังไม่บันทึกเวลา" >&2
+  FAIL=1
+fi
+
 if [[ "$FAIL" -ne 0 ]]; then
   exit 1
 fi
