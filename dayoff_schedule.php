@@ -116,8 +116,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Validate against the weeks rendered for the selected month. Do not trust hidden dates.
             if (!$weekStart || !$weekEnd || !isset($validWeeks[$weekStart]) || $validWeeks[$weekStart] !== $weekEnd) {
                 $error = 'ข้อมูลสัปดาห์ไม่ถูกต้อง';
-            } elseif ($requestedDay === $defaultDayOff) {
-                $error = 'วันที่เลือกเป็นวันหยุดเริ่มต้นอยู่แล้ว';
             } elseif ($requestedDay < 0 || $requestedDay > 6) {
                 $error = 'วันที่เลือกไม่ถูกต้อง';
             } else {
@@ -133,6 +131,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     if ($existingRequest && $existingRequest['status'] === 'PENDING') {
                         throw new RuntimeException('DAYOFF_REQUEST_ALREADY_PENDING');
+                    }
+                    if ($requestedDay === $defaultDayOff
+                        && (!$existingRequest || $existingRequest['status'] !== 'APPROVED')) {
+                        throw new RuntimeException('DAYOFF_REQUEST_ALREADY_DEFAULT');
                     }
                     if ($existingRequest
                         && $existingRequest['status'] === 'APPROVED'
@@ -183,6 +185,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                     if ($e->getMessage() === 'DAYOFF_REQUEST_ALREADY_PENDING') {
                         $error = 'คำขอสัปดาห์นี้อยู่ระหว่างรออนุมัติแล้ว';
+                    } elseif ($e->getMessage() === 'DAYOFF_REQUEST_ALREADY_DEFAULT') {
+                        $error = 'วันที่เลือกเป็นวันหยุดประจำอยู่แล้ว';
                     } elseif ($e->getMessage() === 'DAYOFF_REQUEST_UNCHANGED') {
                         $error = 'กรุณาเลือกวันหยุดใหม่ที่ต่างจากวันที่อนุมัติอยู่';
                     } else {
@@ -474,9 +478,10 @@ include __DIR__ . '/templates/header.php';
                 <label class="block text-white/70 text-sm mb-1">เปลี่ยนเป็นวัน <span class="text-red-400">*</span></label>
                 <select id="modal-requested-day-off" name="requested_day_off" class="input-field" required>
                     <?php foreach ($dayNames as $idx => $name): ?>
-                    <?php if ($idx !== $defaultDayOff): ?>
-                    <option value="<?php echo $idx; ?>"><?php echo $name; ?></option>
-                    <?php endif; ?>
+                    <option value="<?php echo $idx; ?>"
+                            <?php echo $idx === $defaultDayOff ? 'data-default-day="1" disabled' : ''; ?>>
+                        <?php echo $name; ?><?php echo $idx === $defaultDayOff ? ' (กลับไปวันหยุดเดิม)' : ''; ?>
+                    </option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -505,8 +510,17 @@ function openChangeModal(weekStart, weekEnd, weekNum, requestedDayOff = null, is
     document.getElementById('modal-week-label').textContent = 'สัปดาห์ที่ ' + weekNum + ' (' + weekStart + ' - ' + weekEnd + ')';
     document.getElementById('change-modal-title').textContent = isApprovedEdit ? 'ขอแก้ไขวันหยุด' : 'ขอเปลี่ยนวันหยุด';
     document.getElementById('change-modal-approved-note').classList.toggle('hidden', !isApprovedEdit);
+    const defaultDayOption = document.querySelector('#modal-requested-day-off option[data-default-day="1"]');
+    if (defaultDayOption) {
+        defaultDayOption.disabled = !isApprovedEdit;
+    }
     if (requestedDayOff !== null) {
         document.getElementById('modal-requested-day-off').value = String(requestedDayOff);
+    } else {
+        const firstAvailableOption = document.querySelector('#modal-requested-day-off option:not(:disabled)');
+        if (firstAvailableOption) {
+            document.getElementById('modal-requested-day-off').value = firstAvailableOption.value;
+        }
     }
     if (typeof uiOpenModal === 'function') uiOpenModal('change-modal');
     else document.getElementById('change-modal').classList.remove('hidden');
