@@ -108,8 +108,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $requestedDay = (int)($_POST['requested_day_off'] ?? 0);
             $reason = trim($_POST['reason'] ?? '');
             
-            // Validate
-            if (!$weekStart || !$weekEnd) {
+            $validWeeks = [];
+            foreach ($weeks as $listedWeek) {
+                $validWeeks[$listedWeek['start']] = $listedWeek['end'];
+            }
+
+            // Validate against the weeks rendered for the selected month. Do not trust hidden dates.
+            if (!$weekStart || !$weekEnd || !isset($validWeeks[$weekStart]) || $validWeeks[$weekStart] !== $weekEnd) {
                 $error = 'ข้อมูลสัปดาห์ไม่ถูกต้อง';
             } elseif ($requestedDay === $defaultDayOff) {
                 $error = 'วันที่เลือกเป็นวันหยุดเริ่มต้นอยู่แล้ว';
@@ -117,6 +122,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = 'วันที่เลือกไม่ถูกต้อง';
             } else {
                 try {
+                    $pdo->beginTransaction();
+                    $existingStmt = $pdo->prepare("
+                        SELECT * FROM hr_dayoff_requests
+                        WHERE user_id = ? AND week_start = ?
+                        LIMIT 1 FOR UPDATE
+                    ");
+                    $existingStmt->execute([$user['id'], $weekStart]);
+                    $existingRequest = $existingStmt->fetch(PDO::FETCH_ASSOC) ?: null;
+
+                    if ($existingRequest && $existingRequest['status'] === 'PENDING') {
+                        throw new RuntimeException('DAYOFF_REQUEST_ALREADY_PENDING');
+                    }
+                    if ($existingRequest
+                        && $existingRequest['status'] === 'APPROVED'
+                        && (int)$existingRequest['requested_day_off'] === $requestedDay) {
+                        throw new RuntimeException('DAYOFF_REQUEST_UNCHANGED');
+                    }
+
                     $stmt = $pdo->prepare("
                         INSERT INTO hr_dayoff_requests (user_id, week_start, week_end, original_day_off, requested_day_off, reason)
                         VALUES (?, ?, ?, ?, ?, ?)
@@ -130,6 +153,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $idStmt->execute([$user['id'], $weekStart]);
                         $requestId = (int)$idStmt->fetchColumn();
                     }
+                    Auth::log(
+                        $existingRequest ? 'dayoff_request_resubmit' : 'dayoff_request_create',
+                        'hr_dayoff_requests',
+                        $requestId,
+                        $existingRequest,
+                        [
+                            'user_id' => (int)$user['id'],
+                            'week_start' => $weekStart,
+                            'week_end' => $weekEnd,
+                            'original_day_off' => $defaultDayOff,
+                            'requested_day_off' => $requestedDay,
+                            'reason' => $reason ?: null,
+                            'status' => 'PENDING',
+                        ]
+                    );
+                    $pdo->commit();
                     if ($requestId > 0 && function_exists('crm_line_notify_dayoff_requested')) {
                         crm_line_notify_dayoff_requested($pdo, $requestId);
                     }
@@ -139,8 +178,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     header("Location: dayoff_schedule.php?month={$month}&success=1");
                     exit;
                 } catch (Throwable $e) {
+                    if ($pdo->inTransaction()) {
+                        $pdo->rollBack();
+                    }
+                    if ($e->getMessage() === 'DAYOFF_REQUEST_ALREADY_PENDING') {
+                        $error = 'คำขอสัปดาห์นี้อยู่ระหว่างรออนุมัติแล้ว';
+                    } elseif ($e->getMessage() === 'DAYOFF_REQUEST_UNCHANGED') {
+                        $error = 'กรุณาเลือกวันหยุดใหม่ที่ต่างจากวันที่อนุมัติอยู่';
+                    } else {
                     tpHrLogException($e, 'dayoff_schedule request_change');
                     $error = 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้งหรือติดต่อผู้ดูแลระบบ';
+                    }
                 }
             }
         } elseif ($action === 'cancel_request') {
@@ -281,6 +329,12 @@ include __DIR__ . '/templates/header.php';
                     <i class="fas fa-times mr-1" aria-hidden="true"></i>ยกเลิกคำขอ
                 </button>
             </form>
+            <?php elseif ($req && $req['status'] === 'APPROVED'): ?>
+            <button type="button"
+                    onclick="openChangeModal('<?php echo $week['start']; ?>', '<?php echo $week['end']; ?>', <?php echo $week['num']; ?>, <?php echo (int)$req['requested_day_off']; ?>, true)"
+                    class="min-h-[48px] px-4 py-2 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/30 text-amber-200 text-xs sm:text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-medium shrink-0 self-start sm:self-auto">
+                <i class="fas fa-pen mr-1" aria-hidden="true"></i>ขอแก้ไข
+            </button>
             <?php endif; ?>
         </div>
         
@@ -403,8 +457,11 @@ include __DIR__ . '/templates/header.php';
             <input type="hidden" name="week_start" id="modal-week-start">
             <input type="hidden" name="week_end" id="modal-week-end">
             
-            <h3 class="text-xl font-bold text-white mb-1">ขอเปลี่ยนวันหยุด</h3>
+            <h3 id="change-modal-title" class="text-xl font-bold text-white mb-1">ขอเปลี่ยนวันหยุด</h3>
             <p class="text-white/50 text-sm mb-4" id="modal-week-label"></p>
+            <p id="change-modal-approved-note" class="hidden mb-4 rounded-[var(--tp-ios-card-radius)] border border-amber-400/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
+                เมื่อส่งคำขอแก้ไข รายการจะกลับไปรอผู้บริหารอนุมัติอีกครั้ง
+            </p>
             
             <div class="tp-native-form-group">
                 <label class="block text-white/70 text-sm mb-1">วันหยุดเดิม</label>
@@ -415,7 +472,7 @@ include __DIR__ . '/templates/header.php';
             
             <div class="tp-native-form-group">
                 <label class="block text-white/70 text-sm mb-1">เปลี่ยนเป็นวัน <span class="text-red-400">*</span></label>
-                <select name="requested_day_off" class="input-field" required>
+                <select id="modal-requested-day-off" name="requested_day_off" class="input-field" required>
                     <?php foreach ($dayNames as $idx => $name): ?>
                     <?php if ($idx !== $defaultDayOff): ?>
                     <option value="<?php echo $idx; ?>"><?php echo $name; ?></option>
@@ -442,10 +499,15 @@ include __DIR__ . '/templates/header.php';
 </div>
 
 <script>
-function openChangeModal(weekStart, weekEnd, weekNum) {
+function openChangeModal(weekStart, weekEnd, weekNum, requestedDayOff = null, isApprovedEdit = false) {
     document.getElementById('modal-week-start').value = weekStart;
     document.getElementById('modal-week-end').value = weekEnd;
     document.getElementById('modal-week-label').textContent = 'สัปดาห์ที่ ' + weekNum + ' (' + weekStart + ' - ' + weekEnd + ')';
+    document.getElementById('change-modal-title').textContent = isApprovedEdit ? 'ขอแก้ไขวันหยุด' : 'ขอเปลี่ยนวันหยุด';
+    document.getElementById('change-modal-approved-note').classList.toggle('hidden', !isApprovedEdit);
+    if (requestedDayOff !== null) {
+        document.getElementById('modal-requested-day-off').value = String(requestedDayOff);
+    }
     if (typeof uiOpenModal === 'function') uiOpenModal('change-modal');
     else document.getElementById('change-modal').classList.remove('hidden');
 }
