@@ -158,6 +158,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             ]
                         );
                         $pdo->commit();
+                        if (function_exists('crm_line_notify_dayoff_cancelled')) {
+                            crm_line_notify_dayoff_cancelled($pdo, (int)$existingRequest['id']);
+                        }
                         header("Location: dayoff_schedule.php?month={$month}&restored=1");
                         exit;
                     }
