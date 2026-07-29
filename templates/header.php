@@ -1037,6 +1037,10 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
                 <i class="fas fa-file-invoice-dollar"></i>
                 <span>สลิปเงินเดือน</span>
             </a>
+            <a href="/employee_finance.php" class="nav-item <?php echo $current_page === 'employee-finance' ? 'active' : ''; ?>">
+                <i class="fas fa-hand-holding-dollar"></i>
+                <span>เงินกู้และเบิกล่วงหน้า</span>
+            </a>
             
             <a href="/certificate.php" class="nav-item <?php echo $current_page === 'certificate' ? 'active' : ''; ?>">
                 <i class="fas fa-file-signature"></i>

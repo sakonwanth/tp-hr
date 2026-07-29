@@ -1935,6 +1935,16 @@ class PayrollService
                 $dedOtherJson = $setup['deduction_other_json'];
             }
         }
+        $financeItems = $this->employeeFinanceDeductions($userId, substr($monthFirst, 0, 7));
+        if ($financeItems) {
+            $existing = $dedOtherJson ? json_decode($dedOtherJson, true) : [];
+            $existing = is_array($existing) ? $existing : [];
+            foreach ($financeItems as $item) {
+                $dedOther += (float)$item['amount'];
+                $existing[] = $item;
+            }
+            $dedOtherJson = json_encode($existing, JSON_UNESCAPED_UNICODE);
+        }
 
         $hireFactor = $this->applyHireDateIncome(
             $userId,
@@ -2123,6 +2133,7 @@ class PayrollService
         if (!$stmt->rowCount()) {
             throw new \RuntimeException('Run not found or not in approved status');
         }
+        $this->settleEmployeeFinanceForRun($runId);
         // หมายเหตุ: รายจ่าย ERP (erp_company_transactions) สร้างจาก TP-CRM เท่านั้น
     }
 
@@ -2133,6 +2144,45 @@ class PayrollService
         if (!$stmt->rowCount()) {
             throw new \RuntimeException('Run not found or not in paid status');
         }
+        $this->reverseEmployeeFinanceForRun($runId);
+    }
+
+    /** @return array<int,array{name:string,amount:float,source_type:string,source_id:int}> */
+    private function employeeFinanceDeductions(int $userId, string $month): array
+    {
+        try {
+            $items = [];
+            $advance = $this->pdo->prepare("SELECT id, amount FROM hr_salary_advances WHERE user_id=? AND deduction_month=? AND repayment_method='payroll' AND status='pending_deduction'");
+            $advance->execute([$userId, $month]);
+            foreach ($advance->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $items[] = ['name'=>'หักเงินเดือนที่เบิกล่วงหน้า','amount'=>(float)$row['amount'],'source_type'=>'salary_advance','source_id'=>(int)$row['id']];
+            }
+            $loan = $this->pdo->prepare("SELECT r.id,r.installment_no,r.due_amount FROM hr_loan_repayments r JOIN hr_employee_loans l ON l.id=r.loan_id WHERE l.user_id=? AND l.status='active' AND l.repayment_method='payroll' AND DATE_FORMAT(r.due_date,'%Y-%m')=? AND r.status='scheduled'");
+            $loan->execute([$userId, $month]);
+            foreach ($loan->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $items[] = ['name'=>'ค่างวดเงินกู้พนักงาน งวด '.(int)$row['installment_no'],'amount'=>(float)$row['due_amount'],'source_type'=>'employee_loan_repayment','source_id'=>(int)$row['id']];
+            }
+            return $items;
+        } catch (Throwable $e) {
+            return [];
+        }
+    }
+
+    private function settleEmployeeFinanceForRun(int $runId): void
+    {
+        $stmt = $this->pdo->prepare('SELECT payroll_month FROM payroll_runs WHERE id=?');
+        $stmt->execute([$runId]);
+        $month = substr((string)$stmt->fetchColumn(), 0, 7);
+        $this->pdo->prepare("UPDATE hr_salary_advances a JOIN payroll_slips s ON s.user_id=a.user_id AND s.payroll_run_id=? SET a.status='deducted',a.payroll_run_id=? WHERE a.deduction_month=? AND a.repayment_method='payroll' AND a.status='pending_deduction'")->execute([$runId,$runId,$month]);
+        $this->pdo->prepare("UPDATE hr_loan_repayments r JOIN hr_employee_loans l ON l.id=r.loan_id JOIN payroll_slips s ON s.user_id=l.user_id AND s.payroll_run_id=? SET r.status='paid',r.paid_amount=r.due_amount,r.paid_at=NOW(),r.payroll_run_id=? WHERE DATE_FORMAT(r.due_date,'%Y-%m')=? AND l.repayment_method='payroll' AND l.status='active' AND r.status='scheduled'")->execute([$runId,$runId,$month]);
+        $this->pdo->prepare("UPDATE hr_employee_loans l SET l.status='closed',l.closed_at=CURDATE() WHERE l.status='active' AND NOT EXISTS (SELECT 1 FROM hr_loan_repayments r WHERE r.loan_id=l.id AND r.status<>'paid')")->execute();
+    }
+
+    private function reverseEmployeeFinanceForRun(int $runId): void
+    {
+        $this->pdo->prepare("UPDATE hr_salary_advances SET status='pending_deduction',payroll_run_id=NULL WHERE payroll_run_id=? AND status='deducted'")->execute([$runId]);
+        $this->pdo->prepare("UPDATE hr_loan_repayments SET status='scheduled',paid_amount=NULL,paid_at=NULL,payroll_run_id=NULL WHERE payroll_run_id=? AND status='paid'")->execute([$runId]);
+        $this->pdo->prepare("UPDATE hr_employee_loans l SET l.status='active',l.closed_at=NULL WHERE l.status='closed' AND EXISTS (SELECT 1 FROM hr_loan_repayments r WHERE r.loan_id=l.id AND r.status='scheduled')")->execute();
     }
 
     public function recalculateSlip(int $runId, int $userId, string $monthFirst): bool
