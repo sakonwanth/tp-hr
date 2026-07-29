@@ -132,9 +132,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if ($existingRequest && $existingRequest['status'] === 'PENDING') {
                         throw new RuntimeException('DAYOFF_REQUEST_ALREADY_PENDING');
                     }
-                    if ($requestedDay === $defaultDayOff
-                        && (!$existingRequest || $existingRequest['status'] !== 'APPROVED')) {
-                        throw new RuntimeException('DAYOFF_REQUEST_ALREADY_DEFAULT');
+                    if ($requestedDay === $defaultDayOff) {
+                        if (!$existingRequest || $existingRequest['status'] !== 'APPROVED') {
+                            throw new RuntimeException('DAYOFF_REQUEST_ALREADY_DEFAULT');
+                        }
+
+                        $restoreStmt = $pdo->prepare("
+                            UPDATE hr_dayoff_requests
+                            SET status = 'CANCELLED'
+                            WHERE id = ? AND user_id = ? AND status = 'APPROVED'
+                        ");
+                        $restoreStmt->execute([(int)$existingRequest['id'], (int)$user['id']]);
+                        if ($restoreStmt->rowCount() !== 1) {
+                            throw new RuntimeException('DAYOFF_REQUEST_STATE_CHANGED');
+                        }
+
+                        Auth::log(
+                            'dayoff_request_cancel',
+                            'hr_dayoff_requests',
+                            (int)$existingRequest['id'],
+                            $existingRequest,
+                            [
+                                'status' => 'CANCELLED',
+                                'restored_day_off' => $defaultDayOff,
+                            ]
+                        );
+                        $pdo->commit();
+                        header("Location: dayoff_schedule.php?month={$month}&restored=1");
+                        exit;
                     }
                     if ($existingRequest
                         && $existingRequest['status'] === 'APPROVED'
@@ -187,6 +212,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $error = 'คำขอสัปดาห์นี้อยู่ระหว่างรออนุมัติแล้ว';
                     } elseif ($e->getMessage() === 'DAYOFF_REQUEST_ALREADY_DEFAULT') {
                         $error = 'วันที่เลือกเป็นวันหยุดประจำอยู่แล้ว';
+                    } elseif ($e->getMessage() === 'DAYOFF_REQUEST_STATE_CHANGED') {
+                        $error = 'สถานะคำขอมีการเปลี่ยนแปลง กรุณาโหลดหน้าใหม่แล้วลองอีกครั้ง';
                     } elseif ($e->getMessage() === 'DAYOFF_REQUEST_UNCHANGED') {
                         $error = 'กรุณาเลือกวันหยุดใหม่ที่ต่างจากวันที่อนุมัติอยู่';
                     } else {
@@ -207,6 +234,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 if (isset($_GET['success'])) {
     $success = 'ส่งคำขอเปลี่ยนวันหยุดเรียบร้อยแล้ว รอการอนุมัติจากผู้บริหาร';
+} elseif (isset($_GET['restored'])) {
+    $success = 'ยกเลิกการสลับวันหยุดแล้ว สัปดาห์นี้กลับไปใช้วันหยุดประจำเดิมแล้ว';
 }
 
 // Month options
@@ -272,7 +301,7 @@ include __DIR__ . '/templates/header.php';
         $effectiveDayOff = $defaultDayOff;
         $statusBadge = '';
         
-        if ($req) {
+        if ($req && $req['status'] !== 'CANCELLED') {
             if ($req['status'] === 'APPROVED') {
                 $effectiveDayOff = (int)$req['requested_day_off'];
                 $statusBadge = '<span class="px-2.5 py-1 text-xs font-medium rounded-[var(--tp-ios-card-radius)] border border-white/10 bg-green-500/20 text-green-400">อนุมัติแล้ว</span>';
@@ -318,7 +347,7 @@ include __DIR__ . '/templates/header.php';
                 <?php echo $statusBadge; ?>
             </div>
             
-            <?php if (!$req || $req['status'] === 'REJECTED'): ?>
+            <?php if (!$req || in_array($req['status'], ['REJECTED', 'CANCELLED'], true)): ?>
             <button type="button" onclick="openChangeModal('<?php echo $week['start']; ?>', '<?php echo $week['end']; ?>', <?php echo $week['num']; ?>)" 
                     class="btn-primary shrink-0 px-4 min-h-[48px] sm:min-h-[52px] rounded-[var(--tp-ios-card-radius)] text-xs sm:text-sm self-start sm:self-auto touch-manipulation border-0">
                 <i class="fas fa-exchange-alt mr-1" aria-hidden="true"></i>ขอเปลี่ยนวันหยุด
@@ -422,6 +451,9 @@ include __DIR__ . '/templates/header.php';
             <?php if ($req['review_note']): ?>
             <span class="text-red-400/70">(<?php echo htmlspecialchars($req['review_note']); ?>)</span>
             <?php endif; ?>
+            <?php elseif ($req['status'] === 'CANCELLED'): ?>
+            <i class="fas fa-rotate-left text-sky-400 mr-1"></i>
+            ยกเลิกการสลับแล้ว — ใช้วันหยุดประจำ <?php echo $dayNames[$defaultDayOff]; ?>
             <?php endif; ?>
         </div>
         <?php elseif ($req && $req['status'] === 'PENDING'): ?>
@@ -464,7 +496,7 @@ include __DIR__ . '/templates/header.php';
             <h3 id="change-modal-title" class="text-xl font-bold text-white mb-1">ขอเปลี่ยนวันหยุด</h3>
             <p class="text-white/50 text-sm mb-4" id="modal-week-label"></p>
             <p id="change-modal-approved-note" class="hidden mb-4 rounded-[var(--tp-ios-card-radius)] border border-amber-400/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
-                เมื่อส่งคำขอแก้ไข รายการจะกลับไปรอผู้บริหารอนุมัติอีกครั้ง
+                เลือกวันหยุดเดิมเพื่อยกเลิกการสลับทันที หรือเลือกวันอื่นเพื่อส่งให้ผู้บริหารอนุมัติใหม่
             </p>
             
             <div class="tp-native-form-group">
