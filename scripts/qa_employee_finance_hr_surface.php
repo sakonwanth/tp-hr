@@ -13,6 +13,9 @@ $checks = [
     'payroll activation is explained' => str_contains($page, 'จะเริ่มนำค่างวดเข้าสลิปหลังบริษัทบันทึกจ่ายเงิน'),
     'payroll calculation consumes loan repayments' => str_contains($payroll, 'employeeFinanceDeductions'),
     'payroll settlement links run id' => str_contains($payroll, 'settleEmployeeFinanceForRun'),
+    'payroll settlement uses canonical source links' => str_contains($payroll, "x.source_type='employee_loan_repayment' AND x.source_id=r.id"),
+    'payroll approval requires reconciled links' => str_contains($payroll, '$this->assertEmployeeFinanceReconciled($runId);'),
+    'company loan label is consistent' => str_contains($payroll, "'เงินกู้บริษัท งวดที่ '"),
 ];
 $failed = 0;
 foreach ($checks as $label => $ok) {
