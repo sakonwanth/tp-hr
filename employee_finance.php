@@ -10,12 +10,12 @@ $where = $canManage ? '' : 'WHERE f.user_id = ?';
 $params = $canManage ? [] : [$userId];
 $sql = "SELECT f.*,u.first_name_th,u.last_name_th FROM (
           SELECT id,user_id,expense_request_id,'salary_advance' finance_type,amount principal_amount,amount total_payable,
-                 amount monthly_installment,NULL term_months,deduction_month first_due_month,repayment_method,
+                 amount monthly_installment,NULL interest_rate_pct,NULL term_months,deduction_month first_due_month,repayment_method,
                  disbursement_method,status,payroll_run_id,created_at
           FROM hr_salary_advances
           UNION ALL
           SELECT id,user_id,expense_request_id,'employee_loan',principal_amount,total_payable,monthly_installment,
-                 term_months,first_due_month,repayment_method,disbursement_method,status,NULL payroll_run_id,created_at
+                 interest_rate_pct,term_months,first_due_month,repayment_method,disbursement_method,status,NULL payroll_run_id,created_at
           FROM hr_employee_loans
         ) f JOIN users u ON u.id=f.user_id $where ORDER BY f.created_at DESC";
 try {
@@ -36,17 +36,28 @@ $repayments = [];
 $financeAudit = [];
 $expense = null;
 $lineDelivery = ['sent' => 0, 'pending' => 0, 'failed' => 0];
+$paymentSummary = ['paid_installments' => 0, 'total_installments' => 0, 'paid_amount' => 0.0, 'remaining_amount' => 0.0];
 if ($detail) {
     try {
         if ($selectedType === 'employee_loan') {
             $repayStmt = $pdo->prepare(
-                "SELECT r.*,pr.payroll_month,pr.status payroll_status
+                "SELECT r.*,pr.payroll_month,pr.status payroll_status,x.payroll_slip_id,x.link_status payroll_link_status
                  FROM hr_loan_repayments r
                  LEFT JOIN payroll_runs pr ON pr.id=r.payroll_run_id
+                 LEFT JOIN hr_employee_finance_payroll_links x
+                   ON x.source_type='employee_loan_repayment' AND x.source_id=r.id
                  WHERE r.loan_id=? ORDER BY r.installment_no,r.due_date,r.id"
             );
             $repayStmt->execute([$selectedId]);
             $repayments = $repayStmt->fetchAll(PDO::FETCH_ASSOC);
+            $paymentSummary['total_installments'] = count($repayments);
+            foreach ($repayments as $repayment) {
+                if ((string)$repayment['status'] === 'paid') {
+                    $paymentSummary['paid_installments']++;
+                    $paymentSummary['paid_amount'] += (float)($repayment['paid_amount'] ?: $repayment['due_amount']);
+                }
+            }
+            $paymentSummary['remaining_amount'] = max(0, (float)$detail['total_payable'] - $paymentSummary['paid_amount']);
         }
         $expenseId = (int)($detail['expense_request_id'] ?? 0);
         if ($expenseId > 0) {
@@ -88,6 +99,7 @@ $statusLabels = [
 ];
 $statusLabel = static fn(string $status): string => $statusLabels[$status] ?? $status;
 $crmBase = rtrim((string)($_ENV['CRM_BASE_URL'] ?? getenv('CRM_BASE_URL') ?: 'https://crm.tp-asset.com'), '/');
+$erpBase = rtrim((string)($_ENV['ERP_BASE_URL'] ?? getenv('ERP_BASE_URL') ?: 'https://erp.tp-asset.com'), '/');
 $page_title = 'สวัสดิการการเงินพนักงาน';
 $current_page = 'employee-finance';
 require_once __DIR__ . '/templates/header.php';
@@ -117,10 +129,24 @@ require_once __DIR__ . '/templates/header.php';
         <div class="rounded-xl bg-black/15 p-4"><p class="text-white/50">ค่างวด</p><p class="text-white font-semibold mt-1"><?php echo number_format((float)$detail['monthly_installment'], 2); ?> บาท × <?php echo (int)($detail['term_months'] ?: 1); ?> งวด</p></div>
         <div class="rounded-xl bg-black/15 p-4"><p class="text-white/50">เลขที่คำขอ</p><p class="text-white font-semibold mt-1"><?php echo htmlspecialchars((string)($expense['request_code'] ?? '-')); ?></p></div>
       </div>
+      <div class="px-5 pb-5 grid gap-4 md:grid-cols-2 lg:grid-cols-4 text-sm">
+        <div class="rounded-xl border border-white/10 p-4"><p class="text-white/50">อัตราดอกเบี้ย</p><p class="text-white font-semibold mt-1"><?php echo $detail['finance_type'] === 'employee_loan' ? number_format((float)$detail['interest_rate_pct'], 2) . '% ต่อปี (ลดต้นลดดอก)' : 'ไม่มีดอกเบี้ย'; ?></p></div>
+        <div class="rounded-xl border border-white/10 p-4"><p class="text-white/50">วิธีรับเงิน / ชำระคืน</p><p class="text-white font-semibold mt-1"><?php echo $detail['disbursement_method'] === 'transfer' ? 'โอนเข้าบัญชี' : 'จ่ายผ่านเงินเดือน'; ?> · <?php echo $detail['repayment_method'] === 'payroll' ? 'หักผ่านสลิป' : 'โอนคืนบริษัท'; ?></p></div>
+        <div class="rounded-xl border border-white/10 p-4"><p class="text-white/50">เริ่มหักงวดแรก</p><p class="text-white font-semibold mt-1"><?php echo htmlspecialchars((string)$detail['first_due_month']); ?></p></div>
+        <div class="rounded-xl border border-white/10 p-4"><p class="text-white/50">รายการจ่ายเงิน</p><p class="mt-1"><?php if (!empty($expense['id'])): ?><a class="text-violet-300 hover:text-violet-200 font-semibold" target="_blank" rel="noopener" href="<?php echo htmlspecialchars($erpBase . '/expenses/requests/' . (int)$expense['id']); ?>"><?php echo htmlspecialchars((string)$expense['request_code']); ?> <i class="fas fa-external-link-alt text-xs"></i></a><?php else: ?><span class="text-white/60">ยังไม่เชื่อมรายการ ERP</span><?php endif; ?></p></div>
+      </div>
+      <?php if ($detail['finance_type'] === 'employee_loan'): ?>
+      <div class="px-5 pb-5">
+        <div class="rounded-xl bg-emerald-500/10 border border-emerald-400/20 p-4">
+          <div class="flex flex-wrap justify-between gap-2 text-sm"><span class="text-white font-semibold">ชำระแล้ว <?php echo (int)$paymentSummary['paid_installments']; ?> / <?php echo (int)$paymentSummary['total_installments']; ?> งวด</span><span class="text-white/75">ชำระ <?php echo number_format((float)$paymentSummary['paid_amount'], 2); ?> · คงเหลือ <?php echo number_format((float)$paymentSummary['remaining_amount'], 2); ?> บาท</span></div>
+          <div class="h-2 rounded-full bg-black/25 mt-3 overflow-hidden"><div class="h-full bg-emerald-400" style="width:<?php echo $paymentSummary['total_installments'] > 0 ? min(100, ($paymentSummary['paid_installments'] / $paymentSummary['total_installments']) * 100) : 0; ?>%"></div></div>
+        </div>
+      </div>
+      <?php endif; ?>
       <div class="px-5 pb-5 grid gap-4 md:grid-cols-2">
         <div class="rounded-xl border border-white/10 p-4">
           <h3 class="text-white font-semibold">การแจ้งเตือน LINE</h3>
-          <p class="text-white/65 text-sm mt-2"><?php if ($lineDelivery['sent'] > 0): ?>ส่งแล้ว <?php echo $lineDelivery['sent']; ?> รายการ<?php elseif ($lineDelivery['pending'] > 0): ?>อยู่ในคิวส่ง <?php echo $lineDelivery['pending']; ?> รายการ<?php elseif ($lineDelivery['failed'] > 0): ?>ส่งไม่สำเร็จ <?php echo $lineDelivery['failed']; ?> รายการ — ระบบจะลองใหม่<?php else: ?>กำลังสร้างสายอนุมัติและการแจ้งเตือน<?php endif; ?></p>
+          <p class="text-white/65 text-sm mt-2"><?php if (array_sum($lineDelivery) > 0): ?>ส่งสำเร็จ <?php echo $lineDelivery['sent']; ?> · รอส่ง <?php echo $lineDelivery['pending']; ?> · ส่งไม่สำเร็จ <?php echo $lineDelivery['failed']; ?><?php else: ?>ยังไม่มีประวัติในคิว LINE — ตรวจสอบว่าผู้ขอและผู้อนุมัติผูก LINE แล้ว<?php endif; ?></p>
         </div>
         <div class="rounded-xl border border-white/10 p-4">
           <h3 class="text-white font-semibold">การเชื่อมโยงเงินเดือน</h3>
@@ -136,10 +162,16 @@ require_once __DIR__ . '/templates/header.php';
           <?php foreach ($repayments as $repayment): ?><tr>
             <td class="p-3"><?php echo (int)$repayment['installment_no']; ?></td><td class="p-3"><?php echo htmlspecialchars((string)$repayment['due_date']); ?></td>
             <td class="p-3 text-right"><?php echo number_format((float)$repayment['principal_portion'], 2); ?></td><td class="p-3 text-right"><?php echo number_format((float)$repayment['interest_portion'], 2); ?></td><td class="p-3 text-right font-semibold"><?php echo number_format((float)$repayment['due_amount'], 2); ?></td>
-            <td class="p-3"><?php echo htmlspecialchars($statusLabel((string)$repayment['status'])); ?></td><td class="p-3"><?php echo htmlspecialchars((string)($repayment['payroll_month'] ?: 'ยังไม่ลงสลิป')); ?></td>
+            <td class="p-3"><?php echo htmlspecialchars($statusLabel((string)$repayment['status'])); ?></td><td class="p-3"><?php if (!empty($repayment['payroll_slip_id'])): ?><a class="text-violet-300 hover:text-violet-200" target="_blank" rel="noopener" href="<?php echo htmlspecialchars($crmBase . '/payroll_print.php?slip_id=' . (int)$repayment['payroll_slip_id']); ?>"><?php echo htmlspecialchars((string)($repayment['payroll_month'] ?: 'เปิดสลิป')); ?></a><?php else: ?><?php echo htmlspecialchars((string)($repayment['payroll_month'] ?: 'ยังไม่ลงสลิป')); ?><?php endif; ?></td>
           </tr><?php endforeach; ?>
           </tbody>
         </table></div>
+      </div>
+      <?php endif; ?>
+      <?php if ($financeAudit): ?>
+      <div class="border-t border-white/10 p-5">
+        <h3 class="text-white font-semibold mb-3">ประวัติการเปลี่ยนแปลง</h3>
+        <ol class="grid gap-2 md:grid-cols-2 text-sm"><?php foreach ($financeAudit as $audit): ?><li class="rounded-lg bg-black/15 px-3 py-2 text-white/70"><span class="text-white/90"><?php echo htmlspecialchars((string)$audit['event_type']); ?></span> · <?php echo htmlspecialchars((string)$audit['created_at']); ?></li><?php endforeach; ?></ol>
       </div>
       <?php endif; ?>
     </section>
