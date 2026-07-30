@@ -1061,8 +1061,7 @@ class PayrollService
 
     public function getDefaultPayDay(): int
     {
-        $raw = (int)$this->getSetting('payroll_default_pay_day', '25');
-        return ($raw >= 1 && $raw <= 31) ? $raw : 25;
+        return 31;
     }
 
     /** Payroll cycle cutoff day (default 25) — period runs (cutoff+1) prev month through cutoff. */
@@ -2041,7 +2040,7 @@ class PayrollService
 
         $this->pdo->beginTransaction();
         try {
-            $payDay = ($payDay !== null && $payDay >= 1 && $payDay <= 31) ? $payDay : $this->getDefaultPayDay();
+            $payDay = \TpCommon\Hr\PayrollCalendar::paymentDay($month);
             $runId = $existing ? (int)$existing['id'] : 0;
             if ($runId > 0) {
                 $this->pdo->prepare("DELETE FROM payroll_slips WHERE payroll_run_id = ?")->execute([$runId]);
