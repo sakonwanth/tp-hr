@@ -23,6 +23,8 @@ $checks = [
     'payroll approval requires reconciled links' => str_contains($payroll, '$this->assertEmployeeFinanceReconciled($runId);'),
     'company loan label is consistent' => str_contains($payroll, "'เงินกู้บริษัท งวดที่ '"),
 ];
+$checks['reversed payroll links are not rendered as active slips'] = str_contains($page, 'in_array($linkStatus, [\'included\', \'settled\'], true)')
+    && str_contains($page, 'ยกเลิกการเชื่อมสลิปแล้ว');
 $failed = 0;
 foreach ($checks as $label => $ok) {
     echo ($ok ? 'PASS ' : 'FAIL ') . $label . PHP_EOL;
