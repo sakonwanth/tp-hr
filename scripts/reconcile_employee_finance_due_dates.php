@@ -8,7 +8,7 @@ require_once dirname(__DIR__) . '/bootstrap.php';
 
 $apply = in_array('--apply', $argv, true);
 $pdo = getDB();
-$rows = $pdo->query("SELECT id,due_date FROM hr_loan_repayments WHERE status='scheduled' ORDER BY id FOR SHARE")->fetchAll(PDO::FETCH_ASSOC);
+$rows = $pdo->query("SELECT id,due_date FROM hr_loan_repayments WHERE status='scheduled' ORDER BY id")->fetchAll(PDO::FETCH_ASSOC);
 $changes = [];
 foreach ($rows as $row) {
     $date = new DateTimeImmutable((string)$row['due_date']);
