@@ -35,7 +35,7 @@ foreach ($rows as $row) {
 $repayments = [];
 $financeAudit = [];
 $expense = null;
-$lineDelivery = ['sent' => 0, 'pending' => 0, 'failed' => 0];
+$lineDelivery = ['sent' => 0, 'pending' => 0, 'failed' => 0, 'cancelled' => 0];
 $paymentSummary = ['paid_installments' => 0, 'total_installments' => 0, 'paid_amount' => 0.0, 'remaining_amount' => 0.0];
 if ($detail) {
     try {
@@ -146,7 +146,7 @@ require_once __DIR__ . '/templates/header.php';
       <div class="px-5 pb-5 grid gap-4 md:grid-cols-2">
         <div class="rounded-xl border border-white/10 p-4">
           <h3 class="text-white font-semibold">การแจ้งเตือน LINE</h3>
-          <p class="text-white/65 text-sm mt-2"><?php if (array_sum($lineDelivery) > 0): ?>ส่งสำเร็จ <?php echo $lineDelivery['sent']; ?> · รอส่ง <?php echo $lineDelivery['pending']; ?> · ส่งไม่สำเร็จ <?php echo $lineDelivery['failed']; ?><?php else: ?>ยังไม่มีประวัติในคิว LINE — ตรวจสอบว่าผู้ขอและผู้อนุมัติผูก LINE แล้ว<?php endif; ?></p>
+          <p class="text-white/65 text-sm mt-2"><?php if (array_sum($lineDelivery) > 0): ?>ส่งสำเร็จ <?php echo $lineDelivery['sent']; ?> · รอส่ง <?php echo $lineDelivery['pending']; ?> · ส่งไม่สำเร็จ <?php echo $lineDelivery['failed']; ?> · ยกเลิก <?php echo $lineDelivery['cancelled']; ?><?php else: ?>ยังไม่มีประวัติในคิว LINE — ตรวจสอบว่าผู้ขอและผู้อนุมัติผูก LINE แล้ว<?php endif; ?></p>
         </div>
         <div class="rounded-xl border border-white/10 p-4">
           <h3 class="text-white font-semibold">การเชื่อมโยงเงินเดือน</h3>
