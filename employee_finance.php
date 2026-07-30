@@ -109,7 +109,7 @@ require_once __DIR__ . '/templates/header.php';
           <p class="text-emerald-300 text-sm font-semibold">รายละเอียดคำขอ</p>
           <h2 class="text-lg font-bold text-white mt-1"><?php echo $detail['finance_type'] === 'employee_loan' ? 'เงินกู้พนักงาน' : 'เบิกเงินเดือนล่วงหน้า'; ?> · <?php echo number_format((float)$detail['principal_amount'], 2); ?> บาท</h2>
         </div>
-        <a href="/employee_finance.php" class="min-h-[44px] inline-flex items-center rounded-xl border border-white/15 px-4 text-white/80 hover:bg-white/10">ปิดรายละเอียด</a>
+        <a href="/employee_finance.php" class="min-h-[48px] inline-flex items-center rounded-xl border border-white/15 px-4 text-white/80 hover:bg-white/10">ปิดรายละเอียด</a>
       </div>
       <div class="p-5 grid gap-4 md:grid-cols-2 lg:grid-cols-4 text-sm">
         <div class="rounded-xl bg-black/15 p-4"><p class="text-white/50">สถานะคำขอ</p><p class="text-white font-semibold mt-1"><?php echo htmlspecialchars($statusLabel((string)($expense['status'] ?? $detail['status']))); ?></p></div>
