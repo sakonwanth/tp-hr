@@ -30,6 +30,8 @@ jobs:
         run: php scripts/qa_employee_finance_reconciliation_audit.php
       - name: Employee finance payroll-link schema contract
         run: php scripts/qa_employee_finance_payroll_link_schema.php
+      - name: Employee finance due-date reconciliation contract
+        run: php scripts/qa_employee_finance_due_date_reconciliation.php
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
@@ -141,6 +143,10 @@ jobs:
             if [ -n "$PHP_BIN" ] && [ -f scripts/ensure_employee_finance_payroll_link_schema.php ]; then
               echo "🔗 Ensuring employee-finance payroll-link schema..."
               $PHP_BIN scripts/ensure_employee_finance_payroll_link_schema.php
+            fi
+            if [ -n "$PHP_BIN" ] && [ -f scripts/reconcile_employee_finance_due_dates.php ]; then
+              echo "📅 Reconciling scheduled employee-finance due dates..."
+              $PHP_BIN scripts/reconcile_employee_finance_due_dates.php --apply
             fi
 
             chown -R tpasset:psacln . 2>/dev/null || true
