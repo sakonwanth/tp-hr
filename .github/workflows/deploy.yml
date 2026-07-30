@@ -28,6 +28,8 @@ jobs:
         run: php scripts/qa_employee_finance_hr_surface.php
       - name: Employee finance reconciliation audit contract
         run: php scripts/qa_employee_finance_reconciliation_audit.php
+      - name: Employee finance payroll-link schema contract
+        run: php scripts/qa_employee_finance_payroll_link_schema.php
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
@@ -136,6 +138,11 @@ jobs:
               $PHP_BIN scripts/ensure_line_notification_log.php 2>&1 || echo "   line notification log skipped"
             fi
 
+            if [ -n "$PHP_BIN" ] && [ -f scripts/ensure_employee_finance_payroll_link_schema.php ]; then
+              echo "🔗 Ensuring employee-finance payroll-link schema..."
+              $PHP_BIN scripts/ensure_employee_finance_payroll_link_schema.php
+            fi
+
             chown -R tpasset:psacln . 2>/dev/null || true
             find . -type d -exec chmod 755 {} \; 2>/dev/null || true
             find . -type f -exec chmod 644 {} \; 2>/dev/null || true
@@ -161,3 +168,4 @@ jobs:
             git log -1 --format="%h %s (%cr)"
             PHP_BIN=$(which php 2>/dev/null || find /opt/plesk/php -name php -type f 2>/dev/null | sort -rV | head -1 || echo php)
             "$PHP_BIN" scripts/audit_employee_finance_reconciliation.php --run-id=307 --json
+            "$PHP_BIN" scripts/ensure_employee_finance_payroll_link_schema.php --check
