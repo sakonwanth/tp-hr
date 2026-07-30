@@ -34,6 +34,27 @@ $id = isset($segments[1]) ? (int)$segments[1] : 0;
 $sub = $segments[2] ?? '';
 $method = $_SERVER['REQUEST_METHOD'];
 
+// POST /employee-finance/{expense_request_id}/activate-after-disbursement
+if ($resource === 'employee-finance' && $method === 'POST' && $id > 0
+    && $sub === 'activate-after-disbursement') {
+    ApiAuth::require(['payroll.write']);
+    apiKeyForbidServiceScoped();
+    $input = ApiAuth::input();
+    try {
+        $actorId = apiKeyResolveActorForApi($pdo, ApiAuth::currentKey(), $input, 'actor_id', HR_ROLES);
+        $result = $service->activateEmployeeFinanceForExpense($id, $actorId);
+        ApiAuth::success(['data' => $result]);
+    } catch (\InvalidArgumentException $e) {
+        ApiAuth::fail(400, $e->getMessage());
+    } catch (\RuntimeException $e) {
+        tpHrLogException($e, 'payroll_write activateEmployeeFinanceForExpense');
+        ApiAuth::fail(409, $e->getMessage());
+    } catch (\Throwable $e) {
+        tpHrLogException($e, 'payroll_write activateEmployeeFinanceForExpense');
+        ApiAuth::fail(500, 'Internal server error');
+    }
+}
+
 // ── payroll-runs ──
 if ($resource === 'payroll-runs') {
 

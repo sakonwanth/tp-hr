@@ -63,6 +63,9 @@ try {
         case 'payroll-preview':
             require __DIR__ . '/payroll_write.php';
             break;
+        case 'employee-finance':
+            require __DIR__ . '/payroll_write.php';
+            break;
         default:
             if (in_array($resource, $metaResources, true)) {
                 require __DIR__ . '/hr_meta.php';

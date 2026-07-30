@@ -1887,6 +1887,109 @@ class PayrollService
         return 0;
     }
 
+    /**
+     * Activate a paid employee-finance request and immediately reconcile its
+     * first deduction with an already-created payroll run. This is the
+     * canonical activation boundary used by ERP/CRM payout flows.
+     *
+     * @return array{finance_type:string,finance_id:int,user_id:int,first_due_month:string,run_id:?int,recalculated:bool,idempotent:bool}
+     */
+    public function activateEmployeeFinanceForExpense(int $expenseRequestId, int $actorId = 0): array
+    {
+        if ($expenseRequestId <= 0) {
+            throw new \InvalidArgumentException('expense_request_id required');
+        }
+
+        $ownTransaction = !$this->pdo->inTransaction();
+        if ($ownTransaction) {
+            $this->pdo->beginTransaction();
+        }
+        try {
+            $stmt = $this->pdo->prepare(
+                "SELECT id,user_id,'employee_loan' finance_type,first_due_month,status
+                   FROM hr_employee_loans WHERE expense_request_id=? LIMIT 1 FOR UPDATE"
+            );
+            $stmt->execute([$expenseRequestId]);
+            $finance = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$finance) {
+                $stmt = $this->pdo->prepare(
+                    "SELECT id,user_id,'salary_advance' finance_type,deduction_month first_due_month,status
+                       FROM hr_salary_advances WHERE expense_request_id=? LIMIT 1 FOR UPDATE"
+                );
+                $stmt->execute([$expenseRequestId]);
+                $finance = $stmt->fetch(PDO::FETCH_ASSOC);
+            }
+            if (!$finance) {
+                throw new \RuntimeException('ไม่พบข้อมูลเงินกู้หรือเงินเบิกล่วงหน้าที่เชื่อมกับคำขอนี้');
+            }
+
+            $financeType = (string)$finance['finance_type'];
+            $currentStatus = (string)$finance['status'];
+            $activeStatuses = $financeType === 'employee_loan'
+                ? ['active', 'closed']
+                : ['pending_deduction', 'deducted'];
+            $idempotent = in_array($currentStatus, $activeStatuses, true);
+            if (!$idempotent && $currentStatus !== 'pending_disbursement') {
+                throw new \RuntimeException('สถานะสวัสดิการการเงินไม่พร้อมสำหรับการจ่าย: ' . $currentStatus);
+            }
+
+            $month = substr((string)$finance['first_due_month'], 0, 7) . '-01';
+            $runStmt = $this->pdo->prepare('SELECT id,status FROM payroll_runs WHERE payroll_month=? LIMIT 1 FOR UPDATE');
+            $runStmt->execute([$month]);
+            $run = $runStmt->fetch(PDO::FETCH_ASSOC) ?: null;
+            if ($run && (string)$run['status'] === 'paid') {
+                throw new \RuntimeException('รอบเงินเดือนงวดแรกจ่ายแล้ว กรุณาเปลี่ยนเดือนเริ่มหักก่อนบันทึกการจ่ายเงินกู้');
+            }
+
+            if (!$idempotent) {
+                if ($financeType === 'employee_loan') {
+                    $this->pdo->prepare("UPDATE hr_employee_loans SET status='active',started_at=COALESCE(started_at,CURDATE()) WHERE id=? AND status='pending_disbursement'")
+                        ->execute([(int)$finance['id']]);
+                } else {
+                    $this->pdo->prepare("UPDATE hr_salary_advances SET status='pending_deduction' WHERE id=? AND status='pending_disbursement'")
+                        ->execute([(int)$finance['id']]);
+                }
+            }
+
+            $recalculated = false;
+            $runId = $run ? (int)$run['id'] : null;
+            if ($runId !== null) {
+                if ((string)$run['status'] === 'approved') {
+                    $this->pdo->prepare("UPDATE payroll_runs SET status='calculated',approved_by=NULL,approved_at=NULL WHERE id=? AND status='approved'")
+                        ->execute([$runId]);
+                }
+                $recalculated = $this->recalculateSlip($runId, (int)$finance['user_id'], $month);
+                $this->updateRunTotals($runId);
+            }
+
+            $this->pdo->prepare("INSERT INTO hr_employee_finance_audit_logs (user_id,finance_type,finance_id,event_type,actor_user_id,payload_json,created_at) VALUES (?,?,?,'payroll_activation',?,?,NOW())")
+                ->execute([(int)$finance['user_id'], $financeType, (int)$finance['id'], $actorId ?: null, json_encode([
+                    'expense_request_id' => $expenseRequestId,
+                    'payroll_run_id' => $runId,
+                    'recalculated' => $recalculated,
+                    'idempotent' => $idempotent,
+                ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)]);
+
+            if ($ownTransaction) {
+                $this->pdo->commit();
+            }
+            return [
+                'finance_type' => $financeType,
+                'finance_id' => (int)$finance['id'],
+                'user_id' => (int)$finance['user_id'],
+                'first_due_month' => substr($month, 0, 7),
+                'run_id' => $runId,
+                'recalculated' => $recalculated,
+                'idempotent' => $idempotent,
+            ];
+        } catch (\Throwable $e) {
+            if ($ownTransaction && $this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $e;
+        }
+    }
+
     // ──────────────── Slip Calculation ────────────────
 
     /**
