@@ -24,6 +24,8 @@ jobs:
         run: |
           find . -name "*.php" -not -path "./vendor/*" -print0 | xargs -0 -n1 php -l
           echo "OK"
+      - name: Employee finance HR lifecycle contract
+        run: php scripts/qa_employee_finance_hr_surface.php
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:

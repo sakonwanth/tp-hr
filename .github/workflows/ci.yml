@@ -23,6 +23,9 @@ jobs:
           find . -name "*.php" -not -path "./vendor/*" -print0 | xargs -0 -n1 php -l
           echo "Syntax check passed"
 
+      - name: Employee finance HR lifecycle contract
+        run: php scripts/qa_employee_finance_hr_surface.php
+
       - name: Security scan
         run: |
           echo "Checking for exposed credentials..."
