@@ -98,6 +98,12 @@ $statusLabels = [
     'missed' => 'เลยกำหนด', 'partial' => 'ชำระบางส่วน', 'waived' => 'ยกเว้น',
 ];
 $statusLabel = static fn(string $status): string => $statusLabels[$status] ?? $status;
+$linkedPayrollInstallments = 0;
+foreach ($repayments as $repayment) {
+    if (in_array((string)($repayment['payroll_link_status'] ?? ''), ['included', 'settled'], true)) {
+        $linkedPayrollInstallments++;
+    }
+}
 $crmBase = rtrim((string)($_ENV['CRM_BASE_URL'] ?? getenv('CRM_BASE_URL') ?: 'https://crm.tp-asset.com'), '/');
 $erpBase = rtrim((string)($_ENV['ERP_BASE_URL'] ?? getenv('ERP_BASE_URL') ?: 'https://erp.tp-asset.com'), '/');
 $page_title = 'สวัสดิการการเงินพนักงาน';
@@ -150,7 +156,7 @@ require_once __DIR__ . '/templates/header.php';
         </div>
         <div class="rounded-xl border border-white/10 p-4">
           <h3 class="text-white font-semibold">การเชื่อมโยงเงินเดือน</h3>
-          <p class="text-white/65 text-sm mt-2"><?php if ($detail['repayment_method'] !== 'payroll'): ?>เลือกโอนชำระคืน จึงไม่หักผ่านสลิป<?php elseif ($detail['status'] === 'pending_disbursement'): ?>เชื่อมกับ payroll แล้ว แต่จะเริ่มนำค่างวดเข้าสลิปหลังบริษัทบันทึกจ่ายเงิน<?php else: ?>ระบบจะนำค่างวดเดือน <?php echo htmlspecialchars((string)$detail['first_due_month']); ?> เข้ารายการหักอื่นในสลิปเงินเดือนโดยอัตโนมัติ<?php endif; ?></p>
+          <p class="text-white/65 text-sm mt-2"><?php if ($detail['repayment_method'] !== 'payroll'): ?>เลือกโอนชำระคืน จึงไม่หักผ่านสลิป<?php elseif ($detail['status'] === 'pending_disbursement'): ?>เชื่อมกับ payroll แล้ว แต่จะเริ่มนำค่างวดเข้าสลิปหลังบริษัทบันทึกจ่ายเงิน<?php elseif ($linkedPayrollInstallments > 0): ?>เชื่อมกับสลิปเงินเดือนแล้ว <?php echo $linkedPayrollInstallments; ?> / <?php echo max(1, (int)$paymentSummary['total_installments']); ?> งวด<?php else: ?>ระบบจะนำค่างวดเดือน <?php echo htmlspecialchars((string)$detail['first_due_month']); ?> เข้ารายการหักอื่นในสลิปเงินเดือนโดยอัตโนมัติ<?php endif; ?></p>
         </div>
       </div>
       <?php if ($detail['finance_type'] === 'employee_loan'): ?>
