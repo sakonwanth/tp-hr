@@ -117,6 +117,13 @@ $formatThaiDate = static function (?string $value) use ($thaiMonths): string {
 };
 $lineStatusLabels = ['sent'=>'ส่งสำเร็จ','pending'=>'รอส่ง','failed'=>'ส่งไม่สำเร็จ','cancelled'=>'ยกเลิก'];
 $lineRecipientLabels = ['user'=>'ผู้ใช้งาน','group'=>'กลุ่ม LINE'];
+$lineMessageLabels = [
+    'approval_request'=>'แจ้งผู้บริหารให้อนุมัติ',
+    'requester_update'=>'แจ้งผลให้ผู้ขอ',
+    'group_announce'=>'แจ้งความคืบหน้าในกลุ่ม',
+    'payment_update'=>'แจ้งสถานะการจ่ายเงิน',
+    'receipt_update'=>'แจ้งสถานะหลักฐาน/ใบเสร็จ',
+];
 $maskLineRecipient = static function (?string $value): string {
     $value = trim((string)$value);
     if ($value === '') return '-';
@@ -172,7 +179,7 @@ require_once __DIR__ . '/templates/header.php';
           <ol class="divide-y divide-white/10 text-sm">
           <?php foreach ($lineTimeline as $lineEvent): ?>
             <li class="p-4 grid gap-2 md:grid-cols-[1.2fr_1fr_1fr]">
-              <div><p class="text-white font-medium"><?php echo htmlspecialchars((string)$lineEvent['message_type']); ?></p><p class="text-white/50 mt-1"><?php echo htmlspecialchars($lineRecipientLabels[(string)$lineEvent['recipient_type']] ?? (string)$lineEvent['recipient_type']); ?> · <?php echo htmlspecialchars($maskLineRecipient((string)$lineEvent['recipient_line_id'])); ?></p></div>
+              <div><p class="text-white font-medium"><?php echo htmlspecialchars($lineMessageLabels[(string)$lineEvent['message_type']] ?? (string)$lineEvent['message_type']); ?></p><p class="text-white/50 mt-1"><?php echo htmlspecialchars($lineRecipientLabels[(string)$lineEvent['recipient_type']] ?? (string)$lineEvent['recipient_type']); ?> · <?php echo htmlspecialchars($maskLineRecipient((string)$lineEvent['recipient_line_id'])); ?></p></div>
               <div><p class="<?php echo $lineEvent['status'] === 'failed' ? 'text-rose-300' : ($lineEvent['status'] === 'sent' ? 'text-emerald-300' : 'text-amber-300'); ?> font-medium"><?php echo htmlspecialchars($lineStatusLabels[(string)$lineEvent['status']] ?? (string)$lineEvent['status']); ?></p><p class="text-white/50 mt-1">พยายาม <?php echo (int)$lineEvent['attempt_count']; ?> ครั้ง</p></div>
               <div><p class="text-white/70"><?php echo htmlspecialchars((string)($lineEvent['sent_at'] ?: $lineEvent['scheduled_at'] ?: $lineEvent['created_at'])); ?></p><?php if (!empty($lineEvent['last_error'])): ?><p class="text-rose-300 mt-1 break-words">สาเหตุ: <?php echo htmlspecialchars((string)$lineEvent['last_error']); ?></p><?php endif; ?></div>
             </li>
@@ -236,7 +243,7 @@ require_once __DIR__ . '/templates/header.php';
             <td class="p-4 text-right tabular-nums"><?php echo number_format((float)$row['principal_amount'], 2); ?></td>
             <td class="p-4 text-right tabular-nums"><?php echo number_format((float)$row['total_payable'], 2); ?></td>
             <td class="p-4 text-center"><?php echo $row['term_months'] ?: '1'; ?></td>
-            <td class="p-4"><?php echo htmlspecialchars((string)$row['first_due_month']); ?></td>
+            <td class="p-4"><?php echo htmlspecialchars($formatThaiMonth((string)$row['first_due_month'])); ?></td>
             <td class="p-4"><?php echo $row['repayment_method'] === 'payroll' ? 'หักผ่านสลิป' : 'โอนคืน'; ?></td>
             <td class="p-4"><span><?php echo htmlspecialchars($statusLabel((string)$row['status'])); ?></span><a class="block text-violet-300 hover:text-violet-200 mt-2 font-medium" href="?type=<?php echo urlencode((string)$row['finance_type']); ?>&amp;id=<?php echo (int)$row['id']; ?>#finance-detail">ดูรายละเอียด</a></td>
           </tr><?php endforeach; ?>

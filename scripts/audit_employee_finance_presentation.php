@@ -10,6 +10,8 @@ $checks = [
     'LINE timeline query is request-scoped' => str_contains($page, 'FROM erp_expense_line_outbox WHERE expense_request_id=? ORDER BY id DESC LIMIT 20'),
     'LINE error detail is escaped' => str_contains($page, "htmlspecialchars((string)\$lineEvent['last_error'])"),
     'LINE recipient is not exposed in full' => str_contains($page, '$maskLineRecipient((string)$lineEvent[\'recipient_line_id\'])'),
+    'LINE event code is translated before display' => str_contains($page, '$lineMessageLabels[(string)$lineEvent[\'message_type\']]'),
+    'list view does not leak raw YYYY-MM month' => str_contains($page, '$formatThaiMonth((string)$row[\'first_due_month\'])'),
 ];
 $failed = 0;
 foreach ($checks as $name => $ok) { echo ($ok ? 'PASS ' : 'FAIL ') . $name . PHP_EOL; if (!$ok) $failed++; }

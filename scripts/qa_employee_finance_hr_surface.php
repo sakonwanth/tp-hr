@@ -14,6 +14,7 @@ $checks = [
     'LINE delivery timeline is scoped and visible' => str_contains($page, 'FROM erp_expense_line_outbox WHERE expense_request_id=?') && str_contains($page, 'ประวัติการส่ง LINE ล่าสุด'),
     'LINE failure reason and attempts are visible' => str_contains($page, "\$lineEvent['last_error']") && str_contains($page, "\$lineEvent['attempt_count']"),
     'LINE recipient identifiers are masked' => str_contains($page, '$maskLineRecipient') && str_contains($page, "'••••'"),
+    'LINE event codes have business labels' => str_contains($page, "'approval_request'=>'แจ้งผู้บริหารให้อนุมัติ'") && str_contains($page, "'requester_update'=>'แจ้งผลให้ผู้ขอ'"),
     'interest and repayment method are visible' => str_contains($page, 'อัตราดอกเบี้ย') && str_contains($page, 'วิธีรับเงิน / ชำระคืน'),
     'paid and remaining summary is visible' => str_contains($page, 'ชำระแล้ว') && str_contains($page, 'คงเหลือ'),
     'ERP expense source is linked' => str_contains($page, "'/expenses/requests/'"),
@@ -25,6 +26,7 @@ $checks = [
     'payroll settlement uses canonical source links' => str_contains($payroll, "x.source_type='employee_loan_repayment' AND x.source_id=r.id"),
     'confirmed request status is localized' => str_contains($page, "'confirmed' => 'ผู้ขอยืนยันรับเงินแล้ว'"),
     'finance months and due dates use Thai presentation' => str_contains($page, '$formatThaiMonth') && str_contains($page, '$formatThaiDate') && str_contains($page, '+ 543'),
+    'finance list month is localized too' => str_contains($page, '$formatThaiMonth((string)$row[\'first_due_month\'])'),
     'payroll approval requires reconciled links' => str_contains($payroll, '$this->assertEmployeeFinanceReconciled($runId);'),
     'company loan label is consistent' => str_contains($payroll, "'เงินกู้บริษัท งวดที่ '"),
 ];
