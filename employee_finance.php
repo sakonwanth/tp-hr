@@ -36,6 +36,7 @@ $repayments = [];
 $financeAudit = [];
 $expense = null;
 $lineDelivery = ['sent' => 0, 'pending' => 0, 'failed' => 0, 'cancelled' => 0];
+$lineTimeline = [];
 $paymentSummary = ['paid_installments' => 0, 'total_installments' => 0, 'paid_amount' => 0.0, 'remaining_amount' => 0.0];
 if ($detail) {
     try {
@@ -78,6 +79,12 @@ if ($detail) {
                     $lineDelivery[$lineStatus] = (int)$lineRow['total'];
                 }
             }
+            $lineTimelineStmt = $pdo->prepare(
+                "SELECT id,message_type,recipient_type,recipient_line_id,status,attempt_count,last_error,scheduled_at,sent_at,created_at
+                 FROM erp_expense_line_outbox WHERE expense_request_id=? ORDER BY id DESC LIMIT 20"
+            );
+            $lineTimelineStmt->execute([$expenseId]);
+            $lineTimeline = $lineTimelineStmt->fetchAll(PDO::FETCH_ASSOC);
         }
         $auditStmt = $pdo->prepare(
             "SELECT event_type,created_at FROM hr_employee_finance_audit_logs
@@ -107,6 +114,13 @@ $formatThaiMonth = static function (?string $value) use ($thaiMonths): string {
 $formatThaiDate = static function (?string $value) use ($thaiMonths): string {
     if (!$value || !preg_match('/^(\d{4})-(\d{2})-(\d{2})/', $value, $m)) return $value ?: '-';
     return (int)$m[3] . ' ' . ($thaiMonths[(int)$m[2]] ?? $m[2]) . ' ' . ((int)$m[1] + 543);
+};
+$lineStatusLabels = ['sent'=>'ส่งสำเร็จ','pending'=>'รอส่ง','failed'=>'ส่งไม่สำเร็จ','cancelled'=>'ยกเลิก'];
+$lineRecipientLabels = ['user'=>'ผู้ใช้งาน','group'=>'กลุ่ม LINE'];
+$maskLineRecipient = static function (?string $value): string {
+    $value = trim((string)$value);
+    if ($value === '') return '-';
+    return mb_substr($value, 0, 4) . '••••' . mb_substr($value, -4);
 };
 $linkedPayrollInstallments = 0;
 foreach ($repayments as $repayment) {
@@ -151,6 +165,22 @@ require_once __DIR__ . '/templates/header.php';
         <div class="rounded-xl border border-white/10 p-4"><p class="text-white/50">เริ่มหักงวดแรก</p><p class="text-white font-semibold mt-1"><?php echo htmlspecialchars($formatThaiMonth((string)$detail['first_due_month'])); ?></p></div>
         <div class="rounded-xl border border-white/10 p-4"><p class="text-white/50">รายการจ่ายเงิน</p><p class="mt-1"><?php if (!empty($expense['id'])): ?><a class="text-violet-300 hover:text-violet-200 font-semibold" target="_blank" rel="noopener" href="<?php echo htmlspecialchars($erpBase . '/expenses/requests/' . (int)$expense['id']); ?>"><?php echo htmlspecialchars((string)$expense['request_code']); ?> <i class="fas fa-external-link-alt text-xs"></i></a><?php else: ?><span class="text-white/60">ยังไม่เชื่อมรายการ ERP</span><?php endif; ?></p></div>
       </div>
+      <?php if ($lineTimeline): ?>
+      <div class="px-5 pb-5">
+        <div class="rounded-xl border border-white/10 overflow-hidden">
+          <h3 class="px-4 py-3 text-white font-semibold border-b border-white/10">ประวัติการส่ง LINE ล่าสุด</h3>
+          <ol class="divide-y divide-white/10 text-sm">
+          <?php foreach ($lineTimeline as $lineEvent): ?>
+            <li class="p-4 grid gap-2 md:grid-cols-[1.2fr_1fr_1fr]">
+              <div><p class="text-white font-medium"><?php echo htmlspecialchars((string)$lineEvent['message_type']); ?></p><p class="text-white/50 mt-1"><?php echo htmlspecialchars($lineRecipientLabels[(string)$lineEvent['recipient_type']] ?? (string)$lineEvent['recipient_type']); ?> · <?php echo htmlspecialchars($maskLineRecipient((string)$lineEvent['recipient_line_id'])); ?></p></div>
+              <div><p class="<?php echo $lineEvent['status'] === 'failed' ? 'text-rose-300' : ($lineEvent['status'] === 'sent' ? 'text-emerald-300' : 'text-amber-300'); ?> font-medium"><?php echo htmlspecialchars($lineStatusLabels[(string)$lineEvent['status']] ?? (string)$lineEvent['status']); ?></p><p class="text-white/50 mt-1">พยายาม <?php echo (int)$lineEvent['attempt_count']; ?> ครั้ง</p></div>
+              <div><p class="text-white/70"><?php echo htmlspecialchars((string)($lineEvent['sent_at'] ?: $lineEvent['scheduled_at'] ?: $lineEvent['created_at'])); ?></p><?php if (!empty($lineEvent['last_error'])): ?><p class="text-rose-300 mt-1 break-words">สาเหตุ: <?php echo htmlspecialchars((string)$lineEvent['last_error']); ?></p><?php endif; ?></div>
+            </li>
+          <?php endforeach; ?>
+          </ol>
+        </div>
+      </div>
+      <?php endif; ?>
       <?php if ($detail['finance_type'] === 'employee_loan'): ?>
       <div class="px-5 pb-5">
         <div class="rounded-xl bg-emerald-500/10 border border-emerald-400/20 p-4">
