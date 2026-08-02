@@ -26,6 +26,8 @@ jobs:
           echo "OK"
       - name: Employee finance HR lifecycle contract
         run: php scripts/qa_employee_finance_hr_surface.php
+      - name: Employee finance presentation audit
+        run: php scripts/audit_employee_finance_presentation.php
       - name: Employee finance payout activation boundary
         run: php scripts/qa_employee_finance_activation_boundary.php
       - name: Employee finance reconciliation audit contract

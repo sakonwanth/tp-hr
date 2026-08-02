@@ -20,6 +20,8 @@ $checks = [
     'payroll calculation consumes loan repayments' => str_contains($payroll, 'employeeFinanceDeductions'),
     'payroll settlement links run id' => str_contains($payroll, 'settleEmployeeFinanceForRun'),
     'payroll settlement uses canonical source links' => str_contains($payroll, "x.source_type='employee_loan_repayment' AND x.source_id=r.id"),
+    'confirmed request status is localized' => str_contains($page, "'confirmed' => 'ผู้ขอยืนยันรับเงินแล้ว'"),
+    'finance months and due dates use Thai presentation' => str_contains($page, '$formatThaiMonth') && str_contains($page, '$formatThaiDate') && str_contains($page, '+ 543'),
     'payroll approval requires reconciled links' => str_contains($payroll, '$this->assertEmployeeFinanceReconciled($runId);'),
     'company loan label is consistent' => str_contains($payroll, "'เงินกู้บริษัท งวดที่ '"),
 ];
