@@ -132,10 +132,16 @@ require_once BASE_PATH . '/config/app.php';
 require_once BASE_PATH . '/config/database.php';
 
 // Session — SSO shared session (Phase 5)
+// tp-hr is the only project installed as a home-screen PWA, where a
+// browser-session cookie dies whenever the app is swiped away. It opts into a
+// persistent cookie + matching idle window; the other projects keep the
+// tp-common defaults (see SharedSession::GC_RETENTION_FLOOR).
 if (TP_COMMON_AVAILABLE && class_exists('TpCommon\Session\SharedSession')) {
     \TpCommon\Session\SharedSession::start([
-        'project'  => 'tp-hr',
-        'lifetime' => defined('SESSION_LIFETIME') ? (int)SESSION_LIFETIME : 7200,
+        'project'         => 'tp-hr',
+        'lifetime'        => defined('SESSION_LIFETIME') ? (int)SESSION_LIFETIME : 7200,
+        'cookie_lifetime' => defined('PWA_SESSION_LIFETIME') ? (int)PWA_SESSION_LIFETIME : 0,
+        'idle_timeout'    => defined('PWA_SESSION_LIFETIME') ? (int)PWA_SESSION_LIFETIME : 3600,
     ]);
 } elseif (TP_COMMON_AVAILABLE) {
     \TpCommon\Auth\Session::start([
@@ -190,6 +196,7 @@ require_once BASE_PATH . '/core/Services/AttendanceAdjustmentService.php';
 require_once BASE_PATH . '/core/Services/OutsideAttendanceService.php';
 require_once BASE_PATH . '/core/Services/PayrollService.php';
 require_once BASE_PATH . '/core/Services/EmployeeSummaryService.php';
+require_once BASE_PATH . '/core/Services/PushService.php';
 
 // Phase 7: Structured logging + audit log
 if (TP_COMMON_AVAILABLE) {

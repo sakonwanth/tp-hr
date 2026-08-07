@@ -303,8 +303,10 @@ if ($overall !== $cur['status']) {
     if ($overall === 'APPROVED') {
         crm_line_sync_approved_leave_attendance($pdo, $id, $approverId, 'api-v1');
         crm_line_notify_leave_decision($pdo, $id, 'APPROVED', $remarks);
+        tp_hr_push_leave_decision($pdo, $id, 'APPROVED', $remarks);
     } elseif ($overall === 'REJECTED') {
         crm_line_notify_leave_decision($pdo, $id, 'REJECTED', $remarks);
+        tp_hr_push_leave_decision($pdo, $id, 'REJECTED', $remarks);
     }
 }
 

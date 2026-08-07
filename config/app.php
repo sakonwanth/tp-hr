@@ -20,6 +20,17 @@ define('APP_URL', $_ENV['APP_URL'] ?? 'http://localhost/tp-hr');
 // Session
 define('SESSION_LIFETIME', 7200); // 2 hours
 
+/**
+ * How long an installed-PWA session stays signed in, as a sliding window that
+ * follows activity. 0 keeps the pre-PWA behaviour (cookie dies with the browser
+ * session, 1 hour idle timeout).
+ *
+ * This is a real security/convenience trade: employees stop re-logging in every
+ * time iOS evicts the app, at the cost of a longer-lived session on a lost
+ * phone. Lower it (or set 0) if that trade stops being acceptable.
+ */
+define('PWA_SESSION_LIFETIME', (int)($_ENV['PWA_SESSION_LIFETIME'] ?? 1209600)); // 14 days
+
 // Security
 define('MIN_PASSWORD_LENGTH', 8);
 

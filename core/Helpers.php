@@ -862,3 +862,70 @@ if (!function_exists('tp_hr_brand_logo_url')) {
         return '/asset/logo/' . rawurlencode(basename($filename));
     }
 }
+
+/**
+ * Web Push mirror of the LINE workflow notifications.
+ *
+ * Push and LINE are independent channels: LINE reaches every employee, push
+ * only reaches those who installed the PWA and opted in. Both are best-effort
+ * — a delivery problem must never fail the HR action that triggered it, so
+ * this never throws.
+ */
+if (!function_exists('tp_hr_push_leave_decision')) {
+    function tp_hr_push_leave_decision(PDO $pdo, int $requestId, string $decision, string $note = ''): void {
+        try {
+            if (!function_exists('crm_line_leave_context') || !class_exists('PushService')) {
+                return;
+            }
+
+            $push = new PushService($pdo);
+            if (!$push->isConfigured()) {
+                return;
+            }
+
+            $ctx = crm_line_leave_context($pdo, $requestId);
+            if (!$ctx) {
+                return;
+            }
+
+            $leaveName = $ctx['leave_type_name'] ?? $ctx['leave_code'] ?? 'ลา';
+            $range = tp_hr_push_date_range((string)$ctx['start_date'], (string)$ctx['end_date']);
+            $decision = strtoupper($decision);
+
+            if ($decision === 'APPROVED') {
+                $title = 'อนุมัติการลาแล้ว';
+                $body = $leaveName . ' ' . $range . ' ได้รับการอนุมัติ';
+            } elseif ($decision === 'REJECTED') {
+                $title = 'ไม่อนุมัติการลา';
+                $body = $leaveName . ' ' . $range . ' ไม่ได้รับการอนุมัติ';
+            } else {
+                return;
+            }
+
+            if (trim($note) !== '') {
+                $body .= ' — ' . mb_substr(trim($note), 0, 120);
+            }
+
+            $push->sendToUser((int)$ctx['user_id'], [
+                'title' => $title,
+                'body'  => $body,
+                'url'   => '/leave_history.php',
+                'tag'   => 'leave-' . $requestId,
+            ]);
+        } catch (Throwable $e) {
+            if (function_exists('tpHrLogException')) {
+                tpHrLogException($e, 'push/leave-decision');
+            }
+        }
+    }
+}
+
+if (!function_exists('tp_hr_push_date_range')) {
+    function tp_hr_push_date_range(string $start, string $end): string {
+        $startLabel = date('j M', strtotime($start));
+        if ($start === $end) {
+            return $startLabel;
+        }
+        return $startLabel . ' – ' . date('j M', strtotime($end));
+    }
+}

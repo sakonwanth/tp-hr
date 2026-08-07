@@ -751,7 +751,8 @@ function approveLeaveRequest($pdo, $user) {
         }
 
         crm_line_notify_leave_decision($pdo, (int)$requestId, 'APPROVED', $comment);
-        
+        tp_hr_push_leave_decision($pdo, (int)$requestId, 'APPROVED', $comment);
+
         echo json_encode(['success' => true, 'message' => 'อนุมัติคำขอลาสำเร็จ']);
         
     } catch (Exception $e) {
@@ -831,7 +832,8 @@ function rejectLeaveRequest($pdo, $user) {
         $pdo->commit();
 
         crm_line_notify_leave_decision($pdo, (int)$requestId, 'REJECTED', $reason);
-        
+        tp_hr_push_leave_decision($pdo, (int)$requestId, 'REJECTED', $reason);
+
         echo json_encode(['success' => true, 'message' => 'ไม่อนุมัติคำขอลาสำเร็จ']);
         
     } catch (Exception $e) {

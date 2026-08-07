@@ -124,6 +124,60 @@ async function handleAsset(request) {
     return fresh || Response.error();
 }
 
+/**
+ * Web Push. iOS delivers these only to an installed (home-screen) PWA on
+ * 16.4+; on the desktop and Android it works from the browser too.
+ *
+ * The payload is written by core/Services/PushService.php, which already
+ * clamps the fields and forces `url` to a same-origin path.
+ */
+self.addEventListener('push', (event) => {
+    let payload = {};
+    try {
+        payload = event.data ? event.data.json() : {};
+    } catch (err) {
+        payload = {};
+    }
+
+    const title = payload.title || 'TP-HR';
+    const options = {
+        body: payload.body || '',
+        icon: BASE + 'assets/icons/icon-192-v2.png',
+        badge: BASE + 'assets/icons/icon-192-v2.png',
+        tag: payload.tag || 'tp-hr',
+        data: { url: payload.url || BASE },
+        renotify: true,
+    };
+
+    event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+
+    const target = new URL(event.notification.data && event.notification.data.url || BASE, self.location.origin);
+
+    event.waitUntil((async () => {
+        const clientList = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+
+        // Reuse the open app window when there is one — opening a second
+        // window every time a notification is tapped is jarring on iOS.
+        for (const client of clientList) {
+            if (new URL(client.url).origin === target.origin && 'focus' in client) {
+                await client.focus();
+                if ('navigate' in client) {
+                    await client.navigate(target.href).catch(() => {});
+                }
+                return;
+            }
+        }
+
+        if (self.clients.openWindow) {
+            await self.clients.openWindow(target.href);
+        }
+    })());
+});
+
 self.addEventListener('fetch', (event) => {
     const request = event.request;
 

@@ -242,14 +242,202 @@
         });
     }
 
+    // ---------------------------------------------------------- web push
+
+    function csrfToken() {
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        return meta ? meta.getAttribute('content') : '';
+    }
+
+    /** VAPID keys travel as base64url; PushManager wants raw bytes. */
+    function urlBase64ToUint8Array(base64String) {
+        var padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+        var base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+        var raw = window.atob(base64);
+        var output = new Uint8Array(raw.length);
+        for (var i = 0; i < raw.length; i++) {
+            output[i] = raw.charCodeAt(i);
+        }
+        return output;
+    }
+
+    function postPush(body) {
+        return fetch(base + 'api/push.php', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(Object.assign({ _token: csrfToken() }, body)),
+        }).then(function (res) { return res.json(); });
+    }
+
+    function pushConfig() {
+        return fetch(base + 'api/push.php?action=config', { credentials: 'same-origin' })
+            .then(function (res) { return res.ok ? res.json() : null; })
+            .catch(function () { return null; });
+    }
+
+    function pushSupported() {
+        return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+    }
+
+    /**
+     * Must be called from a user gesture — iOS rejects a permission prompt
+     * that isn't tied to a tap.
+     */
+    function enablePush() {
+        if (!pushSupported()) {
+            return Promise.resolve({ success: false, reason: 'unsupported' });
+        }
+
+        return pushConfig().then(function (config) {
+            if (!config || !config.enabled || !config.public_key) {
+                return { success: false, reason: 'not-configured' };
+            }
+
+            return Notification.requestPermission().then(function (permission) {
+                if (permission !== 'granted') {
+                    return { success: false, reason: permission };
+                }
+
+                return navigator.serviceWorker.ready.then(function (registration) {
+                    return registration.pushManager.getSubscription().then(function (existing) {
+                        if (existing) return existing;
+                        return registration.pushManager.subscribe({
+                            userVisibleOnly: true,
+                            applicationServerKey: urlBase64ToUint8Array(config.public_key),
+                        });
+                    });
+                }).then(function (subscription) {
+                    return postPush({ action: 'subscribe', subscription: subscription.toJSON() });
+                });
+            });
+        }).catch(function () {
+            return { success: false, reason: 'error' };
+        });
+    }
+
+    function disablePush() {
+        if (!pushSupported()) return Promise.resolve({ success: false });
+
+        return navigator.serviceWorker.ready
+            .then(function (registration) { return registration.pushManager.getSubscription(); })
+            .then(function (subscription) {
+                if (!subscription) return { success: true };
+                var endpoint = subscription.endpoint;
+                return subscription.unsubscribe().then(function () {
+                    return postPush({ action: 'unsubscribe', endpoint: endpoint });
+                });
+            })
+            .catch(function () { return { success: false }; });
+    }
+
+    window.tpHrPush = {
+        supported: pushSupported,
+        enable: enablePush,
+        disable: disablePush,
+        config: pushConfig,
+    };
+
+    /**
+     * Opt-in card. Only shown inside the installed app: iOS refuses push for a
+     * plain Safari tab, so prompting there would just fail.
+     */
+    function maybeOfferPush() {
+        if (!isStandalone || !pushSupported()) return;
+        if (Notification.permission !== 'default') return;
+        if (document.getElementById('tpPwaPushOptIn')) return;
+
+        pushConfig().then(function (config) {
+            if (!config || !config.enabled || config.subscribed) return;
+
+            var card = document.createElement('div');
+            card.id = 'tpPwaPushOptIn';
+            card.style.cssText = [
+                'position:fixed',
+                'left:16px',
+                'right:16px',
+                'bottom:calc(16px + env(safe-area-inset-bottom, 0px))',
+                'z-index:9997',
+                'padding:16px',
+                'border-radius:22px',
+                'background:rgba(15,23,42,0.95)',
+                'border:1px solid rgba(148,163,184,0.18)',
+                'box-shadow:0 18px 40px rgba(0,0,0,0.35)',
+                'backdrop-filter:blur(20px)',
+                '-webkit-backdrop-filter:blur(20px)',
+                'color:#e2e8f0',
+                'font-size:14px',
+                'line-height:1.6',
+            ].join(';');
+
+            var text = document.createElement('div');
+            text.textContent = 'เปิดการแจ้งเตือน เพื่อรู้ผลอนุมัติการลาและสลิปเงินเดือนทันที';
+
+            var row = document.createElement('div');
+            row.style.cssText = 'display:flex;gap:10px;margin-top:14px';
+
+            var allow = document.createElement('button');
+            allow.type = 'button';
+            allow.textContent = 'เปิดการแจ้งเตือน';
+            allow.style.cssText = [
+                'flex:1',
+                'min-height:48px',
+                'border:0',
+                'border-radius:16px',
+                'background:linear-gradient(135deg,#7c3aed,#8b5cf6)',
+                'color:#fff',
+                'font-family:inherit',
+                'font-size:14px',
+                'font-weight:600',
+                'cursor:pointer',
+            ].join(';');
+            allow.addEventListener('click', function () {
+                allow.disabled = true;
+                allow.textContent = 'กำลังเปิด…';
+                enablePush().then(function () { card.remove(); });
+            });
+
+            var later = document.createElement('button');
+            later.type = 'button';
+            later.textContent = 'ไว้ก่อน';
+            later.style.cssText = [
+                'flex:none',
+                'min-height:48px',
+                'padding:0 16px',
+                'border:1px solid rgba(148,163,184,0.24)',
+                'border-radius:16px',
+                'background:transparent',
+                'color:#94a3b8',
+                'font-family:inherit',
+                'font-size:14px',
+                'cursor:pointer',
+            ].join(';');
+            later.addEventListener('click', function () { card.remove(); });
+
+            row.appendChild(allow);
+            row.appendChild(later);
+            card.appendChild(text);
+            card.appendChild(row);
+            document.body.appendChild(card);
+        });
+    }
+
     // ------------------------------------------------------------- kickoff
 
     registerServiceWorker();
     wireAndroidInstallPrompt();
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', maybeShowInstallHint);
-    } else {
+    function onReady() {
         maybeShowInstallHint();
+        // Only on a logged-in page — the meta tag is rendered by templates/header.php.
+        if (csrfToken()) {
+            window.setTimeout(maybeOfferPush, 4000);
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', onReady);
+    } else {
+        onReady();
     }
 }());
