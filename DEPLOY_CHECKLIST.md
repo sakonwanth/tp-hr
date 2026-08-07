@@ -41,6 +41,32 @@
 
 ---
 
+## PWA / Web Push
+
+**One-time server setup (ต้องทำก่อน deploy รอบแรกที่มี `sw.js`):**
+
+- [ ] Nginx includes [`deploy/nginx-pwa.conf`](deploy/nginx-pwa.conf) — `/sw.js` ต้องตอบ `Cache-Control: no-store`.
+      ถ้าไม่ทำ เบราว์เซอร์จะยึด worker ตัวเก่าไว้ (สูงสุด 24 ชม.) แล้ว fix ที่ deploy ไปจะยังไม่ถึงเครื่องพนักงาน —
+      อาการนี้หลอกมาก เพราะ `curl` เห็นไฟล์ใหม่แต่เบราว์เซอร์ยังรันตัวเก่า
+- [ ] Nginx includes [`deploy/nginx-deny-internal-paths.conf`](deploy/nginx-deny-internal-paths.conf) — ต้อง block `/ios-app/` ด้วย
+- [ ] รัน migration `database/migrations/2026_08_07_hr_push_subscriptions.sql` (additive, ตารางใหม่ล้วน)
+- [ ] `php scripts/generate_vapid_keys.php` → ใส่ `VAPID_*` ใน `.env` production
+      (ถ้าไม่ใส่ ระบบซ่อนฟีเจอร์ push เงียบ ๆ ไม่พัง — แต่ก็ไม่มีแจ้งเตือน)
+
+**Every deploy that touches `sw.js`:**
+
+- [ ] บั๊มพ์ `CACHE_VERSION` ใน [`sw.js`](sw.js) เมื่อแก้ precache list หรือกลยุทธ์ cache
+- [ ] `php scripts/qa_pwa_push_contract.php` ผ่าน (CI รันให้อยู่แล้ว)
+
+**Post-deploy smoke (มือถือจริง, เปิดจากไอคอนหน้าโฮม):**
+
+- [ ] เปิดแอป → ไม่มีหน้า reload เด้งเอง (reload ต้องเกิดเฉพาะตอนกด "อัปเดต")
+- [ ] เปิดโหมดเครื่องบิน แล้วกดเมนูสักหน้า → ต้องได้การ์ด **ไม่มีการเชื่อมต่ออินเทอร์เน็ต** ไม่ใช่หน้า error ของเบราว์เซอร์
+- [ ] อนุมัติการลาให้ตัวเองสักใบ → ต้องได้ทั้ง LINE และ push
+- [ ] ปิดแอปทิ้งไว้ข้ามคืน แล้วเปิดใหม่ → ยังล็อกอินอยู่ (`PWA_SESSION_LIFETIME`)
+
+---
+
 ## Rollback
 
 Revert the deploy commit that introduced CSS/markup regression; if only **`native-shell.css`** changed, restore previous file + matching **`?v=`** bump pattern.

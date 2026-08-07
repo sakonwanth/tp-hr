@@ -34,6 +34,8 @@ jobs:
         run: php scripts/qa_employee_finance_reconciliation_audit.php
       - name: Employee finance payroll-link schema contract
         run: php scripts/qa_employee_finance_payroll_link_schema.php
+      - name: PWA / Web Push contract
+        run: php scripts/qa_pwa_push_contract.php
       - name: Employee finance due-date reconciliation contract
         run: php scripts/qa_employee_finance_due_date_reconciliation.php
       - name: Setup Node.js

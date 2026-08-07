@@ -103,16 +103,45 @@ async function handleNavigate(event) {
     }
 }
 
-/** Assets: serve the cached copy instantly, refresh in the background. */
+/**
+ * Drop other cached variants of the same file once a new one lands, so a
+ * history of `?v=` bumps doesn't accumulate in storage forever.
+ */
+async function pruneOtherVariants(cache, request) {
+    const url = new URL(request.url);
+    const keys = await cache.keys();
+
+    await Promise.all(keys.map((key) => {
+        const keyUrl = new URL(key.url);
+        if (keyUrl.pathname === url.pathname && keyUrl.search !== url.search) {
+            return cache.delete(key);
+        }
+        return Promise.resolve();
+    }));
+}
+
+/**
+ * Assets: stale-while-revalidate, keyed on the FULL url including `?v=`.
+ *
+ * Matching with ignoreSearch would be tempting — one cache entry per file —
+ * but it silently defeats the repo's cache-bust convention: bumping
+ * native-shell.css to ?v=23 would keep serving the cached ?v=22 body on the
+ * first load after a deploy, which is exactly what the bump exists to
+ * prevent (see DEPLOY_CHECKLIST.md). So a bumped version is a cache miss and
+ * goes to the network.
+ *
+ * ignoreSearch survives only as an offline fallback: an old version beats an
+ * unstyled page when the network is gone.
+ */
 async function handleAsset(request) {
     const cache = await caches.open(ASSET_CACHE);
-    // ignoreSearch so the `?v=` cache-buster on native-shell.css still matches.
-    const cached = await cache.match(request, { ignoreSearch: true });
+    const cached = await cache.match(request);
 
     const network = fetch(request)
-        .then((response) => {
+        .then(async (response) => {
             if (response && response.ok && response.type === 'basic') {
-                cache.put(request, response.clone());
+                await cache.put(request, response.clone());
+                await pruneOtherVariants(cache, request);
             }
             return response;
         })
@@ -121,7 +150,12 @@ async function handleAsset(request) {
     if (cached) return cached;
 
     const fresh = await network;
-    return fresh || Response.error();
+    if (fresh) return fresh;
+
+    // Network is down and this exact version was never cached — any previously
+    // cached version of the same file is better than nothing.
+    const stale = await cache.match(request, { ignoreSearch: true });
+    return stale || Response.error();
 }
 
 /**
