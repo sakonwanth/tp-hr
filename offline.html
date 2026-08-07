@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#7c3aed">
+    <title>ออฟไลน์ | TP-HR</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon-v2.png">
+    <!--
+      Served by sw.js when a navigation fails. Must be fully self-contained:
+      no webfont, no /assets/css/*, no script — it has to render with zero
+      network. Tokens mirror native-shell.css by value, not by import.
+    -->
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            color: #e2e8f0;
+            font-family: 'IBM Plex Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+        }
+
+        .card {
+            width: min(420px, 100%);
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            border-radius: 24px;
+            padding: 32px 24px;
+            text-align: center;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+        }
+
+        .glyph {
+            width: 84px;
+            height: 84px;
+            margin: 0 auto 20px;
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.28), rgba(139, 92, 246, 0.14));
+            border: 1px solid rgba(139, 92, 246, 0.35);
+        }
+
+        .glyph svg { width: 40px; height: 40px; stroke: #a78bfa; }
+
+        h1 {
+            margin: 0 0 10px;
+            font-size: 22px;
+            font-weight: 600;
+            color: #f8fafc;
+        }
+
+        p {
+            margin: 0 0 8px;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #94a3b8;
+        }
+
+        .hint {
+            margin-top: 20px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: rgba(148, 163, 184, 0.08);
+            font-size: 13px;
+            line-height: 1.7;
+            color: #cbd5e1;
+            text-align: left;
+        }
+
+        .hint strong { color: #e2e8f0; font-weight: 600; }
+
+        button {
+            margin-top: 24px;
+            width: 100%;
+            min-height: 58px;
+            border: 0;
+            border-radius: 22px;
+            background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+            color: #fff;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        button:active { transform: scale(0.985); }
+    </style>
+</head>
+<body>
+    <main class="card">
+        <div class="glyph" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 1l22 22"/>
+                <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
+                <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>
+                <path d="M10.71 5.05A16 16 0 0 1 22.58 9"/>
+                <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/>
+                <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+                <line x1="12" y1="20" x2="12.01" y2="20"/>
+            </svg>
+        </div>
+
+        <h1>ไม่มีการเชื่อมต่ออินเทอร์เน็ต</h1>
+        <p>TP-HR ต้องต่อเน็ตเพื่อดึงข้อมูลล่าสุด เช่น การลงเวลา การลา และสลิปเงินเดือน</p>
+
+        <div class="hint">
+            <strong>ลองตรวจสอบ</strong><br>
+            • เปิด Wi-Fi หรือเน็ตมือถือ<br>
+            • ปิดโหมดเครื่องบิน<br>
+            • ถ้าอยู่ในอาคาร ลองขยับไปจุดที่สัญญาณดีขึ้น
+        </div>
+
+        <button type="button" onclick="location.reload()">ลองใหม่อีกครั้ง</button>
+    </main>
+</body>
+</html>

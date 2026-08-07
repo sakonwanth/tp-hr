@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#7c3aed">
+    <meta name="robots" content="noindex">
+    <title>ติดตั้งแอป TP-HR</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="icon" type="image/svg+xml" href="/assets/icons/tphr-app-icon.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon-v2.png">
+    <!--
+      Public install guide for employees. Kept dependency-free (inline styles,
+      no DB, no bootstrap.php) so it still renders when the app or database is
+      down — that is exactly when someone is most likely to be sent here.
+    -->
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            min-height: 100dvh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            color: #e2e8f0;
+            font-family: 'IBM Plex Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            padding: max(24px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(32px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+        }
+
+        .wrap { width: min(560px, 100%); margin: 0 auto; }
+
+        header { text-align: center; margin-bottom: 28px; }
+
+        .app-icon {
+            width: 88px;
+            height: 88px;
+            border-radius: 22px;
+            margin: 0 auto 16px;
+            display: block;
+            box-shadow: 0 18px 40px rgba(124, 58, 237, 0.28);
+        }
+
+        h1 { margin: 0 0 8px; font-size: 24px; font-weight: 700; color: #f8fafc; }
+        header p { margin: 0; font-size: 15px; line-height: 1.6; color: #94a3b8; }
+
+        section {
+            background: rgba(15, 23, 42, 0.82);
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            border-radius: 24px;
+            padding: 24px 20px;
+            margin-bottom: 16px;
+        }
+
+        h2 {
+            margin: 0 0 4px;
+            font-size: 17px;
+            font-weight: 600;
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .platform-note { margin: 0 0 18px; font-size: 13px; color: #94a3b8; line-height: 1.6; }
+
+        ol { margin: 0; padding: 0; list-style: none; counter-reset: step; }
+
+        ol li {
+            counter-increment: step;
+            position: relative;
+            padding: 0 0 20px 44px;
+            font-size: 15px;
+            line-height: 1.7;
+            color: #cbd5e1;
+        }
+
+        ol li:last-child { padding-bottom: 0; }
+
+        ol li::before {
+            content: counter(step);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 30px;
+            height: 30px;
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.35), rgba(139, 92, 246, 0.18));
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            color: #c4b5fd;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        strong { color: #f1f5f9; font-weight: 600; }
+
+        .callout {
+            margin-top: 18px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: rgba(234, 179, 8, 0.1);
+            border: 1px solid rgba(234, 179, 8, 0.28);
+            font-size: 13.5px;
+            line-height: 1.7;
+            color: #fde68a;
+        }
+
+        .cta {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 58px;
+            border-radius: 22px;
+            background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            margin-top: 8px;
+        }
+
+        footer {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 13px;
+            line-height: 1.7;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <header>
+            <img class="app-icon" src="/assets/icons/icon-192-v2.png" alt="ไอคอนแอป TP-HR" width="88" height="88">
+            <h1>ติดตั้งแอป TP-HR</h1>
+            <p>เพิ่ม TP-HR ลงหน้าจอโฮมของมือถือ เพื่อเปิดใช้แบบเต็มจอเหมือนแอปทั่วไป ไม่ต้องดาวน์โหลดจาก App Store</p>
+        </header>
+
+        <section>
+            <h2>iPhone / iPad</h2>
+            <p class="platform-note">ต้องเปิดผ่าน <strong>Safari</strong> เท่านั้น — Chrome หรือ LINE บน iOS จะไม่มีเมนูนี้</p>
+            <ol>
+                <li>เปิด <strong>Safari</strong> แล้วเข้าเว็บ TP-HR</li>
+                <li>แตะปุ่ม <strong>แชร์</strong> (ไอคอนสี่เหลี่ยมมีลูกศรชี้ขึ้น) ที่แถบด้านล่าง</li>
+                <li>เลื่อนลงแล้วเลือก <strong>เพิ่มไปยังหน้าจอโฮม</strong> (Add to Home Screen)</li>
+                <li>แตะ <strong>เพิ่ม</strong> มุมขวาบน</li>
+                <li>ปิด Safari แล้วเปิดแอป <strong>TP-HR</strong> จากหน้าโฮมได้เลย</li>
+            </ol>
+            <div class="callout">
+                เปิดจากไอคอนหน้าโฮมทุกครั้ง — การแจ้งเตือนและการแสดงผลเต็มจอจะทำงานเฉพาะตอนเปิดแบบนี้เท่านั้น
+            </div>
+        </section>
+
+        <section>
+            <h2>Android</h2>
+            <p class="platform-note">ใช้ <strong>Chrome</strong> หรือเบราว์เซอร์ที่รองรับ PWA</p>
+            <ol>
+                <li>เปิดเว็บ TP-HR ใน <strong>Chrome</strong></li>
+                <li>แตะเมนู <strong>⋮</strong> มุมขวาบน</li>
+                <li>เลือก <strong>ติดตั้งแอป</strong> หรือ <strong>เพิ่มลงในหน้าจอหลัก</strong></li>
+                <li>ยืนยัน <strong>ติดตั้ง</strong></li>
+            </ol>
+        </section>
+
+        <a class="cta" href="/">เปิด TP-HR</a>
+
+        <footer>
+            มีปัญหาการติดตั้ง? ติดต่อฝ่ายบุคคลหรือทีมไอที
+        </footer>
+    </div>
+</body>
+</html>

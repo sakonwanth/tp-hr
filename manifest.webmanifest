@@ -1,23 +1,62 @@
 {
-  "name": "TP-HR",
+  "id": "/?source=pwa",
+  "name": "TP-HR — ระบบบริหารทรัพยากรบุคคล",
   "short_name": "TP-HR",
-  "start_url": "/",
+  "description": "ลงเวลาเข้า-ออกงาน ขอลา ดูสลิปเงินเดือน และเอกสาร HR ของ TP-Asset Development",
+  "lang": "th",
+  "dir": "ltr",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "categories": ["business", "productivity"],
   "background_color": "#0f172a",
-  "theme_color": "#8b5cf6",
+  "theme_color": "#7c3aed",
   "icons": [
     {
       "src": "/assets/icons/icon-192-v2.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/assets/icons/icon-512-v2.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/icons/icon-192-v2.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/assets/icons/icon-512-v2.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "ลงเวลาเข้า-ออกงาน",
+      "short_name": "ลงเวลา",
+      "url": "/checkin.php?source=pwa-shortcut",
+      "icons": [{ "src": "/assets/icons/icon-192-v2.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "ขอลา",
+      "short_name": "ขอลา",
+      "url": "/leave.php?source=pwa-shortcut",
+      "icons": [{ "src": "/assets/icons/icon-192-v2.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "สลิปเงินเดือน",
+      "short_name": "สลิป",
+      "url": "/payslip.php?source=pwa-shortcut",
+      "icons": [{ "src": "/assets/icons/icon-192-v2.png", "sizes": "192x192", "type": "image/png" }]
     }
   ]
 }

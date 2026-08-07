@@ -115,7 +115,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="icon" type="image/svg+xml" href="<?php echo htmlspecialchars($appIconPath); ?>">
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="<?php echo htmlspecialchars($appTouchIconPath); ?>">
-    
+
+    <!-- PWA — service worker registration + iOS install hint -->
+    <script src="/assets/js/pwa.js?v=1" defer></script>
+
     <!-- IBM Plex Sans Thai — same stack as tp-checkin / logged-in TP-HR -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -132,7 +135,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             -webkit-tap-highlight-color: transparent;
             box-sizing: border-box;
         }
-        
+
+        /* Already installed → the "add to home screen" link is noise.
+           The class is set by assets/js/pwa.js for iOS, which reports
+           navigator.standalone instead of the display-mode media query. */
+        .tp-pwa-standalone .tp-pwa-hide-standalone { display: none; }
+
+        @media (display-mode: standalone) {
+            .tp-pwa-hide-standalone { display: none; }
+        }
+
         body {
             min-height: 100vh;
             min-height: 100dvh;
@@ -363,6 +375,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <a href="<?php echo htmlspecialchars(CRM_BASE_URL); ?>/" class="inline-flex min-h-[48px] items-center justify-center text-sm text-white/60 transition-colors hover:text-white/90 touch-manipulation">
                 <i class="fas fa-arrow-left mr-1"></i>
                 กลับไป TP-CRM
+            </a>
+        </div>
+
+        <!-- PWA install guide (hidden once the app already runs standalone) -->
+        <div class="text-center mt-2 tp-pwa-hide-standalone">
+            <a href="/install.html" class="inline-flex min-h-[48px] items-center justify-center text-sm text-white/60 transition-colors hover:text-white/90 touch-manipulation">
+                <i class="fas fa-mobile-screen-button mr-1"></i>
+                ติดตั้งเป็นแอปบนมือถือ
             </a>
         </div>
         

@@ -57,6 +57,23 @@ RewriteRule ^([^/]+)/?$ $1.php [L]
     php_value max_input_time 300
 </IfModule>
 
+# PWA — correct MIME types (see deploy/nginx-pwa.conf for the production equivalent)
+<IfModule mod_mime.c>
+    AddType application/manifest+json .webmanifest
+</IfModule>
+
+# PWA — the worker must never be served stale, or clients get stuck on an old
+# cache strategy. Browsers also refuse a service worker with a long max-age.
+<IfModule mod_headers.c>
+    <FilesMatch "^sw\.js$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Service-Worker-Allowed "/"
+    </FilesMatch>
+    <FilesMatch "^manifest\.webmanifest$">
+        Header set Cache-Control "public, max-age=3600"
+    </FilesMatch>
+</IfModule>
+
 # Security Headers
 <IfModule mod_headers.c>
     Header set X-Content-Type-Options "nosniff"
