@@ -3,7 +3,7 @@
   "appName": "TP-HR",
   "webDir": "www",
   "server": {
-    "url": "https://hr.tp-asset.com",
+    "url": "https://hr.tp-asset.com/login.php",
     "cleartext": false,
     "allowNavigation": [
       "hr.tp-asset.com",

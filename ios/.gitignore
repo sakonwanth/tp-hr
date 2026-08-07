@@ -1,0 +1,3 @@
+# Signed builds are uploaded to the server, never committed.
+*.ipa
+manifest.plist

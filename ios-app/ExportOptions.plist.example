@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Copy to ExportOptions.plist and fill in teamID (Apple Developer → Membership).
+  The real file is gitignored: it names your team and changes per signing setup.
+
+  method = ad-hoc installs only on UDIDs registered in the provisioning
+  profile. Switch to enterprise only if TP-Asset is accepted into the Apple
+  Developer Enterprise Program, which requires 100+ employees.
+-->
+<plist version="1.0">
+<dict>
+  <key>method</key>
+  <string>ad-hoc</string>
+  <key>teamID</key>
+  <string>YOUR_TEAM_ID</string>
+  <key>compileBitcode</key>
+  <false/>
+  <key>stripSwiftSymbols</key>
+  <true/>
+  <key>thinning</key>
+  <string>&lt;none&gt;</string>
+</dict>
+</plist>

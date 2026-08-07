@@ -20,11 +20,13 @@ which Xcode 26 does not do on install:
 xcodebuild -downloadPlatform iOS
 ```
 
-That is a multi-GB download and asks for an admin password. Until it finishes,
-`xcodebuild` fails with *"iOS 26.5 is not installed"* and no simulator can boot
-(`xcrun simctl list runtimes` shows nothing).
+~8.5 GB. Until it finishes, `xcodebuild` fails with *"iOS 26.5 is not
+installed"* and no simulator can boot (`xcrun simctl list runtimes` is empty).
 
 CocoaPods is **not** needed — Capacitor 8 uses Swift Package Manager.
+
+Status: built and launched on an iPhone 17 simulator (iOS 26.5). The app loads
+production, renders the TP-HR login, and shows the correct home-screen icon.
 
 ## Build and run
 
@@ -45,6 +47,13 @@ xcodebuild -project ios/App/App.xcodeproj -scheme App -sdk iphonesimulator -conf
 `capacitor.config.json` sets `server.url` to production, so the app always
 loads the live site — there is no bundled web build to keep in sync, and a
 web deploy updates the app instantly with no resubmission.
+
+It points at **`/login.php`**, not `/`. The root path serves a redirect shim
+that hands unauthenticated users to the TP-CRM SSO login, and that page is
+built for desktop — launching the app landed on a CRM screen whose content
+overflowed the phone viewport horizontally. `/login.php` is TP-HR's own
+mobile login and redirects to the dashboard when the session is still valid,
+so signed-in users never see it.
 
 `server.allowNavigation` lists the hosts allowed to stay inside the webview.
 `access.line.me` is there because LINE login would otherwise bounce out to
@@ -110,7 +119,18 @@ these is a separate piece of work:
 | Native camera for check-in selfies | `@capacitor/camera` | swap the web capture path |
 | Background GPS | `@capacitor/geolocation` + background mode | `NSLocationAlwaysUsageDescription`, App Review N/A for Ad Hoc |
 | Offline check-in queue | `@capacitor/preferences` or SQLite | conflict handling on sync |
-| PDF payslip downloads | `@capacitor/filesystem` | WKWebView does not download on its own |
+| PDF payslip downloads | `@capacitor/filesystem` | see below — this one is a known break, not just a gap |
 
 Until push is wired natively, the PWA's Web Push (see `../core/Services/PushService.php`)
 covers notifications on iOS 16.4+.
+
+### Known break: payslip PDF download
+
+`../payslip.php` downloads by POSTing a form with `target="_blank"`. WKWebView
+has no download manager, and a POST body does not survive being handed to an
+external browser — so in the wrapper that button does nothing, while it works
+fine in Safari and in the PWA.
+
+Fixing it means intercepting the download in native code and handing the bytes
+to `@capacitor/filesystem` + the share sheet. Until then, tell employees to
+open payslips in Safari, or ship the PWA to anyone who needs PDFs.

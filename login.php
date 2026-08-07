@@ -303,7 +303,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     placeholder="กรอกชื่อผู้ใช้หรืออีเมล"
                     value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>"
                     required
-                    autofocus
                 >
             </div>
             
@@ -393,6 +392,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
     
     <script>
+        // Focus the username field on desktop only. The HTML autofocus
+        // attribute pops the on-screen keyboard the instant the page opens,
+        // which hides the password field and the LINE button — worst inside
+        // the installed app, where there is no address bar to scroll away.
+        (function () {
+            var pointerIsFine = window.matchMedia('(pointer: fine)').matches;
+            if (!pointerIsFine || !window.matchMedia('(min-width: 768px)').matches) return;
+            var username = document.getElementById('login-username');
+            if (username && !username.value) username.focus();
+        }());
+
         function togglePassword() {
             const passwordInput = document.getElementById('password');
             const toggleIcon = document.getElementById('toggleIcon');
