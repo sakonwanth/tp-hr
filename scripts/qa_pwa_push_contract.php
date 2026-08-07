@@ -89,6 +89,21 @@ checkContains('push helper is defined', $helpers, 'function tp_hr_push_leave_dec
 $bootstrap = (string)file_get_contents($root . '/bootstrap.php');
 checkContains('PushService is loaded by bootstrap', $bootstrap, 'core/Services/PushService.php');
 
+// ------------------------------------------------------------- client push
+
+$pwaJs = (string)file_get_contents($root . '/assets/js/pwa.js');
+
+// Safari ties Notification.requestPermission() to user activation, and
+// activation does not survive an await. The opt-in card must therefore hand
+// its already-fetched config to enablePush() so the prompt fires on the tap;
+// fetching inside the handler makes the prompt silently never appear on iOS.
+checkContains('enablePush accepts a preloaded config', $pwaJs, 'function enablePush(preloadedConfig)');
+checkContains('opt-in card passes its config through', $pwaJs, 'enablePush(config)');
+
+// A pruned or rotated subscription leaves permission granted with nothing
+// registered server-side, and nothing would ever prompt again.
+checkContains('silent re-subscribe path exists', $pwaJs, 'function repairPushSubscription');
+
 // -------------------------------------------------------- service worker
 
 $sw = (string)file_get_contents($root . '/sw.js');

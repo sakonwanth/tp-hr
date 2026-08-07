@@ -280,40 +280,76 @@
         return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
     }
 
+    /** Subscribe and hand the subscription to the server. Permission must already be granted. */
+    function subscribeWith(config) {
+        return navigator.serviceWorker.ready.then(function (registration) {
+            return registration.pushManager.getSubscription().then(function (existing) {
+                if (existing) return existing;
+                return registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(config.public_key),
+                });
+            });
+        }).then(function (subscription) {
+            return postPush({ action: 'subscribe', subscription: subscription.toJSON() });
+        });
+    }
+
     /**
-     * Must be called from a user gesture — iOS rejects a permission prompt
-     * that isn't tied to a tap.
+     * Must be called from a user gesture. Safari ties requestPermission() to
+     * user activation, and activation does not survive an await — so when the
+     * caller already fetched the config (the opt-in card does), it passes it
+     * in and the prompt fires synchronously on the tap. Fetching first would
+     * make the prompt silently never appear on iOS.
      */
-    function enablePush() {
+    function enablePush(preloadedConfig) {
         if (!pushSupported()) {
             return Promise.resolve({ success: false, reason: 'unsupported' });
         }
 
-        return pushConfig().then(function (config) {
+        function withConfig(config) {
             if (!config || !config.enabled || !config.public_key) {
-                return { success: false, reason: 'not-configured' };
+                return Promise.resolve({ success: false, reason: 'not-configured' });
             }
-
             return Notification.requestPermission().then(function (permission) {
                 if (permission !== 'granted') {
                     return { success: false, reason: permission };
                 }
-
-                return navigator.serviceWorker.ready.then(function (registration) {
-                    return registration.pushManager.getSubscription().then(function (existing) {
-                        if (existing) return existing;
-                        return registration.pushManager.subscribe({
-                            userVisibleOnly: true,
-                            applicationServerKey: urlBase64ToUint8Array(config.public_key),
-                        });
-                    });
-                }).then(function (subscription) {
-                    return postPush({ action: 'subscribe', subscription: subscription.toJSON() });
-                });
+                return subscribeWith(config);
             });
-        }).catch(function () {
+        }
+
+        var run = preloadedConfig
+            ? withConfig(preloadedConfig)
+            : pushConfig().then(withConfig);
+
+        return run.catch(function () {
             return { success: false, reason: 'error' };
         });
+    }
+
+    /**
+     * Permission already granted, but the server has no subscription for this
+     * install — the row was pruned after repeated delivery failures, or the
+     * browser rotated the endpoint. Nothing prompts the user again in that
+     * state, so notifications would stay silently dead forever. Re-subscribe
+     * quietly; no permission prompt is involved.
+     */
+    function repairPushSubscription() {
+        if (!pushSupported() || Notification.permission !== 'granted') return;
+
+        // Once per tab session — this runs on every page view otherwise.
+        try {
+            if (window.sessionStorage.getItem('tp-hr:push-checked')) return;
+            window.sessionStorage.setItem('tp-hr:push-checked', '1');
+        } catch (err) {
+            /* private mode — checking every view is still harmless */
+        }
+
+        pushConfig().then(function (config) {
+            if (!config || !config.enabled || !config.public_key || config.subscribed) return;
+            return subscribeWith(config);
+        }).catch(function () { /* best effort */ });
     }
 
     function disablePush() {
@@ -334,6 +370,7 @@
     window.tpHrPush = {
         supported: pushSupported,
         enable: enablePush,
+        repair: repairPushSubscription,
         disable: disablePush,
         config: pushConfig,
     };
@@ -394,7 +431,9 @@
             allow.addEventListener('click', function () {
                 allow.disabled = true;
                 allow.textContent = 'กำลังเปิด…';
-                enablePush().then(function () { card.remove(); });
+                // config is already in hand, so requestPermission() runs on the
+                // tap itself — see enablePush().
+                enablePush(config).then(function () { card.remove(); });
             });
 
             var later = document.createElement('button');
@@ -432,6 +471,7 @@
         // Only on a logged-in page — the meta tag is rendered by templates/header.php.
         if (csrfToken()) {
             window.setTimeout(maybeOfferPush, 4000);
+            window.setTimeout(repairPushSubscription, 6000);
         }
     }
 
