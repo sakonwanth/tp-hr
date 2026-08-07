@@ -1,0 +1,19 @@
+node_modules/
+
+# Xcode
+ios/App/build/
+ios/App/DerivedData/
+ios/App/App.xcodeproj/xcuserdata/
+ios/App/App.xcodeproj/project.xcworkspace/xcuserdata/
+ios/App/App.xcworkspace/xcuserdata/
+ios/App/.swiftpm/
+*.xcuserstate
+
+# Build output — never commit a signed build
+build/
+*.ipa
+*.dSYM.zip
+ExportOptions.plist
+
+# Capacitor copies www/ here on every `cap sync`
+ios/App/App/public/

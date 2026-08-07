@@ -1,0 +1,22 @@
+{
+  "name": "tp-hr-ios",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Capacitor wrapper around hr.tp-asset.com for Ad Hoc distribution",
+  "license": "proprietary",
+  "type": "commonjs",
+  "scripts": {
+    "sync": "cap sync ios",
+    "open": "cap open ios",
+    "build:sim": "cap sync ios && xcodebuild -project ios/App/App.xcodeproj -scheme App -sdk iphonesimulator -configuration Debug -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build",
+    "archive": "cap sync ios && xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release -archivePath build/App.xcarchive archive",
+    "export:adhoc": "xcodebuild -exportArchive -archivePath build/App.xcarchive -exportPath build/ipa -exportOptionsPlist ExportOptions.plist"
+  },
+  "dependencies": {
+    "@capacitor/core": "^8.5.0",
+    "@capacitor/ios": "^8.5.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.0"
+  }
+}

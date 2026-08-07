@@ -18,6 +18,9 @@ RewriteRule ^api/v1/(.+)$       api/v1/index.php [L,QSA]
 RewriteRule ^cron/ - [F,L]
 RewriteRule ^scripts/ - [F,L]
 
+# iOS wrapper sources (Capacitor/Xcode) — build inputs, never web content
+RewriteRule ^ios-app/ - [F,L]
+
 # Redirect to HTTPS (uncomment in production)
 # RewriteCond %{HTTPS} off
 # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]

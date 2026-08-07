@@ -1,0 +1,21 @@
+{
+  "appId": "com.tpasset.tphr",
+  "appName": "TP-HR",
+  "webDir": "www",
+  "server": {
+    "url": "https://hr.tp-asset.com",
+    "cleartext": false,
+    "allowNavigation": [
+      "hr.tp-asset.com",
+      "crm.tp-asset.com",
+      "access.line.me",
+      "*.line.me"
+    ]
+  },
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#0f172a",
+    "scrollEnabled": true,
+    "limitsNavigationsToAppBoundDomains": false
+  }
+}
