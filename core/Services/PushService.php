@@ -19,6 +19,14 @@ class PushService
     /** Consecutive failures before a subscription is considered dead. */
     private const MAX_FAILURES = 5;
 
+    /**
+     * Installs kept per user. A few phones plus a desktop browser is normal;
+     * beyond that it is churn, or an authenticated client posting fabricated
+     * endpoints. Oldest rows are dropped rather than refusing the newest
+     * device, so a real re-install always wins.
+     */
+    private const MAX_SUBSCRIPTIONS_PER_USER = 10;
+
     private PDO $pdo;
     private ?bool $available = null;
 
@@ -108,7 +116,7 @@ class PushService
                 last_failed_at = NULL'
         );
 
-        return $stmt->execute([
+        $ok = $stmt->execute([
             'user_id'       => $userId,
             'endpoint'      => $endpoint,
             'endpoint_hash' => hash('sha256', $endpoint),
@@ -116,6 +124,41 @@ class PushService
             'auth_secret'   => $auth,
             'user_agent'    => $userAgent !== null ? mb_substr($userAgent, 0, 255) : null,
         ]);
+
+        if ($ok) {
+            $this->trimToLimit($userId);
+        }
+
+        return $ok;
+    }
+
+    /** Keep only the newest MAX_SUBSCRIPTIONS_PER_USER rows for a user. */
+    private function trimToLimit(int $userId): void
+    {
+        try {
+            // LIMIT is not allowed in a subquery on the same table in MySQL,
+            // so pick the survivors first and delete by id.
+            $stmt = $this->pdo->prepare(
+                'SELECT id FROM hr_push_subscriptions
+                 WHERE user_id = :user_id
+                 ORDER BY created_at DESC, id DESC
+                 LIMIT ' . self::MAX_SUBSCRIPTIONS_PER_USER
+            );
+            $stmt->execute(['user_id' => $userId]);
+            $keep = $stmt->fetchAll(PDO::FETCH_COLUMN) ?: [];
+
+            if (count($keep) < self::MAX_SUBSCRIPTIONS_PER_USER) {
+                return;
+            }
+
+            $in = implode(',', array_fill(0, count($keep), '?'));
+            $delete = $this->pdo->prepare(
+                "DELETE FROM hr_push_subscriptions WHERE user_id = ? AND id NOT IN ($in)"
+            );
+            $delete->execute(array_merge([$userId], $keep));
+        } catch (Throwable $e) {
+            $this->logFailure($e);
+        }
     }
 
     /**
