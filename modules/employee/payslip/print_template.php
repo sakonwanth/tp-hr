@@ -336,6 +336,58 @@ header('Content-Type: text/html; charset=utf-8');
         .link-back { margin-left: 12px; color: #1a365d; font-weight: 500; text-decoration: none; }
         .link-back:hover { text-decoration: underline; }
 
+        /* ------------------------------------------------------------------
+           Phone screens only. This document is an official record and its
+           printed form must not change, so nothing here touches @media print
+           or the markup — it only relaxes the A4 layout for reading in the
+           app, where 375px of width was breaking Thai words mid-syllable
+           ("บริษัท ทีพี- / แอสเสท ดี / เวลลอปเม้น / ท์ จำกัด").
+        ------------------------------------------------------------------ */
+        @media screen and (max-width: 640px) {
+            .page { padding: 16px 16px 24px; }
+
+            /* Logo beside a right-aligned block leaves ~100px for the company
+               name. Stacked, it gets the full width. */
+            .doc-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+            .doc-header-right { text-align: left; }
+            .doc-header-logo img { height: 56px; }
+
+            /* Label/value side by side gives the label a 28% column, far too
+               narrow for "รหัสพนักงาน / Emp.ID". Stack them instead. */
+            .info-table,
+            .info-table tbody,
+            .info-table tr,
+            .info-table th,
+            .info-table td { display: block; width: auto; }
+
+            .info-table tr { border-bottom: 1px solid #e2e8f0; }
+            .info-table tr:last-child { border-bottom: 0; }
+
+            .info-table th {
+                width: auto;
+                border: 0;
+                padding: 10px 12px 2px;
+                font-size: 12px;
+                background: transparent;
+            }
+            .info-table td {
+                border: 0;
+                padding: 0 12px 10px;
+                font-size: 14px;
+                font-weight: 500;
+            }
+
+            /* Money tables stay tabular — the number column is the point —
+               but tighten so the figures are not crushed. */
+            .amount-table th,
+            .amount-table td { padding: 8px 10px; font-size: 12.5px; }
+
+            .doc-title { font-size: 17px; }
+        }
         @media print {
             @page { size: A4 portrait; margin: 12mm 10mm; }
             html, body {
