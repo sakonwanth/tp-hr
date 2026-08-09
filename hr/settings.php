@@ -411,12 +411,12 @@ foreach ($workShifts as $_ws) {
                 <?php if (!empty($holidays)): ?>
                 <a href="/holidays_print.php?year=<?php echo (int)$holidayYear; ?>&amp;auto=pdf"
                    target="_blank" rel="noopener noreferrer"
-                   class="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[var(--tp-ios-card-radius)] border border-white/12 bg-white/[0.06] px-4 text-sm font-semibold text-white hover:bg-white/12 touch-manipulation">
+                   class="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[var(--tp-ios-card-radius)] border border-white/10 bg-white/[0.06] px-4 text-sm font-semibold text-white hover:bg-white/10 touch-manipulation">
                     <i class="fas fa-file-pdf" aria-hidden="true"></i>PDF
                 </a>
                 <a href="/holidays_print.php?year=<?php echo (int)$holidayYear; ?>&amp;auto=png"
                    target="_blank" rel="noopener noreferrer"
-                   class="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[var(--tp-ios-card-radius)] border border-white/12 bg-white/[0.06] px-4 text-sm font-semibold text-white hover:bg-white/12 touch-manipulation">
+                   class="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[var(--tp-ios-card-radius)] border border-white/10 bg-white/[0.06] px-4 text-sm font-semibold text-white hover:bg-white/10 touch-manipulation">
                     <i class="fas fa-file-image" aria-hidden="true"></i>PNG
                 </a>
                 <?php endif; ?>

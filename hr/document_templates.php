@@ -472,7 +472,7 @@ include dirname(__DIR__) . '/templates/header.php';
                     </div>
                     <div class="md:col-span-2 p-3 rounded-[var(--tp-ios-card-radius)] bg-indigo-500/10 border border-indigo-500/30">
                         <label class="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" name="doc_show_esignature" value="1" <?php echo !empty($settings['doc_show_esignature']) ? 'checked' : ''; ?> class="form-checkbox h-4 w-4 text-indigo-500 rounded">
+                            <input type="checkbox" name="doc_show_esignature" value="1" <?php echo !empty($settings['doc_show_esignature']) ? 'checked' : ''; ?> class="h-4 w-4 accent-indigo-500 rounded">
                             <span class="ml-2 text-sm text-white/90">เปิดใช้ลายเซ็นอิเล็กทรอนิกส์ทั่วทั้งระบบ <span class="text-white/50 text-xs">(แสดงภาพลายเซ็นของผู้ลงนามในเอกสาร)</span></span>
                         </label>
                     </div>
@@ -515,7 +515,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 <div class="bg-white rounded p-2 mb-2 flex justify-center">
                     <img src="<?php echo htmlspecialchars($sc['signature_image']); ?>" alt="signature" style="max-height:60px;">
                 </div>
-                <button type="button" class="text-red-300 hover:text-red-200 text-xs touch-manipulation"
+                <button type="button" class="text-red-300 hover:text-red-200 text-xs touch-manipulation min-h-[48px] inline-flex items-center gap-1 px-2 touch-manipulation"
                     data-dt-sig-user="<?php echo (int)$sc['id']; ?>"
                     onclick="dtOpenRemoveSignatureModal(this)">
                     <i class="fas fa-trash mr-1" aria-hidden="true"></i>ลบลายเซ็น
@@ -741,11 +741,11 @@ if (!empty($editRow['id'])) {
             </div>
             <div class="md:col-span-3 flex gap-6 pt-2">
                 <label class="inline-flex items-center cursor-pointer">
-                    <input type="checkbox" name="requires_approval" value="1" <?php echo !empty($editRow['requires_approval']) ? 'checked' : ''; ?> class="form-checkbox h-4 w-4 text-amber-500 rounded">
+                    <input type="checkbox" name="requires_approval" value="1" <?php echo !empty($editRow['requires_approval']) ? 'checked' : ''; ?> class="h-4 w-4 accent-amber-500 rounded">
                     <span class="ml-2 text-sm text-white/80">ต้องขออนุมัติก่อนจัดทำ</span>
                 </label>
                 <label class="inline-flex items-center cursor-pointer">
-                    <input type="checkbox" name="is_active" value="1" <?php echo (!isset($editRow['is_active']) || !empty($editRow['is_active'])) ? 'checked' : ''; ?> class="form-checkbox h-4 w-4 text-green-500 rounded">
+                    <input type="checkbox" name="is_active" value="1" <?php echo (!isset($editRow['is_active']) || !empty($editRow['is_active'])) ? 'checked' : ''; ?> class="h-4 w-4 accent-green-500 rounded">
                     <span class="ml-2 text-sm text-white/80">เปิดใช้งานเอกสาร</span>
                 </label>
             </div>
@@ -764,11 +764,11 @@ if (!empty($editRow['id'])) {
         <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="md:col-span-2 flex gap-6">
                 <label class="inline-flex items-center cursor-pointer">
-                    <input type="checkbox" name="layout[header][show_logo]" value="1" <?php echo !empty($L['header']['show_logo']) ? 'checked' : ''; ?> class="form-checkbox h-4 w-4 text-blue-500 rounded">
+                    <input type="checkbox" name="layout[header][show_logo]" value="1" <?php echo !empty($L['header']['show_logo']) ? 'checked' : ''; ?> class="h-4 w-4 accent-blue-500 rounded">
                     <span class="ml-2 text-sm text-white/80">แสดงโลโก้บริษัท</span>
                 </label>
                 <label class="inline-flex items-center cursor-pointer">
-                    <input type="checkbox" name="layout[header][show_company_address]" value="1" <?php echo !empty($L['header']['show_company_address']) ? 'checked' : ''; ?> class="form-checkbox h-4 w-4 text-blue-500 rounded">
+                    <input type="checkbox" name="layout[header][show_company_address]" value="1" <?php echo !empty($L['header']['show_company_address']) ? 'checked' : ''; ?> class="h-4 w-4 accent-blue-500 rounded">
                     <span class="ml-2 text-sm text-white/80">แสดงที่อยู่บริษัท</span>
                 </label>
             </div>
@@ -794,7 +794,7 @@ if (!empty($editRow['id'])) {
         </div>
         <div class="p-5 space-y-4">
             <label class="flex items-start gap-2 p-3 rounded bg-amber-500/10 border border-amber-500/30 cursor-pointer">
-                <input type="checkbox" name="layout[body][use_custom_body]" value="1" <?php echo !empty($L['body']['use_custom_body']) ? 'checked' : ''; ?> class="form-checkbox h-4 w-4 text-amber-500 rounded mt-0.5">
+                <input type="checkbox" name="layout[body][use_custom_body]" value="1" <?php echo !empty($L['body']['use_custom_body']) ? 'checked' : ''; ?> class="h-4 w-4 accent-amber-500 rounded mt-0.5">
                 <div>
                     <span class="text-sm text-white/90 font-medium">ใช้เนื้อหาแบบกำหนดเอง (Custom Body)</span>
                     <p class="text-white/60 text-xs mt-0.5">เมื่อเปิด: ระบบจะใช้ข้อความด้านล่างแทนเค้าโครงมาตรฐาน — สำหรับเอกสารมาตรฐาน (CERT_WORK, CERT_SALARY, TAX_50TAWI) แนะนำให้ปิดเพื่อใช้ตารางและรูปแบบที่ออกแบบไว้แล้ว</p>
@@ -859,11 +859,11 @@ if (!empty($editRow['id'])) {
             </div>
             <div class="flex flex-wrap gap-6">
                 <label class="inline-flex items-center cursor-pointer">
-                    <input type="checkbox" name="layout[signatures][show_two_signers]" value="1" <?php echo !empty($L['signatures']['show_two_signers']) ? 'checked' : ''; ?> class="form-checkbox h-4 w-4 text-indigo-500 rounded">
+                    <input type="checkbox" name="layout[signatures][show_two_signers]" value="1" <?php echo !empty($L['signatures']['show_two_signers']) ? 'checked' : ''; ?> class="h-4 w-4 accent-indigo-500 rounded">
                     <span class="ml-2 text-sm text-white/80">แสดง 2 ผู้ลงนาม (ประธาน + CEO)</span>
                 </label>
                 <label class="inline-flex items-center cursor-pointer">
-                    <input type="checkbox" name="layout[signatures][show_esignature]" value="1" <?php echo !empty($L['signatures']['show_esignature']) ? 'checked' : ''; ?> class="form-checkbox h-4 w-4 text-indigo-500 rounded">
+                    <input type="checkbox" name="layout[signatures][show_esignature]" value="1" <?php echo !empty($L['signatures']['show_esignature']) ? 'checked' : ''; ?> class="h-4 w-4 accent-indigo-500 rounded">
                     <span class="ml-2 text-sm text-white/80">แสดงภาพลายเซ็นอิเล็กทรอนิกส์เหนือเส้นลงนาม</span>
                 </label>
             </div>
@@ -899,11 +899,11 @@ if (!empty($editRow['id'])) {
         <div class="p-5 space-y-4">
             <div class="flex flex-wrap gap-6">
                 <label class="inline-flex items-center cursor-pointer">
-                    <input type="checkbox" name="layout[footer][show_qr_verify]" value="1" <?php echo !empty($L['footer']['show_qr_verify']) ? 'checked' : ''; ?> class="form-checkbox h-4 w-4 text-rose-500 rounded">
+                    <input type="checkbox" name="layout[footer][show_qr_verify]" value="1" <?php echo !empty($L['footer']['show_qr_verify']) ? 'checked' : ''; ?> class="h-4 w-4 accent-rose-500 rounded">
                     <span class="ml-2 text-sm text-white/80">แสดง QR Code ตรวจสอบเอกสาร</span>
                 </label>
                 <label class="inline-flex items-center cursor-pointer">
-                    <input type="checkbox" name="layout[footer][show_seal_area]" value="1" <?php echo !empty($L['footer']['show_seal_area']) ? 'checked' : ''; ?> class="form-checkbox h-4 w-4 text-rose-500 rounded">
+                    <input type="checkbox" name="layout[footer][show_seal_area]" value="1" <?php echo !empty($L['footer']['show_seal_area']) ? 'checked' : ''; ?> class="h-4 w-4 accent-rose-500 rounded">
                     <span class="ml-2 text-sm text-white/80">แสดงพื้นที่ประทับตราบริษัท</span>
                 </label>
             </div>

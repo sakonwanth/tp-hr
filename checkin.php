@@ -336,7 +336,7 @@ require_once __DIR__ . '/templates/header.php';
                         </div>
                         <?php endif; ?>
                         <?php if (($user['work_mode'] ?? 'OFFICE') === 'WFH'): ?>
-                        <div class="inline-flex items-center gap-2 min-h-[48px] px-3 py-1.5 rounded-[var(--tp-ios-card-radius)] bg-emerald-500/23">
+                        <div class="inline-flex items-center gap-2 min-h-[48px] px-3 py-1.5 rounded-[var(--tp-ios-card-radius)] bg-emerald-500/25">
                             <i class="fas fa-home text-emerald-300 text-2xl" aria-hidden="true"></i>
                             <span class="text-emerald-200 text-sm font-semibold">WFH</span>
                         </div>
@@ -478,7 +478,7 @@ require_once __DIR__ . '/templates/header.php';
                 </div>
                 <div class="space-y-5">
                     <?php if ($ls_today_row): ?>
-                    <div class="rounded-[var(--tp-ios-card-radius)] bg-amber-500/13 p-5 shadow-[var(--tp-surface-well-inset)]">
+                    <div class="rounded-[var(--tp-ios-card-radius)] bg-amber-500/15 p-5 shadow-[var(--tp-surface-well-inset)]">
                         <p class="text-amber-300 text-xs font-semibold uppercase tracking-wide mb-1">
                             <i class="fas fa-sun mr-1"></i>วันนี้ · <?php echo date('d M', strtotime($ls_today)); ?>
                         </p>
@@ -493,13 +493,13 @@ require_once __DIR__ . '/templates/header.php';
                         <p class="text-white/70 text-xs mt-1 line-clamp-2"><?php echo htmlspecialchars($ls_today_row['planned_reason']); ?></p>
                         <?php endif; ?>
                         <button type="button" onclick="cancelLateStart('<?php echo $ls_today; ?>')"
-                                class="mt-3 w-full min-h-[52px] py-2 rounded-[var(--tp-ios-card-radius)] bg-red-500/17 hover:bg-red-500/25 text-red-300 text-sm font-semibold transition-colors touch-manipulation shadow-[var(--tp-surface-well-inset)]">
+                                class="mt-3 w-full min-h-[52px] py-2 rounded-[var(--tp-ios-card-radius)] bg-red-500/15 hover:bg-red-500/25 text-red-300 text-sm font-semibold transition-colors touch-manipulation shadow-[var(--tp-surface-well-inset)]">
                             <i class="fas fa-times-circle mr-1"></i>ยกเลิกการแจ้ง
                         </button>
                     </div>
                     <?php endif; ?>
                     <?php if ($ls_tomorrow_row): ?>
-                    <div class="rounded-[var(--tp-ios-card-radius)] bg-sky-500/13 p-5 shadow-[var(--tp-surface-well-inset)]">
+                    <div class="rounded-[var(--tp-ios-card-radius)] bg-sky-500/15 p-5 shadow-[var(--tp-surface-well-inset)]">
                         <p class="text-blue-300 text-xs font-semibold uppercase tracking-wide mb-1">
                             <i class="fas fa-moon mr-1"></i>พรุ่งนี้ · <?php echo date('d M', strtotime($ls_tomorrow)); ?>
                         </p>
@@ -514,7 +514,7 @@ require_once __DIR__ . '/templates/header.php';
                         <p class="text-white/70 text-xs mt-1 line-clamp-2"><?php echo htmlspecialchars($ls_tomorrow_row['planned_reason']); ?></p>
                         <?php endif; ?>
                         <button type="button" onclick="cancelLateStart('<?php echo $ls_tomorrow; ?>')"
-                                class="mt-3 w-full min-h-[52px] py-2 rounded-[var(--tp-ios-card-radius)] bg-red-500/17 hover:bg-red-500/25 text-red-300 text-sm font-semibold transition-colors touch-manipulation shadow-[var(--tp-surface-well-inset)]">
+                                class="mt-3 w-full min-h-[52px] py-2 rounded-[var(--tp-ios-card-radius)] bg-red-500/15 hover:bg-red-500/25 text-red-300 text-sm font-semibold transition-colors touch-manipulation shadow-[var(--tp-surface-well-inset)]">
                             <i class="fas fa-times-circle mr-1"></i>ยกเลิกการแจ้ง
                         </button>
                     </div>
@@ -529,7 +529,7 @@ require_once __DIR__ . '/templates/header.php';
             </div>
             <?php else: ?>
             <button type="button" onclick="openLateStartModal()"
-                    class="tp-checkin-late-cta w-full min-h-[64px] rounded-[var(--tp-ios-card-radius)] bg-amber-500/20 hover:bg-amber-500/26 p-5 text-left transition-colors touch-manipulation flex items-center gap-4 shadow-[var(--tp-surface-well-inset)]">
+                    class="tp-checkin-late-cta w-full min-h-[64px] rounded-[var(--tp-ios-card-radius)] bg-amber-500/20 hover:bg-amber-500/25 p-5 text-left transition-colors touch-manipulation flex items-center gap-4 shadow-[var(--tp-surface-well-inset)]">
                     <div class="shrink-0 w-12 h-12 rounded-[var(--tp-ios-card-radius)] bg-amber-500 flex items-center justify-center">
                         <i class="fas fa-clock text-white text-2xl" aria-hidden="true"></i>
                     </div>
@@ -615,7 +615,7 @@ require_once __DIR__ . '/templates/header.php';
                         $attDate = $att['attendance_date'];
                         $hol = $holidayMap[$attDate] ?? null;
                     ?>
-                    <div class="p-3 min-h-[54px] rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/8 flex items-center justify-between gap-2">
+                    <div class="p-3 min-h-[54px] rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 flex items-center justify-between gap-2">
                         <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-2">
                                 <p class="text-white text-sm truncate">
@@ -810,7 +810,7 @@ require_once __DIR__ . '/templates/header.php';
         </div>
         
         <!-- Location Info -->
-        <div class="p-3 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/8 mb-6" id="location-info">
+        <div class="p-3 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 mb-6" id="location-info">
             <div class="flex items-center gap-2 text-white/70">
                 <i class="fas fa-map-marker-alt text-red-400"></i>
                 <span id="location-text">กำลังระบุตำแหน่ง...</span>

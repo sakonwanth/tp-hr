@@ -129,7 +129,7 @@ $defaultOffLabel = $dayNames[(int)($summary['default_day_off'] ?? 0)] ?? '-';
         <h3 class="text-white/80 text-sm font-semibold mb-3">สิทธิ์วันลาคงเหลือ (ปี <?php echo (int)date('Y', strtotime($summary['period_start'] ?? date('Y-m-d'))) + 543; ?>)</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <?php foreach ($summary['leave_entitlements'] as $ent): ?>
-            <div class="flex items-center justify-between gap-2 rounded-[var(--tp-ios-card-radius)] bg-black/20 border border-white/8 px-4 py-2.5 min-w-0">
+            <div class="flex items-center justify-between gap-2 rounded-[var(--tp-ios-card-radius)] bg-black/20 border border-white/10 px-4 py-2.5 min-w-0">
                 <span class="text-white/80 text-sm truncate"><?php echo htmlspecialchars($ent['name'] ?? ''); ?></span>
                 <span class="text-white font-semibold tabular-nums shrink-0"><?php echo number_format((float)$ent['remaining_days'], 1); ?> วัน</span>
             </div>

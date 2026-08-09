@@ -282,19 +282,19 @@ $dayNamesShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
                 </div>
 
                 <div class="grid grid-cols-4 gap-2 mt-4 min-w-0">
-                    <div class="rounded-[var(--tp-ios-card-radius)] bg-black/20 border border-white/8 px-2 py-2 min-w-0">
+                    <div class="rounded-[var(--tp-ios-card-radius)] bg-black/20 border border-white/10 px-2 py-2 min-w-0">
                         <div class="text-[11px] text-white/50">เข้า</div>
                         <div class="text-white font-semibold"><?php echo htmlspecialchars($checkIn); ?></div>
                     </div>
-                    <div class="rounded-[var(--tp-ios-card-radius)] bg-black/20 border border-white/8 px-2 py-2 min-w-0">
+                    <div class="rounded-[var(--tp-ios-card-radius)] bg-black/20 border border-white/10 px-2 py-2 min-w-0">
                         <div class="text-[11px] text-white/50">ออก</div>
                         <div class="text-white font-semibold"><?php echo htmlspecialchars($checkOut); ?></div>
                     </div>
-                    <div class="rounded-[var(--tp-ios-card-radius)] bg-black/20 border border-white/8 px-2 py-2 min-w-0">
+                    <div class="rounded-[var(--tp-ios-card-radius)] bg-black/20 border border-white/10 px-2 py-2 min-w-0">
                         <div class="text-[11px] text-white/50">ชม.</div>
                         <div class="text-white font-semibold"><?php echo htmlspecialchars($work); ?></div>
                     </div>
-                    <div class="rounded-[var(--tp-ios-card-radius)] bg-black/20 border border-white/8 px-2 py-2 min-w-0">
+                    <div class="rounded-[var(--tp-ios-card-radius)] bg-black/20 border border-white/10 px-2 py-2 min-w-0">
                         <div class="text-[11px] text-white/50">OT</div>
                         <div class="text-emerald-300 font-semibold"><?php echo htmlspecialchars($ot); ?></div>
                     </div>

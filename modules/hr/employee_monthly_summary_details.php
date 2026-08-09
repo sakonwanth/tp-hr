@@ -52,7 +52,7 @@ $headClass = $panelLayout
     : ($compact ? 'px-4 py-3 text-sm font-semibold bg-white/[0.03] border-b border-white/10' : 'px-5 py-4 text-sm font-semibold bg-white/[0.03] border-b border-white/10');
 $listClass = 'divide-y divide-white/[0.06]';
 $rowPad = $panelLayout ? 'px-5 py-4' : ($compact ? 'px-4 py-3.5' : 'px-5 py-4');
-$actionBtn = 'inline-flex items-center justify-center gap-1.5 min-h-[48px] px-3 py-2 rounded-[var(--tp-ios-card-radius)] text-xs font-medium bg-violet-500/12 hover:bg-violet-500/22 text-violet-200 border border-violet-500/25 touch-manipulation shrink-0 whitespace-nowrap';
+$actionBtn = 'inline-flex items-center justify-center gap-1.5 min-h-[48px] px-3 py-2 rounded-[var(--tp-ios-card-radius)] text-xs font-medium bg-violet-500/10 hover:bg-violet-500/20 text-violet-200 border border-violet-500/25 touch-manipulation shrink-0 whitespace-nowrap';
 $bulkBtn = 'inline-flex items-center justify-center gap-1 min-h-[48px] px-2.5 py-1.5 rounded-[var(--tp-ios-card-radius)] text-[11px] sm:text-xs font-medium touch-manipulation whitespace-nowrap';
 $bulkGroupId = static fn(string $kind): string => 'bulk-' . $kind . '-' . $employeeId;
 
@@ -63,11 +63,11 @@ $renderBulkToolbar = static function (string $kind, string $label, int $count) u
     $group = $bulkGroupId($kind);
     ?>
     <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 shrink-0">
-        <button type="button" class="<?php echo $bulkBtn; ?> bg-white/8 hover:bg-white/15 text-white/75 border border-white/10"
+        <button type="button" class="<?php echo $bulkBtn; ?> bg-white/10 hover:bg-white/15 text-white/75 border border-white/10"
                 data-bulk-action="select-all" data-group="<?php echo htmlspecialchars($group); ?>">เลือกทั้งหมด</button>
-        <button type="button" class="<?php echo $bulkBtn; ?> bg-white/8 hover:bg-white/15 text-white/75 border border-white/10"
+        <button type="button" class="<?php echo $bulkBtn; ?> bg-white/10 hover:bg-white/15 text-white/75 border border-white/10"
                 data-bulk-action="clear-all" data-group="<?php echo htmlspecialchars($group); ?>">ล้าง</button>
-        <button type="button" class="<?php echo $bulkBtn; ?> bg-violet-500/18 hover:bg-violet-500/28 text-violet-100 border border-violet-500/30"
+        <button type="button" class="<?php echo $bulkBtn; ?> bg-violet-500/20 hover:bg-violet-500/30 text-violet-100 border border-violet-500/30"
                 data-bulk-action="edit-selected" data-group="<?php echo htmlspecialchars($group); ?>"
                 data-user-id="<?php echo (int)$employeeId; ?>" data-label="<?php echo htmlspecialchars($label); ?>">
             แก้ที่เลือก (<span class="emp-bulk-count tabular-nums" data-group="<?php echo htmlspecialchars($group); ?>">0</span>)
@@ -242,7 +242,7 @@ $renderDayRow = static function (
                 <p class="text-white/45 text-sm mt-3 leading-relaxed"><?php echo htmlspecialchars($lr['reason']); ?></p>
                 <?php endif; ?>
                 <?php if ($showActions && ($lr['status'] ?? '') === 'PENDING'): ?>
-                <a href="/hr/leaves.php?status=pending" class="inline-flex items-center gap-1.5 mt-4 min-h-[48px] px-3 py-2 rounded-[var(--tp-ios-card-radius)] text-xs font-medium bg-amber-500/12 hover:bg-amber-500/22 text-amber-200 border border-amber-500/25 touch-manipulation">
+                <a href="/hr/leaves.php?status=pending" class="inline-flex items-center gap-1.5 mt-4 min-h-[48px] px-3 py-2 rounded-[var(--tp-ios-card-radius)] text-xs font-medium bg-amber-500/10 hover:bg-amber-500/20 text-amber-200 border border-amber-500/25 touch-manipulation">
                     <i class="fas fa-check text-[11px]" aria-hidden="true"></i>ไปอนุมัติใบลา
                 </a>
                 <?php endif; ?>

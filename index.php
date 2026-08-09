@@ -282,7 +282,7 @@ require_once __DIR__ . '/templates/header.php';
                             : 0;
                         $barColor = $percentage > 50 ? 'bg-emerald-500' : ($percentage > 20 ? 'bg-amber-500' : 'bg-red-500');
                     ?>
-                    <div class="bg-slate-800/50 rounded-[var(--tp-ios-card-radius)] p-5 border border-white/6">
+                    <div class="bg-slate-800/50 rounded-[var(--tp-ios-card-radius)] p-5 border border-white/5">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-white font-medium"><?php echo htmlspecialchars($leave['name']); ?></span>
                             <div class="flex items-center gap-1">
@@ -318,7 +318,7 @@ require_once __DIR__ . '/templates/header.php';
             </h2>
             <div class="space-y-3">
                 <?php foreach ($myData['pending_leaves'] as $leave): ?>
-                <div class="bg-slate-800/50 rounded-[var(--tp-ios-card-radius)] p-5 border border-white/6">
+                <div class="bg-slate-800/50 rounded-[var(--tp-ios-card-radius)] p-5 border border-white/5">
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-white font-medium"><?php echo htmlspecialchars($leave['leave_type_name']); ?></span>
                         <span class="badge badge-warning">รออนุมัติ</span>
@@ -346,7 +346,7 @@ require_once __DIR__ . '/templates/header.php';
             <?php if ($announcements): ?>
                 <div class="space-y-3">
                     <?php foreach ($announcements as $ann): ?>
-                    <div class="bg-slate-800/50 rounded-[var(--tp-ios-card-radius)] p-5 border border-white/6 hover:bg-slate-800/80 transition-colors cursor-pointer">
+                    <div class="bg-slate-800/50 rounded-[var(--tp-ios-card-radius)] p-5 border border-white/5 hover:bg-slate-800/80 transition-colors cursor-pointer">
                         <?php if ($ann['is_pinned']): ?>
                         <span class="inline-flex items-center text-xs text-red-400 mb-2">
                             <i class="fas fa-thumbtack mr-1"></i>
@@ -379,7 +379,7 @@ require_once __DIR__ . '/templates/header.php';
             </h2>
             <div class="space-y-2">
                 <?php if ($stats['pending_leaves'] > 0): ?>
-                <a href="/hr/leaves.php?status=pending" class="flex items-center justify-between min-h-[48px] p-3 rounded-[var(--tp-ios-card-radius)] bg-slate-800/50 hover:bg-primary-500/10 transition-colors group touch-manipulation border border-white/6">
+                <a href="/hr/leaves.php?status=pending" class="flex items-center justify-between min-h-[48px] p-3 rounded-[var(--tp-ios-card-radius)] bg-slate-800/50 hover:bg-primary-500/10 transition-colors group touch-manipulation border border-white/5">
                     <div class="flex items-center gap-3 min-w-0">
                         <div class="w-12 h-12 rounded-[var(--tp-ios-card-radius)] bg-amber-500/20 border border-amber-400/25 flex items-center justify-center shrink-0">
                             <i class="fas fa-calendar-times text-amber-400 text-xl" aria-hidden="true"></i>
@@ -394,7 +394,7 @@ require_once __DIR__ . '/templates/header.php';
                 <?php endif; ?>
                 
                 <?php if ($stats['pending_documents'] > 0): ?>
-                <a href="/hr/documents.php?status=pending" class="flex items-center justify-between min-h-[48px] p-3 rounded-[var(--tp-ios-card-radius)] bg-slate-800/50 hover:bg-primary-500/10 transition-colors group touch-manipulation border border-white/6">
+                <a href="/hr/documents.php?status=pending" class="flex items-center justify-between min-h-[48px] p-3 rounded-[var(--tp-ios-card-radius)] bg-slate-800/50 hover:bg-primary-500/10 transition-colors group touch-manipulation border border-white/5">
                     <div class="flex items-center gap-3 min-w-0">
                         <div class="w-12 h-12 rounded-[var(--tp-ios-card-radius)] bg-purple-500/20 border border-purple-400/25 flex items-center justify-center shrink-0">
                             <i class="fas fa-file-alt text-purple-400 text-xl" aria-hidden="true"></i>
@@ -415,7 +415,7 @@ require_once __DIR__ . '/templates/header.php';
                 </div>
                 <?php endif; ?>
 
-                <a href="/hr/employee_summaries.php" class="flex items-center justify-between min-h-[48px] p-3 rounded-[var(--tp-ios-card-radius)] bg-slate-800/50 hover:bg-primary-500/10 transition-colors group touch-manipulation border border-white/6 mt-2">
+                <a href="/hr/employee_summaries.php" class="flex items-center justify-between min-h-[48px] p-3 rounded-[var(--tp-ios-card-radius)] bg-slate-800/50 hover:bg-primary-500/10 transition-colors group touch-manipulation border border-white/5 mt-2">
                     <div class="flex items-center gap-3 min-w-0">
                         <div class="w-12 h-12 rounded-[var(--tp-ios-card-radius)] bg-blue-500/20 border border-blue-400/25 flex items-center justify-center shrink-0">
                             <i class="fas fa-chart-bar text-blue-400 text-xl" aria-hidden="true"></i>

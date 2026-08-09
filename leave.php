@@ -208,7 +208,7 @@ require_once __DIR__ . '/templates/header.php';
                             </span>
                         </div>
                         <div class="mt-3 grid grid-cols-2 gap-2">
-                            <div class="rounded-[var(--tp-ios-card-radius)] bg-black/20 border border-white/8 px-3 py-2">
+                            <div class="rounded-[var(--tp-ios-card-radius)] bg-black/20 border border-white/10 px-3 py-2">
                                 <div class="text-[11px] text-white/50">จำนวนวัน</div>
                                 <div class="text-white font-semibold"><?php echo number_format($leave['total_days'], 1); ?> วัน</div>
                             </div>
@@ -290,7 +290,7 @@ require_once __DIR__ . '/templates/header.php';
                 <div class="space-y-3">
                     <?php foreach (array_slice($leave_types, 0, 4) as $type): ?>
                     <a href="?action=request&type=<?php echo $type['id']; ?>" 
-                       class="flex min-h-[48px] items-center gap-3 p-3 rounded-[var(--tp-ios-card-radius)] bg-white/5 hover:bg-white/10 border border-white/8 transition-colors touch-manipulation">
+                       class="flex min-h-[48px] items-center gap-3 p-3 rounded-[var(--tp-ios-card-radius)] bg-white/5 hover:bg-white/10 border border-white/10 transition-colors touch-manipulation">
                         <div class="w-10 h-10 rounded-[var(--tp-ios-card-radius)] flex items-center justify-center shrink-0" 
                              style="background-color: <?php echo $type['color'] ?? '#6B7280'; ?>20">
                             <i class="fas fa-<?php echo $type['icon'] ?? 'calendar'; ?> text-xl" aria-hidden="true"
@@ -315,7 +315,7 @@ require_once __DIR__ . '/templates/header.php';
                 
                 <div class="space-y-3">
                     <?php foreach ($pending_requests as $req): ?>
-                    <div class="p-3 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/8">
+                    <div class="p-3 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10">
                         <div class="flex items-center justify-between mb-2">
                             <span class="px-2 py-1 text-xs rounded" style="background-color: <?php echo $req['color'] ?? '#6B7280'; ?>20; color: <?php echo $req['color'] ?? '#6B7280'; ?>">
                                 <?php echo htmlspecialchars($req['leave_type_name']); ?>
@@ -359,7 +359,7 @@ require_once __DIR__ . '/templates/header.php';
                 <?php if ($holidays): ?>
                 <div class="space-y-2">
                     <?php foreach ($holidays as $h): ?>
-                    <div class="flex items-center gap-3 p-2 rounded-[var(--tp-ios-card-radius)] hover:bg-white/5 border border-transparent hover:border-white/8">
+                    <div class="flex items-center gap-3 p-2 rounded-[var(--tp-ios-card-radius)] hover:bg-white/5 border border-transparent hover:border-white/10">
                         <div class="w-12 h-12 rounded-[var(--tp-ios-card-radius)] bg-red-500/20 flex flex-col items-center justify-center shrink-0">
                             <span class="text-red-400 text-xs"><?php echo date('M', strtotime($h['date'])); ?></span>
                             <span class="text-white font-bold"><?php echo date('j', strtotime($h['date'])); ?></span>

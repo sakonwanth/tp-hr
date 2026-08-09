@@ -4,7 +4,7 @@
 # Override: NATIVE_SHELL_CACHE=16 ./scripts/verify-native-shell-cache.sh
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-EXPECT="${NATIVE_SHELL_CACHE:-27}"
+EXPECT="${NATIVE_SHELL_CACHE:-28}"
 
 die() { echo "$*" >&2; exit 1; }
 
@@ -14,7 +14,7 @@ while IFS= read -r line; do
   if [[ ! "$line" =~ native-shell\.css\?v=${EXPECT} ]]; then
     bad+="$line"$'\n'
   fi
-done < <(grep -rn --include='*.php' --exclude-dir=.claude --exclude-dir=node_modules --exclude-dir=vendor 'native-shell\.css?v=' "$ROOT" 2>/dev/null || true)
+done < <(grep -rn --include='*.php' --exclude-dir=.claude --exclude-dir=node_modules --exclude-dir=vendor --exclude-dir=scripts --exclude-dir=tests 'native-shell\.css?v=' "$ROOT" 2>/dev/null || true)
 
 if [[ -n "$bad" ]]; then
   echo -n "$bad" >&2
@@ -33,11 +33,11 @@ while IFS= read -r line; do
   if [[ ! "$line" =~ app\.css\?v=${EXPECT} ]]; then
     bad_app+="$line"$'\n'
   fi
-done < <(grep -rn --include='*.php' --exclude-dir=.claude --exclude-dir=node_modules --exclude-dir=vendor 'assets/css/app\.css' "$ROOT" 2>/dev/null || true)
+done < <(grep -rn --include='*.php' --exclude-dir=.claude --exclude-dir=node_modules --exclude-dir=vendor --exclude-dir=scripts --exclude-dir=tests 'assets/css/app\.css' "$ROOT" 2>/dev/null || true)
 
 if [[ -n "$bad_app" ]]; then
   echo -n "$bad_app" >&2
   die "app.css: expected ?v=${EXPECT} on all loaders — it must match native-shell.css."
 fi
 
-echo "OK — app.css + native-shell.css both ?v=${EXPECT} — loaders: $(grep -r --include='*.php' --exclude-dir=.claude --exclude-dir=node_modules --exclude-dir=vendor -E 'assets/css/(app|native-shell)\.css\?v=' "$ROOT" 2>/dev/null | wc -l | tr -d ' ')"
+echo "OK — app.css + native-shell.css both ?v=${EXPECT} — loaders: $(grep -r --include='*.php' --exclude-dir=.claude --exclude-dir=node_modules --exclude-dir=vendor --exclude-dir=scripts --exclude-dir=tests -E 'assets/css/(app|native-shell)\.css\?v=' "$ROOT" 2>/dev/null | wc -l | tr -d ' ')"

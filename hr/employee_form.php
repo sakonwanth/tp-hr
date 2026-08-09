@@ -1254,7 +1254,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 <div class="education-row border border-white/10 rounded-[var(--tp-ios-card-radius)] p-5 mb-3" data-index="<?php echo $i; ?>">
                     <div class="flex justify-between items-start mb-3">
                         <span class="text-white/50 text-sm">ลำดับที่ <?php echo $i + 1; ?></span>
-                        <button type="button" onclick="this.closest('.education-row').remove()" class="text-red-400 hover:text-red-300 text-sm">
+                        <button type="button" onclick="this.closest('.education-row').remove()" class="text-red-400 hover:text-red-300 text-sm min-h-[48px] inline-flex items-center gap-1 px-2 touch-manipulation">
                             <i class="fas fa-trash mr-1"></i>ลบ
                         </button>
                     </div>
@@ -1322,7 +1322,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 <div class="wh-row border border-white/10 rounded-[var(--tp-ios-card-radius)] p-5 mb-3" data-index="<?php echo $i; ?>">
                     <div class="flex justify-between items-start mb-3">
                         <span class="text-white/50 text-sm">ลำดับที่ <?php echo $i + 1; ?></span>
-                        <button type="button" onclick="this.closest('.wh-row').remove()" class="text-red-400 hover:text-red-300 text-sm">
+                        <button type="button" onclick="this.closest('.wh-row').remove()" class="text-red-400 hover:text-red-300 text-sm min-h-[48px] inline-flex items-center gap-1 px-2 touch-manipulation">
                             <i class="fas fa-trash mr-1"></i>ลบ
                         </button>
                     </div>
@@ -1386,7 +1386,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 <div class="fam-row border border-white/10 rounded-[var(--tp-ios-card-radius)] p-5 mb-3" data-index="<?php echo $i; ?>">
                     <div class="flex justify-between items-start mb-3">
                         <span class="text-white/50 text-sm">ลำดับที่ <?php echo $i + 1; ?></span>
-                        <button type="button" onclick="this.closest('.fam-row').remove()" class="text-red-400 hover:text-red-300 text-sm">
+                        <button type="button" onclick="this.closest('.fam-row').remove()" class="text-red-400 hover:text-red-300 text-sm min-h-[48px] inline-flex items-center gap-1 px-2 touch-manipulation">
                             <i class="fas fa-trash mr-1"></i>ลบ
                         </button>
                     </div>
@@ -1679,7 +1679,7 @@ function addEducationRow() {
     <div class="education-row border border-white/10 rounded-[var(--tp-ios-card-radius)] p-5 mb-3">
         <div class="flex justify-between items-start mb-3">
             <span class="text-white/50 text-sm">ใหม่</span>
-            <button type="button" onclick="this.closest('.education-row').remove()" class="text-red-400 hover:text-red-300 text-sm">
+            <button type="button" onclick="this.closest('.education-row').remove()" class="text-red-400 hover:text-red-300 text-sm min-h-[48px] inline-flex items-center gap-1 px-2 touch-manipulation">
                 <i class="fas fa-trash mr-1"></i>ลบ
             </button>
         </div>
@@ -1731,7 +1731,7 @@ function addWorkHistoryRow() {
     <div class="wh-row border border-white/10 rounded-[var(--tp-ios-card-radius)] p-5 mb-3">
         <div class="flex justify-between items-start mb-3">
             <span class="text-white/50 text-sm">ใหม่</span>
-            <button type="button" onclick="this.closest('.wh-row').remove()" class="text-red-400 hover:text-red-300 text-sm">
+            <button type="button" onclick="this.closest('.wh-row').remove()" class="text-red-400 hover:text-red-300 text-sm min-h-[48px] inline-flex items-center gap-1 px-2 touch-manipulation">
                 <i class="fas fa-trash mr-1"></i>ลบ
             </button>
         </div>
@@ -1779,7 +1779,7 @@ function addFamilyRow() {
     <div class="fam-row border border-white/10 rounded-[var(--tp-ios-card-radius)] p-5 mb-3">
         <div class="flex justify-between items-start mb-3">
             <span class="text-white/50 text-sm">ใหม่</span>
-            <button type="button" onclick="this.closest('.fam-row').remove()" class="text-red-400 hover:text-red-300 text-sm">
+            <button type="button" onclick="this.closest('.fam-row').remove()" class="text-red-400 hover:text-red-300 text-sm min-h-[48px] inline-flex items-center gap-1 px-2 touch-manipulation">
                 <i class="fas fa-trash mr-1"></i>ลบ
             </button>
         </div>

@@ -223,6 +223,15 @@ foreach ($files as $path) {
         if (preg_match('/type\s*=\s*"(checkbox|radio|hidden|submit|button|file)"/i', $tag)) continue;
         if ($classAttr === '') { $skipped++; continue; }
 
+        // Never rendered — the iOS time-picker fallback selects carry `hidden`
+        // and a height rule on them would mean nothing.
+        if (preg_match('/(^|\s)hidden(\s|$)/', $classAttr)) continue;
+
+        // A textarea sized by rows is already taller than the minimum; rows="3"
+        // is roughly 90px. Judging it by its padding classes reports a control
+        // that is visibly fine.
+        if ($tagName === 'textarea' && preg_match('/\brows\s*=\s*"([2-9]|\d{2,})"/i', $tag)) continue;
+
         if (!usesCompliantClass($classAttr, $localInput) && !tailwindHeightOk($classAttr, 52)) {
             add($findings, 'input height < 52px (UI_RULES: input minimum 52px)', $rel, $lineNo, $tag);
         }

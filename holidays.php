@@ -358,7 +358,7 @@ require_once __DIR__ . '/templates/header.php';
                             <span class="tp-holidays-link-row__title">วันหยุดประจำสัปดาห์</span>
                             <span class="tp-holidays-link-row__sub">ดู/ขอเปลี่ยนวันหยุดรายสัปดาห์</span>
                         </span>
-                        <i class="fas fa-chevron-right text-white/28 shrink-0 text-xs" aria-hidden="true"></i>
+                        <i class="fas fa-chevron-right text-white/30 shrink-0 text-xs" aria-hidden="true"></i>
                     </a>
                     <a href="holiday_work_request.php" class="tp-holidays-link-row touch-manipulation">
                         <span class="tp-holidays-link-row__icon"><i class="fas fa-briefcase" aria-hidden="true"></i></span>
@@ -366,7 +366,7 @@ require_once __DIR__ . '/templates/header.php';
                             <span class="tp-holidays-link-row__title">ทำงานวันหยุด / หยุดชดเชย</span>
                             <span class="tp-holidays-link-row__sub">ขอมาทำงานวันหยุดประจำปีและหยุดวันอื่นแทน</span>
                         </span>
-                        <i class="fas fa-chevron-right text-white/28 shrink-0 text-xs" aria-hidden="true"></i>
+                        <i class="fas fa-chevron-right text-white/30 shrink-0 text-xs" aria-hidden="true"></i>
                     </a>
                     <a href="leave.php" class="tp-holidays-link-row touch-manipulation">
                         <span class="tp-holidays-link-row__icon"><i class="fas fa-calendar-alt" aria-hidden="true"></i></span>
@@ -374,7 +374,7 @@ require_once __DIR__ . '/templates/header.php';
                             <span class="tp-holidays-link-row__title">การลา</span>
                             <span class="tp-holidays-link-row__sub">ยื่นขอลาและดูสิทธิ์คงเหลือ</span>
                         </span>
-                        <i class="fas fa-chevron-right text-white/28 shrink-0 text-xs" aria-hidden="true"></i>
+                        <i class="fas fa-chevron-right text-white/30 shrink-0 text-xs" aria-hidden="true"></i>
                     </a>
                 </div>
             </div>
@@ -391,7 +391,7 @@ require_once __DIR__ . '/templates/header.php';
                         วันหยุดนักขัตฤกษ์ / บริษัท
                     </li>
                     <li class="flex items-center gap-3 min-h-[48px]">
-                        <span class="inline-flex h-4 w-4 shrink-0 rounded-full bg-white/12 ring-2 ring-violet-400/55" aria-hidden="true"></span>
+                        <span class="inline-flex h-4 w-4 shrink-0 rounded-full bg-white/10 ring-2 ring-violet-400/55" aria-hidden="true"></span>
                         วันนี้
                     </li>
                 </ul>

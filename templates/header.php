@@ -39,8 +39,8 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png';
     <script src="/assets/js/native-select.js?v=1" defer></script>
 
     <!-- Tailwind CSS (compiled) -->
-    <link rel="stylesheet" href="/assets/css/app.css?v=27">
-    <link rel="stylesheet" href="/assets/css/native-shell.css?v=27">
+    <link rel="stylesheet" href="/assets/css/app.css?v=28">
+    <link rel="stylesheet" href="/assets/css/native-shell.css?v=28">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -1154,7 +1154,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png';
         <div class="mt-6 pt-6 border-t border-slate-700/50">
             <form method="post" action="/logout.php" class="m-0">
                 <?php echo csrfField(); ?>
-                <button type="submit" class="nav-item text-red-400 hover:bg-red-500/10 hover:text-red-300 w-full text-left border-0 bg-transparent cursor-pointer font-inherit text-base">
+                <button type="submit" class="nav-item text-red-400 hover:bg-red-500/10 hover:text-red-300 w-full text-left border-0 bg-transparent cursor-pointer font-[inherit] text-base">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>ออกจากระบบ</span>
                 </button>
