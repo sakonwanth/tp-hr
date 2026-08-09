@@ -219,7 +219,7 @@ include dirname(__DIR__) . '/templates/header.php';
         $empCode = (string)($req['employee_code'] ?? '');
         $dept = (string)($req['department'] ?? '-');
         $leaveName = (string)($req['leave_type_name'] ?? 'ลา');
-        $color = (string)($req['color_code'] ?? '#a78bfa');
+        $color = (string)($req['color_code'] ?? '#d8c4ad');
         $days = number_format((float)($req['total_days'] ?? 0), 1);
         $dateLabel = formatDateThai($req['start_date']);
         if (($req['start_date'] ?? '') !== ($req['end_date'] ?? '')) {
@@ -320,7 +320,7 @@ include dirname(__DIR__) . '/templates/header.php';
                     </td>
                     <td class="px-4 py-3">
                         <div class="flex items-center gap-2 min-w-0">
-                            <span class="w-2 h-2 rounded-full shrink-0" style="background-color: <?php echo htmlspecialchars((string)($req['color_code'] ?? '#a78bfa')); ?>"></span>
+                            <span class="w-2 h-2 rounded-full shrink-0" style="background-color: <?php echo htmlspecialchars((string)($req['color_code'] ?? '#d8c4ad')); ?>"></span>
                             <span class="text-white truncate"><?php echo htmlspecialchars($req['leave_type_name']); ?></span>
                         </div>
                     </td>

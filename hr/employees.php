@@ -627,7 +627,7 @@ async function viewLeaveBalance(userId) {
                         </div>
                     </div>
                     <div class="w-full bg-white/10 rounded-full h-2">
-                        <div class="h-2 rounded-full" style="width: ${usedPercent}%; background-color:${e.color_code || '#a78bfa'}"></div>
+                        <div class="h-2 rounded-full" style="width: ${usedPercent}%; background-color:${e.color_code || '#d8c4ad'}"></div>
                     </div>
                     <p class="text-right text-white/50 text-xs mt-1">คงเหลือ ${e.remaining_days} วัน</p>
                 </div>

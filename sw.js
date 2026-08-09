@@ -15,7 +15,7 @@
  * Bump CACHE_VERSION whenever the precache list or strategy changes.
  */
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const ASSET_CACHE = `tp-hr-assets-${CACHE_VERSION}`;
 
 /** Directory this worker was served from, e.g. '/' or '/tp-hr/'. */
@@ -27,10 +27,9 @@ const PRECACHE_URLS = [
     OFFLINE_URL,
     BASE + 'assets/css/app.css',
     BASE + 'assets/css/native-shell.css',
-    BASE + 'assets/icons/tphr-app-icon.svg',
-    BASE + 'assets/icons/icon-192-v2.png',
-    BASE + 'assets/icons/icon-512-v2.png',
-    BASE + 'assets/icons/apple-touch-icon-v2.png',
+    BASE + 'assets/icons/icon-192-v3.png',
+    BASE + 'assets/icons/icon-512-v3.png',
+    BASE + 'assets/icons/apple-touch-icon-v3.png',
 ];
 
 /**
@@ -176,8 +175,8 @@ self.addEventListener('push', (event) => {
     const title = payload.title || 'TP-HR';
     const options = {
         body: payload.body || '',
-        icon: BASE + 'assets/icons/icon-192-v2.png',
-        badge: BASE + 'assets/icons/icon-192-v2.png',
+        icon: BASE + 'assets/icons/icon-192-v3.png',
+        badge: BASE + 'assets/icons/icon-192-v3.png',
         tag: payload.tag || 'tp-hr',
         data: { url: payload.url || BASE },
         renotify: true,

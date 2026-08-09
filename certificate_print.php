@@ -293,8 +293,8 @@ function signerName(array $s, bool $isEn): string {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title><?php echo htmlspecialchars($page_title); ?></title>
-<link rel="icon" type="image/svg+xml" href="/assets/icons/tphr-app-icon.svg">
-<link rel="stylesheet" href="/assets/css/native-shell.css?v=22">
+<link rel="icon" type="image/png" href="/assets/icons/icon-192-v3.png">
+<link rel="stylesheet" href="/assets/css/native-shell.css?v=23">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ---------- Reset / Base (cloned from CRM payroll_print design system) ---------- */
@@ -310,7 +310,7 @@ body {
 }
 @media screen {
     body {
-        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 52%, #0f172a 100%);
+        background: linear-gradient(135deg, #0f172a 0%, #2b2119 52%, #0f172a 100%);
         background-attachment: fixed;
         color: #e2e8f0;
         padding-top: max(16px, env(safe-area-inset-top, 0px));
@@ -386,14 +386,14 @@ body {
 }
 .toolbar form { display: inline; margin: 0; }
 .toolbar .btn-print {
-    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    background: linear-gradient(135deg, #b79168 0%, #8c6d4d 100%);
     color: #fff;
     border-color: rgba(255,255,255,0.2);
     font-weight: 600;
     min-height: var(--tp-native-btn-secondary-min, 54px);
-    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.35);
+    box-shadow: 0 4px 20px rgba(183, 145, 104, 0.35);
 }
-.toolbar .btn-print:hover { background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%); }
+.toolbar .btn-print:hover { background: linear-gradient(135deg, #8c6d4d 0%, #745a3f 100%); }
 
 /* ---------- Watermark ---------- */
 .watermark {

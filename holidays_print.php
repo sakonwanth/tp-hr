@@ -235,7 +235,7 @@ $renderMonthCard = static function (int $m, int $themeIndex) use ($holidaysByMon
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>วันหยุดประจำปี <?php echo (int) $holidayYearTh; ?></title>
-    <link rel="icon" type="image/svg+xml" href="/assets/icons/tphr-app-icon.svg">
+    <link rel="icon" type="image/png" href="/assets/icons/icon-192-v3.png">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -472,8 +472,8 @@ $renderMonthCard = static function (int $m, int $themeIndex) use ($holidaysByMon
 
         .theme-sky .month-card__head { background: #dbeafe; color: #1e40af; }
         .theme-sky .date-dot { background: #3b82f6; color: #fff; }
-        .theme-violet .month-card__head { background: #ede9fe; color: #6d28d9; }
-        .theme-violet .date-dot { background: #8b5cf6; color: #fff; }
+        .theme-violet .month-card__head { background: #ede9fe; color: #8c6d4d; }
+        .theme-violet .date-dot { background: #c7a989; color: #fff; }
         .theme-amber .month-card__head { background: #fef3c7; color: #b45309; }
         .theme-amber .date-dot { background: #f59e0b; color: #fff; }
 
@@ -771,7 +771,7 @@ $renderMonthCard = static function (int $m, int $themeIndex) use ($holidaysByMon
 
     var THEMES = [
         { head: '#dbeafe', fg: '#1e40af', dot: '#3b82f6' },
-        { head: '#ede9fe', fg: '#6d28d9', dot: '#8b5cf6' },
+        { head: '#ede9fe', fg: '#8c6d4d', dot: '#c7a989' },
         { head: '#fef3c7', fg: '#b45309', dot: '#f59e0b' }
     ];
     var TAGS = {
