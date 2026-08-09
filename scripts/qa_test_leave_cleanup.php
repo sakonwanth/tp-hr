@@ -27,8 +27,14 @@ require_once __DIR__ . '/../bootstrap.php';
 
 const DELETABLE_STATUSES = ['REJECTED', 'CANCELLED'];
 
-/** Words that suggest a request was made to exercise the system. */
-const TEST_PATTERNS = ['ทดสอบ', 'เทส', 'test', 'Test', 'TEST'];
+/**
+ * Words that suggest a request was made to exercise the system.
+ *
+ * 'ตรวจสอบ' earns its place: a real test request used it and the first version
+ * of this list missed the row entirely, which is exactly the failure mode that
+ * makes a pattern search untrustworthy on its own — hence deletion by id.
+ */
+const TEST_PATTERNS = ['ทดสอบ', 'ตรวจสอบ', 'เทส', 'test', 'Test', 'TEST', 'ลองระบบ'];
 
 $pdo = Database::getInstance()->getConnection();
 $mode = $argv[1] ?? '';
@@ -152,20 +158,21 @@ if ($rows === []) {
     exit(0);
 }
 
-foreach ($rows as $r) {
-    printRequest($r);
-}
-
 $deletable = array_values(array_filter($rows, fn($r) => in_array($r['status'], DELETABLE_STATUSES, true)));
 
-echo str_repeat('=', 66) . "\n";
+// The command goes FIRST. Plesk's task output is truncated, and putting the
+// one line the operator actually needs at the bottom means they never see it.
 printf("%d found, %d deletable.\n\n", count($rows), count($deletable));
 
 if ($deletable !== []) {
-    echo "To delete them:\n";
-    echo '  php scripts/qa_test_leave_cleanup.php --delete ' . implode(',', array_column($deletable, 'id')) . "\n\n";
+    echo ">>> To delete, set the task arguments to:\n\n";
+    echo '      --delete ' . implode(',', array_column($deletable, 'id')) . "\n\n";
+    echo "Check the list below first — a genuine request whose reason happens to\n";
+    echo "mention a test matches this search too.\n\n";
 }
 
-echo "Check the employee names and reasons above before deleting anything —\n";
-echo "a real request from someone whose reason happens to mention a test would\n";
-echo "match this search too.\n";
+echo str_repeat('-', 66) . "\n\n";
+
+foreach ($rows as $r) {
+    printRequest($r);
+}
