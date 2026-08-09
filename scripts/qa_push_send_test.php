@@ -22,7 +22,21 @@ if (PHP_SAPI !== 'cli') {
 require_once __DIR__ . '/../bootstrap.php';
 
 $pdo = Database::getInstance()->getConnection();
-$userId = isset($argv[1]) ? (int)$argv[1] : 0;
+$arg = $argv[1] ?? '';
+
+// --reset wipes stored subscriptions so a device can register cleanly. A
+// subscription that points at a deleted Home Screen install still gets
+// accepted by the push service, so it looks healthy while delivering
+// nothing — clearing and re-enabling on the phone is the way out.
+if ($arg === '--reset') {
+    $deleted = $pdo->exec('DELETE FROM hr_push_subscriptions');
+    echo "Deleted $deleted subscription(s).\n";
+    echo "Now on the phone: open TP-HR from the Home Screen, wait ~10s, and it\n";
+    echo "will re-register. Then run this script again without --reset.\n";
+    exit(0);
+}
+
+$userId = (int)$arg;
 
 echo "TP-HR — push send test\n";
 echo str_repeat('-', 60) . "\n";
@@ -44,7 +58,8 @@ if ($total === 0) {
     exit(1);
 }
 
-$sql = 'SELECT id, user_id, endpoint, p256dh, auth_secret, failure_count, last_used_at, last_failed_at
+$sql = 'SELECT id, user_id, endpoint, p256dh, auth_secret, failure_count, last_used_at, last_failed_at,
+               user_agent, created_at
         FROM hr_push_subscriptions';
 $params = [];
 if ($userId > 0) {
@@ -62,14 +77,18 @@ if ($rows === []) {
 
 foreach ($rows as $row) {
     printf(
-        "  id=%d user_id=%d host=%s failures=%d last_ok=%s last_fail=%s\n",
+        "  id=%d user_id=%d host=%s failures=%d created=%s last_ok=%s last_fail=%s\n",
         $row['id'],
         $row['user_id'],
         parse_url($row['endpoint'], PHP_URL_HOST) ?: '?',
         $row['failure_count'],
+        $row['created_at'] ?: '?',
         $row['last_used_at'] ?: 'never',
         $row['last_failed_at'] ?: 'never'
     );
+    // Which device registered this? An iPhone Home Screen install and a
+    // desktop browser look identical above but behave very differently.
+    printf("       device: %s\n", mb_substr((string)($row['user_agent'] ?: 'unknown'), 0, 110));
 }
 
 // 2. Can this server even reach the push service?
@@ -112,7 +131,9 @@ $payload = json_encode([
     'tag'   => 'tp-hr-test',
 ], JSON_UNESCAPED_UNICODE);
 
+$idByEndpoint = [];
 foreach ($rows as $row) {
+    $idByEndpoint[$row['endpoint']] = (int)$row['id'];
     $webPush->queueNotification(
         \Minishlink\WebPush\Subscription::create([
             'endpoint'        => $row['endpoint'],
@@ -135,6 +156,12 @@ foreach ($webPush->flush() as $report) {
     if ($report->isSuccess()) {
         $ok++;
         echo "  [SENT] $host — accepted by the push service\n";
+        // This script bypasses PushService, so nothing else would stamp the
+        // row and last_ok would read "never" even right after a success.
+        $id = $idByEndpoint[$endpoint] ?? null;
+        if ($id !== null) {
+            $pdo->prepare('UPDATE hr_push_subscriptions SET last_used_at = NOW() WHERE id = ?')->execute([$id]);
+        }
         continue;
     }
 
