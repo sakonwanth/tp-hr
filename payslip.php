@@ -251,14 +251,22 @@ include 'templates/header.php';
 </div>
 
 <!-- Slip List -->
-<div class="native-card tp-native-card tp-native-data-card min-w-0 max-w-full overflow-hidden">
+<?php
+// The list used to sit inside a card, which then held another padded div,
+// which held each slip card, which held the net-pay box — four levels of
+// padding stacking up. On a 375px screen that left the content about 190px
+// wide, which is what made these cards feel so cramped. The slip cards are
+// cards already; they stand on the page directly.
+?>
     <?php if (empty($slips)): ?>
-    <div class="tp-native-empty-state text-center py-12 px-4 rounded-[var(--tp-ios-card-radius)] border border-dashed border-white/15 max-w-none mx-4 my-4">
-        <i class="fas fa-file-invoice-dollar text-slate-500 text-4xl mb-3 block" aria-hidden="true"></i>
-        <p class="text-slate-400 text-sm">ไม่พบสลิปเงินเดือนในปี <?php echo $year + 543; ?></p>
+    <div class="native-card tp-native-card tp-native-data-card min-w-0">
+        <div class="tp-native-empty-state text-center py-12 px-4">
+            <i class="fas fa-file-invoice-dollar text-slate-500 text-4xl mb-3 block" aria-hidden="true"></i>
+            <p class="text-slate-400 text-sm">ไม่พบสลิปเงินเดือนในปี <?php echo $year + 543; ?></p>
+        </div>
     </div>
     <?php else: ?>
-    <div class="space-y-6 p-5 md:p-6 min-w-0">
+    <div class="space-y-4 min-w-0">
         <?php foreach ($slips as $s): ?>
         <?php
         $monthName = thaiMonth(date('n', strtotime($s['payroll_month'])));
@@ -289,21 +297,22 @@ include 'templates/header.php';
                         </p>
                     </div>
                 </div>
-                <div class="rounded-[var(--tp-ios-card-radius)] bg-black/20 border border-white/8 px-4 py-3 min-w-0">
+                <div class="rounded-[var(--tp-ios-card-radius)] bg-black/20 border border-white/10 px-4 py-4 min-w-0">
                     <p class="text-white/50 text-xs uppercase tracking-wide">เงินได้สุทธิ</p>
-                    <p class="text-2xl font-bold text-green-400 tabular-nums mt-1"><?php echo number_format($s['net_salary'], 2); ?> <span class="text-sm font-normal text-white/50">บาท</span></p>
+                    <p class="text-2xl font-bold text-green-400 tabular-nums mt-2 leading-tight"><?php echo number_format($s['net_salary'], 2); ?> <span class="text-sm font-normal text-white/50">บาท</span></p>
                 </div>
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 min-w-0">
                     <span class="inline-flex self-start px-3 py-1.5 rounded-full text-xs font-medium <?php echo $statusColors[$s['run_status']] ?? 'bg-gray-500/20 text-gray-400'; ?>">
                         <?php echo $statusText[$s['run_status']] ?? htmlspecialchars($s['run_status']); ?>
                     </span>
                     <div class="flex items-center gap-3 sm:justify-end shrink-0">
+                        <?php // Both actions share one height token — they sat at 48px and 56px, which read as a mistake next to each other. ?>
                         <a href="payslip.php?slip_id=<?php echo (int)$s['id']; ?>"
-                           class="flex-1 sm:flex-none min-h-[48px] min-w-[48px] px-4 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] transition-colors inline-flex items-center justify-center gap-2 touch-manipulation font-medium"
+                           class="flex-1 sm:flex-none min-h-[56px] min-w-[56px] px-4 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] transition-colors inline-flex items-center justify-center gap-2 touch-manipulation font-medium text-sm whitespace-nowrap"
                            title="ดูรายละเอียด">
-                            <i class="fas fa-eye" aria-hidden="true"></i><span class="text-sm sm:hidden">ดู</span>
+                            <i class="fas fa-eye" aria-hidden="true"></i><span class="sm:hidden">ดู</span>
                         </a>
-                        <?php tp_hr_payslip_download_form((int)$s['id'], 'flex-1 sm:flex-none min-h-[56px] min-w-[48px] px-4 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors inline-flex items-center justify-center gap-2 touch-manipulation font-medium text-sm border-0', '<i class="fas fa-download" aria-hidden="true"></i><span class="sm:hidden">ดาวน์โหลด</span><span class="hidden sm:inline">PDF</span>', true, 'ดาวน์โหลด PDF'); ?>
+                        <?php tp_hr_payslip_download_form((int)$s['id'], 'flex-1 sm:flex-none min-h-[56px] min-w-[56px] px-4 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors inline-flex items-center justify-center gap-2 touch-manipulation font-medium text-sm whitespace-nowrap border-0', '<i class="fas fa-download" aria-hidden="true"></i><span class="sm:hidden">ดาวน์โหลด</span><span class="hidden sm:inline">PDF</span>', true, 'ดาวน์โหลด PDF'); ?>
                     </div>
                 </div>
             </div>
@@ -311,7 +320,6 @@ include 'templates/header.php';
         <?php endforeach; ?>
     </div>
     <?php endif; ?>
-</div>
 
 </div>
 
