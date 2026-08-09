@@ -36,10 +36,11 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png';
 
     <!-- PWA — service worker registration + iOS install hint -->
     <script src="/assets/js/pwa.js?v=2" defer></script>
+    <script src="/assets/js/native-select.js?v=1" defer></script>
 
     <!-- Tailwind CSS (compiled) -->
-    <link rel="stylesheet" href="/assets/css/app.css?v=25">
-    <link rel="stylesheet" href="/assets/css/native-shell.css?v=25">
+    <link rel="stylesheet" href="/assets/css/app.css?v=26">
+    <link rel="stylesheet" href="/assets/css/native-shell.css?v=26">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
