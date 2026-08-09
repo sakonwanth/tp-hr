@@ -78,8 +78,8 @@ function thaiDate(?string $d): string {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/app.css?v=28">
-<link rel="stylesheet" href="/assets/css/native-shell.css?v=28">
+<link rel="stylesheet" href="/assets/css/app.css?v=29">
+<link rel="stylesheet" href="/assets/css/native-shell.css?v=29">
 <style>
     * {
         font-family: 'IBM Plex Sans Thai', system-ui, sans-serif;

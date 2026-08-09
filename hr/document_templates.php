@@ -480,7 +480,7 @@ include dirname(__DIR__) . '/templates/header.php';
             </div>
 
             <div class="md:col-span-2 flex justify-end">
-                <button type="submit" class="px-5 py-2 rounded-[var(--tp-ios-card-radius)] bg-violet-500 hover:bg-violet-600 text-white text-sm font-medium">
+                <button type="submit" class="px-5 py-2 rounded-[var(--tp-ios-card-radius)] bg-violet-500 hover:bg-violet-600 text-white text-sm font-medium min-h-[48px] inline-flex items-center justify-center">
                     <i class="fas fa-save mr-1"></i> บันทึกข้อมูลบริษัท
                 </button>
             </div>
@@ -528,7 +528,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 <input type="hidden" name="action" value="upload_signature">
                 <input type="hidden" name="user_id" value="<?php echo (int)$sc['id']; ?>">
                 <input type="file" name="signature" accept="image/png,image/jpeg,image/webp" required class="flex-1 text-white/70 text-xs file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-indigo-500 file:text-white file:text-xs">
-                <button type="submit" class="px-3 py-1 rounded bg-indigo-500 hover:bg-indigo-600 text-white text-xs whitespace-nowrap"><i class="fas fa-upload"></i></button>
+                <button type="submit" class="px-3 py-1 rounded bg-indigo-500 hover:bg-indigo-600 text-white text-xs whitespace-nowrap min-h-[48px] inline-flex items-center justify-center"><i class="fas fa-upload"></i></button>
             </form>
         </div>
         <?php endforeach; ?>
@@ -648,11 +648,11 @@ include dirname(__DIR__) . '/templates/header.php';
                             <input type="hidden" name="_token" value="<?php echo csrfToken(); ?>">
                             <input type="hidden" name="action" value="toggle_active">
                             <input type="hidden" name="id" value="<?php echo (int)$t['id']; ?>">
-                            <button type="submit" class="px-2 py-1 rounded-[var(--tp-ios-card-radius)] bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs touch-manipulation" title="สลับเปิด/ปิด"><i class="fas fa-power-off" aria-hidden="true"></i></button>
+                            <button type="submit" class="px-2 py-1 rounded-[var(--tp-ios-card-radius)] bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs touch-manipulation min-h-[48px] inline-flex items-center justify-center" title="สลับเปิด/ปิด"><i class="fas fa-power-off" aria-hidden="true"></i></button>
                         </form>
                         <?php if ((int)$t['request_count'] === 0): ?>
                         <button type="button"
-                            class="px-2 py-1 rounded-[var(--tp-ios-card-radius)] bg-red-500/20 hover:bg-red-500/30 text-red-300 text-xs touch-manipulation"
+                            class="px-2 py-1 rounded-[var(--tp-ios-card-radius)] bg-red-500/20 hover:bg-red-500/30 text-red-300 text-xs touch-manipulation min-h-[48px] inline-flex items-center justify-center"
                             data-dt-delete-id="<?php echo (int)$t['id']; ?>"
                             data-dt-delete-name="<?php echo htmlspecialchars($t['name'], ENT_QUOTES, 'UTF-8'); ?>"
                             onclick="dtOpenDeleteTemplateModal(this)"
@@ -805,7 +805,7 @@ if (!empty($editRow['id'])) {
                 <p class="text-blue-200 text-xs font-medium mb-2"><i class="fas fa-code mr-1"></i>ตัวแปรที่ใช้ได้ในเนื้อหา (คลิกคัดลอก):</p>
                 <div class="flex flex-wrap gap-1.5">
                     <?php foreach ($placeholderGuide as $ph=>$desc): ?>
-                    <button type="button" onclick="navigator.clipboard.writeText('<?php echo $ph; ?>');this.classList.add('bg-green-500/30')" class="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-white/90 text-xs font-mono" title="<?php echo htmlspecialchars($desc); ?>"><?php echo $ph; ?></button>
+                    <button type="button" onclick="navigator.clipboard.writeText('<?php echo $ph; ?>');this.classList.add('bg-green-500/30')" class="min-h-[48px] inline-flex items-center px-3 py-0.5 rounded bg-white/10 hover:bg-white/20 text-white/90 text-xs font-mono" title="<?php echo htmlspecialchars($desc); ?>"><?php echo $ph; ?></button>
                     <?php endforeach; ?>
                 </div>
             </div>
@@ -928,11 +928,11 @@ if (!empty($editRow['id'])) {
         <div class="flex gap-2">
             <a href="document_templates.php" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-white/10 text-white/80 hover:bg-white/20 text-sm">ยกเลิก</a>
             <?php if ($editRow && $certPreviewReqId > 0): ?>
-                <button type="submit" form="hr_doc_tpl_cert_preview" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-violet-500/20 hover:bg-violet-500/30 text-violet-200 text-sm">
+                <button type="submit" form="hr_doc_tpl_cert_preview" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-violet-500/20 hover:bg-violet-500/30 text-violet-200 text-sm min-h-[48px] inline-flex items-center justify-center">
                     <i class="fas fa-print mr-1"></i> ดูตัวอย่าง
                 </button>
             <?php endif; ?>
-            <button type="submit" class="px-6 py-2 rounded-[var(--tp-ios-card-radius)] bg-violet-500 hover:bg-violet-600 text-white text-sm font-medium">
+            <button type="submit" class="px-6 py-2 rounded-[var(--tp-ios-card-radius)] bg-violet-500 hover:bg-violet-600 text-white text-sm font-medium min-h-[48px] inline-flex items-center justify-center">
                 <i class="fas fa-save mr-1"></i> บันทึกทั้งหมด
             </button>
         </div>
@@ -953,8 +953,8 @@ if (!empty($editRow['id'])) {
             <input type="hidden" name="action" value="delete_template">
             <input type="hidden" name="id" id="dt-delete-template-id" value="">
             <div class="flex flex-wrap gap-2 justify-end">
-                <button type="button" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-white/10 text-white/90 hover:bg-white/20 text-sm touch-manipulation" onclick="dtCloseDeleteTemplateModal()">ยกเลิก</button>
-                <button type="submit" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-red-600 hover:bg-red-700 text-white text-sm font-medium touch-manipulation">ลบเทมเพลต</button>
+                <button type="button" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-white/10 text-white/90 hover:bg-white/20 text-sm touch-manipulation min-h-[48px] inline-flex items-center justify-center" onclick="dtCloseDeleteTemplateModal()">ยกเลิก</button>
+                <button type="submit" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-red-600 hover:bg-red-700 text-white text-sm font-medium touch-manipulation min-h-[48px] inline-flex items-center justify-center">ลบเทมเพลต</button>
             </div>
         </form>
     </div>
@@ -970,8 +970,8 @@ if (!empty($editRow['id'])) {
             <input type="hidden" name="action" value="remove_signature">
             <input type="hidden" name="user_id" id="dt-remove-signature-user-id" value="">
             <div class="flex flex-wrap gap-2 justify-end">
-                <button type="button" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-white/10 text-white/90 hover:bg-white/20 text-sm touch-manipulation" onclick="dtCloseRemoveSignatureModal()">ยกเลิก</button>
-                <button type="submit" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-red-600 hover:bg-red-700 text-white text-sm font-medium touch-manipulation">ลบลายเซ็น</button>
+                <button type="button" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-white/10 text-white/90 hover:bg-white/20 text-sm touch-manipulation min-h-[48px] inline-flex items-center justify-center" onclick="dtCloseRemoveSignatureModal()">ยกเลิก</button>
+                <button type="submit" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-red-600 hover:bg-red-700 text-white text-sm font-medium touch-manipulation min-h-[48px] inline-flex items-center justify-center">ลบลายเซ็น</button>
             </div>
         </form>
     </div>

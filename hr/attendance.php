@@ -516,22 +516,22 @@ include dirname(__DIR__) . '/templates/header.php';
                     <td class="px-4 py-3 text-center">
                         <?php if ($hasAttendance && $rec['check_in_latitude']): ?>
                         <button onclick="viewLocation(<?php echo $rec['check_in_latitude']; ?>, <?php echo $rec['check_in_longitude']; ?>)" 
-                                class="px-2 py-1 bg-white/10 hover:bg-white/20 text-white text-xs rounded transition-colors mr-1" title="ดูตำแหน่ง">
+                                class="px-2 py-1 bg-white/10 hover:bg-white/20 text-white text-xs rounded transition-colors mr-1 min-h-[48px] min-w-[48px] inline-flex items-center justify-center" title="ดูตำแหน่ง">
                             <i class="fas fa-map-marker-alt"></i>
                         </button>
                         <?php endif; ?>
                         <button onclick="editAttendance(<?php echo $rec['id']; ?>, '<?php echo $date; ?>', <?php echo $rec['attendance_id'] ?? 'null'; ?>, '<?php echo $rec['check_in_time'] ? date('H:i', strtotime($rec['check_in_time'])) : ''; ?>', '<?php echo $rec['check_out_time'] ? date('H:i', strtotime($rec['check_out_time'])) : ''; ?>', '<?php echo htmlspecialchars(($rec['first_name_th'] ?? '') . ' ' . ($rec['last_name_th'] ?? ''), ENT_QUOTES); ?>')" 
-                                class="px-2 py-1 bg-white/10 hover:bg-white/20 text-white text-xs rounded transition-colors" title="แก้ไข">
+                                class="px-2 py-1 bg-white/10 hover:bg-white/20 text-white text-xs rounded transition-colors min-h-[48px] min-w-[48px] inline-flex items-center justify-center" title="แก้ไข">
                             <i class="fas fa-edit"></i>
                         </button>
                         <?php if ($hasAttendance): ?>
                         <button onclick="deleteAttendance(<?php echo $rec['id']; ?>, '<?php echo $date; ?>', '<?php echo htmlspecialchars(($rec['first_name_th'] ?? '') . ' ' . ($rec['last_name_th'] ?? ''), ENT_QUOTES); ?>', 'full')" 
-                                class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-200 text-xs rounded transition-colors ml-1 font-medium" title="ลบ/ล้างเวลาเข้า-ออก">
+                                class="min-h-[48px] inline-flex items-center gap-1 px-2.5 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-200 text-xs rounded transition-colors ml-1 font-medium" title="ลบ/ล้างเวลาเข้า-ออก">
                             <i class="fas fa-trash" aria-hidden="true"></i><span>ลบเวลา</span>
                         </button>
                         <?php endif; ?>
                         <button onclick="viewHistory(<?php echo $rec['id']; ?>, '<?php echo $date; ?>', '<?php echo htmlspecialchars(($rec['first_name_th'] ?? '') . ' ' . ($rec['last_name_th'] ?? ''), ENT_QUOTES); ?>')" 
-                                class="px-2 py-1 bg-white/10 hover:bg-white/20 text-white text-xs rounded transition-colors ml-1" title="ประวัติการแก้ไข">
+                                class="px-2 py-1 bg-white/10 hover:bg-white/20 text-white text-xs rounded transition-colors min-h-[48px] min-w-[48px] inline-flex items-center justify-center ml-1" title="ประวัติการแก้ไข">
                             <i class="fas fa-history"></i>
                         </button>
                     </td>
@@ -593,7 +593,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 <label for="edit-note" class="block text-white/80 text-sm mb-2">เหตุผลการแก้ไข <span class="text-red-400" aria-hidden="true">*</span></label>
                 <textarea name="note" id="edit-note" rows="2" class="input-field tp-native-textarea" placeholder="ระบุเหตุผลการแก้ไข (จำเป็น)" required></textarea>
                 <p class="text-white/50 text-xs mt-1">การแก้ไขทั้งหมดจะถูกบันทึกใน audit log</p>
-                <button type="button" id="edit-open-delete-btn" class="mt-3 text-red-300/90 hover:text-red-200 text-xs font-medium touch-manipulation hidden">
+                <button type="button" id="edit-open-delete-btn" class="mt-3 min-h-[48px] inline-flex items-center px-2 text-red-300/90 hover:text-red-200 text-xs font-medium touch-manipulation hidden">
                     <i class="fas fa-trash mr-1" aria-hidden="true"></i>ลงเวลาผิด? ลบ/ล้างเวลาเพื่อให้ลงใหม่
                 </button>
             </div>

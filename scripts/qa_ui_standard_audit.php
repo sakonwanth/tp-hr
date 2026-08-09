@@ -122,6 +122,43 @@ function usesCompliantClass(string $classAttr, array $known): bool
     return false;
 }
 
+/**
+ * Ancestor classes that size their descendant buttons and links, e.g.
+ * `.toolbar a, .toolbar button { min-height: 48px }`.
+ *
+ * A control styled that way carries no size class of its own, so checking its
+ * class list alone reports it as bare. That is how holidays_print.php's print
+ * and PNG buttons were flagged while already being 48px.
+ *
+ * @return array<string,true> ancestor class names
+ */
+function contextSizingClasses(array $cssSources, int $px): array
+{
+    $out = [];
+    foreach ($cssSources as $css) {
+        if (!preg_match_all('/([^{}]+)\{([^}]*)\}/s', $css, $m, PREG_SET_ORDER)) continue;
+        foreach ($m as $rule) {
+            if (!preg_match('/(?:min-height|height)\s*:\s*([0-9.]+)(px|rem)/i', $rule[2], $h)) continue;
+            $value = (float)$h[1] * (strtolower($h[2]) === 'rem' ? 16 : 1);
+            if ($value < $px) continue;
+
+            foreach (explode(',', $rule[1]) as $sel) {
+                if (preg_match('/\.([a-zA-Z0-9_-]+)\s+(?:button|a)\s*$/', trim($sel), $s)) {
+                    $out[$s[1]] = true;
+                }
+            }
+        }
+    }
+    return $out;
+}
+
+function contextuallySized(string $classAttr, array $contextSized): bool
+{
+    // The ancestor is not visible from the tag, so this is necessarily
+    // approximate: it accepts any button on a page that defines such a rule.
+    return $contextSized !== [];
+}
+
 // ------------------------------------------------------------------ scan
 
 $files = [];
@@ -174,7 +211,9 @@ foreach ($files as $path) {
     // button — which is how the first run produced a pile of false positives.
     $localButton = $tallEnoughButton;
     $localInput = $tallEnoughInput;
+    $contextSized = [];
     if (preg_match_all('/<style\b[^>]*>(.*?)<\/style>/is', $source, $sm)) {
+        $contextSized = contextSizingClasses($sm[1], 48);
         $localTokens = array_merge($tokens, cssTokens($sm[1]));
         $localButton = array_merge($localButton, classesTallerThan(48, $sm[1], $localTokens));
         $localInput = array_merge($localInput, classesTallerThan(52, $sm[1], $localTokens));
@@ -198,7 +237,14 @@ foreach ($files as $path) {
         // A class built from a PHP variable cannot be judged from source.
         // Counting it as a violation would be a guess, so it is set aside and
         // reported separately.
+        //
+        // PHPEXPR is the placeholder left behind when the PHP blocks were
+        // blanked above. class="PHPEXPR" means the whole list came from a
+        // variable — $bulkBtn and $cellClass both carry min-h-[48px], so
+        // treating the placeholder as a real class name reported compliant
+        // controls as bare.
         if (strpos($classAttr, '<?') !== false || strpos($classAttr, '$') !== false
+            || strpos($classAttr, 'PHPEXPR') !== false
             || preg_match('/class\s*=\s*[\'"]?\s*\.\s*\$/', $tag)) {
             $skipped++;
             continue;
@@ -210,7 +256,28 @@ foreach ($files as $path) {
                 $skipped++;
                 continue;
             }
-            if (!usesCompliantClass($classAttr, $localButton) && !tailwindHeightOk($classAttr, 48)) {
+
+            // Sized by a contextual rule such as `.toolbar button { min-height }`
+            // rather than by a class of its own. Judging it on its class list
+            // alone reports a control that is already compliant.
+            if ($classAttr !== '' && contextuallySized($classAttr, $contextSized)) {
+                $skipped++;
+                continue;
+            }
+            // A button wrapping block content — a whole card made tappable —
+            // takes its height from what is inside it, not from a height rule.
+            // holidays.php's "next holiday" card is one, and no size class will
+            // ever appear on it.
+            $wrapsBlock = false;
+            $closeAt = stripos($source, '</button>', $hit[0][1]);
+            if ($closeAt !== false) {
+                $inner = substr($source, $hit[0][1] + strlen($tag), $closeAt - $hit[0][1] - strlen($tag));
+                $wrapsBlock = stripos($inner, '<div') !== false;
+            }
+
+            if (!$wrapsBlock
+                && !usesCompliantClass($classAttr, $localButton)
+                && !tailwindHeightOk($classAttr, 48)) {
                 add($findings, 'button height < 48px (UI_RULES: button minimum 48px)', $rel, $lineNo, $tag);
             }
             if ($classAttr !== '' && strpos($classAttr, 'whitespace-nowrap') === false

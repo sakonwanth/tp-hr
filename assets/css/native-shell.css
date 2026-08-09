@@ -1144,6 +1144,8 @@ button.tp-holidays-month-chip {
   gap: var(--tp-space-8);
   width: 100%;
   margin: 0 0 var(--tp-space-8);
+  /* Tappable on phones (opens the month grid), so it needs a real target. */
+  min-height: var(--tp-native-touch-min);
   padding: 0;
   border: none;
   background: transparent;
