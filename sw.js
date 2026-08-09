@@ -197,13 +197,28 @@ self.addEventListener('notificationclick', (event) => {
         // Reuse the open app window when there is one — opening a second
         // window every time a notification is tapped is jarring on iOS.
         for (const client of clientList) {
-            if (new URL(client.url).origin === target.origin && 'focus' in client) {
-                await client.focus();
-                if ('navigate' in client) {
-                    await client.navigate(target.href).catch(() => {});
+            if (new URL(client.url).origin !== target.origin || !('focus' in client)) continue;
+
+            await client.focus();
+
+            if (client.url === target.href) return; // already on the right page
+
+            // WindowClient.navigate() does not work on iOS Safari. Left to
+            // fail silently it focuses the app without changing the page, so
+            // every notification appears to open wherever the app happened to
+            // be — usually the dashboard. Ask the page to navigate itself
+            // instead; assets/js/pwa.js listens for this.
+            if ('navigate' in client) {
+                try {
+                    const navigated = await client.navigate(target.href);
+                    if (navigated) return;
+                } catch (err) {
+                    /* unsupported here — fall through to the message */
                 }
-                return;
             }
+
+            client.postMessage({ type: 'TP_HR_NAVIGATE', url: target.href });
+            return;
         }
 
         if (self.clients.openWindow) {
