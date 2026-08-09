@@ -365,8 +365,24 @@
             /* private mode — checking every view is still harmless */
         }
 
-        pushConfig().then(function (config) {
-            if (!config || !config.enabled || !config.public_key || config.subscribed) return;
+        Promise.all([
+            pushConfig(),
+            navigator.serviceWorker.ready.then(function (registration) {
+                return registration.pushManager.getSubscription();
+            }),
+        ]).then(function (results) {
+            var config = results[0];
+            var local = results[1];
+
+            if (!config || !config.enabled || !config.public_key) return;
+
+            // Trusting the server's count alone is not enough. Reinstalling
+            // the app gives the browser a brand new endpoint while the old
+            // row still sits on the server, so `subscribed` stays true and
+            // notifications are dead forever with nothing to trigger a fix.
+            // Only skip when BOTH sides agree there is a live subscription.
+            if (local && config.subscribed) return;
+
             return subscribeWith(config);
         }).catch(function () { /* best effort */ });
     }

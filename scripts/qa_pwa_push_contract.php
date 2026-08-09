@@ -104,6 +104,16 @@ checkContains('opt-in card passes its config through', $pwaJs, 'enablePush(confi
 // registered server-side, and nothing would ever prompt again.
 checkContains('silent re-subscribe path exists', $pwaJs, 'function repairPushSubscription');
 
+// Reinstalling the app gives the browser a new endpoint while the old row
+// still sits on the server, so the server's own `subscribed` flag stays true.
+// Skipping on that alone leaves notifications dead forever with nothing to
+// trigger a repair — both sides must agree before we skip re-subscribing.
+check(
+    're-subscribe checks the browser, not just the server',
+    str_contains($pwaJs, 'if (local && config.subscribed) return;'),
+    true
+);
+
 // -------------------------------------------------------- service worker
 
 $sw = (string)file_get_contents($root . '/sw.js');
