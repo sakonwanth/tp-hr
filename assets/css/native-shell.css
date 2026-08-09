@@ -1875,3 +1875,34 @@ button.tp-holidays-list-row:hover {
     transform: none;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Nested-card padding collapse
+   ---------------------------------------------------------------------------
+   A data card that exists only to hold a list of other cards contributes
+   nothing but padding, and that padding stacks: card (24px) + its inner
+   padded div (20px) + each row card (20px) left roughly 190px of usable width
+   on a 375px phone. Text wrapped that had no need to, and every list read as
+   cramped. Measured across the app by scripts/qa_nested_cards_audit.php — 17
+   files carried 56–76px of accumulated side padding.
+
+   Collapsing it here rather than editing 17 templates keeps the change in one
+   reviewable place and avoids surgery on div nesting inside PHP branches,
+   which is easy to get subtly wrong.
+
+   :has() is Safari 15.4+ / Chrome 105+. Browsers without it simply keep the
+   old, roomier-looking padding — no breakage, just no improvement.
+--------------------------------------------------------------------------- */
+.tp-native-data-card:has(.tp-ios-attendance-panel) {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+/* The wrapper's own inner padded div would otherwise keep half the squeeze.
+   Only the horizontal padding goes — vertical rhythm between rows stays. */
+.tp-native-data-card:has(.tp-ios-attendance-panel) > div {
+  padding-left: 0;
+  padding-right: 0;
+}
