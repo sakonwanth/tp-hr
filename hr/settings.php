@@ -229,22 +229,22 @@ require_once __DIR__ . '/../templates/header.php';
 <?php endif; ?>
 
 <!-- Tabs -->
-<div class="mb-6 border-b border-white/10 pb-4">
-    <div class="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 min-w-0" role="tablist" aria-label="หมวดตั้งค่า">
-        <a href="?tab=general" role="tab" aria-selected="<?php echo $tab === 'general' ? 'true' : 'false'; ?>"
-           class="shrink-0 inline-flex min-h-[48px] items-center gap-2 rounded-[var(--tp-ios-card-radius)] px-4 py-2 whitespace-nowrap transition-colors touch-manipulation <?php echo $tab === 'general' ? 'bg-violet-600 text-white shadow-sm' : 'bg-white/10 text-white/70 hover:bg-white/15 hover:text-white'; ?>">
+<div class="mb-6">
+    <div class="tp-native-segment" role="tablist" aria-label="หมวดตั้งค่า">
+        <a href="?tab=general" role="tab" class="tp-native-segment__item"
+           aria-selected="<?php echo $tab === 'general' ? 'true' : 'false'; ?>">
             <i class="fas fa-sliders-h" aria-hidden="true"></i><span>ทั่วไป</span>
         </a>
-        <a href="?tab=holidays" role="tab" aria-selected="<?php echo $tab === 'holidays' ? 'true' : 'false'; ?>"
-           class="shrink-0 inline-flex min-h-[48px] items-center gap-2 rounded-[var(--tp-ios-card-radius)] px-4 py-2 whitespace-nowrap transition-colors touch-manipulation <?php echo $tab === 'holidays' ? 'bg-violet-600 text-white shadow-sm' : 'bg-white/10 text-white/70 hover:bg-white/15 hover:text-white'; ?>">
+        <a href="?tab=holidays" role="tab" class="tp-native-segment__item"
+           aria-selected="<?php echo $tab === 'holidays' ? 'true' : 'false'; ?>">
             <i class="fas fa-calendar-day" aria-hidden="true"></i><span>วันหยุด</span>
         </a>
-        <a href="?tab=leave-types" role="tab" aria-selected="<?php echo $tab === 'leave-types' ? 'true' : 'false'; ?>"
-           class="shrink-0 inline-flex min-h-[48px] items-center gap-2 rounded-[var(--tp-ios-card-radius)] px-4 py-2 whitespace-nowrap transition-colors touch-manipulation <?php echo $tab === 'leave-types' ? 'bg-violet-600 text-white shadow-sm' : 'bg-white/10 text-white/70 hover:bg-white/15 hover:text-white'; ?>">
+        <a href="?tab=leave-types" role="tab" class="tp-native-segment__item"
+           aria-selected="<?php echo $tab === 'leave-types' ? 'true' : 'false'; ?>">
             <i class="fas fa-umbrella-beach" aria-hidden="true"></i><span>ประเภทการลา</span>
         </a>
-        <a href="?tab=shifts" role="tab" aria-selected="<?php echo $tab === 'shifts' ? 'true' : 'false'; ?>"
-           class="shrink-0 inline-flex min-h-[48px] items-center gap-2 rounded-[var(--tp-ios-card-radius)] px-4 py-2 whitespace-nowrap transition-colors touch-manipulation <?php echo $tab === 'shifts' ? 'bg-violet-600 text-white shadow-sm' : 'bg-white/10 text-white/70 hover:bg-white/15 hover:text-white'; ?>">
+        <a href="?tab=shifts" role="tab" class="tp-native-segment__item"
+           aria-selected="<?php echo $tab === 'shifts' ? 'true' : 'false'; ?>">
             <i class="fas fa-clock" aria-hidden="true"></i><span>กะทำงาน</span>
         </a>
     </div>

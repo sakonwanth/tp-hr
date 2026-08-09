@@ -39,8 +39,8 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png';
     <script src="/assets/js/native-select.js?v=1" defer></script>
 
     <!-- Tailwind CSS (compiled) -->
-    <link rel="stylesheet" href="/assets/css/app.css?v=26">
-    <link rel="stylesheet" href="/assets/css/native-shell.css?v=26">
+    <link rel="stylesheet" href="/assets/css/app.css?v=27">
+    <link rel="stylesheet" href="/assets/css/native-shell.css?v=27">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
