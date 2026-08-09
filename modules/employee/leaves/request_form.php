@@ -147,7 +147,7 @@ $min_leave_date = date('Y-m-d', strtotime('-365 days'));
                 <a href="leave.php" class="touch-manipulation flex-1 min-h-[54px] inline-flex items-center justify-center py-3 bg-white/10 hover:bg-white/20 text-white text-center rounded-[var(--tp-radius-button)] transition-colors font-medium border-0">
                     ยกเลิก
                 </a>
-                <button type="submit" class="btn-primary touch-manipulation flex-1 inline-flex items-center justify-center gap-2 min-h-[58px] py-3 rounded-[var(--tp-radius-button)] font-semibold border-0">
+                <button type="submit" class="btn-primary touch-manipulation flex-1 inline-flex items-center justify-center gap-2 min-h-[58px] py-3 rounded-[var(--tp-radius-button)] font-semibold border-0 whitespace-nowrap">
                     <i class="fas fa-paper-plane" aria-hidden="true"></i><span>ส่งคำขอลา</span>
                 </button>
             </div>

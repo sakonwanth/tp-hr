@@ -221,10 +221,10 @@ require_once __DIR__ . '/../templates/header.php';
                 data-revealed="0"
                 aria-label="ค่าคีย์ถูกซ่อน กดแสดงเพื่อดู"><?php $__pl = function_exists('mb_strlen') ? mb_strlen($plainKey, 'UTF-8') : strlen($plainKey); echo htmlspecialchars(str_repeat('●', max(12, min(64, $__pl)))); ?></div>
             <div class="flex flex-col sm:flex-row gap-2 shrink-0">
-                <button type="button" id="hr-api-toggle-key-btn" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] border border-amber-400/40 bg-amber-500/15 px-4 text-sm font-semibold text-amber-100 hover:bg-amber-500/25 touch-manipulation gap-2">
+                <button type="button" id="hr-api-toggle-key-btn" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] border border-amber-400/40 bg-amber-500/15 px-4 text-sm font-semibold text-amber-100 hover:bg-amber-500/25 touch-manipulation gap-2 whitespace-nowrap">
                     <i class="fas fa-eye" aria-hidden="true"></i><span id="hr-api-toggle-key-label">แสดงคีย์</span>
                 </button>
-                <button type="button" id="hr-api-copy-key-btn" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] border border-amber-400/40 bg-amber-500/20 px-4 text-sm font-semibold text-amber-100 hover:bg-amber-500/30 touch-manipulation gap-2">
+                <button type="button" id="hr-api-copy-key-btn" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] border border-amber-400/40 bg-amber-500/20 px-4 text-sm font-semibold text-amber-100 hover:bg-amber-500/30 touch-manipulation gap-2 whitespace-nowrap">
                     <i class="fas fa-copy" aria-hidden="true"></i>คัดลอก
                 </button>
             </div>
@@ -304,7 +304,7 @@ require_once __DIR__ . '/../templates/header.php';
             </div>
 
             <div class="md:col-span-2">
-                <button type="submit" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 hover:bg-violet-700 px-6 text-sm font-semibold text-white touch-manipulation gap-2">
+                <button type="submit" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 hover:bg-violet-700 px-6 text-sm font-semibold text-white touch-manipulation gap-2 whitespace-nowrap">
                     <i class="fas fa-plus" aria-hidden="true"></i>ออกคีย์
                 </button>
             </div>
@@ -360,7 +360,7 @@ require_once __DIR__ . '/../templates/header.php';
                     </div>
                     <?php if ((int)$k['is_active'] === 1): ?>
                     <button type="button"
-                        class="w-full min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 text-sm font-semibold touch-manipulation"
+                        class="w-full min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 text-sm font-semibold touch-manipulation whitespace-nowrap"
                         data-ak-act="revoke"
                         data-ak-id="<?= (int)$k['id'] ?>"
                         data-ak-name="<?= htmlspecialchars($k['name'], ENT_QUOTES, 'UTF-8') ?>"
@@ -368,7 +368,7 @@ require_once __DIR__ . '/../templates/header.php';
                         Revoke</button>
                     <?php else: ?>
                     <button type="button"
-                        class="w-full min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 text-sm font-semibold touch-manipulation"
+                        class="w-full min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 text-sm font-semibold touch-manipulation whitespace-nowrap"
                         data-ak-act="activate"
                         data-ak-id="<?= (int)$k['id'] ?>"
                         data-ak-name="<?= htmlspecialchars($k['name'], ENT_QUOTES, 'UTF-8') ?>"
@@ -421,14 +421,14 @@ require_once __DIR__ . '/../templates/header.php';
                     <td class="px-4 py-3 text-center whitespace-nowrap">
                         <?php if ((int)$k['is_active'] === 1): ?>
                         <button type="button"
-                            class="inline-flex min-h-[48px] min-w-[72px] items-center justify-center rounded-[var(--tp-ios-card-radius)] text-rose-300 hover:bg-rose-500/15 text-xs font-medium touch-manipulation"
+                            class="inline-flex min-h-[48px] min-w-[72px] items-center justify-center rounded-[var(--tp-ios-card-radius)] text-rose-300 hover:bg-rose-500/15 text-xs font-medium touch-manipulation whitespace-nowrap"
                             data-ak-act="revoke"
                             data-ak-id="<?= (int)$k['id'] ?>"
                             data-ak-name="<?= htmlspecialchars($k['name'], ENT_QUOTES, 'UTF-8') ?>"
                             onclick="hrApiKeysOpenActionModal(this)">Revoke</button>
                         <?php else: ?>
                         <button type="button"
-                            class="inline-flex min-h-[48px] min-w-[72px] items-center justify-center rounded-[var(--tp-ios-card-radius)] text-emerald-300 hover:bg-emerald-500/15 text-xs font-medium touch-manipulation"
+                            class="inline-flex min-h-[48px] min-w-[72px] items-center justify-center rounded-[var(--tp-ios-card-radius)] text-emerald-300 hover:bg-emerald-500/15 text-xs font-medium touch-manipulation whitespace-nowrap"
                             data-ak-act="activate"
                             data-ak-id="<?= (int)$k['id'] ?>"
                             data-ak-name="<?= htmlspecialchars($k['name'], ENT_QUOTES, 'UTF-8') ?>"
@@ -522,8 +522,8 @@ require_once __DIR__ . '/../templates/header.php';
             </div>
         </div>
         <div class="flex flex-col sm:flex-row gap-3 pt-2">
-            <button type="button" id="hr-ak-modal-cancel" class="flex-1 min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium">ยกเลิก</button>
-            <button type="submit" id="hr-ak-modal-confirm" class="flex-1 min-h-[56px] py-2.5 rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold text-white bg-rose-600 hover:bg-rose-700">ยืนยัน</button>
+            <button type="button" id="hr-ak-modal-cancel" class="flex-1 min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium whitespace-nowrap">ยกเลิก</button>
+            <button type="submit" id="hr-ak-modal-confirm" class="flex-1 min-h-[56px] py-2.5 rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold text-white bg-rose-600 hover:bg-rose-700 whitespace-nowrap">ยืนยัน</button>
         </div>
     </form>
 </div>

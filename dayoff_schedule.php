@@ -352,7 +352,7 @@ include __DIR__ . '/templates/header.php';
             
             <?php if (!$req || in_array($req['status'], ['REJECTED', 'CANCELLED'], true)): ?>
             <button type="button" onclick="openChangeModal('<?php echo $week['start']; ?>', '<?php echo $week['end']; ?>', <?php echo $week['num']; ?>)" 
-                    class="btn-primary shrink-0 px-4 min-h-[48px] sm:min-h-[52px] rounded-[var(--tp-ios-card-radius)] text-xs sm:text-sm self-start sm:self-auto touch-manipulation border-0">
+                    class="btn-primary shrink-0 px-4 min-h-[48px] sm:min-h-[52px] rounded-[var(--tp-ios-card-radius)] text-xs sm:text-sm self-start sm:self-auto touch-manipulation border-0 whitespace-nowrap">
                 <i class="fas fa-exchange-alt mr-1" aria-hidden="true"></i>ขอเปลี่ยนวันหยุด
             </button>
             <?php elseif ($req && $req['status'] === 'PENDING'): ?>
@@ -360,7 +360,7 @@ include __DIR__ . '/templates/header.php';
                 <?php echo csrfField(); ?>
                 <input type="hidden" name="action" value="cancel_request">
                 <input type="hidden" name="request_id" value="<?php echo $req['id']; ?>">
-                <button type="submit" class="min-h-[48px] px-3 py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-300 text-xs sm:text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-medium"
+                <button type="submit" class="min-h-[48px] px-3 py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-300 text-xs sm:text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-medium whitespace-nowrap"
                         onclick="return confirm('ยกเลิกคำขอเปลี่ยนวันหยุดสัปดาห์นี้?')">
                     <i class="fas fa-times mr-1" aria-hidden="true"></i>ยกเลิกคำขอ
                 </button>
@@ -368,7 +368,7 @@ include __DIR__ . '/templates/header.php';
             <?php elseif ($req && $req['status'] === 'APPROVED'): ?>
             <button type="button"
                     onclick="openChangeModal('<?php echo $week['start']; ?>', '<?php echo $week['end']; ?>', <?php echo $week['num']; ?>, <?php echo (int)$req['requested_day_off']; ?>, true)"
-                    class="min-h-[48px] px-4 py-2 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/30 text-amber-200 text-xs sm:text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-medium shrink-0 self-start sm:self-auto">
+                    class="min-h-[48px] px-4 py-2 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/30 text-amber-200 text-xs sm:text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-medium shrink-0 self-start sm:self-auto whitespace-nowrap">
                 <i class="fas fa-pen mr-1" aria-hidden="true"></i>ขอแก้ไข
             </button>
             <?php endif; ?>
@@ -527,10 +527,10 @@ include __DIR__ . '/templates/header.php';
             </div>
             
             <div class="flex flex-col-reverse gap-3 sm:flex-row pt-2">
-                <button type="button" onclick="closeChangeModal()" class="flex-1 min-h-[52px] inline-flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] font-semibold touch-manipulation border-0">
+                <button type="button" onclick="closeChangeModal()" class="flex-1 min-h-[52px] inline-flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] font-semibold touch-manipulation border-0 whitespace-nowrap">
                     ยกเลิก
                 </button>
-                <button type="submit" class="flex-1 min-h-[56px] inline-flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] font-semibold touch-manipulation border-0">
+                <button type="submit" class="flex-1 min-h-[56px] inline-flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] font-semibold touch-manipulation border-0 whitespace-nowrap">
                     <i class="fas fa-paper-plane" aria-hidden="true"></i>ส่งคำขอ
                 </button>
             </div>

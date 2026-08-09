@@ -279,11 +279,11 @@ include dirname(__DIR__) . '/templates/header.php';
                     </div>
                     <div class="flex flex-col sm:flex-row gap-2 shrink-0 w-full sm:w-auto">
                         <button type="button" onclick="approveLeave(<?php echo (int)$leave['id']; ?>)"
-                                class="min-h-[56px] px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-semibold">
+                                class="min-h-[56px] px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-semibold whitespace-nowrap">
                             อนุมัติ
                         </button>
                         <button type="button" onclick="rejectLeave(<?php echo (int)$leave['id']; ?>)"
-                                class="min-h-[48px] px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/25 text-red-300 text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-medium">
+                                class="min-h-[48px] px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/25 text-red-300 text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-medium whitespace-nowrap">
                             ไม่อนุมัติ
                         </button>
                     </div>
@@ -499,10 +499,10 @@ include dirname(__DIR__) . '/templates/header.php';
                           placeholder="ระบุเหตุผลที่ไม่อนุมัติ..."></textarea>
             </div>
             <div class="flex flex-col sm:flex-row gap-3 pt-2">
-                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium">
+                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium whitespace-nowrap">
                     ยกเลิก
                 </button>
-                <button type="submit" class="flex-1 min-h-[56px] py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold">
+                <button type="submit" class="flex-1 min-h-[56px] py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold whitespace-nowrap">
                     ไม่อนุมัติ
                 </button>
             </div>

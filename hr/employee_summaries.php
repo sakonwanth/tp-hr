@@ -280,7 +280,7 @@ include dirname(__DIR__) . '/templates/header.php';
                     </td>
                     <td class="px-4 py-3 text-center">
                         <button type="button"
-                                class="emp-summary-toggle inline-flex items-center justify-center min-h-[48px] px-3 py-1.5 bg-violet-500/15 hover:bg-violet-500/25 text-violet-200 rounded-[var(--tp-ios-card-radius)] text-xs font-medium touch-manipulation"
+                                class="emp-summary-toggle inline-flex items-center justify-center min-h-[48px] px-3 py-1.5 bg-violet-500/15 hover:bg-violet-500/25 text-violet-200 rounded-[var(--tp-ios-card-radius)] text-xs font-medium touch-manipulation whitespace-nowrap"
                                 aria-expanded="false"
                                 data-target="emp-detail-<?php echo (int)$row['id']; ?>">
                             <i class="fas fa-chevron-down mr-1 transition-transform emp-summary-chevron" aria-hidden="true"></i>

@@ -221,11 +221,11 @@ include 'templates/header.php';
             <p class="text-white/50 text-xs mt-2 line-clamp-2"><?php echo htmlspecialchars($req['reason']); ?></p>
             
             <div class="flex gap-2 mt-3">
-                <button type="button" onclick="viewDetail(<?php echo $req['id']; ?>)" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-medium">
+                <button type="button" onclick="viewDetail(<?php echo $req['id']; ?>)" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-medium whitespace-nowrap">
                     <i class="fas fa-eye mr-1" aria-hidden="true"></i>ดูรายละเอียด
                 </button>
                 <?php if ($req['status'] === 'PENDING'): ?>
-                <button type="button" onclick="cancelRequest(<?php echo $req['id']; ?>)" class="flex-1 min-h-[48px] py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-300 text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-medium">
+                <button type="button" onclick="cancelRequest(<?php echo $req['id']; ?>)" class="flex-1 min-h-[48px] py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-300 text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-medium whitespace-nowrap">
                     <i class="fas fa-times mr-1" aria-hidden="true"></i>ยกเลิก
                 </button>
                 <?php endif; ?>

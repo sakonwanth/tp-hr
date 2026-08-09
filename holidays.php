@@ -303,7 +303,7 @@ require_once __DIR__ . '/templates/header.php';
                                 data-pager-step="-1" aria-label="เดือนก่อนหน้า">
                             <i class="fas fa-chevron-left" aria-hidden="true"></i>
                         </button>
-                        <button type="button" class="tp-holidays-pager-all touch-manipulation"
+                        <button type="button" class="tp-holidays-pager-all touch-manipulation whitespace-nowrap"
                                 id="tp-holidays-pager-toggle" aria-pressed="false">ดูทั้งปี</button>
                         <button type="button" class="tp-holidays-year-btn touch-manipulation"
                                 data-pager-step="1" aria-label="เดือนถัดไป">

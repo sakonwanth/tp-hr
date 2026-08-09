@@ -245,17 +245,17 @@ include dirname(__DIR__) . '/templates/header.php';
             <?php if ($st === 'PENDING'): ?>
             <div class="grid grid-cols-2 gap-2">
                 <button type="button" onclick="updateDocStatus(<?php echo $reqId; ?>, 'PROCESSING')"
-                        class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold touch-manipulation">
+                        class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold touch-manipulation whitespace-nowrap">
                     <i class="fas fa-play mr-2" aria-hidden="true"></i>เริ่มจัดทำ
                 </button>
                 <button type="button" onclick="rejectDoc(<?php echo $reqId; ?>)"
-                        class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 text-sm font-semibold touch-manipulation">
+                        class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 text-sm font-semibold touch-manipulation whitespace-nowrap">
                     <i class="fas fa-times mr-2" aria-hidden="true"></i>ปฏิเสธ
                 </button>
             </div>
             <?php elseif ($st === 'PROCESSING'): ?>
             <button type="button" onclick="completeDoc(<?php echo $reqId; ?>)"
-                    class="w-full min-h-[56px] rounded-[var(--tp-ios-card-radius)] bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold touch-manipulation">
+                    class="w-full min-h-[56px] rounded-[var(--tp-ios-card-radius)] bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold touch-manipulation whitespace-nowrap">
                 <i class="fas fa-check mr-2" aria-hidden="true"></i>จัดทำเสร็จ
             </button>
             <?php elseif (in_array($st, ['COMPLETED', 'READY', 'DELIVERED'], true) && !empty($req['document_url'])): ?>
@@ -265,7 +265,7 @@ include dirname(__DIR__) . '/templates/header.php';
             </a>
             <?php else: ?>
             <button type="button" onclick="viewDocDetail(<?php echo $reqId; ?>)"
-                    class="w-full min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
+                    class="w-full min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation whitespace-nowrap">
                 <i class="fas fa-eye mr-2" aria-hidden="true"></i>ดูรายละเอียด
             </button>
             <?php endif; ?>
@@ -332,16 +332,16 @@ include dirname(__DIR__) . '/templates/header.php';
                         ?>
                         <?php if ($req['status'] === 'PENDING'): ?>
                         <button type="button" onclick="updateDocStatus(<?php echo (int)$req['id']; ?>, 'PROCESSING')" 
-                                class="inline-flex min-h-[48px] items-center gap-1.5 px-3 py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="เริ่มจัดทำ">
+                                class="inline-flex min-h-[48px] items-center gap-1.5 px-3 py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation whitespace-nowrap" title="เริ่มจัดทำ">
                             <i class="fas fa-play" aria-hidden="true"></i><span class="hidden xl:inline">เริ่ม</span>
                         </button>
                         <button type="button" onclick="rejectDoc(<?php echo (int)$req['id']; ?>)"
-                                class="inline-flex min-h-[48px] items-center gap-1.5 px-3 py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 text-xs font-medium rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="ปฏิเสธ">
+                                class="inline-flex min-h-[48px] items-center gap-1.5 px-3 py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 text-xs font-medium rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation whitespace-nowrap" title="ปฏิเสธ">
                             <i class="fas fa-times" aria-hidden="true"></i><span class="hidden xl:inline">ปฏิเสธ</span>
                         </button>
                         <?php elseif ($req['status'] === 'PROCESSING'): ?>
                         <button type="button" onclick="completeDoc(<?php echo (int)$req['id']; ?>)" 
-                                class="inline-flex min-h-[48px] items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="จัดทำเสร็จ">
+                                class="inline-flex min-h-[48px] items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation whitespace-nowrap" title="จัดทำเสร็จ">
                             <i class="fas fa-check" aria-hidden="true"></i><span class="hidden xl:inline">เสร็จ</span>
                         </button>
                         <?php elseif (in_array($req['status'], ['COMPLETED', 'READY', 'DELIVERED'], true) && $req['document_url']): ?>
@@ -350,7 +350,7 @@ include dirname(__DIR__) . '/templates/header.php';
                             <i class="fas fa-download" aria-hidden="true"></i><span class="hidden xl:inline">ดาวน์โหลด</span>
                         </a>
                         <?php else: ?>
-                        <button type="button" onclick="viewDocDetail(<?php echo (int)$req['id']; ?>)" class="inline-flex min-h-[48px] items-center gap-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="ดูรายละเอียด">
+                        <button type="button" onclick="viewDocDetail(<?php echo (int)$req['id']; ?>)" class="inline-flex min-h-[48px] items-center gap-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation whitespace-nowrap" title="ดูรายละเอียด">
                             <i class="fas fa-eye" aria-hidden="true"></i><span class="hidden xl:inline">ดู</span>
                         </button>
                         <?php endif; ?>
@@ -416,8 +416,8 @@ include dirname(__DIR__) . '/templates/header.php';
             </div>
             
             <div class="flex flex-col sm:flex-row gap-4">
-                <button type="button" onclick="closeCompleteModal()" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium">ยกเลิก</button>
-                <button type="submit" class="flex-1 min-h-[56px] py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold">บันทึก</button>
+                <button type="button" onclick="closeCompleteModal()" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium whitespace-nowrap">ยกเลิก</button>
+                <button type="submit" class="flex-1 min-h-[56px] py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold whitespace-nowrap">บันทึก</button>
             </div>
         </form>
     </div>
@@ -434,8 +434,8 @@ include dirname(__DIR__) . '/templates/header.php';
                 <textarea name="reason" id="reject-reason" required rows="3" class="input-field tp-native-textarea w-full"></textarea>
             </div>
             <div class="flex flex-col sm:flex-row gap-4">
-                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium">ยกเลิก</button>
-                <button type="submit" class="flex-1 min-h-[56px] py-2 bg-red-600 hover:bg-red-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold">ปฏิเสธ</button>
+                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium whitespace-nowrap">ยกเลิก</button>
+                <button type="submit" class="flex-1 min-h-[56px] py-2 bg-red-600 hover:bg-red-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold whitespace-nowrap">ปฏิเสธ</button>
             </div>
         </form>
     </div>
@@ -446,7 +446,7 @@ include dirname(__DIR__) . '/templates/header.php';
     <div class="native-card tp-native-card w-full max-w-md my-auto rounded-[var(--tp-ios-card-radius)] p-6 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
         <h3 id="detail-stub-title" class="text-xl font-bold text-white mb-2">รายละเอียดคำขอ</h3>
         <p class="text-white/65 text-sm mb-6">คำขอเอกสาร <span id="detail-stub-id" class="font-mono text-white"></span> — ยังไม่มีหน้ารายละเอียดแยกในรุ่นนี้ ใช้ปุ่มดู/พิมพ์หรือข้อมูลในตารางแทน</p>
-        <button type="button" onclick="closeDetailStubModal()" class="w-full min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium">ปิด</button>
+        <button type="button" onclick="closeDetailStubModal()" class="w-full min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium whitespace-nowrap">ปิด</button>
     </div>
 </div>
 

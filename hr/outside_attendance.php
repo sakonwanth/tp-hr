@@ -516,14 +516,14 @@ include dirname(__DIR__) . '/templates/header.php';
                             data-emp-label="<?php echo htmlspecialchars($empName, ENT_QUOTES); ?>"
                             data-request-type="<?php echo htmlspecialchars(hrOutsideTypeLabel($type), ENT_QUOTES); ?>"
                             onclick="openApproveModal(event, <?php echo (int)$req['id']; ?>)"
-                            class="tp-outside-action-button bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-colors touch-manipulation shadow-sm shadow-emerald-900/30">
+                            class="tp-outside-action-button bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-colors touch-manipulation shadow-sm shadow-emerald-900/30 whitespace-nowrap">
                         <i class="fas fa-check mr-2" aria-hidden="true"></i>อนุมัติ
                     </button>
                     <button type="button"
                             data-emp-label="<?php echo htmlspecialchars($empName, ENT_QUOTES); ?>"
                             data-request-type="<?php echo htmlspecialchars(hrOutsideTypeLabel($type), ENT_QUOTES); ?>"
                             onclick="openRejectModal(event, <?php echo (int)$req['id']; ?>)"
-                            class="tp-outside-action-button bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 font-semibold transition-colors touch-manipulation">
+                            class="tp-outside-action-button bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 font-semibold transition-colors touch-manipulation whitespace-nowrap">
                         <i class="fas fa-times mr-2" aria-hidden="true"></i>ไม่อนุมัติ
                     </button>
                 </div>
@@ -552,8 +552,8 @@ include dirname(__DIR__) . '/templates/header.php';
             <input type="text" id="approve-note" class="input-field tp-native-input w-full" placeholder="บันทึกประกอบการอนุมัติ" autocomplete="off">
         </div>
         <div class="flex flex-col sm:flex-row gap-3">
-            <button type="button" onclick="closeApproveModal()" class="flex-1 min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium">ยกเลิก</button>
-            <button type="button" onclick="submitApprove()" class="flex-1 min-h-[56px] py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold">อนุมัติ</button>
+            <button type="button" onclick="closeApproveModal()" class="flex-1 min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium whitespace-nowrap">ยกเลิก</button>
+            <button type="button" onclick="submitApprove()" class="flex-1 min-h-[56px] py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold whitespace-nowrap">อนุมัติ</button>
         </div>
     </div>
 </div>
@@ -571,8 +571,8 @@ include dirname(__DIR__) . '/templates/header.php';
                 <textarea name="review_remarks" id="reject-review-remarks" rows="3" class="input-field tp-native-textarea w-full" placeholder="ระบุเหตุผลให้พนักงานเห็นในสถานะคำขอ" required></textarea>
             </div>
             <div class="flex flex-col-reverse sm:flex-row gap-3">
-                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[48px] bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-medium">ยกเลิก</button>
-                <button type="submit" class="flex-1 min-h-[56px] bg-red-600 hover:bg-red-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-semibold">
+                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[48px] bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-medium whitespace-nowrap">ยกเลิก</button>
+                <button type="submit" class="flex-1 min-h-[56px] bg-red-600 hover:bg-red-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-semibold whitespace-nowrap">
                     <i class="fas fa-times mr-2" aria-hidden="true"></i>ไม่อนุมัติ
                 </button>
             </div>

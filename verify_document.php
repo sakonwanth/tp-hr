@@ -78,8 +78,8 @@ function thaiDate(?string $d): string {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/app.css?v=29">
-<link rel="stylesheet" href="/assets/css/native-shell.css?v=29">
+<link rel="stylesheet" href="/assets/css/app.css?v=30">
+<link rel="stylesheet" href="/assets/css/native-shell.css?v=30">
 <style>
     * {
         font-family: 'IBM Plex Sans Thai', system-ui, sans-serif;
@@ -159,7 +159,7 @@ function thaiDate(?string $d): string {
                     <label class="block text-white/80 text-sm font-medium mb-2" for="verify-doc-err">เลขที่เอกสาร <span class="font-normal text-white/50">(ถ้ามี)</span></label>
                     <input id="verify-doc-err" type="text" name="doc" autocomplete="off" placeholder="เช่น HR-2569-00001" class="input-field tp-native-input w-full">
                 </div>
-                <button type="submit" class="tp-native-btn-primary w-full touch-manipulation">ตรวจสอบ</button>
+                <button type="submit" class="tp-native-btn-primary w-full touch-manipulation whitespace-nowrap">ตรวจสอบ</button>
             </form>
             <p class="tp-ios-caption-muted text-center text-xs leading-relaxed" id="form-hint-err">กรอกรหัสยืนยันจาก QR หรือเลขที่เอกสารอย่างใดอย่างหนึ่ง</p>
         </div>
@@ -179,7 +179,7 @@ function thaiDate(?string $d): string {
                     <label class="block text-white/80 text-sm font-medium mb-2" for="verify-doc-init">เลขที่เอกสาร <span class="font-normal text-white/50">(ถ้ามี)</span></label>
                     <input id="verify-doc-init" type="text" name="doc" autocomplete="off" placeholder="เช่น HR-2569-00001" class="input-field tp-native-input w-full">
                 </div>
-                <button type="submit" class="tp-native-btn-primary w-full touch-manipulation">ตรวจสอบ</button>
+                <button type="submit" class="tp-native-btn-primary w-full touch-manipulation whitespace-nowrap">ตรวจสอบ</button>
             </form>
             <p class="tp-ios-caption-muted text-center text-xs leading-relaxed" id="form-hint-init">กรอกรหัสยืนยันที่ปรากฏในหนังสือรับรอง หรือเลขที่เอกสาร อย่างน้อยหนึ่งช่อง</p>
         </div>

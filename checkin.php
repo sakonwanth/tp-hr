@@ -425,7 +425,7 @@ require_once __DIR__ . '/templates/header.php';
                         <!-- Check-in Button -->
                         <button id="btn-checkin" type="button"
                                 onclick="startCheckin('in')"
-                                class="tp-checkin-primary-action tp-checkin-primary-action--in hover:brightness-110 active:scale-[0.985] text-white transition touch-manipulation border-0">
+                                class="tp-checkin-primary-action tp-checkin-primary-action--in hover:brightness-110 active:scale-[0.985] text-white transition touch-manipulation border-0 whitespace-nowrap">
                             <i class="fas fa-fingerprint text-5xl mb-2 shrink-0" aria-hidden="true"></i>
                             <span class="text-lg font-bold whitespace-nowrap">ลงเวลาเข้า</span>
                         </button>
@@ -444,7 +444,7 @@ require_once __DIR__ . '/templates/header.php';
                         <!-- Check-out Button -->
                         <button id="btn-checkout" type="button"
                                 onclick="startCheckin('out')"
-                                class="tp-checkin-primary-action tp-checkin-primary-action--out hover:brightness-110 active:scale-[0.985] text-white transition touch-manipulation border-0">
+                                class="tp-checkin-primary-action tp-checkin-primary-action--out hover:brightness-110 active:scale-[0.985] text-white transition touch-manipulation border-0 whitespace-nowrap">
                             <i class="fas fa-sign-out-alt text-5xl mb-2 shrink-0" aria-hidden="true"></i>
                             <span class="text-lg font-bold whitespace-nowrap">ลงเวลาออก</span>
                         </button>
@@ -493,7 +493,7 @@ require_once __DIR__ . '/templates/header.php';
                         <p class="text-white/70 text-xs mt-1 line-clamp-2"><?php echo htmlspecialchars($ls_today_row['planned_reason']); ?></p>
                         <?php endif; ?>
                         <button type="button" onclick="cancelLateStart('<?php echo $ls_today; ?>')"
-                                class="mt-3 w-full min-h-[52px] py-2 rounded-[var(--tp-ios-card-radius)] bg-red-500/15 hover:bg-red-500/25 text-red-300 text-sm font-semibold transition-colors touch-manipulation shadow-[var(--tp-surface-well-inset)]">
+                                class="mt-3 w-full min-h-[52px] py-2 rounded-[var(--tp-ios-card-radius)] bg-red-500/15 hover:bg-red-500/25 text-red-300 text-sm font-semibold transition-colors touch-manipulation shadow-[var(--tp-surface-well-inset)] whitespace-nowrap">
                             <i class="fas fa-times-circle mr-1"></i>ยกเลิกการแจ้ง
                         </button>
                     </div>
@@ -514,14 +514,14 @@ require_once __DIR__ . '/templates/header.php';
                         <p class="text-white/70 text-xs mt-1 line-clamp-2"><?php echo htmlspecialchars($ls_tomorrow_row['planned_reason']); ?></p>
                         <?php endif; ?>
                         <button type="button" onclick="cancelLateStart('<?php echo $ls_tomorrow; ?>')"
-                                class="mt-3 w-full min-h-[52px] py-2 rounded-[var(--tp-ios-card-radius)] bg-red-500/15 hover:bg-red-500/25 text-red-300 text-sm font-semibold transition-colors touch-manipulation shadow-[var(--tp-surface-well-inset)]">
+                                class="mt-3 w-full min-h-[52px] py-2 rounded-[var(--tp-ios-card-radius)] bg-red-500/15 hover:bg-red-500/25 text-red-300 text-sm font-semibold transition-colors touch-manipulation shadow-[var(--tp-surface-well-inset)] whitespace-nowrap">
                             <i class="fas fa-times-circle mr-1"></i>ยกเลิกการแจ้ง
                         </button>
                     </div>
                     <?php endif; ?>
                     <?php if (!($ls_today_row && $ls_tomorrow_row)): ?>
                     <button type="button" onclick="openLateStartModal()"
-                            class="w-full min-h-[52px] py-2.5 rounded-[var(--tp-ios-card-radius)] bg-white/[0.05] hover:bg-white/[0.09] text-white/70 text-sm font-medium transition-colors touch-manipulation">
+                            class="w-full min-h-[52px] py-2.5 rounded-[var(--tp-ios-card-radius)] bg-white/[0.05] hover:bg-white/[0.09] text-white/70 text-sm font-medium transition-colors touch-manipulation whitespace-nowrap">
                         <i class="fas fa-plus-circle mr-1"></i>เพิ่มการแจ้งอีกวัน
                     </button>
                     <?php endif; ?>
@@ -741,11 +741,11 @@ require_once __DIR__ . '/templates/header.php';
         <!-- Submit -->
         <div class="flex gap-2">
             <button type="button" onclick="closeLateStartModal()"
-                    class="flex-1 min-h-[52px] py-3 bg-white/10 hover:bg-white/15 text-white rounded-[var(--tp-ios-card-radius)] font-medium transition-colors touch-manipulation border-0">
+                    class="flex-1 min-h-[52px] py-3 bg-white/10 hover:bg-white/15 text-white rounded-[var(--tp-ios-card-radius)] font-medium transition-colors touch-manipulation border-0 whitespace-nowrap">
                 ยกเลิก
             </button>
             <button type="button" onclick="submitLateStart()"
-                    class="flex-1 min-h-[56px] py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-[var(--tp-ios-card-radius)] font-semibold transition-colors touch-manipulation border-0">
+                    class="flex-1 min-h-[56px] py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-[var(--tp-ios-card-radius)] font-semibold transition-colors touch-manipulation border-0 whitespace-nowrap">
                 <i class="fas fa-paper-plane mr-2"></i>ส่งคำขอ
             </button>
         </div>
@@ -774,10 +774,10 @@ require_once __DIR__ . '/templates/header.php';
         </div>
 
         <div class="flex gap-3">
-            <button type="button" onclick="closeOffsiteModal()" class="flex-1 min-h-[52px] py-3 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] font-medium transition-colors touch-manipulation border-0">
+            <button type="button" onclick="closeOffsiteModal()" class="flex-1 min-h-[52px] py-3 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] font-medium transition-colors touch-manipulation border-0 whitespace-nowrap">
                 ยกเลิก
             </button>
-            <button type="button" onclick="submitOffsite()" class="flex-1 min-h-[56px] py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-[var(--tp-ios-card-radius)] font-semibold transition-colors touch-manipulation border-0">
+            <button type="button" onclick="submitOffsite()" class="flex-1 min-h-[56px] py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-[var(--tp-ios-card-radius)] font-semibold transition-colors touch-manipulation border-0 whitespace-nowrap">
                 <i class="fas fa-paper-plane mr-1"></i>ส่งคำขอ
             </button>
         </div>
@@ -821,13 +821,13 @@ require_once __DIR__ . '/templates/header.php';
         
         <!-- Buttons -->
         <div class="flex gap-3">
-            <button type="button" onclick="closeCheckinModal()" class="flex-1 min-h-[52px] py-3 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation border-0">
+            <button type="button" onclick="closeCheckinModal()" class="flex-1 min-h-[52px] py-3 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation border-0 whitespace-nowrap">
                 ยกเลิก
             </button>
-            <button type="button" id="btn-capture" onclick="capturePhoto()" class="flex-1 min-h-[56px] py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation border-0">
+            <button type="button" id="btn-capture" onclick="capturePhoto()" class="flex-1 min-h-[56px] py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation border-0 whitespace-nowrap">
                 <i class="fas fa-camera mr-2" aria-hidden="true"></i>ถ่ายรูป
             </button>
-            <button type="button" id="btn-confirm" onclick="confirmCheckin()" class="flex-1 min-h-[56px] py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors hidden touch-manipulation border-0">
+            <button type="button" id="btn-confirm" onclick="confirmCheckin()" class="flex-1 min-h-[56px] py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors hidden touch-manipulation border-0 whitespace-nowrap">
                 <i class="fas fa-check mr-2" aria-hidden="true"></i>ยืนยัน
             </button>
         </div>

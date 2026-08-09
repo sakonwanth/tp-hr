@@ -397,25 +397,25 @@ include dirname(__DIR__) . '/templates/header.php';
             <div class="grid grid-cols-2 gap-2 mt-4">
                 <button type="button"
                         onclick="editAttendance(<?php echo (int)$rec['id']; ?>, '<?php echo htmlspecialchars($date, ENT_QUOTES); ?>', <?php echo $rec['attendance_id'] ?? 'null'; ?>, '<?php echo $rec['check_in_time'] ? date('H:i', strtotime($rec['check_in_time'])) : ''; ?>', '<?php echo $rec['check_out_time'] ? date('H:i', strtotime($rec['check_out_time'])) : ''; ?>', '<?php echo htmlspecialchars(($rec['first_name_th'] ?? '') . ' ' . ($rec['last_name_th'] ?? ''), ENT_QUOTES); ?>')"
-                        class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
+                        class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation whitespace-nowrap">
                     <i class="fas fa-edit mr-2" aria-hidden="true"></i>แก้ไขเวลา
                 </button>
                 <button type="button"
                         onclick="viewHistory(<?php echo (int)$rec['id']; ?>, '<?php echo htmlspecialchars($date, ENT_QUOTES); ?>', '<?php echo htmlspecialchars(($rec['first_name_th'] ?? '') . ' ' . ($rec['last_name_th'] ?? ''), ENT_QUOTES); ?>')"
-                        class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
+                        class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation whitespace-nowrap">
                     <i class="fas fa-history mr-2" aria-hidden="true"></i>ประวัติ
                 </button>
                 <?php if ($hasAttendance && $rec['check_in_latitude']): ?>
                 <button type="button"
                         onclick="viewLocation(<?php echo $rec['check_in_latitude']; ?>, <?php echo $rec['check_in_longitude']; ?>)"
-                        class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
+                        class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation whitespace-nowrap">
                     <i class="fas fa-map-marker-alt mr-2" aria-hidden="true"></i>ตำแหน่ง
                 </button>
                 <?php endif; ?>
                 <?php if ($hasAttendance): ?>
                 <button type="button"
                         onclick="deleteAttendance(<?php echo (int)$rec['id']; ?>, '<?php echo htmlspecialchars($date, ENT_QUOTES); ?>', '<?php echo htmlspecialchars(($rec['first_name_th'] ?? '') . ' ' . ($rec['last_name_th'] ?? ''), ENT_QUOTES); ?>', 'full')"
-                        class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-200 text-sm font-semibold touch-manipulation">
+                        class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-200 text-sm font-semibold touch-manipulation whitespace-nowrap">
                     <i class="fas fa-trash mr-2" aria-hidden="true"></i>ลบเวลา
                 </button>
                 <?php endif; ?>
@@ -526,7 +526,7 @@ include dirname(__DIR__) . '/templates/header.php';
                         </button>
                         <?php if ($hasAttendance): ?>
                         <button onclick="deleteAttendance(<?php echo $rec['id']; ?>, '<?php echo $date; ?>', '<?php echo htmlspecialchars(($rec['first_name_th'] ?? '') . ' ' . ($rec['last_name_th'] ?? ''), ENT_QUOTES); ?>', 'full')" 
-                                class="min-h-[48px] inline-flex items-center gap-1 px-2.5 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-200 text-xs rounded transition-colors ml-1 font-medium" title="ลบ/ล้างเวลาเข้า-ออก">
+                                class="min-h-[48px] inline-flex items-center gap-1 px-2.5 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-200 text-xs rounded transition-colors ml-1 font-medium whitespace-nowrap" title="ลบ/ล้างเวลาเข้า-ออก">
                             <i class="fas fa-trash" aria-hidden="true"></i><span>ลบเวลา</span>
                         </button>
                         <?php endif; ?>
@@ -593,14 +593,15 @@ include dirname(__DIR__) . '/templates/header.php';
                 <label for="edit-note" class="block text-white/80 text-sm mb-2">เหตุผลการแก้ไข <span class="text-red-400" aria-hidden="true">*</span></label>
                 <textarea name="note" id="edit-note" rows="2" class="input-field tp-native-textarea" placeholder="ระบุเหตุผลการแก้ไข (จำเป็น)" required></textarea>
                 <p class="text-white/50 text-xs mt-1">การแก้ไขทั้งหมดจะถูกบันทึกใน audit log</p>
-                <button type="button" id="edit-open-delete-btn" class="mt-3 min-h-[48px] inline-flex items-center px-2 text-red-300/90 hover:text-red-200 text-xs font-medium touch-manipulation hidden">
-                    <i class="fas fa-trash mr-1" aria-hidden="true"></i>ลงเวลาผิด? ลบ/ล้างเวลาเพื่อให้ลงใหม่
+                <p id="edit-open-delete-hint" class="text-white/50 text-xs mt-3 hidden">ลงเวลาผิด?</p>
+                <button type="button" id="edit-open-delete-btn" class="mt-1 min-h-[48px] inline-flex items-center px-2 text-red-300/90 hover:text-red-200 text-xs font-medium touch-manipulation whitespace-nowrap hidden">
+                    <i class="fas fa-trash mr-1" aria-hidden="true"></i>ลบ/ล้างเวลาเพื่อลงใหม่
                 </button>
             </div>
             
             <div class="flex flex-col sm:flex-row gap-4">
-                <button type="button" onclick="closeEditModal()" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation">ยกเลิก</button>
-                <button type="submit" class="flex-1 min-h-[56px] py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold">บันทึก</button>
+                <button type="button" onclick="closeEditModal()" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation whitespace-nowrap">ยกเลิก</button>
+                <button type="submit" class="flex-1 min-h-[56px] py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold whitespace-nowrap">บันทึก</button>
             </div>
         </form>
     </div>
@@ -665,8 +666,8 @@ include dirname(__DIR__) . '/templates/header.php';
                 <textarea name="note" id="delete-note" rows="3" class="input-field tp-native-textarea" placeholder="เช่น ลงเวลาเข้าผิด อนุมัติให้ลบและลงใหม่" required></textarea>
             </div>
             <div class="flex flex-col sm:flex-row gap-3">
-                <button type="button" onclick="closeDeleteModal()" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation">ยกเลิก</button>
-                <button type="submit" class="flex-1 min-h-[56px] py-2 bg-red-600 hover:bg-red-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold"><i class="fas fa-trash mr-1" aria-hidden="true"></i> ยืนยัน</button>
+                <button type="button" onclick="closeDeleteModal()" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation whitespace-nowrap">ยกเลิก</button>
+                <button type="submit" class="flex-1 min-h-[56px] py-2 bg-red-600 hover:bg-red-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold whitespace-nowrap"><i class="fas fa-trash mr-1" aria-hidden="true"></i> ยืนยัน</button>
             </div>
         </form>
     </div>
@@ -741,9 +742,11 @@ function editAttendance(userId, date, attendanceId, checkIn, checkOut, empName) 
     syncEditTimeSelectFromInput('edit-check-in');
     syncEditTimeSelectFromInput('edit-check-out');
     var delLink = document.getElementById('edit-open-delete-btn');
+    var delHint = document.getElementById('edit-open-delete-hint');
     if (delLink) {
         if (attendanceId) {
             delLink.classList.remove('hidden');
+            if (delHint) delHint.classList.remove('hidden');
             delLink.onclick = function () {
                 if (typeof uiCloseModal === 'function') uiCloseModal('edit-modal');
                 else document.getElementById('edit-modal').classList.add('hidden');
@@ -751,6 +754,7 @@ function editAttendance(userId, date, attendanceId, checkIn, checkOut, empName) 
             };
         } else {
             delLink.classList.add('hidden');
+            if (delHint) delHint.classList.add('hidden');
         }
     }
     if (typeof uiOpenModal === 'function') uiOpenModal('edit-modal');

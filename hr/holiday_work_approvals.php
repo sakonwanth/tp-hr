@@ -161,7 +161,7 @@ include dirname(__DIR__) . '/templates/header.php';
         </div>
         <?php if ($pendingCount > 0 && $statusFilter === 'PENDING'): ?>
         <button type="button" onclick="openApproveAllModal()"
-                class="w-full sm:w-auto min-h-[56px] px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold">
+                class="w-full sm:w-auto min-h-[56px] px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold whitespace-nowrap">
             <i class="fas fa-check-double mr-2" aria-hidden="true"></i>อนุมัติทั้งหมด (<?php echo $pendingCount; ?>)
         </button>
         <?php endif; ?>
@@ -250,8 +250,8 @@ include dirname(__DIR__) . '/templates/header.php';
             <p class="text-white/60 text-sm mt-3 break-words"><?php echo htmlspecialchars($req['reason'] ?? '-'); ?></p>
             <?php if ($st === 'PENDING'): ?>
             <div class="grid grid-cols-2 gap-2 mt-4">
-                <button type="button" onclick="openApproveOneModal(<?php echo (int) $req['id']; ?>)" class="min-h-[56px] rounded-[var(--tp-ios-card-radius)] bg-emerald-600 text-white font-semibold touch-manipulation">อนุมัติ</button>
-                <button type="button" data-emp-label="<?php echo htmlspecialchars(trim($req['first_name_th'] . ' ' . $req['last_name_th']), ENT_QUOTES); ?>" onclick="openRejectModal(event, <?php echo (int) $req['id']; ?>)" class="min-h-[56px] rounded-[var(--tp-ios-card-radius)] bg-red-500/15 border border-red-500/35 text-red-200 font-semibold touch-manipulation">ไม่อนุมัติ</button>
+                <button type="button" onclick="openApproveOneModal(<?php echo (int) $req['id']; ?>)" class="min-h-[56px] rounded-[var(--tp-ios-card-radius)] bg-emerald-600 text-white font-semibold touch-manipulation whitespace-nowrap">อนุมัติ</button>
+                <button type="button" data-emp-label="<?php echo htmlspecialchars(trim($req['first_name_th'] . ' ' . $req['last_name_th']), ENT_QUOTES); ?>" onclick="openRejectModal(event, <?php echo (int) $req['id']; ?>)" class="min-h-[56px] rounded-[var(--tp-ios-card-radius)] bg-red-500/15 border border-red-500/35 text-red-200 font-semibold touch-manipulation whitespace-nowrap">ไม่อนุมัติ</button>
             </div>
             <?php endif; ?>
         </div>
@@ -287,8 +287,8 @@ include dirname(__DIR__) . '/templates/header.php';
                     <td class="px-4 py-3 text-center">
                         <?php if ($req['status'] === 'PENDING'): ?>
                         <div class="flex justify-center gap-2">
-                            <button type="button" onclick="openApproveOneModal(<?php echo (int) $req['id']; ?>)" class="min-h-[48px] px-3 bg-emerald-600 text-white rounded-[var(--tp-ios-card-radius)] text-sm touch-manipulation">อนุมัติ</button>
-                            <button type="button" data-emp-label="<?php echo htmlspecialchars(trim($req['first_name_th'] . ' ' . $req['last_name_th']), ENT_QUOTES); ?>" onclick="openRejectModal(event, <?php echo (int) $req['id']; ?>)" class="min-h-[48px] px-3 bg-red-500/15 text-red-200 rounded-[var(--tp-ios-card-radius)] text-sm touch-manipulation">ไม่อนุมัติ</button>
+                            <button type="button" onclick="openApproveOneModal(<?php echo (int) $req['id']; ?>)" class="min-h-[48px] px-3 bg-emerald-600 text-white rounded-[var(--tp-ios-card-radius)] text-sm touch-manipulation whitespace-nowrap">อนุมัติ</button>
+                            <button type="button" data-emp-label="<?php echo htmlspecialchars(trim($req['first_name_th'] . ' ' . $req['last_name_th']), ENT_QUOTES); ?>" onclick="openRejectModal(event, <?php echo (int) $req['id']; ?>)" class="min-h-[48px] px-3 bg-red-500/15 text-red-200 rounded-[var(--tp-ios-card-radius)] text-sm touch-manipulation whitespace-nowrap">ไม่อนุมัติ</button>
                         </div>
                         <?php else: ?>
                         <span class="text-white/40 text-xs">—</span>
@@ -312,8 +312,8 @@ include dirname(__DIR__) . '/templates/header.php';
     <div class="native-card tp-native-card w-full max-w-md p-6 rounded-[var(--tp-ios-card-radius)]">
         <h3 class="text-xl font-bold text-white mb-4">อนุมัติคำขอนี้?</h3>
         <div class="flex gap-3">
-            <button type="button" onclick="closeApproveOneModal()" class="flex-1 min-h-[48px] bg-white/10 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation">ยกเลิก</button>
-            <button type="button" onclick="document.getElementById('approve-one-form').submit()" class="flex-1 min-h-[56px] bg-emerald-600 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold">อนุมัติ</button>
+            <button type="button" onclick="closeApproveOneModal()" class="flex-1 min-h-[48px] bg-white/10 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation whitespace-nowrap">ยกเลิก</button>
+            <button type="button" onclick="document.getElementById('approve-one-form').submit()" class="flex-1 min-h-[56px] bg-emerald-600 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold whitespace-nowrap">อนุมัติ</button>
         </div>
     </div>
 </div>
@@ -326,8 +326,8 @@ include dirname(__DIR__) . '/templates/header.php';
             <?php echo csrfField(); ?>
             <input type="hidden" name="action" value="approve_all">
             <div class="flex gap-3">
-                <button type="button" onclick="closeApproveAllModal()" class="flex-1 min-h-[48px] bg-white/10 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation">ยกเลิก</button>
-                <button type="submit" class="flex-1 min-h-[56px] bg-emerald-600 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold">อนุมัติทั้งหมด</button>
+                <button type="button" onclick="closeApproveAllModal()" class="flex-1 min-h-[48px] bg-white/10 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation whitespace-nowrap">ยกเลิก</button>
+                <button type="submit" class="flex-1 min-h-[56px] bg-emerald-600 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold whitespace-nowrap">อนุมัติทั้งหมด</button>
             </div>
         </form>
     </div>
@@ -346,8 +346,8 @@ include dirname(__DIR__) . '/templates/header.php';
                 <input type="text" name="review_note" id="reject-review-note" class="input-field w-full">
             </div>
             <div class="flex gap-3">
-                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[48px] bg-white/10 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation">ยกเลิก</button>
-                <button type="submit" class="flex-1 min-h-[56px] bg-red-600 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold">ไม่อนุมัติ</button>
+                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[48px] bg-white/10 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation whitespace-nowrap">ยกเลิก</button>
+                <button type="submit" class="flex-1 min-h-[56px] bg-red-600 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold whitespace-nowrap">ไม่อนุมัติ</button>
             </div>
         </form>
     </div>

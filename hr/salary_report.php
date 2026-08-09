@@ -432,7 +432,7 @@ require_once __DIR__ . '/../templates/header.php';
             <label class="block text-white/70 text-sm mb-1" for="hr-sal-paydate">วันที่นำจ่าย</label>
             <input id="hr-sal-paydate" type="date" name="pay_date" class="input-field tp-native-input w-full min-h-[48px]" value="<?php echo htmlspecialchars($payDateStr); ?>">
         </div>
-        <button type="submit" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 hover:bg-violet-700 px-5 text-sm font-semibold text-white touch-manipulation gap-2">
+        <button type="submit" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 hover:bg-violet-700 px-5 text-sm font-semibold text-white touch-manipulation gap-2 whitespace-nowrap">
             <i class="fas fa-search" aria-hidden="true"></i>โหลดข้อมูล
         </button>
     </form>
@@ -528,10 +528,10 @@ require_once __DIR__ . '/../templates/header.php';
         </div>
 
         <div class="flex flex-wrap gap-3 mt-5">
-            <button type="submit" name="action" value="save" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] border border-white/15 bg-white/10 px-5 text-sm font-semibold text-white hover:bg-white/20 touch-manipulation gap-2">
+            <button type="submit" name="action" value="save" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] border border-white/15 bg-white/10 px-5 text-sm font-semibold text-white hover:bg-white/20 touch-manipulation gap-2 whitespace-nowrap">
                 <i class="fas fa-floppy-disk" aria-hidden="true"></i>บันทึกข้อมูล
             </button>
-            <button type="submit" name="action" value="export" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 hover:bg-violet-700 px-5 text-sm font-semibold text-white touch-manipulation gap-2">
+            <button type="submit" name="action" value="export" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 hover:bg-violet-700 px-5 text-sm font-semibold text-white touch-manipulation gap-2 whitespace-nowrap">
                 <i class="fas fa-file-excel" aria-hidden="true"></i>บันทึกและดาวน์โหลด Excel
             </button>
         </div>

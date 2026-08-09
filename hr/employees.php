@@ -289,7 +289,7 @@ $flashError = flash('error');
             </select>
         </div>
         <div class="flex items-end gap-2 min-w-0 sm:col-span-2 xl:col-span-1">
-            <button type="submit" class="flex-1 min-h-[56px] py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-semibold">
+            <button type="submit" class="flex-1 min-h-[56px] py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-semibold whitespace-nowrap">
                 <i class="fas fa-search mr-2" aria-hidden="true"></i>ค้นหา
             </button>
         </div>
@@ -304,7 +304,7 @@ $flashError = flash('error');
             <input type="hidden" name="search" value="<?php echo htmlspecialchars($search); ?>">
             <input type="hidden" name="department" value="<?php echo htmlspecialchars($department); ?>">
             <input type="hidden" name="status" value="<?php echo htmlspecialchars($status); ?>">
-            <button type="submit" class="w-full min-h-[56px] py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-center rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation inline-flex items-center justify-center font-semibold gap-2">
+            <button type="submit" class="w-full min-h-[56px] py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-center rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation inline-flex items-center justify-center font-semibold gap-2 whitespace-nowrap">
                 <i class="fas fa-file-excel" aria-hidden="true"></i>Export CSV
             </button>
         </form>
@@ -403,7 +403,7 @@ $flashError = flash('error');
                 <button type="button"
                         title="สิทธิ์การลาและประวัติ"
                         onclick="viewLeaveBalance(<?php echo (int)$emp['id']; ?>)"
-                        class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
+                        class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation whitespace-nowrap">
                     <i class="fas fa-calendar-alt mr-2" aria-hidden="true"></i>สิทธิ์ลา
                 </button>
                 <?php if (canManageUsers() || hr_can_access_hr_dashboard()): ?>
@@ -419,7 +419,7 @@ $flashError = flash('error');
                 <?php if (canManageUsers()): ?>
                 <button type="button"
                         onclick="confirmDelete(<?php echo (int)$emp['id']; ?>, '<?php echo htmlspecialchars($emp['first_name_th'] ?? '', ENT_QUOTES); ?>')"
-                        class="col-span-2 min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-200 text-sm font-semibold touch-manipulation">
+                        class="col-span-2 min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-200 text-sm font-semibold touch-manipulation whitespace-nowrap">
                     <i class="fas fa-trash mr-2"></i>ลบพนักงาน
                 </button>
                 <?php endif; ?>

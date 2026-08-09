@@ -233,7 +233,7 @@ include dirname(__DIR__) . '/templates/header.php';
         <?php if (count($visiblePendingIds) > 0 && $statusFilter === 'PENDING'): ?>
         <button type="button"
                 onclick="openApproveAllModal()"
-                class="w-full sm:w-auto min-h-[56px] px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-semibold shadow-sm shadow-emerald-900/30">
+                class="w-full sm:w-auto min-h-[56px] px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-semibold shadow-sm shadow-emerald-900/30 whitespace-nowrap">
             <i class="fas fa-check-double mr-2" aria-hidden="true"></i>อนุมัติทั้งหมด (<?php echo count($visiblePendingIds); ?>)
         </button>
         <?php endif; ?>
@@ -369,13 +369,13 @@ include dirname(__DIR__) . '/templates/header.php';
                 <button type="button"
                         data-emp-label="<?php echo htmlspecialchars($empName, ENT_QUOTES); ?>"
                         onclick="openApproveOneModal(event, <?php echo (int)$req['id']; ?>)"
-                        class="min-h-[56px] rounded-[var(--tp-ios-card-radius)] bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-colors touch-manipulation shadow-sm shadow-emerald-900/30">
+                        class="min-h-[56px] rounded-[var(--tp-ios-card-radius)] bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-colors touch-manipulation shadow-sm shadow-emerald-900/30 whitespace-nowrap">
                     <i class="fas fa-check mr-2" aria-hidden="true"></i>อนุมัติ
                 </button>
                 <button type="button"
                         data-emp-label="<?php echo htmlspecialchars($empName, ENT_QUOTES); ?>"
                         onclick="openRejectModal(event, <?php echo (int)$req['id']; ?>)"
-                        class="min-h-[56px] rounded-[var(--tp-ios-card-radius)] bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 font-semibold transition-colors touch-manipulation">
+                        class="min-h-[56px] rounded-[var(--tp-ios-card-radius)] bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 font-semibold transition-colors touch-manipulation whitespace-nowrap">
                     <i class="fas fa-times mr-2" aria-hidden="true"></i>ไม่อนุมัติ
                 </button>
             </div>
@@ -441,13 +441,13 @@ include dirname(__DIR__) . '/templates/header.php';
                             <button type="button"
                                     data-emp-label="<?php echo htmlspecialchars($empName, ENT_QUOTES); ?>"
                                     onclick="openApproveOneModal(event, <?php echo (int)$req['id']; ?>)"
-                                    class="inline-flex items-center gap-1.5 min-h-[56px] px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation">
+                                    class="inline-flex items-center gap-1.5 min-h-[56px] px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation whitespace-nowrap">
                                 <i class="fas fa-check" aria-hidden="true"></i><span>อนุมัติ</span>
                             </button>
                             <button type="button"
                                     data-emp-label="<?php echo htmlspecialchars($empName, ENT_QUOTES); ?>"
                                     onclick="openRejectModal(event, <?php echo (int)$req['id']; ?>)"
-                                    class="inline-flex items-center gap-1.5 min-h-[48px] px-3 py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 text-sm font-medium rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation">
+                                    class="inline-flex items-center gap-1.5 min-h-[48px] px-3 py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 text-sm font-medium rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation whitespace-nowrap">
                                 <i class="fas fa-times" aria-hidden="true"></i><span>ปฏิเสธ</span>
                             </button>
                         </div>
@@ -479,8 +479,8 @@ include dirname(__DIR__) . '/templates/header.php';
             <input type="text" id="approve-one-note" class="input-field tp-native-input w-full" placeholder="บันทึกประกอบการอนุมัติ" autocomplete="off">
         </div>
         <div class="flex flex-col sm:flex-row gap-3">
-            <button type="button" onclick="closeApproveOneModal()" class="flex-1 min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium">ยกเลิก</button>
-            <button type="button" onclick="submitApproveOne()" class="flex-1 min-h-[56px] py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold">อนุมัติ</button>
+            <button type="button" onclick="closeApproveOneModal()" class="flex-1 min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium whitespace-nowrap">ยกเลิก</button>
+            <button type="button" onclick="submitApproveOne()" class="flex-1 min-h-[56px] py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold whitespace-nowrap">อนุมัติ</button>
         </div>
     </div>
 </div>
@@ -498,8 +498,8 @@ include dirname(__DIR__) . '/templates/header.php';
                 <input type="text" name="review_remarks" id="approve-all-note" class="input-field tp-native-input w-full" placeholder="บันทึกประกอบการอนุมัติทั้งหมด" autocomplete="off">
             </div>
             <div class="flex flex-col sm:flex-row gap-3">
-                <button type="button" onclick="closeApproveAllModal()" class="flex-1 min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium">ยกเลิก</button>
-                <button type="submit" class="flex-1 min-h-[56px] py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold">อนุมัติทั้งหมด</button>
+                <button type="button" onclick="closeApproveAllModal()" class="flex-1 min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium whitespace-nowrap">ยกเลิก</button>
+                <button type="submit" class="flex-1 min-h-[56px] py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold whitespace-nowrap">อนุมัติทั้งหมด</button>
             </div>
         </form>
     </div>
@@ -518,8 +518,8 @@ include dirname(__DIR__) . '/templates/header.php';
                 <textarea name="review_remarks" id="reject-review-remarks" rows="3" class="input-field tp-native-textarea w-full" placeholder="ระบุเหตุผลให้พนักงานเห็นในประวัติ" required></textarea>
             </div>
             <div class="flex flex-col-reverse sm:flex-row gap-3">
-                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[48px] bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-medium">ยกเลิก</button>
-                <button type="submit" class="flex-1 min-h-[56px] bg-red-600 hover:bg-red-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-semibold">
+                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[48px] bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-medium whitespace-nowrap">ยกเลิก</button>
+                <button type="submit" class="flex-1 min-h-[56px] bg-red-600 hover:bg-red-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-semibold whitespace-nowrap">
                     <i class="fas fa-times mr-2" aria-hidden="true"></i>ไม่อนุมัติ
                 </button>
             </div>

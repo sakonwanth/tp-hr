@@ -263,18 +263,18 @@ include dirname(__DIR__) . '/templates/header.php';
                 <?php if ($statusKey === 'PENDING'): ?>
                 <button type="button"
                         onclick="openApproveLeave(<?php echo (int)$req['id']; ?>)"
-                        class="min-h-[56px] rounded-[var(--tp-ios-card-radius)] bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold touch-manipulation shadow-sm shadow-emerald-900/40">
+                        class="min-h-[56px] rounded-[var(--tp-ios-card-radius)] bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold touch-manipulation shadow-sm shadow-emerald-900/40 whitespace-nowrap">
                     <i class="fas fa-check mr-2" aria-hidden="true"></i>อนุมัติ
                 </button>
                 <button type="button"
                         onclick="rejectLeave(<?php echo (int)$req['id']; ?>)"
-                        class="min-h-[56px] rounded-[var(--tp-ios-card-radius)] bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 text-sm font-semibold touch-manipulation">
+                        class="min-h-[56px] rounded-[var(--tp-ios-card-radius)] bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 text-sm font-semibold touch-manipulation whitespace-nowrap">
                     <i class="fas fa-times mr-2" aria-hidden="true"></i>ไม่อนุมัติ
                 </button>
                 <?php else: ?>
                 <button type="button"
                         onclick="viewDetail(<?php echo (int)$req['id']; ?>)"
-                        class="col-span-2 min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation">
+                        class="col-span-2 min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-white/10 hover:bg-white/20 text-white text-sm font-semibold touch-manipulation whitespace-nowrap">
                     <i class="fas fa-eye mr-2" aria-hidden="true"></i>ดูรายละเอียด
                 </button>
                 <?php endif; ?>
@@ -347,15 +347,15 @@ include dirname(__DIR__) . '/templates/header.php';
                         <div class="flex flex-wrap items-center justify-center gap-2">
                         <?php if ($req['status'] === 'PENDING'): ?>
                         <button type="button" onclick="openApproveLeave(<?php echo (int)$req['id']; ?>)" 
-                                class="inline-flex items-center justify-center gap-1.5 min-h-[56px] px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation">
+                                class="inline-flex items-center justify-center gap-1.5 min-h-[56px] px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation whitespace-nowrap">
                             <i class="fas fa-check" aria-hidden="true"></i><span>อนุมัติ</span>
                         </button>
                         <button type="button" onclick="rejectLeave(<?php echo (int)$req['id']; ?>)"
-                                class="inline-flex items-center justify-center gap-1.5 min-h-[48px] px-3 py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 text-sm font-medium rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation">
+                                class="inline-flex items-center justify-center gap-1.5 min-h-[48px] px-3 py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-red-200 text-sm font-medium rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation whitespace-nowrap">
                             <i class="fas fa-times" aria-hidden="true"></i><span>ปฏิเสธ</span>
                         </button>
                         <?php else: ?>
-                        <button type="button" onclick="viewDetail(<?php echo (int)$req['id']; ?>)" class="inline-flex items-center justify-center gap-1.5 min-h-[48px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation">
+                        <button type="button" onclick="viewDetail(<?php echo (int)$req['id']; ?>)" class="inline-flex items-center justify-center gap-1.5 min-h-[48px] px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation whitespace-nowrap">
                             <i class="fas fa-eye" aria-hidden="true"></i><span>ดู</span>
                         </button>
                         <?php endif; ?>
@@ -416,8 +416,8 @@ include dirname(__DIR__) . '/templates/header.php';
         </div>
         <input type="hidden" id="approve-request-id" value="">
         <div class="flex flex-col sm:flex-row gap-3 pt-2">
-            <button type="button" onclick="closeApproveModal()" class="flex-1 min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium">ยกเลิก</button>
-            <button type="button" onclick="confirmApproveLeave()" class="flex-1 min-h-[56px] py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold">อนุมัติ</button>
+            <button type="button" onclick="closeApproveModal()" class="flex-1 min-h-[48px] py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium whitespace-nowrap">ยกเลิก</button>
+            <button type="button" onclick="confirmApproveLeave()" class="flex-1 min-h-[56px] py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold whitespace-nowrap">อนุมัติ</button>
         </div>
     </div>
 </div>
@@ -432,8 +432,8 @@ include dirname(__DIR__) . '/templates/header.php';
                 <textarea name="reason" id="reject-reason" required rows="3" class="input-field tp-native-textarea"></textarea>
             </div>
             <div class="flex flex-col sm:flex-row gap-4">
-                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium">ยกเลิก</button>
-                <button type="submit" class="flex-1 min-h-[56px] py-2 bg-red-600 hover:bg-red-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold">ไม่อนุมัติ</button>
+                <button type="button" onclick="closeRejectModal()" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium whitespace-nowrap">ยกเลิก</button>
+                <button type="submit" class="flex-1 min-h-[56px] py-2 bg-red-600 hover:bg-red-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold whitespace-nowrap">ไม่อนุมัติ</button>
             </div>
         </form>
     </div>

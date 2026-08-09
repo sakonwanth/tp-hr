@@ -297,6 +297,9 @@ $renderMonthCard = static function (int $m, int $themeIndex) use ($holidaysByMon
                 font-size: 13px;
                 text-decoration: none;
                 cursor: pointer;
+                /* UI_RULES: button labels do not wrap. No Tailwind on this
+                   page, so whitespace-nowrap is not available. */
+                white-space: nowrap;
             }
             .toolbar .btn-print { background: var(--ink); color: #fff; font-weight: 600; }
             .toolbar .btn-png { background: var(--gold); border-color: var(--gold); color: #2a2005; font-weight: 600; }

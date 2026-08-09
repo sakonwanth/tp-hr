@@ -196,6 +196,14 @@ foreach ($files as $path) {
     $rel = str_replace($root . '/', '', $path);
     $source = (string)file_get_contents($path);
 
+    // A file that opens with `<?php` and never closes it is pure PHP: any
+    // markup in it lives inside a string, where the PHP-blanking below cannot
+    // reach it. bootstrap.php builds a button that way, and it was reported as
+    // a bare tag on every run.
+    if (preg_match('/^\s*<\?php/', $source) && strpos($source, '?' . '>') === false) {
+        continue;
+    }
+
     // Inline PHP inside a tag closes with '>', which stops any [^>]* tag
     // match halfway and hides the class attribute that follows — every such
     // button then looks like it has no height at all. Blank the PHP blocks
@@ -269,6 +277,7 @@ foreach ($files as $path) {
             // holidays.php's "next holiday" card is one, and no size class will
             // ever appear on it.
             $wrapsBlock = false;
+            $inner = '';
             $closeAt = stripos($source, '</button>', $hit[0][1]);
             if ($closeAt !== false) {
                 $inner = substr($source, $hit[0][1] + strlen($tag), $closeAt - $hit[0][1] - strlen($tag));
@@ -280,9 +289,24 @@ foreach ($files as $path) {
                 && !tailwindHeightOk($classAttr, 48)) {
                 add($findings, 'button height < 48px (UI_RULES: button minimum 48px)', $rel, $lineNo, $tag);
             }
+            // Whether a button can wrap depends on its label, so judge the
+            // label — not just the absence of a class. The first version of
+            // this check flagged every button without whitespace-nowrap and
+            // reported 196, a third of which were icon-only buttons with no
+            // text in them at all.
             if ($classAttr !== '' && strpos($classAttr, 'whitespace-nowrap') === false
                 && !usesCompliantClass($classAttr, $localButton)) {
-                add($findings, 'button may wrap text (UI_RULES: no text wrapping in buttons)', $rel, $lineNo, $tag);
+                $label = trim(preg_replace('/\s+/', ' ', strip_tags($inner ?? '')));
+
+                if ($label === '') {
+                    // Icon only — nothing to wrap.
+                } elseif (strpos($label, 'PHPEXPR') !== false) {
+                    $skipped++;   // label comes from a variable; length unknown
+                } elseif (mb_strlen($label) > 28) {
+                    add($findings, 'button label too long for one line (shorten the label — nowrap would overflow)', $rel, $lineNo, $tag);
+                } else {
+                    add($findings, 'button may wrap text (UI_RULES: no text wrapping in buttons)', $rel, $lineNo, $tag);
+                }
             }
             continue;
         }

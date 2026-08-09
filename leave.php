@@ -330,7 +330,7 @@ require_once __DIR__ . '/templates/header.php';
                         </p>
                         <div class="mt-3 flex">
                             <button type="button" onclick="cancelRequest(<?php echo $req['id']; ?>)"
-                                    class="w-full md:w-auto md:ml-auto min-h-[48px] px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-200 text-sm font-semibold transition-colors touch-manipulation">
+                                    class="w-full md:w-auto md:ml-auto min-h-[48px] px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-200 text-sm font-semibold transition-colors touch-manipulation whitespace-nowrap">
                                 <i class="fas fa-times mr-2" aria-hidden="true"></i>ยกเลิกคำขอ
                             </button>
                         </div>

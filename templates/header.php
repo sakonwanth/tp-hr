@@ -39,8 +39,8 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png';
     <script src="/assets/js/native-select.js?v=1" defer></script>
 
     <!-- Tailwind CSS (compiled) -->
-    <link rel="stylesheet" href="/assets/css/app.css?v=29">
-    <link rel="stylesheet" href="/assets/css/native-shell.css?v=29">
+    <link rel="stylesheet" href="/assets/css/app.css?v=30">
+    <link rel="stylesheet" href="/assets/css/native-shell.css?v=30">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -1154,7 +1154,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png';
         <div class="mt-6 pt-6 border-t border-slate-700/50">
             <form method="post" action="/logout.php" class="m-0">
                 <?php echo csrfField(); ?>
-                <button type="submit" class="nav-item text-red-400 hover:bg-red-500/10 hover:text-red-300 w-full text-left border-0 bg-transparent cursor-pointer font-[inherit] text-base">
+                <button type="submit" class="nav-item text-red-400 hover:bg-red-500/10 hover:text-red-300 w-full text-left border-0 bg-transparent cursor-pointer font-[inherit] text-base whitespace-nowrap">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>ออกจากระบบ</span>
                 </button>
@@ -1167,7 +1167,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png';
 <header class="app-shell-mobile-only mobile-app-header header-glass fixed top-0 left-0 right-0 z-40">
     <div class="mobile-app-header-bar">
         <div class="mobile-nav-cluster">
-            <button type="button" id="mobileMenuBtn" class="mobile-nav-menu-btn touch-manipulation">
+            <button type="button" id="mobileMenuBtn" class="mobile-nav-menu-btn touch-manipulation whitespace-nowrap">
                 เมนู
             </button>
             <a href="/" class="mobile-nav-brand touch-manipulation" aria-label="TP-HR Human Resources — หน้าแรก">
@@ -1318,7 +1318,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png';
             <div class="mobile-menu-logout-wrap">
                 <form method="post" action="/logout.php" class="mobile-menu-logout-form">
                     <?php echo csrfField(); ?>
-                    <button type="submit" class="mobile-menu-logout-btn" aria-label="ออกจากระบบ TP-HR">
+                    <button type="submit" class="mobile-menu-logout-btn whitespace-nowrap" aria-label="ออกจากระบบ TP-HR">
                         <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
                         <span>ออกจากระบบ</span>
                     </button>

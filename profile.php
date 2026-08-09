@@ -78,7 +78,7 @@ include 'templates/header.php';
     <p class="text-white/60 text-sm mb-6">กรุณาออกจากระบบแล้วเข้าใหม่ หรือติดต่อฝ่าย HR หากยังเห็นข้อความนี้</p>
     <form method="post" action="/logout.php" class="inline m-0">
         <?php echo csrfField(); ?>
-        <button type="submit" class="inline-flex min-h-[56px] items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-violet-700 touch-manipulation border-0 cursor-pointer">ออกจากระบบ</button>
+        <button type="submit" class="inline-flex min-h-[56px] items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-violet-700 touch-manipulation border-0 cursor-pointer whitespace-nowrap">ออกจากระบบ</button>
     </form>
 </div>
 <?php include 'templates/footer.php';
@@ -175,7 +175,7 @@ endif; ?>
             </div>
         </div>
         
-        <button type="button" onclick="openEditModal('profile')" class="w-full mt-6 min-h-[48px] bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-medium border-0">
+        <button type="button" onclick="openEditModal('profile')" class="w-full mt-6 min-h-[48px] bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation font-medium border-0 whitespace-nowrap">
             <i class="fas fa-edit mr-2" aria-hidden="true"></i>แก้ไขข้อมูลติดต่อ
         </button>
     </div>
@@ -297,7 +297,7 @@ endif; ?>
             <i class="fas fa-phone-alt text-rose-400 text-2xl" aria-hidden="true"></i>
             ผู้ติดต่อฉุกเฉิน
         </h3>
-        <button type="button" onclick="openAddModal('emergency')" class="inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[56px] bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors font-semibold touch-manipulation border-0 w-full sm:w-auto">
+        <button type="button" onclick="openAddModal('emergency')" class="inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[56px] bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors font-semibold touch-manipulation border-0 w-full sm:w-auto whitespace-nowrap">
             <i class="fas fa-plus" aria-hidden="true"></i>เพิ่มผู้ติดต่อ
         </button>
     </div>
@@ -349,7 +349,7 @@ endif; ?>
             <i class="fas fa-users text-amber-400 text-2xl" aria-hidden="true"></i>
             ข้อมูลครอบครัว
         </h3>
-        <button type="button" onclick="openAddModal('family')" class="inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[56px] bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors font-semibold touch-manipulation border-0 w-full sm:w-auto">
+        <button type="button" onclick="openAddModal('family')" class="inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[56px] bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors font-semibold touch-manipulation border-0 w-full sm:w-auto whitespace-nowrap">
             <i class="fas fa-plus" aria-hidden="true"></i>เพิ่มสมาชิก
         </button>
     </div>
@@ -379,10 +379,10 @@ endif; ?>
             </div>
             <p class="text-white/70 text-sm mt-3"><?php echo htmlspecialchars($member['occupation'] ?? '-'); ?></p>
             <div class="grid grid-cols-2 gap-2 mt-4">
-                <button type="button" onclick="editFamily(<?php echo $member['id']; ?>)" class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-white/10 text-white/70 hover:text-white hover:bg-white/20 touch-manipulation font-medium">
+                <button type="button" onclick="editFamily(<?php echo $member['id']; ?>)" class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-white/10 text-white/70 hover:text-white hover:bg-white/20 touch-manipulation font-medium whitespace-nowrap">
                     <i class="fas fa-edit mr-2" aria-hidden="true"></i>แก้ไข
                 </button>
-                <button type="button" onclick="deleteFamily(<?php echo $member['id']; ?>)" class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-red-500/15 border border-red-500/25 text-red-300 hover:bg-red-500/25 touch-manipulation font-medium">
+                <button type="button" onclick="deleteFamily(<?php echo $member['id']; ?>)" class="min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-red-500/15 border border-red-500/25 text-red-300 hover:bg-red-500/25 touch-manipulation font-medium whitespace-nowrap">
                     <i class="fas fa-trash mr-2" aria-hidden="true"></i>ลบ
                 </button>
             </div>
@@ -439,7 +439,7 @@ endif; ?>
             <i class="fas fa-graduation-cap text-blue-400 text-2xl" aria-hidden="true"></i>
             ประวัติการศึกษา
         </h3>
-        <button type="button" onclick="openAddModal('education')" class="inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[56px] bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors font-semibold touch-manipulation border-0 w-full sm:w-auto">
+        <button type="button" onclick="openAddModal('education')" class="inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[56px] bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors font-semibold touch-manipulation border-0 w-full sm:w-auto whitespace-nowrap">
             <i class="fas fa-plus" aria-hidden="true"></i>เพิ่มประวัติ
         </button>
     </div>
@@ -493,7 +493,7 @@ endif; ?>
             <i class="fas fa-briefcase text-emerald-400 text-2xl" aria-hidden="true"></i>
             ประวัติการทำงาน (ก่อนเข้าบริษัท)
         </h3>
-        <button type="button" onclick="openAddModal('work')" class="inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[56px] bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors font-semibold touch-manipulation border-0 w-full sm:w-auto">
+        <button type="button" onclick="openAddModal('work')" class="inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[56px] bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors font-semibold touch-manipulation border-0 w-full sm:w-auto whitespace-nowrap">
             <i class="fas fa-plus" aria-hidden="true"></i>เพิ่มประวัติ
         </button>
     </div>
@@ -554,10 +554,10 @@ endif; ?>
                 <!-- Dynamic content -->
             </div>
             <div class="flex flex-col sm:flex-row gap-3 mt-6">
-                <button type="button" onclick="closeModal()" class="flex-1 min-h-[52px] py-3 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] transition-colors font-semibold border-0 touch-manipulation">
+                <button type="button" onclick="closeModal()" class="flex-1 min-h-[52px] py-3 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] transition-colors font-semibold border-0 touch-manipulation whitespace-nowrap">
                     ยกเลิก
                 </button>
-                <button type="submit" class="flex-1 min-h-[56px] py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors font-semibold border-0 touch-manipulation">
+                <button type="submit" class="flex-1 min-h-[56px] py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors font-semibold border-0 touch-manipulation whitespace-nowrap">
                     บันทึก
                 </button>
             </div>

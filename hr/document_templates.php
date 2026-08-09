@@ -480,7 +480,7 @@ include dirname(__DIR__) . '/templates/header.php';
             </div>
 
             <div class="md:col-span-2 flex justify-end">
-                <button type="submit" class="px-5 py-2 rounded-[var(--tp-ios-card-radius)] bg-violet-500 hover:bg-violet-600 text-white text-sm font-medium min-h-[48px] inline-flex items-center justify-center">
+                <button type="submit" class="px-5 py-2 rounded-[var(--tp-ios-card-radius)] bg-violet-500 hover:bg-violet-600 text-white text-sm font-medium min-h-[48px] inline-flex items-center justify-center whitespace-nowrap">
                     <i class="fas fa-save mr-1"></i> บันทึกข้อมูลบริษัท
                 </button>
             </div>
@@ -515,7 +515,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 <div class="bg-white rounded p-2 mb-2 flex justify-center">
                     <img src="<?php echo htmlspecialchars($sc['signature_image']); ?>" alt="signature" style="max-height:60px;">
                 </div>
-                <button type="button" class="text-red-300 hover:text-red-200 text-xs touch-manipulation min-h-[48px] inline-flex items-center gap-1 px-2 touch-manipulation"
+                <button type="button" class="text-red-300 hover:text-red-200 text-xs touch-manipulation min-h-[48px] inline-flex items-center gap-1 px-2 touch-manipulation whitespace-nowrap"
                     data-dt-sig-user="<?php echo (int)$sc['id']; ?>"
                     onclick="dtOpenRemoveSignatureModal(this)">
                     <i class="fas fa-trash mr-1" aria-hidden="true"></i>ลบลายเซ็น
@@ -592,14 +592,14 @@ include dirname(__DIR__) . '/templates/header.php';
                     <input type="hidden" name="_token" value="<?php echo csrfToken(); ?>">
                     <input type="hidden" name="action" value="toggle_active">
                     <input type="hidden" name="id" value="<?php echo (int)$t['id']; ?>">
-                    <button type="submit" class="w-full min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-sm font-semibold touch-manipulation" title="สลับเปิด/ปิด">
+                    <button type="submit" class="w-full min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-sm font-semibold touch-manipulation whitespace-nowrap" title="สลับเปิด/ปิด">
                         <i class="fas fa-power-off mr-2" aria-hidden="true"></i>เปิด/ปิด
                     </button>
                 </form>
             </div>
             <?php if ((int)$t['request_count'] === 0): ?>
             <button type="button"
-                class="w-full min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-red-500/20 hover:bg-red-500/30 text-red-300 text-sm font-semibold touch-manipulation"
+                class="w-full min-h-[48px] rounded-[var(--tp-ios-card-radius)] bg-red-500/20 hover:bg-red-500/30 text-red-300 text-sm font-semibold touch-manipulation whitespace-nowrap"
                 data-dt-delete-id="<?php echo (int)$t['id']; ?>"
                 data-dt-delete-name="<?php echo htmlspecialchars($t['name'], ENT_QUOTES, 'UTF-8'); ?>"
                 onclick="dtOpenDeleteTemplateModal(this)">
@@ -928,11 +928,11 @@ if (!empty($editRow['id'])) {
         <div class="flex gap-2">
             <a href="document_templates.php" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-white/10 text-white/80 hover:bg-white/20 text-sm">ยกเลิก</a>
             <?php if ($editRow && $certPreviewReqId > 0): ?>
-                <button type="submit" form="hr_doc_tpl_cert_preview" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-violet-500/20 hover:bg-violet-500/30 text-violet-200 text-sm min-h-[48px] inline-flex items-center justify-center">
+                <button type="submit" form="hr_doc_tpl_cert_preview" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-violet-500/20 hover:bg-violet-500/30 text-violet-200 text-sm min-h-[48px] inline-flex items-center justify-center whitespace-nowrap">
                     <i class="fas fa-print mr-1"></i> ดูตัวอย่าง
                 </button>
             <?php endif; ?>
-            <button type="submit" class="px-6 py-2 rounded-[var(--tp-ios-card-radius)] bg-violet-500 hover:bg-violet-600 text-white text-sm font-medium min-h-[48px] inline-flex items-center justify-center">
+            <button type="submit" class="px-6 py-2 rounded-[var(--tp-ios-card-radius)] bg-violet-500 hover:bg-violet-600 text-white text-sm font-medium min-h-[48px] inline-flex items-center justify-center whitespace-nowrap">
                 <i class="fas fa-save mr-1"></i> บันทึกทั้งหมด
             </button>
         </div>
@@ -953,8 +953,8 @@ if (!empty($editRow['id'])) {
             <input type="hidden" name="action" value="delete_template">
             <input type="hidden" name="id" id="dt-delete-template-id" value="">
             <div class="flex flex-wrap gap-2 justify-end">
-                <button type="button" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-white/10 text-white/90 hover:bg-white/20 text-sm touch-manipulation min-h-[48px] inline-flex items-center justify-center" onclick="dtCloseDeleteTemplateModal()">ยกเลิก</button>
-                <button type="submit" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-red-600 hover:bg-red-700 text-white text-sm font-medium touch-manipulation min-h-[48px] inline-flex items-center justify-center">ลบเทมเพลต</button>
+                <button type="button" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-white/10 text-white/90 hover:bg-white/20 text-sm touch-manipulation min-h-[48px] inline-flex items-center justify-center whitespace-nowrap" onclick="dtCloseDeleteTemplateModal()">ยกเลิก</button>
+                <button type="submit" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-red-600 hover:bg-red-700 text-white text-sm font-medium touch-manipulation min-h-[48px] inline-flex items-center justify-center whitespace-nowrap">ลบเทมเพลต</button>
             </div>
         </form>
     </div>
@@ -970,8 +970,8 @@ if (!empty($editRow['id'])) {
             <input type="hidden" name="action" value="remove_signature">
             <input type="hidden" name="user_id" id="dt-remove-signature-user-id" value="">
             <div class="flex flex-wrap gap-2 justify-end">
-                <button type="button" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-white/10 text-white/90 hover:bg-white/20 text-sm touch-manipulation min-h-[48px] inline-flex items-center justify-center" onclick="dtCloseRemoveSignatureModal()">ยกเลิก</button>
-                <button type="submit" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-red-600 hover:bg-red-700 text-white text-sm font-medium touch-manipulation min-h-[48px] inline-flex items-center justify-center">ลบลายเซ็น</button>
+                <button type="button" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-white/10 text-white/90 hover:bg-white/20 text-sm touch-manipulation min-h-[48px] inline-flex items-center justify-center whitespace-nowrap" onclick="dtCloseRemoveSignatureModal()">ยกเลิก</button>
+                <button type="submit" class="px-4 py-2 rounded-[var(--tp-ios-card-radius)] bg-red-600 hover:bg-red-700 text-white text-sm font-medium touch-manipulation min-h-[48px] inline-flex items-center justify-center whitespace-nowrap">ลบลายเซ็น</button>
             </div>
         </form>
     </div>

@@ -327,6 +327,10 @@ header('Content-Type: text/html; charset=utf-8');
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
+            /* UI_RULES: button labels do not wrap. No Tailwind on this page,
+               so whitespace-nowrap is not available. Screen-only — the button
+               sits in .no-print, so the printed slip is untouched. */
+            white-space: nowrap;
             text-decoration: none;
             display: inline-flex;
             align-items: center;

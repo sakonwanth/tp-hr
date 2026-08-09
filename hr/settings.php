@@ -320,7 +320,7 @@ foreach ($workShifts as $_ws) {
         </div>
         
         <div class="flex flex-col md:flex-row md:justify-end gap-3">
-            <button type="submit" class="inline-flex min-h-[48px] w-full md:w-auto items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 hover:bg-violet-700 px-6 text-sm font-semibold text-white touch-manipulation gap-2">
+            <button type="submit" class="inline-flex min-h-[48px] w-full md:w-auto items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 hover:bg-violet-700 px-6 text-sm font-semibold text-white touch-manipulation gap-2 whitespace-nowrap">
                 <i class="fas fa-save" aria-hidden="true"></i>บันทึกการตั้งค่า
             </button>
         </div>
@@ -359,7 +359,7 @@ foreach ($workShifts as $_ws) {
                 <label for="is_recurring" class="text-white/80 text-sm">วันหยุดประจำปี (ซ้ำทุกปี)</label>
             </div>
             
-            <button type="submit" class="inline-flex min-h-[48px] w-full items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 hover:bg-violet-700 px-4 text-sm font-semibold text-white touch-manipulation gap-2">
+            <button type="submit" class="inline-flex min-h-[48px] w-full items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 hover:bg-violet-700 px-4 text-sm font-semibold text-white touch-manipulation gap-2 whitespace-nowrap">
                 <i class="fas fa-plus" aria-hidden="true"></i>เพิ่มวันหยุด
             </button>
             </form>
@@ -383,7 +383,7 @@ foreach ($workShifts as $_ws) {
                         <input id="holiday-sync-to" type="number" name="to_year" min="2000" max="2100" value="<?php echo min(2100, (int)$holidayYear + 1); ?>" class="input-field tp-native-input w-full min-h-[48px]">
                     </div>
                 </div>
-                <button type="submit" class="inline-flex min-h-[48px] w-full items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-sky-600 hover:bg-sky-700 px-4 text-sm font-semibold text-white touch-manipulation gap-2">
+                <button type="submit" class="inline-flex min-h-[48px] w-full items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-sky-600 hover:bg-sky-700 px-4 text-sm font-semibold text-white touch-manipulation gap-2 whitespace-nowrap">
                     <i class="fas fa-cloud-download-alt" aria-hidden="true"></i>อัปเดตจาก API
                 </button>
             </form>
@@ -404,7 +404,7 @@ foreach ($workShifts as $_ws) {
                     <input type="hidden" name="tab" value="holidays">
                     <label class="sr-only" for="holiday-year-filter">ปี ค.ศ.</label>
                     <input id="holiday-year-filter" type="number" name="year" min="2000" max="2100" value="<?php echo (int)$holidayYear; ?>" class="input-field tp-native-input w-28 min-h-[48px]">
-                    <button type="submit" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/15 touch-manipulation">
+                    <button type="submit" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/15 touch-manipulation whitespace-nowrap">
                         ดูปี
                     </button>
                 </form>
@@ -438,7 +438,7 @@ foreach ($workShifts as $_ws) {
                     <?php endif; ?>
                 </div>
                 <button type="button"
-                    class="mt-4 inline-flex min-h-[48px] w-full items-center justify-center rounded-[var(--tp-ios-card-radius)] border border-red-500/35 bg-red-500/15 text-red-200 hover:bg-red-500/25 text-sm font-medium touch-manipulation gap-2"
+                    class="mt-4 inline-flex min-h-[48px] w-full items-center justify-center rounded-[var(--tp-ios-card-radius)] border border-red-500/35 bg-red-500/15 text-red-200 hover:bg-red-500/25 text-sm font-medium touch-manipulation gap-2 whitespace-nowrap"
                     data-h-del-id="<?php echo (int)$holiday['id']; ?>"
                     data-h-del-name="<?php echo htmlspecialchars($holiday['name'], ENT_QUOTES, 'UTF-8'); ?>"
                     onclick="hrSettingsOpenDelHoliday(this)">
@@ -510,7 +510,7 @@ foreach ($workShifts as $_ws) {
                     <input type="hidden" name="csrf_token" value="<?php echo csrfToken(); ?>">
                     <input type="hidden" name="action" value="use_all_thai_holidays_for_year">
                     <input type="hidden" name="holiday_year" value="<?php echo (int)$holidayYear; ?>">
-                    <button type="submit" class="inline-flex min-h-[48px] w-full sm:w-auto items-center justify-center rounded-[var(--tp-ios-card-radius)] border border-emerald-500/30 bg-emerald-500/15 px-4 text-sm font-semibold text-emerald-100 hover:bg-emerald-500/25 touch-manipulation gap-2">
+                    <button type="submit" class="inline-flex min-h-[48px] w-full sm:w-auto items-center justify-center rounded-[var(--tp-ios-card-radius)] border border-emerald-500/30 bg-emerald-500/15 px-4 text-sm font-semibold text-emerald-100 hover:bg-emerald-500/25 touch-manipulation gap-2 whitespace-nowrap">
                         <i class="fas fa-check-double" aria-hidden="true"></i>ใช้ทั้งหมด
                     </button>
                 </form>
@@ -542,7 +542,7 @@ foreach ($workShifts as $_ws) {
                         <input type="hidden" name="csrf_token" value="<?php echo csrfToken(); ?>">
                         <input type="hidden" name="action" value="use_thai_holiday">
                         <input type="hidden" name="source_holiday_id" value="<?php echo (int)$sourceHoliday['id']; ?>">
-                        <button type="submit" class="inline-flex min-h-[48px] w-full sm:w-auto items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 px-3 text-sm font-semibold text-white hover:bg-violet-700 touch-manipulation gap-2">
+                        <button type="submit" class="inline-flex min-h-[48px] w-full sm:w-auto items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 px-3 text-sm font-semibold text-white hover:bg-violet-700 touch-manipulation gap-2 whitespace-nowrap">
                             <i class="fas fa-plus" aria-hidden="true"></i>เลือกใช้
                         </button>
                     </form>
@@ -605,7 +605,7 @@ foreach ($workShifts as $_ws) {
             </div>
             <p class="text-slate-400 text-sm mt-3"><?php echo $conditions ? htmlspecialchars(implode(', ', $conditions)) : '-'; ?></p>
             <button type="button" onclick="editLeaveType(<?php echo htmlspecialchars(json_encode($lt)); ?>)"
-                    class="inline-flex min-h-[48px] w-full items-center justify-center rounded-[var(--tp-ios-card-radius)] border border-white/15 bg-white/10 text-white hover:bg-white/20 text-sm font-medium touch-manipulation gap-2 mt-4">
+                    class="inline-flex min-h-[48px] w-full items-center justify-center rounded-[var(--tp-ios-card-radius)] border border-white/15 bg-white/10 text-white hover:bg-white/20 text-sm font-medium touch-manipulation gap-2 mt-4 whitespace-nowrap">
                 <i class="fas fa-edit mr-2" aria-hidden="true"></i>แก้ไข
             </button>
         </div>
@@ -721,10 +721,10 @@ foreach ($workShifts as $_ws) {
             </div>
             
             <div class="flex gap-3 pt-2">
-                <button type="button" onclick="closeModal('editLeaveTypeModal')" class="inline-flex flex-1 min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] border border-white/15 bg-white/10 text-white hover:bg-white/20 text-sm font-medium touch-manipulation">
+                <button type="button" onclick="closeModal('editLeaveTypeModal')" class="inline-flex flex-1 min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] border border-white/15 bg-white/10 text-white hover:bg-white/20 text-sm font-medium touch-manipulation whitespace-nowrap">
                     ยกเลิก
                 </button>
-                <button type="submit" class="inline-flex flex-1 min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold touch-manipulation gap-2">
+                <button type="submit" class="inline-flex flex-1 min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold touch-manipulation gap-2 whitespace-nowrap">
                     <i class="fas fa-save" aria-hidden="true"></i>บันทึก
                 </button>
             </div>
@@ -815,7 +815,7 @@ function closeModal(id) {
                         <span class="text-white/80 text-sm">เปิดใช้งาน</span>
                     </label>
                     
-                    <button type="submit" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] border border-white/15 bg-white/10 px-4 text-sm font-medium text-white hover:bg-white/20 touch-manipulation gap-2">
+                    <button type="submit" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] border border-white/15 bg-white/10 px-4 text-sm font-medium text-white hover:bg-white/20 touch-manipulation gap-2 whitespace-nowrap">
                         <i class="fas fa-save mr-1" aria-hidden="true"></i>บันทึก
                     </button>
                 </div>
@@ -838,8 +838,8 @@ function closeModal(id) {
             <input type="hidden" name="action" value="delete_holiday">
             <input type="hidden" name="holiday_id" id="hr-settings-del-holiday-id" value="">
             <div class="flex flex-wrap gap-2 justify-end">
-                <button type="button" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] border border-white/15 bg-white/10 px-4 text-sm font-medium text-white hover:bg-white/20 touch-manipulation" onclick="hrSettingsCloseDelHoliday()">ยกเลิก</button>
-                <button type="submit" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-red-600 hover:bg-red-700 px-4 text-sm font-semibold text-white touch-manipulation">ลบวันหยุด</button>
+                <button type="button" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] border border-white/15 bg-white/10 px-4 text-sm font-medium text-white hover:bg-white/20 touch-manipulation whitespace-nowrap" onclick="hrSettingsCloseDelHoliday()">ยกเลิก</button>
+                <button type="submit" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-red-600 hover:bg-red-700 px-4 text-sm font-semibold text-white touch-manipulation whitespace-nowrap">ลบวันหยุด</button>
             </div>
         </form>
     </div>

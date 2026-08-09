@@ -294,7 +294,7 @@ function signerName(array $s, bool $isEn): string {
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title><?php echo htmlspecialchars($page_title); ?></title>
 <link rel="icon" type="image/png" href="/assets/icons/icon-192-v3.png">
-<link rel="stylesheet" href="/assets/css/native-shell.css?v=29">
+<link rel="stylesheet" href="/assets/css/native-shell.css?v=30">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ---------- Reset / Base (cloned from CRM payroll_print design system) ---------- */
@@ -380,6 +380,8 @@ body {
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
+    white-space: nowrap;  /* UI_RULES: button labels do not wrap. This page has
+                             no Tailwind, so it cannot use whitespace-nowrap. */
 }
 .toolbar a:hover, .toolbar button:hover, .toolbar .tb-btn:hover {
     background: rgba(51, 65, 85, 0.75);

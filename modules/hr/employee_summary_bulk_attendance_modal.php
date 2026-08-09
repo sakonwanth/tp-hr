@@ -48,8 +48,8 @@ $bulkReloadBase = $bulkReloadBase ?? '';
             <input type="hidden" id="bulk-att-user-id" value="">
 
             <div class="flex flex-col sm:flex-row gap-3">
-                <button type="button" id="bulk-att-cancel" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation">ยกเลิก</button>
-                <button type="submit" id="bulk-att-submit" class="flex-1 min-h-[56px] py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold">บันทึกทั้งหมด</button>
+                <button type="button" id="bulk-att-cancel" class="flex-1 min-h-[48px] py-2 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation whitespace-nowrap">ยกเลิก</button>
+                <button type="submit" id="bulk-att-submit" class="flex-1 min-h-[56px] py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] touch-manipulation font-semibold whitespace-nowrap">บันทึกทั้งหมด</button>
             </div>
         </form>
     </div>

@@ -245,7 +245,7 @@ include __DIR__ . '/templates/header.php';
                 <?php if ($canRequest): ?>
                 <button type="button"
                         onclick="openHolidayWorkModal('<?php echo htmlspecialchars($hol['date'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($hol['name'], ENT_QUOTES); ?>')"
-                        class="btn-primary min-h-[48px] px-4 rounded-[var(--tp-ios-card-radius)] text-sm touch-manipulation border-0">
+                        class="btn-primary min-h-[48px] px-4 rounded-[var(--tp-ios-card-radius)] text-sm touch-manipulation border-0 whitespace-nowrap">
                     <i class="fas fa-briefcase mr-1" aria-hidden="true"></i>ขอมาทำงานวันนี้
                 </button>
                 <?php elseif ($req && $req['status'] === 'PENDING'): ?>
@@ -253,7 +253,7 @@ include __DIR__ . '/templates/header.php';
                     <?php echo csrfField(); ?>
                     <input type="hidden" name="action" value="cancel_request">
                     <input type="hidden" name="request_id" value="<?php echo (int)$req['id']; ?>">
-                    <button type="submit" class="min-h-[48px] px-3 py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-300 text-sm rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium"
+                    <button type="submit" class="min-h-[48px] px-3 py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-300 text-sm rounded-[var(--tp-ios-card-radius)] touch-manipulation font-medium whitespace-nowrap"
                             onclick="return confirm('ยกเลิกคำขอนี้?')">
                         <i class="fas fa-times mr-1" aria-hidden="true"></i>ยกเลิกคำขอ
                     </button>
@@ -302,10 +302,10 @@ include __DIR__ . '/templates/header.php';
 
             <div class="grid grid-cols-2 gap-3 mt-6">
                 <button type="button" onclick="closeHolidayWorkModal()"
-                        class="min-h-[52px] rounded-[var(--tp-ios-card-radius)] bg-white/10 hover:bg-white/15 text-white touch-manipulation">
+                        class="min-h-[52px] rounded-[var(--tp-ios-card-radius)] bg-white/10 hover:bg-white/15 text-white touch-manipulation whitespace-nowrap">
                     ยกเลิก
                 </button>
-                <button type="submit" class="btn-primary min-h-[52px] rounded-[var(--tp-ios-card-radius)] border-0 touch-manipulation">
+                <button type="submit" class="btn-primary min-h-[52px] rounded-[var(--tp-ios-card-radius)] border-0 touch-manipulation whitespace-nowrap">
                     ส่งคำขอ
                 </button>
             </div>

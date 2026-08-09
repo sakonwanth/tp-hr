@@ -293,7 +293,7 @@ require_once __DIR__ . '/../templates/header.php';
         <input type="hidden" name="start_date" value="<?php echo htmlspecialchars($startDate); ?>">
         <input type="hidden" name="end_date" value="<?php echo htmlspecialchars($endDate); ?>">
         <input type="hidden" name="department" value="<?php echo htmlspecialchars($department); ?>">
-        <button type="submit" class="inline-flex min-h-[48px] w-full md:w-auto items-center justify-center rounded-[var(--tp-ios-card-radius)] border border-white/15 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20 touch-manipulation gap-2" title="ส่งออกข้อมูลตารางด้านล่างเป็นไฟล์ CSV (UTF-8)">
+        <button type="submit" class="inline-flex min-h-[48px] w-full md:w-auto items-center justify-center rounded-[var(--tp-ios-card-radius)] border border-white/15 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20 touch-manipulation gap-2 whitespace-nowrap" title="ส่งออกข้อมูลตารางด้านล่างเป็นไฟล์ CSV (UTF-8)">
             <i class="fas fa-file-csv" aria-hidden="true"></i>Export CSV
         </button>
     </form>
@@ -350,7 +350,7 @@ require_once __DIR__ . '/../templates/header.php';
         </div>
         <?php endif; ?>
         
-        <button type="submit" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 hover:bg-violet-700 px-5 text-sm font-semibold text-white touch-manipulation gap-2">
+        <button type="submit" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 hover:bg-violet-700 px-5 text-sm font-semibold text-white touch-manipulation gap-2 whitespace-nowrap">
             <i class="fas fa-search" aria-hidden="true"></i>ค้นหา
         </button>
     </form>

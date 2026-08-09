@@ -1,12 +1,13 @@
 /**
  * TP-HR — Native component system (iOS 26–inspired).
+ * v20: data-card no longer clips a child that asks for its own overflow (employee-form tab strip).
  * v19: Holidays mobile QA — next-card balance, layout order, hidden month scrollbars, touch targets.
  * v18: Holidays fine-tune — sticky month nav, detail modal triggers, export PDF, interactive rows/cells.
  * v17: Holidays page — IOS26 toolbar, segmented control, calendar cells, grouped list.
  * v16: HR dashboard secondary `<details>` accordion (below `xl`) — chevron + marker reset.
  * v15: Liquid Glass chrome — floating inset tab strip + gradient scrim · glass sticky CTA slab (`tp-ios-sticky-cta-slab`) · typography caps (page title max 28px · section ~19px · card title ~17px).
  * v14: token ladder + scroll buffer 160 · primary 58 · input 56 · textarea 120.
- * Headers: `/assets/css/native-shell.css?v=19`.
+ * Headers: `/assets/css/native-shell.css?v=30`.
  */
 
 html {
@@ -491,10 +492,17 @@ body.tp-native-app.tp-app-shell {
   border-radius: var(--tp-radius-card);
 }
 
+/* `overflow: hidden` keeps children inside the rounded corners, but as a
+   shorthand it also beat any `overflow-x-auto` the markup asked for — the
+   employee-form tab strip ended up clipped and unscrollable, hiding its last
+   tab on a 375px screen. Skip cards that set their own overflow utility. */
+.tp-native-data-card:not([class*="overflow-"]) {
+  overflow: hidden;
+}
+
 .tp-native-data-card {
   border-radius: var(--tp-radius-card);
   border: none;
-  overflow: hidden;
 }
 
 .tp-native-modal,

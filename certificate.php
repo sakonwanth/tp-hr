@@ -148,7 +148,7 @@ include 'templates/header.php';
                 <a href="certificate.php" class="touch-manipulation flex-1 min-h-[52px] inline-flex items-center justify-center py-3 bg-white/10 hover:bg-white/20 text-white text-center rounded-[var(--tp-ios-card-radius)] transition-colors font-medium">
                     ยกเลิก
                 </a>
-                <button type="submit" class="touch-manipulation flex-1 min-h-[56px] inline-flex items-center justify-center gap-2 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors font-semibold border-0">
+                <button type="submit" class="touch-manipulation flex-1 min-h-[56px] inline-flex items-center justify-center gap-2 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-[var(--tp-ios-card-radius)] transition-colors font-semibold border-0 whitespace-nowrap">
                     <i class="fas fa-paper-plane" aria-hidden="true"></i><span>ส่งคำขอ</span>
                 </button>
             </div>
@@ -382,7 +382,7 @@ document.getElementById('certificate-form').addEventListener('submit', async fun
                     </a>
                     <?php elseif ($req['status'] === 'PENDING'): ?>
                     <button type="button" onclick="cancelRequest(<?php echo (int)$req['id']; ?>)"
-                            class="min-h-[48px] inline-flex items-center justify-center px-4 py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-300 rounded-[var(--tp-ios-card-radius)] transition-colors text-sm font-medium touch-manipulation w-full sm:w-auto">
+                            class="min-h-[48px] inline-flex items-center justify-center px-4 py-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-300 rounded-[var(--tp-ios-card-radius)] transition-colors text-sm font-medium touch-manipulation w-full sm:w-auto whitespace-nowrap">
                         <i class="fas fa-times mr-2" aria-hidden="true"></i>ยกเลิก
                     </button>
                     <?php endif; ?>
