@@ -14,15 +14,15 @@ $tp_hr_main_native_class = 'content-area tp-native-page';
 if ($tp_hr_employee_tab_shell && ($cp_shell === 'dashboard')) {
     $tp_hr_main_native_class .= ' tp-native-page--home';
 }
-$appIconPath = '/assets/icons/tphr-app-icon.svg';
-$appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
+$appIconPath = '/assets/icons/icon-192-v3.png';
+$appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png';
 ?>
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#7c3aed">
+    <meta name="theme-color" content="#b79168">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -39,7 +39,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
 
     <!-- Tailwind CSS (compiled) -->
     <link rel="stylesheet" href="/assets/css/app.css">
-    <link rel="stylesheet" href="/assets/css/native-shell.css?v=22">
+    <link rel="stylesheet" href="/assets/css/native-shell.css?v=23">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -61,7 +61,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         }
         
         body {
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #2b2119 50%, #0f172a 100%);
             min-height: 100vh;
             min-height: 100dvh;
             padding-bottom: env(safe-area-inset-bottom, 0);
@@ -113,14 +113,14 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         }
         
         .nav-item:hover {
-            background: rgba(139, 92, 246, 0.1);
+            background: rgba(199, 169, 137, 0.1);
             color: #fff;
         }
         
         .nav-item.active {
-            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+            background: linear-gradient(135deg, #b79168 0%, #8c6d4d 100%);
             color: #fff;
-            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+            box-shadow: 0 4px 12px rgba(183, 145, 104, 0.4);
         }
         
         .nav-item i {
@@ -173,8 +173,8 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         }
         
         .quick-action:hover {
-            background: rgba(139, 92, 246, 0.15);
-            border-color: rgba(139, 92, 246, 0.3);
+            background: rgba(199, 169, 137, 0.15);
+            border-color: rgba(199, 169, 137, 0.3);
             transform: translateY(-4px);
         }
         
@@ -195,18 +195,18 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             justify-content: center;
             min-height: 58px;
             padding: 12px 20px;
-            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+            background: linear-gradient(135deg, #b79168 0%, #8c6d4d 100%);
             color: #fff;
             border-radius: var(--tp-radius-button);
             font-weight: 500;
             transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+            box-shadow: 0 4px 12px rgba(183, 145, 104, 0.3);
             touch-action: manipulation;
         }
         
         .btn-primary:hover {
             transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+            box-shadow: 0 6px 20px rgba(183, 145, 104, 0.4);
         }
 
         /* Hero primary CTA on dashboard — reads clearly as main action */
@@ -216,11 +216,11 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             font-size: 1.0625rem;
             font-weight: 600;
             border-radius: clamp(18px, 3vw, 22px);
-            box-shadow: 0 8px 32px rgba(124, 58, 237, 0.45), 0 2px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 32px rgba(183, 145, 104, 0.45), 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
         .btn-primary-prominent:hover {
-            box-shadow: 0 12px 36px rgba(124, 58, 237, 0.5), 0 2px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 12px 36px rgba(183, 145, 104, 0.5), 0 2px 8px rgba(0, 0, 0, 0.2);
         }
         
         .btn-secondary {
@@ -295,8 +295,8 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         
         .input-field:focus {
             outline: none;
-            border-color: #7c3aed;
-            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+            border-color: #b79168;
+            box-shadow: 0 0 0 3px rgba(183, 145, 104, 0.2);
         }
         
         .input-field::placeholder {
@@ -308,7 +308,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             -webkit-appearance: none;
             appearance: none;
             padding-right: 2.75rem;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23a78bfa'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23d8c4ad'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 0.85rem center;
             background-size: 1.1rem 1.1rem;
@@ -354,7 +354,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
         }
         .mobile-nav-brand:focus-visible {
-            outline: 2px solid rgba(167, 139, 250, 0.65);
+            outline: 2px solid rgba(216, 196, 173, 0.65);
             outline-offset: 3px;
         }
         .mobile-nav-brand-stack {
@@ -450,7 +450,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             transform: scale(0.98);
         }
         .mobile-nav-menu-btn:focus-visible {
-            outline: 2px solid rgba(167, 139, 250, 0.65);
+            outline: 2px solid rgba(216, 196, 173, 0.65);
             outline-offset: 2px;
         }
 
@@ -462,7 +462,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             display: flex;
             flex-direction: column;
             min-height: 100dvh;
-            background: linear-gradient(165deg, #0f172a 0%, #1e1b4b 42%, #0f172a 100%);
+            background: linear-gradient(165deg, #0f172a 0%, #2b2119 42%, #0f172a 100%);
             -webkit-overflow-scrolling: touch;
         }
         .mobile-menu-overlay.hidden {
@@ -505,10 +505,10 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         }
         .mobile-menu-close:hover {
             background: rgba(51, 65, 85, 0.85);
-            border-color: rgba(167, 139, 250, 0.35);
+            border-color: rgba(216, 196, 173, 0.35);
         }
         .mobile-menu-close:focus-visible {
-            outline: 2px solid rgba(167, 139, 250, 0.65);
+            outline: 2px solid rgba(216, 196, 173, 0.65);
             outline-offset: 2px;
         }
         .mobile-menu-scroll {
@@ -623,18 +623,18 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             color: #a5b4fc;
         }
         .mobile-menu-tile:hover {
-            background: rgba(139, 92, 246, 0.14);
-            border-color: rgba(167, 139, 250, 0.28);
+            background: rgba(199, 169, 137, 0.14);
+            border-color: rgba(216, 196, 173, 0.28);
             color: #fff;
         }
         .mobile-menu-tile:hover i {
-            color: #c4b5fd;
+            color: #e8dccf;
         }
         .mobile-menu-tile.active {
-            background: linear-gradient(145deg, #7c3aed 0%, #6d28d9 100%);
+            background: linear-gradient(145deg, #b79168 0%, #8c6d4d 100%);
             border-color: rgba(255, 255, 255, 0.12);
             color: #fff;
-            box-shadow: 0 8px 24px rgba(124, 58, 237, 0.38);
+            box-shadow: 0 8px 24px rgba(183, 145, 104, 0.38);
         }
         .mobile-menu-tile.active i {
             color: #fff;
@@ -750,7 +750,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(139, 92, 246, 0.2);
+            background: rgba(199, 169, 137, 0.2);
             color: #ddd6fe;
             font-size: 16px;
         }
@@ -965,7 +965,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png';
         }
         
         .data-table tbody tr:hover {
-            background: rgba(139, 92, 246, 0.05);
+            background: rgba(199, 169, 137, 0.05);
         }
         
         /* Animations */

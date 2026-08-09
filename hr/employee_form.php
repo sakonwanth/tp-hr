@@ -1560,7 +1560,7 @@ include dirname(__DIR__) . '/templates/header.php';
 <style>
 .tab-btn { color: rgba(255,255,255,0.55); background: transparent; border-radius: 20px; }
 .tab-btn:hover { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.06); }
-.tab-btn.active { color: white; background: rgba(124,58,237,0.35); box-shadow: 0 0 0 1px rgba(167,139,250,0.45); }
+.tab-btn.active { color: white; background: rgba(183, 145, 104,0.35); box-shadow: 0 0 0 1px rgba(216, 196, 173,0.45); }
 </style>
 
 <script>

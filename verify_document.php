@@ -72,14 +72,14 @@ function thaiDate(?string $d): string {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#7c3aed">
+<meta name="theme-color" content="#b79168">
 <title>ตรวจสอบความถูกต้องของเอกสาร</title>
-<link rel="icon" type="image/svg+xml" href="/assets/icons/tphr-app-icon.svg">
+<link rel="icon" type="image/png" href="/assets/icons/icon-192-v3.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/app.css">
-<link rel="stylesheet" href="/assets/css/native-shell.css?v=22">
+<link rel="stylesheet" href="/assets/css/native-shell.css?v=23">
 <style>
     * {
         font-family: 'IBM Plex Sans Thai', system-ui, sans-serif;
@@ -90,7 +90,7 @@ function thaiDate(?string $d): string {
         min-height: 100vh;
         min-height: 100dvh;
         overflow-x: hidden;
-        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+        background: linear-gradient(135deg, #0f172a 0%, #2b2119 50%, #0f172a 100%);
         display: flex;
         align-items: center;
         justify-content: center;

@@ -73,7 +73,7 @@ body {
   --tp-icon-md: 28px;
   --tp-icon-lg: 32px;
 
-  --tp-bg-app: linear-gradient(135deg, #0f172a 0%, #1e1b4b 52%, #0f172a 100%);
+  --tp-bg-app: linear-gradient(135deg, #0f172a 0%, #2b2119 52%, #0f172a 100%);
   --tp-theme-bar: #0f172a;
 
   /* iOS-like tab semantics (adapted for dark branded shell — not literal UIKit clones) */
@@ -270,7 +270,7 @@ body.tp-native-app.tp-app-shell {
 }
 
 .tp-native-bottom-tab-link:focus-visible {
-  outline: 2px solid rgba(167, 139, 250, 0.85);
+  outline: 2px solid rgba(216, 196, 173, 0.85);
   outline-offset: 2px;
 }
 
@@ -455,9 +455,9 @@ body.tp-native-app.tp-app-shell {
   font-size: 1rem;
   font-weight: 600;
   border-radius: var(--tp-radius-button);
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  background: linear-gradient(135deg, #b79168 0%, #8c6d4d 100%);
   border: none;
-  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 4px 20px rgba(183, 145, 104, 0.35);
 }
 
 .tp-native-btn-secondary {
@@ -471,9 +471,9 @@ body.tp-native-app.tp-app-shell {
   border-radius: var(--tp-radius-control);
   font-size: 1rem;
   font-weight: 600;
-  color: rgba(196, 181, 253, 0.98);
-  background: rgba(124, 58, 237, 0.12);
-  border: 1px solid rgba(167, 139, 250, 0.45);
+  color: rgba(232, 220, 207, 0.98);
+  background: rgba(183, 145, 104, 0.12);
+  border: 1px solid rgba(216, 196, 173, 0.45);
   touch-action: manipulation;
 }
 
@@ -865,7 +865,7 @@ body.tp-native-app .section-title i {
 /* The whole year block is the picker — a visible <select> underneath repeated the
    year a third time. */
 .tp-holidays-year-display:has(.tp-holidays-year-select:focus-visible) {
-  outline: 2px solid rgba(167, 139, 250, 0.85);
+  outline: 2px solid rgba(216, 196, 173, 0.85);
   outline-offset: 4px;
   border-radius: var(--tp-radius-control);
 }
@@ -922,8 +922,8 @@ body.tp-native-app .section-title i {
   min-height: var(--tp-native-touch-min);
   padding: 0 var(--tp-space-16);
   border-radius: var(--tp-radius-control);
-  border: 1px solid rgba(167, 139, 250, 0.35);
-  background: rgba(124, 58, 237, 0.18);
+  border: 1px solid rgba(216, 196, 173, 0.35);
+  background: rgba(183, 145, 104, 0.18);
   color: rgb(233, 225, 255);
   font-size: var(--tp-font-body);
   font-weight: 600;
@@ -932,7 +932,7 @@ body.tp-native-app .section-title i {
 }
 
 .tp-holidays-manage-btn:hover {
-  background: rgba(124, 58, 237, 0.28);
+  background: rgba(183, 145, 104, 0.28);
 }
 
 .tp-holidays-segment {
@@ -1051,13 +1051,13 @@ body.tp-native-app .section-title i {
 }
 
 .tp-holidays-month-chip.has-holidays {
-  border-color: rgba(167, 139, 250, 0.28);
-  background: rgba(124, 58, 237, 0.14);
+  border-color: rgba(216, 196, 173, 0.28);
+  background: rgba(183, 145, 104, 0.14);
   color: rgb(237, 233, 255);
 }
 
 .tp-holidays-month-chip.is-current:not(.is-active) {
-  border-color: rgba(167, 139, 250, 0.55);
+  border-color: rgba(216, 196, 173, 0.55);
   color: #fff;
 }
 
@@ -1066,7 +1066,7 @@ body.tp-native-app .section-title i {
   border-color: transparent;
   background: rgb(124, 58, 237);
   color: #fff;
-  box-shadow: 0 2px 10px rgba(124, 58, 237, 0.38);
+  box-shadow: 0 2px 10px rgba(183, 145, 104, 0.38);
 }
 
 button.tp-holidays-month-chip {
@@ -1250,7 +1250,7 @@ button.tp-holidays-month-chip {
 }
 
 .tp-holidays-month-chip.has-holidays .tp-holidays-month-chip__count {
-  background: rgba(167, 139, 250, 0.3);
+  background: rgba(216, 196, 173, 0.3);
   color: rgb(243, 240, 255);
 }
 
@@ -1343,8 +1343,8 @@ button.tp-holidays-month-chip {
 }
 
 .tp-holidays-pager-all[aria-pressed='true'] {
-  border-color: rgba(167, 139, 250, 0.35);
-  background: rgba(124, 58, 237, 0.22);
+  border-color: rgba(216, 196, 173, 0.35);
+  background: rgba(183, 145, 104, 0.22);
   color: rgb(233, 225, 255);
 }
 
@@ -1364,7 +1364,7 @@ button.tp-holidays-month-chip {
 }
 
 .tp-holidays-month.is-current {
-  border-color: rgba(167, 139, 250, 0.28);
+  border-color: rgba(216, 196, 173, 0.28);
 }
 
 .tp-holidays-month__head {
@@ -1389,8 +1389,8 @@ button.tp-holidays-month-chip {
   height: 1.5rem;
   padding: 0 var(--tp-space-8);
   border-radius: 999px;
-  background: rgba(124, 58, 237, 0.22);
-  border: 1px solid rgba(167, 139, 250, 0.3);
+  background: rgba(183, 145, 104, 0.22);
+  border: 1px solid rgba(216, 196, 173, 0.3);
   font-size: 0.6875rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -1458,7 +1458,7 @@ button.tp-holidays-cal-day:focus-visible,
 button.tp-holidays-list-row:focus-visible,
 button.tp-holidays-month-chip:focus-visible,
 button.tp-holidays-next-card:focus-visible {
-  outline: 2px solid rgba(167, 139, 250, 0.85);
+  outline: 2px solid rgba(216, 196, 173, 0.85);
   outline-offset: 2px;
 }
 
@@ -1467,7 +1467,7 @@ button.tp-holidays-next-card:focus-visible {
 }
 
 .tp-holidays-cal-day--holiday {
-  background: linear-gradient(160deg, rgba(124, 58, 237, 0.62), rgba(167, 139, 250, 0.38));
+  background: linear-gradient(160deg, rgba(183, 145, 104, 0.62), rgba(216, 196, 173, 0.38));
   color: #fff;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
@@ -1478,7 +1478,7 @@ button.tp-holidays-next-card:focus-visible {
 
 .tp-holidays-cal-day--today:not(.tp-holidays-cal-day--holiday) {
   background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.55);
+  box-shadow: 0 0 0 2px rgba(216, 196, 173, 0.55);
   color: #fff;
 }
 
@@ -1524,7 +1524,7 @@ button.tp-holidays-next-card:focus-visible {
 }
 
 .tp-holidays-month__name-row:focus-visible {
-  outline: 2px solid rgba(167, 139, 250, 0.85);
+  outline: 2px solid rgba(216, 196, 173, 0.85);
   outline-offset: 2px;
 }
 
@@ -1536,8 +1536,8 @@ button.tp-holidays-next-card:focus-visible {
   min-width: 1.5rem;
   height: 1.5rem;
   border-radius: 999px;
-  background: rgba(124, 58, 237, 0.3);
-  border: 1px solid rgba(167, 139, 250, 0.32);
+  background: rgba(183, 145, 104, 0.3);
+  border: 1px solid rgba(216, 196, 173, 0.32);
   font-size: 0.6875rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -1627,7 +1627,7 @@ button.tp-holidays-list-row:hover {
 }
 
 .tp-holidays-list-row.is-today {
-  background: rgba(124, 58, 237, 0.1);
+  background: rgba(183, 145, 104, 0.1);
 }
 
 .tp-holidays-list-date {
@@ -1677,7 +1677,7 @@ button.tp-holidays-list-row:hover {
   font-size: 0.6875rem;
   font-weight: 600;
   line-height: 1.25;
-  color: rgba(167, 139, 250, 0.95);
+  color: rgba(216, 196, 173, 0.95);
 }
 
 .tp-holidays-next-card {
@@ -1685,8 +1685,8 @@ button.tp-holidays-list-row:hover {
   width: 100%;
   padding: var(--tp-space-16);
   border-radius: var(--tp-ios-card-radius);
-  background: linear-gradient(145deg, rgba(124, 58, 237, 0.28), rgba(30, 27, 75, 0.55));
-  border: 1px solid rgba(167, 139, 250, 0.28);
+  background: linear-gradient(145deg, rgba(183, 145, 104, 0.28), rgba(30, 27, 75, 0.55));
+  border: 1px solid rgba(216, 196, 173, 0.28);
   box-shadow: var(--tp-surface-card-shadow);
   font: inherit;
   color: inherit;
@@ -1701,8 +1701,8 @@ button.tp-holidays-list-row:hover {
 }
 
 .tp-holidays-next-card--clickable:hover {
-  background: linear-gradient(145deg, rgba(124, 58, 237, 0.36), rgba(30, 27, 75, 0.62));
-  border-color: rgba(167, 139, 250, 0.42);
+  background: linear-gradient(145deg, rgba(183, 145, 104, 0.36), rgba(30, 27, 75, 0.62));
+  border-color: rgba(216, 196, 173, 0.42);
 }
 
 .tp-holidays-next-card--clickable:active {
@@ -1710,7 +1710,7 @@ button.tp-holidays-list-row:hover {
 }
 
 .tp-holidays-next-card--clickable:focus-visible {
-  outline: 2px solid rgba(167, 139, 250, 0.85);
+  outline: 2px solid rgba(216, 196, 173, 0.85);
   outline-offset: 2px;
 }
 
@@ -1838,8 +1838,8 @@ button.tp-holidays-list-row:hover {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: var(--tp-radius-small-control);
-  background: rgba(124, 58, 237, 0.16);
-  border: 1px solid rgba(167, 139, 250, 0.22);
+  background: rgba(183, 145, 104, 0.16);
+  border: 1px solid rgba(216, 196, 173, 0.22);
   color: rgb(196, 181, 253);
 }
 

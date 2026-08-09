@@ -18,7 +18,7 @@ $system_tagline = 'Human Resource Management';
 $system_tagline_th = 'ระบบบริหารทรัพยากรบุคคล';
 $company_name = 'TP-Asset Development Co., Ltd.';
 // CRM repo ships "LOGO TP-ASSET - 6.png" under asset/logo/ (tp-logo.png does not exist → broken image on login).
-$hr_login_logo_fallback = '/assets/icons/tphr-app-icon.svg';
+$hr_login_logo_fallback = '/assets/icons/icon-192-v3.png';
 $crm_brand_logo_path = tp_hr_brand_logo_url('LOGO TP-ASSET - 6.png');
 $company_logo = !empty($_ENV['HR_LOGIN_LOGO']) ? $_ENV['HR_LOGIN_LOGO'] : $crm_brand_logo_path;
 
@@ -99,8 +99,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <?php $appIconPath = '/assets/icons/tphr-app-icon.svg'; ?>
-    <?php $appTouchIconPath = '/assets/icons/apple-touch-icon-v2.png'; ?>
+    <?php $appIconPath = '/assets/icons/icon-192-v3.png'; ?>
+    <?php $appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png'; ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>เข้าสู่ระบบ | <?php echo htmlspecialchars($system_name); ?></title>
@@ -110,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="<?php echo htmlspecialchars($system_name); ?>">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#7c3aed">
+    <meta name="theme-color" content="#b79168">
     <link rel="manifest" href="/manifest.webmanifest">
     <link rel="icon" type="image/svg+xml" href="<?php echo htmlspecialchars($appIconPath); ?>">
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -127,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Icons & Tailwind -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/app.css">
-    <link rel="stylesheet" href="/assets/css/native-shell.css?v=22">
+    <link rel="stylesheet" href="/assets/css/native-shell.css?v=23">
     
     <style>
         * {
@@ -182,8 +182,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .input-field:focus {
-            border-color: #7c3aed;
-            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+            border-color: #b79168;
+            box-shadow: 0 0 0 3px rgba(183, 145, 104, 0.2);
             outline: none;
             background: rgba(255, 255, 255, 0.12);
         }
@@ -193,22 +193,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .btn-login {
-            background: #7c3aed;
+            background: #b79168;
             border-radius: var(--tp-radius-button);
             transition: background 0.2s ease, box-shadow 0.2s ease;
             font-weight: 600;
             min-height: 58px;
             touch-action: manipulation;
-            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+            box-shadow: 0 4px 12px rgba(183, 145, 104, 0.3);
         }
 
         .btn-login:hover {
-            background: #6d28d9;
-            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
+            background: #8c6d4d;
+            box-shadow: 0 6px 20px rgba(183, 145, 104, 0.35);
         }
 
         .btn-login:active {
-            background: #5b21b6;
+            background: #745a3f;
         }
 
         .btn-line {
@@ -244,17 +244,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .logo-glow {
-            filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.5));
+            filter: drop-shadow(0 0 20px rgba(199, 169, 137, 0.5));
             transition: all 0.3s ease;
         }
 
         .logo-glow:hover {
-            filter: drop-shadow(0 0 30px rgba(139, 92, 246, 0.7));
+            filter: drop-shadow(0 0 30px rgba(199, 169, 137, 0.7));
             transform: scale(1.05);
         }
 
         .tagline {
-            color: rgba(196, 181, 253, 0.95);
+            color: rgba(232, 220, 207, 0.95);
         }
 
     </style>
