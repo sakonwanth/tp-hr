@@ -62,6 +62,25 @@
             reloading = true;
             window.location.reload();
         });
+
+        // Tapping a notification asks the worker to open a page. iOS Safari
+        // does not support WindowClient.navigate(), so the worker falls back
+        // to handing us the destination — see notificationclick in sw.js.
+        navigator.serviceWorker.addEventListener('message', function (event) {
+            var data = event.data;
+            if (!data || data.type !== 'TP_HR_NAVIGATE' || typeof data.url !== 'string') return;
+
+            // Same-origin only: never let a message move the app off-site.
+            var target;
+            try {
+                target = new URL(data.url, window.location.origin);
+            } catch (err) {
+                return;
+            }
+            if (target.origin !== window.location.origin) return;
+
+            window.location.href = target.href;
+        });
     }
 
     function showUpdateToast(worker) {

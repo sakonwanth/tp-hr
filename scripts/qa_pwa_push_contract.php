@@ -112,6 +112,19 @@ checkContains('sw handles push', $sw, "addEventListener('push'");
 checkContains('sw handles notification clicks', $sw, "addEventListener('notificationclick'");
 checkContains('sw keeps the API out of the cache', $sw, "'api/'");
 
+// WindowClient.navigate() is unsupported on iOS Safari. Relying on it alone
+// focuses the app without changing the page, so every notification appears to
+// open wherever the app happened to be — usually the dashboard. The worker
+// must fall back to messaging the page, and the page must act on it.
+checkContains('sw falls back to messaging the page', $sw, 'TP_HR_NAVIGATE');
+checkContains('client acts on the navigate message', $pwaJs, 'TP_HR_NAVIGATE');
+// A message must never be able to move the app off-site.
+check(
+    'navigate message is origin-checked',
+    str_contains($pwaJs, 'target.origin !== window.location.origin'),
+    true
+);
+
 // Regression guard: matching assets with ignoreSearch silently defeats the
 // `?v=` cache-bust convention in DEPLOY_CHECKLIST.md — a bumped stylesheet
 // would keep serving the previous body on the first load after a deploy.
