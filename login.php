@@ -117,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="apple-touch-icon" sizes="180x180" href="<?php echo htmlspecialchars($appTouchIconPath); ?>">
 
     <!-- PWA — service worker registration + iOS install hint -->
-    <script src="/assets/js/pwa.js?v=1" defer></script>
+    <script src="/assets/js/pwa.js?v=2" defer></script>
 
     <!-- IBM Plex Sans Thai — same stack as tp-checkin / logged-in TP-HR -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

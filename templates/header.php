@@ -35,7 +35,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png';
     <link rel="apple-touch-icon" sizes="180x180" href="<?php echo htmlspecialchars($appTouchIconPath); ?>">
 
     <!-- PWA — service worker registration + iOS install hint -->
-    <script src="/assets/js/pwa.js?v=1" defer></script>
+    <script src="/assets/js/pwa.js?v=2" defer></script>
 
     <!-- Tailwind CSS (compiled) -->
     <link rel="stylesheet" href="/assets/css/app.css">
