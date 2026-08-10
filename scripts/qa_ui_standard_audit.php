@@ -95,6 +95,34 @@ foreach (['assets/css/native-shell.css', 'templates/header.php', 'login.php'] as
 $tokens = cssTokens($css);
 $tallEnoughButton = classesTallerThan(48, $css, $tokens);
 $tallEnoughInput  = classesTallerThan(52, $css, $tokens);
+$parentSized      = stretchesToParent($css);
+
+/**
+ * Classes that take their size from the parent rather than from themselves:
+ * `height: 100%`, or absolutely positioned to fill its box.
+ *
+ * holidays.php overlays a transparent `<select>` on a styled year card so the
+ * whole card opens the picker. The select measures 60px on screen because the
+ * card is 60px, but its own rule only says `height: 100%` — no number for
+ * classesTallerThan() to compare. Judging it on its own declarations reported
+ * a control that is in fact the largest tap target on the page.
+ *
+ * @return array<string,true> class names
+ */
+function stretchesToParent(array $cssSources): array
+{
+    $out = [];
+    foreach ($cssSources as $css) {
+        if (!preg_match_all('/\.([a-zA-Z0-9_-]+)\s*(?:,[^{]*)?\{([^}]*)\}/s', $css, $m, PREG_SET_ORDER)) continue;
+        foreach ($m as $rule) {
+            $body = $rule[2];
+            $fills = preg_match('/height\s*:\s*100%/i', $body)
+                || (preg_match('/position\s*:\s*absolute/i', $body) && preg_match('/inset\s*:\s*0/i', $body));
+            if ($fills) $out[$rule[1]] = true;
+        }
+    }
+    return $out;
+}
 
 /** Tailwind arbitrary values: min-h-[56px], h-[3.5rem]. */
 function tailwindHeightOk(string $classAttr, int $px): bool
@@ -111,6 +139,23 @@ function tailwindHeightOk(string $classAttr, int $px): bool
             if (((int)$step) * 4 >= $px) return true;
         }
     }
+
+    // A control can be tall enough without ever naming a height: padding plus
+    // line-height is what actually sizes it. checkin.php's time input is
+    // `px-4 py-3 text-lg` and measures 56px, but with only the rules above it
+    // was reported as under the 52px minimum on every run.
+    //
+    // Only inferred when both a vertical padding and a text size are given —
+    // guessing the inherited font size would credit height that may not exist.
+    // An explicit leading-* would change the result and is not read here.
+    $lineHeights = ['xs' => 16, 'sm' => 20, 'base' => 24, 'lg' => 28, 'xl' => 28, '2xl' => 32, '3xl' => 36];
+    if (preg_match('/\btext-(xs|sm|base|lg|xl|2xl|3xl)(?![\w-])/', $classAttr, $t)
+        && preg_match('/\b(?:p|py)-(\d+(?:\.\d+)?)(?![\w-])/', $classAttr, $p)) {
+        $pad = (float)$p[1] * 4;
+        $border = preg_match('/\bborder(?:-[trbl])?(?![\w-])|\bborder-\d/', $classAttr) ? 2 : 0;
+        if ($pad * 2 + $lineHeights[$t[1]] + $border >= $px) return true;
+    }
+
     return false;
 }
 
@@ -322,6 +367,10 @@ foreach ($files as $path) {
         // is roughly 90px. Judging it by its padding classes reports a control
         // that is visibly fine.
         if ($tagName === 'textarea' && preg_match('/\brows\s*=\s*"([2-9]|\d{2,})"/i', $tag)) continue;
+
+        // Stretched to fill its parent — the parent is the tap target, and its
+        // size is not visible from this tag.
+        if (usesCompliantClass($classAttr, $parentSized)) { $skipped++; continue; }
 
         if (!usesCompliantClass($classAttr, $localInput) && !tailwindHeightOk($classAttr, 52)) {
             add($findings, 'input height < 52px (UI_RULES: input minimum 52px)', $rel, $lineNo, $tag);
