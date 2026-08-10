@@ -141,8 +141,12 @@ $page_title = 'สวัสดิการการเงินพนักง�
 $current_page = 'employee-finance';
 require_once __DIR__ . '/templates/header.php';
 ?>
-<main class="content-area p-4 md:p-6">
-  <div class="max-w-6xl mx-auto space-y-6">
+<?php /* templates/header.php has already opened <main class="content-area">.
+         Opening a second one here nested two .content-area elements, so the
+         desktop rule `margin-left: 280px; width: calc(100% - 280px)` applied
+         twice — 560px of left margin — and the page sat pushed to the right of
+         every other screen. It was also a second <main> landmark on the page. */ ?>
+  <div class="tp-hr-admin-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(1200px,100%)] mx-auto min-w-0 space-y-6">
     <section class="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-5">
       <div class="flex flex-wrap items-start justify-between gap-4">
         <div><h1 class="text-xl font-bold text-white">สวัสดิการการเงินพนักงาน</h1><p class="text-white/60 mt-1">เบิกเงินเดือนล่วงหน้า เงินกู้ และติดตามตารางชำระ</p></div>
@@ -209,13 +213,64 @@ require_once __DIR__ . '/templates/header.php';
       <?php if ($detail['finance_type'] === 'employee_loan'): ?>
       <div class="border-t border-white/10 p-5">
         <h3 class="text-white font-semibold mb-3">ตารางผ่อนชำระและการลงสลิป</h3>
-        <div class="overflow-x-auto"><table class="w-full min-w-[720px] text-sm">
+        <?php
+        // One renderer for the payroll-slip cell, shared by the phone cards and
+        // the table below, so the two cannot drift apart.
+        $payrollSlipCell = static function (array $repayment) use ($crmBase, $formatThaiMonth): string {
+            $linkStatus = (string)($repayment['payroll_link_status'] ?? '');
+            if (!empty($repayment['payroll_slip_id']) && in_array($linkStatus, ['included', 'settled'], true)) {
+                return '<a class="text-violet-300 hover:text-violet-200" target="_blank" rel="noopener" href="'
+                    . htmlspecialchars($crmBase . '/payroll_print.php?slip_id=' . (int)$repayment['payroll_slip_id']) . '">'
+                    . htmlspecialchars($repayment['payroll_month'] ? $formatThaiMonth((string)$repayment['payroll_month']) : 'เปิดสลิป')
+                    . '</a>';
+            }
+            if ($linkStatus === 'reversed') {
+                return '<span class="text-amber-300">ยกเลิกการเชื่อมสลิปแล้ว</span>';
+            }
+            return htmlspecialchars($repayment['payroll_month'] ? $formatThaiMonth((string)$repayment['payroll_month']) : 'ยังไม่ลงสลิป');
+        };
+        ?>
+        <?php /* Phone: seven columns do not fit 375px, and side-scrolling a
+                 table hides the numbers that matter. One card per instalment
+                 instead — same data, read top to bottom. */ ?>
+        <div class="md:hidden space-y-3">
+          <?php foreach ($repayments as $repayment): ?>
+          <div class="tp-ios-attendance-panel p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <p class="text-white font-semibold">งวดที่ <?php echo (int)$repayment['installment_no']; ?></p>
+                <p class="text-white/50 text-xs mt-0.5">ครบกำหนด <?php echo htmlspecialchars($formatThaiDate((string)$repayment['due_date'])); ?></p>
+              </div>
+              <p class="text-white font-semibold tabular-nums text-right shrink-0"><?php echo number_format((float)$repayment['due_amount'], 2); ?></p>
+            </div>
+            <dl class="grid grid-cols-2 gap-3 mt-3 text-sm min-w-0">
+              <div class="min-w-0">
+                <dt class="text-white/50 text-xs">เงินต้น</dt>
+                <dd class="text-white/85 tabular-nums"><?php echo number_format((float)$repayment['principal_portion'], 2); ?></dd>
+              </div>
+              <div class="min-w-0">
+                <dt class="text-white/50 text-xs">ดอกเบี้ย</dt>
+                <dd class="text-white/85 tabular-nums"><?php echo number_format((float)$repayment['interest_portion'], 2); ?></dd>
+              </div>
+              <div class="min-w-0">
+                <dt class="text-white/50 text-xs">สถานะ</dt>
+                <dd class="text-white/85"><?php echo htmlspecialchars($statusLabel((string)$repayment['status'])); ?></dd>
+              </div>
+              <div class="min-w-0">
+                <dt class="text-white/50 text-xs">รอบเงินเดือน</dt>
+                <dd class="text-white/85"><?php echo $payrollSlipCell($repayment); ?></dd>
+              </div>
+            </dl>
+          </div>
+          <?php endforeach; ?>
+        </div>
+        <div class="hidden md:block tp-native-table-shell overflow-x-auto min-w-0 max-w-full overscroll-x-contain"><table class="w-full min-w-[720px] text-sm">
           <thead class="text-white/55"><tr><th class="text-left p-3">งวด</th><th class="text-left p-3">ครบกำหนด</th><th class="text-right p-3">เงินต้น</th><th class="text-right p-3">ดอกเบี้ย</th><th class="text-right p-3">ยอดชำระ</th><th class="text-left p-3">สถานะ</th><th class="text-left p-3">รอบเงินเดือน</th></tr></thead>
           <tbody class="divide-y divide-white/10 text-white/80">
           <?php foreach ($repayments as $repayment): ?><tr>
             <td class="p-3"><?php echo (int)$repayment['installment_no']; ?></td><td class="p-3"><?php echo htmlspecialchars($formatThaiDate((string)$repayment['due_date'])); ?></td>
             <td class="p-3 text-right"><?php echo number_format((float)$repayment['principal_portion'], 2); ?></td><td class="p-3 text-right"><?php echo number_format((float)$repayment['interest_portion'], 2); ?></td><td class="p-3 text-right font-semibold"><?php echo number_format((float)$repayment['due_amount'], 2); ?></td>
-            <td class="p-3"><?php echo htmlspecialchars($statusLabel((string)$repayment['status'])); ?></td><td class="p-3"><?php $linkStatus = (string)($repayment['payroll_link_status'] ?? ''); ?><?php if (!empty($repayment['payroll_slip_id']) && in_array($linkStatus, ['included', 'settled'], true)): ?><a class="text-violet-300 hover:text-violet-200" target="_blank" rel="noopener" href="<?php echo htmlspecialchars($crmBase . '/payroll_print.php?slip_id=' . (int)$repayment['payroll_slip_id']); ?>"><?php echo htmlspecialchars($repayment['payroll_month'] ? $formatThaiMonth((string)$repayment['payroll_month']) : 'เปิดสลิป'); ?></a><?php elseif ($linkStatus === 'reversed'): ?><span class="text-amber-300">ยกเลิกการเชื่อมสลิปแล้ว</span><?php else: ?><?php echo htmlspecialchars($repayment['payroll_month'] ? $formatThaiMonth((string)$repayment['payroll_month']) : 'ยังไม่ลงสลิป'); ?><?php endif; ?></td>
+            <td class="p-3"><?php echo htmlspecialchars($statusLabel((string)$repayment['status'])); ?></td><td class="p-3"><?php echo $payrollSlipCell($repayment); ?></td>
           </tr><?php endforeach; ?>
           </tbody>
         </table></div>
@@ -234,7 +289,47 @@ require_once __DIR__ . '/templates/header.php';
       <?php if (!$rows): ?>
         <div class="p-8 text-center text-white/60">ยังไม่มีรายการเงินกู้หรือเบิกล่วงหน้า</div>
       <?php else: ?>
-        <div class="overflow-x-auto"><table class="w-full min-w-[760px] text-sm">
+        <?php /* Phone: eight columns cannot fit, so each record becomes a card
+                 — name and amount lead, the rest reads as label/value pairs. */ ?>
+        <div class="md:hidden p-5 space-y-3">
+          <?php foreach ($rows as $row): ?>
+          <div class="tp-ios-attendance-panel p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <p class="text-white font-semibold"><?php echo htmlspecialchars(trim(($row['first_name_th'] ?? '') . ' ' . ($row['last_name_th'] ?? ''))); ?></p>
+                <p class="text-white/50 text-xs mt-0.5"><?php echo $row['finance_type'] === 'employee_loan' ? 'เงินกู้พนักงาน' : 'เบิกเงินเดือนล่วงหน้า'; ?></p>
+              </div>
+              <div class="text-right shrink-0">
+                <p class="text-white font-semibold tabular-nums"><?php echo number_format((float)$row['total_payable'], 2); ?></p>
+                <p class="text-white/50 text-xs mt-0.5">ชำระรวม</p>
+              </div>
+            </div>
+            <dl class="grid grid-cols-2 gap-3 mt-3 text-sm min-w-0">
+              <div class="min-w-0">
+                <dt class="text-white/50 text-xs">เงินต้น</dt>
+                <dd class="text-white/85 tabular-nums"><?php echo number_format((float)$row['principal_amount'], 2); ?></dd>
+              </div>
+              <div class="min-w-0">
+                <dt class="text-white/50 text-xs">งวด</dt>
+                <dd class="text-white/85 tabular-nums"><?php echo $row['term_months'] ?: '1'; ?></dd>
+              </div>
+              <div class="min-w-0">
+                <dt class="text-white/50 text-xs">เริ่มชำระ</dt>
+                <dd class="text-white/85"><?php echo htmlspecialchars($formatThaiMonth((string)$row['first_due_month'])); ?></dd>
+              </div>
+              <div class="min-w-0">
+                <dt class="text-white/50 text-xs">วิธีชำระ</dt>
+                <dd class="text-white/85"><?php echo $row['repayment_method'] === 'payroll' ? 'หักผ่านสลิป' : 'โอนคืน'; ?></dd>
+              </div>
+            </dl>
+            <div class="flex items-center justify-between gap-3 mt-3 pt-3 border-t border-white/10">
+              <span class="text-white/85 text-sm min-w-0"><?php echo htmlspecialchars($statusLabel((string)$row['status'])); ?></span>
+              <a class="tp-tap-48 shrink-0 text-violet-300 hover:text-violet-200 text-sm font-medium whitespace-nowrap" href="?type=<?php echo urlencode((string)$row['finance_type']); ?>&amp;id=<?php echo (int)$row['id']; ?>#finance-detail">ดูรายละเอียด</a>
+            </div>
+          </div>
+          <?php endforeach; ?>
+        </div>
+        <div class="hidden md:block tp-native-table-shell overflow-x-auto min-w-0 max-w-full overscroll-x-contain"><table class="w-full min-w-[760px] text-sm">
           <thead class="text-white/60"><tr><th class="text-left p-4">พนักงาน</th><th class="text-left p-4">ประเภท</th><th class="text-right p-4">เงินต้น</th><th class="text-right p-4">ชำระรวม</th><th class="text-center p-4">งวด</th><th class="text-left p-4">เริ่มชำระ</th><th class="text-left p-4">วิธีชำระ</th><th class="text-left p-4">สถานะ</th></tr></thead>
           <tbody class="divide-y divide-white/10 text-white/85">
           <?php foreach ($rows as $row): ?><tr class="hover:bg-white/[.03]">
@@ -251,5 +346,5 @@ require_once __DIR__ . '/templates/header.php';
       <?php endif; ?>
     </section>
   </div>
-</main>
+<?php /* footer.php closes the <main> that header.php opened. */ ?>
 <?php require_once __DIR__ . '/templates/footer.php'; ?>

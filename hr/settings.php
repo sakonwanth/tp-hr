@@ -201,7 +201,7 @@ $workShifts = $pdo->query("SELECT * FROM hr_work_shifts ORDER BY id")->fetchAll(
 require_once __DIR__ . '/../templates/header.php';
 ?>
 
-<div class="tp-hr-admin-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<div class="tp-hr-admin-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(1200px,100%)] mx-auto min-w-0">
 <!-- Page Header -->
 <header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
     <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">

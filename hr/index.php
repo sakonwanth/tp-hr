@@ -113,7 +113,7 @@ $current_page = 'hr-dashboard';
 include dirname(__DIR__) . '/templates/header.php';
 ?>
 
-<div class="tp-hr-admin-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
+<div class="tp-hr-admin-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(1200px,100%)] mx-auto min-w-0">
 <header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
     <h1 class="tp-ios-page-title">แดชบอร์ด HR</h1>
     <p class="tp-ios-caption-muted mt-2 max-w-[42rem]">ภาพรวมการเข้างาน การลา และคำขอเอกสาร ณ วันที่ <?php echo formatDateThai($today); ?></p>
