@@ -10,9 +10,19 @@
  *
  * Requires VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY / VAPID_SUBJECT in .env.
  * Generate them once with: php scripts/generate_vapid_keys.php
+ *
+ * hr_push_subscriptions is shared with tp-checkin, which subscribes from its
+ * own origin. Every query here is scoped to APP so a leave decision never
+ * reaches a checkin install, whose service worker would resolve the payload's
+ * path against the wrong host. The canonical implementation of all of this now
+ * lives in TpCommon\Push\WebPushService; this class stays standalone only
+ * because scripts/qa_pwa_push_contract.php runs in CI without vendor/.
  */
 class PushService
 {
+    /** Value written to, and filtered on, the `app` column. */
+    private const APP = 'tp-hr';
+
     /** Push services drop payloads larger than this. */
     private const MAX_PAYLOAD_BYTES = 3000;
 
@@ -73,7 +83,11 @@ class PushService
     private function tableExists(): bool
     {
         try {
-            $this->pdo->query('SELECT 1 FROM hr_push_subscriptions LIMIT 1');
+            // Probes the `app` column, not just the table: this code can reach
+            // production before 2026_08_11_hr_push_subscriptions_app.sql runs,
+            // and hiding the feature for those few minutes beats every
+            // subscribe and send throwing on an unknown column.
+            $this->pdo->query('SELECT app FROM hr_push_subscriptions LIMIT 1');
             return true;
         } catch (Throwable $e) {
             return false;
@@ -105,10 +119,11 @@ class PushService
 
         $stmt = $this->pdo->prepare(
             'INSERT INTO hr_push_subscriptions
-                (user_id, endpoint, endpoint_hash, p256dh, auth_secret, user_agent, last_used_at)
-             VALUES (:user_id, :endpoint, :endpoint_hash, :p256dh, :auth_secret, :user_agent, NULL)
+                (user_id, app, endpoint, endpoint_hash, p256dh, auth_secret, user_agent, last_used_at)
+             VALUES (:user_id, :app, :endpoint, :endpoint_hash, :p256dh, :auth_secret, :user_agent, NULL)
              ON DUPLICATE KEY UPDATE
                 user_id = VALUES(user_id),
+                app = VALUES(app),
                 p256dh = VALUES(p256dh),
                 auth_secret = VALUES(auth_secret),
                 user_agent = VALUES(user_agent),
@@ -118,6 +133,7 @@ class PushService
 
         $ok = $stmt->execute([
             'user_id'       => $userId,
+            'app'           => self::APP,
             'endpoint'      => $endpoint,
             'endpoint_hash' => hash('sha256', $endpoint),
             'p256dh'        => $p256dh,
@@ -140,11 +156,11 @@ class PushService
             // so pick the survivors first and delete by id.
             $stmt = $this->pdo->prepare(
                 'SELECT id FROM hr_push_subscriptions
-                 WHERE user_id = :user_id
+                 WHERE user_id = :user_id AND app = :app
                  ORDER BY created_at DESC, id DESC
                  LIMIT ' . self::MAX_SUBSCRIPTIONS_PER_USER
             );
-            $stmt->execute(['user_id' => $userId]);
+            $stmt->execute(['user_id' => $userId, 'app' => self::APP]);
             $keep = $stmt->fetchAll(PDO::FETCH_COLUMN) ?: [];
 
             if (count($keep) < self::MAX_SUBSCRIPTIONS_PER_USER) {
@@ -153,9 +169,9 @@ class PushService
 
             $in = implode(',', array_fill(0, count($keep), '?'));
             $delete = $this->pdo->prepare(
-                "DELETE FROM hr_push_subscriptions WHERE user_id = ? AND id NOT IN ($in)"
+                "DELETE FROM hr_push_subscriptions WHERE user_id = ? AND app = ? AND id NOT IN ($in)"
             );
-            $delete->execute(array_merge([$userId], $keep));
+            $delete->execute(array_merge([$userId, self::APP], $keep));
         } catch (Throwable $e) {
             $this->logFailure($e);
         }
@@ -194,11 +210,13 @@ class PushService
         }
 
         $stmt = $this->pdo->prepare(
-            'DELETE FROM hr_push_subscriptions WHERE user_id = :user_id AND endpoint_hash = :endpoint_hash'
+            'DELETE FROM hr_push_subscriptions
+             WHERE user_id = :user_id AND app = :app AND endpoint_hash = :endpoint_hash'
         );
 
         return $stmt->execute([
             'user_id'       => $userId,
+            'app'           => self::APP,
             'endpoint_hash' => hash('sha256', $endpoint),
         ]);
     }
@@ -209,8 +227,10 @@ class PushService
             return 0;
         }
 
-        $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM hr_push_subscriptions WHERE user_id = :user_id');
-        $stmt->execute(['user_id' => $userId]);
+        $stmt = $this->pdo->prepare(
+            'SELECT COUNT(*) FROM hr_push_subscriptions WHERE user_id = :user_id AND app = :app'
+        );
+        $stmt->execute(['user_id' => $userId, 'app' => self::APP]);
 
         return (int)$stmt->fetchColumn();
     }
@@ -243,9 +263,9 @@ class PushService
             $stmt = $this->pdo->prepare(
                 "SELECT id, endpoint, p256dh, auth_secret
                  FROM hr_push_subscriptions
-                 WHERE user_id IN ($placeholders)"
+                 WHERE app = ? AND user_id IN ($placeholders)"
             );
-            $stmt->execute($userIds);
+            $stmt->execute(array_merge([self::APP], $userIds));
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
             if ($rows === []) {
@@ -402,9 +422,10 @@ class PushService
                     ->prepare("UPDATE hr_push_subscriptions SET last_failed_at = NOW(), failure_count = failure_count + 1 WHERE id IN ($in)")
                     ->execute($failed);
                 // Give up on installs that keep failing for non-expiry reasons.
+                // Scoped to this app: another app's rows are not ours to prune.
                 $this->pdo
-                    ->prepare('DELETE FROM hr_push_subscriptions WHERE failure_count >= ' . self::MAX_FAILURES)
-                    ->execute();
+                    ->prepare('DELETE FROM hr_push_subscriptions WHERE app = ? AND failure_count >= ' . self::MAX_FAILURES)
+                    ->execute([self::APP]);
             }
         } catch (Throwable $e) {
             $this->logFailure($e);
