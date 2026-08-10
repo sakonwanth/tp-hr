@@ -187,7 +187,7 @@ require_once __DIR__ . '/../templates/header.php';
 <div class="tp-hr-admin-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
     <header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
         <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
-            <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
+            <a href="/hr/index.php" class="tp-tap-48 hover:text-white touch-manipulation">แดชบอร์ด HR</a>
             <span class="mx-2">/</span>
             <span class="text-white">External API Keys</span>
         </nav>
@@ -265,7 +265,7 @@ require_once __DIR__ . '/../templates/header.php';
                         <div class="text-white/90 text-sm font-semibold mb-3 pb-2 border-b border-white/10"><?= htmlspecialchars($groupTitle) ?></div>
                         <div class="flex flex-wrap gap-2.5">
                             <?php foreach ($scopes as $sv => $sl): ?>
-                            <label class="inline-flex items-center gap-2 text-white/80 text-sm bg-white/5 px-3 py-2 rounded-[var(--tp-ios-card-radius)] border border-transparent hover:border-violet-500/30 cursor-pointer touch-manipulation min-h-[48px]">
+                            <label class="inline-flex min-h-[48px] items-center gap-2 text-white/80 text-sm bg-white/5 px-3 py-2 rounded-[var(--tp-ios-card-radius)] border border-transparent hover:border-violet-500/30 cursor-pointer touch-manipulation min-h-[48px]">
                                 <input type="checkbox" name="scopes[]" value="<?= htmlspecialchars($sv) ?>" class="rounded border-white/20 text-violet-600 focus:ring-violet-500 shrink-0">
                                 <span><?= htmlspecialchars($sl) ?> <code class="text-white/45 text-xs">(<?= htmlspecialchars($sv) ?>)</code></span>
                             </label>

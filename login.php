@@ -126,8 +126,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     <!-- Icons & Tailwind -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/assets/css/app.css?v=30">
-    <link rel="stylesheet" href="/assets/css/native-shell.css?v=30">
+    <link rel="stylesheet" href="/assets/css/app.css?v=31">
+    <link rel="stylesheet" href="/assets/css/native-shell.css?v=31">
     
     <style>
         * {
@@ -334,7 +334,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             <!-- Remember Me -->
             <div class="mt-3 flex min-h-[48px] items-center justify-between gap-3">
-                <label class="flex cursor-pointer select-none items-center gap-2 text-sm text-white text-opacity-80">
+                <label class="flex min-h-[48px] cursor-pointer select-none items-center gap-2 text-sm text-white text-opacity-80">
                     <input type="checkbox" name="remember" class="h-4 w-4 shrink-0 rounded border-white/30 bg-white/10 text-purple-500 focus:ring-purple-500 focus:ring-offset-0">
                     จดจำฉัน
                 </label>

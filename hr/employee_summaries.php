@@ -54,7 +54,7 @@ include dirname(__DIR__) . '/templates/header.php';
 <div class="tp-hr-admin-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(1200px,100%)] mx-auto min-w-0">
 <header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
     <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
-        <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
+        <a href="/hr/index.php" class="tp-tap-48 hover:text-white touch-manipulation">แดชบอร์ด HR</a>
         <span class="mx-2">/</span>
         <span class="text-white">สรุปรายพนักงาน</span>
     </nav>
@@ -139,9 +139,9 @@ include dirname(__DIR__) . '/templates/header.php';
         </summary>
         <ul class="text-white/70 text-sm space-y-3 list-none mt-4 pt-4 border-t border-white/10 leading-relaxed">
             <li><strong class="text-amber-300">มาสาย / ขาด / ไม่มีลงเวลา</strong> — เลือกหลายวันแล้วกด <strong class="text-amber-200">แก้ทั้งกลุ่ม</strong> หรือ <strong class="text-amber-200">แก้ที่เลือก</strong> · หรือกด <strong class="text-amber-200">รายวัน</strong> เพื่อแก้ทีละวัน</li>
-            <li><strong class="text-blue-300">ลา</strong> — พนักงานยื่นใบลา → HR อนุมัติที่ <a href="/hr/leaves.php?status=pending" class="text-violet-300 hover:text-violet-200 underline">อนุมัติการลา</a></li>
-            <li><strong class="text-violet-300">สลับวันหยุด</strong> — CEO อนุมัติที่ <a href="/hr/dayoff_approvals.php" class="text-violet-300 hover:text-violet-200 underline">อนุมัติเปลี่ยนวันหยุด</a></li>
-            <li><strong class="text-orange-300">มาทำงานวันหยุด / หยุดชดเชย</strong> — CEO อนุมัติที่ <a href="/hr/holiday_work_approvals.php" class="text-orange-300 hover:text-orange-200 underline">อนุมัติทำงานวันหยุด</a></li>
+            <li><strong class="text-blue-300">ลา</strong> — พนักงานยื่นใบลา → HR อนุมัติที่ <a href="/hr/leaves.php?status=pending" class="tp-tap-48 text-violet-300 hover:text-violet-200 underline">อนุมัติการลา</a></li>
+            <li><strong class="text-violet-300">สลับวันหยุด</strong> — CEO อนุมัติที่ <a href="/hr/dayoff_approvals.php" class="tp-tap-48 text-violet-300 hover:text-violet-200 underline">อนุมัติเปลี่ยนวันหยุด</a></li>
+            <li><strong class="text-orange-300">มาทำงานวันหยุด / หยุดชดเชย</strong> — CEO อนุมัติที่ <a href="/hr/holiday_work_approvals.php" class="tp-tap-48 text-orange-300 hover:text-orange-200 underline">อนุมัติทำงานวันหยุด</a></li>
         </ul>
     </details>
 </div>

@@ -245,7 +245,7 @@ require_once __DIR__ . '/templates/header.php';
             <td class="p-4 text-center"><?php echo $row['term_months'] ?: '1'; ?></td>
             <td class="p-4"><?php echo htmlspecialchars($formatThaiMonth((string)$row['first_due_month'])); ?></td>
             <td class="p-4"><?php echo $row['repayment_method'] === 'payroll' ? 'หักผ่านสลิป' : 'โอนคืน'; ?></td>
-            <td class="p-4"><span><?php echo htmlspecialchars($statusLabel((string)$row['status'])); ?></span><a class="block text-violet-300 hover:text-violet-200 mt-2 font-medium" href="?type=<?php echo urlencode((string)$row['finance_type']); ?>&amp;id=<?php echo (int)$row['id']; ?>#finance-detail">ดูรายละเอียด</a></td>
+            <td class="p-4"><span><?php echo htmlspecialchars($statusLabel((string)$row['status'])); ?></span><a class="tp-tap-48 block text-violet-300 hover:text-violet-200 mt-2 font-medium" href="?type=<?php echo urlencode((string)$row['finance_type']); ?>&amp;id=<?php echo (int)$row['id']; ?>#finance-detail">ดูรายละเอียด</a></td>
           </tr><?php endforeach; ?>
           </tbody></table></div>
       <?php endif; ?>

@@ -192,7 +192,7 @@ include 'templates/header.php';
 <!-- Slip List View -->
 <header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
     <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
-        <a href="index.php" class="hover:text-white touch-manipulation">หน้าแรก</a>
+        <a href="index.php" class="tp-tap-48 hover:text-white touch-manipulation">หน้าแรก</a>
         <span class="mx-2">/</span>
         <span class="text-white">สลิปเงินเดือน</span>
     </nav>

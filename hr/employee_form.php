@@ -461,9 +461,9 @@ include dirname(__DIR__) . '/templates/header.php';
 <div class="tp-hr-admin-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
 <header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
     <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
-        <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
+        <a href="/hr/index.php" class="tp-tap-48 hover:text-white touch-manipulation">แดชบอร์ด HR</a>
         <span class="mx-2">/</span>
-        <a href="/hr/employees.php" class="hover:text-white touch-manipulation">จัดการพนักงาน</a>
+        <a href="/hr/employees.php" class="tp-tap-48 hover:text-white touch-manipulation">จัดการพนักงาน</a>
         <span class="mx-2">/</span>
         <span class="text-white"><?php echo $action === 'edit' ? 'แก้ไข' : 'เพิ่ม'; ?></span>
     </nav>
@@ -526,23 +526,23 @@ include dirname(__DIR__) . '/templates/header.php';
             <span class="hidden sm:inline">ข้อมูลส่วนตัว</span>
             <span class="sm:hidden">ส่วนตัว</span>
         </button>
-        <button type="button" role="tab" aria-selected="false" aria-controls="tab-work" onclick="switchTab('tab-work')" id="btn-tab-work" class="tab-btn shrink-0 min-h-[48px] px-4 py-2.5 rounded-[var(--tp-ios-card-radius)] text-sm font-medium transition-all flex items-center gap-2 touch-manipulation whitespace-nowrap">
+        <button type="button" role="tab" aria-selected="false" aria-controls="tab-work" onclick="switchTab('tab-work')" id="btn-tab-work" class="tab-btn shrink-0 min-h-[48px] min-w-[48px] px-4 py-2.5 rounded-[var(--tp-ios-card-radius)] text-sm font-medium transition-all flex items-center gap-2 touch-manipulation whitespace-nowrap">
             <i class="fas fa-briefcase" aria-hidden="true"></i>
             <span class="hidden sm:inline">ข้อมูลการทำงาน</span>
             <span class="sm:hidden">การทำงาน</span>
         </button>
-        <button type="button" role="tab" aria-selected="false" aria-controls="tab-welfare" onclick="switchTab('tab-welfare')" id="btn-tab-welfare" class="tab-btn shrink-0 min-h-[48px] px-4 py-2.5 rounded-[var(--tp-ios-card-radius)] text-sm font-medium transition-all flex items-center gap-2 touch-manipulation whitespace-nowrap">
+        <button type="button" role="tab" aria-selected="false" aria-controls="tab-welfare" onclick="switchTab('tab-welfare')" id="btn-tab-welfare" class="tab-btn shrink-0 min-h-[48px] min-w-[48px] px-4 py-2.5 rounded-[var(--tp-ios-card-radius)] text-sm font-medium transition-all flex items-center gap-2 touch-manipulation whitespace-nowrap">
             <i class="fas fa-shield-alt" aria-hidden="true"></i>
             <span class="hidden sm:inline">สวัสดิการ & การเงิน</span>
             <span class="sm:hidden">สวัสดิการ</span>
         </button>
         <?php if ($action === 'edit' && $employee): ?>
-        <button type="button" role="tab" aria-selected="false" aria-controls="tab-history" onclick="switchTab('tab-history')" id="btn-tab-history" class="tab-btn shrink-0 min-h-[48px] px-4 py-2.5 rounded-[var(--tp-ios-card-radius)] text-sm font-medium transition-all flex items-center gap-2 touch-manipulation whitespace-nowrap">
+        <button type="button" role="tab" aria-selected="false" aria-controls="tab-history" onclick="switchTab('tab-history')" id="btn-tab-history" class="tab-btn shrink-0 min-h-[48px] min-w-[48px] px-4 py-2.5 rounded-[var(--tp-ios-card-radius)] text-sm font-medium transition-all flex items-center gap-2 touch-manipulation whitespace-nowrap">
             <i class="fas fa-history" aria-hidden="true"></i>
             <span class="hidden sm:inline">ประวัติ & ครอบครัว</span>
             <span class="sm:hidden">ประวัติ</span>
         </button>
-        <button type="button" role="tab" aria-selected="false" aria-controls="tab-system" onclick="switchTab('tab-system')" id="btn-tab-system" class="tab-btn shrink-0 min-h-[48px] px-4 py-2.5 rounded-[var(--tp-ios-card-radius)] text-sm font-medium transition-all flex items-center gap-2 touch-manipulation whitespace-nowrap">
+        <button type="button" role="tab" aria-selected="false" aria-controls="tab-system" onclick="switchTab('tab-system')" id="btn-tab-system" class="tab-btn shrink-0 min-h-[48px] min-w-[48px] px-4 py-2.5 rounded-[var(--tp-ios-card-radius)] text-sm font-medium transition-all flex items-center gap-2 touch-manipulation whitespace-nowrap">
             <i class="fas fa-cog" aria-hidden="true"></i>
             <span class="hidden sm:inline">ระบบ</span>
         </button>

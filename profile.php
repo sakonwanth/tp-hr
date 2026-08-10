@@ -88,7 +88,7 @@ endif; ?>
 <div class="tp-profile-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
 <header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
     <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
-        <a href="index.php" class="hover:text-white touch-manipulation">หน้าแรก</a>
+        <a href="index.php" class="tp-tap-48 hover:text-white touch-manipulation">หน้าแรก</a>
         <span class="mx-2">/</span>
         <span class="text-white">ข้อมูลส่วนตัว</span>
     </nav>

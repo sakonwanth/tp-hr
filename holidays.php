@@ -144,14 +144,14 @@ require_once __DIR__ . '/templates/header.php';
 <div class="tp-holidays-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(1200px,100%)] mx-auto min-w-0">
     <header class="tp-ios-large-title-block mb-5 md:mb-6">
         <nav class="mb-2 text-sm text-white/55" aria-label="Breadcrumb">
-            <a href="index.php" class="hover:text-white touch-manipulation">หน้าแรก</a>
+            <a href="index.php" class="tp-tap-48 hover:text-white touch-manipulation">หน้าแรก</a>
             <span class="mx-2">/</span>
             <span class="text-white/85">วันหยุดประจำปี</span>
         </nav>
         <h1 class="tp-ios-page-title">วันหยุดประจำปี</h1>
         <p class="tp-ios-caption-muted mt-2 max-w-[40rem]">
             นักขัตฤกษ์และวันหยุดบริษัท — แยกจาก
-            <a href="dayoff_schedule.php" class="text-violet-300 hover:text-violet-200 underline touch-manipulation">วันหยุดประจำสัปดาห์</a>
+            <a href="dayoff_schedule.php" class="tp-tap-48 text-violet-300 hover:text-violet-200 underline touch-manipulation">วันหยุดประจำสัปดาห์</a>
         </p>
     </header>
 

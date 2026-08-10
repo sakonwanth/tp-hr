@@ -39,8 +39,8 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png';
     <script src="/assets/js/native-select.js?v=1" defer></script>
 
     <!-- Tailwind CSS (compiled) -->
-    <link rel="stylesheet" href="/assets/css/app.css?v=30">
-    <link rel="stylesheet" href="/assets/css/native-shell.css?v=30">
+    <link rel="stylesheet" href="/assets/css/app.css?v=31">
+    <link rel="stylesheet" href="/assets/css/native-shell.css?v=31">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -351,6 +351,8 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png';
             max-width: none;
             text-decoration: none;
             padding: 4px 0;
+            /* measured 47px — one pixel under the UI_RULES tap minimum */
+            min-height: var(--tp-native-touch-min, 48px);
             border-radius: 12px;
             text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
         }

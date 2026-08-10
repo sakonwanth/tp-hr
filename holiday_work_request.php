@@ -165,7 +165,7 @@ include __DIR__ . '/templates/header.php';
 <div class="tp-holiday-work-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
 <header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
     <nav class="mb-2 text-sm text-white/60" aria-label="Breadcrumb">
-        <a href="index.php" class="inline-flex min-h-[48px] items-center hover:text-white touch-manipulation">หน้าแรก</a>
+        <a href="index.php" class="tp-tap-48 inline-flex min-h-[48px] items-center hover:text-white touch-manipulation">หน้าแรก</a>
         <span class="mx-2">/</span>
         <a href="holidays.php" class="inline-flex min-h-[48px] items-center hover:text-white touch-manipulation">วันหยุดประจำปี</a>
         <span class="mx-2">/</span>
@@ -273,7 +273,7 @@ include __DIR__ . '/templates/header.php';
     <ul class="space-y-2 text-xs text-white/60 leading-relaxed list-disc pl-5">
         <li>หลังอนุมัติ ระบบจะนับวันหยุดนั้นเป็น<strong class="text-white/80">วันทำงาน</strong>ของคุณ (ต้องลงเวลา มาสาย/ขาดงานมีผลตามปกติ)</li>
         <li>วันหยุดชดเชย (ถ้าระบุ) จะกลายเป็น<strong class="text-white/80">วันหยุด</strong>ของคุณแม้เป็นวันทำงานปกติ</li>
-        <li>การสลับวันหยุดประจำสัปดาห์แยกต่างหาก — ดูที่ <a href="dayoff_schedule.php" class="text-violet-300 hover:text-violet-200 underline">วันหยุดประจำสัปดาห์</a></li>
+        <li>การสลับวันหยุดประจำสัปดาห์แยกต่างหาก — ดูที่ <a href="dayoff_schedule.php" class="tp-tap-48 text-violet-300 hover:text-violet-200 underline">วันหยุดประจำสัปดาห์</a></li>
     </ul>
 </div>
 </div>

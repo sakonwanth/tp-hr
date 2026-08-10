@@ -205,7 +205,7 @@ require_once __DIR__ . '/../templates/header.php';
 <!-- Page Header -->
 <header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
     <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
-        <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
+        <a href="/hr/index.php" class="tp-tap-48 hover:text-white touch-manipulation">แดชบอร์ด HR</a>
         <span class="mx-2">/</span>
         <span class="text-white">ตั้งค่าระบบ</span>
     </nav>
@@ -356,7 +356,7 @@ foreach ($workShifts as $_ws) {
             
             <div class="flex items-center gap-2">
                 <input type="checkbox" name="is_recurring" id="is_recurring" class="rounded border-white/20 bg-white/5">
-                <label for="is_recurring" class="text-white/80 text-sm">วันหยุดประจำปี (ซ้ำทุกปี)</label>
+                <label for="is_recurring" class="inline-flex min-h-[48px] items-center text-white/80 text-sm">วันหยุดประจำปี (ซ้ำทุกปี)</label>
             </div>
             
             <button type="submit" class="inline-flex min-h-[48px] w-full items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 hover:bg-violet-700 px-4 text-sm font-semibold text-white touch-manipulation gap-2 whitespace-nowrap">
@@ -709,12 +709,12 @@ foreach ($workShifts as $_ws) {
             </div>
             
             <div class="flex flex-wrap items-center gap-4">
-                <label class="flex items-center gap-2 cursor-pointer">
+                <label class="flex min-h-[48px] items-center gap-2 cursor-pointer">
                     <input type="checkbox" name="is_paid" id="edit_is_paid" class="rounded border-white/20 bg-white/5">
                     <span class="text-white/80 text-sm">ได้รับค่าจ้าง</span>
                 </label>
                 
-                <label class="flex items-center gap-2 cursor-pointer">
+                <label class="flex min-h-[48px] items-center gap-2 cursor-pointer">
                     <input type="checkbox" name="is_active" id="edit_is_active" class="rounded border-white/20 bg-white/5">
                     <span class="text-white/80 text-sm">เปิดใช้งาน</span>
                 </label>
@@ -810,7 +810,7 @@ function closeModal(id) {
                 </div>
                 
                 <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
-                    <label class="flex items-center gap-2 cursor-pointer">
+                    <label class="flex min-h-[48px] items-center gap-2 cursor-pointer">
                         <input type="checkbox" name="is_active" class="rounded border-white/20 bg-white/5" <?php echo $shift['is_active'] ? 'checked' : ''; ?>>
                         <span class="text-white/80 text-sm">เปิดใช้งาน</span>
                     </label>

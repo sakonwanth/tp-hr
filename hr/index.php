@@ -157,7 +157,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 <p class="text-2xl font-bold text-white tabular-nums"><?php echo (int)$pendingLeaves; ?></p>
             </div>
         </div>
-        <a href="leaves.php" class="text-violet-400 text-sm hover:underline mt-3 inline-block touch-manipulation font-medium">ดูทั้งหมด →</a>
+        <a href="leaves.php" class="tp-tap-48 text-violet-400 text-sm hover:underline mt-3 inline-block touch-manipulation font-medium">ดูทั้งหมด →</a>
     </div>
 
     <div class="stat-card tp-native-summary-card group min-w-0">
@@ -170,7 +170,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 <p class="text-2xl font-bold text-white tabular-nums"><?php echo (int)$pendingOutside; ?></p>
             </div>
         </div>
-        <a href="outside_attendance.php" class="text-sky-400 text-sm hover:underline mt-3 inline-block touch-manipulation font-medium">ดูทั้งหมด →</a>
+        <a href="outside_attendance.php" class="tp-tap-48 text-sky-400 text-sm hover:underline mt-3 inline-block touch-manipulation font-medium">ดูทั้งหมด →</a>
     </div>
 
     <div class="stat-card tp-native-summary-card group min-w-0">
@@ -183,7 +183,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 <p class="text-2xl font-bold text-white tabular-nums"><?php echo (int)$pendingDocs; ?></p>
             </div>
         </div>
-        <a href="documents.php" class="text-blue-400 text-sm hover:underline mt-3 inline-block touch-manipulation font-medium">ดูทั้งหมด →</a>
+        <a href="documents.php" class="tp-tap-48 text-blue-400 text-sm hover:underline mt-3 inline-block touch-manipulation font-medium">ดูทั้งหมด →</a>
     </div>
 </div>
 
@@ -250,7 +250,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 <i class="fas fa-calendar-alt text-violet-400 text-2xl shrink-0" aria-hidden="true"></i>
                 <span class="min-w-0">คำขอลารออนุมัติ</span>
             </h2>
-            <a href="leaves.php" class="text-violet-400 text-sm hover:underline shrink-0 touch-manipulation font-medium">ดูทั้งหมด</a>
+            <a href="leaves.php" class="tp-tap-48 text-violet-400 text-sm hover:underline shrink-0 touch-manipulation font-medium">ดูทั้งหมด</a>
         </div>
 
         <?php if (empty($recentLeaves)): ?>
@@ -406,7 +406,7 @@ include dirname(__DIR__) . '/templates/header.php';
             <i class="fas fa-file-signature text-blue-400 text-2xl shrink-0" aria-hidden="true"></i>
             <span class="min-w-0">คำขอเอกสารรอดำเนินการ</span>
         </h2>
-        <a href="documents.php" class="text-blue-400 text-sm hover:underline shrink-0 touch-manipulation font-medium">ดูทั้งหมด</a>
+        <a href="documents.php" class="tp-tap-48 text-blue-400 text-sm hover:underline shrink-0 touch-manipulation font-medium">ดูทั้งหมด</a>
     </div>
 
     <div class="md:hidden p-5 space-y-4">

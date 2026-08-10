@@ -336,9 +336,9 @@ include dirname(__DIR__) . '/templates/header.php';
 <div class="tp-hr-admin-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(960px,100%)] mx-auto min-w-0">
 <header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
     <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
-        <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
+        <a href="/hr/index.php" class="tp-tap-48 hover:text-white touch-manipulation">แดชบอร์ด HR</a>
         <span class="mx-2">/</span>
-        <a href="/hr/documents.php" class="hover:text-white touch-manipulation">จัดการคำขอเอกสาร</a>
+        <a href="/hr/documents.php" class="tp-tap-48 hover:text-white touch-manipulation">จัดการคำขอเอกสาร</a>
         <span class="mx-2">/</span>
         <span class="text-white">ตั้งค่าเอกสารรับรอง</span>
     </nav>
@@ -402,7 +402,7 @@ include dirname(__DIR__) . '/templates/header.php';
                     <input type="url" name="company_logo_url" placeholder="URL ภาพ (หรือจะอัปโหลดด้านล่าง)"
                         value="<?php echo htmlspecialchars($settings['company_logo'] ?? ''); ?>"
                         class="input-field tp-native-input w-full mb-2">
-                    <input type="file" name="company_logo" accept="image/*" class="w-full text-white/70 text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-violet-500 file:text-white file:text-xs">
+                    <input type="file" name="company_logo" accept="image/*" class="min-h-[48px] w-full text-white/70 text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-violet-500 file:text-white file:text-xs">
                 </div>
                 <div class="p-5 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10">
                     <label class="block text-white/80 text-sm font-medium mb-2">
@@ -420,7 +420,7 @@ include dirname(__DIR__) . '/templates/header.php';
                     <input type="url" name="company_seal_url" placeholder="URL ภาพตรา (PNG โปร่งใส) หรืออัปโหลด"
                         value="<?php echo htmlspecialchars($settings['company_seal'] ?? ''); ?>"
                         class="input-field tp-native-input w-full mb-2">
-                    <input type="file" name="company_seal" accept="image/*" class="w-full text-white/70 text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-amber-500 file:text-white file:text-xs">
+                    <input type="file" name="company_seal" accept="image/*" class="min-h-[48px] w-full text-white/70 text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-amber-500 file:text-white file:text-xs">
                 </div>
             </div>
 
@@ -471,7 +471,7 @@ include dirname(__DIR__) . '/templates/header.php';
                         <textarea name="doc_footer_note_th" rows="2" placeholder="เช่น เอกสารฉบับนี้ออกโดยระบบ HR อัตโนมัติ สามารถตรวจสอบผ่าน QR Code ได้" class="input-field tp-native-textarea w-full"><?php echo htmlspecialchars($settings['doc_footer_note_th'] ?? ''); ?></textarea>
                     </div>
                     <div class="md:col-span-2 p-3 rounded-[var(--tp-ios-card-radius)] bg-indigo-500/10 border border-indigo-500/30">
-                        <label class="inline-flex items-center cursor-pointer">
+                        <label class="inline-flex min-h-[48px] items-center cursor-pointer">
                             <input type="checkbox" name="doc_show_esignature" value="1" <?php echo !empty($settings['doc_show_esignature']) ? 'checked' : ''; ?> class="h-4 w-4 accent-indigo-500 rounded">
                             <span class="ml-2 text-sm text-white/90">เปิดใช้ลายเซ็นอิเล็กทรอนิกส์ทั่วทั้งระบบ <span class="text-white/50 text-xs">(แสดงภาพลายเซ็นของผู้ลงนามในเอกสาร)</span></span>
                         </label>
@@ -527,7 +527,7 @@ include dirname(__DIR__) . '/templates/header.php';
                 <input type="hidden" name="_token" value="<?php echo csrfToken(); ?>">
                 <input type="hidden" name="action" value="upload_signature">
                 <input type="hidden" name="user_id" value="<?php echo (int)$sc['id']; ?>">
-                <input type="file" name="signature" accept="image/png,image/jpeg,image/webp" required class="flex-1 text-white/70 text-xs file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-indigo-500 file:text-white file:text-xs">
+                <input type="file" name="signature" accept="image/png,image/jpeg,image/webp" required class="min-h-[48px] flex-1 text-white/70 text-xs file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-indigo-500 file:text-white file:text-xs">
                 <button type="submit" class="px-3 py-1 rounded bg-indigo-500 hover:bg-indigo-600 text-white text-xs whitespace-nowrap min-h-[48px] inline-flex items-center justify-center"><i class="fas fa-upload"></i></button>
             </form>
         </div>
@@ -553,7 +553,7 @@ include dirname(__DIR__) . '/templates/header.php';
     <?php else: ?>
     <div class="p-5 border-b border-white/10 flex items-center justify-between">
         <h2 class="text-white font-semibold"><i class="fas fa-file-alt mr-2 text-violet-400" aria-hidden="true"></i>รายการเอกสารในระบบ</h2>
-        <a href="?edit=new" class="px-3 py-1.5 rounded-[var(--tp-ios-card-radius)] bg-violet-500 hover:bg-violet-600 text-white text-xs font-medium touch-manipulation"><i class="fas fa-plus mr-1" aria-hidden="true"></i>เพิ่ม</a>
+        <a href="?edit=new" class="inline-flex min-h-[48px] items-center px-3 py-1.5 rounded-[var(--tp-ios-card-radius)] bg-violet-500 hover:bg-violet-600 text-white text-xs font-medium touch-manipulation"><i class="fas fa-plus mr-1" aria-hidden="true"></i>เพิ่ม</a>
     </div>
     <div class="md:hidden p-5 space-y-4">
         <?php foreach ($tpls as $t): ?>
@@ -679,7 +679,7 @@ if (!empty($editRow['id'])) {
 
 <!-- Back link -->
 <div class="mb-4">
-    <a href="document_templates.php" class="text-white/60 hover:text-white text-sm"><i class="fas fa-arrow-left mr-1"></i> กลับไปหน้ารายการ</a>
+    <a href="document_templates.php" class="inline-flex min-h-[48px] items-center text-white/60 hover:text-white text-sm"><i class="fas fa-arrow-left mr-1"></i> กลับไปหน้ารายการ</a>
 </div>
 
 <?php if ($certPreviewReqId > 0): ?>
@@ -740,11 +740,11 @@ if (!empty($editRow['id'])) {
                 <textarea name="description" rows="2" class="input-field tp-native-textarea w-full"><?php echo htmlspecialchars($editRow['description'] ?? ''); ?></textarea>
             </div>
             <div class="md:col-span-3 flex gap-6 pt-2">
-                <label class="inline-flex items-center cursor-pointer">
+                <label class="inline-flex min-h-[48px] items-center cursor-pointer">
                     <input type="checkbox" name="requires_approval" value="1" <?php echo !empty($editRow['requires_approval']) ? 'checked' : ''; ?> class="h-4 w-4 accent-amber-500 rounded">
                     <span class="ml-2 text-sm text-white/80">ต้องขออนุมัติก่อนจัดทำ</span>
                 </label>
-                <label class="inline-flex items-center cursor-pointer">
+                <label class="inline-flex min-h-[48px] items-center cursor-pointer">
                     <input type="checkbox" name="is_active" value="1" <?php echo (!isset($editRow['is_active']) || !empty($editRow['is_active'])) ? 'checked' : ''; ?> class="h-4 w-4 accent-green-500 rounded">
                     <span class="ml-2 text-sm text-white/80">เปิดใช้งานเอกสาร</span>
                 </label>
@@ -763,11 +763,11 @@ if (!empty($editRow['id'])) {
         </div>
         <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="md:col-span-2 flex gap-6">
-                <label class="inline-flex items-center cursor-pointer">
+                <label class="inline-flex min-h-[48px] items-center cursor-pointer">
                     <input type="checkbox" name="layout[header][show_logo]" value="1" <?php echo !empty($L['header']['show_logo']) ? 'checked' : ''; ?> class="h-4 w-4 accent-blue-500 rounded">
                     <span class="ml-2 text-sm text-white/80">แสดงโลโก้บริษัท</span>
                 </label>
-                <label class="inline-flex items-center cursor-pointer">
+                <label class="inline-flex min-h-[48px] items-center cursor-pointer">
                     <input type="checkbox" name="layout[header][show_company_address]" value="1" <?php echo !empty($L['header']['show_company_address']) ? 'checked' : ''; ?> class="h-4 w-4 accent-blue-500 rounded">
                     <span class="ml-2 text-sm text-white/80">แสดงที่อยู่บริษัท</span>
                 </label>
@@ -858,11 +858,11 @@ if (!empty($editRow['id'])) {
                 </div>
             </div>
             <div class="flex flex-wrap gap-6">
-                <label class="inline-flex items-center cursor-pointer">
+                <label class="inline-flex min-h-[48px] items-center cursor-pointer">
                     <input type="checkbox" name="layout[signatures][show_two_signers]" value="1" <?php echo !empty($L['signatures']['show_two_signers']) ? 'checked' : ''; ?> class="h-4 w-4 accent-indigo-500 rounded">
                     <span class="ml-2 text-sm text-white/80">แสดง 2 ผู้ลงนาม (ประธาน + CEO)</span>
                 </label>
-                <label class="inline-flex items-center cursor-pointer">
+                <label class="inline-flex min-h-[48px] items-center cursor-pointer">
                     <input type="checkbox" name="layout[signatures][show_esignature]" value="1" <?php echo !empty($L['signatures']['show_esignature']) ? 'checked' : ''; ?> class="h-4 w-4 accent-indigo-500 rounded">
                     <span class="ml-2 text-sm text-white/80">แสดงภาพลายเซ็นอิเล็กทรอนิกส์เหนือเส้นลงนาม</span>
                 </label>
@@ -898,11 +898,11 @@ if (!empty($editRow['id'])) {
         </div>
         <div class="p-5 space-y-4">
             <div class="flex flex-wrap gap-6">
-                <label class="inline-flex items-center cursor-pointer">
+                <label class="inline-flex min-h-[48px] items-center cursor-pointer">
                     <input type="checkbox" name="layout[footer][show_qr_verify]" value="1" <?php echo !empty($L['footer']['show_qr_verify']) ? 'checked' : ''; ?> class="h-4 w-4 accent-rose-500 rounded">
                     <span class="ml-2 text-sm text-white/80">แสดง QR Code ตรวจสอบเอกสาร</span>
                 </label>
-                <label class="inline-flex items-center cursor-pointer">
+                <label class="inline-flex min-h-[48px] items-center cursor-pointer">
                     <input type="checkbox" name="layout[footer][show_seal_area]" value="1" <?php echo !empty($L['footer']['show_seal_area']) ? 'checked' : ''; ?> class="h-4 w-4 accent-rose-500 rounded">
                     <span class="ml-2 text-sm text-white/80">แสดงพื้นที่ประทับตราบริษัท</span>
                 </label>

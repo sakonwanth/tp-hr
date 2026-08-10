@@ -403,9 +403,9 @@ require_once __DIR__ . '/../templates/header.php';
 
 <header class="tp-ios-large-title-block mb-6 md:mb-8 min-w-0">
     <nav class="text-sm text-white/60 mb-2" aria-label="Breadcrumb">
-        <a href="/hr/index.php" class="hover:text-white touch-manipulation">แดชบอร์ด HR</a>
+        <a href="/hr/index.php" class="tp-tap-48 hover:text-white touch-manipulation">แดชบอร์ด HR</a>
         <span class="mx-2">/</span>
-        <a href="/hr/reports.php" class="hover:text-white touch-manipulation">รายงาน</a>
+        <a href="/hr/reports.php" class="tp-tap-48 hover:text-white touch-manipulation">รายงาน</a>
         <span class="mx-2">/</span>
         <span class="text-white">รายงานเงินเดือน</span>
     </nav>

@@ -337,7 +337,10 @@ header('Content-Type: text/html; charset=utf-8');
             justify-content: center;
         }
         .btn-print:hover { background: #2d4a7c; }
-        .link-back { margin-left: 12px; color: #1a365d; font-weight: 500; text-decoration: none; }
+        /* 48px is the UI_RULES tap minimum. This page loads no Tailwind, so
+           the size has to be declared here. Screen only — the link sits in
+           .no-print, so the printed slip is unchanged. */
+        .link-back { margin-left: 12px; min-height: 48px; display: inline-flex; align-items: center; color: #1a365d; font-weight: 500; text-decoration: none; }
         .link-back:hover { text-decoration: underline; }
 
         /* ------------------------------------------------------------------

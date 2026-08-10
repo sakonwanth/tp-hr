@@ -53,7 +53,7 @@ include 'templates/header.php';
 <!-- New Request Form -->
 <div class="mb-6 min-w-0">
     <nav class="text-sm text-white/60 mb-1" aria-label="Breadcrumb">
-        <a href="certificate.php" class="hover:text-white touch-manipulation">ขอหนังสือรับรอง</a>
+        <a href="certificate.php" class="tp-tap-48 hover:text-white touch-manipulation">ขอหนังสือรับรอง</a>
         <span class="mx-2">/</span>
         <span class="text-white">ยื่นคำขอใหม่</span>
     </nav>

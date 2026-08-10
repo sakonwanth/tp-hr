@@ -94,7 +94,7 @@ $renderDayRow = static function (
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div class="flex items-start gap-3 min-w-0 flex-1">
                 <?php if ($showActions && $bulkGroup && $date): ?>
-                <label class="flex items-center pt-0.5 shrink-0 cursor-pointer touch-manipulation">
+                <label class="flex min-h-[48px] min-w-[48px] items-center justify-center shrink-0 cursor-pointer touch-manipulation">
                     <input type="checkbox" class="emp-bulk-day-cb w-4 h-4 rounded border-white/30 bg-white/10 text-violet-500 focus:ring-violet-500/50"
                            data-group="<?php echo htmlspecialchars($bulkGroup); ?>"
                            data-date="<?php echo htmlspecialchars($date); ?>"
