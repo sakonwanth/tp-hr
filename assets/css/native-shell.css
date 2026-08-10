@@ -1,5 +1,6 @@
 /**
  * TP-HR — Native component system (iOS 26–inspired).
+ * v23: dashboard sticky check-in CTA removed — it duplicated the tab bar; home reclaims the reserved strip.
  * v22: utilities beside a component class now win — mb-*, min-h-* were being silently overridden.
  * v21: tap targets — .tp-tap-48 hit-area helper for controls that cannot grow.
  * v20: data-card no longer clips a child that asks for its own overflow (employee-form tab strip).
@@ -9,7 +10,7 @@
  * v16: HR dashboard secondary `<details>` accordion (below `xl`) — chevron + marker reset.
  * v15: Liquid Glass chrome — floating inset tab strip + gradient scrim · glass sticky CTA slab (`tp-ios-sticky-cta-slab`) · typography caps (page title max 28px · section ~19px · card title ~17px).
  * v14: token ladder + scroll buffer 160 · primary 58 · input 56 · textarea 120.
- * Headers: `/assets/css/native-shell.css?v=32`.
+ * Headers: `/assets/css/native-shell.css?v=33`.
  */
 
 html {
@@ -634,8 +635,12 @@ body.tp-native-app main.content-area.tp-native-page {
   font-size: 0.75rem;
 }
 
-/* Employee routes: tab bar present */
-body.tp-with-tab-nav main.tp-native-page:not(.tp-native-page--home) {
+/* Employee routes: tab bar present.
+   The home page used to reserve a button's height on top of this, to clear a
+   sticky check-in CTA that floated above the tab bar. That CTA is gone — it
+   duplicated the tab bar's own "ลงเวลา" tab a few pixels below it — so home
+   now ends like every other tabbed page and gets the reserved strip back. */
+body.tp-with-tab-nav main.tp-native-page {
   padding-bottom: max(
     var(--tp-scroll-end-buffer),
     calc(var(--tp-bottom-nav-slot) + var(--tp-cta-gap-above-tabs))
@@ -645,22 +650,7 @@ body.tp-with-tab-nav main.tp-native-page:not(.tp-native-page--home) {
 }
 
 @media (min-width: 768px) {
-  body.tp-with-tab-nav main.tp-native-page:not(.tp-native-page--home) {
-    padding-left: max(var(--tp-page-pad-tablet), env(safe-area-inset-left, 0px));
-    padding-right: max(var(--tp-page-pad-tablet), env(safe-area-inset-right, 0px));
-  }
-}
-
-body.tp-with-tab-nav main.tp-native-page--home {
-  padding-bottom: calc(
-    var(--tp-bottom-nav-slot) + var(--tp-cta-gap-above-tabs) + var(--tp-native-btn-min) + var(--tp-scroll-end-buffer)
-  );
-  padding-left: max(var(--tp-page-pad-mobile), env(safe-area-inset-left, 0px));
-  padding-right: max(var(--tp-page-pad-mobile), env(safe-area-inset-right, 0px));
-}
-
-@media (min-width: 768px) {
-  body.tp-with-tab-nav main.tp-native-page--home {
+  body.tp-with-tab-nav main.tp-native-page {
     padding-left: max(var(--tp-page-pad-tablet), env(safe-area-inset-left, 0px));
     padding-right: max(var(--tp-page-pad-tablet), env(safe-area-inset-right, 0px));
   }

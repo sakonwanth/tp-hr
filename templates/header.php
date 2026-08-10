@@ -10,10 +10,10 @@ $current_page = $current_page ?? '';
 $cp_shell = $current_page;
 $tp_hr_is_hr_route = is_string($cp_shell) && strncmp($cp_shell, 'hr-', 3) === 0;
 $tp_hr_employee_tab_shell = !$tp_hr_is_hr_route;
+// `tp-native-page--home` existed only to reserve bottom space for the sticky
+// check-in CTA on the dashboard. That CTA is gone, no rule targets the class
+// any more, and home now ends like every other tabbed page.
 $tp_hr_main_native_class = 'content-area tp-native-page';
-if ($tp_hr_employee_tab_shell && ($cp_shell === 'dashboard')) {
-    $tp_hr_main_native_class .= ' tp-native-page--home';
-}
 $appIconPath = '/assets/icons/icon-192-v3.png';
 $appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png';
 ?>
@@ -39,8 +39,8 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png';
     <script src="/assets/js/native-select.js?v=1" defer></script>
 
     <!-- Tailwind CSS (compiled) -->
-    <link rel="stylesheet" href="/assets/css/app.css?v=32">
-    <link rel="stylesheet" href="/assets/css/native-shell.css?v=32">
+    <link rel="stylesheet" href="/assets/css/app.css?v=33">
+    <link rel="stylesheet" href="/assets/css/native-shell.css?v=33">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">

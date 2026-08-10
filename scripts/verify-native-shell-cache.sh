@@ -4,7 +4,7 @@
 # Override: NATIVE_SHELL_CACHE=16 ./scripts/verify-native-shell-cache.sh
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-EXPECT="${NATIVE_SHELL_CACHE:-32}"
+EXPECT="${NATIVE_SHELL_CACHE:-33}"
 
 die() { echo "$*" >&2; exit 1; }
 

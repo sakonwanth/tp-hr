@@ -431,16 +431,8 @@ require_once __DIR__ . '/templates/header.php';
 </div>
 </div>
 
-<!-- Primary CTA แบบ sticky เหนือแถบแท็บ — เฉพาะมือถือ/แท็บเล็ต (ซ่อนที่ desktop มีแถบข้าง) -->
-<div class="app-shell-mobile-only home-sticky-cta tp-sticky-primary-action print:hidden" role="region" aria-label="ลงเวลาด่วน">
-    <div class="home-sticky-cta-inner max-w-lg mx-auto w-full px-0">
-        <div class="tp-ios-sticky-cta-slab">
-            <a href="/checkin.php" class="tp-native-btn-primary w-full justify-center shadow-lg no-underline text-white gap-2">
-                <i class="fas fa-fingerprint" aria-hidden="true"></i>
-                <span class="whitespace-nowrap">ลงเวลา</span>
-            </a>
-        </div>
-    </div>
-</div>
+<!-- ไม่มี sticky CTA ลงเวลาที่นี่แล้ว: มันลอยทับอยู่บนแท็บ "ลงเวลา" ที่ลิงก์ไป
+     /checkin.php เหมือนกัน ห่างกันไม่กี่พิกเซล และหน้านี้ยังมีปุ่มลงเวลาที่ hero
+     กับทางลัดด่วนอีก ปุ่มลอยจึงเป็นทางเข้าที่ห้าของงานเดียวกันบนจอเดียว -->
 
 <?php require_once __DIR__ . '/templates/footer.php'; ?>
