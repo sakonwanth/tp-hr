@@ -461,6 +461,62 @@ require_once __DIR__ . '/../templates/header.php';
         <?php endif; ?>
 
         <?php if ($rows): ?>
+        <?php /* Phone: seventeen columns will never fit, and the table was
+                 simply `hidden` below md — so a phone showed the note field and
+                 the save button with no payroll data at all. One card per
+                 employee instead, grouped income then deductions.
+
+                 Read-only on purpose. The กยศ. field is a real input, and the
+                 desktop table is only display:none on a phone — its inputs are
+                 still in the form and still submit. A second input with the
+                 same name would submit too, and being later in the DOM the
+                 untouched hidden copy would overwrite whatever was typed on
+                 desktop. So the value is shown here, and edited on a wider
+                 screen. */ ?>
+        <div class="md:hidden space-y-3">
+            <?php foreach ($rows as $i => $row): ?>
+            <div class="tp-ios-attendance-panel p-4">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                        <p class="text-white font-semibold">
+                            <?php echo ($i + 1) . '. ' . htmlspecialchars($row['full_name']); ?>
+                            <?php if (!empty($row['unmatched_items'])): ?>
+                            <i class="fas fa-triangle-exclamation text-amber-400 ml-1" aria-hidden="true" title="มีรายการจาก CRM ที่ยังไม่รู้จัก"></i>
+                            <?php endif; ?>
+                        </p>
+                        <p class="text-white/50 text-xs mt-0.5"><?php echo htmlspecialchars($row['position']); ?></p>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <p class="text-emerald-400 font-semibold tabular-nums"><?php echo number_format($row['net_salary'], 2); ?></p>
+                        <p class="text-white/50 text-xs mt-0.5">จ่ายสุทธิ</p>
+                    </div>
+                </div>
+
+                <p class="text-white/50 text-xs mt-4 mb-2">รายรับ</p>
+                <dl class="grid grid-cols-2 gap-3 text-sm min-w-0">
+                    <div class="min-w-0"><dt class="text-white/50 text-xs">เงินเดือน</dt><dd class="text-white/85 tabular-nums"><?php echo number_format($row['base_salary'], 2); ?></dd></div>
+                    <div class="min-w-0"><dt class="text-white/50 text-xs">ค่าตำแหน่ง</dt><dd class="text-white/85 tabular-nums"><?php echo number_format($row['allowance_position'], 2); ?></dd></div>
+                    <div class="min-w-0"><dt class="text-white/50 text-xs">ค่าครองชีพ</dt><dd class="text-white/85 tabular-nums"><?php echo number_format($row['allowance_col'], 2); ?></dd></div>
+                    <div class="min-w-0"><dt class="text-white/50 text-xs">ค่าเดินทาง</dt><dd class="text-white/85 tabular-nums"><?php echo number_format($row['allowance_transport'], 2); ?></dd></div>
+                    <div class="min-w-0"><dt class="text-white/50 text-xs">โบนัส</dt><dd class="text-white/85 tabular-nums"><?php echo number_format($row['bonus'], 2); ?></dd></div>
+                    <div class="min-w-0"><dt class="text-white/50 text-xs">ค่าบริหาร</dt><dd class="text-white/85 tabular-nums"><?php echo number_format($row['admin_fee'], 2); ?></dd></div>
+                    <div class="min-w-0"><dt class="text-white/50 text-xs">ชดเชยวันหยุด</dt><dd class="text-white/85 tabular-nums"><?php echo number_format($row['holiday_compensation'], 2); ?></dd></div>
+                    <div class="min-w-0"><dt class="text-white/50 text-xs">รวมรายรับ</dt><dd class="text-white font-medium tabular-nums"><?php echo number_format($row['total_income'], 2); ?></dd></div>
+                </dl>
+
+                <p class="text-white/50 text-xs mt-4 mb-2">รายจ่าย</p>
+                <dl class="grid grid-cols-2 gap-3 text-sm min-w-0">
+                    <div class="min-w-0"><dt class="text-white/50 text-xs">ประกันสังคม</dt><dd class="text-white/85 tabular-nums"><?php echo number_format($row['social_security'], 2); ?></dd></div>
+                    <div class="min-w-0"><dt class="text-white/50 text-xs">ลางาน</dt><dd class="text-white/85 tabular-nums"><?php echo number_format($row['leave_deduction'], 2); ?></dd></div>
+                    <div class="min-w-0"><dt class="text-white/50 text-xs">ภาษี</dt><dd class="text-white/85 tabular-nums"><?php echo number_format($row['tax'], 2); ?></dd></div>
+                    <div class="min-w-0"><dt class="text-amber-300/90 text-xs">กยศ.</dt><dd class="text-white/85 tabular-nums"><?php echo number_format((float)$row['student_loan'], 2); ?></dd></div>
+                    <div class="min-w-0"><dt class="text-white/50 text-xs">รวมรายจ่าย</dt><dd class="text-white font-medium tabular-nums"><?php echo number_format($row['total_deductions'], 2); ?></dd></div>
+                </dl>
+            </div>
+            <?php endforeach; ?>
+            <p class="text-white/45 text-xs px-1">แก้ไขยอด กยศ. ได้บนหน้าจอที่กว้างกว่านี้</p>
+        </div>
+
         <div class="hidden md:block tp-native-table-shell overflow-x-auto min-w-0 max-w-full overscroll-x-contain -mx-1 px-1 pb-px">
             <table class="w-full text-sm" style="min-width:1700px">
                 <thead class="bg-white/5">

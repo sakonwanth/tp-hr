@@ -473,30 +473,35 @@ $flashError = flash('error');
                         <p><?php echo htmlspecialchars($emp['email'] ?? '-'); ?></p>
                         <p class="text-white/50"><?php echo htmlspecialchars($emp['phone'] ?? '-'); ?></p>
                     </td>
-                    <td class="px-4 py-3 text-center text-white/80 text-sm">
+                    <td class="px-4 py-3 text-center text-white/80 text-sm whitespace-nowrap">
                         <?php echo $emp['hire_date'] ? formatDateThai($emp['hire_date']) : '-'; ?>
                     </td>
-                    <td class="px-4 py-3 text-center text-white">
+                    <td class="px-4 py-3 text-center text-white whitespace-nowrap">
                         <?php echo number_format($emp['total_leave_days'] ?? 0, 1); ?> วัน
                     </td>
                     <td class="px-4 py-3 text-center">
                         <?php if ($emp['checked_in_today']): ?>
-                        <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs bg-emerald-500/20 text-emerald-300">เข้างาน</span>
+                        <span class="inline-block whitespace-nowrap px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs bg-emerald-500/20 text-emerald-300">เข้างาน</span>
                         <?php elseif (($emp['work_mode'] ?? 'OFFICE') === 'WFH'): ?>
-                        <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs bg-blue-500/20 text-blue-300">WFH</span>
+                        <span class="inline-block whitespace-nowrap px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs bg-blue-500/20 text-blue-300">WFH</span>
                         <?php else: ?>
-                        <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs bg-gray-500/20 text-gray-400">-</span>
+                        <span class="inline-block whitespace-nowrap px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs bg-gray-500/20 text-gray-400">-</span>
                         <?php endif; ?>
                     </td>
                     <td class="px-4 py-3 text-center">
                         <?php if ($emp['is_active']): ?>
-                        <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs bg-emerald-500/20 text-emerald-300">ทำงาน</span>
+                        <span class="inline-block whitespace-nowrap px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs bg-emerald-500/20 text-emerald-300">ทำงาน</span>
                         <?php else: ?>
-                        <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs bg-red-500/20 text-red-400">พ้นสภาพ</span>
+                        <span class="inline-block whitespace-nowrap px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs bg-red-500/20 text-red-400">พ้นสภาพ</span>
                         <?php endif; ?>
                     </td>
                     <td class="px-4 py-3 text-center">
-                        <div class="inline-flex flex-wrap items-center justify-center gap-2 max-w-[220px] mx-auto">
+                        <?php /* Five 48px buttons with 8px gaps need 272px. The
+                                 group was capped at 220px and allowed to wrap,
+                                 which split every row's actions across two lines
+                                 — sensible when the table was capped at 960px,
+                                 wasteful now that it has 1200px to work with. */ ?>
+                        <div class="inline-flex items-center justify-center gap-2 mx-auto">
                         <a href="employee_view.php?id=<?php echo (int)$emp['id']; ?>"
                            class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center bg-white/10 hover:bg-white/20 text-white text-sm rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation" title="ดูข้อมูล" aria-label="ดูข้อมูล">
                             <i class="fas fa-eye" aria-hidden="true"></i>
