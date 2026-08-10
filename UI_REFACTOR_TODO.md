@@ -70,11 +70,30 @@
 
 ## Regression checklist
 
-- [ ] HR vs non-HR sidebar visibility parity  
-- [ ] CEO-only routes (`reports`, `settings`, `dayoff_approvals`) still blocked for staff  
-- [ ] Leave submit → HR approval row appears  
-- [ ] Payslip PDF/download path untouched  
-- [ ] LINE login unaffected (`api/line_login.php`)  
+Run `php scripts/qa_role_regression.php`. It is read only — GET requests and
+file reads, no login, no database. Add `--no-http` to skip the network, or
+`--cookie="tp_session=…"` from a browser signed in as ordinary staff to turn
+two of the manual steps into real checks.
+
+Every assertion below has been mutation-tested: break the guard and the check
+goes red, restore it and the check goes green. A check that has never failed
+proves nothing.
+
+Automated:
+
+- [x] HR vs non-HR sidebar visibility parity — A4, A5
+- [x] CEO-only routes (`reports`, `settings`, `dayoff_approvals`) still blocked for staff — A3, B4–B6, and C1 with `--cookie`
+- [x] Payslip PDF/download path untouched — A7, A8, B8
+- [x] LINE login unaffected (`api/line_login.php`) — A6, B7
+
+Still by hand, because no amount of source reading proves what a signed-in
+person sees. The script prints these at the end of every run:
+
+- [ ] Leave submit → HR approval row appears — M1
+- [ ] Payslip downloads and prints correctly as an employee — M2
+- [ ] LINE login round trip completes — M3
+- [ ] Sidebar compared side by side, staff vs HR vs CEO — M4
+- [ ] Typing a CEO-only URL as staff bounces with a message — M5
 
 ---
 

@@ -31,6 +31,10 @@ jobs:
         run: php scripts/qa_employee_finance_activation_boundary.php
       - name: PWA / Web Push contract
         run: php scripts/qa_pwa_push_contract.php
+      # Source half only — the HTTP half needs the production site, which a PR
+      # build should not depend on. Run the full thing locally.
+      - name: Role & route guards
+        run: php scripts/qa_role_regression.php --no-http
 
       - name: Security scan
         run: |
