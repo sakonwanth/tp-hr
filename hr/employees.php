@@ -343,7 +343,7 @@ $flashError = flash('error');
         $activeCls = $isActive ? 'bg-green-500/15 border border-green-500/30 text-green-200'
             : 'bg-red-500/15 border border-red-500/30 text-red-200';
         ?>
-        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-5 min-w-0">
+        <div class="tp-ios-attendance-panel p-5 min-w-0">
             <div class="flex items-start justify-between gap-3">
                 <div class="flex items-center gap-3 min-w-0">
                     <?php if (!empty($emp['avatar'])): ?>

@@ -327,7 +327,7 @@ include dirname(__DIR__) . '/templates/header.php';
         $st = (string)$req['status'];
         $empName = trim(($req['first_name_th'] ?? '') . ' ' . ($req['last_name_th'] ?? ''));
         ?>
-        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-5">
+        <div class="tp-ios-attendance-panel p-5">
             <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
                     <p class="text-white font-medium break-words"><?php echo htmlspecialchars($empName); ?></p>

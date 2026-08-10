@@ -383,7 +383,7 @@ include dirname(__DIR__) . '/templates/header.php';
         </div>
         <i class="fas fa-chevron-down text-white/40 group-open:rotate-180 transition-transform"></i>
     </summary>
-    <div class="p-5 border-t border-white/10">
+    <div class="p-4 border-t border-white/10">
         <form method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <input type="hidden" name="_token" value="<?php echo csrfToken(); ?>">
             <input type="hidden" name="action" value="save_company">
@@ -502,7 +502,7 @@ include dirname(__DIR__) . '/templates/header.php';
         </div>
         <i class="fas fa-chevron-down text-white/40 group-open:rotate-180 transition-transform"></i>
     </summary>
-    <div class="p-5 border-t border-white/10 grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="p-4 border-t border-white/10 grid grid-cols-1 md:grid-cols-2 gap-4">
         <?php foreach ($signerCandidates as $sc): ?>
         <div class="p-5 rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10">
             <div class="flex items-start justify-between mb-2">
@@ -557,7 +557,7 @@ include dirname(__DIR__) . '/templates/header.php';
     </div>
     <div class="md:hidden p-5 space-y-4">
         <?php foreach ($tpls as $t): ?>
-        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-5 space-y-3">
+        <div class="tp-ios-attendance-panel p-5 space-y-3">
             <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
                     <p class="text-white/50 text-xs">ลำดับ <?= (int)$t['sort_order']; ?> · <span class="font-mono text-violet-300"><?php echo htmlspecialchars($t['code']); ?></span></p>

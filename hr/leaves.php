@@ -230,7 +230,7 @@ include dirname(__DIR__) . '/templates/header.php';
         $chipCls = $statusColors[$statusKey] ?? 'bg-white/5 border border-white/10 text-white/70';
         $chipText = $statusText[$statusKey] ?? $statusKey;
         ?>
-        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-5">
+        <div class="tp-ios-attendance-panel p-5">
             <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
                     <div class="text-white font-semibold truncate break-words"><?php echo htmlspecialchars($fullName); ?></div>

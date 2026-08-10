@@ -318,7 +318,7 @@ require_once __DIR__ . '/../templates/header.php';
         </div>
         <div class="md:hidden p-5 space-y-4">
             <?php foreach ($keys as $k): $scopes = json_decode($k['scopes'] ?? '[]', true) ?: []; ?>
-                <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-5 space-y-3">
+                <div class="tp-ios-attendance-panel p-5 space-y-3">
                     <div class="flex items-start justify-between gap-2">
                         <div class="min-w-0">
                             <p class="text-white font-semibold break-words"><?= htmlspecialchars($k['name']) ?></p>
@@ -452,7 +452,7 @@ require_once __DIR__ . '/../templates/header.php';
         </div>
         <div class="md:hidden p-5 space-y-4">
             <?php foreach ($recentLogs as $l): ?>
-                <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-5 text-xs">
+                <div class="tp-ios-attendance-panel p-5 text-xs">
                     <div class="flex items-start justify-between gap-2">
                         <span class="text-white/55 shrink-0"><?= htmlspecialchars($l['created_at']) ?></span>
                         <span class="<?= ((int)$l['status_code'] >= 400) ? 'text-rose-300' : 'text-emerald-300' ?> font-mono font-semibold"><?= (int)$l['status_code'] ?></span>

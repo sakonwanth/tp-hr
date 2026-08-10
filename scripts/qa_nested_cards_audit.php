@@ -143,6 +143,48 @@ foreach ($cssSources as $c) {
 }
 $cssPadding = cssHorizontalPadding($cssSources, $tokens);
 
+/**
+ * Collapse rules the stylesheet actually declares, in the form
+ * `.outer:has(.inner) { padding: 0 }` — optionally with a companion
+ * `.outer:has(.inner) > div { padding-left/right: 0 }`.
+ *
+ * Read from the CSS rather than hardcoded. A hardcoded pair passed this
+ * script's own mutation test while the rule was disabled in the stylesheet:
+ * the count stayed at 5 either way, which would have let someone delete the
+ * rule and still get a clean report.
+ *
+ * @return array<int,array{outer:string,inner:string,child:bool}>
+ */
+function collapseRules(array $cssSources): array
+{
+    $rules = [];
+    foreach ($cssSources as $css) {
+        // Selector capture runs back to the previous `}`, so a rule preceded by
+        // a comment block arrives as "/* ... */\n.selector" and an anchored
+        // match never fires. Both collapse rules sit under a long comment, so
+        // every rule was missed and the mutation test passed for the wrong
+        // reason — the count was identical because nothing was ever detected.
+        $css = preg_replace('#/\*.*?\*/#s', '', $css) ?? $css;
+
+        if (!preg_match_all('/([^{}]+)\{([^}]*)\}/s', $css, $m, PREG_SET_ORDER)) continue;
+        foreach ($m as $rule) {
+            $sel = trim($rule[1]);
+            $body = $rule[2];
+            if (!preg_match('/^\.([a-zA-Z0-9_-]+):has\(\s*\.([a-zA-Z0-9_-]+)\s*\)(\s*>\s*div)?$/', $sel, $s)) continue;
+
+            $zeroesAll = preg_match('/(?<!-)padding\s*:\s*0(?:px)?\s*(?:;|$)/i', $body) === 1;
+            $zeroesSide = preg_match('/padding-left\s*:\s*0/i', $body) === 1
+                && preg_match('/padding-right\s*:\s*0/i', $body) === 1;
+            if (!$zeroesAll && !$zeroesSide) continue;
+
+            $rules[] = ['outer' => $s[1], 'inner' => $s[2], 'child' => isset($s[3]) && trim($s[3]) !== ''];
+        }
+    }
+    return $rules;
+}
+
+$collapseRules = collapseRules($cssSources);
+
 // ------------------------------------------------------------------ files
 
 $files = [];
@@ -211,16 +253,47 @@ foreach ($files as $path) {
         }
 
         $lineNo = substr_count(substr($source, 0, $offset), "\n") + 1;
-        $entry = ['kind' => $kind ?? 'padded-div', 'pad' => $pad, 'line' => $lineNo];
+        // `cls` keeps the whole class list. `kind` is only the first match in
+        // CARD_CLASSES, so a wrapper written `native-card tp-native-card
+        // tp-native-data-card` reports as `native-card` and a check against the
+        // kind would never see the data card the collapse rule keys on.
+        $entry = ['kind' => $kind ?? 'padded-div', 'pad' => $pad, 'line' => $lineNo, 'cls' => $classAttr];
+
+        // Apply whatever collapse rules the stylesheet declares. Summing the
+        // markup alone charged for padding the browser had already removed, so
+        // ten chains that render at 327px kept being reported as 64-76px
+        // squeezes. Rendered widths are the authority — see the header note.
+        //
+        // The rule relieves everything below it, not just the element that
+        // triggers it, so the inner class is looked for anywhere in the chain
+        // including the current element.
+        $chainCards = $openCards;
+
+        foreach ($collapseRules as $cr) {
+            $hasInner = strpos($classAttr, $cr['inner']) !== false;
+            foreach ($openCards as $o) {
+                if (strpos($o['cls'], $cr['inner']) !== false) { $hasInner = true; break; }
+            }
+            if (!$hasInner) continue;
+
+            foreach ($chainCards as $i => $o) {
+                if (strpos($o['cls'], $cr['outer']) === false) continue;
+                $chainCards[$i]['pad'] = 0;
+                if ($cr['child'] && isset($chainCards[$i + 1]) && $chainCards[$i + 1]['kind'] === 'padded-div') {
+                    $chainCards[$i + 1]['pad'] = 0;
+                }
+                break;
+            }
+        }
 
         $chainPad = $pad;
-        foreach ($openCards as $o) {
+        foreach ($chainCards as $o) {
             $chainPad += $o['pad'];
         }
 
         if ($kind !== null && $chainPad >= PADDING_BUDGET_PX) {
             $chain = [];
-            foreach ($openCards as $o) {
+            foreach ($chainCards as $o) {
                 $chain[] = sprintf('%s(%dpx)', $o['kind'], $o['pad']);
             }
             $chain[] = sprintf('%s(%dpx)', $entry['kind'], $pad);

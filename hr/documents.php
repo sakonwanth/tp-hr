@@ -200,7 +200,7 @@ include dirname(__DIR__) . '/templates/header.php';
         $chipCls = $statusColors[$st] ?? 'border border-white/15 bg-white/5 text-white/70';
         $chipLbl = $statusText[$st] ?? $st;
         ?>
-        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-5 space-y-3">
+        <div class="tp-ios-attendance-panel p-5 space-y-3">
             <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
                     <p class="text-white/50 text-xs uppercase tracking-wide">รหัสคำขอ</p>

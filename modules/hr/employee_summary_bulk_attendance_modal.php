@@ -19,7 +19,10 @@ $bulkReloadBase = $bulkReloadBase ?? '';
 ?>
 <div id="bulk-att-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-[60] flex items-center justify-center p-5 overflow-y-auto overscroll-contain" role="dialog" aria-modal="true" aria-labelledby="bulk-att-modal-title">
     <div class="native-card tp-native-card w-full max-w-lg my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-[var(--tp-ios-card-radius)]">
-        <form id="bulk-att-form" class="p-6">
+        <!-- .native-card already pads 24px; the form's own p-6 doubled it and
+             left the date list 213px wide on a 375px screen — the tightest box
+             in the app. -->
+        <form id="bulk-att-form">
             <h3 id="bulk-att-modal-title" class="text-xl font-bold text-white mb-1">แก้ไขเวลาหลายวัน</h3>
             <p id="bulk-att-subtitle" class="text-white/55 text-sm mb-4"></p>
 

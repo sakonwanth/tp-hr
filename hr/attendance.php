@@ -351,7 +351,7 @@ include dirname(__DIR__) . '/templates/header.php';
         $workHours = $rec['work_minutes'] ? number_format(((float)$rec['work_minutes']) / 60, 1) : '-';
         $otHours = ($rec['ot_minutes'] ?? 0) > 0 ? (int)floor(((int)$rec['ot_minutes']) / 60) : 0;
         ?>
-        <div class="rounded-[var(--tp-ios-card-radius)] bg-white/5 border border-white/10 p-5<?php echo $highlightUserId === (int)$rec['id'] ? ' ring-2 ring-violet-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>"
+        <div class="tp-ios-attendance-panel p-5<?php echo $highlightUserId === (int)$rec['id'] ? ' ring-2 ring-violet-400 ring-offset-2 ring-offset-slate-900/80' : ''; ?>"
              id="att-row-<?php echo (int)$rec['id']; ?>">
             <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
