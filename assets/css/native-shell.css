@@ -1,5 +1,6 @@
 /**
  * TP-HR — Native component system (iOS 26–inspired).
+ * v22: utilities beside a component class now win — mb-*, min-h-* were being silently overridden.
  * v21: tap targets — .tp-tap-48 hit-area helper for controls that cannot grow.
  * v20: data-card no longer clips a child that asks for its own overflow (employee-form tab strip).
  * v19: Holidays mobile QA — next-card balance, layout order, hidden month scrollbars, touch targets.
@@ -8,7 +9,7 @@
  * v16: HR dashboard secondary `<details>` accordion (below `xl`) — chevron + marker reset.
  * v15: Liquid Glass chrome — floating inset tab strip + gradient scrim · glass sticky CTA slab (`tp-ios-sticky-cta-slab`) · typography caps (page title max 28px · section ~19px · card title ~17px).
  * v14: token ladder + scroll buffer 160 · primary 58 · input 56 · textarea 120.
- * Headers: `/assets/css/native-shell.css?v=31`.
+ * Headers: `/assets/css/native-shell.css?v=32`.
  */
 
 html {
@@ -447,7 +448,15 @@ body.tp-native-app.tp-app-shell {
   min-height: var(--tp-native-touch-min);
 }
 
-.tp-native-form-group {
+/* A utility and a component class weigh the same, and app.css loads first, so
+   this rule silently beat every `mb-*` written beside it — 60 places across 17
+   files asked for a margin and got this one instead. On hr/attendance.php the
+   filter row's `mb-0` still rendered 18px, which pushed the day-nav and report
+   buttons a row-height below the inputs they belong with.
+
+   The `[class^=]` / `[class*=" "]` pair matches the class as a whole word;
+   `[class*="mb-"]` alone would also match a class like `thumb-strip`. */
+.tp-native-form-group:not([class^="mb-"]):not([class*=" mb-"]) {
   margin-bottom: var(--tp-form-group-gap-min);
 }
 
@@ -720,6 +729,13 @@ body.tp-native-app .section-title i {
 .tp-native-quick-action-card,
 .tp-native-quick-action {
   border-radius: var(--tp-radius-card);
+}
+
+/* Same trap as the form group: six cards ask for min-h-[96px] and were held to
+   the 48px touch floor instead. The floor only applies when nothing else is
+   asked for. */
+.tp-native-quick-action-card:not([class*="min-h-"]),
+.tp-native-quick-action:not([class*="min-h-"]) {
   min-height: var(--tp-native-touch-min);
 }
 

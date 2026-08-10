@@ -238,11 +238,11 @@ include dirname(__DIR__) . '/templates/header.php';
             </select>
         </div>
         <div class="flex flex-wrap items-end gap-2 lg:col-span-4">
-            <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['date' => date('Y-m-d')]))); ?>" class="flex-1 min-h-[48px] min-w-[7rem] py-2.5 bg-white/10 hover:bg-white/20 text-white text-center rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation inline-flex items-center justify-center font-medium">วันนี้</a>
-            <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['date' => date('Y-m-d', strtotime('-1 day', strtotime($date)))]))); ?>" class="min-h-[48px] min-w-[48px] px-3 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] inline-flex items-center justify-center touch-manipulation" aria-label="วันก่อนหน้า">
+            <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['date' => date('Y-m-d')]))); ?>" class="flex-1 min-h-[56px] min-w-[7rem] py-2.5 bg-white/10 hover:bg-white/20 text-white text-center rounded-[var(--tp-ios-card-radius)] transition-colors touch-manipulation inline-flex items-center justify-center font-medium">วันนี้</a>
+            <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['date' => date('Y-m-d', strtotime('-1 day', strtotime($date)))]))); ?>" class="min-h-[56px] min-w-[48px] px-3 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] inline-flex items-center justify-center touch-manipulation" aria-label="วันก่อนหน้า">
                 <i class="fas fa-chevron-left" aria-hidden="true"></i>
             </a>
-            <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['date' => date('Y-m-d', strtotime('+1 day', strtotime($date)))]))); ?>" class="min-h-[48px] min-w-[48px] px-3 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] inline-flex items-center justify-center touch-manipulation" aria-label="วันถัดไป">
+            <a href="?<?php echo htmlspecialchars(http_build_query(array_merge($filterBase, ['date' => date('Y-m-d', strtotime('+1 day', strtotime($date)))]))); ?>" class="min-h-[56px] min-w-[48px] px-3 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-[var(--tp-ios-card-radius)] inline-flex items-center justify-center touch-manipulation" aria-label="วันถัดไป">
                 <i class="fas fa-chevron-right" aria-hidden="true"></i>
             </a>
         </div>

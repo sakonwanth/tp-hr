@@ -39,8 +39,8 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png';
     <script src="/assets/js/native-select.js?v=1" defer></script>
 
     <!-- Tailwind CSS (compiled) -->
-    <link rel="stylesheet" href="/assets/css/app.css?v=31">
-    <link rel="stylesheet" href="/assets/css/native-shell.css?v=31">
+    <link rel="stylesheet" href="/assets/css/app.css?v=32">
+    <link rel="stylesheet" href="/assets/css/native-shell.css?v=32">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -879,6 +879,12 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png';
             font-size: 1.125rem;
             font-weight: 600;
             color: #fff;
+        }
+
+        /* Eleven headings write `mb-0` and were given 16px anyway — a utility
+           and a component class weigh the same, and this sheet loads after
+           app.css. The default only applies when the markup asks for nothing. */
+        .section-title:not([class^="mb-"]):not([class*=" mb-"]) {
             margin-bottom: 16px;
         }
         
