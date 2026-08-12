@@ -2,7 +2,7 @@
 /**
  * session ยังอยู่ครบไหม — ตรวจด้วย session จริงของคุณเอง
  *
- *   php scripts/qa_session_survival.php --cookie="tp_session=ค่าจากเบราว์เซอร์"
+ *   php scripts/qa_session_survival.php        แล้วสคริปต์จะถามให้วางค่าคุกกี้
  *
  * READ ONLY. ยิง GET อย่างเดียว ไม่ล็อกอิน ไม่เขียนอะไร ไม่เก็บคุกกี้ไว้ที่ไหน
  *
@@ -89,10 +89,28 @@ function fetchPage(string $url, string $cookie): array
 echo "TP — session ยังอยู่ครบไหม (read only)\n";
 echo str_repeat('=', 70) . "\n\n";
 
+/*
+ * ไม่ได้ใส่ --cookie มา แล้วรันจาก terminal จริง → ถามเอา
+ *
+ * เดิมเอกสารเขียนตัวอย่างเป็น --cookie="tp_session=ค่าจริง" แล้วคนก็ copy
+ * ทั้งบรรทัดไปรัน ซึ่งถูกต้องแล้วที่ทำแบบนั้น — คำสั่งที่ copy ไปวางได้ทันที
+ * ไม่ควรมีคำที่ต้องแก้ก่อนซ่อนอยู่ ผลคือส่งคำว่า "ค่าจริง" ไปเป็น session id
+ * สามรอบติด และตีความว่า session ตายไปแล้วทั้งที่ยังดีอยู่
+ *
+ * ถามตรงนี้แทน คำสั่งจึงไม่มีอะไรให้พิมพ์ผิด
+ */
+if ($cookieValue === '' && stream_isatty(STDIN)) {
+    echo "วางค่า tp_session จากเบราว์เซอร์ แล้วกด Enter\n";
+    echo "(F12 → Application → Cookies → hr.tp-asset.com → แถว tp_session ช่อง Value)\n";
+    echo "ปล่อยว่างแล้วกด Enter เพื่อข้ามไปตรวจเฉพาะฝั่ง guest\n\n> ";
+    $cookieValue = trim((string)fgets(STDIN));
+    echo "\n";
+}
+
 if ($cookieValue === '') {
-    echo "ยังไม่ได้ใส่ --cookie จึงตรวจได้แค่ฝั่ง guest\n";
-    echo "หมายเหตุ: ต้องเขียนติดกันด้วย = เช่น --cookie=\"tp_session=abc…\"\n";
-    echo "          ถ้าเว้นวรรค (--cookie \"…\") PHP จะอ่านไม่เห็นค่าเลย\n\n";
+    echo "ไม่มีคุกกี้ จึงตรวจได้แค่ฝั่ง guest\n";
+    echo "ถ้าจะใส่ผ่าน argument ต้องเขียนติดกันด้วย = เช่น --cookie=\"tp_session=…\"\n";
+    echo "เว้นวรรค (--cookie \"…\") PHP จะอ่านไม่เห็นค่าเลย\n\n";
 } else {
     if (!str_contains($cookieValue, '=')) {
         $cookieValue = 'tp_session=' . $cookieValue;   // เผลอ copy มาแต่ค่า
@@ -111,6 +129,14 @@ if ($cookieValue === '') {
 
     echo "ใช้คุกกี้ที่ใส่มา (ไม่ถูกเก็บไว้ที่ไหน)\n";
     printf("  ค่าที่จะส่ง: tp_session=%s  (%d ตัวอักษร)\n", $masked, $len);
+
+    // จับกรณีที่เคยเกิดจริง: copy คำสั่งตัวอย่างไปทั้งบรรทัดโดยไม่ได้แทนค่า
+    $placeholders = ['ค่าจริง', 'ค่าจากเบราว์เซอร์', 'ค่าใหม่', 'value', 'xxx'];
+    if (in_array($sid, $placeholders, true)) {
+        echo "  ⚠ นี่คือข้อความตัวอย่าง ไม่ใช่ค่าจริงจากเบราว์เซอร์\n";
+        echo "    รันใหม่โดยไม่ต้องใส่ --cookie แล้วสคริปต์จะถามให้วางค่าเอง\n\n";
+        exit(1);
+    }
 
     // session id ของ PHP ปกติเป็น hex 32 ตัว (หรือ 26 ตัวเมื่อใช้ sid ยาวอื่น)
     if (!preg_match('/^[a-zA-Z0-9,\-]{20,}$/', $sid)) {
