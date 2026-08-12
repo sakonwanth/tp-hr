@@ -90,12 +90,36 @@ echo "TP — session ยังอยู่ครบไหม (read only)\n";
 echo str_repeat('=', 70) . "\n\n";
 
 if ($cookieValue === '') {
-    echo "ยังไม่ได้ใส่ --cookie จึงตรวจได้แค่ฝั่ง guest\n\n";
+    echo "ยังไม่ได้ใส่ --cookie จึงตรวจได้แค่ฝั่ง guest\n";
+    echo "หมายเหตุ: ต้องเขียนติดกันด้วย = เช่น --cookie=\"tp_session=abc…\"\n";
+    echo "          ถ้าเว้นวรรค (--cookie \"…\") PHP จะอ่านไม่เห็นค่าเลย\n\n";
 } else {
     if (!str_contains($cookieValue, '=')) {
         $cookieValue = 'tp_session=' . $cookieValue;   // เผลอ copy มาแต่ค่า
     }
-    echo "ใช้คุกกี้ที่ใส่มา (ไม่ถูกเก็บไว้ที่ไหน)\n\n";
+
+    /*
+     * แสดงให้เห็นว่ากำลังจะส่งอะไรออกไป
+     *
+     * รอบก่อนผลออกมา "0 จาก 4" โดยไม่มีอะไรบอกได้เลยว่าเป็นเพราะ session ตาย
+     * จริง หรือค่าที่ใส่มาถูกตัด/พิมพ์ผิด — ต้องเดาเอาทั้งสองรอบ ซึ่งเสียเวลา
+     * เปล่า ตรงนี้ปิดช่องนั้น โดยไม่พิมพ์ค่าเต็มออกมา
+     */
+    $sid = substr($cookieValue, strpos($cookieValue, '=') + 1);
+    $len = strlen($sid);
+    $masked = $len <= 8 ? $sid : substr($sid, 0, 4) . str_repeat('•', max(0, $len - 8)) . substr($sid, -4);
+
+    echo "ใช้คุกกี้ที่ใส่มา (ไม่ถูกเก็บไว้ที่ไหน)\n";
+    printf("  ค่าที่จะส่ง: tp_session=%s  (%d ตัวอักษร)\n", $masked, $len);
+
+    // session id ของ PHP ปกติเป็น hex 32 ตัว (หรือ 26 ตัวเมื่อใช้ sid ยาวอื่น)
+    if (!preg_match('/^[a-zA-Z0-9,\-]{20,}$/', $sid)) {
+        echo "  ⚠ ค่านี้ไม่เหมือน session id ของ PHP — น่าจะ copy มาไม่ครบ\n";
+        echo "    หรือหลุดเป็นข้อความอย่างอื่นมา ลอง copy ช่อง Value ใหม่\n";
+    } elseif ($len < 26) {
+        echo "  ⚠ สั้นกว่าที่ควรเป็น อาจ copy มาไม่ครบ\n";
+    }
+    echo "\n";
 }
 
 $signedIn = 0;
