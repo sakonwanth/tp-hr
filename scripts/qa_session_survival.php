@@ -45,7 +45,12 @@ function fetchPage(string $url, string $cookie): array
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_HEADER => true,
-        CURLOPT_FOLLOWLOCATION => false,
+        // Follow redirects. Judging a signed-in page by body size alone called
+        // every redirect a failure, and a signed-in visit can legitimately
+        // bounce once. Where it lands is the answer, not how big the first
+        // response was.
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_MAXREDIRS => 5,
         CURLOPT_TIMEOUT => 20,
         CURLOPT_USERAGENT => 'tp-session-survival/1.0',
     ]);
@@ -65,13 +70,19 @@ function fetchPage(string $url, string $cookie): array
     }
 
     $location = preg_match('/^location:\s*(\S+)/im', $headers, $l) ? $l[1] : '';
+    $finalUrl = (string)curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
 
     return [
         'status' => $status,
         'bytes' => strlen($body),
         'body' => $body,
         'location' => $location,
+        'finalUrl' => $finalUrl,
         'cookieMaxAge' => $expires,
+        // The clearest signal that a request was not accepted: the server put
+        // a password box in front of it.
+        'hasLoginForm' => str_contains($body, 'type="password"'),
+        'isSsoStub' => stripos($body, 'Redirecting') !== false && strlen($body) < 2000,
     ];
 }
 
@@ -96,33 +107,46 @@ foreach ($systems as $name => $spec) {
     $mine = $cookieValue === '' ? null : fetchPage($spec['url'], $cookieValue);
 
     $verdict = '—';
+    $why = '';
     if ($mine !== null) {
-        $isLocked = $spec['unlock'] !== null
-            && (str_contains($mine['location'], $spec['unlock'])
-                || str_contains($mine['body'], 'ยืนยันตัวตนอีกครั้ง'));
+        $isLocked = str_contains($mine['body'], 'ยืนยันตัวตนอีกครั้ง')
+            || ($spec['unlock'] !== null && str_contains($mine['finalUrl'], ltrim($spec['unlock'], '/')));
 
         if ($isLocked) {
-            $verdict = 'ล็อกอยู่ — ต้องใส่รหัสผ่านที่ ' . $spec['unlock'];
+            $verdict = 'ล็อกอยู่ — ใส่รหัสผ่านที่ ' . $spec['unlock'];
             $locked[] = $name;
+        } elseif ($mine['hasLoginForm']) {
+            $verdict = 'ไม่ผ่าน — เจอหน้าล็อกอิน';
+            $why = 'ไปจบที่ ' . $mine['finalUrl'];
+        } elseif ($mine['isSsoStub']) {
+            // The SSO guard answers 200 with a small HTML page that bounces the
+            // browser, so curl never follows it and the size alone looked like
+            // an unexplained short response. It means "not signed in".
+            $verdict = 'ไม่ผ่าน — SSO ส่งไปหน้าล็อกอิน';
+            $why = 'ได้หน้า redirect ' . $mine['bytes'] . ' bytes แทนเนื้อหาจริง';
         } elseif ($mine['bytes'] >= RENDERED_MIN_BYTES) {
             $verdict = 'ล็อกอินอยู่ ใช้งานได้';
             $signedIn++;
         } else {
-            $verdict = 'ไม่ผ่าน — ถูกส่งกลับไปหน้าล็อกอิน';
+            $verdict = 'ไม่แน่ใจ — หน้าเล็กผิดปกติ';
+            $why = 'status ' . $mine['status'] . ' · ' . $mine['bytes'] . ' bytes · ไปจบที่ ' . $mine['finalUrl'];
         }
     }
 
-    $rows[] = [$name, $guest['bytes'], $mine['bytes'] ?? null, $verdict, $guest['cookieMaxAge']];
+    $rows[] = [$name, $guest['bytes'], $mine['bytes'] ?? null, $verdict, $guest['cookieMaxAge'], $why];
 }
 
 printf("  %-11s %10s %10s   %s\n", 'ระบบ', 'guest', 'ของคุณ', 'ผล');
 echo '  ' . str_repeat('-', 66) . "\n";
-foreach ($rows as [$name, $g, $m, $verdict, $maxAge]) {
+foreach ($rows as [$name, $g, $m, $verdict, $maxAge, $why]) {
     printf("  %-11s %8d B %8s   %s\n", $name, $g, $m === null ? '-' : $m . ' B', $verdict);
+    if ($why !== '') {
+        printf("  %-11s %19s   %s\n", '', '', $why);
+    }
 }
 
 echo "\n  อายุคุกกี้ที่แต่ละระบบออกให้ (ตอนสร้าง session ใหม่):\n";
-foreach ($rows as [$name, , , , $maxAge]) {
+foreach ($rows as [$name, , , , $maxAge, ]) {
     $label = $maxAge === null ? 'ไม่ได้ออกคุกกี้ใหม่'
         : ($maxAge > 0 ? sprintf('%d วิ (%.0f วัน) — ถาวร', $maxAge, $maxAge / 86400)
                        : 'ไม่มีวันหมดอายุระบุ — ตายเมื่อปิดเบราว์เซอร์');
