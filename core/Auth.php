@@ -128,7 +128,10 @@ class Auth {
      * SSO: redirects to CRM login if TpCommon\Auth\SsoGuard is available.
      */
     public static function requireLogin(): void {
-        if (self::check()) return;
+        if (self::check()) {
+            self::requireUnlockIfNeeded();
+            return;
+        }
 
         // SSO — redirect to central CRM login
         if (defined('TP_COMMON_AVAILABLE') && TP_COMMON_AVAILABLE
@@ -147,7 +150,43 @@ class Auth {
         $redirectUrl = urlencode($_SERVER['REQUEST_URI'] ?? '');
         redirect('/login.php?redirect=' . $redirectUrl);
     }
-    
+
+    /**
+     * Send a signed-in user to the unlock screen when tp-hr has locked itself.
+     *
+     * Locking is not signing out — the session is intact, and so is the user's
+     * session in tp-crm and the rest. Only tp-hr wants the password again,
+     * which is the whole point of the per-project lock in tp-common.
+     *
+     * The unlock page and the logout route are exempt, or there would be no
+     * way out of the lock.
+     */
+    private static function requireUnlockIfNeeded(): void {
+        // method_exists as well as class_exists: the deploy pulls tp-common on
+        // the server and tolerates that pull failing, so tp-hr can end up new
+        // while the library is old. Without this the whole app would fatal on
+        // an undefined method; with it, the lock simply does not engage.
+        if (!defined('TP_COMMON_AVAILABLE') || !TP_COMMON_AVAILABLE
+            || !class_exists('TpCommon\Session\SharedSession')
+            || !method_exists('TpCommon\Session\SharedSession', 'needsReauth')
+            || !\TpCommon\Session\SharedSession::needsReauth('tp-hr')) {
+            return;
+        }
+
+        $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+        foreach (['/unlock.php', '/logout.php', '/login.php'] as $allowed) {
+            if ($path === $allowed) return;
+        }
+
+        if (self::isAjax()) {
+            http_response_code(401);
+            echo json_encode(['error' => 'Reauthentication required', 'unlock' => '/unlock.php']);
+            exit;
+        }
+
+        redirect('/unlock.php?redirect=' . urlencode($_SERVER['REQUEST_URI'] ?? '/'));
+    }
+
     /**
      * Require HR role
      */

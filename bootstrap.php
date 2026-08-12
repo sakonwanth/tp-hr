@@ -144,19 +144,27 @@ if (TP_COMMON_AVAILABLE && class_exists('TpCommon\Session\SharedSession')) {
     $tpHrRemember = !(defined('REMEMBER_CHOICE_COOKIE')
         && ($_COOKIE[REMEMBER_CHOICE_COOKIE] ?? '1') === '0');
 
-    $tpHrIdle = $tpHrRemember
-        ? (defined('PWA_SESSION_LIFETIME') ? (int)PWA_SESSION_LIFETIME : 3600)
-        : (defined('SESSION_LIFETIME_NOT_REMEMBERED') ? (int)SESSION_LIFETIME_NOT_REMEMBERED : 28800);
+    $tpHrLong = defined('PWA_SESSION_LIFETIME') ? (int)PWA_SESSION_LIFETIME : 3600;
+    $tpHrShort = defined('SESSION_LIFETIME_NOT_REMEMBERED') ? (int)SESSION_LIFETIME_NOT_REMEMBERED : 28800;
 
-    \TpCommon\Session\SharedSession::start([
+    $tpHrOptions = [
         'project'         => 'tp-hr',
         'lifetime'        => defined('SESSION_LIFETIME') ? (int)SESSION_LIFETIME : 7200,
         // The cookie is shared with the other projects, so it keeps the long
         // life either way — shortening it here would sign the user out of
-        // tp-crm too. Only tp-hr's idle window follows the checkbox.
-        'cookie_lifetime' => defined('PWA_SESSION_LIFETIME') ? (int)PWA_SESSION_LIFETIME : 0,
-        'idle_timeout'    => $tpHrIdle,
-    ]);
+        // tp-crm too. Only tp-hr's own windows follow the checkbox.
+        'cookie_lifetime' => $tpHrLong,
+        'idle_timeout'    => $tpHrLong,
+    ];
+
+    // Cleared "จดจำฉัน" asks tp-hr for the password again after a shift,
+    // rather than ending the session. Locking keeps the person signed in to
+    // tp-crm and the rest; a logout here would take those down with it.
+    if (!$tpHrRemember) {
+        $tpHrOptions['reauth_after'] = $tpHrShort;
+    }
+
+    \TpCommon\Session\SharedSession::start($tpHrOptions);
 } elseif (TP_COMMON_AVAILABLE) {
     \TpCommon\Auth\Session::start([
         'name'         => 'TPHRSESSID',

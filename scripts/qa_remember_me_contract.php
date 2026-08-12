@@ -36,6 +36,19 @@ function check(string $id, string $what, bool $ok, string $why): void
 echo "TP-HR — สัญญาของปุ่ม \"จดจำฉัน\" (read only)\n";
 echo str_repeat('=', 68) . "\n\n";
 
+/**
+ * Source with comments removed.
+ *
+ * "does this file call Auth::login()" has to ignore the comment in unlock.php
+ * that explains why it must not — the first version of that check failed on
+ * its own documentation.
+ */
+function codeOnly(string $src): string
+{
+    $src = preg_replace('#/\*.*?\*/#s', '', $src) ?? $src;
+    return preg_replace('#(^|\s)//.*$#m', '', $src) ?? $src;
+}
+
 $login = (string)file_get_contents($root . '/login.php');
 $boot = (string)file_get_contents($root . '/bootstrap.php');
 $conf = (string)file_get_contents($root . '/config/app.php');
@@ -58,13 +71,13 @@ check('R4', 'บันทึกตัวเลือกลงคุกกี้�
         && strpos($login, "'httponly' => true") !== false,
     'ไม่ได้ตั้งคุกกี้ หรือไม่ได้ตั้ง httponly');
 
-check('R5', 'bootstrap.php เอาค่าไปเลือก idle window',
+check('R5', 'bootstrap.php เอาค่าที่ผู้ใช้เลือกไปกำหนดพฤติกรรมจริง',
     strpos($boot, 'REMEMBER_CHOICE_COOKIE') !== false
-        && strpos($boot, "'idle_timeout'    => \$tpHrIdle") !== false,
-    'bootstrap ไม่ได้ใช้ค่านั้นเลือกเวลา');
+        && strpos($boot, '$tpHrRemember') !== false,
+    'bootstrap ไม่ได้ใช้ค่านั้นเลย');
 
-check('R6', 'คุกกี้ session ยังยาวเท่าเดิมทั้งสองกรณี',
-    strpos($boot, "'cookie_lifetime' => defined('PWA_SESSION_LIFETIME')") !== false,
+check('R6', 'คุกกี้ session ยาวเท่าเดิมทั้งสองกรณี',
+    preg_match('/\x27cookie_lifetime\x27\s*=>\s*\$tpHrLong/', $boot) === 1,
     'ไป (ย่อ|ยืด) คุกกี้ที่ใช้ร่วมกัน — จะลากโปรเจกต์อื่นหลุดตาม');
 
 check('R7', 'มีค่าคงที่ของช่วงเวลาแบบไม่จำ และสั้นกว่าแบบจำ',
@@ -91,6 +104,59 @@ check('R9', 'เอาติ๊กออก -> ได้ช่วงเวลา
 check('R10', 'ยังไม่มีคุกกี้ (ผู้ใช้เดิม) -> ได้ช่วงเวลายาวเหมือนก่อนแก้',
     $window(null) === (int)PWA_SESSION_LIFETIME,
     'ผู้ใช้ที่ล็อกอินค้างอยู่จะโดนลดเวลาโดยไม่ได้เลือกเอง');
+
+// ------------------------------------------------------- per-project unlock
+
+echo "\nหน้าปลดล็อก — ล็อกเฉพาะ tp-hr ไม่ลากโปรเจกต์อื่นออก\n\n";
+
+$unlock = (string)@file_get_contents($root . '/unlock.php');
+$auth = (string)file_get_contents($root . '/core/Auth.php');
+
+check('U1', 'มีหน้า unlock.php',
+    $unlock !== '',
+    'ไม่พบไฟล์ — ผู้ใช้ที่โดนล็อกจะไม่มีทางกลับเข้าระบบ');
+
+check('U2', 'ต้องล็อกอินอยู่ก่อนถึงจะเข้าหน้านี้ได้',
+    strpos($unlock, 'Auth::check()') !== false,
+    'ไม่ได้ตรวจว่าล็อกอินอยู่');
+
+check('U3', 'ตรวจ CSRF ก่อนรับรหัสผ่าน',
+    strpos($unlock, 'verifyCsrfToken') !== false,
+    'ไม่ตรวจ CSRF');
+
+check('U4', 'ตรวจรหัสผ่านของผู้ใช้ที่ล็อกอินอยู่ ไม่ใช่รับ username มาใหม่',
+    strpos($unlock, 'password_verify') !== false
+        && strpos($unlock, 'WHERE id = ?') !== false,
+    'ไม่ได้ยืนยันรหัสผ่านกับ user id ของ session ปัจจุบัน');
+
+check('U5', 'ปลดล็อกด้วย markReauthenticated ไม่ใช่ล็อกอินใหม่',
+    strpos($unlock, "markReauthenticated('tp-hr')") !== false
+        && strpos(codeOnly($unlock), 'Auth::login(') === false,
+    'ถ้าเรียก Auth::login จะสร้าง session id ใหม่ และเตะโปรเจกต์อื่นออกทั้งหมด');
+
+// Look for the call, not the name: the method's own definition contains the
+// name too, so an earlier version of this check stayed green after the call
+// site was deleted.
+check('U6', 'requireLogin เรียกตัวเช็คล็อกจริง ไม่ใช่แค่มี method อยู่',
+    preg_match('/self::requireUnlockIfNeeded\(\);/', $auth) === 1
+        && strpos($auth, "needsReauth('tp-hr')") !== false,
+    'guard ไม่ได้เรียกตัวเช็ค — คนที่โดนล็อกจะเข้าใช้งานได้ตามปกติ');
+
+check('U7', 'หน้า unlock / logout / login ได้รับการยกเว้น ไม่งั้นวนลูป',
+    strpos($auth, "'/unlock.php', '/logout.php', '/login.php'") !== false,
+    'ไม่มี allowlist — ผู้ใช้จะติดลูป redirect');
+
+check('U8', 'คำขอแบบ AJAX ได้ 401 พร้อมทางไปปลดล็อก ไม่ใช่ HTML',
+    strpos($auth, "'unlock' => '/unlock.php'") !== false,
+    'AJAX จะได้หน้า HTML กลับไปแทน JSON');
+
+check('U9', 'bootstrap ขอ reauth_after เฉพาะตอนไม่ได้ติ๊กจำ',
+    preg_match('/if \(!\$tpHrRemember\) \{\s*\$tpHrOptions\[\x27reauth_after\x27\]/', $boot) === 1,
+    'ประกาศ reauth_after ตลอดเวลา หรือไม่ประกาศเลย');
+
+check('U10', 'ติ๊กจำไว้ -> ไม่ล็อก (idle window ยาวทั้งคู่)',
+    strpos($boot, "'idle_timeout'    => \$tpHrLong,") !== false,
+    'idle window ไม่ได้ยาวเท่ากันทั้งสองกรณี — session อาจถูกทำลายแทนที่จะล็อก');
 
 echo "\n" . str_repeat('=', 68) . "\n";
 printf("ผ่าน %d · ไม่ผ่าน %d\n", $pass, $fail);
