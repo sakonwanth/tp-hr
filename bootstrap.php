@@ -137,11 +137,25 @@ require_once BASE_PATH . '/config/database.php';
 // persistent cookie + matching idle window; the other projects keep the
 // tp-common defaults (see SharedSession::GC_RETENTION_FLOOR).
 if (TP_COMMON_AVAILABLE && class_exists('TpCommon\Session\SharedSession')) {
+    // "จดจำฉัน" on the login form. Read from its own cookie because this runs
+    // before the session exists. Absent means remembered: that is what the app
+    // did before the box was wired up, and the box now ships pre-ticked, so
+    // only an explicit clear shortens the window.
+    $tpHrRemember = !(defined('REMEMBER_CHOICE_COOKIE')
+        && ($_COOKIE[REMEMBER_CHOICE_COOKIE] ?? '1') === '0');
+
+    $tpHrIdle = $tpHrRemember
+        ? (defined('PWA_SESSION_LIFETIME') ? (int)PWA_SESSION_LIFETIME : 3600)
+        : (defined('SESSION_LIFETIME_NOT_REMEMBERED') ? (int)SESSION_LIFETIME_NOT_REMEMBERED : 28800);
+
     \TpCommon\Session\SharedSession::start([
         'project'         => 'tp-hr',
         'lifetime'        => defined('SESSION_LIFETIME') ? (int)SESSION_LIFETIME : 7200,
+        // The cookie is shared with the other projects, so it keeps the long
+        // life either way — shortening it here would sign the user out of
+        // tp-crm too. Only tp-hr's idle window follows the checkbox.
         'cookie_lifetime' => defined('PWA_SESSION_LIFETIME') ? (int)PWA_SESSION_LIFETIME : 0,
-        'idle_timeout'    => defined('PWA_SESSION_LIFETIME') ? (int)PWA_SESSION_LIFETIME : 3600,
+        'idle_timeout'    => $tpHrIdle,
     ]);
 } elseif (TP_COMMON_AVAILABLE) {
     \TpCommon\Auth\Session::start([

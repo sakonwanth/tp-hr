@@ -35,6 +35,8 @@ jobs:
       # build should not depend on. Run the full thing locally.
       - name: Role & route guards
         run: php scripts/qa_role_regression.php --no-http
+      - name: Remember-me contract
+        run: php scripts/qa_remember_me_contract.php
 
       - name: Security scan
         run: |

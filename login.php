@@ -87,6 +87,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $result = Auth::login($username, $password);
 
             if ($result['success']) {
+                // Remember the choice, not the person: this cookie only tells
+                // bootstrap.php which idle window to ask SharedSession for. It
+                // carries no identity and grants nothing on its own.
+                $remember = !empty($_POST['remember']);
+                setcookie(REMEMBER_CHOICE_COOKIE, $remember ? '1' : '0', [
+                    'expires'  => time() + PWA_SESSION_LIFETIME,
+                    'path'     => '/',
+                    'secure'   => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+                    'httponly' => true,
+                    'samesite' => 'Lax',
+                ]);
+
                 $redirect = safeRedirectTarget(loginReturnQueryValue(), '/');
                 redirect($redirect);
             } else {
@@ -335,7 +347,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <!-- Remember Me -->
             <div class="mt-3 flex min-h-[48px] items-center justify-between gap-3">
                 <label class="flex min-h-[48px] cursor-pointer select-none items-center gap-2 text-sm text-white text-opacity-80">
-                    <input type="checkbox" name="remember" class="h-4 w-4 shrink-0 rounded border-white/30 bg-white/10 text-purple-500 focus:ring-purple-500 focus:ring-offset-0">
+                    <?php /* Ticked by default: staying signed in is what the app
+                             already did, so an employee who ignores this box
+                             gets the behaviour they had. Clearing it is the
+                             deliberate act — for a shared or borrowed device. */ ?>
+                    <input type="checkbox" name="remember" value="1" checked
+                           class="h-4 w-4 shrink-0 rounded border-white/30 bg-white/10 text-purple-500 focus:ring-purple-500 focus:ring-offset-0">
                     จดจำฉัน
                 </label>
                 <a href="<?php echo htmlspecialchars(CRM_BASE_URL); ?>/login.php" class="inline-flex min-h-[48px] shrink-0 items-center text-purple-400 hover:text-purple-300 text-sm transition-colors touch-manipulation">

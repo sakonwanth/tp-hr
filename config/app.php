@@ -31,6 +31,20 @@ define('SESSION_LIFETIME', 7200); // 2 hours
  */
 define('PWA_SESSION_LIFETIME', (int)($_ENV['PWA_SESSION_LIFETIME'] ?? 1209600)); // 14 days
 
+/**
+ * The window used when someone clears "จดจำฉัน" on the login form — long
+ * enough for a shift, short enough that a borrowed phone or a shared desktop
+ * does not stay signed in overnight.
+ *
+ * Only tp-hr's own window changes. The session cookie is shared with tp-crm and
+ * the others, so shortening it here would sign the user out of those too;
+ * SharedSession tracks idle time per project, and this sets tp-hr's.
+ */
+define('SESSION_LIFETIME_NOT_REMEMBERED', (int)($_ENV['SESSION_LIFETIME_NOT_REMEMBERED'] ?? 28800)); // 8 hours
+
+/** Cookie that carries the "จดจำฉัน" choice between requests. Not a credential. */
+define('REMEMBER_CHOICE_COOKIE', 'tp_hr_remember');
+
 // Security
 define('MIN_PASSWORD_LENGTH', 8);
 
