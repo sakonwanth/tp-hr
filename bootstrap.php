@@ -132,10 +132,13 @@ require_once BASE_PATH . '/config/app.php';
 require_once BASE_PATH . '/config/database.php';
 
 // Session — SSO shared session (Phase 5)
-// tp-hr is the only project installed as a home-screen PWA, where a
-// browser-session cookie dies whenever the app is swiped away. It opts into a
-// persistent cookie + matching idle window; the other projects keep the
-// tp-common defaults (see SharedSession::GC_RETENTION_FLOOR).
+// tp-hr is installed as a home-screen PWA, where a browser-session cookie dies
+// whenever the app is swiped away. It opts into a persistent cookie + matching
+// idle window (see SharedSession::GC_RETENTION_FLOOR).
+//
+// tp-checkin is installed the same way and now does the same; it used to be
+// described here as the only one, which was wrong and left tp-checkin on the
+// browser-session default it could not live with.
 if (TP_COMMON_AVAILABLE && class_exists('TpCommon\Session\SharedSession')) {
     // "จดจำฉัน" on the login form. Read from its own cookie because this runs
     // before the session exists. Absent means remembered: that is what the app
