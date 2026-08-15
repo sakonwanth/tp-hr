@@ -6,6 +6,36 @@ $pdo = getDB();
 $currentUser = Auth::user();
 $userId = (int)($currentUser['id'] ?? 0);
 $canManage = hr_can_access_hr_dashboard();
+$canEditFinance = isCEOOrAbove();
+$financeFlash = $_SESSION['employee_finance_flash'] ?? null;
+unset($_SESSION['employee_finance_flash']);
+$selectedType = (string)($_GET['type'] ?? $_POST['type'] ?? '');
+$selectedId = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && (string)($_POST['action'] ?? '') === 'change_first_due_month') {
+    $redirect = '/employee_finance.php?type=' . urlencode($selectedType) . '&id=' . $selectedId . '#finance-detail';
+    try {
+        if (!$canEditFinance) {
+            throw new RuntimeException('เฉพาะ CEO, Chairman หรือ Admin เท่านั้นที่แก้เดือนเริ่มหักได้');
+        }
+        if (!verifyCsrf()) {
+            throw new RuntimeException('เซสชันหมดอายุ กรุณาโหลดหน้าใหม่แล้วลองอีกครั้ง');
+        }
+        require_once __DIR__ . '/core/Services/EmployeeFinanceManagementService.php';
+        $service = new EmployeeFinanceManagementService($pdo);
+        $service->changeFirstDueMonth(
+            $selectedType,
+            $selectedId,
+            (string)($_POST['first_due_month'] ?? ''),
+            $userId,
+            (string)($_POST['reason'] ?? '')
+        );
+        $_SESSION['employee_finance_flash'] = ['type' => 'success', 'message' => 'เปลี่ยนเดือนเริ่มหักเรียบร้อยแล้ว'];
+    } catch (Throwable $e) {
+        $_SESSION['employee_finance_flash'] = ['type' => 'error', 'message' => $e->getMessage()];
+    }
+    header('Location: ' . $redirect);
+    exit;
+}
 $where = $canManage ? '' : 'WHERE f.user_id = ?';
 $params = $canManage ? [] : [$userId];
 $sql = "SELECT f.*,u.first_name_th,u.last_name_th FROM (
@@ -23,8 +53,6 @@ try {
 } catch (Throwable $e) {
     $rows = [];
 }
-$selectedType = (string)($_GET['type'] ?? '');
-$selectedId = (int)($_GET['id'] ?? 0);
 $detail = null;
 foreach ($rows as $row) {
     if ((int)$row['id'] === $selectedId && (string)$row['finance_type'] === $selectedType) {
@@ -87,7 +115,7 @@ if ($detail) {
             $lineTimeline = $lineTimelineStmt->fetchAll(PDO::FETCH_ASSOC);
         }
         $auditStmt = $pdo->prepare(
-            "SELECT event_type,created_at FROM hr_employee_finance_audit_logs
+            "SELECT event_type,payload_json,created_at FROM hr_employee_finance_audit_logs
              WHERE finance_type=? AND finance_id=? ORDER BY id DESC LIMIT 20"
         );
         $auditStmt->execute([$selectedType, $selectedId]);
@@ -123,6 +151,7 @@ $lineMessageLabels = [
     'group_announce'=>'แจ้งความคืบหน้าในกลุ่ม',
     'payment_update'=>'แจ้งสถานะการจ่ายเงิน',
     'receipt_update'=>'แจ้งสถานะหลักฐาน/ใบเสร็จ',
+    'finance_schedule_changed'=>'แจ้งเปลี่ยนเดือนเริ่มหัก',
 ];
 $maskLineRecipient = static function (?string $value): string {
     $value = trim((string)$value);
@@ -147,6 +176,11 @@ require_once __DIR__ . '/templates/header.php';
          twice — 560px of left margin — and the page sat pushed to the right of
          every other screen. It was also a second <main> landmark on the page. */ ?>
   <div class="tp-hr-admin-stack tp-ios-master-screen tp-native-stack--page w-full max-w-[min(1200px,100%)] mx-auto min-w-0 space-y-6">
+    <?php if (is_array($financeFlash)): ?>
+    <div role="alert" class="rounded-xl border px-4 py-3 <?php echo ($financeFlash['type'] ?? '') === 'success' ? 'border-emerald-400/30 bg-emerald-500/10 text-emerald-200' : 'border-rose-400/30 bg-rose-500/10 text-rose-200'; ?>">
+      <?php echo htmlspecialchars((string)($financeFlash['message'] ?? '')); ?>
+    </div>
+    <?php endif; ?>
     <section class="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-5">
       <div class="flex flex-wrap items-start justify-between gap-4">
         <div><h1 class="text-xl font-bold text-white">สวัสดิการการเงินพนักงาน</h1><p class="text-white/60 mt-1">เบิกเงินเดือนล่วงหน้า เงินกู้ และติดตามตารางชำระ</p></div>
@@ -176,6 +210,28 @@ require_once __DIR__ . '/templates/header.php';
         <div class="rounded-xl border border-white/10 p-4"><p class="text-white/50">เริ่มหักงวดแรก</p><p class="text-white font-semibold mt-1"><?php echo htmlspecialchars($formatThaiMonth((string)$detail['first_due_month'])); ?></p></div>
         <div class="rounded-xl border border-white/10 p-4"><p class="text-white/50">รายการจ่ายเงิน</p><p class="mt-1"><?php if (!empty($expense['id'])): ?><a class="text-violet-300 hover:text-violet-200 font-semibold" target="_blank" rel="noopener" href="<?php echo htmlspecialchars($erpBase . '/expenses/requests/' . (int)$expense['id']); ?>"><?php echo htmlspecialchars((string)$expense['request_code']); ?> <i class="fas fa-external-link-alt text-xs"></i></a><?php else: ?><span class="text-white/60">ยังไม่เชื่อมรายการ ERP</span><?php endif; ?></p></div>
       </div>
+      <?php if ($canEditFinance && $detail['status'] === 'pending_disbursement' && in_array((string)($expense['status'] ?? ''), ['submitted', 'approved'], true)): ?>
+      <div class="px-5 pb-5">
+        <form method="post" class="rounded-xl border border-amber-300/25 bg-amber-400/5 p-4 grid gap-4 md:grid-cols-[1fr_1.5fr_auto] md:items-end">
+          <?php echo csrfField(); ?>
+          <input type="hidden" name="action" value="change_first_due_month">
+          <input type="hidden" name="type" value="<?php echo htmlspecialchars($selectedType); ?>">
+          <input type="hidden" name="id" value="<?php echo $selectedId; ?>">
+          <label class="block text-sm text-white/80">เดือนเริ่มหักใหม่
+            <select name="first_due_month" required class="mt-2 w-full min-h-[48px] rounded-xl border border-white/15 bg-slate-950 px-3 text-white">
+              <option value="">กรุณาเลือกเดือน</option>
+              <option value="<?php echo date('Y-m'); ?>"><?php echo htmlspecialchars($formatThaiMonth(date('Y-m'))); ?> (รอบปัจจุบัน)</option>
+              <option value="<?php echo date('Y-m', strtotime('+1 month')); ?>"><?php echo htmlspecialchars($formatThaiMonth(date('Y-m', strtotime('+1 month')))); ?> (รอบถัดไป)</option>
+            </select>
+          </label>
+          <label class="block text-sm text-white/80">เหตุผลการแก้ไข
+            <input type="text" name="reason" required maxlength="500" placeholder="เช่น ผู้ขอเลือกเดือนผิด ต้องหักในรอบปัจจุบัน" class="mt-2 w-full min-h-[48px] rounded-xl border border-white/15 bg-slate-950 px-3 text-white">
+          </label>
+          <button type="submit" class="min-h-[48px] rounded-xl bg-amber-500 hover:bg-amber-400 px-5 font-semibold text-slate-950" onclick="return confirm('ยืนยันเปลี่ยนเดือนเริ่มหัก? ระบบจะตรวจรอบเงินเดือนและสร้างตารางงวดใหม่โดยอัตโนมัติ')">บันทึกการแก้ไข</button>
+        </form>
+        <p class="text-xs text-white/50 mt-2">แก้ได้เฉพาะรายการที่ยังไม่จ่ายและยังไม่เชื่อมสลิป ระบบบันทึกผู้แก้ เหตุผล และข้อมูลก่อน–หลังทุกครั้ง</p>
+      </div>
+      <?php endif; ?>
       <?php if ($lineTimeline): ?>
       <div class="px-5 pb-5">
         <div class="rounded-xl border border-white/10 overflow-hidden">
@@ -279,7 +335,7 @@ require_once __DIR__ . '/templates/header.php';
       <?php if ($financeAudit): ?>
       <div class="border-t border-white/10 p-5">
         <h3 class="text-white font-semibold mb-3">ประวัติการเปลี่ยนแปลง</h3>
-        <ol class="grid gap-2 md:grid-cols-2 text-sm"><?php foreach ($financeAudit as $audit): ?><li class="rounded-lg bg-black/15 px-3 py-2 text-white/70"><span class="text-white/90"><?php echo htmlspecialchars((string)$audit['event_type']); ?></span> · <?php echo htmlspecialchars((string)$audit['created_at']); ?></li><?php endforeach; ?></ol>
+        <ol class="grid gap-2 md:grid-cols-2 text-sm"><?php foreach ($financeAudit as $audit): $auditPayload = json_decode((string)($audit['payload_json'] ?? ''), true) ?: []; ?><li class="rounded-lg bg-black/15 px-3 py-2 text-white/70"><span class="text-white/90"><?php echo htmlspecialchars((string)$audit['event_type']); ?></span> · <?php echo htmlspecialchars((string)$audit['created_at']); ?><?php if (($audit['event_type'] ?? '') === 'first_due_month_changed'): ?><p class="mt-1 text-white/60"><?php echo htmlspecialchars($formatThaiMonth((string)($auditPayload['old_month'] ?? ''))); ?> → <?php echo htmlspecialchars($formatThaiMonth((string)($auditPayload['new_month'] ?? ''))); ?> · <?php echo htmlspecialchars((string)($auditPayload['reason'] ?? '')); ?></p><?php endif; ?></li><?php endforeach; ?></ol>
       </div>
       <?php endif; ?>
     </section>
