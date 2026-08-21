@@ -69,11 +69,6 @@ class EmployeeSummaryService
 
         $attendanceExempt = \TpCommon\Hr\AttendanceScope::isUserExemptById($this->pdo, $userId);
 
-        // แก้ record ที่ backfill เป็น ABSENT ก่อนอนุมัติลา (หรือ sync ล้มเหลว)
-        if (!$attendanceExempt) {
-            $this->reconcileAbsentOverlappingApprovedLeave($userId, $periodStart, $lastDay);
-        }
-
         $defaultDayOff = $this->getDefaultDayOff($userId);
         $dayoffSwaps = $this->getApprovedDayoffSwaps($userId, $periodStart, $lastDay);
         $holidayWorkExceptions = $this->getApprovedHolidayWorkExceptions($userId, $periodStart, $lastDay);
@@ -389,9 +384,9 @@ class EmployeeSummaryService
      *
      * @return array<string,int|float>
      */
-    public function getOrgMonthlyKpi(string $month): array
+    public function getOrgMonthlyKpi(string $month, ?string $department = null): array
     {
-        $rows = $this->getOrgMonthlySummaries($month);
+        $rows = $this->getOrgMonthlySummaries($month, $department);
         $totals = [
             'employee_count' => count($rows),
             'expected_work_days' => 0,
@@ -600,32 +595,6 @@ class EmployeeSummaryService
             }
         }
         return null;
-    }
-
-    /**
-     * แก้ hr_attendances ที่ status=ABSENT แต่มีใบลาอนุมัติครอบคลุมวันนั้น
-     */
-    private function reconcileAbsentOverlappingApprovedLeave(int $userId, string $monthStart, string $monthEnd): void
-    {
-        try {
-            $stmt = $this->pdo->prepare("
-                UPDATE hr_attendances a
-                INNER JOIN hr_leave_requests lr
-                  ON lr.user_id = a.user_id
-                 AND lr.status = 'APPROVED'
-                 AND a.attendance_date BETWEEN lr.start_date AND lr.end_date
-                SET a.status = 'LEAVE',
-                    a.adjustment_reason = CONCAT_WS('\n', NULLIF(a.adjustment_reason,''), ?),
-                    a.adjusted_at = NOW()
-                WHERE a.user_id = ?
-                  AND a.attendance_date BETWEEN ? AND ?
-                  AND a.status = 'ABSENT'
-            ");
-            $audit = '[auto-reconcile ' . date('Y-m-d H:i') . '] approved leave overrides ABSENT';
-            $stmt->execute([$audit, $userId, $monthStart, $monthEnd]);
-        } catch (Throwable $e) {
-            /* non-fatal */
-        }
     }
 
     /**

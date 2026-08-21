@@ -15,6 +15,7 @@ if (!hr_can_manage_attendance()) {
 }
 
 $pdo = Database::getInstance()->getConnection();
+require_once dirname(__DIR__) . '/core/Services/DailyAttendancePolicy.php';
 
 // Filters
 $date = $_GET['date'] ?? date('Y-m-d');
@@ -24,8 +25,9 @@ $page = max(1, (int)($_GET['page'] ?? 1));
 $limit = DEFAULT_PER_PAGE;
 $offset = ($page - 1) * $limit;
 
-// Get departments
-$stmtDepts = $pdo->query("SELECT DISTINCT department FROM users WHERE department IS NOT NULL AND department != '' AND " . tp_hr_non_system_user_condition_sql('') . " ORDER BY department");
+// Only employees who are actually required to clock in belong in this report.
+$attendanceScopeSql = tp_hr_attendance_scope_filter_sql('u');
+$stmtDepts = $pdo->query("SELECT DISTINCT u.department FROM users u WHERE u.department IS NOT NULL AND u.department != '' AND {$attendanceScopeSql} ORDER BY u.department");
 $departments = $stmtDepts->fetchAll(PDO::FETCH_COLUMN);
 
 // Check if selected date is a public/company holiday (used for status derivation below)
@@ -35,14 +37,23 @@ $holidayInfo = $stmtHoliday->fetch();
 
 $weekday = (int)date('w', strtotime($date));
 
-// Get all employees with attendance + effective day-off + approved leave for the selected date
+// Load the complete scoped day once. KPI cards, status filters, and rows are all
+// derived from this same result so they cannot disagree with one another.
 $sql = "
     SELECT u.id, u.first_name_th, u.last_name_th, u.employee_code, u.department,
            a.check_in_time, a.check_out_time, a.status, a.late_minutes, 
            a.early_leave_minutes, a.ot_minutes, a.work_minutes, a.id as attendance_id,
            a.check_in_photo, a.check_in_latitude, a.check_in_longitude,
-           COALESCE(dor.requested_day_off, s.day_off) AS effective_day_off,
-           lr_info.leave_name AS approved_leave_name
+           COALESCE(dor.requested_day_off, s.day_off, 0) AS effective_day_off,
+           lr_info.leave_name AS approved_leave_name,
+           EXISTS(
+               SELECT 1 FROM hr_holiday_work_exceptions hwe
+               WHERE hwe.user_id = u.id AND hwe.status = 'APPROVED' AND hwe.holiday_date = ?
+           ) AS is_holiday_work,
+           EXISTS(
+               SELECT 1 FROM hr_holiday_work_exceptions hwe
+               WHERE hwe.user_id = u.id AND hwe.status = 'APPROVED' AND hwe.comp_date = ?
+           ) AS is_comp_day
     FROM users u
     LEFT JOIN hr_attendances a ON u.id = a.user_id AND a.attendance_date = ?
     LEFT JOIN hr_employee_schedules s ON s.user_id = u.id
@@ -50,92 +61,66 @@ $sql = "
          AND dor.status = 'APPROVED'
          AND ? BETWEEN dor.week_start AND dor.week_end
     LEFT JOIN (
-        SELECT lr.user_id, lt.name AS leave_name
+        SELECT lr.user_id, MAX(lt.name) AS leave_name
         FROM hr_leave_requests lr
         JOIN hr_leave_types lt ON lt.id = lr.leave_type_id
         WHERE lr.status = 'APPROVED' AND ? BETWEEN lr.start_date AND lr.end_date
+        GROUP BY lr.user_id
     ) lr_info ON lr_info.user_id = u.id
-    WHERE u.is_active = 1 AND " . tp_hr_non_system_user_condition_sql('u') . "
+    WHERE {$attendanceScopeSql}
 ";
-$params = [$date, $date, $date];
+$params = [$date, $date, $date, $date, $date];
 
 if ($department) {
     $sql .= " AND u.department = ?";
     $params[] = $department;
 }
 
-if ($status === 'PRESENT') {
-    $sql .= " AND a.id IS NOT NULL";
-} elseif ($status === 'ABSENT') {
-    $sql .= " AND a.id IS NULL";
-} elseif ($status === 'LATE') {
-    $sql .= " AND a.late_minutes > 0";
-}
-
-// Count
-$countSql = "SELECT COUNT(*) FROM (" . str_replace("u.id, u.first_name_th, u.last_name_th, u.employee_code, u.department,\n           a.check_in_time, a.check_out_time, a.status, a.late_minutes, \n           a.early_leave_minutes, a.ot_minutes, a.work_minutes, a.id as attendance_id,\n           a.check_in_photo, a.check_in_latitude, a.check_in_longitude", "1", $sql) . ") t";
-$stmtCount = $pdo->prepare($countSql);
-$stmtCount->execute($params);
-$totalRecords = $stmtCount->fetchColumn();
-$totalPages = ceil($totalRecords / $limit);
-
-$sql .= " ORDER BY a.check_in_time DESC, u.first_name_th ASC LIMIT $limit OFFSET $offset";
+$sql .= " ORDER BY a.check_in_time DESC, u.first_name_th ASC";
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
-$records = $stmt->fetchAll();
+$allRecords = $stmt->fetchAll();
+$today = date('Y-m-d');
+$stats = ['total_employees' => count($allRecords), 'checked_in' => 0, 'late_count' => 0, 'checked_out' => 0, 'avg_check_in' => null];
+$checkInSeconds = [];
+foreach ($allRecords as &$rec) {
+    $rec['is_holiday'] = $holidayInfo && empty($rec['is_holiday_work']);
+    $rec['is_scheduled_off'] = empty($rec['is_holiday_work'])
+        && empty($rec['is_comp_day'])
+        && (int)$rec['effective_day_off'] === $weekday;
+    $rec['daily_state'] = DailyAttendancePolicy::classify($rec, $date, $today);
+    if ($rec['daily_state']['is_working']) $stats['checked_in']++;
+    if ($rec['daily_state']['is_late']) $stats['late_count']++;
+    if ($rec['daily_state']['is_working'] && !empty($rec['check_out_time'])) $stats['checked_out']++;
+    if (!empty($rec['check_in_time'])) {
+        $checkInTimestamp = strtotime((string)$rec['check_in_time']);
+        if ($checkInTimestamp !== false) {
+            $checkInSeconds[] = ((int)date('H', $checkInTimestamp) * 3600) + ((int)date('i', $checkInTimestamp) * 60);
+        }
+    }
+}
+unset($rec);
+if ($checkInSeconds) {
+    $avgSeconds = (int)round(array_sum($checkInSeconds) / count($checkInSeconds));
+    $stats['avg_check_in'] = sprintf('%02d:%02d', intdiv($avgSeconds, 3600), intdiv($avgSeconds % 3600, 60));
+}
+$absentCount = count(array_filter($allRecords, static fn(array $rec): bool => $rec['daily_state']['is_absent']));
 
-// Daily stats
-$stmtStats = $pdo->prepare("
-    SELECT 
-        (SELECT COUNT(*) FROM users WHERE is_active = 1 AND " . tp_hr_non_system_user_condition_sql('') . ") as total_employees,
-        COUNT(a.id) as checked_in,
-        SUM(CASE WHEN a.late_minutes > 0 THEN 1 ELSE 0 END) as late_count,
-        SUM(CASE WHEN a.check_out_time IS NOT NULL THEN 1 ELSE 0 END) as checked_out,
-        SEC_TO_TIME(AVG(TIME_TO_SEC(a.check_in_time))) as avg_check_in
-    FROM hr_attendances a
-    WHERE a.attendance_date = ?
-");
-$stmtStats->execute([$date]);
-$stats = $stmtStats->fetch();
+$filteredRecords = array_values(array_filter($allRecords, static function (array $rec) use ($status): bool {
+    return match ($status) {
+        'PRESENT' => $rec['daily_state']['is_working'],
+        'ABSENT' => $rec['daily_state']['is_absent'],
+        'LATE' => $rec['daily_state']['is_late'],
+        default => true,
+    };
+}));
+$totalRecords = count($filteredRecords);
+$totalPages = (int)ceil($totalRecords / $limit);
+$records = array_slice($filteredRecords, $offset, $limit);
 
-// Count employees who are "excused" for this date (holiday, their day-off, or on approved leave)
-// so that absentCount excludes them.
-$stmtExcused = $pdo->prepare("
-    SELECT COUNT(DISTINCT u.id) AS excused
-    FROM users u
-    LEFT JOIN hr_employee_schedules s ON s.user_id = u.id
-    LEFT JOIN hr_dayoff_requests dor ON dor.user_id = u.id
-         AND dor.status = 'APPROVED'
-         AND ? BETWEEN dor.week_start AND dor.week_end
-    LEFT JOIN hr_attendances a ON u.id = a.user_id AND a.attendance_date = ?
-    LEFT JOIN hr_leave_requests lr ON lr.user_id = u.id
-         AND lr.status = 'APPROVED' AND ? BETWEEN lr.start_date AND lr.end_date
-    WHERE u.is_active = 1 AND " . tp_hr_non_system_user_condition_sql('u') . "
-      AND a.id IS NULL
-      AND (
-          ? = 1 /* isHoliday flag */
-          OR COALESCE(dor.requested_day_off, s.day_off) = ?
-          OR lr.id IS NOT NULL
-      )
-");
-$isHoliday = $holidayInfo ? 1 : 0;
-$stmtExcused->execute([$date, $date, $date, $isHoliday, $weekday]);
-$excusedCount = (int)$stmtExcused->fetchColumn();
-
-$absentCount = max(0, $stats['total_employees'] - $stats['checked_in'] - $excusedCount);
-
-// "Weekly day off" banner: show only if ALL active employees have this weekday as their day_off
-$stmtDayOff = $pdo->prepare("
-    SELECT COUNT(DISTINCT u.id) AS total,
-           SUM(CASE WHEN COALESCE(s.day_off, 0) = ? THEN 1 ELSE 0 END) AS matches
-    FROM users u
-    LEFT JOIN hr_employee_schedules s ON s.user_id = u.id
-    WHERE u.is_active = 1 AND " . tp_hr_non_system_user_condition_sql('u') . "
-");
-$stmtDayOff->execute([$weekday]);
-$dayOffStats = $stmtDayOff->fetch();
-$isWeekend = ($dayOffStats['total'] > 0 && (int)$dayOffStats['total'] === (int)$dayOffStats['matches']);
+$isWeekend = count($allRecords) > 0
+    && count(array_filter($allRecords, static fn(array $rec): bool => !empty($rec['is_scheduled_off']))) === count($allRecords);
 
 $filterBase = ['date' => $date];
 if ($department !== '') {
@@ -311,31 +296,19 @@ include dirname(__DIR__) . '/templates/header.php';
         <?php foreach ($records as $rec): ?>
         <?php
         $hasAttendance = !empty($rec['attendance_id']);
-        $isLate = ($rec['late_minutes'] ?? 0) > 0;
+        $isLate = !empty($rec['daily_state']['is_late']);
         $isEarlyLeave = ($rec['early_leave_minutes'] ?? 0) > 0;
-        $isUserDayOff = !$hasAttendance
-            && $rec['effective_day_off'] !== null
-            && (int)$rec['effective_day_off'] === $weekday;
-        $onLeave = !$hasAttendance && !empty($rec['approved_leave_name']);
-
-        $statusLabel = 'ปกติ';
-        $statusCls = 'bg-green-500/15 border border-green-500/30 text-green-300';
-        if (!$hasAttendance && $holidayInfo) {
-            $statusLabel = 'วันหยุด';
-            $statusCls = 'bg-orange-500/15 border border-orange-500/30 text-orange-200';
-        } elseif (!$hasAttendance && $onLeave) {
-            $statusLabel = 'ลา';
-            $statusCls = 'bg-blue-500/15 border border-blue-500/30 text-blue-200';
-        } elseif (!$hasAttendance && $isUserDayOff) {
-            $statusLabel = 'วันหยุดประจำสัปดาห์';
-            $statusCls = 'bg-sky-500/15 border border-sky-500/30 text-sky-200';
-        } elseif (!$hasAttendance) {
-            $statusLabel = 'ขาดงาน';
-            $statusCls = 'bg-red-500/15 border border-red-500/30 text-red-200';
-        } elseif ($isLate) {
-            $statusLabel = 'มาสาย';
-            $statusCls = 'bg-yellow-500/15 border border-yellow-500/30 text-yellow-200';
-        }
+        $onLeave = $rec['daily_state']['code'] === 'LEAVE';
+        $statusLabel = $rec['daily_state']['label'];
+        $statusCls = match ($rec['daily_state']['code']) {
+            'ABSENT' => 'bg-red-500/15 border border-red-500/30 text-red-200',
+            'LATE', 'NOT_YET' => 'bg-yellow-500/15 border border-yellow-500/30 text-yellow-200',
+            'LEAVE' => 'bg-blue-500/15 border border-blue-500/30 text-blue-200',
+            'HOLIDAY' => 'bg-orange-500/15 border border-orange-500/30 text-orange-200',
+            'DAY_OFF', 'COMP_DAY' => 'bg-sky-500/15 border border-sky-500/30 text-sky-200',
+            'WFH' => 'bg-purple-500/15 border border-purple-500/30 text-purple-200',
+            default => 'bg-green-500/15 border border-green-500/30 text-green-300',
+        };
 
         $notes = [];
         if ($onLeave) $notes[] = htmlspecialchars($rec['approved_leave_name']);
@@ -441,12 +414,18 @@ include dirname(__DIR__) . '/templates/header.php';
                 <?php foreach ($records as $rec): ?>
                 <?php
                 $hasAttendance = !empty($rec['attendance_id']);
-                $isLate = ($rec['late_minutes'] ?? 0) > 0;
+                $isLate = !empty($rec['daily_state']['is_late']);
                 $isEarlyLeave = ($rec['early_leave_minutes'] ?? 0) > 0;
-                $isUserDayOff = !$hasAttendance
-                    && $rec['effective_day_off'] !== null
-                    && (int)$rec['effective_day_off'] === $weekday;
-                $onLeave = !$hasAttendance && !empty($rec['approved_leave_name']);
+                $onLeave = $rec['daily_state']['code'] === 'LEAVE';
+                $desktopStatusCls = match ($rec['daily_state']['code']) {
+                    'ABSENT' => 'border-red-500/25 bg-red-500/15 text-red-300',
+                    'LATE', 'NOT_YET' => 'border-amber-500/25 bg-amber-500/15 text-amber-300',
+                    'LEAVE' => 'border-blue-500/25 bg-blue-500/15 text-blue-300',
+                    'HOLIDAY' => 'border-orange-500/25 bg-orange-500/15 text-orange-300',
+                    'DAY_OFF', 'COMP_DAY' => 'border-sky-500/25 bg-sky-500/15 text-sky-300',
+                    'WFH' => 'border-purple-500/25 bg-purple-500/15 text-purple-300',
+                    default => 'border-emerald-500/25 bg-emerald-500/15 text-emerald-300',
+                };
                 ?>
                 <tr class="hover:bg-white/[0.04]<?php echo $highlightUserId === (int)$rec['id'] ? ' bg-violet-500/10 ring-1 ring-inset ring-violet-400/50' : ''; ?>"
                     id="att-row-<?php echo (int)$rec['id']; ?>">
@@ -490,19 +469,7 @@ include dirname(__DIR__) . '/templates/header.php';
                         <?php endif; ?>
                     </td>
                     <td class="px-4 py-3 text-center">
-                        <?php if (!$hasAttendance && $holidayInfo): ?>
-                        <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs border border-orange-500/25 bg-orange-500/15 text-orange-300">วันหยุด</span>
-                        <?php elseif (!$hasAttendance && $onLeave): ?>
-                        <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs border border-blue-500/25 bg-blue-500/15 text-blue-300">ลา</span>
-                        <?php elseif (!$hasAttendance && $isUserDayOff): ?>
-                        <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs border border-sky-500/25 bg-sky-500/15 text-sky-300">วันหยุดประจำสัปดาห์</span>
-                        <?php elseif (!$hasAttendance): ?>
-                        <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs border border-red-500/25 bg-red-500/15 text-red-300">ขาดงาน</span>
-                        <?php elseif ($isLate): ?>
-                        <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs border border-amber-500/25 bg-amber-500/15 text-amber-300">มาสาย</span>
-                        <?php else: ?>
-                        <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs border border-emerald-500/25 bg-emerald-500/15 text-emerald-300">ปกติ</span>
-                        <?php endif; ?>
+                        <span class="px-3 py-1 rounded-[var(--tp-ios-card-radius)] text-xs border <?php echo $desktopStatusCls; ?>"><?php echo htmlspecialchars($rec['daily_state']['label']); ?></span>
                     </td>
                     <td class="px-4 py-3 text-center text-white/60 text-sm">
                         <?php

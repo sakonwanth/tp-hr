@@ -38,7 +38,7 @@ $departments = $pdo->query("
 ")->fetchAll(PDO::FETCH_COLUMN);
 
 $rows = $summaryService->getOrgMonthlySummaries($month, $department !== '' ? $department : null);
-$orgKpi = $summaryService->getOrgMonthlyKpi($month);
+$orgKpi = $summaryService->getOrgMonthlyKpi($month, $department !== '' ? $department : null);
 $expandUserId = (int)($_GET['expand'] ?? 0);
 
 $attendanceReturnQuery = ['month' => $month];
