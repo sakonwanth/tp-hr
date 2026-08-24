@@ -153,6 +153,16 @@ $lineMessageLabels = [
     'receipt_update'=>'แจ้งสถานะหลักฐาน/ใบเสร็จ',
     'finance_schedule_changed'=>'แจ้งเปลี่ยนเดือนเริ่มหัก',
 ];
+$disbursementLabels = [
+    'transfer' => 'โอนเข้าบัญชีพนักงาน',
+    'payroll' => 'จ่ายพร้อมรอบเงินเดือน',
+    'cash' => 'จ่ายเงินสดให้พนักงาน',
+];
+$repaymentLabels = [
+    'payroll' => 'หักคืนผ่านสลิปเงินเดือน',
+    'transfer' => 'พนักงานโอนคืนบริษัท',
+    'cash' => 'พนักงานคืนเป็นเงินสด',
+];
 $maskLineRecipient = static function (?string $value): string {
     $value = trim((string)$value);
     if ($value === '') return '-';
@@ -206,7 +216,7 @@ require_once __DIR__ . '/templates/header.php';
       </div>
       <div class="px-5 pb-5 grid gap-4 md:grid-cols-2 lg:grid-cols-4 text-sm">
         <div class="rounded-xl border border-white/10 p-4"><p class="text-white/50">อัตราดอกเบี้ย</p><p class="text-white font-semibold mt-1"><?php echo $detail['finance_type'] === 'employee_loan' ? number_format((float)$detail['interest_rate_pct'], 2) . '% ต่อปี (ลดต้นลดดอก)' : 'ไม่มีดอกเบี้ย'; ?></p></div>
-        <div class="rounded-xl border border-white/10 p-4"><p class="text-white/50">วิธีรับเงิน / ชำระคืน</p><p class="text-white font-semibold mt-1"><?php echo $detail['disbursement_method'] === 'transfer' ? 'โอนเข้าบัญชี' : 'จ่ายผ่านเงินเดือน'; ?> · <?php echo $detail['repayment_method'] === 'payroll' ? 'หักผ่านสลิป' : 'โอนคืนบริษัท'; ?></p></div>
+        <div class="rounded-xl border border-white/10 p-4"><p class="text-white/50">บริษัทจ่าย / พนักงานคืน</p><p class="text-white font-semibold mt-1"><?php echo htmlspecialchars($disbursementLabels[(string)$detail['disbursement_method']] ?? (string)$detail['disbursement_method']); ?> · <?php echo htmlspecialchars($repaymentLabels[(string)$detail['repayment_method']] ?? (string)$detail['repayment_method']); ?></p></div>
         <div class="rounded-xl border border-white/10 p-4"><p class="text-white/50">เริ่มหักงวดแรก</p><p class="text-white font-semibold mt-1"><?php echo htmlspecialchars($formatThaiMonth((string)$detail['first_due_month'])); ?></p></div>
         <div class="rounded-xl border border-white/10 p-4"><p class="text-white/50">รายการจ่ายเงิน</p><p class="mt-1"><?php if (!empty($expense['id'])): ?><a class="text-violet-300 hover:text-violet-200 font-semibold" target="_blank" rel="noopener" href="<?php echo htmlspecialchars($erpBase . '/expenses/requests/' . (int)$expense['id']); ?>"><?php echo htmlspecialchars((string)$expense['request_code']); ?> <i class="fas fa-external-link-alt text-xs"></i></a><?php else: ?><span class="text-white/60">ยังไม่เชื่อมรายการ ERP</span><?php endif; ?></p></div>
       </div>
@@ -263,7 +273,7 @@ require_once __DIR__ . '/templates/header.php';
         </div>
         <div class="rounded-xl border border-white/10 p-4">
           <h3 class="text-white font-semibold">การเชื่อมโยงเงินเดือน</h3>
-          <p class="text-white/65 text-sm mt-2"><?php if ($detail['repayment_method'] !== 'payroll'): ?>เลือกโอนชำระคืน จึงไม่หักผ่านสลิป<?php elseif ($detail['status'] === 'pending_disbursement'): ?>เชื่อมกับ payroll แล้ว แต่จะเริ่มนำค่างวดเข้าสลิปหลังบริษัทบันทึกจ่ายเงิน<?php elseif ($linkedPayrollInstallments > 0): ?>เชื่อมกับสลิปเงินเดือนแล้ว <?php echo $linkedPayrollInstallments; ?> / <?php echo max(1, (int)$paymentSummary['total_installments']); ?> งวด<?php else: ?>ระบบจะนำค่างวดเดือน <?php echo htmlspecialchars($formatThaiMonth((string)$detail['first_due_month'])); ?> เข้ารายการหักอื่นในสลิปเงินเดือนโดยอัตโนมัติ<?php endif; ?></p>
+          <p class="text-white/65 text-sm mt-2"><?php if ($detail['repayment_method'] !== 'payroll'): ?>รายการนี้ไม่หักผ่านสลิป พนักงานต้องคืนบริษัทตามวิธีที่เลือก และฝ่ายรับเงินต้องบันทึกหลักฐานการรับชำระ<?php elseif ($detail['status'] === 'pending_disbursement'): ?>จะเริ่มนำค่างวดเข้าสลิปหลังบริษัทบันทึกจ่ายเงิน<?php elseif ($linkedPayrollInstallments > 0): ?>เชื่อมกับสลิปเงินเดือนแล้ว <?php echo $linkedPayrollInstallments; ?> / <?php echo max(1, (int)$paymentSummary['total_installments']); ?> งวด<?php else: ?>ระบบจะนำค่างวดเดือน <?php echo htmlspecialchars($formatThaiMonth((string)$detail['first_due_month'])); ?> เข้ารายการหักอื่นในสลิปเงินเดือนโดยอัตโนมัติ<?php endif; ?></p>
         </div>
       </div>
       <?php if ($detail['finance_type'] === 'employee_loan'): ?>
@@ -375,7 +385,7 @@ require_once __DIR__ . '/templates/header.php';
               </div>
               <div class="min-w-0">
                 <dt class="text-white/50 text-xs">วิธีชำระ</dt>
-                <dd class="text-white/85"><?php echo $row['repayment_method'] === 'payroll' ? 'หักผ่านสลิป' : 'โอนคืน'; ?></dd>
+                <dd class="text-white/85"><?php echo htmlspecialchars($repaymentLabels[(string)$row['repayment_method']] ?? (string)$row['repayment_method']); ?></dd>
               </div>
             </dl>
             <div class="flex items-center justify-between gap-3 mt-3 pt-3 border-t border-white/10">
@@ -395,7 +405,7 @@ require_once __DIR__ . '/templates/header.php';
             <td class="p-4 text-right tabular-nums"><?php echo number_format((float)$row['total_payable'], 2); ?></td>
             <td class="p-4 text-center"><?php echo $row['term_months'] ?: '1'; ?></td>
             <td class="p-4"><?php echo htmlspecialchars($formatThaiMonth((string)$row['first_due_month'])); ?></td>
-            <td class="p-4"><?php echo $row['repayment_method'] === 'payroll' ? 'หักผ่านสลิป' : 'โอนคืน'; ?></td>
+            <td class="p-4"><?php echo htmlspecialchars($repaymentLabels[(string)$row['repayment_method']] ?? (string)$row['repayment_method']); ?></td>
             <td class="p-4"><span><?php echo htmlspecialchars($statusLabel((string)$row['status'])); ?></span><a class="tp-tap-48 block text-violet-300 hover:text-violet-200 mt-2 font-medium" href="?type=<?php echo urlencode((string)$row['finance_type']); ?>&amp;id=<?php echo (int)$row['id']; ?>#finance-detail">ดูรายละเอียด</a></td>
           </tr><?php endforeach; ?>
           </tbody></table></div>

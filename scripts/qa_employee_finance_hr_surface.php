@@ -6,6 +6,9 @@ $root = dirname(__DIR__);
 $page = (string) file_get_contents($root . '/employee_finance.php');
 $payroll = (string) file_get_contents($root . '/core/Services/PayrollService.php');
 $checks = [
+    'disbursement and repayment directions are not merged' => str_contains($page, 'บริษัทจ่าย / พนักงานคืน')
+        && str_contains($page, 'พนักงานโอนคืนบริษัท')
+        && str_contains($page, 'หักคืนผ่านสลิปเงินเดือน'),
     'employee-owned detail route' => str_contains($page, '$detail = $row;'),
     'loan repayment schedule is visible' => str_contains($page, 'ตารางผ่อนชำระและการลงสลิป'),
     'expense workflow status is visible' => str_contains($page, 'สถานะคำขอ'),
@@ -15,7 +18,7 @@ $checks = [
     'LINE failure reason and attempts are visible' => str_contains($page, "\$lineEvent['last_error']") && str_contains($page, "\$lineEvent['attempt_count']"),
     'LINE recipient identifiers are masked' => str_contains($page, '$maskLineRecipient') && str_contains($page, "'••••'"),
     'LINE event codes have business labels' => str_contains($page, "'approval_request'=>'แจ้งผู้บริหารให้อนุมัติ'") && str_contains($page, "'requester_update'=>'แจ้งผลให้ผู้ขอ'"),
-    'interest and repayment method are visible' => str_contains($page, 'อัตราดอกเบี้ย') && str_contains($page, 'วิธีรับเงิน / ชำระคืน'),
+    'interest and repayment method are visible' => str_contains($page, 'อัตราดอกเบี้ย') && str_contains($page, 'บริษัทจ่าย / พนักงานคืน'),
     'paid and remaining summary is visible' => str_contains($page, 'ชำระแล้ว') && str_contains($page, 'คงเหลือ'),
     'ERP expense source is linked' => str_contains($page, "'/expenses/requests/'"),
     'canonical payroll slip source is linked' => str_contains($page, "hr_employee_finance_payroll_links") && str_contains($page, "payroll_print.php?slip_id="),
