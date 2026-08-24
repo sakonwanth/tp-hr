@@ -11,6 +11,91 @@ $financeFlash = $_SESSION['employee_finance_flash'] ?? null;
 unset($_SESSION['employee_finance_flash']);
 $selectedType = (string)($_GET['type'] ?? $_POST['type'] ?? '');
 $selectedId = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
+if (empty($_SESSION['employee_finance_repayment_key'])) {
+    $_SESSION['employee_finance_repayment_key'] = bin2hex(random_bytes(24));
+}
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && (string)($_POST['action'] ?? '') === 'receive_repayment') {
+    $redirect = '/employee_finance.php?type=' . urlencode($selectedType) . '&id=' . $selectedId . '#repayment';
+    try {
+        if (!$canManage) {
+            throw new RuntimeException('ไม่มีสิทธิ์บันทึกรับคืนเงิน');
+        }
+        if (!verifyCsrf()) {
+            throw new RuntimeException('เซสชันหมดอายุ กรุณาโหลดหน้าใหม่แล้วลองอีกครั้ง');
+        }
+        require_once __DIR__ . '/core/Services/EmployeeFinanceRepaymentService.php';
+        $service = new EmployeeFinanceRepaymentService($pdo);
+        $result = $service->receive(
+            $selectedType,
+            $selectedId,
+            (float)($_POST['amount'] ?? 0),
+            (string)($_POST['payment_method'] ?? ''),
+            (string)($_POST['received_at'] ?? ''),
+            $userId,
+            (string)($_POST['reference_number'] ?? ''),
+            (string)($_POST['notes'] ?? ''),
+            (string)($_POST['idempotency_key'] ?? '')
+        );
+        unset($_SESSION['employee_finance_repayment_key']);
+        $_SESSION['employee_finance_flash'] = [
+            'type' => 'success',
+            'message' => 'บันทึกรับชำระแล้ว เลขที่ ' . (string)$result['receipt_number'],
+        ];
+    } catch (Throwable $e) {
+        $_SESSION['employee_finance_flash'] = ['type' => 'error', 'message' => $e->getMessage()];
+    }
+    header('Location: ' . $redirect);
+    exit;
+}
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && (string)($_POST['action'] ?? '') === 'upload_repayment_evidence') {
+    $redirect = '/employee_finance.php?type=' . urlencode($selectedType) . '&id=' . $selectedId . '#repayment';
+    try {
+        if (!$canManage) throw new RuntimeException('ไม่มีสิทธิ์แนบหลักฐานรับเงิน');
+        if (!verifyCsrf()) throw new RuntimeException('เซสชันหมดอายุ กรุณาโหลดหน้าใหม่แล้วลองอีกครั้ง');
+        $receiptId = (int)($_POST['receipt_id'] ?? 0);
+        $receiptStmt = $pdo->prepare(
+            "SELECT id,user_id FROM hr_employee_finance_repayments_received
+              WHERE id=? AND finance_type=? AND finance_id=? AND status='posted' LIMIT 1"
+        );
+        $receiptStmt->execute([$receiptId, $selectedType, $selectedId]);
+        $receiptRow = $receiptStmt->fetch(PDO::FETCH_ASSOC);
+        if (!$receiptRow) throw new RuntimeException('ไม่พบรายการรับชำระ');
+        $file = $_FILES['evidence'] ?? null;
+        if (!is_array($file) || (int)($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            throw new RuntimeException('กรุณาเลือกไฟล์หลักฐานที่ลงนามแล้ว');
+        }
+        if ((int)$file['size'] <= 0 || (int)$file['size'] > 10 * 1024 * 1024) {
+            throw new RuntimeException('ไฟล์หลักฐานต้องมีขนาดไม่เกิน 10 MB');
+        }
+        $mime = (new finfo(FILEINFO_MIME_TYPE))->file((string)$file['tmp_name']);
+        $extensions = ['application/pdf' => 'pdf', 'image/jpeg' => 'jpg', 'image/png' => 'png'];
+        if (!isset($extensions[$mime])) throw new RuntimeException('รองรับเฉพาะ PDF, JPG และ PNG');
+        $relativeDir = 'storage/uploads/employee-finance/' . date('Y/m');
+        $absoluteDir = __DIR__ . '/' . $relativeDir;
+        if (!is_dir($absoluteDir) && !mkdir($absoluteDir, 0750, true) && !is_dir($absoluteDir)) {
+            throw new RuntimeException('ไม่สามารถเตรียมพื้นที่เก็บหลักฐานได้');
+        }
+        $relativePath = $relativeDir . '/receipt-' . $receiptId . '-' . bin2hex(random_bytes(8)) . '.' . $extensions[$mime];
+        if (!move_uploaded_file((string)$file['tmp_name'], __DIR__ . '/' . $relativePath)) {
+            throw new RuntimeException('บันทึกไฟล์หลักฐานไม่สำเร็จ');
+        }
+        $pdo->beginTransaction();
+        $pdo->prepare('UPDATE hr_employee_finance_repayments_received SET evidence_path=? WHERE id=?')
+            ->execute([$relativePath, $receiptId]);
+        $pdo->prepare(
+            "INSERT INTO hr_employee_finance_audit_logs
+             (user_id,finance_type,finance_id,event_type,actor_user_id,payload_json,created_at)
+             VALUES (?,?,?,'repayment_evidence_uploaded',?,?,NOW())"
+        )->execute([(int)$receiptRow['user_id'], $selectedType, $selectedId, $userId, json_encode(['receipt_id' => $receiptId, 'path' => $relativePath], JSON_UNESCAPED_UNICODE)]);
+        $pdo->commit();
+        $_SESSION['employee_finance_flash'] = ['type' => 'success', 'message' => 'แนบหลักฐานรับเงินที่ลงนามแล้วเรียบร้อย'];
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        $_SESSION['employee_finance_flash'] = ['type' => 'error', 'message' => $e->getMessage()];
+    }
+    header('Location: ' . $redirect);
+    exit;
+}
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && (string)($_POST['action'] ?? '') === 'change_first_due_month') {
     $redirect = '/employee_finance.php?type=' . urlencode($selectedType) . '&id=' . $selectedId . '#finance-detail';
     try {
@@ -61,6 +146,7 @@ foreach ($rows as $row) {
     }
 }
 $repayments = [];
+$receivedRepayments = [];
 $financeAudit = [];
 $expense = null;
 $lineDelivery = ['sent' => 0, 'pending' => 0, 'failed' => 0, 'cancelled' => 0];
@@ -80,14 +166,33 @@ if ($detail) {
             $repayStmt->execute([$selectedId]);
             $repayments = $repayStmt->fetchAll(PDO::FETCH_ASSOC);
             $paymentSummary['total_installments'] = count($repayments);
+        }
+        $receivedStmt = $pdo->prepare(
+            "SELECT p.*,u.first_name_th receiver_first_name,u.last_name_th receiver_last_name,o.status accounting_status,
+                    o.erp_transaction_id,o.last_error accounting_error
+               FROM hr_employee_finance_repayments_received p
+               LEFT JOIN users u ON u.id=p.received_by
+               LEFT JOIN hr_employee_finance_accounting_outbox o ON o.repayment_received_id=p.id
+              WHERE p.finance_type=? AND p.finance_id=? ORDER BY p.received_at DESC,p.id DESC"
+        );
+        $receivedStmt->execute([$selectedType, $selectedId]);
+        $receivedRepayments = $receivedStmt->fetchAll(PDO::FETCH_ASSOC);
+        if ($selectedType === 'employee_loan') {
             foreach ($repayments as $repayment) {
-                if ((string)$repayment['status'] === 'paid') {
-                    $paymentSummary['paid_installments']++;
-                    $paymentSummary['paid_amount'] += (float)($repayment['paid_amount'] ?: $repayment['due_amount']);
+                $installmentPaid = (float)($repayment['paid_amount'] ?? 0);
+                $paymentSummary['paid_amount'] += $installmentPaid;
+                if ((string)$repayment['status'] === 'paid') $paymentSummary['paid_installments']++;
+            }
+        } elseif ((string)$detail['status'] === 'deducted') {
+            $paymentSummary['paid_amount'] = (float)$detail['total_payable'];
+        } else {
+            foreach ($receivedRepayments as $received) {
+                if ((string)$received['status'] === 'posted') {
+                    $paymentSummary['paid_amount'] += (float)$received['amount'];
                 }
             }
-            $paymentSummary['remaining_amount'] = max(0, (float)$detail['total_payable'] - $paymentSummary['paid_amount']);
         }
+        $paymentSummary['remaining_amount'] = max(0, (float)$detail['total_payable'] - $paymentSummary['paid_amount']);
         $expenseId = (int)($detail['expense_request_id'] ?? 0);
         if ($expenseId > 0) {
             $expenseStmt = $pdo->prepare(
@@ -128,6 +233,7 @@ $statusLabels = [
     'pending_disbursement' => 'รออนุมัติ/รอจ่ายเงิน', 'submitted' => 'รออนุมัติ',
     'approved' => 'อนุมัติแล้ว รอจ่ายเงิน', 'active' => 'กำลังผ่อนชำระ',
     'pending_deduction' => 'รอหักเงินเดือน', 'deducted' => 'หักเงินเดือนแล้ว',
+    'repaid' => 'รับคืนครบแล้ว',
     'paid' => 'ชำระแล้ว', 'closed' => 'ชำระครบแล้ว', 'cancelled' => 'ยกเลิก',
     'rejected' => 'ไม่อนุมัติ', 'defaulted' => 'ค้างชำระ', 'scheduled' => 'รอถึงกำหนด',
     'missed' => 'เลยกำหนด', 'partial' => 'ชำระบางส่วน', 'waived' => 'ยกเว้น',
@@ -258,11 +364,44 @@ require_once __DIR__ . '/templates/header.php';
         </div>
       </div>
       <?php endif; ?>
-      <?php if ($detail['finance_type'] === 'employee_loan'): ?>
-      <div class="px-5 pb-5">
+      <div id="repayment" class="px-5 pb-5">
         <div class="rounded-xl bg-emerald-500/10 border border-emerald-400/20 p-4">
-          <div class="flex flex-wrap justify-between gap-2 text-sm"><span class="text-white font-semibold">ชำระแล้ว <?php echo (int)$paymentSummary['paid_installments']; ?> / <?php echo (int)$paymentSummary['total_installments']; ?> งวด</span><span class="text-white/75">ชำระ <?php echo number_format((float)$paymentSummary['paid_amount'], 2); ?> · คงเหลือ <?php echo number_format((float)$paymentSummary['remaining_amount'], 2); ?> บาท</span></div>
-          <div class="h-2 rounded-full bg-black/25 mt-3 overflow-hidden"><div class="h-full bg-emerald-400" style="width:<?php echo $paymentSummary['total_installments'] > 0 ? min(100, ($paymentSummary['paid_installments'] / $paymentSummary['total_installments']) * 100) : 0; ?>%"></div></div>
+          <div class="flex flex-wrap justify-between gap-2 text-sm"><span class="text-white font-semibold"><?php echo $detail['finance_type'] === 'employee_loan' ? 'ชำระครบ ' . (int)$paymentSummary['paid_installments'] . ' / ' . (int)$paymentSummary['total_installments'] . ' งวด' : 'สถานะการคืนเงิน'; ?></span><span class="text-white/75">รับคืนแล้ว <?php echo number_format((float)$paymentSummary['paid_amount'], 2); ?> · คงเหลือ <?php echo number_format((float)$paymentSummary['remaining_amount'], 2); ?> บาท</span></div>
+          <div class="h-2 rounded-full bg-black/25 mt-3 overflow-hidden"><div class="h-full bg-emerald-400" style="width:<?php echo (float)$detail['total_payable'] > 0 ? min(100, ((float)$paymentSummary['paid_amount'] / (float)$detail['total_payable']) * 100) : 0; ?>%"></div></div>
+        </div>
+      </div>
+      <?php if ($canManage && (float)$paymentSummary['remaining_amount'] > 0 && in_array((string)($expense['status'] ?? ''), ['paid','confirmed','completed'], true)): ?>
+      <div class="px-5 pb-5">
+        <form method="post" class="rounded-xl border border-sky-300/25 bg-sky-400/5 p-4 grid gap-4 md:grid-cols-2 lg:grid-cols-4 lg:items-end">
+          <?php echo csrfField(); ?>
+          <input type="hidden" name="action" value="receive_repayment">
+          <input type="hidden" name="type" value="<?php echo htmlspecialchars($selectedType); ?>">
+          <input type="hidden" name="id" value="<?php echo $selectedId; ?>">
+          <input type="hidden" name="idempotency_key" value="<?php echo htmlspecialchars((string)$_SESSION['employee_finance_repayment_key']); ?>">
+          <label class="block text-sm text-white/80">วิธีรับคืน
+            <select name="payment_method" required class="mt-2 w-full min-h-[48px] rounded-xl border border-white/15 bg-slate-950 px-3 text-white"><option value="cash">รับคืนเป็นเงินสด</option><option value="transfer">พนักงานโอนคืนบริษัท</option></select>
+          </label>
+          <label class="block text-sm text-white/80">ยอดรับชำระ
+            <input type="number" name="amount" min="0.01" max="<?php echo number_format((float)$paymentSummary['remaining_amount'], 2, '.', ''); ?>" step="0.01" required value="<?php echo number_format((float)$paymentSummary['remaining_amount'], 2, '.', ''); ?>" class="mt-2 w-full min-h-[48px] rounded-xl border border-white/15 bg-slate-950 px-3 text-white tabular-nums">
+          </label>
+          <label class="block text-sm text-white/80">วันเวลารับชำระ
+            <input type="datetime-local" name="received_at" required value="<?php echo date('Y-m-d\TH:i'); ?>" class="mt-2 w-full min-h-[48px] rounded-xl border border-white/15 bg-slate-950 px-3 text-white">
+          </label>
+          <label class="block text-sm text-white/80">เลขอ้างอิง (ถ้ามี)
+            <input type="text" name="reference_number" maxlength="100" class="mt-2 w-full min-h-[48px] rounded-xl border border-white/15 bg-slate-950 px-3 text-white">
+          </label>
+          <label class="block text-sm text-white/80 md:col-span-2 lg:col-span-3">หมายเหตุ
+            <input type="text" name="notes" maxlength="1000" placeholder="ระบุผู้ส่งมอบเงินหรือรายละเอียดเพิ่มเติม" class="mt-2 w-full min-h-[48px] rounded-xl border border-white/15 bg-slate-950 px-3 text-white">
+          </label>
+          <button type="submit" class="min-h-[48px] rounded-xl bg-sky-500 hover:bg-sky-400 px-5 font-semibold text-slate-950" onclick="return confirm('ยืนยันยอดรับชำระ? ระบบจะตัดยอดลูกหนี้และออกเลขที่ใบรับเงินทันที')">บันทึกรับคืนเงิน</button>
+        </form>
+      </div>
+      <?php endif; ?>
+      <?php if ($receivedRepayments): ?>
+      <div class="px-5 pb-5">
+        <div class="rounded-xl border border-white/10 overflow-hidden">
+          <h3 class="px-4 py-3 text-white font-semibold border-b border-white/10">ประวัติรับชำระ</h3>
+          <div class="divide-y divide-white/10"><?php foreach ($receivedRepayments as $received): ?><div class="p-4 grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto] md:items-center text-sm"><div><p class="text-white font-semibold"><?php echo htmlspecialchars((string)$received['receipt_number']); ?></p><p class="text-white/50 mt-1"><?php echo htmlspecialchars((string)$received['received_at']); ?></p></div><div><p class="text-white"><?php echo number_format((float)$received['amount'], 2); ?> บาท</p><p class="text-white/50 mt-1"><?php echo $received['payment_method'] === 'cash' ? 'เงินสด' : 'โอนคืนบริษัท'; ?></p></div><div><p class="text-white/75">ผู้รับ <?php echo htmlspecialchars(trim((string)$received['receiver_first_name'] . ' ' . (string)$received['receiver_last_name'])); ?></p><p class="text-white/50 mt-1">บัญชี: <?php echo htmlspecialchars((string)($received['accounting_status'] ?? 'pending')); ?> · หลักฐาน: <?php echo !empty($received['evidence_path']) ? 'แนบแล้ว' : 'รอลงนาม'; ?></p></div><div class="flex flex-wrap gap-2"><a class="min-h-[48px] inline-flex items-center justify-center rounded-xl border border-white/15 px-4 text-white hover:bg-white/10" target="_blank" rel="noopener" href="/employee_finance_receipt.php?id=<?php echo (int)$received['id']; ?>">เปิดใบรับเงิน</a><?php if ($canManage): ?><form method="post" enctype="multipart/form-data" class="flex items-center gap-2"><?php echo csrfField(); ?><input type="hidden" name="action" value="upload_repayment_evidence"><input type="hidden" name="type" value="<?php echo htmlspecialchars($selectedType); ?>"><input type="hidden" name="id" value="<?php echo $selectedId; ?>"><input type="hidden" name="receipt_id" value="<?php echo (int)$received['id']; ?>"><label class="min-h-[48px] inline-flex cursor-pointer items-center justify-center rounded-xl bg-white/10 px-4 text-white hover:bg-white/15"><span><?php echo !empty($received['evidence_path']) ? 'เปลี่ยนหลักฐาน' : 'แนบฉบับลงนาม'; ?></span><input class="sr-only" type="file" name="evidence" accept="application/pdf,image/jpeg,image/png" required onchange="this.form.submit()"></label></form><?php endif; ?></div></div><?php endforeach; ?></div>
         </div>
       </div>
       <?php endif; ?>

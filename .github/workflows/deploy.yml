@@ -34,6 +34,8 @@ jobs:
         run: php scripts/qa_employee_finance_reconciliation_audit.php
       - name: Employee finance payroll-link schema contract
         run: php scripts/qa_employee_finance_payroll_link_schema.php
+      - name: Employee finance cash and transfer repayment service
+        run: php tests/employee_finance_repayment_service_test.php
       - name: PWA / Web Push contract
         run: php scripts/qa_pwa_push_contract.php
       - name: Employee finance due-date reconciliation contract
@@ -141,6 +143,11 @@ jobs:
               $PHP_BIN scripts/ensure_holiday_work_schema.php 2>&1 || echo "   holiday work schema skipped"
             fi
 
+            if [ -n "$PHP_BIN" ] && [ -f scripts/run_migration.php ] && [ -f database/migrations/2026_08_24_employee_finance_repayments.sql ]; then
+              echo "Ensuring employee-finance repayment schema..."
+              $PHP_BIN scripts/run_migration.php 2026_08_24_employee_finance_repayments.sql
+            fi
+
             if [ -n "$PHP_BIN" ] && [ -f scripts/ensure_line_notification_log.php ]; then
               echo "📬 Ensuring line_notification_log table..."
               $PHP_BIN scripts/ensure_line_notification_log.php 2>&1 || echo "   line notification log skipped"
@@ -181,3 +188,4 @@ jobs:
             PHP_BIN=$(which php 2>/dev/null || find /opt/plesk/php -name php -type f 2>/dev/null | sort -rV | head -1 || echo php)
             "$PHP_BIN" scripts/audit_employee_finance_reconciliation.php --run-id=307 --json
             "$PHP_BIN" scripts/ensure_employee_finance_payroll_link_schema.php --check
+            "$PHP_BIN" scripts/verify_employee_finance_repayment_schema.php
