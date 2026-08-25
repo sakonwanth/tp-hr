@@ -2143,7 +2143,12 @@ class PayrollService
 
         $this->pdo->beginTransaction();
         try {
-            $payDay = \TpCommon\Hr\PayrollCalendar::paymentDay($month);
+            $defaultPayDay = \TpCommon\Hr\PayrollCalendar::paymentDay($month);
+            $lastDay = (int)(new \DateTimeImmutable($month . '-01'))->format('t');
+            $payDay = $payDay ?? $defaultPayDay;
+            if ($payDay < 1 || $payDay > $lastDay) {
+                throw new \InvalidArgumentException("วันที่จ่ายต้องอยู่ระหว่าง 1–{$lastDay} สำหรับเดือนที่เลือก");
+            }
             $runId = $existing ? (int)$existing['id'] : 0;
             if ($runId > 0) {
                 $this->pdo->prepare("UPDATE hr_employee_finance_payroll_links SET link_status='reversed',reversed_at=NOW(),settled_at=NULL WHERE payroll_run_id=? AND link_status='included'")->execute([$runId]);

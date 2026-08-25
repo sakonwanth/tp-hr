@@ -72,6 +72,8 @@ if ($resource === 'payroll-runs') {
             $payDay = isset($input['pay_day']) ? (int)$input['pay_day'] : null;
             $result = $service->createRun($month, $createdBy, $payDay);
             ApiAuth::success(['data' => $result]);
+        } catch (\InvalidArgumentException $e) {
+            ApiAuth::fail(400, $e->getMessage());
         } catch (\RuntimeException $e) {
             tpHrLogException($e, 'payroll_write createRun');
             ApiAuth::fail(409, $e->getMessage());
