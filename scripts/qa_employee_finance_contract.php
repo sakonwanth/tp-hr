@@ -15,6 +15,8 @@ $checks = [
     'LINE consent payload' => str_contains((string)file_get_contents($crm . '/expense_request_form.php'), 'finance_consent'),
     'CRM payroll consumes finance rows' => str_contains((string)file_get_contents($crm . '/modules/payroll/queries.php'), 'payroll_employee_finance_deductions'),
     'HR payroll defaults to canonical payment day and accepts validated override' => str_contains((string)file_get_contents($root . '/core/Services/PayrollService.php'), '$payDay = $payDay ?? $defaultPayDay'),
+    'HR profile owns salary setup base at write boundary' => str_contains((string)file_get_contents($root . '/core/Services/PayrollService.php'), '? $profileBase'),
+    'HR approval blocks stale salary snapshots' => str_contains((string)file_get_contents($root . '/core/Services/PayrollService.php'), 'assertRunSalarySnapshotCurrent($runId)'),
     'HR payroll consumes finance rows' => str_contains((string)file_get_contents($root . '/core/Services/PayrollService.php'), 'employeeFinanceDeductions'),
     'ERP uses shared policy' => str_contains((string)file_get_contents($erp . '/core/HrLoanService.php'), 'EmployeeFinancePolicy'),
     'HR management surface' => is_file($root . '/employee_finance.php'),

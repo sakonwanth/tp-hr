@@ -1524,10 +1524,10 @@ class PayrollService
             throw new \InvalidArgumentException('เดือนที่มีผลไม่ถูกต้อง');
         }
 
-        $baseSalary = (float)($data['base_salary'] ?? 0);
-        if ($baseSalary < 0) {
-            throw new \InvalidArgumentException('ฐานเงินเดือนต้องไม่ต่ำกว่า 0');
-        }
+        $profileBase = $this->resolveProfileBaseSalary($userId, $effectiveFrom);
+        $baseSalary = ($profileBase !== null && $profileBase > 0)
+            ? $profileBase
+            : max(0, (float)($data['base_salary'] ?? 0));
 
         $bonusFixed = max(0, (float)($data['bonus_fixed'] ?? 0));
         $providentFund = max(0, (float)($data['provident_fund'] ?? 0));
@@ -2203,6 +2203,7 @@ class PayrollService
 
     public function approveRun(int $runId, int $approvedBy): void
     {
+        $this->assertRunSalarySnapshotCurrent($runId);
         $this->syncEmployeeFinanceLinksForRun($runId);
         $this->assertEmployeeFinanceReconciled($runId);
         $stmt = $this->pdo->prepare(
@@ -2211,6 +2212,37 @@ class PayrollService
         $stmt->execute([$approvedBy, $runId]);
         if (!$stmt->rowCount()) {
             throw new \RuntimeException('อนุมัติได้เฉพาะรอบที่คำนวณแล้วเท่านั้น');
+        }
+    }
+
+    private function assertRunSalarySnapshotCurrent(int $runId): void
+    {
+        $stmt = $this->pdo->prepare('SELECT payroll_month, pay_day FROM payroll_runs WHERE id = ? LIMIT 1');
+        $stmt->execute([$runId]);
+        $run = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$run) {
+            throw new \RuntimeException('ไม่พบรอบเงินเดือน');
+        }
+        $monthFirst = date('Y-m-01', strtotime((string)$run['payroll_month']));
+        $slips = $this->pdo->prepare('SELECT user_id, gross_salary FROM payroll_slips WHERE payroll_run_id = ?');
+        $slips->execute([$runId]);
+        $changed = 0;
+        $missing = 0;
+        foreach ($slips->fetchAll(PDO::FETCH_ASSOC) as $slip) {
+            $userId = (int)$slip['user_id'];
+            $profileBase = $this->resolveProfileBaseSalary($userId, $monthFirst);
+            $fresh = $this->calculateSlip($userId, $monthFirst, (int)$run['pay_day']);
+            if ($profileBase === null || $profileBase <= 0) {
+                $missing++;
+            } elseif (abs((float)$slip['gross_salary'] - (float)$fresh['gross_salary']) > 0.01) {
+                $changed++;
+            }
+        }
+        if ($changed > 0 || $missing > 0) {
+            throw new \RuntimeException(
+                'ยังอนุมัติไม่ได้ — ฐานเงินเดือน HR เปลี่ยนหลังคำนวณ ' . $changed
+                . ' คน และไม่พบฐานเงินเดือนใน HR ' . $missing . ' คน กรุณาแก้ข้อมูล HR ให้ครบแล้วคำนวณรอบใหม่'
+            );
         }
     }
 
