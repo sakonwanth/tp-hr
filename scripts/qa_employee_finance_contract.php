@@ -17,6 +17,8 @@ $checks = [
     'HR payroll defaults to canonical payment day and accepts validated override' => str_contains((string)file_get_contents($root . '/core/Services/PayrollService.php'), '$payDay = $payDay ?? $defaultPayDay'),
     'HR profile owns salary setup base at write boundary' => str_contains((string)file_get_contents($root . '/core/Services/PayrollService.php'), '? $profileBase'),
     'HR approval blocks stale salary snapshots' => str_contains((string)file_get_contents($root . '/core/Services/PayrollService.php'), 'assertRunSalarySnapshotCurrent($runId)'),
+    'parity diagnostic exposes salary source without credentials' => str_contains((string)file_get_contents($root . '/scripts/payroll_calc_single.php'), "in_array('--explain'")
+        && str_contains((string)file_get_contents($root . '/scripts/payroll_calc_single.php'), "'profile' => \$service->getUserSalaryProfile"),
     'HR payroll consumes finance rows' => str_contains((string)file_get_contents($root . '/core/Services/PayrollService.php'), 'employeeFinanceDeductions'),
     'ERP uses shared policy' => str_contains((string)file_get_contents($erp . '/core/HrLoanService.php'), 'EmployeeFinancePolicy'),
     'HR management surface' => is_file($root . '/employee_finance.php'),
