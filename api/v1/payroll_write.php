@@ -42,7 +42,11 @@ if ($resource === 'employee-finance' && $method === 'POST' && $id > 0
     $input = ApiAuth::input();
     try {
         $actorId = apiKeyResolveActorForApi($pdo, ApiAuth::currentKey(), $input, 'actor_id', HR_ROLES);
-        $result = $service->activateEmployeeFinanceForExpense($id, $actorId);
+        $result = $service->activateEmployeeFinanceForExpense(
+            $id,
+            $actorId,
+            (string)($input['payment_method'] ?? '')
+        );
         ApiAuth::success(['data' => $result]);
     } catch (\InvalidArgumentException $e) {
         ApiAuth::fail(400, $e->getMessage());

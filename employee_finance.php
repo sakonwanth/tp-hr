@@ -121,6 +121,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (string)($_POST['action'] ?? '') ==
     header('Location: ' . $redirect);
     exit;
 }
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && (string)($_POST['action'] ?? '') === 'change_repayment_method') {
+    $redirect = '/employee_finance.php?type=' . urlencode($selectedType) . '&id=' . $selectedId . '#finance-detail';
+    try {
+        if (!$canEditFinance) throw new RuntimeException('เฉพาะ CEO, Chairman หรือ Admin เท่านั้นที่แก้วิธีคืนเงินได้');
+        if (!verifyCsrf()) throw new RuntimeException('เซสชันหมดอายุ กรุณาโหลดหน้าใหม่แล้วลองอีกครั้ง');
+        require_once __DIR__ . '/core/Services/EmployeeFinanceManagementService.php';
+        (new EmployeeFinanceManagementService($pdo))->changeRepaymentMethod(
+            $selectedType, $selectedId, (string)($_POST['repayment_method'] ?? ''),
+            $userId, (string)($_POST['reason'] ?? '')
+        );
+        $_SESSION['employee_finance_flash'] = ['type'=>'success','message'=>'เปลี่ยนวิธีคืนเงินเรียบร้อยแล้ว'];
+    } catch (Throwable $e) {
+        $_SESSION['employee_finance_flash'] = ['type'=>'error','message'=>$e->getMessage()];
+    }
+    header('Location: ' . $redirect);
+    exit;
+}
 $where = $canManage ? '' : 'WHERE f.user_id = ?';
 $params = $canManage ? [] : [$userId];
 $sql = "SELECT f.*,u.first_name_th,u.last_name_th FROM (
@@ -346,6 +363,21 @@ require_once __DIR__ . '/templates/header.php';
           <button type="submit" class="min-h-[48px] rounded-xl bg-amber-500 hover:bg-amber-400 px-5 font-semibold text-slate-950" onclick="return confirm('ยืนยันเปลี่ยนเดือนเริ่มหัก? ระบบจะตรวจรอบเงินเดือนและสร้างตารางงวดใหม่โดยอัตโนมัติ')">บันทึกการแก้ไข</button>
         </form>
         <p class="text-xs text-white/50 mt-2">แก้ได้เฉพาะรายการที่ยังไม่จ่ายและยังไม่เชื่อมสลิป ระบบบันทึกผู้แก้ เหตุผล และข้อมูลก่อน–หลังทุกครั้ง</p>
+      </div>
+      <?php endif; ?>
+      <?php if ($canEditFinance && !in_array((string)$detail['status'], ['closed','deducted','cancelled','rejected'], true) && !$receivedRepayments): ?>
+      <div class="px-5 pb-5">
+        <form method="post" class="rounded-xl border border-sky-300/25 bg-sky-400/5 p-4 grid gap-4 md:grid-cols-[1fr_1.5fr_auto] md:items-end">
+          <?php echo csrfField(); ?><input type="hidden" name="action" value="change_repayment_method"><input type="hidden" name="type" value="<?php echo htmlspecialchars($selectedType); ?>"><input type="hidden" name="id" value="<?php echo $selectedId; ?>">
+          <label class="block text-sm text-white/80">แผนคืนเงิน
+            <select name="repayment_method" required class="mt-2 w-full min-h-[48px] rounded-xl border border-white/15 bg-slate-950 px-3 text-white">
+              <?php foreach ($repaymentLabels as $method => $label): ?><option value="<?php echo $method; ?>" <?php echo $detail['repayment_method'] === $method ? 'selected' : ''; ?>><?php echo htmlspecialchars($label); ?></option><?php endforeach; ?>
+            </select>
+          </label>
+          <label class="block text-sm text-white/80">เหตุผลการเปลี่ยน<input type="text" name="reason" required maxlength="500" class="mt-2 w-full min-h-[48px] rounded-xl border border-white/15 bg-slate-950 px-3 text-white" placeholder="ระบุเหตุผลเพื่อบันทึก Audit"></label>
+          <button class="min-h-[48px] rounded-xl bg-sky-500 hover:bg-sky-400 px-5 font-semibold text-slate-950" onclick="return confirm('ยืนยันเปลี่ยนแผนคืนเงิน?')">บันทึกวิธีคืนเงิน</button>
+        </form>
+        <p class="text-xs text-white/50 mt-2">เปลี่ยนได้ก่อนมีรายการรับชำระหรือเชื่อมสลิป ระบบเก็บผู้แก้ เหตุผล และค่าก่อน–หลัง</p>
       </div>
       <?php endif; ?>
       <?php if ($lineTimeline): ?>

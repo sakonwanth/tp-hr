@@ -151,17 +151,80 @@ final class EmployeeFinanceManagementService
         }
     }
 
+    /** @return array{finance_type:string,finance_id:int,old_method:string,new_method:string} */
+    public function changeRepaymentMethod(
+        string $financeType,
+        int $financeId,
+        string $newMethod,
+        int $actorUserId,
+        string $reason
+    ): array {
+        if (!in_array($financeType, ['salary_advance', 'employee_loan'], true) || $financeId <= 0) {
+            throw new RuntimeException('ไม่พบรายการการเงินพนักงานที่ต้องการแก้ไข');
+        }
+        if (!in_array($newMethod, ['payroll', 'transfer', 'cash'], true)) {
+            throw new RuntimeException('วิธีคืนเงินไม่ถูกต้อง');
+        }
+        $reason = trim($reason);
+        if ($reason === '') {
+            throw new RuntimeException('กรุณาระบุเหตุผลที่เปลี่ยนวิธีคืนเงิน');
+        }
+        $startedHere = !$this->pdo->inTransaction();
+        if ($startedHere) $this->pdo->beginTransaction();
+        try {
+            $row = $this->lockFinanceRow($financeType, $financeId);
+            if (!$row) throw new RuntimeException('ไม่พบรายการการเงินพนักงานที่ต้องการแก้ไข');
+            if (in_array((string)$row['status'], ['closed', 'deducted', 'cancelled', 'rejected'], true)) {
+                throw new RuntimeException('รายการสิ้นสุดแล้ว จึงเปลี่ยนวิธีคืนเงินไม่ได้');
+            }
+            $received = $this->pdo->prepare(
+                "SELECT COUNT(*) FROM hr_employee_finance_repayments_received WHERE finance_type=? AND finance_id=? AND status='posted'"
+            );
+            $received->execute([$financeType, $financeId]);
+            if ((int)$received->fetchColumn() > 0) {
+                throw new RuntimeException('เริ่มรับชำระแล้ว จึงเปลี่ยนแผนคืนเงินไม่ได้');
+            }
+            $this->assertNoPayrollLink($financeType, $financeId);
+            if ($newMethod === 'payroll') {
+                $this->assertPayrollMonthOpen(substr((string)$row['first_due_month'], 0, 7));
+            }
+            $oldMethod = (string)$row['repayment_method'];
+            if ($oldMethod === $newMethod) throw new RuntimeException('วิธีคืนเงินใหม่ตรงกับข้อมูลเดิม');
+            $table = $financeType === 'salary_advance' ? 'hr_salary_advances' : 'hr_employee_loans';
+            $nextStatus = (string)$row['status'];
+            if (!empty($row['paid_at']) && $financeType === 'salary_advance') {
+                $nextStatus = $newMethod === 'payroll' ? 'pending_deduction' : 'partial';
+            }
+            $stmt = $this->pdo->prepare("UPDATE {$table} SET repayment_method=?,status=?,updated_at=NOW() WHERE id=?");
+            $stmt->execute([$newMethod, $nextStatus, $financeId]);
+            $payload = json_encode([
+                'old_method' => $oldMethod, 'new_method' => $newMethod, 'reason' => $reason,
+                'expense_request_id' => (int)$row['expense_request_id'],
+            ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+            $this->pdo->prepare(
+                "INSERT INTO hr_employee_finance_audit_logs
+                 (user_id,finance_type,finance_id,event_type,actor_user_id,payload_json,created_at)
+                 VALUES (?,?,?,'repayment_method_changed',?,?,NOW())"
+            )->execute([(int)$row['user_id'], $financeType, $financeId, $actorUserId, $payload]);
+            if ($startedHere) $this->pdo->commit();
+            return ['finance_type'=>$financeType,'finance_id'=>$financeId,'old_method'=>$oldMethod,'new_method'=>$newMethod];
+        } catch (Throwable $e) {
+            if ($startedHere && $this->pdo->inTransaction()) $this->pdo->rollBack();
+            throw $e;
+        }
+    }
+
     private function lockFinanceRow(string $financeType, int $financeId): ?array
     {
         if ($financeType === 'salary_advance') {
             $sql = "SELECT a.id,a.user_id,a.expense_request_id,a.amount principal_amount,1 term_months,
-	                           a.deduction_month first_due_month,a.status,r.status expense_status,r.paid_at,r.request_code
+                           a.deduction_month first_due_month,a.repayment_method,a.status,r.status expense_status,r.paid_at,r.request_code
                       FROM hr_salary_advances a
                       JOIN line_expense_requests r ON r.id=a.expense_request_id
                      WHERE a.id=? LIMIT 1 FOR UPDATE";
         } else {
             $sql = "SELECT l.id,l.user_id,l.expense_request_id,l.principal_amount,l.term_months,
-	                           l.first_due_month,l.status,r.status expense_status,r.paid_at,r.request_code
+                           l.first_due_month,l.repayment_method,l.status,r.status expense_status,r.paid_at,r.request_code
                       FROM hr_employee_loans l
                       JOIN line_expense_requests r ON r.id=l.expense_request_id
                      WHERE l.id=? LIMIT 1 FOR UPDATE";

@@ -1894,7 +1894,7 @@ class PayrollService
      *
      * @return array{finance_type:string,finance_id:int,user_id:int,first_due_month:string,run_id:?int,recalculated:bool,idempotent:bool}
      */
-    public function activateEmployeeFinanceForExpense(int $expenseRequestId, int $actorId = 0): array
+    public function activateEmployeeFinanceForExpense(int $expenseRequestId, int $actorId = 0, string $paymentMethod = ''): array
     {
         if ($expenseRequestId <= 0) {
             throw new \InvalidArgumentException('expense_request_id required');
@@ -1906,15 +1906,21 @@ class PayrollService
         }
         try {
             $stmt = $this->pdo->prepare(
-                "SELECT id,user_id,'employee_loan' finance_type,first_due_month,status
-                   FROM hr_employee_loans WHERE expense_request_id=? LIMIT 1 FOR UPDATE"
+                "SELECT l.id,l.user_id,'employee_loan' finance_type,l.first_due_month,l.status,
+                        l.repayment_method,r.payment_method actual_payment_method
+                   FROM hr_employee_loans l
+                   JOIN line_expense_requests r ON r.id=l.expense_request_id
+                  WHERE l.expense_request_id=? LIMIT 1 FOR UPDATE"
             );
             $stmt->execute([$expenseRequestId]);
             $finance = $stmt->fetch(PDO::FETCH_ASSOC);
             if (!$finance) {
                 $stmt = $this->pdo->prepare(
-                    "SELECT id,user_id,'salary_advance' finance_type,deduction_month first_due_month,status
-                       FROM hr_salary_advances WHERE expense_request_id=? LIMIT 1 FOR UPDATE"
+                    "SELECT a.id,a.user_id,'salary_advance' finance_type,a.deduction_month first_due_month,a.status,
+                            a.repayment_method,r.payment_method actual_payment_method
+                       FROM hr_salary_advances a
+                       JOIN line_expense_requests r ON r.id=a.expense_request_id
+                      WHERE a.expense_request_id=? LIMIT 1 FOR UPDATE"
                 );
                 $stmt->execute([$expenseRequestId]);
                 $finance = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -1925,9 +1931,19 @@ class PayrollService
 
             $financeType = (string)$finance['finance_type'];
             $currentStatus = (string)$finance['status'];
+            $repaymentMethod = (string)($finance['repayment_method'] ?? 'payroll');
+            $actualPaymentMethod = $paymentMethod !== ''
+                ? $paymentMethod
+                : (string)($finance['actual_payment_method'] ?? 'transfer');
+            if (!in_array($actualPaymentMethod, ['transfer', 'cash', 'cheque'], true)) {
+                throw new \InvalidArgumentException('payment_method must be transfer, cash or cheque');
+            }
+            $disbursementMethod = in_array($actualPaymentMethod, ['cash', 'cheque'], true)
+                ? $actualPaymentMethod
+                : 'transfer';
             $activeStatuses = $financeType === 'employee_loan'
                 ? ['active', 'closed']
-                : ['pending_deduction', 'deducted'];
+                : ['pending_deduction', 'partial', 'deducted'];
             $idempotent = in_array($currentStatus, $activeStatuses, true);
             if (!$idempotent && $currentStatus !== 'pending_disbursement') {
                 throw new \RuntimeException('สถานะสวัสดิการการเงินไม่พร้อมสำหรับการจ่าย: ' . $currentStatus);
@@ -1943,17 +1959,27 @@ class PayrollService
 
             if (!$idempotent) {
                 if ($financeType === 'employee_loan') {
-                    $this->pdo->prepare("UPDATE hr_employee_loans SET status='active',started_at=COALESCE(started_at,CURDATE()) WHERE id=? AND status='pending_disbursement'")
-                        ->execute([(int)$finance['id']]);
+                    $this->pdo->prepare("UPDATE hr_employee_loans SET status='active',disbursement_method=?,started_at=COALESCE(started_at,CURDATE()) WHERE id=? AND status='pending_disbursement'")
+                        ->execute([$disbursementMethod, (int)$finance['id']]);
                 } else {
-                    $this->pdo->prepare("UPDATE hr_salary_advances SET status='pending_deduction' WHERE id=? AND status='pending_disbursement'")
-                        ->execute([(int)$finance['id']]);
+                    $nextStatus = $repaymentMethod === 'payroll' ? 'pending_deduction' : 'partial';
+                    $this->pdo->prepare("UPDATE hr_salary_advances SET status=?,disbursement_method=? WHERE id=? AND status='pending_disbursement'")
+                        ->execute([$nextStatus, $disbursementMethod, (int)$finance['id']]);
                 }
+            } elseif ($financeType === 'employee_loan') {
+                $this->pdo->prepare('UPDATE hr_employee_loans SET disbursement_method=? WHERE id=?')
+                    ->execute([$disbursementMethod, (int)$finance['id']]);
+            } else {
+                $nextStatus = $repaymentMethod === 'payroll'
+                    ? (in_array($currentStatus, ['partial', 'pending_deduction'], true) ? 'pending_deduction' : $currentStatus)
+                    : (in_array($currentStatus, ['pending_deduction', 'partial'], true) ? 'partial' : $currentStatus);
+                $this->pdo->prepare('UPDATE hr_salary_advances SET status=?,disbursement_method=? WHERE id=?')
+                    ->execute([$nextStatus, $disbursementMethod, (int)$finance['id']]);
             }
 
             $recalculated = false;
             $runId = $run ? (int)$run['id'] : null;
-            if ($runId !== null) {
+            if ($runId !== null && $repaymentMethod === 'payroll') {
                 if ((string)$run['status'] === 'approved') {
                     $this->pdo->prepare("UPDATE payroll_runs SET status='calculated',approved_by=NULL,approved_at=NULL WHERE id=? AND status='approved'")
                         ->execute([$runId]);
@@ -1968,6 +1994,8 @@ class PayrollService
                     'payroll_run_id' => $runId,
                     'recalculated' => $recalculated,
                     'idempotent' => $idempotent,
+                    'repayment_method' => $repaymentMethod,
+                    'disbursement_method' => $disbursementMethod,
                 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)]);
 
             if ($ownTransaction) {

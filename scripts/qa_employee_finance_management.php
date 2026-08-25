@@ -20,6 +20,10 @@ $checks = [
 	    'change is audited with before and after values' => str_contains($service, "'first_due_month_changed'") && str_contains($service, "'old_month'") && str_contains($service, "'new_month'"),
 	    'requester receives queued LINE correction notice' => str_contains($service, "'finance_schedule_changed'") && str_contains($service, 'erp_expense_line_outbox'),
     'UI exposes audit reason and month transition' => str_contains($page, "auditPayload['old_month']") && str_contains($page, "auditPayload['reason']"),
+    'repayment plan supports payroll transfer and cash' => str_contains($service, "['payroll', 'transfer', 'cash']"),
+    'repayment plan blocks posted receipts and payroll links' => str_contains($service, 'hr_employee_finance_repayments_received') && str_contains($service, 'assertNoPayrollLink'),
+    'repayment plan change requires reason and audit' => str_contains($service, 'กรุณาระบุเหตุผลที่เปลี่ยนวิธีคืนเงิน') && str_contains($service, "'repayment_method_changed'"),
+    'repayment plan edit UI is available to executives' => str_contains($page, 'change_repayment_method') && str_contains($page, 'แผนคืนเงิน'),
 ];
 
 $passed = 0;
