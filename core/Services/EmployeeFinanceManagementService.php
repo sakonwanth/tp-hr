@@ -206,6 +206,7 @@ final class EmployeeFinanceManagementService
                  (user_id,finance_type,finance_id,event_type,actor_user_id,payload_json,created_at)
                  VALUES (?,?,?,'repayment_method_changed',?,?,NOW())"
             )->execute([(int)$row['user_id'], $financeType, $financeId, $actorUserId, $payload]);
+            $this->enqueueRepaymentMethodNotification($row, $financeType, $oldMethod, $newMethod, $reason, $payload);
             if ($startedHere) $this->pdo->commit();
             return ['finance_type'=>$financeType,'finance_id'=>$financeId,'old_method'=>$oldMethod,'new_method'=>$newMethod];
         } catch (Throwable $e) {
@@ -299,6 +300,41 @@ final class EmployeeFinanceManagementService
 	             VALUES (?,'finance_schedule_changed','user',?,?,?,'pending',NOW())"
 	        )->execute([(int)$row['expense_request_id'], $lineUserId, mb_substr($message, 0, 2000), $payload]);
 	    }
+
+        /** @param array<string,mixed> $row */
+        private function enqueueRepaymentMethodNotification(
+            array $row,
+            string $financeType,
+            string $oldMethod,
+            string $newMethod,
+            string $reason,
+            string $payload
+        ): void {
+            if (!$this->tableExists('erp_expense_line_outbox')) {
+                return;
+            }
+            $line = $this->pdo->prepare('SELECT line_user_id FROM users WHERE id=? AND is_active=1 LIMIT 1');
+            $line->execute([(int)$row['user_id']]);
+            $lineUserId = trim((string)$line->fetchColumn());
+            if ($lineUserId === '') {
+                return;
+            }
+            $financeLabel = $financeType === 'employee_loan' ? 'เงินกู้บริษัท' : 'เบิกเงินเดือนล่วงหน้า';
+            $methodLabels = ['payroll'=>'หักเงินเดือน', 'transfer'=>'โอนคืน', 'cash'=>'คืนเงินสด'];
+            $message = sprintf(
+                "%s %s\nผู้บริหารเปลี่ยนวิธีคืนเงินจาก %s เป็น %s\nเหตุผล: %s",
+                $financeLabel,
+                (string)($row['request_code'] ?? ''),
+                $methodLabels[$oldMethod] ?? $oldMethod,
+                $methodLabels[$newMethod] ?? $newMethod,
+                $reason
+            );
+            $this->pdo->prepare(
+                "INSERT INTO erp_expense_line_outbox
+                 (expense_request_id,message_type,recipient_type,recipient_line_id,message_text,payload_json,status,scheduled_at)
+                 VALUES (?,'finance_repayment_method_changed','user',?,?,?,'pending',NOW())"
+            )->execute([(int)$row['expense_request_id'], $lineUserId, mb_substr($message, 0, 2000), $payload]);
+        }
 
 	    private function tableExists(string $table): bool
 	    {

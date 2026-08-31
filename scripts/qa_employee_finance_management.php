@@ -23,6 +23,10 @@ $checks = [
     'repayment plan supports payroll transfer and cash' => str_contains($service, "['payroll', 'transfer', 'cash']"),
     'repayment plan blocks posted receipts and payroll links' => str_contains($service, 'hr_employee_finance_repayments_received') && str_contains($service, 'assertNoPayrollLink'),
     'repayment plan change requires reason and audit' => str_contains($service, 'กรุณาระบุเหตุผลที่เปลี่ยนวิธีคืนเงิน') && str_contains($service, "'repayment_method_changed'"),
+    'repayment method change queues requester LINE notice' => str_contains($service, 'enqueueRepaymentMethodNotification')
+        && str_contains($service, "'finance_repayment_method_changed'")
+        && str_contains($service, "'payroll'=>'หักเงินเดือน'")
+        && str_contains($service, "'cash'=>'คืนเงินสด'"),
     'repayment plan edit UI is available to executives' => str_contains($page, 'change_repayment_method') && str_contains($page, 'แผนคืนเงิน'),
 ];
 
