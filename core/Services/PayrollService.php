@@ -1953,7 +1953,7 @@ class PayrollService
             $runStmt = $this->pdo->prepare('SELECT id,status FROM payroll_runs WHERE payroll_month=? LIMIT 1 FOR UPDATE');
             $runStmt->execute([$month]);
             $run = $runStmt->fetch(PDO::FETCH_ASSOC) ?: null;
-            if ($run && (string)$run['status'] === 'paid') {
+            if ($repaymentMethod === 'payroll' && $run && (string)$run['status'] === 'paid') {
                 throw new \RuntimeException('รอบเงินเดือนงวดแรกจ่ายแล้ว กรุณาเปลี่ยนเดือนเริ่มหักก่อนบันทึกการจ่ายเงินกู้');
             }
 

@@ -30,6 +30,8 @@ jobs:
         run: php scripts/audit_employee_finance_presentation.php
       - name: Employee finance payout activation boundary
         run: php scripts/qa_employee_finance_activation_boundary.php
+      - name: Employee finance disbursement reconciliation contract
+        run: php scripts/qa_employee_finance_disbursement_reconciliation.php
       - name: Employee finance reconciliation audit contract
         run: php scripts/qa_employee_finance_reconciliation_audit.php
       - name: Employee finance payroll-link schema contract

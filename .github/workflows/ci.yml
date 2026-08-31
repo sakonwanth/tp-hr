@@ -29,6 +29,8 @@ jobs:
         run: php scripts/audit_employee_finance_presentation.php
       - name: Employee finance payout activation boundary
         run: php scripts/qa_employee_finance_activation_boundary.php
+      - name: Employee finance disbursement reconciliation contract
+        run: php scripts/qa_employee_finance_disbursement_reconciliation.php
       - name: PWA / Web Push contract
         run: php scripts/qa_pwa_push_contract.php
       # Source half only — the HTTP half needs the production site, which a PR
