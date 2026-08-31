@@ -2,6 +2,8 @@
 
 $script = (string)file_get_contents(__DIR__ . '/reconcile_employee_finance_disbursement.php');
 $service = (string)file_get_contents(__DIR__ . '/../core/Services/PayrollService.php');
+$deploy = (string)file_get_contents(__DIR__ . '/../.github/workflows/deploy.yml');
+$verify = (string)file_get_contents(__DIR__ . '/verify_employee_finance_repayment_schema.php');
 $checks = [
     'preview is default' => str_contains($script, '$apply = array_key_exists(\'apply\', $options)')
         && str_contains($script, "'mode'=>\$apply ? 'apply' : 'preview'"),
@@ -15,6 +17,8 @@ $checks = [
         && str_contains($service, "'payroll_activation'"),
     'apply is single-record only' => str_contains($script, 'Apply must target exactly one matching expense request'),
     'non-payroll repayment ignores paid payroll run' => str_contains($service, '$repaymentMethod === \'payroll\' && $run'),
+    'deploy applies disbursement enum migration' => str_contains($deploy, '2026_08_26_employee_finance_disbursement_method.sql'),
+    'schema verification requires cash and cheque disbursement methods' => str_contains($verify, "['cash', 'cheque']"),
 ];
 $failed = 0;
 foreach ($checks as $label => $ok) {

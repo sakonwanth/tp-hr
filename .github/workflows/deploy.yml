@@ -150,6 +150,11 @@ jobs:
               $PHP_BIN scripts/run_migration.php 2026_08_24_employee_finance_repayments.sql
             fi
 
+            if [ -n "$PHP_BIN" ] && [ -f scripts/run_migration.php ] && [ -f database/migrations/2026_08_26_employee_finance_disbursement_method.sql ]; then
+              echo "Ensuring employee-finance disbursement method schema..."
+              $PHP_BIN scripts/run_migration.php 2026_08_26_employee_finance_disbursement_method.sql
+            fi
+
             if [ -n "$PHP_BIN" ] && [ -f scripts/ensure_line_notification_log.php ]; then
               echo "📬 Ensuring line_notification_log table..."
               $PHP_BIN scripts/ensure_line_notification_log.php 2>&1 || echo "   line notification log skipped"

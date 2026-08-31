@@ -21,5 +21,18 @@ $method = $pdo->query(
       WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='hr_salary_advances' AND COLUMN_NAME='repayment_method'"
 )->fetchColumn();
 if (!str_contains((string)$method, "'cash'")) $missing[] = 'hr_salary_advances.repayment_method:cash';
+foreach (['hr_salary_advances', 'hr_employee_loans'] as $table) {
+    $stmt = $pdo->prepare(
+        "SELECT COLUMN_TYPE FROM information_schema.COLUMNS
+          WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=? AND COLUMN_NAME='disbursement_method'"
+    );
+    $stmt->execute([$table]);
+    $columnType = (string)$stmt->fetchColumn();
+    foreach (['cash', 'cheque'] as $requiredMethod) {
+        if (!str_contains($columnType, "'{$requiredMethod}'")) {
+            $missing[] = "{$table}.disbursement_method:{$requiredMethod}";
+        }
+    }
+}
 echo json_encode(['ok' => $missing === [], 'missing' => $missing], JSON_UNESCAPED_UNICODE) . PHP_EOL;
 exit($missing === [] ? 0 : 1);
