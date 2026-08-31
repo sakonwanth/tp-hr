@@ -1,0 +1,52 @@
+name: Reconcile employee finance projection
+
+on:
+  workflow_dispatch:
+    inputs:
+      expense_request_id:
+        description: ERP expense request ID
+        required: true
+        type: string
+      mode:
+        description: Preview or apply one targeted repair
+        required: true
+        default: preview
+        type: choice
+        options: [preview, apply]
+      confirmation:
+        description: For apply, enter APPLY-<expense_request_id>
+        required: false
+        type: string
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate inputs
+        env:
+          REQUEST_ID: ${{ inputs.expense_request_id }}
+          MODE: ${{ inputs.mode }}
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          [[ "$REQUEST_ID" =~ ^[1-9][0-9]*$ ]]
+          if [ "$MODE" = apply ]; then
+            [ "$CONFIRMATION" = "APPLY-$REQUEST_ID" ]
+          fi
+      - name: Run targeted reconciliation on Production
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          command_timeout: 2m
+          script: |
+            set -e
+            cd "${{ secrets.SSH_PATH }}"
+            PHP_BIN=$(which php 2>/dev/null || find /opt/plesk/php -name php -type f 2>/dev/null | sort -rV | head -1 || echo php)
+            APPLY_FLAG=""
+            if [ "${{ inputs.mode }}" = apply ]; then APPLY_FLAG="--apply"; fi
+            "$PHP_BIN" scripts/reconcile_employee_finance_disbursement.php \
+              --expense-request-id="${{ inputs.expense_request_id }}" $APPLY_FLAG --json
+            "$PHP_BIN" scripts/reconcile_employee_finance_disbursement.php \
+              --expense-request-id="${{ inputs.expense_request_id }}" --json

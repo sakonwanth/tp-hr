@@ -12,8 +12,8 @@ $expenseRequestId = max(0, (int)($options['expense-request-id'] ?? 0));
 $actorId = max(0, (int)($options['actor-id'] ?? 0));
 $apply = array_key_exists('apply', $options);
 $asJson = array_key_exists('json', $options);
-if ($apply && ($expenseRequestId <= 0 || $actorId <= 0)) {
-    fwrite(STDERR, "--apply requires --expense-request-id and --actor-id\n");
+if ($apply && $expenseRequestId <= 0) {
+    fwrite(STDERR, "--apply requires --expense-request-id\n");
     exit(2);
 }
 
