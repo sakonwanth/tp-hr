@@ -235,6 +235,7 @@ pf_require_columns($pdo, 'users', [
 pf_require_columns($pdo, 'hr_attendances', [
     'id', 'user_id', 'attendance_date', 'shift_id',
     'planned_start_time', 'planned_reason', 'planned_requested_at', 'planned_requested_by',
+    'planned_status', 'planned_reviewed_by', 'planned_reviewed_at', 'planned_review_note',
     'check_in_time', 'check_out_time', 'work_minutes', 'break_minutes',
     'late_minutes', 'late_excused', 'late_excused_reason', 'late_notified_at',
     'early_leave_minutes', 'ot_minutes', 'is_offsite', 'offsite_status',
@@ -302,6 +303,7 @@ pf_require_columns($pdo, 'payroll_slips', [
 
 pf_require_index($pdo, 'hr_attendances', 'uk_user_date', 'user_id,attendance_date', true);
 pf_require_index($pdo, 'hr_attendances', 'idx_hr_att_planned', 'user_id,attendance_date,planned_start_time', false);
+pf_require_index($pdo, 'hr_attendances', 'idx_hr_att_planned_approval', 'planned_status,attendance_date,user_id', false);
 pf_require_index($pdo, 'hr_employee_schedules', 'uk_user', 'user_id', true);
 pf_require_index($pdo, 'hr_dayoff_requests', 'uk_user_week', 'user_id,week_start', true);
 pf_require_index($pdo, 'hr_api_keys', 'uk_key_hash', 'key_hash', true);

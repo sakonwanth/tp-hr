@@ -238,16 +238,20 @@ if ($action === 'plan-late') {
         // Result-equivalent to the CRM insert-or-update branches (planned_* + audit).
         $stmt = $pdo->prepare("INSERT INTO hr_attendances
                 (user_id, attendance_date, shift_id, planned_start_time, planned_reason,
-                 planned_requested_at, planned_requested_by, adjustment_reason, adjusted_by, adjusted_at, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, NOW(), ?, ?, ?, NOW(), NOW(), NOW())
+                 planned_requested_at, planned_requested_by, planned_status, planned_reviewed_by, planned_reviewed_at,
+                 adjustment_reason, adjusted_by, adjusted_at, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, NOW(), ?, 'APPROVED', ?, NOW(), ?, ?, NOW(), NOW(), NOW())
             ON DUPLICATE KEY UPDATE
                 planned_start_time=VALUES(planned_start_time),
                 planned_reason=VALUES(planned_reason),
                 planned_requested_at=NOW(),
                 planned_requested_by=VALUES(planned_requested_by),
+                planned_status='APPROVED',
+                planned_reviewed_by=VALUES(planned_reviewed_by),
+                planned_reviewed_at=NOW(),
                 adjustment_reason=CONCAT_WS(\"\\n\", NULLIF(adjustment_reason,''), VALUES(adjustment_reason)),
                 updated_at=NOW()");
-        $stmt->execute([$userId, $date, $shiftId, $plannedStart, $reason, $plannedBy ?: null, $audit, $plannedBy ?: null]);
+        $stmt->execute([$userId, $date, $shiftId, $plannedStart, $reason, $plannedBy ?: null, $plannedBy ?: null, $audit, $plannedBy ?: null]);
     } catch (Throwable $e) {
         tpHrLogException($e, 'api/v1/attendance plan-late');
         ApiAuth::fail(500, 'Internal server error');
@@ -273,6 +277,7 @@ if ($action === 'cancel-plan-late') {
         $stmt = $pdo->prepare("UPDATE hr_attendances
             SET planned_start_time=NULL, planned_reason=NULL,
                 planned_requested_at=NULL, planned_requested_by=NULL,
+                planned_status='CANCELLED',
                 adjustment_reason=CONCAT_WS(\"\\n\", NULLIF(adjustment_reason,''), ?),
                 updated_at=NOW()
             WHERE id=?");
@@ -382,7 +387,7 @@ if ($action === 'auto-absent') {
                 status = CASE
                     WHEN status IN ('PRESENT','LATE','WFH','HALF_DAY','LEAVE','HOLIDAY') THEN status
                     WHEN late_excused = 1 THEN status
-                    WHEN planned_start_time IS NOT NULL AND planned_start_time <> '' THEN status
+                    WHEN planned_status = 'APPROVED' AND planned_start_time IS NOT NULL AND planned_start_time <> '' THEN status
                     ELSE 'ABSENT' END,
                 adjustment_reason = CONCAT_WS(\"\\n\", NULLIF(adjustment_reason,''), VALUES(adjustment_reason)),
                 adjusted_at = NOW()");
@@ -479,7 +484,7 @@ try {
             $targetUser,
             $shift,
             $time,
-            $row['planned_start_time'] ?? null
+            (($row['planned_status'] ?? null) === 'APPROVED') ? ($row['planned_start_time'] ?? null) : null
         );
         $checkinStatus = (string)$checkInSummary['status'];
         $lateMinutes = (int)$checkInSummary['late_minutes'];

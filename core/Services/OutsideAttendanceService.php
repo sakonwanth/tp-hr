@@ -145,7 +145,7 @@ class OutsideAttendanceService
             $targetUser,
             $shift,
             $checkInAt,
-            $attendance['planned_start_time'] ?? null
+            (($attendance['planned_status'] ?? null) === 'APPROVED') ? ($attendance['planned_start_time'] ?? null) : null
         );
 
         $values = [

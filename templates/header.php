@@ -1105,6 +1105,11 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png';
                     <i class="fas fa-location-dot"></i>
                     <span>อนุมัตินอกสถานที่</span>
                 </a>
+
+                <a href="/hr/planned_late_approvals.php" class="nav-item <?php echo $current_page === 'hr-planned-late' ? 'active' : ''; ?>">
+                    <i class="fas fa-clock"></i>
+                    <span>อนุมัติเข้างานสาย</span>
+                </a>
                 
                 <a href="/hr/leaves.php" class="nav-item <?php echo $current_page === 'hr-leaves' ? 'active' : ''; ?>">
                     <i class="fas fa-calendar-check"></i>
@@ -1278,6 +1283,10 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png';
                     <a href="/hr/outside_attendance.php" class="mobile-menu-tile <?php echo $current_page === 'hr-outside-attendance' ? 'active' : ''; ?>">
                         <i class="fas fa-location-dot" aria-hidden="true"></i>
                         <span>อนุมัตินอกสถานที่</span>
+                    </a>
+                    <a href="/hr/planned_late_approvals.php" class="mobile-menu-tile <?php echo $current_page === 'hr-planned-late' ? 'active' : ''; ?>">
+                        <i class="fas fa-clock" aria-hidden="true"></i>
+                        <span>อนุมัติเข้างานสาย</span>
                     </a>
                     <a href="/hr/leaves.php" class="mobile-menu-tile <?php echo $current_page === 'hr-leaves' ? 'active' : ''; ?>">
                         <i class="fas fa-calendar-check" aria-hidden="true"></i>

@@ -55,7 +55,7 @@ $late_start_can_today_request = ['ok' => false];
 $late_start_can_tomorrow_request = ['ok' => true];
 try {
     $ls_stmt = $pdo->prepare("
-        SELECT attendance_date, planned_start_time, planned_reason, planned_requested_at
+        SELECT attendance_date, planned_start_time, planned_reason, planned_requested_at, planned_status
         FROM hr_attendances
         WHERE user_id = ? AND attendance_date IN (?, ?)
     ");
@@ -488,14 +488,15 @@ require_once __DIR__ . '/templates/header.php';
                             echo $lsTt !== false ? date('H:i', $lsTt) : '—:—';
                             ?>
                             <span class="text-white/50 text-sm font-normal">น.</span>
+                            <?php $psToday = $ls_today_row['planned_status'] ?? 'PENDING'; ?><span class="block text-xs font-semibold mt-1 <?php echo $psToday === 'APPROVED' ? 'text-emerald-300' : ($psToday === 'PENDING' ? 'text-amber-300' : 'text-red-300'); ?>"><?php echo htmlspecialchars(['PENDING'=>'รออนุมัติ','APPROVED'=>'อนุมัติแล้ว','REJECTED'=>'ไม่อนุมัติ','CANCELLED'=>'ยกเลิกแล้ว'][$psToday] ?? $psToday); ?></span>
                         </p>
                         <?php if (!empty($ls_today_row['planned_reason'])): ?>
                         <p class="text-white/70 text-xs mt-1 line-clamp-2"><?php echo htmlspecialchars($ls_today_row['planned_reason']); ?></p>
                         <?php endif; ?>
-                        <button type="button" onclick="cancelLateStart('<?php echo $ls_today; ?>')"
+                        <?php if ($psToday === 'PENDING'): ?><button type="button" onclick="cancelLateStart('<?php echo $ls_today; ?>')"
                                 class="mt-3 w-full min-h-[52px] py-2 rounded-[var(--tp-ios-card-radius)] bg-red-500/15 hover:bg-red-500/25 text-red-300 text-sm font-semibold transition-colors touch-manipulation shadow-[var(--tp-surface-well-inset)] whitespace-nowrap">
                             <i class="fas fa-times-circle mr-1"></i>ยกเลิกการแจ้ง
-                        </button>
+                        </button><?php elseif ($psToday === 'REJECTED'): ?><button type="button" onclick="openLateStartModal()" class="mt-3 w-full min-h-[52px] rounded-[var(--tp-ios-card-radius)] bg-violet-600 text-white font-semibold touch-manipulation">ยื่นคำขอใหม่</button><?php endif; ?>
                     </div>
                     <?php endif; ?>
                     <?php if ($ls_tomorrow_row): ?>
@@ -509,14 +510,15 @@ require_once __DIR__ . '/templates/header.php';
                             echo $lsTt2 !== false ? date('H:i', $lsTt2) : '—:—';
                             ?>
                             <span class="text-white/50 text-sm font-normal">น.</span>
+                            <?php $psTomorrow = $ls_tomorrow_row['planned_status'] ?? 'PENDING'; ?><span class="block text-xs font-semibold mt-1 <?php echo $psTomorrow === 'APPROVED' ? 'text-emerald-300' : ($psTomorrow === 'PENDING' ? 'text-amber-300' : 'text-red-300'); ?>"><?php echo htmlspecialchars(['PENDING'=>'รออนุมัติ','APPROVED'=>'อนุมัติแล้ว','REJECTED'=>'ไม่อนุมัติ','CANCELLED'=>'ยกเลิกแล้ว'][$psTomorrow] ?? $psTomorrow); ?></span>
                         </p>
                         <?php if (!empty($ls_tomorrow_row['planned_reason'])): ?>
                         <p class="text-white/70 text-xs mt-1 line-clamp-2"><?php echo htmlspecialchars($ls_tomorrow_row['planned_reason']); ?></p>
                         <?php endif; ?>
-                        <button type="button" onclick="cancelLateStart('<?php echo $ls_tomorrow; ?>')"
+                        <?php if ($psTomorrow === 'PENDING'): ?><button type="button" onclick="cancelLateStart('<?php echo $ls_tomorrow; ?>')"
                                 class="mt-3 w-full min-h-[52px] py-2 rounded-[var(--tp-ios-card-radius)] bg-red-500/15 hover:bg-red-500/25 text-red-300 text-sm font-semibold transition-colors touch-manipulation shadow-[var(--tp-surface-well-inset)] whitespace-nowrap">
                             <i class="fas fa-times-circle mr-1"></i>ยกเลิกการแจ้ง
-                        </button>
+                        </button><?php elseif ($psTomorrow === 'REJECTED'): ?><button type="button" onclick="openLateStartModal()" class="mt-3 w-full min-h-[52px] rounded-[var(--tp-ios-card-radius)] bg-violet-600 text-white font-semibold touch-manipulation">ยื่นคำขอใหม่</button><?php endif; ?>
                     </div>
                     <?php endif; ?>
                     <?php if (!($ls_today_row && $ls_tomorrow_row)): ?>

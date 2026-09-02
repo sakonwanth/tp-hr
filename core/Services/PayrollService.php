@@ -1265,7 +1265,7 @@ class PayrollService
         try {
             $stmt = $this->pdo->prepare("
                 SELECT attendance_date, status, late_minutes, late_excused, late_notified_at, remarks,
-                       check_in_time, planned_start_time
+                       check_in_time, planned_start_time, planned_status
                 FROM hr_attendances WHERE user_id = ? AND attendance_date BETWEEN ? AND ?
                 ORDER BY attendance_date
             ");
@@ -1275,7 +1275,7 @@ class PayrollService
             try {
                 $stmt = $this->pdo->prepare("
                     SELECT attendance_date, status, late_minutes, late_excused, late_notified_at, remarks,
-                           NULL AS check_in_time, NULL AS planned_start_time
+                           NULL AS check_in_time, NULL AS planned_start_time, NULL AS planned_status
                     FROM hr_attendances WHERE user_id = ? AND attendance_date BETWEEN ? AND ?
                     ORDER BY attendance_date
                 ");
@@ -1303,7 +1303,7 @@ class PayrollService
             $status = $log['status'] ?? 'PRESENT';
             $lateMin = (int)($log['late_minutes'] ?? 0);
             $excused = (int)($log['late_excused'] ?? 0);
-            $plannedStart = $log['planned_start_time'] ?? null;
+            $plannedStart = (($log['planned_status'] ?? null) === 'APPROVED') ? ($log['planned_start_time'] ?? null) : null;
             $checkIn = $log['check_in_time'] ?? null;
 
             if ($status === 'ABSENT') {

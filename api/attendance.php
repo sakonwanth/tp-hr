@@ -5,6 +5,7 @@
  */
 
 require_once dirname(__DIR__) . '/bootstrap.php';
+require_once dirname(__DIR__) . '/core/Services/PlannedLateApprovalService.php';
 
 header('Content-Type: application/json');
 
@@ -129,7 +130,7 @@ function handleCheckIn(PDO $pdo, array $user, array $input): void {
     $attendanceService = new AttendanceService($pdo);
     $shift = $attendanceService->getDefaultShift();
     $checkInAt = date('Y-m-d H:i:s');
-    $checkInSummary = $attendanceService->determineCheckIn($user, $shift, $checkInAt, $existing['planned_start_time'] ?? null);
+    $checkInSummary = $attendanceService->determineCheckIn($user, $shift, $checkInAt, PlannedLateApprovalService::effectiveStart($existing ?: null));
     $lateMinutes = (int)$checkInSummary['late_minutes'];
     $status = (string)$checkInSummary['status'];
 
@@ -190,7 +191,7 @@ function handleCheckIn(PDO $pdo, array $user, array $input): void {
         }
 
         // planned_start_time may have changed since the initial validation read.
-        $checkInSummary = $attendanceService->determineCheckIn($user, $shift, $checkInAt, $existing['planned_start_time'] ?? null);
+        $checkInSummary = $attendanceService->determineCheckIn($user, $shift, $checkInAt, PlannedLateApprovalService::effectiveStart($existing));
         $lateMinutes = (int)$checkInSummary['late_minutes'];
         $status = (string)$checkInSummary['status'];
 
@@ -723,7 +724,7 @@ function applyAttendanceAdjust(
         $date,
         $checkInFull,
         $checkOutFull,
-        $existing ? ($existing['planned_start_time'] ?? null) : null,
+        PlannedLateApprovalService::effectiveStart($existing ?: null),
         $existing ? ($existing['status'] ?? null) : null
     );
     $workMinutes = (int)$summary['work_minutes'];
@@ -1089,7 +1090,7 @@ function handleClearTimes(PDO $pdo, array $user, array $input): void {
         $date,
         $newCheckIn,
         $newCheckOut,
-        $existing['planned_start_time'] ?? null,
+        PlannedLateApprovalService::effectiveStart($existing ?: null),
         $existing['status'] ?? null
     );
 
@@ -1359,6 +1360,10 @@ function handleLateStartRequest(PDO $pdo, array $user, array $input): void {
                     planned_reason = ?,
                     planned_requested_at = NOW(),
                     planned_requested_by = ?,
+                    planned_status = 'PENDING',
+                    planned_reviewed_by = NULL,
+                    planned_reviewed_at = NULL,
+                    planned_review_note = NULL,
                     updated_at = NOW()
                 WHERE id = ?
             ");
@@ -1369,9 +1374,9 @@ function handleLateStartRequest(PDO $pdo, array $user, array $input): void {
             $stmt = $pdo->prepare("
                 INSERT INTO hr_attendances
                     (user_id, attendance_date, shift_id,
-                     planned_start_time, planned_reason, planned_requested_at, planned_requested_by,
+                     planned_start_time, planned_reason, planned_requested_at, planned_requested_by, planned_status,
                      created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, NOW(), ?, NOW(), NOW())
+                VALUES (?, ?, ?, ?, ?, NOW(), ?, 'PENDING', NOW(), NOW())
             ");
             $stmt->execute([$user['id'], $target_date, $shift_id, $planned_start . ':00', $reason, $user['id']]);
             $attendanceId = (int)$pdo->lastInsertId();
@@ -1397,7 +1402,7 @@ function handleLateStartRequest(PDO $pdo, array $user, array $input): void {
             require_once __DIR__ . '/../core/CrmLineNotifierBridge.php';
             if (function_exists('crm_line_notify_planned_late_request')) {
                 crm_line_notify_planned_late_request(
-                    $pdo, $user, $target_date, $planned_start . ':00', $reason, date('Y-m-d H:i:s')
+                    $pdo, $user, $target_date, $planned_start . ':00', $reason, date('Y-m-d H:i:s'), $attendanceId
                 );
             }
         } catch (Throwable $e) { error_log('notify_planned_late_request error: ' . $e->getMessage()); }
@@ -1407,7 +1412,8 @@ function handleLateStartRequest(PDO $pdo, array $user, array $input): void {
         'attendance_id' => $attendanceId,
         'target_date'   => $target_date,
         'planned_start' => $planned_start,
-    ], sprintf('แจ้งเข้างานสายวันที่ %s เวลา %s เรียบร้อย', $target_date, $planned_start));
+        'approval_status' => 'PENDING',
+    ], sprintf('ส่งคำขอแจ้งเข้างานสายวันที่ %s เวลา %s แล้ว กรุณารอผู้อนุมัติ', $target_date, $planned_start));
 }
 
 /**
@@ -1421,12 +1427,15 @@ function cancelLateStartRequest(PDO $pdo, array $user, array $input): void {
         apiError('รูปแบบวันที่ไม่ถูกต้อง');
     }
 
-    $stmt = $pdo->prepare("SELECT id, check_in_time, planned_start_time FROM hr_attendances WHERE user_id = ? AND attendance_date = ? LIMIT 1");
+    $stmt = $pdo->prepare("SELECT id, check_in_time, planned_start_time, planned_status FROM hr_attendances WHERE user_id = ? AND attendance_date = ? LIMIT 1");
     $stmt->execute([$user['id'], $target_date]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$row || empty($row['planned_start_time'])) {
         apiError('ไม่พบคำขอแจ้งเข้างานสายของวันดังกล่าว', 404);
+    }
+    if (($row['planned_status'] ?? null) !== 'PENDING') {
+        apiError('คำขอนี้ได้รับการดำเนินการแล้ว ไม่สามารถยกเลิกได้');
     }
     if (!empty($row['check_in_time'])) {
         apiError('ลงเวลาเข้างานไปแล้ว — ไม่สามารถยกเลิกได้');
@@ -1446,6 +1455,7 @@ function cancelLateStartRequest(PDO $pdo, array $user, array $input): void {
                 planned_reason = NULL,
                 planned_requested_at = NULL,
                 planned_requested_by = NULL,
+                planned_status = 'CANCELLED',
                 updated_at = NOW()
             WHERE id = ?
         ");

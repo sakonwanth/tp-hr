@@ -71,7 +71,7 @@ class AttendanceAdjustmentService
                 $date,
                 $checkIn,
                 $checkOut,
-                $attendance['planned_start_time'] ?? null,
+                (($attendance['planned_status'] ?? null) === 'APPROVED') ? ($attendance['planned_start_time'] ?? null) : null,
                 $attendance['status'] ?? null
             );
 
