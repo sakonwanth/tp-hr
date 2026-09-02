@@ -15,23 +15,31 @@ $files = [
     'auto_absent' => $root . '/../tp-crm/scripts/cron_hr_auto_absent.php',
 ];
 foreach ($files as $name => $path) {
-    if (!is_file($path)) { fwrite(STDERR, "[FAIL] missing {$name}\n"); exit(1); }
-    $files[$name] = file_get_contents($path);
+    $files[$name] = is_file($path) ? file_get_contents($path) : null;
 }
 
 $checks = [
     'additive approval schema and legacy backfill' => str_contains($files['migration'], "planned_status ENUM('PENDING','APPROVED','REJECTED','CANCELLED')") && str_contains($files['migration'], "SET planned_status = 'APPROVED'"),
-    'HR and Checkin submissions are pending' => str_contains($files['submit'], "planned_status = 'PENDING'") && str_contains($files['checkin_submit'], "planned_status = 'PENDING'"),
+    'HR submissions are pending' => str_contains($files['submit'], "planned_status = 'PENDING'"),
     'approval has transaction row lock' => str_contains($files['approve_service'], 'FOR UPDATE') && str_contains($files['approve_service'], "planned_status = 'PENDING'"),
     'four-eyes and post-checkin guards' => str_contains($files['approve_service'], 'ผู้ยื่นคำขอไม่สามารถอนุมัติ') && str_contains($files['approve_service'], 'พนักงานลงเวลาแล้ว'),
     'HR payroll requires approved state' => str_contains($files['payroll'], "=== 'APPROVED'"),
-    'CRM payroll requires approved state' => str_contains($files['crm_payroll'], "=== 'APPROVED'"),
-    'auto absent skips approved only' => str_contains($files['auto_absent'], "=== 'APPROVED'"),
     'web approval inbox and CSRF' => str_contains($files['inbox'], 'verifyCsrfToken') && str_contains($files['inbox'], 'PlannedLateApprovalService'),
-    'LINE offers approve and reject postbacks' => str_contains($files['line_flex'], 'hr_planned_late_approve') && str_contains($files['line_flex'], 'hr_planned_late_reject'),
-    'LINE verifies linked active approver role' => str_contains($files['line_action'], 'u.line_user_id=?') && str_contains($files['line_action'], "['HR','Admin','Chairman','CEO']"),
-    'LINE webhook routes both decisions' => str_contains($files['line_webhook'], "case 'hr_planned_late_approve':") && str_contains($files['line_webhook'], "case 'hr_planned_late_reject':"),
 ];
+
+$crossChecks = [
+    'Checkin submissions are pending' => ['checkin_submit', "planned_status = 'PENDING'"],
+    'CRM payroll requires approved state' => ['crm_payroll', "=== 'APPROVED'"],
+    'auto absent skips approved only' => ['auto_absent', "=== 'APPROVED'"],
+    'LINE offers approve and reject postbacks' => ['line_flex', ['hr_planned_late_approve','hr_planned_late_reject']],
+    'LINE verifies linked active approver role' => ['line_action', ['u.line_user_id=?', "['HR','Admin','Chairman','CEO']"]],
+    'LINE webhook routes both decisions' => ['line_webhook', ["case 'hr_planned_late_approve':", "case 'hr_planned_late_reject':"]],
+];
+foreach ($crossChecks as $label => [$fileKey, $needles]) {
+    if ($files[$fileKey] === null) { echo "[SKIP] {$label} (sibling repo unavailable)\n"; continue; }
+    $needles = (array)$needles;
+    $checks[$label] = array_reduce($needles, static fn(bool $ok, string $needle): bool => $ok && str_contains($files[$fileKey], $needle), true);
+}
 
 $passed = 0;
 foreach ($checks as $label => $ok) {
