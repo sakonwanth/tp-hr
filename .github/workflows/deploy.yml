@@ -36,6 +36,8 @@ jobs:
         run: php scripts/qa_employee_finance_reconciliation_audit.php
       - name: Employee finance payroll-link schema contract
         run: php scripts/qa_employee_finance_payroll_link_schema.php
+      - name: Planned-late approval contract
+        run: php scripts/qa_planned_late_approval_contract.php
       - name: Employee finance cash and transfer repayment service
         run: php tests/employee_finance_repayment_service_test.php
       - name: PWA / Web Push contract
@@ -155,6 +157,12 @@ jobs:
               $PHP_BIN scripts/run_migration.php 2026_08_26_employee_finance_disbursement_method.sql
             fi
 
+            if [ -n "$PHP_BIN" ] && [ -f scripts/run_migration.php ] && [ -f database/migrations/2026_09_02_planned_late_approval_workflow.sql ]; then
+              echo "Ensuring planned-late approval workflow schema..."
+              $PHP_BIN scripts/run_migration.php 2026_09_02_planned_late_approval_workflow.sql
+              $PHP_BIN scripts/verify_planned_late_approval_schema.php
+            fi
+
             if [ -n "$PHP_BIN" ] && [ -f scripts/ensure_line_notification_log.php ]; then
               echo "📬 Ensuring line_notification_log table..."
               $PHP_BIN scripts/ensure_line_notification_log.php 2>&1 || echo "   line notification log skipped"
@@ -197,3 +205,4 @@ jobs:
             "$PHP_BIN" scripts/reconcile_employee_finance_disbursement.php --json
             "$PHP_BIN" scripts/ensure_employee_finance_payroll_link_schema.php --check
             "$PHP_BIN" scripts/verify_employee_finance_repayment_schema.php
+            "$PHP_BIN" scripts/verify_planned_late_approval_schema.php

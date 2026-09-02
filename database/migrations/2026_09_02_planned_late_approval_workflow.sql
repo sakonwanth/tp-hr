@@ -12,6 +12,4 @@ WHERE planned_start_time IS NOT NULL
   AND planned_status IS NULL;
 
 ALTER TABLE hr_attendances
-    ADD INDEX IF NOT EXISTS idx_hr_att_planned_approval (planned_status, attendance_date, user_id),
-    ADD CONSTRAINT fk_hr_att_planned_reviewer
-        FOREIGN KEY (planned_reviewed_by) REFERENCES users(id) ON DELETE SET NULL;
+    ADD INDEX IF NOT EXISTS idx_hr_att_planned_approval (planned_status, attendance_date, user_id);
