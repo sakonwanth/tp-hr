@@ -52,7 +52,7 @@ $stmt = $pdo->prepare(
      FROM hr_attendances a JOIN users u ON u.id = a.user_id
      WHERE {$where} AND a.planned_start_time IS NOT NULL
      ORDER BY CASE a.planned_status WHEN 'PENDING' THEN 0 ELSE 1 END,
-              a.attendance_date ASC, a.planned_requested_at ASC"
+              a.attendance_date DESC, a.planned_requested_at DESC, a.id DESC"
 );
 $stmt->execute($status === 'ALL' ? [] : [$status]);
 $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);

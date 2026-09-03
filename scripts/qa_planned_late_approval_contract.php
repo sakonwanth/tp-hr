@@ -25,6 +25,7 @@ $checks = [
     'four-eyes and post-checkin guards' => str_contains($files['approve_service'], 'ผู้ยื่นคำขอไม่สามารถอนุมัติ') && str_contains($files['approve_service'], 'พนักงานลงเวลาแล้ว'),
     'HR payroll requires approved state' => str_contains($files['payroll'], "=== 'APPROVED'"),
     'web approval inbox and CSRF' => str_contains($files['inbox'], 'verifyCsrfToken') && str_contains($files['inbox'], 'PlannedLateApprovalService'),
+    'approval inbox sorts newest first' => str_contains($files['inbox'], 'a.attendance_date DESC') && str_contains($files['inbox'], 'a.planned_requested_at DESC'),
 ];
 
 $crossChecks = [
@@ -34,6 +35,7 @@ $crossChecks = [
     'LINE offers approve and reject postbacks' => ['line_flex', ['hr_planned_late_approve','hr_planned_late_reject']],
     'LINE verifies linked active approver role' => ['line_action', ['u.line_user_id=?', "['HR','Admin','Chairman','CEO']"]],
     'LINE webhook routes both decisions' => ['line_webhook', ["case 'hr_planned_late_approve':", "case 'hr_planned_late_reject':"]],
+    'LINE replies to approver with detailed flex' => ['line_webhook', ['replyLineFlexMessage($replyToken', "'flex'" ]],
 ];
 foreach ($crossChecks as $label => [$fileKey, $needles]) {
     if ($files[$fileKey] === null) { echo "[SKIP] {$label} (sibling repo unavailable)\n"; continue; }
