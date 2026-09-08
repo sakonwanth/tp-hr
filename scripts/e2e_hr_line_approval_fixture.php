@@ -22,10 +22,10 @@ if ($action === '--create') {
         $id = (int)$pdo->lastInsertId();
         $created = true;
     }
-    $log = $pdo->query("SELECT status,payload_type,created_at FROM line_notification_log WHERE event='hr.dayoff_requested' ORDER BY id DESC LIMIT 1")->fetch(PDO::FETCH_ASSOC) ?: [];
+    $log = $pdo->query("SELECT status,payload_type,created_at FROM line_notification_log WHERE module='hr' AND event='dayoff_requested' ORDER BY id DESC LIMIT 1")->fetch(PDO::FETCH_ASSOC) ?: [];
     $dispatched = $created || !$log;
     if ($dispatched) crm_line_notify_dayoff_requested($pdo,$id);
-    $log = $pdo->query("SELECT status,payload_type,created_at FROM line_notification_log WHERE event='hr.dayoff_requested' ORDER BY id DESC LIMIT 1")->fetch(PDO::FETCH_ASSOC) ?: [];
+    $log = $pdo->query("SELECT status,payload_type,created_at FROM line_notification_log WHERE module='hr' AND event='dayoff_requested' ORDER BY id DESC LIMIT 1")->fetch(PDO::FETCH_ASSOC) ?: [];
     echo "E2E_FIXTURE_ID={$id}; status=PENDING; notification=".($dispatched ? 'dispatched' : 'kept').'; delivery_status='.($log['status'] ?? 'missing').'; payload_type='.($log['payload_type'] ?? 'missing')."\n";
     exit(0);
 }
