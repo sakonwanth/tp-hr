@@ -8,6 +8,7 @@ $action = (string)($argv[1] ?? '');
 $marker = '[CODEX-E2E-HR-LINE-20260908]';
 
 if ($action === '--create') {
+    $created = false;
     $existing = $pdo->prepare("SELECT id FROM hr_dayoff_requests WHERE reason LIKE ? AND status='PENDING' ORDER BY id DESC LIMIT 1");
     $existing->execute([$marker.'%']);
     $id = (int)($existing->fetchColumn() ?: 0);
@@ -19,9 +20,11 @@ if ($action === '--create') {
         $stmt = $pdo->prepare("INSERT INTO hr_dayoff_requests(user_id,week_start,week_end,original_day_off,requested_day_off,reason,status) VALUES (?,'2099-12-28','2100-01-03',?,?,?,'PENDING')");
         $stmt->execute([(int)$user['id'],$original,$requested,$marker.' isolated production acceptance fixture']);
         $id = (int)$pdo->lastInsertId();
+        $created = true;
     }
-    crm_line_notify_dayoff_requested($pdo,$id);
-    echo "E2E_FIXTURE_ID={$id}; status=PENDING; notification=dispatched\n";
+    if ($created) crm_line_notify_dayoff_requested($pdo,$id);
+    $log = $pdo->query("SELECT status,payload_type,created_at FROM line_notification_log WHERE event='hr.dayoff_requested' ORDER BY id DESC LIMIT 1")->fetch(PDO::FETCH_ASSOC) ?: [];
+    echo "E2E_FIXTURE_ID={$id}; status=PENDING; notification=".($created ? 'dispatched' : 'kept').'; delivery_status='.($log['status'] ?? 'missing').'; payload_type='.($log['payload_type'] ?? 'missing')."\n";
     exit(0);
 }
 
