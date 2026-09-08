@@ -82,6 +82,17 @@ class ApiAuth {
         return $key;
     }
 
+    /** Require a valid API key carrying at least one of the supplied scopes. */
+    public static function requireAny(array $allowedScopes): array {
+        $key = self::require([]);
+        $scopes = json_decode($key['scopes'] ?? '[]', true) ?: [];
+        if (in_array('*', $scopes, true)) return $key;
+        foreach ($allowedScopes as $scope) {
+            if (in_array($scope, $scopes, true)) return $key;
+        }
+        self::fail(403, 'One of these scopes is required: ' . implode(', ', $allowedScopes));
+    }
+
     public static function currentKey(): ?array {
         return self::$key;
     }
