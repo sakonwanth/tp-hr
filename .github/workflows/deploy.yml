@@ -168,7 +168,6 @@ jobs:
               $PHP_BIN scripts/ensure_line_notification_log.php 2>&1 || echo "   line notification log skipped"
             fi
 
-            "$PHP_BIN" scripts/e2e_hr_line_approval_fixture.php --cleanup 8
 
             if [ -n "$PHP_BIN" ] && [ -f scripts/ensure_employee_finance_payroll_link_schema.php ]; then
               echo "🔗 Ensuring employee-finance payroll-link schema..."
