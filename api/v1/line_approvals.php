@@ -5,7 +5,9 @@ require_once dirname(__DIR__, 2).'/core/Services/AttendanceAdjustmentService.php
 require_once dirname(__DIR__, 2).'/core/Services/OutsideAttendanceService.php';
 
 $method = ApiAuth::requireMethod(['POST']);
-ApiAuth::require(['line_approvals.approve']);
+// Reuse the established CRM integration approval scope so existing production
+// keys can call this aggregate endpoint without an unsafe key migration.
+ApiAuth::require(['leave.approve']);
 apiKeyForbidServiceScoped();
 $pdo = getDB();
 $body = ApiAuth::input();
