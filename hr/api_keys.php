@@ -156,6 +156,7 @@ $scopeGroups = [
         'overtime.write'     => 'สร้างคำขอ (ผูกพนักงาน หรือ + write_all)',
         'overtime.write_all' => 'สร้างแทนผู้อื่น',
         'overtime.approve'   => 'อนุมัติ/ปฏิเสธ',
+        'line_approvals.approve' => 'อนุมัติงาน HR ผ่าน LINE',
     ],
     'ลงเวลานอกสถานที่' => [
         'outside.read'     => 'อ่านคำขอ (ผูกพนักงาน หรือ + read_all)',

@@ -43,6 +43,9 @@ try {
         case 'overtime':
             require __DIR__ . '/overtime.php';
             break;
+        case 'line-approvals':
+            require __DIR__ . '/line_approvals.php';
+            break;
         case 'outside-attendance':
             require __DIR__ . '/outside.php';
             break;

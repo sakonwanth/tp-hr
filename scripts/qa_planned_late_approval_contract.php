@@ -11,6 +11,8 @@ $files = [
     'line_flex' => $root . '/../tp-crm/modules/hr/notifications.php',
     'line_action' => $root . '/../tp-crm/core/Services/PlannedLateLineApprovalService.php',
     'line_webhook' => $root . '/../tp-crm/api/line_webhook.php',
+    'line_all_service' => $root . '/../tp-crm/core/Services/HrLineApprovalService.php',
+    'line_hr_boundary' => $root . '/core/Services/HrLineApprovalService.php',
     'crm_payroll' => $root . '/../tp-crm/modules/payroll/queries.php',
     'auto_absent' => $root . '/../tp-crm/scripts/cron_hr_auto_absent.php',
 ];
@@ -25,6 +27,7 @@ $checks = [
     'four-eyes and post-checkin guards' => str_contains($files['approve_service'], 'ผู้ยื่นคำขอไม่สามารถอนุมัติ') && str_contains($files['approve_service'], 'พนักงานลงเวลาแล้ว'),
     'HR payroll requires approved state' => str_contains($files['payroll'], "=== 'APPROVED'"),
     'web approval inbox and CSRF' => str_contains($files['inbox'], 'verifyCsrfToken') && str_contains($files['inbox'], 'PlannedLateApprovalService'),
+    'canonical HR LINE approval boundary uses locks' => str_contains($files['line_hr_boundary'], 'FOR UPDATE') && str_contains($files['line_hr_boundary'], "status='PENDING'"),
     'approval inbox sorts newest first' => str_contains($files['inbox'], 'a.attendance_date DESC') && str_contains($files['inbox'], 'a.planned_requested_at DESC'),
 ];
 
@@ -36,6 +39,7 @@ $crossChecks = [
     'LINE verifies linked active approver role' => ['line_action', ['u.line_user_id=?', "['HR','Admin','Chairman','CEO']"]],
     'LINE webhook routes both decisions' => ['line_webhook', ["case 'hr_planned_late_approve':", "case 'hr_planned_late_reject':"]],
     'LINE replies to approver with detailed flex' => ['line_webhook', ['replyLineFlexMessage($replyToken', "'flex'" ]],
+    'LINE supports all employee HR approval workflows' => ['line_all_service', ["'leave'","'adjustment'","'outside'","'dayoff'","'holiday_work'",'HrClient::fromEnv()']],
 ];
 foreach ($crossChecks as $label => [$fileKey, $needles]) {
     if ($files[$fileKey] === null) { echo "[SKIP] {$label} (sibling repo unavailable)\n"; continue; }
