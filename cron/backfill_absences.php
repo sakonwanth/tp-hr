@@ -98,3 +98,10 @@ for ($ts = strtotime($start); $ts <= strtotime($end); $ts += 86400) {
 }
 
 echo "[backfill_absences] done. marked={$marked}, skipped={$skipped}\n";
+
+// Re-evaluate attendance discipline after the authoritative absence backfill.
+// The detector is idempotent by employee + rule + evidence fingerprint.
+$disciplineScript = __DIR__ . '/scan_attendance_discipline.php';
+if (is_file($disciplineScript)) {
+    require $disciplineScript;
+}

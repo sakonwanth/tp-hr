@@ -46,6 +46,9 @@ try {
         case 'line-approvals':
             require __DIR__ . '/line_approvals.php';
             break;
+        case 'attendance-discipline':
+            require __DIR__ . '/attendance_discipline.php';
+            break;
         case 'outside-attendance':
             require __DIR__ . '/outside.php';
             break;

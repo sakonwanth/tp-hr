@@ -38,6 +38,8 @@ jobs:
         run: php scripts/qa_employee_finance_payroll_link_schema.php
       - name: Planned-late approval contract
         run: php scripts/qa_planned_late_approval_contract.php
+      - name: Attendance discipline and LINE warning contract
+        run: php scripts/qa_attendance_discipline_contract.php
       - name: Employee finance cash and transfer repayment service
         run: php tests/employee_finance_repayment_service_test.php
       - name: PWA / Web Push contract
@@ -126,6 +128,10 @@ jobs:
             if [ -n "$COMPOSER_BIN" ] && [ -f composer.json ]; then
               $COMPOSER_BIN install --no-interaction --no-dev 2>&1 || echo "composer install skipped"
             fi
+            if [ -z "$PHP_BIN" ] || ! $PHP_BIN -r "require 'vendor/autoload.php'; exit(class_exists('Mpdf\\Mpdf') ? 0 : 1);"; then
+              echo "ERROR: mPDF runtime required for attendance warning documents is unavailable"
+              exit 1
+            fi
 
             if [ -n "$PHP_BIN" ] && [ -f scripts/ensure_outside_attendance_schema.php ]; then
               echo "📍 Ensuring offsite attendance request schema..."
@@ -161,6 +167,11 @@ jobs:
               echo "Ensuring planned-late approval workflow schema..."
               $PHP_BIN scripts/run_migration.php 2026_09_02_planned_late_approval_workflow.sql
               $PHP_BIN scripts/verify_planned_late_approval_schema.php
+            fi
+
+            if [ -n "$PHP_BIN" ] && [ -f scripts/run_migration.php ] && [ -f database/migrations/2026_09_16_attendance_discipline.sql ]; then
+              echo "Ensuring attendance-discipline and warning-letter schema..."
+              $PHP_BIN scripts/run_migration.php 2026_09_16_attendance_discipline.sql
             fi
 
             if [ -n "$PHP_BIN" ] && [ -f scripts/ensure_line_notification_log.php ]; then
