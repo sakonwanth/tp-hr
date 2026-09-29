@@ -1,6 +1,9 @@
 <?php
 
 require_once __DIR__ . '/bootstrap.php';
+
+use TpCommon\Hr\EmployeeFinanceSchedulePolicy as SchedulePolicy;
+
 Auth::requireLogin();
 $pdo = getDB();
 $currentUser = Auth::user();
@@ -115,6 +118,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (string)($_POST['action'] ?? '') ==
             (string)($_POST['reason'] ?? '')
         );
         $_SESSION['employee_finance_flash'] = ['type' => 'success', 'message' => 'เปลี่ยนเดือนเริ่มหักเรียบร้อยแล้ว'];
+    } catch (Throwable $e) {
+        $_SESSION['employee_finance_flash'] = ['type' => 'error', 'message' => $e->getMessage()];
+    }
+    header('Location: ' . $redirect);
+    exit;
+}
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && (string)($_POST['action'] ?? '') === 'reschedule_repayment') {
+    $redirect = '/employee_finance.php?type=' . urlencode($selectedType) . '&id=' . $selectedId . '#finance-detail';
+    try {
+        if (!$canEditFinance) {
+            throw new RuntimeException('เฉพาะ CEO, Chairman หรือ Admin เท่านั้นที่เลื่อนงวดชำระได้');
+        }
+        if (!verifyCsrf()) {
+            throw new RuntimeException('เซสชันหมดอายุ กรุณาโหลดหน้าใหม่แล้วลองอีกครั้ง');
+        }
+        require_once __DIR__ . '/core/Services/EmployeeFinanceManagementService.php';
+        $moved = (new EmployeeFinanceManagementService($pdo))->rescheduleRepayment(
+            $selectedType,
+            $selectedId,
+            (int)($_POST['repayment_id'] ?? 0),
+            (string)($_POST['new_month'] ?? ''),
+            $userId,
+            (string)($_POST['reason'] ?? '')
+        );
+        $_SESSION['employee_finance_flash'] = [
+            'type' => 'success',
+            'message' => 'เลื่อนกำหนดชำระเป็นเดือน ' . $moved['new_month'] . ' แล้ว'
+                . ($moved['moved'] > 1 ? ' (งวดที่เหลืออีก ' . ($moved['moved'] - 1) . ' งวดเลื่อนตามไปด้วย)' : ''),
+        ];
     } catch (Throwable $e) {
         $_SESSION['employee_finance_flash'] = ['type' => 'error', 'message' => $e->getMessage()];
     }
@@ -297,6 +329,100 @@ foreach ($repayments as $repayment) {
         $linkedPayrollInstallments++;
     }
 }
+// Why the schedule controls are — or are not — offered. The ERP request
+// page reads the same shared policy, so the two screens cannot disagree
+// about what is editable: ERP used to advertise "จัดการเดือนเริ่มหักใน HR"
+// from the HR row alone and land the user on a page with no form at all.
+$scheduleGate = [
+    'can_change_first_due' => false,
+    'first_due_blockers'   => [],
+    'can_reschedule'       => false,
+    'reschedule_blocker'   => null,
+    'movable'              => [],
+    'allowed_months'       => SchedulePolicy::allowedMonths(),
+];
+$advancePayrollLinkStatus = '';
+if ($detail && $selectedType === 'salary_advance') {
+    try {
+        $advanceLinkStmt = $pdo->prepare(
+            "SELECT link_status FROM hr_employee_finance_payroll_links
+              WHERE source_type='salary_advance' AND source_id=? LIMIT 1"
+        );
+        $advanceLinkStmt->execute([$selectedId]);
+        $advancePayrollLinkStatus = (string)($advanceLinkStmt->fetchColumn() ?: '');
+    } catch (Throwable $e) {
+        // Older deployments may not have the payroll-link table yet.
+        $advancePayrollLinkStatus = '';
+    }
+}
+if ($detail) {
+    $expenseStatus = (string)($expense['status'] ?? '');
+    $financeStatus = (string)$detail['status'];
+
+    if (!$canEditFinance) {
+        $scheduleGate['first_due_blockers'][] = 'ต้องเป็น CEO, Chairman หรือ Admin จึงจะแก้กำหนดชำระได้';
+    }
+    if ($financeStatus !== 'pending_disbursement') {
+        $scheduleGate['first_due_blockers'][] = 'จ่ายเงินให้พนักงานแล้ว — ช่วงนี้ต้องใช้ "เลื่อนงวดชำระ" แทน';
+    } elseif ($expense && !in_array($expenseStatus, ['submitted', 'approved'], true)) {
+        $scheduleGate['first_due_blockers'][] = 'คำขอเบิกอยู่สถานะ "' . $statusLabel($expenseStatus)
+            . '" ซึ่งเลยขั้นตอนก่อนจ่ายเงินไปแล้ว';
+    }
+    // Mirror EmployeeFinanceManagementService::assertNoPayrollLink() — a page
+    // that offers a form the service will reject is the same lie in reverse.
+    if ($linkedPayrollInstallments > 0
+        || in_array($advancePayrollLinkStatus, ['included', 'settled'], true)) {
+        $scheduleGate['first_due_blockers'][] = 'เชื่อมกับสลิปเงินเดือนแล้ว';
+    }
+    $scheduleGate['can_change_first_due'] = $scheduleGate['first_due_blockers'] === [];
+
+    if ($selectedType === 'salary_advance') {
+        $advanceBlock = SchedulePolicy::advanceBlockReason([
+            'status'              => $financeStatus,
+            'deduction_month'     => (string)$detail['first_due_month'],
+            'payroll_run_id'      => (int)($detail['payroll_run_id'] ?? 0),
+            'payroll_link_status' => $advancePayrollLinkStatus,
+        ]);
+        if ($advanceBlock === null) {
+            $scheduleGate['can_reschedule'] = true;
+            $scheduleGate['movable'][] = [
+                'id'    => 0,
+                'label' => 'เดือนที่หักคืน',
+                'month' => substr((string)$detail['first_due_month'], 0, 7),
+            ];
+        } else {
+            $scheduleGate['reschedule_blocker'] = SchedulePolicy::reasonText($advanceBlock);
+        }
+    } elseif (!SchedulePolicy::loanDisbursed($financeStatus)) {
+        $scheduleGate['reschedule_blocker'] = SchedulePolicy::reasonText(
+            $financeStatus === 'pending_disbursement'
+                ? SchedulePolicy::BLOCK_NOT_DISBURSED
+                : SchedulePolicy::BLOCK_SETTLED
+        );
+    } else {
+        $lastLoanBlock = SchedulePolicy::BLOCK_NO_SCHEDULE;
+        foreach ($repayments as $repayment) {
+            $installmentBlock = SchedulePolicy::installmentBlockReason($repayment);
+            if ($installmentBlock === null) {
+                $scheduleGate['movable'][] = [
+                    'id'    => (int)$repayment['id'],
+                    'label' => 'งวด ' . (int)$repayment['installment_no'],
+                    'month' => substr((string)$repayment['due_date'], 0, 7),
+                ];
+            } else {
+                $lastLoanBlock = $installmentBlock;
+            }
+        }
+        $scheduleGate['can_reschedule'] = $scheduleGate['movable'] !== [];
+        if (!$scheduleGate['can_reschedule']) {
+            $scheduleGate['reschedule_blocker'] = SchedulePolicy::reasonText($lastLoanBlock);
+        }
+    }
+    if (!$canEditFinance && $scheduleGate['can_reschedule']) {
+        $scheduleGate['can_reschedule'] = false;
+        $scheduleGate['reschedule_blocker'] = 'ต้องเป็น CEO, Chairman หรือ Admin จึงจะเลื่อนงวดชำระได้';
+    }
+}
 $crmBase = rtrim((string)($_ENV['CRM_BASE_URL'] ?? getenv('CRM_BASE_URL') ?: 'https://crm.tp-asset.com'), '/');
 $erpBase = rtrim((string)($_ENV['ERP_BASE_URL'] ?? getenv('ERP_BASE_URL') ?: 'https://erp.tp-asset.com'), '/');
 $page_title = 'สวัสดิการการเงินพนักงาน';
@@ -343,7 +469,7 @@ require_once __DIR__ . '/templates/header.php';
         <div class="rounded-xl border border-white/10 p-4"><p class="text-white/50">เริ่มหักงวดแรก</p><p class="text-white font-semibold mt-1"><?php echo htmlspecialchars($formatThaiMonth((string)$detail['first_due_month'])); ?></p></div>
         <div class="rounded-xl border border-white/10 p-4"><p class="text-white/50">รายการจ่ายเงิน</p><p class="mt-1"><?php if (!empty($expense['id'])): ?><a class="text-violet-300 hover:text-violet-200 font-semibold" target="_blank" rel="noopener" href="<?php echo htmlspecialchars($erpBase . '/expenses/requests/' . (int)$expense['id']); ?>"><?php echo htmlspecialchars((string)$expense['request_code']); ?> <i class="fas fa-external-link-alt text-xs"></i></a><?php else: ?><span class="text-white/60">ยังไม่เชื่อมรายการ ERP</span><?php endif; ?></p></div>
       </div>
-      <?php if ($canEditFinance && $detail['status'] === 'pending_disbursement' && in_array((string)($expense['status'] ?? ''), ['submitted', 'approved'], true)): ?>
+      <?php if ($scheduleGate['can_change_first_due']): ?>
       <div class="px-5 pb-5">
         <form method="post" class="rounded-xl border border-amber-300/25 bg-amber-400/5 p-4 grid gap-4 md:grid-cols-[1fr_1.5fr_auto] md:items-end">
           <?php echo csrfField(); ?>
@@ -363,6 +489,50 @@ require_once __DIR__ . '/templates/header.php';
           <button type="submit" class="min-h-[48px] rounded-xl bg-amber-500 hover:bg-amber-400 px-5 font-semibold text-slate-950" onclick="return confirm('ยืนยันเปลี่ยนเดือนเริ่มหัก? ระบบจะตรวจรอบเงินเดือนและสร้างตารางงวดใหม่โดยอัตโนมัติ')">บันทึกการแก้ไข</button>
         </form>
         <p class="text-xs text-white/50 mt-2">แก้ได้เฉพาะรายการที่ยังไม่จ่ายและยังไม่เชื่อมสลิป ระบบบันทึกผู้แก้ เหตุผล และข้อมูลก่อน–หลังทุกครั้ง</p>
+      </div>
+      <?php endif; ?>
+      <?php if ($scheduleGate['can_reschedule']): ?>
+      <div class="px-5 pb-5">
+        <form method="post" class="rounded-xl border border-violet-300/25 bg-violet-400/5 p-4 grid gap-4 md:grid-cols-2 lg:grid-cols-[1fr_1fr_1.5fr_auto] lg:items-end">
+          <?php echo csrfField(); ?>
+          <input type="hidden" name="action" value="reschedule_repayment">
+          <input type="hidden" name="type" value="<?php echo htmlspecialchars($selectedType); ?>">
+          <input type="hidden" name="id" value="<?php echo $selectedId; ?>">
+          <label class="block text-sm text-white/80">งวดที่จะเลื่อน
+            <select name="repayment_id" required class="mt-2 w-full min-h-[48px] rounded-xl border border-white/15 bg-slate-950 px-3 text-white">
+              <?php foreach ($scheduleGate['movable'] as $movable): ?>
+              <option value="<?php echo (int)$movable['id']; ?>"><?php echo htmlspecialchars($movable['label'] . ' · ครบกำหนด ' . $formatThaiMonth($movable['month'])); ?></option>
+              <?php endforeach; ?>
+            </select>
+          </label>
+          <label class="block text-sm text-white/80">เลื่อนไปเดือน
+            <select name="new_month" required class="mt-2 w-full min-h-[48px] rounded-xl border border-white/15 bg-slate-950 px-3 text-white">
+              <option value="">กรุณาเลือกเดือน</option>
+              <?php foreach ($scheduleGate['allowed_months'] as $allowedMonth): ?>
+              <option value="<?php echo htmlspecialchars($allowedMonth); ?>"><?php echo htmlspecialchars($formatThaiMonth($allowedMonth)); ?></option>
+              <?php endforeach; ?>
+            </select>
+          </label>
+          <label class="block text-sm text-white/80">เหตุผลการเลื่อน
+            <input type="text" name="reason" required maxlength="500" placeholder="เช่น พนักงานขอเลื่อนหนึ่งงวด" class="mt-2 w-full min-h-[48px] rounded-xl border border-white/15 bg-slate-950 px-3 text-white">
+          </label>
+          <button type="submit" class="min-h-[48px] rounded-xl bg-violet-500 hover:bg-violet-400 px-5 font-semibold text-slate-950" onclick="return confirm('ยืนยันเลื่อนกำหนดชำระ? งวดที่เหลือหลังจากงวดนี้จะเลื่อนตามไปด้วยจำนวนเดือนเท่ากัน')">บันทึกการเลื่อนงวด</button>
+        </form>
+        <p class="text-xs text-white/50 mt-2">จ่ายเงินแล้วยังเลื่อนงวดเข้า–ออกได้จนกว่าจะถึงวันครบกำหนดจริงของงวดนั้น · ยอดเงินและดอกเบี้ยไม่เปลี่ยน เลื่อนเฉพาะเดือนที่หักคืน · งวดที่เข้าสลิปเงินเดือนแล้วต้องถอนออกจากสลิปก่อน</p>
+      </div>
+      <?php elseif ($canManage && !$scheduleGate['can_change_first_due']): ?>
+      <div class="px-5 pb-5">
+        <div class="rounded-xl border border-white/10 bg-black/15 p-4">
+          <h3 class="text-white font-semibold">ทำไมตอนนี้แก้กำหนดชำระไม่ได้</h3>
+          <ul class="mt-2 space-y-1 text-sm text-white/70 list-disc list-inside">
+            <?php foreach ($scheduleGate['first_due_blockers'] as $blocker): ?>
+            <li><?php echo htmlspecialchars($blocker); ?></li>
+            <?php endforeach; ?>
+            <?php if ($scheduleGate['reschedule_blocker']): ?>
+            <li><?php echo htmlspecialchars('เลื่อนงวดชำระ: ' . $scheduleGate['reschedule_blocker']); ?></li>
+            <?php endif; ?>
+          </ul>
+        </div>
       </div>
       <?php endif; ?>
       <?php if ($canEditFinance && !in_array((string)$detail['status'], ['closed','deducted','cancelled','rejected'], true) && !$receivedRepayments): ?>
