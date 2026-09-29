@@ -28,6 +28,28 @@ $checks = [
         && str_contains($service, "'payroll'=>'หักเงินเดือน'")
         && str_contains($service, "'cash'=>'คืนเงินสด'"),
     'repayment plan edit UI is available to executives' => str_contains($page, 'change_repayment_method') && str_contains($page, 'แผนคืนเงิน'),
+
+    // Post-disbursement rescheduling (owner rule: a collection may be moved
+    // in or out until its real repayment date arrives).
+    'reschedule is a first-class service operation' => str_contains($service, 'public function rescheduleRepayment('),
+    'reschedule reuses the shared schedule policy' => str_contains($service, 'EmployeeFinanceSchedulePolicy::installmentBlockReason')
+        && str_contains($service, 'EmployeeFinanceSchedulePolicy::advanceBlockReason')
+        && str_contains($service, 'EmployeeFinanceSchedulePolicy::assertMonthInWindow'),
+    'reschedule requires a reason' => str_contains($service, 'กรุณาระบุเหตุผลที่เลื่อนงวดชำระ'),
+    'reschedule locks the whole installment tail' => str_contains($service, 'lockLoanInstallments')
+        && str_contains($service, 'FOR UPDATE'),
+    'reschedule refuses to jump over an earlier installment' => str_contains($service, 'เดือนใหม่ต้องอยู่หลังงวดก่อนหน้า'),
+    'reschedule only touches unbilled installments' => str_contains($service, "WHERE id=? AND status='scheduled' AND payroll_run_id IS NULL"),
+    'reschedule keeps due dates on the payroll calendar' => str_contains($service, 'PayrollCalendar::paymentDate'),
+    'reschedule keeps first_due_month in step' => str_contains($service, "DATE_FORMAT(MIN(r.due_date),'%Y-%m')"),
+    'reschedule is audited and pushed to the requester' => str_contains($service, "'repayment_rescheduled'")
+        && str_contains($service, 'enqueueRescheduleNotification'),
+    'reschedule UI is wired to the service' => str_contains($page, "=== 'reschedule_repayment'")
+        && str_contains($page, 'rescheduleRepayment(')
+        && str_contains($page, 'name="repayment_id"')
+        && str_contains($page, 'name="new_month"'),
+    'the page explains why the schedule is locked' => str_contains($page, 'ทำไมตอนนี้แก้กำหนดชำระไม่ได้')
+        && str_contains($page, "first_due_blockers"),
 ];
 
 $passed = 0;
