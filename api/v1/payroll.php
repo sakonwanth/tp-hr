@@ -30,7 +30,7 @@ $slipSelect = "
            s.total_deductions, s.net_salary,
            s.absent_days, s.late_count_30, s.late_count_60,
            s.absence_deduction, s.lateness_deduction,
-           r.payroll_month, r.status AS run_status, r.approved_at
+           r.payroll_month, r.pay_day, r.status AS run_status, r.approved_at
     FROM payroll_slips s
     JOIN payroll_runs r ON r.id = s.payroll_run_id
     JOIN users u ON u.id = s.user_id
@@ -51,7 +51,7 @@ if ($resource === 'payroll-runs') {
         }
         $stmt = $pdo->prepare($sql . " ORDER BY u.employee_code ASC");
         $stmt->execute($params);
-        ApiAuth::success(['data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+        ApiAuth::success(['data' => \TpCommon\Hr\PayrollPaymentDate::enrich($pdo, $stmt->fetchAll(PDO::FETCH_ASSOC))]);
     }
     if ($id > 0) {
         if ($payrollUnscopedForbidden) {
@@ -120,7 +120,7 @@ if ($resource === 'payslips') {
         } elseif ($payrollUnscopedForbidden) {
             ApiAuth::fail(403, 'Reading payslips by id requires payroll.read_all (or *) or a service user bound to the API key');
         }
-        ApiAuth::success(['data' => $row]);
+        ApiAuth::success(['data' => \TpCommon\Hr\PayrollPaymentDate::enrich($pdo, [$row])[0]]);
     }
     if ($payrollUnscopedForbidden) {
         ApiAuth::fail(403, 'Listing payslips requires payroll.read_all (or *) or a service user bound to the API key');
@@ -141,7 +141,7 @@ if ($resource === 'payslips') {
     }
     $stmt = $pdo->prepare($slipSelect . $extra . " ORDER BY r.payroll_month DESC, u.employee_code ASC LIMIT 2000");
     $stmt->execute($params);
-    ApiAuth::success(['data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+    ApiAuth::success(['data' => \TpCommon\Hr\PayrollPaymentDate::enrich($pdo, $stmt->fetchAll(PDO::FETCH_ASSOC))]);
 }
 
 ApiAuth::fail(404, 'Endpoint not found');
