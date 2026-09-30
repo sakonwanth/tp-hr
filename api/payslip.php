@@ -87,7 +87,7 @@ function downloadPDF(PDO $pdo, array $user, int $slipId): void {
     }
 
     $stmt = $pdo->prepare("
-        SELECT ps.*, pr.payroll_month, pr.status as run_status, pr.paid_date,
+        SELECT ps.*, pr.payroll_month, pr.pay_day, pr.status as run_status, pr.paid_date,
                emp.first_name_th, emp.last_name_th, emp.employee_code, emp.department, emp.position
         FROM payroll_slips ps
         JOIN payroll_runs pr ON ps.payroll_run_id = pr.id
@@ -96,6 +96,7 @@ function downloadPDF(PDO $pdo, array $user, int $slipId): void {
     ");
     $stmt->execute([$slipId, $user['id']]);
     $slip = $stmt->fetch();
+    if ($slip) $slip['payment_date'] = \TpCommon\Hr\PayrollPaymentDate::resolve($pdo, $slip);
 
     if (!$slip) {
         http_response_code(404);
@@ -184,6 +185,7 @@ function generatePayslipHTML($slip, $monthName, $year) {
     <div class="container">
         <div class="header">
             <h1>' . htmlspecialchars($companyName) . '</h1>
+            <p>วันที่จ่ายเงิน: ' . htmlspecialchars($slip['payment_date'] ?? '') . '</p>
             <h2>ใบแสดงรายได้ประจำเดือน ' . $monthName . ' ' . $year . '</h2>
         </div>
         
@@ -305,8 +307,8 @@ function getSlipList($pdo, $user) {
     $year = (int)($_GET['year'] ?? date('Y'));
     
     $stmt = $pdo->prepare("
-        SELECT ps.id, ps.gross_salary, ps.total_income, ps.total_deductions, ps.net_salary,
-               pr.payroll_month, pr.status, pr.paid_date
+        SELECT ps.id, ps.payroll_run_id, ps.user_id, ps.gross_salary, ps.total_income, ps.total_deductions, ps.net_salary,
+               pr.payroll_month, pr.pay_day, pr.status, pr.paid_date
         FROM payroll_slips ps
         JOIN payroll_runs pr ON ps.payroll_run_id = pr.id
         WHERE ps.user_id = ? AND YEAR(pr.payroll_month) = ?
@@ -314,7 +316,7 @@ function getSlipList($pdo, $user) {
         ORDER BY pr.payroll_month DESC
     ");
     $stmt->execute([$user['id'], $year]);
-    $slips = $stmt->fetchAll();
+    $slips = \TpCommon\Hr\PayrollPaymentDate::enrich($pdo, $stmt->fetchAll(PDO::FETCH_ASSOC));
     
     echo json_encode(['success' => true, 'slips' => $slips]);
 }
@@ -328,7 +330,7 @@ function getSlipDetail($pdo, $user) {
     $slipId = (int)($_GET['slip_id'] ?? 0);
     
     $stmt = $pdo->prepare("
-        SELECT ps.*, pr.payroll_month, pr.status as run_status, pr.paid_date,
+        SELECT ps.*, pr.payroll_month, pr.pay_day, pr.status as run_status, pr.paid_date,
                emp.first_name_th, emp.last_name_th, emp.employee_code, emp.department, emp.position
         FROM payroll_slips ps
         JOIN payroll_runs pr ON ps.payroll_run_id = pr.id
@@ -337,6 +339,7 @@ function getSlipDetail($pdo, $user) {
     ");
     $stmt->execute([$slipId, $user['id']]);
     $slip = $stmt->fetch();
+    if ($slip) $slip['payment_date'] = \TpCommon\Hr\PayrollPaymentDate::resolve($pdo, $slip);
     
     if (!$slip) {
         http_response_code(404);

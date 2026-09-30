@@ -44,16 +44,9 @@ $month_label_en = date('F Y', $pm);
 $period_label = date('m/Y', $pm);
 $ytd_year = (int)date('Y', $pm);
 
-// วันที่จ่ายเงินเดือน — logic เดียวกับ CRM payroll_print.php
-$pay_day_int = (int)($slip['pay_day'] ?? 25);
-if ($pay_day_int < 1) {
-    $pay_day_int = 1;
-}
-$last_day_of_month = (int)date('t', $pm);
-if ($pay_day_int > $last_day_of_month) {
-    $pay_day_int = $last_day_of_month;
-}
-$pay_date = date('Y-m-', $pm) . str_pad((string)$pay_day_int, 2, '0', STR_PAD_LEFT);
+$pay_date = \TpCommon\Hr\PayrollPaymentDate::resolve(
+    $pdo, $slip
+);
 $pay_date_th = (int)date('j', strtotime($pay_date)) . ' ' . thaiMonth((int)date('n', strtotime($pay_date))) . ' ' . ((int)date('Y', strtotime($pay_date)) + 543);
 $pay_date_en = date('j F Y', strtotime($pay_date));
 

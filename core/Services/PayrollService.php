@@ -2179,6 +2179,11 @@ class PayrollService
             }
             $runId = $existing ? (int)$existing['id'] : 0;
             if ($runId > 0) {
+                $lockRun = $this->pdo->prepare('SELECT status FROM payroll_runs WHERE id=? FOR UPDATE');
+                $lockRun->execute([$runId]);
+                if (!in_array($lockRun->fetchColumn(), ['draft', 'calculated'], true)) {
+                    throw new \RuntimeException('สถานะรอบเปลี่ยนแล้ว กรุณาโหลดหน้าใหม่ก่อนคำนวณ');
+                }
                 $this->pdo->prepare("UPDATE hr_employee_finance_payroll_links SET link_status='reversed',reversed_at=NOW(),settled_at=NULL WHERE payroll_run_id=? AND link_status='included'")->execute([$runId]);
                 $this->pdo->prepare("DELETE FROM payroll_slips WHERE payroll_run_id = ?")->execute([$runId]);
                 $this->pdo->prepare("UPDATE payroll_runs SET pay_day = ? WHERE id = ?")->execute([$payDay, $runId]);
