@@ -927,17 +927,20 @@ function startCheckin(type) {
 }
 
 // Close modal
-function closeCheckinModal() {
+function closeCheckinModal(preservePhoto = false) {
     const modal = document.getElementById('checkin-modal');
     if (typeof uiCloseModal === 'function') uiCloseModal('checkin-modal');
     else modal.classList.add('hidden');
     stopCamera();
-    resetModal();
+    if (!preservePhoto) resetModal();
 }
 
 // Reset modal state
 function resetModal() {
     photoData = null;
+    const confirmButton = document.getElementById('btn-confirm');
+    confirmButton.disabled = false;
+    confirmButton.innerHTML = '<i class="fas fa-check mr-2"></i>ยืนยัน';
     document.getElementById('captured-photo').classList.add('hidden');
     document.getElementById('camera-preview').classList.remove('hidden');
     document.getElementById('btn-capture').classList.remove('hidden');
@@ -1024,8 +1027,11 @@ function capturePhoto() {
     stopCamera();
 }
 
+let checkinSubmitting = false;
 // Confirm check-in (รองรับ outside_reason retry flow)
 async function confirmCheckin(outsideReason = null) {
+    if (checkinSubmitting) return;
+    checkinSubmitting = true;
     const btn = document.getElementById('btn-confirm');
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>กำลังบันทึก...';
@@ -1049,6 +1055,7 @@ async function confirmCheckin(outsideReason = null) {
 
         if (result.success) {
             const isPending = !!(result.data && result.data.pending_approval);
+            closeOffsiteModal();
             closeCheckinModal();
             if (isPending) {
                 showToast('success', 'สำเร็จ', result.message || 'ส่งคำขอเรียบร้อย รอผู้อนุมัติ');
@@ -1062,16 +1069,16 @@ async function confirmCheckin(outsideReason = null) {
         // Error paths
         if (result.data && result.data.requires_outside_reason) {
             // ปิด checkin modal ก่อน แล้วเปิด offsite modal (retry)
-            closeCheckinModal();
-            openOffsiteModal(result.error);
+            closeCheckinModal(true);
+            openOffsiteModal(result.message || result.error);
             return;
         }
-        showToast('error', 'ผิดพลาด', result.error || 'เกิดข้อผิดพลาด');
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-check mr-2"></i>ยืนยัน';
+        showToast('error', 'ผิดพลาด', result.message || result.error || 'เกิดข้อผิดพลาด');
     } catch (err) {
         console.error('Check-in error:', err);
         showToast('error', 'ผิดพลาด', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+    } finally {
+        checkinSubmitting = false;
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-check mr-2"></i>ยืนยัน';
     }
@@ -1096,9 +1103,8 @@ function submitOffsite() {
         document.getElementById('offsite-reason').focus();
         return;
     }
-    closeOffsiteModal();
     // Re-submit with reason — photoData still in memory
-    confirmCheckin(reason);
+    return confirmCheckin(reason);
 }
 
 /* =====================================================
