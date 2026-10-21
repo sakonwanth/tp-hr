@@ -63,6 +63,7 @@ class OutsideAttendanceService
             }
 
             $this->markRequestReviewed($requestId, 'APPROVED', $reviewerId, $remarks, (int)$result['attendance_id']);
+            $result['summary'] = array_replace($result['summary'], $this->refreshWorkSummary((int)$result['attendance_id']));
             $this->pdo->commit();
 
             if (function_exists('crm_line_notify_outside_attendance_decision')) {
@@ -106,6 +107,9 @@ class OutsideAttendanceService
             $this->rollbackPendingStamp($request);
 
             $this->markRequestReviewed($requestId, 'REJECTED', $reviewerId, $remarks, (int)($request['attendance_id'] ?? 0) ?: null);
+            if (!empty($request['attendance_id'])) {
+                $this->refreshWorkSummary((int)$request['attendance_id']);
+            }
             $this->pdo->commit();
 
             if (function_exists('crm_line_notify_outside_attendance_decision')) {
@@ -239,8 +243,8 @@ class OutsideAttendanceService
         $checkOutAt = AttendanceService::normalizeDateTime($date, (string)$request['request_time']);
         $attendance = $this->lockAttendanceForCheckout($request);
 
-        if (!$attendance || empty($attendance['check_in_time'])) {
-            throw new OutsideAttendanceException('ยังไม่มีเวลาเข้างาน จึงไม่สามารถอนุมัติเวลาออกงานได้', 409);
+        if (!$attendance) {
+            throw new OutsideAttendanceException('ไม่พบรายการลงเวลาของคำขอนี้', 409);
         }
         if (!empty($attendance['check_out_time'])
             && !$this->sameCapturedTime($attendance['check_out_time'], $checkOutAt)) {
@@ -248,11 +252,9 @@ class OutsideAttendanceService
         }
 
         $shift = $attendanceService->getShiftById((int)($attendance['shift_id'] ?? 0));
-        $summary = $attendanceService->summarizeWork(
-            $attendance['check_in_time'] ?? null,
-            $checkOutAt,
-            $shift,
-            (string)$attendance['attendance_date']
+        $summary = $attendanceService->summarizeRecordedWork(
+            array_replace($attendance, ['check_out_time' => $checkOutAt, 'check_outside_status' => 'APPROVED']),
+            $shift
         );
 
         $this->pdo->prepare("
@@ -298,6 +300,26 @@ class OutsideAttendanceService
             'check_out_time' => $checkOutAt,
             'summary' => $summary,
         ];
+    }
+
+    /** Called under the existing attendance lock, after either direction changes. */
+    private function refreshWorkSummary(int $attendanceId): array
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM hr_attendances WHERE id = ? FOR UPDATE");
+        $stmt->execute([$attendanceId]);
+        $attendance = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$attendance) throw new OutsideAttendanceException('ไม่พบรายการลงเวลา', 409);
+        $service = new AttendanceService($this->pdo);
+        $summary = $service->summarizeRecordedWork(
+            $attendance,
+            $service->getShiftById((int)($attendance['shift_id'] ?? 0))
+        );
+        $directions = [$attendance['check_in_outside_status'] ?? null, $attendance['check_outside_status'] ?? null];
+        $status = in_array('PENDING', $directions, true) ? 'PENDING'
+            : (in_array('REJECTED', $directions, true) ? 'REJECTED' : 'APPROVED');
+        $this->pdo->prepare("UPDATE hr_attendances SET work_minutes=?, break_minutes=?, ot_minutes=?, early_leave_minutes=?, offsite_status=? WHERE id=?")
+            ->execute([$summary['work_minutes'], $summary['break_minutes'], $summary['ot_minutes'], $summary['early_leave_minutes'], $status, $attendanceId]);
+        return $summary;
     }
 
     private function lockRequest(int $requestId): array

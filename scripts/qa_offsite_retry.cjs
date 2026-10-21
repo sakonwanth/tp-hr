@@ -2,6 +2,24 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
+// Render the production PHP CTA branch, including pending entry.
+const ctaSource = fs.readFileSync(`${__dirname}/../checkin.php`, 'utf8');
+const ctaStart = ctaSource.indexOf("<?php if (!empty($today_attendance['check_out_time'])");
+assert.ok(ctaStart >= 0, 'CTA fixture anchor exists');
+const cta = ctaSource.slice(ctaStart, ctaSource.indexOf('<?php endif; ?>', ctaStart) + '<?php endif; ?>'.length);
+for (const state of [
+    { in: null, out: null, expected: 'btn-checkin' },
+    { in: '2026-10-22 08:30:00', out: null, expected: 'btn-checkout' },
+    { in: '2026-10-22 08:30:00', out: '2026-10-22 17:30:00', expected: 'รออนุมัติคำขอนอกสถานที่' },
+    { in: null, out: '2026-10-22 17:30:00', expected: 'ติดต่อ HR' },
+]) {
+    const data = JSON.stringify({check_in_time: state.in, check_out_time: state.out});
+    const php = "$today_attendance=json_decode('" + data + "',true); $pending_in=$pending_out=$pending_outside_in=$pending_outside_out=true; eval('?>'.base64_decode('" + Buffer.from(cta).toString('base64') + "'));";
+    const html = require('node:child_process').execFileSync(process.env.PHP_BIN || 'php', ['-r', php], {encoding:'utf8'});
+    assert.ok(html.includes(state.expected), 'pending CTA renders ' + state.expected);
+    if (state.out) assert.ok(!html.includes('id="btn-checkout"'), 'submitted checkout cannot be repeated');
+}
+console.log('PASS pending-entry checkout CTA, completed pending pair and rejected-entry correction');
 const source = fs.readFileSync(`${__dirname}/../checkin.php`, 'utf8');
 const lifecycle = source.slice(source.indexOf('// Close modal\n'), source.indexOf('// Get location\n'));
 const flow = source.slice(source.indexOf('// Confirm check-in'), source.indexOf('/* =====================================================', source.indexOf('// Confirm check-in')));

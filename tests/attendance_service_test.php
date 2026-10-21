@@ -77,4 +77,16 @@ assertSameValue('2026-04-24 18:45:00', $summary['check_out_at'], 'short checkout
 assertSameValue('LATE', $summary['status'], 'summary carries late status');
 assertSameValue(539, $summary['work_minutes'], 'summary work minutes');
 
+$recorded = ['attendance_date'=>'2026-04-24', 'check_in_time'=>'2026-04-24 08:30:00', 'check_out_time'=>'2026-04-24 17:30:00'];
+assertSameValue(480, $service->summarizeRecordedWork($recorded, $shift)['work_minutes'], 'ordinary pair counts work');
+foreach (['check_in_outside_status','check_outside_status'] as $direction) {
+    foreach (['PENDING','REJECTED'] as $state) {
+        assertSameValue(
+            ['work_minutes'=>0,'break_minutes'=>0,'ot_minutes'=>0,'early_leave_minutes'=>0],
+            $service->summarizeRecordedWork($recorded + [$direction=>$state], $shift),
+            "$direction $state cannot finalize totals"
+        );
+    }
+}
+assertSameValue(0, $service->summarizeRecordedWork(array_replace($recorded,['check_in_time'=>null]),$shift)['early_leave_minutes'], 'missing entry cannot accrue early leave');
 echo "AttendanceService regression fixtures passed." . PHP_EOL;

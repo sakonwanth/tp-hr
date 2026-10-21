@@ -65,6 +65,17 @@ class AttendanceService
         );
     }
 
+    /** Only confirmed timestamps contribute to work/OT/early-leave totals. */
+    public function summarizeRecordedWork(array $attendance, ?array $shift): array
+    {
+        if (empty($attendance['check_in_time']) || empty($attendance['check_out_time'])
+            || in_array($attendance['check_in_outside_status'] ?? null, ['PENDING', 'REJECTED'], true)
+            || in_array($attendance['check_outside_status'] ?? null, ['PENDING', 'REJECTED'], true)) {
+            return ['work_minutes' => 0, 'break_minutes' => 0, 'ot_minutes' => 0, 'early_leave_minutes' => 0];
+        }
+        return $this->summarizeWork($attendance['check_in_time'], $attendance['check_out_time'], $shift, $attendance['attendance_date']);
+    }
+
     public function summarizeAttendance(
         array $user,
         ?array $shift,

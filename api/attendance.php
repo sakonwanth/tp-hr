@@ -164,7 +164,7 @@ function handleCheckIn(PDO $pdo, array $user, array $input): void {
                     'pending_approval' => true,
                     'request_id'       => $pending['request_id'],
                     'attendance_id'    => $pending['attendance_id'],
-                    'check_in_time'    => date('H:i:s'),
+                    'check_in_time'    => substr($pending['request_time'], 11, 8),
                 ], 'ส่งคำขอลงเวลาเข้างานนอกสถานที่เรียบร้อยแล้ว รอผู้อนุมัติ');
             }
             apiError('คุณไม่ได้อยู่ในพื้นที่ที่อนุญาตให้ลงเวลา กรุณาตรวจสอบตำแหน่งของคุณ');
@@ -189,6 +189,10 @@ function handleCheckIn(PDO $pdo, array $user, array $input): void {
             $pdo->rollBack();
             apiError('คุณได้ลงเวลาเข้างานวันนี้แล้ว', 409);
         }
+        if (!empty($existing['check_out_time'])) {
+            $pdo->rollBack();
+            apiError('มีเวลาออกงานแล้ว กรุณาขอแก้ไขเวลาเข้างานผ่าน HR', 409);
+        }
 
         // planned_start_time may have changed since the initial validation read.
         $checkInSummary = $attendanceService->determineCheckIn($user, $shift, $checkInAt, PlannedLateApprovalService::effectiveStart($existing));
@@ -199,6 +203,8 @@ function handleCheckIn(PDO $pdo, array $user, array $input): void {
         $stmt = $pdo->prepare("
             UPDATE hr_attendances SET
                 check_in_time = ?,
+                offsite_status = check_outside_status,
+                check_in_outside_status = NULL,
                 check_in_type = 'GPS',
                 check_in_latitude = ?,
                 check_in_longitude = ?,
@@ -273,8 +279,8 @@ function createOutsideLocationRequest(
     ?string $photo,
     string $reason
 ): array {
-    $requestDate = date('Y-m-d');
     $requestTime = date('Y-m-d H:i:s');
+    $requestDate = substr($requestTime, 0, 10);
 
     if ($requestType === 'CHECK_OUT' && $attendanceId) {
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM hr_attendance_outside_requests WHERE attendance_id = ? AND request_type = ? AND status = 'PENDING'");
@@ -336,7 +342,7 @@ function createOutsideLocationRequest(
         crm_line_notify_outside_attendance_requested($pdo, $requestId);
     }
 
-    return ['request_id' => $requestId, 'attendance_id' => $attendanceId, 'photo_path' => $photoPath];
+    return ['request_id' => $requestId, 'attendance_id' => $attendanceId, 'photo_path' => $photoPath, 'request_time' => $requestTime];
 }
 
 /** Stamp the captured request time immediately; approval only validates that stamp later. */
@@ -352,6 +358,7 @@ function stampPendingOutsideAttendance(
 
     if ($requestType === 'CHECK_IN') {
         if ($attendance && !empty($attendance['check_in_time'])) apiError('คุณได้ลงเวลาเข้างานวันนี้แล้ว', 409);
+        if (!empty($attendance['check_out_time'])) apiError('มีเวลาออกงานแล้ว กรุณาขอแก้ไขเวลาเข้างานผ่าน HR', 409);
         if ($attendance) {
             $pdo->prepare("UPDATE hr_attendances SET check_in_time=?, check_in_type='GPS', check_in_latitude=?, check_in_longitude=?, check_in_location_id=NULL, check_in_photo=?, check_in_ip=?, is_offsite=1, offsite_status='PENDING', check_in_outside_status='PENDING', offsite_reason=?, status='PENDING', updated_at=NOW() WHERE id=?")
                 ->execute([$requestTime, $latitude, $longitude, $photoPath, $_SERVER['REMOTE_ADDR'] ?? '', $reason, (int)$attendance['id']]);
@@ -385,11 +392,6 @@ function handleCheckOut(PDO $pdo, array $user, array $input): void {
 
     if (!$attendance || !$attendance['check_in_time']) {
         apiError('คุณยังไม่ได้ลงเวลาเข้างานวันนี้');
-    }
-    $pendingCheckIn = $pdo->prepare("SELECT 1 FROM hr_attendance_outside_requests WHERE user_id=? AND request_date=CURDATE() AND request_type='CHECK_IN' AND status='PENDING' LIMIT 1");
-    $pendingCheckIn->execute([(int)$user['id']]);
-    if ($pendingCheckIn->fetchColumn()) {
-        apiError('คำขอลงเวลาเข้างานนอกสถานที่ยังรออนุมัติ จึงยังลงเวลาออกไม่ได้', 409);
     }
     if ($attendance['check_out_time']) {
         apiError('คุณได้ลงเวลาออกงานวันนี้แล้ว');
@@ -427,7 +429,7 @@ function handleCheckOut(PDO $pdo, array $user, array $input): void {
                     'pending_approval' => true,
                     'request_id'       => $pending['request_id'],
                     'attendance_id'    => $pending['attendance_id'],
-                    'check_out_time'   => date('H:i:s'),
+                    'check_out_time'   => substr($pending['request_time'], 11, 8),
                 ], 'ส่งคำขอลงเวลาออกงานนอกสถานที่เรียบร้อยแล้ว รอผู้อนุมัติ');
             }
             apiError('คุณไม่ได้อยู่ในพื้นที่ที่อนุญาตให้ลงเวลา กรุณาตรวจสอบตำแหน่งของคุณ');
@@ -459,7 +461,7 @@ function handleCheckOut(PDO $pdo, array $user, array $input): void {
 
         $attendanceService = new AttendanceService($pdo);
         $shift = $attendanceService->getShiftById((int)($attendance['shift_id'] ?? 0));
-        $workSummary = $attendanceService->summarizeWork($attendance['check_in_time'], $checkOutAt, $shift, (string)$attendance['attendance_date']);
+        $workSummary = $attendanceService->summarizeRecordedWork(array_replace($attendance, ['check_out_time' => $checkOutAt, 'check_outside_status' => null]), $shift);
         $workMinutes = (int)$workSummary['work_minutes'];
         $breakMinutes = (int)$workSummary['break_minutes'];
         $otMinutes = (int)$workSummary['ot_minutes'];
@@ -468,6 +470,8 @@ function handleCheckOut(PDO $pdo, array $user, array $input): void {
     $stmt = $pdo->prepare("
         UPDATE hr_attendances SET
             check_out_time = ?,
+            offsite_status = CASE WHEN check_in_outside_status IS NOT NULL THEN check_in_outside_status WHEN check_outside_status = 'REJECTED' THEN NULL ELSE offsite_status END,
+            check_outside_status = NULL,
             check_out_type = 'GPS',
             check_out_latitude = ?,
             check_out_longitude = ?,

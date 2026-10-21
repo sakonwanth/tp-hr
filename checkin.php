@@ -421,7 +421,9 @@ require_once __DIR__ . '/templates/header.php';
                 
                 <!-- Check-in/Check-out Buttons -->
                 <div class="flex flex-col items-center gap-6">
-                    <?php if (!$today_attendance || !$today_attendance['check_in_time']): ?>
+                    <?php if (!empty($today_attendance['check_out_time']) && empty($today_attendance['check_in_time'])): ?>
+                        <p class="text-amber-200 text-center">บันทึกเวลาออกแล้ว · กรุณาติดต่อ HR เพื่อแก้ไขเวลาเข้า</p>
+                    <?php elseif (!$today_attendance || !$today_attendance['check_in_time']): ?>
                         <!-- Check-in Button -->
                         <button id="btn-checkin" type="button"
                                 onclick="startCheckin('in')"
@@ -430,16 +432,6 @@ require_once __DIR__ . '/templates/header.php';
                             <span class="text-lg font-bold whitespace-nowrap">ลงเวลาเข้า</span>
                         </button>
                         
-                    <?php elseif ($pending_in): ?>
-                        <div class="tp-checkin-primary-action--done text-amber-200 flex items-center justify-center gap-3">
-                            <i class="fas fa-hourglass-half text-4xl" aria-hidden="true"></i>
-                            <span class="text-base font-semibold text-center px-2">รออนุมัติเวลาเข้างานนอกสถานที่</span>
-                        </div>
-                    <?php elseif ($pending_out): ?>
-                        <div class="tp-checkin-primary-action--done text-amber-200 flex items-center justify-center gap-3">
-                            <i class="fas fa-hourglass-half text-4xl" aria-hidden="true"></i>
-                            <span class="text-base font-semibold text-center px-2">รออนุมัติเวลาออกงานนอกสถานที่</span>
-                        </div>
                     <?php elseif (!$today_attendance['check_out_time']): ?>
                         <!-- Check-out Button -->
                         <button id="btn-checkout" type="button"
@@ -449,6 +441,11 @@ require_once __DIR__ . '/templates/header.php';
                             <span class="text-lg font-bold whitespace-nowrap">ลงเวลาออก</span>
                         </button>
                         
+                    <?php elseif ($pending_in || $pending_out): ?>
+                        <div class="tp-checkin-primary-action--done text-amber-200 flex items-center justify-center gap-3">
+                            <i class="fas fa-hourglass-half text-4xl" aria-hidden="true"></i>
+                            <span class="text-base font-semibold text-center px-2">บันทึกเข้า–ออกแล้ว · รออนุมัติคำขอนอกสถานที่</span>
+                        </div>
                     <?php else: ?>
                         <!-- All Done -->
                         <div class="tp-checkin-primary-action--done text-white flex items-center justify-center gap-3">

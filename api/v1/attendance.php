@@ -477,6 +477,10 @@ try {
             $pdo->rollBack();
             ApiAuth::fail(409, 'Already checked in today');
         }
+        if (!empty($row['check_out_time'])) {
+            $pdo->rollBack();
+            ApiAuth::fail(409, 'Checkout already recorded; request an HR attendance correction');
+        }
         $shift = $row && !empty($row['shift_id'])
             ? $attendanceService->getShiftById((int)$row['shift_id'])
             : $attendanceService->getDefaultShift();
@@ -494,6 +498,7 @@ try {
                 UPDATE hr_attendances
                 SET check_in_time=?, check_in_type=?, check_in_latitude=?, check_in_longitude=?,
                     check_in_location_id=?, check_in_ip=?, late_minutes=?, status=?,
+                    offsite_status=check_outside_status, check_in_outside_status=NULL,
                     remarks = COALESCE(NULLIF(?, ''), remarks)
                 WHERE id=?
             ")->execute([$time, $type, $lat, $lng, $locId, $ip, $lateMinutes, $checkinStatus, $remarks, (int)$row['id']]);
@@ -509,7 +514,7 @@ try {
             $newId = (int)$pdo->lastInsertId();
         }
     } else { // checkout
-        if (!$row) {
+        if (!$row || empty($row['check_in_time'])) {
             $pdo->rollBack();
             ApiAuth::fail(409, 'No check-in found for today');
         }
@@ -518,12 +523,14 @@ try {
             ApiAuth::fail(409, 'Already checked out today');
         }
         $shift = $attendanceService->getShiftById((int)($row['shift_id'] ?? 0));
-        $workSummary = $attendanceService->summarizeWork($row['check_in_time'] ?? null, $time, $shift, $date);
+        $workSummary = $attendanceService->summarizeRecordedWork(array_replace($row, ['check_out_time' => $time, 'check_outside_status' => null]), $shift);
         $pdo->prepare("
             UPDATE hr_attendances
             SET check_out_time=?, check_out_type=?, check_out_latitude=?, check_out_longitude=?,
                 check_out_location_id=?, check_out_ip=?, work_minutes=?, break_minutes=?,
                 ot_minutes=?, early_leave_minutes=?,
+                offsite_status=CASE WHEN check_in_outside_status IS NOT NULL THEN check_in_outside_status WHEN check_outside_status='REJECTED' THEN NULL ELSE offsite_status END,
+                check_outside_status=NULL,
                 remarks = COALESCE(NULLIF(?, ''), remarks)
             WHERE id=?
         ")->execute([
