@@ -57,9 +57,20 @@ $workplaces=$service->rows('workplaces');
 <h2 class="text-xl"><?= $id?'แก้ไขรายการ':'เพิ่มรายการ' ?>: <?= $tabs[$tab] ?></h2>
 <?= csrfField() ?><input type="hidden" name="version" value="<?= $esc($version) ?>">
 <div><span class="block mb-2">รหัส (อัตโนมัติ)</span><p><?= $esc($row['code'] ?? 'ระบบจะสร้างรหัสเมื่อบันทึก') ?></p></div>
+<?php if ($tab==='locations'): ?>
+<section id="location-picker" class="space-y-3" aria-label="เลือกพิกัดลงเวลา">
+<input type="hidden" id="latitude" name="latitude" value="<?= $esc($row['latitude'] ?? '') ?>">
+<input type="hidden" id="longitude" name="longitude" value="<?= $esc($row['longitude'] ?? '') ?>">
+<p>แตะบนแผนที่หรือลากหมุดเพื่อเลือกพิกัด วงสีม่วงคือพื้นที่ที่อนุญาตให้ลงเวลา</p>
+<div class="flex flex-wrap gap-3"><button type="button" id="use-current-location" class="btn-primary min-h-[48px] px-4">ใช้ตำแหน่งปัจจุบัน</button><button type="button" id="use-map-center" class="min-h-[48px] px-4 rounded-xl bg-white/10">เลือกจุดกึ่งกลางแผนที่</button></div>
+<div id="location-map" role="region" aria-label="แผนที่เลือกพิกัด ใช้ลูกศรเลื่อนแผนที่แล้วกดเลือกจุดกึ่งกลาง" style="height:360px;max-height:60vh;min-height:240px;position:relative;z-index:0;border-radius:12px"></div>
+<p id="location-summary" class="break-words"></p><p id="location-status" role="status" aria-live="polite" class="text-white/70"></p>
+<noscript><p role="alert">กรุณาเปิด JavaScript เพื่อเลือกพิกัดและดูวงรัศมีลงเวลา</p></noscript>
+</section>
+<?php endif; ?>
 <?php $fields=['name'=>['ชื่อ'.$tabs[$tab],'text',100]];
 $fields['address']=['ที่อยู่','textarea',5000];
-if ($tab==='locations') $fields += ['latitude'=>['ละติจูด (-90 ถึง 90)','number',null],'longitude'=>['ลองจิจูด (-180 ถึง 180)','number',null],'radius_meters'=>['รัศมีที่อนุญาต (เมตร)','number',null]];
+if ($tab==='locations') $fields += ['radius_meters'=>['รัศมีที่อนุญาต (เมตร)','number',null]];
 $fields['description']=['รายละเอียด','textarea',5000];
 foreach ($fields as $field=>$config): ?>
 <div><label for="<?= $field ?>" class="block mb-2"><?= $config[0] ?></label>
@@ -92,6 +103,11 @@ $historyValue=static function($field,$value) use ($workplaces) {
 <?php endif; ?>
 </div>
 <style>.org-save input,.org-save select,.org-save textarea { scroll-margin-block: 110px; } .org-save button:disabled { opacity: .6; cursor: wait; }</style>
+<?php if ($ready && $tab==='locations'): ?>
+<link rel="stylesheet" href="/assets/vendor/leaflet/leaflet.css">
+<script src="/assets/vendor/leaflet/leaflet.js"></script>
+<script src="/assets/js/organization-map.js?v=20261105-1"></script>
+<?php endif; ?>
 <script>
 document.getElementById('organization-error')?.focus();
 document.querySelectorAll('.org-save').forEach(form => form.addEventListener('submit', () => {
