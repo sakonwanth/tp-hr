@@ -1,4 +1,13 @@
-# HR organization management
+# HR workplace and GPS management
+
+## Scope correction (2026-11-05)
+
+The user clarified that “ตำแหน่ง” means geographic location, not job title. The current HR menu is **สถานที่ทำงานและพิกัดลงเวลา**, with only workplaces and GPS points. Old job-title/assignment tab links redirect to workplaces; employee job titles remain editable in the employee form. Existing catalog tables and audit history are retained without deletion.
+
+Workplace and point codes are generated on the server under the catalog transaction lock (`WP-` / `LOC-` plus a sequence). Users do not enter codes, submitted overrides are ignored, and edits retain existing codes. GPS revisions preserve the original attendance location IDs. No migration, payroll change, Check-in policy change, or temporary QA grant is needed.
+
+The sections below document the earlier release and its historical verification; references to four tabs and central job-title assignment describe the superseded UI.
+
 
 Implemented and deployed 2026-11-05. Runtime release: HR `013d06de49ffa87a5f8a9b959292df67f6eff494`, Check-in `90d14a7fd14015e4a4b0a32a9e0f97968202046d`. Production migration and read-only real-account verification passed. The initial release used read-only sessions. A subsequent authorized run created disposable TEST accounts and verified normal HR password login and successful HR attendance writes; see the end-to-end QA section below. Dedicated Check-in login still excludes TEST accounts, and SSO/provider login was not tested.
 

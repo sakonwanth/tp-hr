@@ -47,7 +47,6 @@ require dirname(__DIR__) . '/templates/header.php';
 <?php if (!$ready): ?><div role="alert" class="native-card p-6">ยังไม่พร้อมใช้งาน กรุณาให้ผู้ดูแลระบบติดตั้งการปรับปรุงฐานข้อมูลโครงสร้างองค์กรก่อน</div>
 <?php else:
 $workplaces=$service->rows('workplaces');
-$positions=$service->rows('positions');
 ?>
 <section class="native-card p-4 sm:p-6 space-y-4">
 <div class="flex flex-wrap items-center justify-between gap-2"><h2 class="text-xl"><?= $tabs[$tab] ?></h2><a class="btn-primary inline-flex items-center min-h-[48px] px-4" href="?tab=<?= $tab ?>#editor">เพิ่มรายการ</a></div>
@@ -59,9 +58,9 @@ $positions=$service->rows('positions');
 <?= csrfField() ?><input type="hidden" name="version" value="<?= $esc($version) ?>">
 <div><span class="block mb-2">รหัส (อัตโนมัติ)</span><p><?= $esc($row['code'] ?? 'ระบบจะสร้างรหัสเมื่อบันทึก') ?></p></div>
 <?php $fields=['name'=>['ชื่อ'.$tabs[$tab],'text',100]];
-if ($tab!=='positions') $fields['address']=['ที่อยู่','textarea',5000];
+$fields['address']=['ที่อยู่','textarea',5000];
 if ($tab==='locations') $fields += ['latitude'=>['ละติจูด (-90 ถึง 90)','number',null],'longitude'=>['ลองจิจูด (-180 ถึง 180)','number',null],'radius_meters'=>['รัศมีที่อนุญาต (เมตร)','number',null]];
-$fields[$tab==='positions'?'job_description':'description']=['รายละเอียด','textarea',5000];
+$fields['description']=['รายละเอียด','textarea',5000];
 foreach ($fields as $field=>$config): ?>
 <div><label for="<?= $field ?>" class="block mb-2"><?= $config[0] ?></label>
 <?php if ($config[1]==='textarea'): ?><textarea id="<?= $field ?>" name="<?= $field ?>" class="input-field w-full" maxlength="5000" rows="4"><?= $esc($row[$field]??'') ?></textarea>
@@ -69,16 +68,16 @@ foreach ($fields as $field=>$config): ?>
 <?php endforeach; ?>
 <?php if ($tab==='locations'): ?><label class="block" for="workplace_id">อยู่ในสถานที่ทำงาน</label><select id="workplace_id" name="workplace_id" class="input-field w-full min-h-[52px]"><option value="0">ยังไม่ผูกสถานที่ทำงาน</option><?php foreach ($workplaces as $w): if (!$w['is_active'] && (int)($row['workplace_id']??0)!==(int)$w['id']) continue; ?><option value="<?= (int)$w['id'] ?>" <?= (int)($row['workplace_id']??0)===(int)$w['id']?'selected':'' ?>><?= $esc($w['name']) ?><?= !$w['is_active']?' (ปิดใช้งาน)':'' ?></option><?php endforeach; ?></select><p class="text-white/70">พิกัดและรัศมีมีผลต่อการลงเวลาครั้งถัดไป เมื่อแก้ข้อมูลจุด ระบบจะเก็บรุ่นเดิมสำหรับประวัติลงเวลา ห้ามปิดจุดสุดท้ายก่อนเพิ่มจุดทดแทน</p><?php endif; ?>
 <label class="flex items-center gap-3 min-h-[48px]"><input type="checkbox" name="is_active" value="1" <?= ($row['is_active']??1)?'checked':'' ?>> เปิดใช้งาน (เอาเครื่องหมายออกเพื่อปิดใช้งาน)</label>
-<?php if ($tab==='positions'): ?><p class="text-white/70">เปลี่ยนชื่อรายการนี้จะไม่เปลี่ยนตำแหน่งเดิมของพนักงานโดยอัตโนมัติ และไม่มีผลต่อบทบาทหรือเงินเดือน</p><?php endif; ?>
+
 <div class="sticky bottom-4 p-3 rounded-xl native-card flex flex-wrap gap-3 items-center"><button class="btn-primary min-h-[48px] px-6" type="submit">บันทึกข้อมูล</button><a class="inline-flex items-center min-h-[48px] px-4" href="?tab=<?= $tab ?>">ยกเลิก</a><span class="org-progress" role="status"></span></div>
 </form>
 <?php if ($id): $history=$service->history($tab,$id);
-$historyLabels=['code'=>'รหัส','title'=>'ตำแหน่ง','name'=>'ชื่อสถานที่','address'=>'ที่อยู่','description'=>'รายละเอียด','job_description'=>'รายละเอียดงาน','latitude'=>'ละติจูด','longitude'=>'ลองจิจูด','radius_meters'=>'รัศมี (เมตร)','is_active'=>'สถานะ','position_text'=>'ตำแหน่งที่แสดง','position_catalog_title'=>'ตำแหน่งส่วนกลาง','workplace_name'=>'สถานที่ประจำ','replacement_id'=>'จุดลงเวลารุ่นใหม่'];
-$historyValue=static function($field,$value) use ($positions,$workplaces) {
+$historyLabels=['code'=>'รหัส','name'=>'ชื่อสถานที่','address'=>'ที่อยู่','description'=>'รายละเอียด','latitude'=>'ละติจูด','longitude'=>'ลองจิจูด','radius_meters'=>'รัศมี (เมตร)','is_active'=>'สถานะ','workplace_name'=>'สถานที่ประจำ','replacement_id'=>'จุดลงเวลารุ่นใหม่'];
+$historyValue=static function($field,$value) use ($workplaces) {
     if ($value===null || $value==='') return '—';
     if ($field==='is_active') return (int)$value?'เปิดใช้งาน':'ปิดใช้งาน';
-    if ($field==='position_id' || $field==='workplace_id') {
-        foreach ($field==='position_id'?$positions:$workplaces as $entry) if ((int)$entry['id']===(int)$value) return $entry['title']??$entry['name'];
+    if ($field==='workplace_id') {
+        foreach ($workplaces as $entry) if ((int)$entry['id']===(int)$value) return $entry['title']??$entry['name'];
     }
     return (string)$value;
 }; ?>
