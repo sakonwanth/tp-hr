@@ -1,6 +1,18 @@
 # HR organization management
 
-Implemented 2026-11-05. Local implementation and isolated QA only; no production migration, deployment or real-account acceptance has been performed.
+Implemented and deployed 2026-11-05. Runtime release: HR `013d06de49ffa87a5f8a9b959292df67f6eff494`, Check-in `90d14a7fd14015e4a4b0a32a9e0f97968202046d`. Production migration and read-only real-account verification passed. A successful live attendance write and normal password/SSO login have NOT been tested; the user confirmed no dedicated test account exists, and real employee attendance must not be changed.
+
+The scoped release used exact-commit fast-forward over SSH after CI passed, without common-library updates, dependency upgrades or unrelated finance reconciliation. Commits tagged `[scoped-deploy]` run validation but intentionally skip the general deploy job; its green workflow result is not deployment evidence by itself. Server revision verification and the migration log establish this release.
+
+Production checks on 2026-11-05:
+- The migration applied all six statements; schema verification passed; both public health endpoints returned HTTP 200.
+- Temporary server-issued sessions exercised existing active OFFICE accounts: Chairman with HR management authority, and Staff. No active literal HR-role OFFICE account was available. Normal password/SSO authentication was not exercised. Temporary sessions were deleted after verification; existing sessions/passwords were untouched.
+- All four HR catalog tabs opened; missing-CSRF writes were rejected. Staff opened Check-in, both history surfaces and today's API; catalog GET/POST and check-in/out POST without CSRF returned 403.
+- Deployed writer mode is HR API. Read-only evaluation with real location data accepted the active point center and rejected distant GPS. Historical check-in/out foreign keys have no missing location rows.
+- SHA-256 comparison before/after was identical for 982 past attendance records, business fields of 15 user records, all existing position rows and both location rows. Newly added workplace/assignment/audit tables remained empty. No business test rows were inserted.
+- Domain error logs did not grow during deployment and these checks (HR 0 bytes; Check-in 84,915 bytes before and after).
+- CI: HR https://github.com/sakonwanth/tp-hr/actions/runs/42002105019; Check-in https://github.com/sakonwanth/tp-checkin/actions/runs/42001971842.
+
 
 ## Entry points and ownership
 
@@ -43,7 +55,7 @@ npm run verify:static-ui
 /Applications/XAMPP/xamppfiles/bin/php scripts/qa_role_regression.php --no-http
 ```
 
-## Release and acceptance still required
+## Release procedure and remaining acceptance
 
 1. Review the HR and Check-in changes together, leaving unrelated working-tree changes separate.
 2. Deploy the Check-in empty-catalog guard; verify at least one usable active point exists before enforcing GPS attendance.
