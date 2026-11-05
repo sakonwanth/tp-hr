@@ -62,5 +62,5 @@ jobs:
         run: |
           npm ci
           npm run verify:static-ui
-          npx playwright install chromium
+          # Listing tests does not launch a browser or require a browser download.
           npx playwright test --list --reporter=list
