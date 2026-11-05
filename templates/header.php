@@ -1143,6 +1143,11 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png';
                     <span>จัดการเอกสาร</span>
                 </a>
 
+                <?php if (isHR()): ?>
+                <a href="/hr/organization.php" class="nav-item <?php echo $current_page === 'hr-organization' ? 'active' : ''; ?>">
+                    <i class="fas fa-building" aria-hidden="true"></i><span>ตำแหน่งและสถานที่ทำงาน</span>
+                </a>
+                <?php endif; ?>
                 <a href="/hr/document_templates.php" class="nav-item <?php echo $current_page === 'hr-document-templates' ? 'active' : ''; ?>">
                     <i class="fas fa-file-signature"></i>
                     <span>ตั้งค่าเอกสารรับรอง</span>
@@ -1319,7 +1324,12 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png';
                         <i class="fas fa-file-alt" aria-hidden="true"></i>
                         <span>จัดการเอกสาร</span>
                     </a>
-                    <a href="/hr/document_templates.php" class="mobile-menu-tile <?php echo $current_page === 'hr-document-templates' ? 'active' : ''; ?>">
+                    <?php if (isHR()): ?>
+                <a href="/hr/organization.php" class="mobile-menu-tile <?php echo $current_page === 'hr-organization' ? 'active' : ''; ?>">
+                    <i class="fas fa-building" aria-hidden="true"></i><span>ตำแหน่งและสถานที่ทำงาน</span>
+                </a>
+                <?php endif; ?>
+                <a href="/hr/document_templates.php" class="mobile-menu-tile <?php echo $current_page === 'hr-document-templates' ? 'active' : ''; ?>">
                         <i class="fas fa-file-signature" aria-hidden="true"></i>
                         <span>ตั้งค่าเอกสารรับรอง</span>
                     </a>

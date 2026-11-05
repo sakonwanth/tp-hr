@@ -16,12 +16,15 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: pdo, pdo_mysql, mbstring, json, curl
+          extensions: pdo, pdo_mysql, pdo_sqlite, mbstring, json, curl
 
       - name: PHP syntax check
         run: |
           find . -name "*.php" -not -path "./vendor/*" -print0 | xargs -0 -n1 php -l
           echo "Syntax check passed"
+
+      - name: Organization catalog lifecycle and permissions
+        run: php tests/organization_service_test.php
 
       - name: Employee finance HR lifecycle contract
         run: php scripts/qa_employee_finance_hr_surface.php

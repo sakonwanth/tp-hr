@@ -228,6 +228,10 @@ require_once __DIR__ . '/../templates/header.php';
 </div>
 <?php endif; ?>
 
+<a href="/hr/organization.php" class="native-card flex items-center gap-3 p-4 mb-6 min-h-[48px]">
+    <i class="fas fa-building" aria-hidden="true"></i><span>จัดการตำแหน่งงาน สถานที่ทำงาน และจุดลงเวลา</span>
+</a>
+
 <!-- Tabs -->
 <div class="mb-6">
     <div class="tp-native-segment" role="tablist" aria-label="หมวดตั้งค่า">

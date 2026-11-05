@@ -468,6 +468,18 @@ try {
     }
 
     $pdo->beginTransaction();
+
+    // Catalog entries can be retired while a client is submitting a cached location.
+    // Lock before writing; historical attendance continues referencing the old row.
+    if ($type === 'GPS' && $locId !== null) {
+        $locationQuery = $pdo->prepare('SELECT id, is_active FROM hr_checkin_locations WHERE id=? FOR UPDATE');
+        $locationQuery->execute([$locId]);
+        $location = $locationQuery->fetch(PDO::FETCH_ASSOC);
+        if (!$location || !(int)$location['is_active']) {
+            $pdo->rollBack();
+            ApiAuth::fail(409, 'Check-in location changed or is inactive; refresh locations and retry');
+        }
+    }
     $find = $pdo->prepare("SELECT * FROM hr_attendances WHERE user_id = ? AND attendance_date = ? LIMIT 1 FOR UPDATE");
     $find->execute([$userId, $date]);
     $row = $find->fetch(PDO::FETCH_ASSOC);

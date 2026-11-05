@@ -60,7 +60,7 @@ jobs:
     name: Deploy (SSH)
     runs-on: ubuntu-latest
     needs: [validate]
-    if: success() && vars.SELF_DEPLOY_ENABLED == 'true'
+    if: success() && vars.SELF_DEPLOY_ENABLED == 'true' && !contains(github.event.head_commit.message, '[scoped-deploy]')
     steps:
       - uses: actions/checkout@v5
 
@@ -174,6 +174,12 @@ jobs:
               $PHP_BIN scripts/run_migration.php 2026_09_16_attendance_discipline.sql
             fi
 
+            if [ -n "$PHP_BIN" ]; then
+              echo "Ensuring HR organization catalog schema..."
+              $PHP_BIN scripts/run_migration.php 2026_11_05_hr_organization.sql
+              $PHP_BIN scripts/verify_organization_schema.php
+            fi
+
             if [ -n "$PHP_BIN" ] && [ -f scripts/ensure_line_notification_log.php ]; then
               echo "📬 Ensuring line_notification_log table..."
               $PHP_BIN scripts/ensure_line_notification_log.php 2>&1 || echo "   line notification log skipped"
@@ -201,7 +207,7 @@ jobs:
     name: Verify
     runs-on: ubuntu-latest
     needs: deploy
-    if: success() && vars.SELF_DEPLOY_ENABLED == 'true'
+    if: success() && vars.SELF_DEPLOY_ENABLED == 'true' && !contains(github.event.head_commit.message, '[scoped-deploy]')
     steps:
       - uses: appleboy/ssh-action@v1.0.3
         with:
