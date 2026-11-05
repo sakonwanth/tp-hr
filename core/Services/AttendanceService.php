@@ -98,6 +98,16 @@ class AttendanceService
         ];
     }
 
+    /** Show recorded activity today without manufacturing an absent row for an open day. */
+    public static function historyDisplayEnd(string $closedEnd, string $periodStart, string $periodEnd, string $today, ?array $todayAttendance): string
+    {
+        if ($today >= $periodStart && $today <= $periodEnd && $today > $closedEnd
+            && (!empty($todayAttendance['check_in_time']) || !empty($todayAttendance['check_out_time']))) {
+            return $today;
+        }
+        return $closedEnd;
+    }
+
     public function getUserForAttendance(int $userId): ?array
     {
         try {

@@ -90,3 +90,9 @@ foreach (['check_in_outside_status','check_outside_status'] as $direction) {
 }
 assertSameValue(0, $service->summarizeRecordedWork(array_replace($recorded,['check_in_time'=>null]),$shift)['early_leave_minutes'], 'missing entry cannot accrue early leave');
 echo "AttendanceService regression fixtures passed." . PHP_EOL;
+
+assertSameValue('2026-11-05', AttendanceService::historyDisplayEnd('2026-11-04','2026-10-26','2026-11-25','2026-11-05',['check_in_time'=>'2026-11-05 08:30:00']), 'history displays recorded entry today');
+assertSameValue('2026-11-05', AttendanceService::historyDisplayEnd('2026-11-04','2026-10-26','2026-11-25','2026-11-05',['check_out_time'=>'2026-11-05 17:30:00']), 'history displays recorded exit today');
+assertSameValue('2026-11-04', AttendanceService::historyDisplayEnd('2026-11-04','2026-10-26','2026-11-25','2026-11-05',null), 'unrecorded open day is not displayed as absent');
+assertSameValue('2026-11-04', AttendanceService::historyDisplayEnd('2026-11-04','2026-10-26','2026-11-25','2026-11-05',['planned_start_time'=>'10:00']), 'planned placeholder does not create an absent day');
+assertSameValue('2026-10-25', AttendanceService::historyDisplayEnd('2026-10-25','2026-09-26','2026-10-25','2026-11-05',['check_in_time'=>'2026-11-05 08:30:00']), 'history respects the selected period');

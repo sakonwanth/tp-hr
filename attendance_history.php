@@ -83,6 +83,10 @@ foreach ($attendances as $att) {
     $attendanceByDate[$att['attendance_date']] = $att;
 }
 
+// Calendar display may include recorded activity today; payroll/absence scans keep
+// their original closed-day boundary above.
+$displayLastDay = AttendanceService::historyDisplayEnd($lastDay, $monthStart, $monthEnd, $today, $attendanceByDate[$today] ?? null);
+
 // Get employee's day-off schedule (default)
 $stmtSched = $pdo->prepare("SELECT day_off FROM hr_employee_schedules WHERE user_id = ?");
 $stmtSched->execute([$user['id']]);
@@ -96,13 +100,13 @@ $stmtSwaps = $pdo->prepare("
     WHERE user_id = ? AND status = 'APPROVED' 
     AND week_start <= ? AND week_end >= ?
 ");
-$stmtSwaps->execute([$user['id'], $lastDay, $monthStart]);
+$stmtSwaps->execute([$user['id'], $displayLastDay, $monthStart]);
 $dayoffSwaps = $stmtSwaps->fetchAll();
 
 // Generate all days
 $allDays = [];
 $currentDay = $monthStart;
-while ($currentDay <= $lastDay) {
+while ($currentDay <= $displayLastDay) {
     $dow = (int)date('w', strtotime($currentDay));
     // Check if this date falls in an approved swap week
     $effectiveDayOff = $defaultDayOff;
