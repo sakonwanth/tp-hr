@@ -10,17 +10,17 @@
     const locate = document.getElementById('use-current-location');
     const center = document.getElementById('use-map-center');
     const canvas = document.getElementById('location-map');
-    let selected = lat.value !== '' && lng.value !== '' && Number.isFinite(Number(lat.value)) && Number.isFinite(Number(lng.value));
+    const validPoint = () => [lat, lng].every(input => input.value !== '' && input.validity.valid && Number.isFinite(Number(input.value)));
+    let selected = validPoint();
     let map, marker, circle, request = 0;
     const meters = () => radius.validity.valid && radius.value !== '' ? Number(radius.value) : null;
     const describe = () => {
         summary.textContent = selected ? `พิกัดที่เลือก: ${lat.value}, ${lng.value} · รัศมี ${meters() ?? '—'} เมตร` : 'ยังไม่ได้เลือกพิกัด';
     };
-    const select = (latitude, longitude, fit = false) => {
+    const select = (latitude, longitude, fit = false, preserveInput = false) => {
         if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || Math.abs(latitude) > 90) return;
         longitude = ((longitude + 180) % 360 + 360) % 360 - 180;
-        lat.value = latitude.toFixed(7);
-        lng.value = longitude.toFixed(7);
+        if (!preserveInput) { lat.value = latitude.toFixed(7); lng.value = longitude.toFixed(7); }
         selected = true;
         const point = [Number(lat.value), Number(lng.value)];
         if (map) {
@@ -36,9 +36,9 @@
     };
     // Register before the page's saving indicator; a missing point must never lock the form.
     form.addEventListener('submit', event => {
-        if (selected) return;
+        if (selected && validPoint()) return;
         event.preventDefault(); event.stopImmediatePropagation();
-        status.textContent = 'กรุณาเลือกพิกัดจากแผนที่หรือใช้ตำแหน่งปัจจุบันก่อนบันทึก';
+        status.textContent = 'กรุณากรอกพิกัดให้ถูกต้อง เลือกจากแผนที่ หรือใช้ตำแหน่งปัจจุบันก่อนบันทึก';
         locate.focus();
     }, true);
     if (window.L) {
@@ -47,11 +47,27 @@
             .on('tileerror', () => { status.textContent = 'โหลดพื้นแผนที่ไม่ได้ กรุณาตรวจอินเทอร์เน็ต หรือใช้ตำแหน่งปัจจุบัน'; });
         map.on('click', e => { request++; locate.disabled = false; select(e.latlng.lat, e.latlng.lng); status.textContent = 'เลือกพิกัดแล้ว กดบันทึกเพื่อยืนยัน'; });
         center.addEventListener('click', () => { request++; locate.disabled = false; const p = map.getCenter(); select(p.lat, p.lng); status.textContent = 'เลือกจุดกึ่งกลางแผนที่แล้ว'; });
-        if (selected) select(Number(lat.value), Number(lng.value), true);
+        if (selected) select(Number(lat.value), Number(lng.value), true, true);
     } else {
         canvas.textContent = 'เปิดแผนที่ไม่ได้ กรุณาโหลดหน้าใหม่ หรือใช้ตำแหน่งปัจจุบัน';
         center.disabled = true;
     }
+    const manualPoint = (fit) => {
+        request++; locate.disabled = false;
+        selected = validPoint();
+        if (selected) {
+            select(Number(lat.value), Number(lng.value), fit, true);
+            status.textContent = 'อัปเดตพิกัดจากตัวเลขแล้ว ตรวจหมุดและรัศมีก่อนบันทึก';
+        } else {
+            if (map && marker) { map.removeLayer(marker); map.removeLayer(circle); marker = circle = null; }
+            describe();
+            status.textContent = 'กรอกละติจูด -90 ถึง 90 และลองจิจูด -180 ถึง 180 ให้ครบ';
+        }
+    };
+    [lat, lng].forEach(input => {
+        input.addEventListener('input', () => manualPoint(false));
+        input.addEventListener('change', () => manualPoint(true));
+    });
     radius.addEventListener('input', () => {
         if (circle && meters() !== null) { circle.setRadius(meters()); map.fitBounds(circle.getBounds(), {padding: [30, 30], maxZoom: 18}); }
         describe();

@@ -59,9 +59,9 @@ $workplaces=$service->rows('workplaces');
 <div><span class="block mb-2">รหัส (อัตโนมัติ)</span><p><?= $esc($row['code'] ?? 'ระบบจะสร้างรหัสเมื่อบันทึก') ?></p></div>
 <?php if ($tab==='locations'): ?>
 <section id="location-picker" class="space-y-3" aria-label="เลือกพิกัดลงเวลา">
-<input type="hidden" id="latitude" name="latitude" value="<?= $esc($row['latitude'] ?? '') ?>">
-<input type="hidden" id="longitude" name="longitude" value="<?= $esc($row['longitude'] ?? '') ?>">
-<p>แตะบนแผนที่หรือลากหมุดเพื่อเลือกพิกัด วงสีม่วงคือพื้นที่ที่อนุญาตให้ลงเวลา</p>
+<div><label for="latitude" class="block mb-2">ละติจูด (Latitude)</label><input type="number" id="latitude" name="latitude" min="-90" max="90" step="any" required inputmode="decimal" class="input-field w-full min-h-[52px]" value="<?= $esc($row['latitude'] ?? '') ?>"></div>
+<div><label for="longitude" class="block mb-2">ลองจิจูด (Longitude)</label><input type="number" id="longitude" name="longitude" min="-180" max="180" step="any" required inputmode="decimal" class="input-field w-full min-h-[52px]" value="<?= $esc($row['longitude'] ?? '') ?>"></div>
+<p>กรอกละติจูด–ลองจิจูดโดยตรง หรือแตะบนแผนที่และลากหมุดเพื่อเลือกพิกัด วงสีม่วงคือพื้นที่ที่อนุญาตให้ลงเวลา</p>
 <div class="flex flex-wrap gap-3"><button type="button" id="use-current-location" class="btn-primary min-h-[48px] px-4">ใช้ตำแหน่งปัจจุบัน</button><button type="button" id="use-map-center" class="min-h-[48px] px-4 rounded-xl bg-white/10">เลือกจุดกึ่งกลางแผนที่</button></div>
 <div id="location-map" role="region" aria-label="แผนที่เลือกพิกัด ใช้ลูกศรเลื่อนแผนที่แล้วกดเลือกจุดกึ่งกลาง" style="height:360px;max-height:60vh;min-height:240px;position:relative;z-index:0;border-radius:12px"></div>
 <p id="location-summary" class="break-words"></p><p id="location-status" role="status" aria-live="polite" class="text-white/70"></p>
@@ -106,7 +106,7 @@ $historyValue=static function($field,$value) use ($workplaces) {
 <?php if ($ready && $tab==='locations'): ?>
 <link rel="stylesheet" href="/assets/vendor/leaflet/leaflet.css">
 <script src="/assets/vendor/leaflet/leaflet.js"></script>
-<script src="/assets/js/organization-map.js?v=20261105-1"></script>
+<script src="/assets/js/organization-map.js?v=20261106-1"></script>
 <?php endif; ?>
 <script>
 document.getElementById('organization-error')?.focus();
