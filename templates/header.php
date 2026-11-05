@@ -1145,7 +1145,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png';
 
                 <?php if (isHR()): ?>
                 <a href="/hr/organization.php" class="nav-item <?php echo $current_page === 'hr-organization' ? 'active' : ''; ?>">
-                    <i class="fas fa-building" aria-hidden="true"></i><span>ตำแหน่งและสถานที่ทำงาน</span>
+                    <i class="fas fa-building" aria-hidden="true"></i><span>สถานที่ทำงานและพิกัดลงเวลา</span>
                 </a>
                 <?php endif; ?>
                 <a href="/hr/document_templates.php" class="nav-item <?php echo $current_page === 'hr-document-templates' ? 'active' : ''; ?>">
@@ -1326,7 +1326,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png';
                     </a>
                     <?php if (isHR()): ?>
                 <a href="/hr/organization.php" class="mobile-menu-tile <?php echo $current_page === 'hr-organization' ? 'active' : ''; ?>">
-                    <i class="fas fa-building" aria-hidden="true"></i><span>ตำแหน่งและสถานที่ทำงาน</span>
+                    <i class="fas fa-building" aria-hidden="true"></i><span>สถานที่ทำงานและพิกัดลงเวลา</span>
                 </a>
                 <?php endif; ?>
                 <a href="/hr/document_templates.php" class="mobile-menu-tile <?php echo $current_page === 'hr-document-templates' ? 'active' : ''; ?>">

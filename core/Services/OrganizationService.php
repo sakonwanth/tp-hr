@@ -109,11 +109,25 @@ final class OrganizationService
     }
     public function save(int $actor, string $kind, int $id, string $version, array $input): int
     {
-        $v = self::validate($kind, $input);
-        return $this->transaction($actor, function () use ($actor,$kind,$id,$version,$input,$v) {
+        return $this->transaction($actor, function () use ($actor,$kind,$id,$version,$input) {
             $old = $id ? $this->get($kind,$id) : null;
             if ($id && (!$old || !hash_equals(self::token($old),$version))) throw new DomainException('ข้อมูลมีการเปลี่ยนแปลง กรุณาโหลดหน้าใหม่ก่อนบันทึก');
             $table = self::TABLES[$kind];
+            if (in_array($kind, ['workplaces','locations'], true)) {
+                // Generate under the shared catalog mutex; keep existing codes immutable.
+                $code = $old['code'] ?? '';
+                if ($code === '') {
+                    $prefix = $kind === 'workplaces' ? 'WP-' : 'LOC-';
+                    $sequence = (int)$this->db->query("SELECT COALESCE(MAX(id),0) FROM $table")->fetchColumn() + 1;
+                    $exists = $this->db->prepare("SELECT 1 FROM $table WHERE code=?");
+                    do {
+                        $code = $prefix . str_pad((string)$sequence++, 6, '0', STR_PAD_LEFT);
+                        $exists->execute([$code]);
+                    } while ($exists->fetchColumn());
+                }
+                $input['code'] = $code;
+            }
+            $v = self::validate($kind, $input);
             $q = $this->db->prepare("SELECT id FROM $table WHERE code=? AND id<>?");
             $q->execute([$v['code'],$id]);
             if ($q->fetchColumn()) throw new DomainException('รหัสนี้ถูกใช้งานแล้ว');

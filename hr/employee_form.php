@@ -24,14 +24,6 @@ if (!$canEditSensitive && ($_GET['action'] ?? 'add') === 'add') {
 }
 
 $pdo = Database::getInstance()->getConnection();
-require_once dirname(__DIR__) . '/core/Services/OrganizationService.php';
-$organizationService = new OrganizationService($pdo);
-$organizationReady = $organizationService->ready();
-// A linked title is managed through the audited organization assignment form.
-// Read the current binding at the UPDATE boundary, including edits from an older tab.
-$positionUpdateExpression = OrganizationService::employeePositionUpdateSql($organizationReady);
-
-
 $action = $_GET['action'] ?? 'add';
 $id = (int)($_GET['id'] ?? 0);
 $employee = null;
@@ -75,7 +67,6 @@ if ($action === 'edit' && $id > 0) {
     $stmtFamily->execute([$id]);
     $familyRecords = $stmtFamily->fetchAll();
     
-    $organizationAssignment = $organizationReady ? $organizationService->assignment($id) : null;
     $page_title = 'แก้ไขข้อมูลพนักงาน';
 } else {
     $action = 'add';
@@ -268,7 +259,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'chang
                         marital_status = ?, blood_type = ?, religion = ?, military_status = ?,
                         id_card = ?, id_card_expiry = ?,
                         nationality = ?, address = ?, registered_address = ?,
-                        department = ?, position = {$positionUpdateExpression}, role_id = ?,
+                        department = ?, position = ?, role_id = ?,
                         hire_date = ?, termination_date = ?, employment_type = ?,
                         work_mode = ?,
                         probation_days = ?, probation_end_date = ?, probation_passed_date = ?,
@@ -842,16 +833,10 @@ include dirname(__DIR__) . '/templates/header.php';
             </div>
             <div>
                 <label class="block text-white/70 text-sm mb-1">ตำแหน่ง</label>
-                <?php if ($action === 'edit' && isHR()): ?>
-                <a href="/hr/organization.php?tab=assignments&amp;id=<?php echo (int)$id; ?>" class="inline-flex min-h-[48px] items-center text-violet-300">จัดการตำแหน่งส่วนกลางและสถานที่ทำงาน</a>
-                <?php endif; ?>
                 <input type="text" name="position" 
                        value="<?php echo htmlspecialchars($employee['position'] ?? ''); ?>"
-                       <?php echo !empty($organizationAssignment['position_id']) ? 'readonly aria-describedby="position-linked-help"' : ''; ?>
                        class="input-field tp-native-input" placeholder="เช่น โปรแกรมเมอร์">
-                <?php if (!empty($organizationAssignment['position_id'])): ?>
-                <p id="position-linked-help" class="text-sm text-white/70 mt-2">ตำแหน่งนี้ผูกกับรายการส่วนกลาง แก้ไขผ่านเมนูจัดการตำแหน่งและสถานที่ทำงานด้านบน</p>
-                <?php endif; ?>
+
             </div>
             <div>
                 <label class="block text-white/70 text-sm mb-1">บทบาท (Role)</label>

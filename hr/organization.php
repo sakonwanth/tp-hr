@@ -6,17 +6,17 @@ Auth::requireHR();
 $pdo = getDB();
 $service = new OrganizationService($pdo);
 if (!hr_can_access_hr_dashboard() || !$service->canManage((int)Auth::id())) { http_response_code(403); exit('คุณไม่มีสิทธิ์จัดการโครงสร้างองค์กร'); }
-$page_title = 'ตำแหน่งและสถานที่ทำงาน';
+$page_title = 'สถานที่ทำงานและพิกัดลงเวลา';
 $current_page = 'hr-organization';
-$tabs = ['positions'=>'ตำแหน่งงาน','workplaces'=>'สถานที่ทำงาน','locations'=>'จุดลงเวลา','assignments'=>'กำหนดให้พนักงาน'];
-$tab = (string)($_GET['tab'] ?? 'positions');
-if (!isset($tabs[$tab])) $tab = 'positions';
+$tabs = ['workplaces'=>'สถานที่ทำงาน','locations'=>'พิกัดลงเวลา'];
+$tab = (string)($_GET['tab'] ?? 'workplaces');
+if (!isset($tabs[$tab])) { redirect('/hr/organization.php?tab=workplaces',303); exit; }
 $id = max(0,(int)($_GET['id'] ?? 0));
 $error = '';
 $ready = $service->ready();
 $row = null;
 if ($ready && $id) {
-    try { $row = $tab === 'assignments' ? $service->assignment($id) : $service->get($tab,$id); }
+    try { $row = $service->get($tab,$id); }
     catch (DomainException $e) { $error=$e->getMessage(); }
     if (!$row) { http_response_code(404); $error='ไม่พบรายการที่เลือก'; $id=0; }
 }
@@ -24,12 +24,7 @@ $version = OrganizationService::token($row);
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $ready) {
     try {
         if (!verifyCsrf()) throw new DomainException('เซสชันหมดอายุ กรุณาโหลดหน้าใหม่');
-        if ($tab === 'assignments') {
-            if (!$id) throw new DomainException('กรุณาเลือกพนักงาน');
-            $service->assign((int)Auth::id(),$id,(int)($_POST['position_id'] ?? 0),(int)($_POST['workplace_id'] ?? 0),(string)($_POST['version'] ?? ''),!empty($_POST['refresh_title']));
-        } else {
-            $id = $service->save((int)Auth::id(),$tab,$id,(string)($_POST['version'] ?? ''),$_POST);
-        }
+        $id = $service->save((int)Auth::id(),$tab,$id,(string)($_POST['version'] ?? ''),$_POST);
         redirect('/hr/organization.php?tab='.$tab.'&id='.$id.'&saved=1',303);
         exit;
     } catch (DomainException $e) { $error=$e->getMessage(); }
@@ -43,8 +38,8 @@ $esc = static fn($v)=>htmlspecialchars((string)($v ?? ''),ENT_QUOTES,'UTF-8');
 require dirname(__DIR__) . '/templates/header.php';
 ?>
 <div class="tp-hr-admin-stack tp-ios-master-screen w-full mx-auto min-w-0 space-y-6" style="max-width:1200px">
-<header><a href="/hr/" class="inline-flex items-center min-h-[48px] text-violet-300">กลับแดชบอร์ด HR</a><h1 class="tp-ios-page-title">ตำแหน่งและสถานที่ทำงาน</h1><p class="text-white/70 mt-2">จัดการข้อมูลบริษัทและพื้นที่ลงเวลา ปิดใช้งานแทนการลบเพื่อเก็บประวัติเดิม</p></header>
-<nav aria-label="หมวดโครงสร้างองค์กร" class="flex flex-wrap gap-2">
+<header><a href="/hr/" class="inline-flex items-center min-h-[48px] text-violet-300">กลับแดชบอร์ด HR</a><h1 class="tp-ios-page-title">สถานที่ทำงานและพิกัดลงเวลา</h1><p class="text-white/70 mt-2">กำหนดสถานที่ พิกัด GPS และรัศมีที่อนุญาตให้ลงเวลา ปิดใช้งานแทนการลบเพื่อเก็บประวัติเดิม</p></header>
+<nav aria-label="หมวดสถานที่และพิกัด" class="flex flex-wrap gap-2">
 <?php foreach ($tabs as $key=>$label): ?><a href="?tab=<?= $key ?>" class="inline-flex items-center min-h-[48px] px-4 rounded-xl <?= $tab===$key ? 'bg-violet-600 text-white' : 'bg-white/10 text-white' ?>" <?= $tab===$key ? 'aria-current="page"' : '' ?>><?= $label ?></a><?php endforeach; ?>
 </nav>
 <?php if ($error): ?><div id="organization-error" tabindex="-1" role="alert" class="p-4 rounded-xl bg-red-500/15 text-red-200"><?= $esc($error) ?></div><?php endif; ?>
@@ -54,24 +49,6 @@ require dirname(__DIR__) . '/templates/header.php';
 $workplaces=$service->rows('workplaces');
 $positions=$service->rows('positions');
 ?>
-<?php if ($tab==='assignments'): ?>
-<section class="native-card p-4 sm:p-6 space-y-4">
-<h2 class="text-xl">เลือกพนักงาน</h2>
-<form method="get" class="space-y-4"><input type="hidden" name="tab" value="assignments"><label class="block" for="employee">พนักงาน</label><select id="employee" name="id" class="input-field w-full min-h-[52px]" required><option value="">เลือกพนักงาน</option>
-<?php $employees=$pdo->query('SELECT id, first_name_th, last_name_th FROM users WHERE is_active=1 AND is_employee=1 ORDER BY first_name_th')->fetchAll(PDO::FETCH_ASSOC); foreach ($employees as $e): ?><option value="<?= (int)$e['id'] ?>" <?= $id===(int)$e['id']?'selected':'' ?>><?= $esc($e['first_name_th'].' '.$e['last_name_th']) ?></option><?php endforeach; ?></select><button class="btn-primary min-h-[48px] px-4">เปิดข้อมูลพนักงาน</button></form>
-</section>
-<?php if ($id && $row): ?>
-<form method="post" class="native-card p-4 sm:p-6 space-y-4 org-save">
-<?= csrfField() ?><input type="hidden" name="version" value="<?= $esc($version) ?>">
-<p>ตำแหน่งที่แสดงในระบบปัจจุบัน: <strong><?= $esc($row['position_text'] ?? '') ?></strong></p>
-<p class="text-white/70">การเลือกตำแหน่งใหม่จะเปลี่ยนชื่อตำแหน่งในข้อมูลพนักงาน แต่ไม่เปลี่ยนบทบาทหรือสิทธิ์ใช้งาน การยกเลิกการผูกจะยังเก็บข้อความตำแหน่งเดิมไว้</p>
-<?php foreach (['position_id'=>['ตำแหน่งงาน',$positions,'title'],'workplace_id'=>['สถานที่ทำงานประจำ',$workplaces,'name']] as $field=>$config): ?>
-<label class="block" for="<?= $field ?>"><?= $config[0] ?></label><select id="<?= $field ?>" name="<?= $field ?>" class="input-field w-full min-h-[52px]"><option value="0">ไม่ผูกกับรายการส่วนกลาง</option>
-<?php foreach ($config[1] as $item): if (!$item['is_active'] && (int)($row[$field]??0)!==(int)$item['id']) continue; ?><option value="<?= (int)$item['id'] ?>" <?= (int)($row[$field]??0)===(int)$item['id']?'selected':'' ?>><?= $esc($item[$config[2]]) ?><?= !$item['is_active']?' (ปิดใช้งาน — ข้อมูลเดิม)':'' ?></option><?php endforeach; ?></select>
-<?php endforeach; ?><label class="flex items-center gap-3 min-h-[48px]"><input type="checkbox" name="refresh_title" value="1"> ปรับข้อความตำแหน่งปัจจุบันให้ตรงกับรายการที่เลือก</label><p class="text-white/70">สถานที่ประจำใช้สำหรับข้อมูลบุคลากร จุดที่อนุญาตให้ลงเวลายังคงเป็นจุดเปิดใช้งานทั้งหมดตามนโยบายเดิม</p>
-<div class="sticky bottom-4 p-3 rounded-xl native-card"><button class="btn-primary min-h-[48px] px-6" type="submit">บันทึกการกำหนด</button><span class="org-progress ml-3" role="status"></span></div></form>
-<?php endif; ?>
-<?php else: ?>
 <section class="native-card p-4 sm:p-6 space-y-4">
 <div class="flex flex-wrap items-center justify-between gap-2"><h2 class="text-xl"><?= $tabs[$tab] ?></h2><a class="btn-primary inline-flex items-center min-h-[48px] px-4" href="?tab=<?= $tab ?>#editor">เพิ่มรายการ</a></div>
 <?php $items=$service->rows($tab); if (!$items): ?><p class="text-white/70">ยังไม่มีรายการ เริ่มเพิ่มได้จากแบบฟอร์มด้านล่าง</p><?php endif; ?>
@@ -80,7 +57,8 @@ $positions=$service->rows('positions');
 <form id="editor" method="post" class="native-card p-4 sm:p-6 space-y-4 org-save">
 <h2 class="text-xl"><?= $id?'แก้ไขรายการ':'เพิ่มรายการ' ?>: <?= $tabs[$tab] ?></h2>
 <?= csrfField() ?><input type="hidden" name="version" value="<?= $esc($version) ?>">
-<?php $fields=['code'=>['รหัส','text',20],($tab==='positions'?'title':'name')=>['ชื่อ'.$tabs[$tab],'text',100]];
+<div><span class="block mb-2">รหัส (อัตโนมัติ)</span><p><?= $esc($row['code'] ?? 'ระบบจะสร้างรหัสเมื่อบันทึก') ?></p></div>
+<?php $fields=['name'=>['ชื่อ'.$tabs[$tab],'text',100]];
 if ($tab!=='positions') $fields['address']=['ที่อยู่','textarea',5000];
 if ($tab==='locations') $fields += ['latitude'=>['ละติจูด (-90 ถึง 90)','number',null],'longitude'=>['ลองจิจูด (-180 ถึง 180)','number',null],'radius_meters'=>['รัศมีที่อนุญาต (เมตร)','number',null]];
 $fields[$tab==='positions'?'job_description':'description']=['รายละเอียด','textarea',5000];
@@ -94,7 +72,6 @@ foreach ($fields as $field=>$config): ?>
 <?php if ($tab==='positions'): ?><p class="text-white/70">เปลี่ยนชื่อรายการนี้จะไม่เปลี่ยนตำแหน่งเดิมของพนักงานโดยอัตโนมัติ และไม่มีผลต่อบทบาทหรือเงินเดือน</p><?php endif; ?>
 <div class="sticky bottom-4 p-3 rounded-xl native-card flex flex-wrap gap-3 items-center"><button class="btn-primary min-h-[48px] px-6" type="submit">บันทึกข้อมูล</button><a class="inline-flex items-center min-h-[48px] px-4" href="?tab=<?= $tab ?>">ยกเลิก</a><span class="org-progress" role="status"></span></div>
 </form>
-<?php endif; ?>
 <?php if ($id): $history=$service->history($tab,$id);
 $historyLabels=['code'=>'รหัส','title'=>'ตำแหน่ง','name'=>'ชื่อสถานที่','address'=>'ที่อยู่','description'=>'รายละเอียด','job_description'=>'รายละเอียดงาน','latitude'=>'ละติจูด','longitude'=>'ลองจิจูด','radius_meters'=>'รัศมี (เมตร)','is_active'=>'สถานะ','position_text'=>'ตำแหน่งที่แสดง','position_catalog_title'=>'ตำแหน่งส่วนกลาง','workplace_name'=>'สถานที่ประจำ','replacement_id'=>'จุดลงเวลารุ่นใหม่'];
 $historyValue=static function($field,$value) use ($positions,$workplaces) {

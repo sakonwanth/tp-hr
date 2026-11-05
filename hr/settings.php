@@ -229,7 +229,7 @@ require_once __DIR__ . '/../templates/header.php';
 <?php endif; ?>
 
 <a href="/hr/organization.php" class="native-card flex items-center gap-3 p-4 mb-6 min-h-[48px]">
-    <i class="fas fa-building" aria-hidden="true"></i><span>จัดการตำแหน่งงาน สถานที่ทำงาน และจุดลงเวลา</span>
+    <i class="fas fa-building" aria-hidden="true"></i><span>จัดการสถานที่ทำงานและพิกัดลงเวลา</span>
 </a>
 
 <!-- Tabs -->
