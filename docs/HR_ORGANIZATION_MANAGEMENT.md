@@ -1,6 +1,6 @@
 # HR organization management
 
-Implemented and deployed 2026-11-05. Runtime release: HR `013d06de49ffa87a5f8a9b959292df67f6eff494`, Check-in `90d14a7fd14015e4a4b0a32a9e0f97968202046d`. Production migration and read-only real-account verification passed. A successful live attendance write and normal password/SSO login have NOT been tested; the user confirmed no dedicated test account exists, and real employee attendance must not be changed.
+Implemented and deployed 2026-11-05. Runtime release: HR `013d06de49ffa87a5f8a9b959292df67f6eff494`, Check-in `90d14a7fd14015e4a4b0a32a9e0f97968202046d`. Production migration and read-only real-account verification passed. The initial release used read-only sessions. A subsequent authorized run created disposable TEST accounts and verified normal HR password login and successful HR attendance writes; see the end-to-end QA section below. Dedicated Check-in login still excludes TEST accounts, and SSO/provider login was not tested.
 
 The scoped release used exact-commit fast-forward over SSH after CI passed, without common-library updates, dependency upgrades or unrelated finance reconciliation. Commits tagged `[scoped-deploy]` run validation but intentionally skip the general deploy job; its green workflow result is not deployment evidence by itself. Server revision verification and the migration log establish this release.
 
@@ -54,6 +54,28 @@ Commands (from tp-hr):
 npm run verify:static-ui
 /Applications/XAMPP/xamppfiles/bin/php scripts/qa_role_regression.php --no-http
 ```
+
+
+## Production end-to-end QA — 2026-11-05
+
+After explicit authorization to create and remove test accounts, two isolated roles (HR and Staff) were created with `account_type=TEST`, `is_test_account=1`, `QAE-` employee codes, zero salary and no LINE identity. The actual payroll/person filters excluded both accounts before any test requests.
+
+The first run exposed a history display defect: the HR history calendar stopped at the last closed day and hid today's recorded punches. Both fixture accounts and all associated test data were cleaned immediately. Commit `802751f323f5ab9c6b11dbc758ff0d7709fe458d` fixes display only: recorded activity today is visible, while unrecorded/open days and payroll/absence calculations retain the original cutoff. Focused tests, CI and deployment passed.
+
+The repeat run at 17:49:48–17:49:58 Asia/Bangkok passed 33 assertions through real HTTPS forms/APIs and real password verification:
+- HR/Staff local password login; Staff denied access to catalog management.
+- Create/edit positions and workplaces; create a GPS point; assign position/workplace to the Staff test account.
+- Successful HR check-in and checkout, and duplicate-entry/exit rejection, with synthetic coordinates at the isolated test point. This tests server persistence and location rules, not a physical phone GPS sensor or camera.
+- Edit the point between entry and exit; the recorded entry retained the original point ID/name/coordinates, while exit referenced the replacement. History displayed today's recorded times and catalog change history.
+- Deactivate test points/workplace/position while retaining the test attendance, then clean up.
+- Actual dedicated Check-in password login rejected the TEST account as designed. Successful end-to-end attendance was tested through HR, not through the separate Check-in UI/HR-API writer path. No production-person classification or login restriction was weakened to force a pass.
+- No payroll slips were created and no LINE notification-log entries were added during the test. No leave/offsite/planned-late requests or notification-producing flows were invoked.
+
+Both runs were cleaned by exact fixture IDs with TEST-identity checks, a transaction and an unexpected-foreign-key guard. Test sessions/cookie jars were removed; passwords were generated in memory and not retained. A separate read-only verification found zero remaining test users, attendance, assignment, audit, catalog, location-link or payroll rows, and no remaining user foreign-key references. Auto-increment counters were not reset.
+
+Before/after hashes matched for business fields of 15 original users, 982 past attendance records, original locations and all organization catalogs/assignments. Evidence includes assertion results, test audit-event metadata, cleanup verification and the first failed run (already cleaned), so the initial failure is not hidden.
+
+CI for the history fix: https://github.com/sakonwanth/tp-hr/actions/runs/42013815473.
 
 ## Release procedure and remaining acceptance
 
