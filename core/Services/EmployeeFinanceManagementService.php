@@ -36,7 +36,7 @@ final class EmployeeFinanceManagementService
         if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $newMonth)) {
             throw new RuntimeException('รูปแบบเดือนเริ่มหักไม่ถูกต้อง');
         }
-        $allowedMonths = [date('Y-m'), date('Y-m', strtotime('+1 month'))];
+        $allowedMonths = [date('Y-m'), date('Y-m', strtotime('first day of next month'))];
         if (!in_array($newMonth, $allowedMonths, true)) {
             throw new RuntimeException('เลือกได้เฉพาะรอบเงินเดือนปัจจุบันหรือรอบถัดไป');
         }
@@ -81,10 +81,11 @@ final class EmployeeFinanceManagementService
 	                if ((int)$repaymentGuard->fetchColumn() > 0) {
 	                    throw new RuntimeException('ตารางผ่อนเริ่มดำเนินการแล้ว จึงเปลี่ยนเดือนเริ่มหักไม่ได้');
 	                }
-	                $schedule = EmployeeFinancePolicy::buildReducingBalanceSchedule(
+	                $schedule = EmployeeFinancePolicy::rebuildExistingSchedule(
                     (float)$row['principal_amount'],
                     (int)$row['term_months'],
-                    $newMonth
+                    $newMonth,
+                    (float)$row['interest_rate_pct']
                 );
                 $summary = EmployeeFinancePolicy::summarize($schedule);
                 $stmt = $this->pdo->prepare(
@@ -483,7 +484,7 @@ final class EmployeeFinanceManagementService
                       JOIN line_expense_requests r ON r.id=a.expense_request_id
                      WHERE a.id=? LIMIT 1 FOR UPDATE";
         } else {
-            $sql = "SELECT l.id,l.user_id,l.expense_request_id,l.principal_amount,l.term_months,
+            $sql = "SELECT l.id,l.user_id,l.expense_request_id,l.principal_amount,l.term_months,l.interest_rate_pct,
                            l.first_due_month,l.repayment_method,l.status,r.status expense_status,r.paid_at,r.request_code
                       FROM hr_employee_loans l
                       JOIN line_expense_requests r ON r.id=l.expense_request_id

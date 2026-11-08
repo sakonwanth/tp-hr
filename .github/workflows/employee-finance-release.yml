@@ -1,0 +1,77 @@
+name: Employee finance code-only release
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        type: choice
+        options: [validate, deploy]
+        default: validate
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: employee-finance-production
+  cancel-in-progress: false
+jobs:
+  validate:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_sqlite, pdo_mysql, mbstring, curl
+      - name: QA and audit of HR ownership and lifecycle guards
+        run: |
+          php -l core/Services/EmployeeFinanceManagementService.php
+          php scripts/qa_employee_finance_management.php
+          php scripts/qa_employee_finance_hr_surface.php
+          php scripts/audit_employee_finance_presentation.php
+          php tests/employee_finance_repayment_service_test.php
+          bash -n scripts/deploy_employee_finance_readonly.sh
+      - name: Disposable code-only deployment control E2E
+        run: php scripts/qa_employee_finance_release.php hr
+  preflight:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read-only shared schema and protected-record preflight
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          command_timeout: 3m
+          script: |
+            set -eu
+            cd '${{ secrets.SSH_PATH }}'
+            git fetch origin main
+            TARGET='${{ github.sha }}'
+            SCRIPT=$(mktemp)
+            trap 'rm -f "$SCRIPT"' EXIT
+            git show "$TARGET:scripts/audit_employee_finance_release.php" > "$SCRIPT"
+            php "$SCRIPT"
+  deploy:
+    if: inputs.mode == 'deploy'
+    needs: [validate, preflight]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          command_timeout: 10m
+          script: |
+            set -eu
+            cd '${{ secrets.SSH_PATH }}'
+            git fetch origin main
+            TARGET='${{ github.sha }}'
+            test "$(git rev-parse origin/main)" = "$TARGET"
+            SCRIPT=$(mktemp)
+            trap 'rm -f "$SCRIPT"' EXIT
+            git show "$TARGET:scripts/deploy_employee_finance_readonly.sh" > "$SCRIPT"
+            bash "$SCRIPT" "$PWD" "$TARGET" hr
