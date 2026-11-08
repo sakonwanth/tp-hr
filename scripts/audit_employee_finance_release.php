@@ -14,7 +14,14 @@ try {
 } catch(Throwable $e) { throw new RuntimeException('Read-only release audit connection unavailable'); }
 $db->exec('SET TRANSACTION READ ONLY');$db->beginTransaction();
 try {
-    $required=['erp_payees'=>['created_by','notes','directory_visible','bank_name','bank_account_no','bank_account_name'],'hr_employee_loans'=>['interest_rate_pct','term_months','schedule_snapshot_json','first_due_month'],'hr_loan_repayments'=>['installment_no','paid_amount','payroll_run_id','status'],'hr_employee_finance_payroll_links'=>['link_status','source_type','source_id'],'hr_employee_finance_audit_logs'=>['event_type','payload_json','actor_user_id'],'erp_expense_workflow_events'=>['payload_json','event_type','actor_user_id']];
+    $required=[
+        'erp_expense_saved_banks'=>['id','owner_user_id','bank_id','dedupe_hash','bank_name','bank_account_no','bank_account_name'],
+        'hr_employee_loans'=>['interest_rate_pct','term_months','schedule_snapshot_json','first_due_month'],
+        'hr_loan_repayments'=>['installment_no','paid_amount','payroll_run_id','status'],
+        'hr_employee_finance_payroll_links'=>['link_status','source_type','source_id'],
+        'hr_employee_finance_audit_logs'=>['event_type','payload_json','actor_user_id'],
+        'erp_expense_workflow_events'=>['payload_json','event_type','actor_user_id'],
+    ];
     foreach($required as $table=>$columns){$q=$db->prepare('SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=?');$q->execute([$table]);if(array_diff($columns,$q->fetchAll(PDO::FETCH_COLUMN)))throw new RuntimeException('Employee-finance schema contract unavailable: '.$table.'; no migration was attempted');}
     $q=$db->prepare('SELECT * FROM line_expense_requests WHERE request_code IN (?,?,?,?) ORDER BY id');
     $q->execute(['EXP-2026-0129','EXP-2026-0130','EXP-2026-0140','EXP-2026-0146']);
