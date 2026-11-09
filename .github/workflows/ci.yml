@@ -23,6 +23,9 @@ jobs:
           find . -name "*.php" -not -path "./vendor/*" -print0 | xargs -0 -n1 php -l
           echo "Syntax check passed"
 
+      - name: HR ownership capture guard
+        run: php tests/hr_ownership_test.php
+
       - name: Retired CRM capture guard
         run: php tests/legacy_crm_capture_test.php
 

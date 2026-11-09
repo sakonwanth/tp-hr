@@ -1071,7 +1071,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png';
             </a>
             <?php endif; ?>
             
-            <a href="/profile.php" class="nav-item <?php echo $current_page === 'profile' ? 'active' : ''; ?>">
+            <a href="/employee_profile.php" class="nav-item <?php echo $current_page === 'profile' ? 'active' : ''; ?>">
                 <i class="fas fa-user"></i>
                 <span>ข้อมูลส่วนตัว</span>
             </a>
@@ -1144,6 +1144,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png';
                 </a>
 
                 <?php if (isHR()): ?>
+                <a href="/payroll.php" class="nav-item"><i class="fas fa-money-check-alt" aria-hidden="true"></i><span>จัดการเงินเดือน</span></a>
                 <a href="/hr/organization.php" class="nav-item <?php echo $current_page === 'hr-organization' ? 'active' : ''; ?>">
                     <i class="fas fa-building" aria-hidden="true"></i><span>สถานที่ทำงานและพิกัดลงเวลา</span>
                 </a>
@@ -1261,7 +1262,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png';
                     <span>อนุมัตินอกสถานที่</span>
                 </a>
                 <?php endif; ?>
-                <a href="/profile.php" class="mobile-menu-tile <?php echo $current_page === 'profile' ? 'active' : ''; ?>">
+                <a href="/employee_profile.php" class="mobile-menu-tile <?php echo $current_page === 'profile' ? 'active' : ''; ?>">
                     <i class="fas fa-user" aria-hidden="true"></i>
                     <span>ข้อมูลส่วนตัว</span>
                 </a>
@@ -1325,6 +1326,7 @@ $appTouchIconPath = '/assets/icons/apple-touch-icon-v3.png';
                         <span>จัดการเอกสาร</span>
                     </a>
                     <?php if (isHR()): ?>
+                <a href="/payroll.php" class="mobile-menu-tile"><i class="fas fa-money-check-alt" aria-hidden="true"></i><span>จัดการเงินเดือน</span></a>
                 <a href="/hr/organization.php" class="mobile-menu-tile <?php echo $current_page === 'hr-organization' ? 'active' : ''; ?>">
                     <i class="fas fa-building" aria-hidden="true"></i><span>สถานที่ทำงานและพิกัดลงเวลา</span>
                 </a>

@@ -456,7 +456,7 @@ require_once __DIR__ . '/../templates/header.php';
         <?php if ($rowsWithUnmatched): ?>
         <div class="mb-4 rounded-[var(--tp-ios-card-radius)] border border-amber-500/35 bg-amber-500/15 px-4 py-3 text-amber-100 text-sm" role="status">
             <i class="fas fa-triangle-exclamation mr-2" aria-hidden="true"></i>
-            พบ <?php echo count($rowsWithUnmatched); ?> คนที่มีรายการรายรับ/รายจ่ายจาก CRM ที่ยังไม่รู้จัก (ดูไอคอน <i class="fas fa-triangle-exclamation" aria-hidden="true"></i> ในตาราง) — ยอด "รวมรายรับ"/"รวมรายจ่าย" นับรวมให้ถูกต้องแล้ว แต่จำนวนนี้ยังไม่ถูกแยกเข้าคอลัมน์ไหน ต้องแจ้งให้เพิ่ม label เข้าไปในโค้ด
+            พบ <?php echo count($rowsWithUnmatched); ?> คนที่มีรายการรายรับ/รายจ่ายจาก HR ที่ยังไม่รู้จัก (ดูไอคอน <i class="fas fa-triangle-exclamation" aria-hidden="true"></i> ในตาราง) — ยอด "รวมรายรับ"/"รวมรายจ่าย" นับรวมให้ถูกต้องแล้ว แต่จำนวนนี้ยังไม่ถูกแยกเข้าคอลัมน์ไหน ต้องแจ้งให้เพิ่ม label เข้าไปในโค้ด
         </div>
         <?php endif; ?>
 
@@ -481,7 +481,7 @@ require_once __DIR__ . '/../templates/header.php';
                         <p class="text-white font-semibold">
                             <?php echo ($i + 1) . '. ' . htmlspecialchars($row['full_name']); ?>
                             <?php if (!empty($row['unmatched_items'])): ?>
-                            <i class="fas fa-triangle-exclamation text-amber-400 ml-1" aria-hidden="true" title="มีรายการจาก CRM ที่ยังไม่รู้จัก"></i>
+                            <i class="fas fa-triangle-exclamation text-amber-400 ml-1" aria-hidden="true" title="มีรายการจาก HR ที่ยังไม่รู้จัก"></i>
                             <?php endif; ?>
                         </p>
                         <p class="text-white/50 text-xs mt-0.5"><?php echo htmlspecialchars($row['position']); ?></p>
@@ -529,8 +529,8 @@ require_once __DIR__ . '/../templates/header.php';
                         <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-white/60 uppercase">ค่าครองชีพ</th>
                         <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-white/60 uppercase">ค่าเดินทาง</th>
                         <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-white/60 uppercase">โบนัส</th>
-                        <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-white/60 uppercase" title="ข้อมูลจาก employee_salary_setup — แก้ไขได้ที่ CRM payroll.php">ค่าบริหาร<span class="block normal-case text-[10px] text-white/40">จาก CRM</span></th>
-                        <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-white/60 uppercase" title="ข้อมูลจาก employee_salary_setup — แก้ไขได้ที่ CRM payroll.php">ชดเชยวันหยุด<span class="block normal-case text-[10px] text-white/40">จาก CRM</span></th>
+                        <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-white/60 uppercase" title="ข้อมูลจาก employee_salary_setup — แก้ไขได้ที่ HR payroll.php">ค่าบริหาร<span class="block normal-case text-[10px] text-white/40">จาก HR</span></th>
+                        <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-white/60 uppercase" title="ข้อมูลจาก employee_salary_setup — แก้ไขได้ที่ HR payroll.php">ชดเชยวันหยุด<span class="block normal-case text-[10px] text-white/40">จาก HR</span></th>
                         <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-white/60 uppercase">รวมรายรับ</th>
                         <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-white/60 uppercase">ประกันสังคม</th>
                         <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-white/60 uppercase">ลางาน</th>
