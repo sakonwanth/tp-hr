@@ -329,8 +329,8 @@ function ep_val($u, $k) { return htmlspecialchars((string)($u[$k] ?? '')); }
                     <i class="fas fa-save mr-2"></i>บันทึกข้อมูล
                 </button>
                 <?php if ($is_hr_admin): ?>
-                <a href="users.php?action=edit&id=<?php echo (int)$u['id']; ?>" class="btn-form bg-white/10 hover:bg-white/20 px-6 py-2.5 rounded-xl font-medium transition-all">
-                    <i class="fas fa-user-cog mr-2"></i>ไปหน้าจัดการผู้ใช้
+                <a href="hr/employees.php" class="btn-form bg-white/10 hover:bg-white/20 px-6 py-2.5 rounded-xl font-medium transition-all">
+                    <i class="fas fa-user-cog mr-2"></i>ไปหน้าจัดการพนักงาน
                 </a>
                 <?php endif; ?>
             </div>

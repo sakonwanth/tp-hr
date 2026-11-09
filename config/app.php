@@ -15,7 +15,7 @@ if (isset($_ENV['APP_DEBUG'])) {
     define('APP_DEBUG', $__appEnv !== 'production');
 }
 unset($__appEnv);
-define('APP_URL', $_ENV['APP_URL'] ?? 'http://localhost/tp-hr');
+define('APP_URL', $_ENV['APP_URL'] ?? (APP_ENV === 'production' ? 'https://hr.tp-asset.com' : 'http://localhost/tp-hr'));
 
 // Session
 define('SESSION_LIFETIME', 7200); // 2 hours
@@ -49,7 +49,7 @@ define('REMEMBER_CHOICE_COOKIE', 'tp_hr_remember');
 define('MIN_PASSWORD_LENGTH', 8);
 
 // External services
-define('CRM_BASE_URL', $_ENV['CRM_BASE_URL'] ?? 'http://localhost/tp-crm');
+define('CRM_BASE_URL', $_ENV['CRM_BASE_URL'] ?? (APP_ENV === 'production' ? 'https://crm.tp-asset.com' : 'http://localhost/tp-crm'));
 
 /** Public base URL of TP-Checkin (รูปลงเวลาเก็บใต้ {CHECKIN}/storage/photos/...) */
 $checkinDefaultUrl = (defined('APP_ENV') && strtolower((string)APP_ENV) === 'production')
