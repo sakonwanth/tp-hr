@@ -33,6 +33,7 @@ jobs:
         run: |
           php tests/attendance_photo_evidence_test.php
           php tests/attendance_capture_policy_test.php
+          php tests/attendance_v1_receiver_test.php
           php tests/capture_evidence_transaction_test.php hr
           php tests/planned_late_request_race_test.php hr
           php tests/clock_health_test.php
