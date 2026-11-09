@@ -117,6 +117,7 @@ function handleCheckIn(PDO $pdo, array $user, array $input): void {
     $latitude      = $input['latitude']  ?? null;
     $longitude     = $input['longitude'] ?? null;
     $photo         = $input['photo']     ?? null;
+    if (!is_string($photo) || $photo === '') apiError('กรุณาถ่ายรูป Selfie', 422);
     $outsideReason = trim((string)($input['outside_reason'] ?? $input['offsite_reason'] ?? ''));
 
     $stmt = $pdo->prepare("SELECT * FROM hr_attendances WHERE user_id = ? AND attendance_date = CURDATE()");
@@ -176,6 +177,7 @@ function handleCheckIn(PDO $pdo, array $user, array $input): void {
     $photoPath = null;
     if ($photo) {
         $photoPath = savePhoto($photo, $user['id'], 'checkin');
+        if (!$photoPath) apiError('ไม่สามารถบันทึกรูปยืนยัน กรุณาถ่ายรูปใหม่', 422);
     }
 
     // Re-read under a write lock immediately before persisting. The earlier read is
@@ -296,6 +298,7 @@ function createOutsideLocationRequest(
     $photoPath = null;
     if ($photo) {
         $photoPath = savePhoto($photo, $user['id'], strtolower($requestType) . '_outside');
+        if (!$photoPath) apiError('ไม่สามารถบันทึกรูปยืนยัน กรุณาถ่ายรูปใหม่', 422);
     }
 
     $pdo->beginTransaction();
@@ -384,6 +387,7 @@ function handleCheckOut(PDO $pdo, array $user, array $input): void {
     $latitude      = $input['latitude']  ?? null;
     $longitude     = $input['longitude'] ?? null;
     $photo         = $input['photo']     ?? null;
+    if (!is_string($photo) || $photo === '') apiError('กรุณาถ่ายรูป Selfie', 422);
     $outsideReason = trim((string)($input['outside_reason'] ?? $input['offsite_reason'] ?? ''));
 
     $stmt = $pdo->prepare("SELECT * FROM hr_attendances WHERE user_id = ? AND attendance_date = CURDATE()");
@@ -441,6 +445,7 @@ function handleCheckOut(PDO $pdo, array $user, array $input): void {
     $photoPath = null;
     if ($photo) {
         $photoPath = savePhoto($photo, $user['id'], 'checkout');
+        if (!$photoPath) apiError('ไม่สามารถบันทึกรูปยืนยัน กรุณาถ่ายรูปใหม่', 422);
     }
     
     // Lock and validate again at the write boundary so repeated/concurrent checkout
