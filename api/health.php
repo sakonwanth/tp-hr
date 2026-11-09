@@ -3,6 +3,7 @@
  * Health check endpoint — GET /api/health
  */
 require_once dirname(__DIR__) . '/bootstrap.php';
+require_once dirname(__DIR__) . '/core/Services/ClockHealth.php';
 
 if (defined('TP_COMMON_AVAILABLE') && TP_COMMON_AVAILABLE && class_exists('TpCommon\HealthCheck')) {
     $pdo = null;
@@ -34,6 +35,7 @@ if (defined('TP_COMMON_AVAILABLE') && TP_COMMON_AVAILABLE && class_exists('TpCom
         }
 
         return [
+            'clock' => ClockHealth::healthCheck(),
             'checkin' => array_filter([
                 'status' => $status,
                 'checkin_app_url_configured' => $hasUrl,
@@ -50,4 +52,6 @@ if (defined('TP_COMMON_AVAILABLE') && TP_COMMON_AVAILABLE && class_exists('TpCom
 header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
 header('Cache-Control: no-store');
-echo json_encode(['status' => 'ok', 'project' => 'tp-hr', 'tp_common' => false], JSON_UNESCAPED_UNICODE);
+$clock = ClockHealth::healthCheck();
+http_response_code($clock['status'] === 'error' ? 503 : 200);
+echo json_encode(['status' => $clock['status'] === 'error' ? 'degraded' : 'ok', 'project' => 'tp-hr', 'tp_common' => false, 'checks' => ['clock' => ['status' => $clock['status']]]], JSON_UNESCAPED_UNICODE);

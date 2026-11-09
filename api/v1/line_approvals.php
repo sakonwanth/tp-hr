@@ -14,14 +14,15 @@ $body = ApiAuth::input();
 $workflow = strtolower(trim((string)($body['workflow'] ?? '')));
 $decision = strtolower(trim((string)($body['decision'] ?? '')));
 $id = (int)($body['id'] ?? 0);
-$roles = in_array($workflow, ['adjustment','dayoff','holiday_work'], true) ? CEO_ROLES : MANAGER_ROLES;
+$roles = $workflow === 'planned_late' ? ['HR','Admin','Chairman','CEO']
+    : (in_array($workflow, ['adjustment','dayoff','holiday_work'], true) ? CEO_ROLES : MANAGER_ROLES);
 $actorId = apiKeyResolveActorForApi($pdo, ApiAuth::currentKey(), $body, 'actor_id', $roles);
 
 try {
     $data = (new HrLineApprovalService($pdo))->decide($workflow,$id,$actorId,$decision);
     ApiAuth::success(['data'=>$data]);
 } catch (DomainException $e) {
-    ApiAuth::fail(409,$e->getMessage());
+    ApiAuth::fail($e->getCode() === 503 ? 503 : 409,$e->getMessage());
 } catch (InvalidArgumentException $e) {
     ApiAuth::fail(400,$e->getMessage());
 } catch (Throwable $e) {

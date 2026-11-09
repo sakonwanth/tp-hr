@@ -1425,3 +1425,12 @@ window.addEventListener('pageshow', function (ev) {
 <!-- Main Content -->
 <main id="tp-hr-main" class="<?php echo htmlspecialchars($tp_hr_main_native_class, ENT_QUOTES, 'UTF-8'); ?>">
 <div class="tp-native-stack--page min-w-0">
+<?php if ($isHR): ?>
+<?php require_once dirname(__DIR__) . '/core/Services/ClockHealth.php'; $tpClockHealth = ClockHealth::read(); ?>
+<?php if (in_array($tpClockHealth['status'], ['warning', 'critical'], true)): ?>
+<div role="<?php echo $tpClockHealth['status'] === 'critical' ? 'alert' : 'status'; ?>" aria-live="<?php echo $tpClockHealth['status'] === 'critical' ? 'assertive' : 'polite'; ?>" class="rounded-xl border border-amber-500/20 bg-amber-500/15 p-4 text-sm mb-4">
+    <i class="fas fa-clock mr-2" aria-hidden="true"></i>
+    <?php echo $tpClockHealth['status'] === 'critical' ? 'เวลาของระบบยังตรวจสอบไม่สำเร็จ กรุณาแจ้งผู้ดูแลระบบก่อนยืนยันข้อมูลลงเวลา' : 'การตรวจเวลาของระบบยังไม่สมบูรณ์ กรุณาแจ้งผู้ดูแลระบบให้ตรวจสอบ'; ?>
+</div>
+<?php endif; unset($tpClockHealth); ?>
+<?php endif; ?>

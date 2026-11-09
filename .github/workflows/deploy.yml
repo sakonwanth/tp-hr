@@ -19,7 +19,28 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ env.PHP_VERSION }}
-          extensions: pdo, pdo_mysql, mbstring, json, curl
+          extensions: pdo, pdo_mysql, pdo_sqlite, mbstring, json, curl, gd
+      - name: Checkout shared HR calculators for behavioral tests
+        uses: actions/checkout@v5
+        with:
+          repository: sakonwanth/tp-common
+          path: .ci-common
+          ssh-key: ${{ secrets.TP_COMMON_DEPLOY_KEY }}
+          persist-credentials: false
+      - name: Place shared calculator beside HR
+        run: mv .ci-common ../tp-common
+      - name: Attendance capture, evidence, clock and planned-late behavior
+        run: |
+          php tests/attendance_photo_evidence_test.php
+          php tests/attendance_capture_policy_test.php
+          php tests/capture_evidence_transaction_test.php hr
+          php tests/planned_late_request_race_test.php hr
+          php tests/clock_health_test.php
+          php tests/clock_incident_audit_test.php
+          python3 tests/clock_health_monitor_test.py
+          php tests/planned_late_approval_service_test.php
+          php tests/planned_late_consumer_boundary_test.php
+
       - name: PHP syntax check
         run: |
           find . -name "*.php" -not -path "./vendor/*" -print0 | xargs -0 -n1 php -l

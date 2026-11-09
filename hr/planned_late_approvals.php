@@ -21,23 +21,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('/hr/planned_late_approvals.php', 302);
     }
     try {
-        $decision = ($_POST['action'] ?? '') === 'approve' ? 'APPROVED' : 'REJECTED';
+        $action = (string)($_POST['action'] ?? '');
+        if (!in_array($action, ['approve', 'reject'], true)) {
+            throw new InvalidArgumentException('กรุณาระบุผลอนุมัติให้ถูกต้อง แล้วลองใหม่');
+        }
+        $decision = $action === 'approve' ? 'APPROVED' : 'REJECTED';
         $row = (new PlannedLateApprovalService($pdo))->decide(
             (int)($_POST['attendance_id'] ?? 0),
             (int)$user['id'],
             $decision,
             trim((string)($_POST['review_note'] ?? ''))
         );
-        Auth::log('PLANNED_LATE_' . $decision, 'hr_attendances', (int)$row['id'], null, [
-            'employee_id' => (int)$row['user_id'],
-            'attendance_date' => $row['attendance_date'],
-        ]);
         if (function_exists('crm_line_notify_planned_late_decision')) {
             crm_line_notify_planned_late_decision($pdo, (int)$row['id'], $decision, (int)$user['id']);
         }
         flash('success', $decision === 'APPROVED' ? 'อนุมัติคำขอเรียบร้อยแล้ว' : 'ปฏิเสธคำขอเรียบร้อยแล้ว');
     } catch (Throwable $e) {
-        flash('error', $e->getMessage());
+        tpHrLogException($e, 'hr/planned-late-approval');
+        flash('error', $e instanceof PDOException ? 'บันทึกผลอนุมัติไม่สำเร็จ กรุณาติดต่อ HR' : $e->getMessage());
     }
     redirect('/hr/planned_late_approvals.php?status=' . urlencode((string)($_GET['status'] ?? 'PENDING')), 302);
 }
@@ -90,11 +91,12 @@ include dirname(__DIR__) . '/templates/header.php';
             </div>
             <dl class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4 text-sm"><div><dt class="text-white/50">วันที่</dt><dd class="text-white mt-1"><?php echo htmlspecialchars($r['attendance_date']); ?></dd></div><div><dt class="text-white/50">เวลาเข้าที่ขอ</dt><dd class="text-white mt-1 tabular-nums"><?php echo htmlspecialchars(substr($r['planned_start_time'],0,5)); ?> น.</dd></div><div><dt class="text-white/50">เหตุผล</dt><dd class="text-white mt-1"><?php echo htmlspecialchars($r['planned_reason']); ?></dd></div></dl>
             <?php if ($isPending): ?>
-            <form method="post" class="mt-5 grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-2" onsubmit="this.querySelectorAll('button').forEach(b=>b.disabled=true)">
+            <form method="post" class="mt-5 grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-2" onsubmit="if(this.dataset.submitting)return false; const action=event.submitter?.value; if(!['approve','reject'].includes(action))return false; this.elements.namedItem('action').value=action; this.dataset.submitting='1'; this.querySelectorAll('button').forEach(b=>b.disabled=true)">
+                <input type="hidden" name="action" value="">
                 <input type="hidden" name="_token" value="<?php echo htmlspecialchars(csrfToken()); ?>"><input type="hidden" name="attendance_id" value="<?php echo (int)$r['id']; ?>">
                 <label class="sr-only" for="note-<?php echo (int)$r['id']; ?>">หมายเหตุผู้อนุมัติ</label><input id="note-<?php echo (int)$r['id']; ?>" name="review_note" maxlength="500" class="input-field tp-native-input min-h-[52px]" placeholder="หมายเหตุ (ถ้ามี)">
-                <button name="action" value="approve" class="min-h-[48px] px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold touch-manipulation whitespace-nowrap"><i class="fas fa-check mr-2"></i>อนุมัติ</button>
-                <button name="action" value="reject" onclick="return confirm('ยืนยันไม่อนุมัติคำขอนี้?')" class="min-h-[48px] px-5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold touch-manipulation whitespace-nowrap"><i class="fas fa-times mr-2"></i>ไม่อนุมัติ</button>
+                <button type="submit" value="approve" class="min-h-[48px] px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold touch-manipulation whitespace-nowrap"><i class="fas fa-check mr-2"></i>อนุมัติ</button>
+                <button type="submit" value="reject" onclick="return confirm('ยืนยันไม่อนุมัติคำขอนี้?')" class="min-h-[48px] px-5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold touch-manipulation whitespace-nowrap"><i class="fas fa-times mr-2"></i>ไม่อนุมัติ</button>
             </form>
             <?php endif; ?>
         </article>

@@ -502,38 +502,26 @@ class HrOperationsService
         return true;
     }
 
-    /** Canonical shared-DB decision boundary for a planned-late LINE action. */
+    /** HR executes policy locally; external consumers cross the authenticated HR API. */
     public function decidePlannedLate(int $attendanceId, int $actorId, string $decision, string $note = ''): array
     {
-        $decision = strtoupper($decision);
-        if ($attendanceId <= 0 || $actorId <= 0 || !in_array($decision, ['APPROVED', 'REJECTED'], true)) {
+        $decision = strtoupper(trim($decision));
+        if ($attendanceId <= 0 || $actorId <= 0 || !in_array($decision, ['APPROVED','REJECTED'], true)) {
             throw new InvalidArgumentException('ข้อมูลคำขอไม่ถูกต้อง');
         }
-        $this->pdo->beginTransaction();
-        try {
-            $stmt = $this->pdo->prepare("SELECT a.id,a.user_id,a.attendance_date,a.planned_start_time,a.planned_reason,
-                                                a.planned_requested_at,a.planned_status,a.check_in_time,
-                                                CONCAT_WS(' ',u.first_name_th,u.last_name_th) employee_name
-                                         FROM hr_attendances a JOIN users u ON u.id=a.user_id
-                                         WHERE a.id=? FOR UPDATE");
-            $stmt->execute([$attendanceId]);
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            if (!$row || empty($row['planned_start_time'])) throw new RuntimeException('ไม่พบคำขอ');
-            if ($row['planned_status'] !== 'PENDING') throw new DomainException('คำขอนี้ได้รับการดำเนินการแล้ว');
-            if ((int)$row['user_id'] === $actorId) throw new DomainException('ผู้ยื่นคำขอไม่สามารถอนุมัติคำขอของตนเอง');
-            if (!empty($row['check_in_time'])) throw new DomainException('พนักงานลงเวลาแล้ว ไม่สามารถเปลี่ยนผลคำขอได้');
-            $update = $this->pdo->prepare("UPDATE hr_attendances SET planned_status=?,planned_reviewed_by=?,planned_reviewed_at=NOW(),planned_review_note=?,updated_at=NOW() WHERE id=? AND planned_status='PENDING'");
-            $update->execute([$decision,$actorId,mb_substr(trim($note),0,500),$attendanceId]);
-            if ($update->rowCount() !== 1) throw new DomainException('คำขอนี้ได้รับการดำเนินการแล้ว');
-            $this->pdo->commit();
-            $row['planned_status'] = $decision;
-            $row['planned_review_note'] = mb_substr(trim($note),0,500);
-            $row['planned_reviewed_at'] = date('Y-m-d H:i:s');
-            return $row;
-        } catch (Throwable $e) {
-            if ($this->pdo->inTransaction()) $this->pdo->rollBack();
-            throw $e;
+        if (defined('BASE_PATH') && realpath(BASE_PATH) !== realpath(dirname(__DIR__,2))) {
+            // Do not load HR's PayrollService into a consumer that already has a
+            // class with that compatibility name, or fall back to local writes.
+            $client = \TpCommon\Http\HrClient::fromEnv();
+            $response = $client->decideLineApproval('planned_late',$attendanceId,$decision === 'APPROVED' ? 'approve' : 'reject',$actorId);
+            if (empty($response['success'])) throw new RuntimeException((string)($response['error'] ?? $response['message'] ?? 'HR API ไม่สามารถดำเนินการได้'));
+            $row = (array)($response['data'] ?? []);
+            return isset($row['data']) && is_array($row['data']) ? $row['data'] : $row;
         }
+        require_once __DIR__.'/AttendanceService.php';
+        require_once __DIR__.'/PayrollService.php';
+        require_once __DIR__.'/PlannedLateApprovalService.php';
+        return (new PlannedLateApprovalService($this->pdo))->decide($attendanceId,$actorId,$decision,$note);
     }
 
     /**

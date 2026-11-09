@@ -16,6 +16,8 @@
 if (PHP_SAPI !== 'cli') { http_response_code(403); exit('CLI only'); }
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once dirname(__DIR__) . '/core/Services/ClockHealth.php';
+ClockHealth::assertSafe();
 require_once __DIR__ . '/../core/WfhStamp.php';
 $pdo = getDB();
 

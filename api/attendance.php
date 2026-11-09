@@ -5,6 +5,8 @@
  */
 
 require_once dirname(__DIR__) . '/bootstrap.php';
+require_once dirname(__DIR__) . '/core/Services/AttendanceCapturePolicy.php';
+require_once dirname(__DIR__) . '/core/Services/ClockHealth.php';
 require_once dirname(__DIR__) . '/core/Services/PlannedLateApprovalService.php';
 
 header('Content-Type: application/json');
@@ -105,6 +107,31 @@ if ($method === 'POST') {
     apiError('Method not allowed', 405);
 }
 
+
+/** Remove only this request's unreferenced photo; uncertain outcomes preserve evidence. */
+function hrDiscardUnreferencedAttendancePhoto(PDO $pdo, int $userId, string $path): void {
+    if ($userId <= 0 || !preg_match('#^uploads/attendance/[0-9]{4}/[0-9]{2}/[a-z0-9_]+_' . $userId . '_[0-9]{8}_[0-9]{6}_[a-f0-9]+[.]jpg$#D', $path)) return;
+    $base = realpath(STORAGE_PATH);$file = $base ? realpath($base.'/'.$path) : false;
+    if (!$file || $file !== $base.'/'.$path || !is_file($file) || is_link($base.'/'.$path)) return;
+    try {
+        $q = $pdo->prepare('SELECT COUNT(*) FROM hr_attendances WHERE check_in_photo=? OR check_out_photo=?');
+        $q->execute([$path,$path]);if ((int)$q->fetchColumn()>0) return;
+        $q = $pdo->prepare('SELECT COUNT(*) FROM hr_attendance_outside_requests WHERE photo_path=?');
+        $q->execute([$path]);if ((int)$q->fetchColumn()>0) return;
+        @unlink($file);
+    } catch (Throwable $e) { error_log('[tp-hr] photo cleanup deferred; unable to verify capture outcome'); }
+}
+
+/** Covers apiError()/exit as well as exceptions after a successful image save. */
+function hrTrackAttendancePhoto(PDO $pdo, int $userId, ?string $path): void {
+    if (!$path) return;
+    register_shutdown_function(static function() use($pdo,$userId,$path):void {
+        try { if ($pdo->inTransaction()) $pdo->rollBack(); }
+        catch (Throwable $e) { error_log('[tp-hr] photo cleanup deferred; transaction outcome unknown'); return; }
+        hrDiscardUnreferencedAttendancePhoto($pdo,$userId,$path);
+    });
+}
+
 /**
  * Handle Check-in
  *
@@ -114,6 +141,9 @@ if ($method === 'POST') {
  * - Off-site workflow: outside_reason → hr_attendance_outside_requests (PENDING)
  */
 function handleCheckIn(PDO $pdo, array $user, array $input): void {
+    try { ClockHealth::assertSafe(); $gpsEvidence = AttendanceCapturePolicy::validateGps($input); }
+    catch (DomainException $e) { apiError($e->getMessage(), $e->getCode() ?: 422); }
+
     $latitude      = $input['latitude']  ?? null;
     $longitude     = $input['longitude'] ?? null;
     $photo         = $input['photo']     ?? null;
@@ -144,9 +174,6 @@ function handleCheckIn(PDO $pdo, array $user, array $input): void {
 
     $locationId = null;
     if ($enforceLocation) {
-        if (empty($latitude) || empty($longitude)) {
-            apiError('กรุณาเปิด GPS เพื่อระบุตำแหน่ง');
-        }
         $locationId = validateLocation($pdo, (float)$latitude, (float)$longitude);
         if ($locationId === null) {
             if ($outsideNeedsApproval) {
@@ -160,7 +187,7 @@ function handleCheckIn(PDO $pdo, array $user, array $input): void {
                     ]);
                     exit;
                 }
-                $pending = createOutsideLocationRequest($pdo, $user, 'CHECK_IN', null, (float)$latitude, (float)$longitude, $photo, $outsideReason);
+                $pending = createOutsideLocationRequest($pdo, $user, 'CHECK_IN', null, (float)$latitude, (float)$longitude, $photo, $outsideReason, $input, (string)($_SERVER['HTTP_USER_AGENT'] ?? ''));
                 apiSuccess([
                     'pending_approval' => true,
                     'request_id'       => $pending['request_id'],
@@ -178,15 +205,19 @@ function handleCheckIn(PDO $pdo, array $user, array $input): void {
     if ($photo) {
         $photoPath = savePhoto($photo, $user['id'], 'checkin');
         if (!$photoPath) apiError('ไม่สามารถบันทึกรูปยืนยัน กรุณาถ่ายรูปใหม่', 422);
+        hrTrackAttendancePhoto($pdo, (int)$user['id'], $photoPath);
     }
 
     // Re-read under a write lock immediately before persisting. The earlier read is
     // only for UX/calculation; two simultaneous requests must never overwrite time.
     $pdo->beginTransaction();
     try {
+        AttendanceCapturePolicy::assertLocation($pdo, $gpsEvidence, $locationId ? (int)$locationId : null, $user, (bool)$enforceLocation);
         $lockedStmt = $pdo->prepare("SELECT * FROM hr_attendances WHERE user_id = ? AND attendance_date = CURDATE() LIMIT 1 FOR UPDATE");
         $lockedStmt->execute([(int)$user['id']]);
         $existing = $lockedStmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        ClockHealth::assertSafe();
+        $gpsEvidence = AttendanceCapturePolicy::validateGps($input);
         if ($existing && !empty($existing['check_in_time'])) {
             $pdo->rollBack();
             apiError('คุณได้ลงเวลาเข้างานวันนี้แล้ว', 409);
@@ -233,6 +264,7 @@ function handleCheckIn(PDO $pdo, array $user, array $input): void {
         $attId = (int)$pdo->lastInsertId();
     }
 
+        AttendanceCapturePolicy::persistMetadata($pdo, (int)$attId, 'in', $gpsEvidence, $photoPath, (string)($_SERVER['HTTP_USER_AGENT'] ?? ''), $checkInAt);
         $pdo->commit();
     } catch (PDOException $e) {
         if ($pdo->inTransaction()) {
@@ -247,6 +279,7 @@ function handleCheckIn(PDO $pdo, array $user, array $input): void {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }
+        if ($e instanceof DomainException) apiError($e->getMessage(), $e->getCode() ?: 422);
         throw $e;
     }
 
@@ -279,8 +312,12 @@ function createOutsideLocationRequest(
     ?float $latitude,
     ?float $longitude,
     ?string $photo,
-    string $reason
+    string $reason,
+    array $gpsInput,
+    string $deviceInfo
 ): array {
+    if (!is_string($photo) || $photo === '') apiError('กรุณาถ่ายรูป Selfie', 422);
+    AttendanceCapturePolicy::validateGps($gpsInput);
     $requestTime = date('Y-m-d H:i:s');
     $requestDate = substr($requestTime, 0, 10);
 
@@ -299,10 +336,17 @@ function createOutsideLocationRequest(
     if ($photo) {
         $photoPath = savePhoto($photo, $user['id'], strtolower($requestType) . '_outside');
         if (!$photoPath) apiError('ไม่สามารถบันทึกรูปยืนยัน กรุณาถ่ายรูปใหม่', 422);
+        hrTrackAttendancePhoto($pdo, (int)$user['id'], $photoPath);
     }
 
     $pdo->beginTransaction();
     try {
+    // Serialize this user's pending timestamps before validating the freshness window.
+    $pendingLock = $pdo->prepare('SELECT id FROM hr_attendances WHERE user_id=? AND attendance_date=? LIMIT 1 FOR UPDATE');
+    $pendingLock->execute([(int)$user['id'],$requestDate]);
+    ClockHealth::assertSafe();
+    $gpsEvidence = AttendanceCapturePolicy::validateGps($gpsInput);
+
     $stmt = $pdo->prepare("
         INSERT INTO hr_attendance_outside_requests (
             user_id, attendance_id, request_type,
@@ -327,12 +371,14 @@ function createOutsideLocationRequest(
     );
     $pdo->prepare("UPDATE hr_attendance_outside_requests SET attendance_id = ? WHERE id = ?")
         ->execute([$attendanceId, $requestId]);
+    AttendanceCapturePolicy::persistMetadata($pdo, $attendanceId, $requestType === 'CHECK_OUT' ? 'out' : 'in', $gpsEvidence, $photoPath, $deviceInfo, $requestTime);
     $pdo->commit();
     } catch (Throwable $e) {
         if ($pdo->inTransaction()) $pdo->rollBack();
         if ($e instanceof PDOException && (string)$e->getCode() === '23000') {
             apiError('มีคำขอที่รออนุมัติอยู่แล้วสำหรับรายการนี้', 409);
         }
+        if ($e instanceof DomainException) apiError($e->getMessage(), $e->getCode() ?: 422);
         throw $e;
     }
     Auth::log('OUTSIDE_LOCATION_REQUEST', 'hr_attendance_outside_requests', $requestId, [
@@ -384,6 +430,9 @@ function stampPendingOutsideAttendance(
  * Handle Check-out
  */
 function handleCheckOut(PDO $pdo, array $user, array $input): void {
+    try { ClockHealth::assertSafe(); $gpsEvidence = AttendanceCapturePolicy::validateGps($input); }
+    catch (DomainException $e) { apiError($e->getMessage(), $e->getCode() ?: 422); }
+
     $latitude      = $input['latitude']  ?? null;
     $longitude     = $input['longitude'] ?? null;
     $photo         = $input['photo']     ?? null;
@@ -412,9 +461,6 @@ function handleCheckOut(PDO $pdo, array $user, array $input): void {
 
     $locationId = null;
     if ($enforceLocation) {
-        if (empty($latitude) || empty($longitude)) {
-            apiError('กรุณาเปิด GPS เพื่อระบุตำแหน่ง');
-        }
         $locationId = validateLocation($pdo, (float)$latitude, (float)$longitude);
         if ($locationId === null) {
             if ($outsideNeedsApproval) {
@@ -428,7 +474,7 @@ function handleCheckOut(PDO $pdo, array $user, array $input): void {
                     ]);
                     exit;
                 }
-                $pending = createOutsideLocationRequest($pdo, $user, 'CHECK_OUT', (int)$attendance['id'], (float)$latitude, (float)$longitude, $photo, $outsideReason);
+                $pending = createOutsideLocationRequest($pdo, $user, 'CHECK_OUT', (int)$attendance['id'], (float)$latitude, (float)$longitude, $photo, $outsideReason, $input, (string)($_SERVER['HTTP_USER_AGENT'] ?? ''));
                 apiSuccess([
                     'pending_approval' => true,
                     'request_id'       => $pending['request_id'],
@@ -446,15 +492,19 @@ function handleCheckOut(PDO $pdo, array $user, array $input): void {
     if ($photo) {
         $photoPath = savePhoto($photo, $user['id'], 'checkout');
         if (!$photoPath) apiError('ไม่สามารถบันทึกรูปยืนยัน กรุณาถ่ายรูปใหม่', 422);
+        hrTrackAttendancePhoto($pdo, (int)$user['id'], $photoPath);
     }
     
     // Lock and validate again at the write boundary so repeated/concurrent checkout
     // requests cannot overwrite the first recorded checkout time.
     $pdo->beginTransaction();
     try {
+        AttendanceCapturePolicy::assertLocation($pdo, $gpsEvidence, $locationId ? (int)$locationId : null, $user, (bool)$enforceLocation);
         $lockedStmt = $pdo->prepare("SELECT * FROM hr_attendances WHERE id = ? AND user_id = ? FOR UPDATE");
         $lockedStmt->execute([(int)$attendance['id'], (int)$user['id']]);
         $attendance = $lockedStmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        ClockHealth::assertSafe();
+        $gpsEvidence = AttendanceCapturePolicy::validateGps($input);
         if (!$attendance || empty($attendance['check_in_time'])) {
             $pdo->rollBack();
             apiError('คุณยังไม่ได้ลงเวลาเข้างานวันนี้', 409);
@@ -503,11 +553,13 @@ function handleCheckOut(PDO $pdo, array $user, array $input): void {
         $earlyLeaveMinutes,
         $attendance['id']
     ]);
+        AttendanceCapturePolicy::persistMetadata($pdo, (int)$attendance['id'], 'out', $gpsEvidence, $photoPath, (string)($_SERVER['HTTP_USER_AGENT'] ?? ''), $checkOutAt);
         $pdo->commit();
     } catch (Throwable $e) {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }
+        if ($e instanceof DomainException) apiError($e->getMessage(), $e->getCode() ?: 422);
         throw $e;
     }
     
@@ -542,54 +594,42 @@ function validateLocation(PDO $pdo, float $latitude, float $longitude): ?int {
  * Save photo to storage (ต้องเป็นภาพที่ GD อ่านได้ — ไม่บันทึก raw ที่ไม่ใช่รูป)
  */
 function savePhoto(string $base64Data, int $userId, string $type): string {
-    if (preg_match('/^data:image\/(\w+);base64,/i', $base64Data, $matches)) {
-        $declared = strtolower($matches[1]);
-        if (!in_array($declared, ['jpeg', 'jpg', 'png', 'gif', 'webp'], true)) {
-            return '';
-        }
-        $base64Data = preg_replace('/^data:image\/\w+;base64,/i', '', $base64Data, 1);
-    }
-
-    $data = base64_decode($base64Data, true);
-    if ($data === false || $data === '') {
-        return '';
-    }
-    if (strlen($data) > MAX_UPLOAD_SIZE) {
-        return '';
-    }
-
-    $image = @imagecreatefromstring($data);
-    if ($image === false) {
-        return '';
-    }
+    require_once dirname(__DIR__) . '/core/Services/AttendancePhotoEvidence.php';
+    if ($userId <= 0) return '';
+    $image = AttendancePhotoEvidence::decode($base64Data, MAX_UPLOAD_SIZE);
+    if ($image === null) return '';
 
     $dir = STORAGE_PATH . '/uploads/attendance/' . date('Y/m');
-    if (!is_dir($dir)) {
-        mkdir($dir, 0755, true);
+    if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
+        imagedestroy($image);
+        return '';
     }
-
     $type = preg_replace('/[^a-z0-9_]/', '', strtolower($type)) ?: 'checkin';
     $filename = sprintf('%s_%d_%s_%s.jpg', $type, $userId, date('Ymd_His'), bin2hex(random_bytes(3)));
     $path = $dir . '/' . $filename;
-
-    $maxWidth = 800;
-    $quality = 80;
-    $width = imagesx($image);
-    $height = imagesy($image);
-    if ($width > $maxWidth) {
-        $newWidth = $maxWidth;
-        $newHeight = (int) ($height * ($maxWidth / $width));
-        $resized = imagecreatetruecolor($newWidth, $newHeight);
-        imagecopyresampled($resized, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
-        imagedestroy($image);
-        imagejpeg($resized, $path, $quality);
-        imagedestroy($resized);
-    } else {
-        imagejpeg($image, $path, $quality);
+    $resized = null;
+    try {
+        $width = imagesx($image);
+        $height = imagesy($image);
+        $output = $image;
+        if ($width > 800) {
+            $resized = imagecreatetruecolor(800, max(1, (int) ($height * (800 / $width))));
+            if (!$resized) return '';
+            imagecopyresampled($resized, $image, 0, 0, 0, 0, 800, imagesy($resized), $width, $height);
+            $output = $resized;
+        }
+        $written = @imagejpeg($output, $path, 80);
+    } catch (Throwable $e) {
+        $written = false;
+    } finally {
+        if ($resized instanceof GdImage) imagedestroy($resized);
         imagedestroy($image);
     }
+    if (empty($written) || !is_file($path) || filesize($path) === 0) {
+        if (is_file($path)) @unlink($path);
+        return '';
+    }
     @chmod($path, 0644);
-
     return 'uploads/attendance/' . date('Y/m') . '/' . $filename;
 }
 
@@ -1323,6 +1363,7 @@ function handleDelete(PDO $pdo, array $user, array $input): void {
  * Input: { target_date: Y-m-d, planned_start_time: HH:MM, reason: string }
  */
 function handleLateStartRequest(PDO $pdo, array $user, array $input): void {
+    try { ClockHealth::assertSafe(); } catch (DomainException $e) { apiError($e->getMessage(), 503); }
     $target_date   = trim((string)($input['target_date'] ?? ''));
     $planned_start = trim((string)($input['planned_start_time'] ?? ''));
     $reason        = trim((string)($input['reason'] ?? ''));
@@ -1353,7 +1394,7 @@ function handleLateStartRequest(PDO $pdo, array $user, array $input): void {
         apiError($timeCheck['message']);
     }
 
-    $stmt = $pdo->prepare("SELECT id, check_in_time FROM hr_attendances WHERE user_id = ? AND attendance_date = ? LIMIT 1");
+    $stmt = $pdo->prepare("SELECT id, user_id, attendance_date, check_in_time, planned_start_time, planned_reason, planned_status, planned_requested_at, planned_requested_by, planned_reviewed_by, planned_reviewed_at FROM hr_attendances WHERE user_id = ? AND attendance_date = ? LIMIT 1");
     $stmt->execute([$user['id'], $target_date]);
     $existing = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -1361,7 +1402,25 @@ function handleLateStartRequest(PDO $pdo, array $user, array $input): void {
         apiError('ลงเวลาเข้างานวันดังกล่าวไปแล้ว — กรุณาใช้แบบฟอร์มขอแก้ไขเวลาเข้างานแทน');
     }
 
+    $pdo->beginTransaction();
     try {
+        // The snapshot above is for validation/UX. Never act on it after waiting for a writer.
+        $lockedStmt = $pdo->prepare("SELECT id, user_id, attendance_date, check_in_time, planned_start_time, planned_reason, planned_status, planned_requested_at, planned_requested_by, planned_reviewed_by, planned_reviewed_at FROM hr_attendances WHERE user_id = ? AND attendance_date = ? LIMIT 1 FOR UPDATE");
+        $lockedStmt->execute([(int)$user['id'], $target_date]);
+        $locked = $lockedStmt->fetch(PDO::FETCH_ASSOC);
+        ClockHealth::assertSafe();
+        if ($locked !== $existing) {
+            throw new DomainException('ข้อมูลคำขอเปลี่ยนแปลงแล้ว กรุณารีเฟรชและลองใหม่', 409);
+        }
+        if ($locked && ((int)$locked['user_id'] !== (int)$user['id'] || $locked['attendance_date'] !== $target_date)) {
+            throw new DomainException('ไม่มีสิทธิ์แก้ไขคำขอนี้', 403);
+        }
+        if ($locked && !empty($locked['check_in_time'])) {
+            throw new DomainException('ลงเวลาเข้างานไปแล้ว — ไม่สามารถแก้ไขคำขอได้', 409);
+        }
+        $currentWindow = canRequestLateStart($pdo, $target_date, null, (int)$user['id']);
+        if (!$currentWindow['ok']) throw new DomainException($currentWindow['message'], 400);
+        $existing = $locked;
         if ($existing) {
             $stmt = $pdo->prepare("
                 UPDATE hr_attendances
@@ -1374,9 +1433,21 @@ function handleLateStartRequest(PDO $pdo, array $user, array $input): void {
                     planned_reviewed_at = NULL,
                     planned_review_note = NULL,
                     updated_at = NOW()
-                WHERE id = ?
+                WHERE id = ? AND user_id = ? AND check_in_time IS NULL AND COALESCE(planned_status, '') = ?
             ");
-            $stmt->execute([$planned_start . ':00', $reason, $user['id'], $existing['id']]);
+            $stmt->execute([$planned_start . ':00', $reason, $user['id'], $existing['id'], $user['id'], (string)($existing['planned_status'] ?? '')]);
+            if ($stmt->rowCount() !== 1) {
+                // MySQL reports zero changed rows for an identical retry in the same second.
+                $verify = $pdo->prepare('SELECT check_in_time, planned_start_time, planned_reason, planned_status, planned_requested_by, planned_reviewed_by, planned_reviewed_at, planned_review_note FROM hr_attendances WHERE id = ? AND user_id = ?');
+                $verify->execute([(int)$existing['id'], (int)$user['id']]);
+                $stored = $verify->fetch(PDO::FETCH_ASSOC);
+                if (!$stored || !empty($stored['check_in_time']) || $stored['planned_status'] !== 'PENDING'
+                    || $stored['planned_start_time'] !== $planned_start . ':00' || $stored['planned_reason'] !== $reason
+                    || (int)$stored['planned_requested_by'] !== (int)$user['id']
+                    || $stored['planned_reviewed_by'] !== null || $stored['planned_reviewed_at'] !== null || $stored['planned_review_note'] !== null) {
+                    throw new DomainException('ข้อมูลคำขอเปลี่ยนแปลงแล้ว กรุณารีเฟรชและลองใหม่', 409);
+                }
+            }
             $attendanceId = (int)$existing['id'];
         } else {
             $shift_id = $shift['id'] ?? null;
@@ -1390,20 +1461,25 @@ function handleLateStartRequest(PDO $pdo, array $user, array $input): void {
             $stmt->execute([$user['id'], $target_date, $shift_id, $planned_start . ':00', $reason, $user['id']]);
             $attendanceId = (int)$pdo->lastInsertId();
         }
-    } catch (PDOException $e) {
+
+        if (class_exists('Auth') && method_exists('Auth', 'log')) {
+            try {
+                Auth::log('REQUEST_LATE_START', 'hr_attendances', $attendanceId, [
+                    'target_date'   => $target_date,
+                    'planned_start' => $planned_start,
+                    'reason'        => $reason,
+                ]);
+            } catch (Throwable $e) { /* non-fatal */ }
+        }
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        if ($e instanceof DomainException) apiError($e->getMessage(), $e->getCode() ?: 409);
+        if ($e instanceof PDOException && (int)($e->errorInfo[1] ?? 0) === 1062) apiError('ข้อมูลคำขอเปลี่ยนแปลงแล้ว กรุณารีเฟรชและลองใหม่', 409);
         tpHrLogException($e, 'api/attendance handleLateStartRequest');
         apiError('บันทึกคำขอไม่สำเร็จ กรุณาลองใหม่', 500);
     }
 
-    if (class_exists('Auth') && method_exists('Auth', 'log')) {
-        try {
-            Auth::log('REQUEST_LATE_START', 'hr_attendances', $attendanceId, [
-                'target_date'   => $target_date,
-                'planned_start' => $planned_start,
-                'reason'        => $reason,
-            ]);
-        } catch (Throwable $e) { /* non-fatal */ }
-    }
 
     // LINE notification via CRM bridge (HR + Admin + Chairman + CEO)
     if (is_file(__DIR__ . '/../core/CrmLineNotifierBridge.php')) {
@@ -1430,13 +1506,14 @@ function handleLateStartRequest(PDO $pdo, array $user, array $input): void {
  * Input: { target_date: Y-m-d }
  */
 function cancelLateStartRequest(PDO $pdo, array $user, array $input): void {
+    try { ClockHealth::assertSafe(); } catch (DomainException $e) { apiError($e->getMessage(), 503); }
     $target_date = trim((string)($input['target_date'] ?? ''));
 
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $target_date)) {
         apiError('รูปแบบวันที่ไม่ถูกต้อง');
     }
 
-    $stmt = $pdo->prepare("SELECT id, check_in_time, planned_start_time, planned_status FROM hr_attendances WHERE user_id = ? AND attendance_date = ? LIMIT 1");
+    $stmt = $pdo->prepare("SELECT id, user_id, attendance_date, check_in_time, planned_start_time, planned_reason, planned_status, planned_requested_at, planned_requested_by, planned_reviewed_by, planned_reviewed_at FROM hr_attendances WHERE user_id = ? AND attendance_date = ? LIMIT 1");
     $stmt->execute([$user['id'], $target_date]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -1457,7 +1534,30 @@ function cancelLateStartRequest(PDO $pdo, array $user, array $input): void {
         }
     }
 
+    $pdo->beginTransaction();
     try {
+        // The snapshot above is for validation/UX. Never act on it after waiting for a writer.
+        $lockedStmt = $pdo->prepare("SELECT id, user_id, attendance_date, check_in_time, planned_start_time, planned_reason, planned_status, planned_requested_at, planned_requested_by, planned_reviewed_by, planned_reviewed_at FROM hr_attendances WHERE user_id = ? AND attendance_date = ? LIMIT 1 FOR UPDATE");
+        $lockedStmt->execute([(int)$user['id'], $target_date]);
+        $locked = $lockedStmt->fetch(PDO::FETCH_ASSOC);
+        ClockHealth::assertSafe();
+        if ($locked !== $row) {
+            throw new DomainException('ข้อมูลคำขอเปลี่ยนแปลงแล้ว กรุณารีเฟรชและลองใหม่', 409);
+        }
+        if ($locked && ((int)$locked['user_id'] !== (int)$user['id'] || $locked['attendance_date'] !== $target_date)) {
+            throw new DomainException('ไม่มีสิทธิ์แก้ไขคำขอนี้', 403);
+        }
+        if ($locked && !empty($locked['check_in_time'])) {
+            throw new DomainException('ลงเวลาเข้างานไปแล้ว — ไม่สามารถแก้ไขคำขอได้', 409);
+        }
+        if (!$locked || empty($locked['planned_start_time']) || ($locked['planned_status'] ?? null) !== 'PENDING') {
+            throw new DomainException('คำขอนี้ได้รับการดำเนินการแล้ว ไม่สามารถยกเลิกได้', 409);
+        }
+        if (function_exists('canRequestLateStart')) {
+            $currentWindow = canRequestLateStart($pdo, $target_date, null, (int)$user['id']);
+            if (!$currentWindow['ok']) throw new DomainException($currentWindow['message'], 400);
+        }
+        $row = $locked;
         $stmt = $pdo->prepare("
             UPDATE hr_attendances
             SET planned_start_time = NULL,
@@ -1466,21 +1566,27 @@ function cancelLateStartRequest(PDO $pdo, array $user, array $input): void {
                 planned_requested_by = NULL,
                 planned_status = 'CANCELLED',
                 updated_at = NOW()
-            WHERE id = ?
+            WHERE id = ? AND user_id = ? AND check_in_time IS NULL AND COALESCE(planned_status, '') = ?
         ");
-        $stmt->execute([$row['id']]);
-    } catch (PDOException $e) {
+        $stmt->execute([$row['id'], $user['id'], 'PENDING']);
+        if ($stmt->rowCount() !== 1) throw new DomainException('ข้อมูลคำขอเปลี่ยนแปลงแล้ว กรุณารีเฟรชและลองใหม่', 409);
+
+        if (class_exists('Auth') && method_exists('Auth', 'log')) {
+            try {
+                Auth::log('CANCEL_LATE_START', 'hr_attendances', (int)$row['id'], [
+                    'target_date' => $target_date,
+                ]);
+            } catch (Throwable $e) { /* non-fatal */ }
+        }
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        if ($e instanceof DomainException) apiError($e->getMessage(), $e->getCode() ?: 409);
+        if ($e instanceof PDOException && (int)($e->errorInfo[1] ?? 0) === 1062) apiError('ข้อมูลคำขอเปลี่ยนแปลงแล้ว กรุณารีเฟรชและลองใหม่', 409);
         tpHrLogException($e, 'api/attendance cancelLateStartRequest');
         apiError('ยกเลิกคำขอไม่สำเร็จ กรุณาลองใหม่', 500);
     }
 
-    if (class_exists('Auth') && method_exists('Auth', 'log')) {
-        try {
-            Auth::log('CANCEL_LATE_START', 'hr_attendances', (int)$row['id'], [
-                'target_date' => $target_date,
-            ]);
-        } catch (Throwable $e) { /* non-fatal */ }
-    }
 
     if (is_file(__DIR__ . '/../core/CrmLineNotifierBridge.php')) {
         try {

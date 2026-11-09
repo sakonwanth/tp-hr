@@ -16,6 +16,7 @@ final class HrLineApprovalService
         else $note = 'อนุมัติผ่าน LINE';
 
         return match ($workflow) {
+            'planned_late' => $this->decidePlannedLate($requestId, $actorId, $decision, $note),
             'leave' => $this->decideLeave($requestId, $actorId, $decision, $note),
             'adjustment' => $this->decideAdjustment($requestId, $actorId, $decision, $note),
             'outside' => $this->decideOutside($requestId, $actorId, $decision, $note),
@@ -23,6 +24,12 @@ final class HrLineApprovalService
             'holiday_work' => $this->decideSimple($workflow, 'hr_holiday_work_exceptions', $requestId, $actorId, $decision, $note),
             default => throw new InvalidArgumentException('ไม่รองรับประเภทคำขอนี้'),
         };
+    }
+
+    private function decidePlannedLate(int $id, int $actorId, string $decision, string $note): array
+    {
+        require_once __DIR__ . '/PlannedLateApprovalService.php';
+        return (new PlannedLateApprovalService($this->pdo))->decide($id, $actorId, $decision === 'approve' ? 'APPROVED' : 'REJECTED', $note);
     }
 
     private function decideAdjustment(int $id, int $actorId, string $decision, string $note): array

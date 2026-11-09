@@ -1,0 +1,22 @@
+[Unit]
+Description=TP read-only NTP and clock health monitor
+After=network-online.target ntpsec.service
+Wants=network-online.target
+OnFailure=tp-clock-health-failure.service
+
+[Service]
+Type=oneshot
+User=root
+Group=psacln
+ExecStart=/usr/bin/python3 /usr/local/lib/tp-clock-health/clock_health_monitor.py --status-file /var/www/vhosts/tp-asset.com/.clock-health/status.json
+TimeoutStartSec=20s
+UMask=0027
+NoNewPrivileges=true
+CapabilityBoundingSet=~CAP_SYS_TIME
+ProtectClock=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/www/vhosts/tp-asset.com/.clock-health
+StandardOutput=journal
+StandardError=journal

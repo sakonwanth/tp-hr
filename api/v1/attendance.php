@@ -5,9 +5,9 @@
  *   GET  /api/v1/attendance?date=YYYY-MM-DD[&user_id=]         scope: attendance.read (+ attendance.read_all if key has no service_user_id)
  *   GET  /api/v1/attendance?from=&to=[&user_id=]               scope: เช่นเดียวกัน
  *   POST /api/v1/attendance/checkin                            scope: attendance.write (+ attendance.write_all if key has no service_user_id)
- *        body: { user_id, time?, type?, latitude?, longitude?, location_id?, remarks? }
+ *        body: { user_id, latitude, longitude, gps_captured_at, accuracy?, location_id, photo_path, device_info?, remarks? }; time is server-owned
  *   POST /api/v1/attendance/checkout                           scope: เช่นเดียวกัน
- *        body: { user_id, time?, type?, latitude?, longitude?, location_id?, remarks? }
+ *        body: { user_id, latitude, longitude, gps_captured_at, accuracy?, location_id, photo_path, device_info?, remarks? }; time is server-owned
  */
 $method = ApiAuth::requireMethod(['GET', 'POST']);
 $pdo = getDB();
@@ -213,81 +213,10 @@ if ($action === 'manual-log') {
     ApiAuth::success(['data' => ['user_id' => $userId, 'attendance_date' => $date, 'status' => $status]]);
 }
 
-// Plan-late: admin sets a planned (excused) late start for a user+date (Phase 2.1 — from CRM
-// admin_plan_late). Caller validates business rules (no existing check-in, not a past date) +
-// supplies shift_id + audit. Upsert is result-equivalent to the CRM insert/update branches.
-if ($action === 'plan-late') {
-    $body = ApiAuth::input();
-    $key = ApiAuth::currentKey();
-    $userId = apiKeyResolveScopedUserId($key, (int)($body['user_id'] ?? 0));
-    apiKeyRequireServiceUserOrReadAllScope(
-        $key,
-        'attendance.write_all',
-        'Plan-late via API requires attendance.write_all (or *) or a service user bound to the API key'
-    );
-    $date = trim((string)($body['date'] ?? ''));
-    $plannedStart = trim((string)($body['planned_start'] ?? ''));
-    $reason = trim((string)($body['reason'] ?? ''));
-    $plannedBy = (int)($body['planned_by'] ?? 0);
-    $shiftId = isset($body['shift_id']) && $body['shift_id'] !== '' ? (int)$body['shift_id'] : null;
-    $audit = trim((string)($body['audit'] ?? ''));
-    if ($userId <= 0) ApiAuth::fail(400, 'user_id required');
-    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) ApiAuth::fail(400, 'invalid date');
-    if (!preg_match('/^\d{2}:\d{2}:\d{2}$/', $plannedStart)) ApiAuth::fail(400, 'invalid planned_start (HH:MM:SS)');
-    try {
-        // Result-equivalent to the CRM insert-or-update branches (planned_* + audit).
-        $stmt = $pdo->prepare("INSERT INTO hr_attendances
-                (user_id, attendance_date, shift_id, planned_start_time, planned_reason,
-                 planned_requested_at, planned_requested_by, planned_status, planned_reviewed_by, planned_reviewed_at,
-                 adjustment_reason, adjusted_by, adjusted_at, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, NOW(), ?, 'APPROVED', ?, NOW(), ?, ?, NOW(), NOW(), NOW())
-            ON DUPLICATE KEY UPDATE
-                planned_start_time=VALUES(planned_start_time),
-                planned_reason=VALUES(planned_reason),
-                planned_requested_at=NOW(),
-                planned_requested_by=VALUES(planned_requested_by),
-                planned_status='APPROVED',
-                planned_reviewed_by=VALUES(planned_reviewed_by),
-                planned_reviewed_at=NOW(),
-                adjustment_reason=CONCAT_WS(\"\\n\", NULLIF(adjustment_reason,''), VALUES(adjustment_reason)),
-                updated_at=NOW()");
-        $stmt->execute([$userId, $date, $shiftId, $plannedStart, $reason, $plannedBy ?: null, $plannedBy ?: null, $audit, $plannedBy ?: null]);
-    } catch (Throwable $e) {
-        tpHrLogException($e, 'api/v1/attendance plan-late');
-        ApiAuth::fail(500, 'Internal server error');
-    }
-    ApiAuth::success(['data' => ['user_id' => $userId, 'attendance_date' => $date, 'planned_start_time' => $plannedStart]]);
-}
+// Retired unused legacy auto-approval and unscoped cancellation routes.
+if ($action === 'plan-late') ApiAuth::fail(410, 'Legacy planned-late writes are retired; use the HR request and approval workflow');
 
-// Cancel-plan-late: clear a planned late start on an attendance row (Phase 2.1 — verbatim
-// from CRM admin_cancel_planned_late). Caller validates (row exists, has planned, no check-in).
-if ($action === 'cancel-plan-late') {
-    $body = ApiAuth::input();
-    $key = ApiAuth::currentKey();
-    apiKeyRequireServiceUserOrReadAllScope(
-        $key,
-        'attendance.write_all',
-        'Cancel-plan-late via API requires attendance.write_all (or *) or a service user bound to the API key'
-    );
-    $attendanceId = (int)($body['attendance_id'] ?? 0);
-    $audit = trim((string)($body['audit'] ?? ''));
-    if ($attendanceId <= 0) ApiAuth::fail(400, 'attendance_id required');
-    try {
-        // SQL byte-identical to the CRM direct path (parity by construction).
-        $stmt = $pdo->prepare("UPDATE hr_attendances
-            SET planned_start_time=NULL, planned_reason=NULL,
-                planned_requested_at=NULL, planned_requested_by=NULL,
-                planned_status='CANCELLED',
-                adjustment_reason=CONCAT_WS(\"\\n\", NULLIF(adjustment_reason,''), ?),
-                updated_at=NOW()
-            WHERE id=?");
-        $stmt->execute([$audit, $attendanceId]);
-    } catch (Throwable $e) {
-        tpHrLogException($e, 'api/v1/attendance cancel-plan-late');
-        ApiAuth::fail(500, 'Internal server error');
-    }
-    ApiAuth::success(['data' => ['id' => $attendanceId, 'planned_start_time' => null, 'affected' => $stmt->rowCount()]]);
-}
+if ($action === 'cancel-plan-late') ApiAuth::fail(410, 'Legacy planned-late writes are retired; use the HR request and approval workflow');
 
 // Retired unchecked CRM capture routes. Check-in owns employee GPS/photo/approval capture.
 if (in_array($action, ['crm-checkin', 'crm-checkout'], true)) {
@@ -365,24 +294,23 @@ apiKeyRequireServiceUserOrReadAllScope(
     'Check-in/out for users via API requires attendance.write_all (or *) or a service user bound to the API key'
 );
 $userId = apiKeyResolveScopedUserId($key, (int)($body['user_id'] ?? 0));
-$time   = trim($body['time'] ?? '');
-$type   = strtoupper(trim($body['type'] ?? 'MANUAL'));
-$lat    = isset($body['latitude']) ? (float)$body['latitude'] : null;
-$lng    = isset($body['longitude']) ? (float)$body['longitude'] : null;
-$locId  = isset($body['location_id']) ? (int)$body['location_id'] : null;
-$remarks = trim($body['remarks'] ?? '');
-
-if ($userId <= 0) ApiAuth::fail(400, 'user_id required');
-if (!in_array($type, ['GPS','WIFI','QR','FACE','FINGERPRINT','MANUAL'], true)) ApiAuth::fail(400, 'type invalid');
-
-if ($time === '') {
-    $tsNow = time();
-    $time = date('Y-m-d H:i:s', $tsNow);
-} else {
-    $tsNow = strtotime($time);
-    if (!$tsNow) ApiAuth::fail(400, 'time invalid (YYYY-MM-DD HH:MM:SS)');
-    $time = date('Y-m-d H:i:s', $tsNow);
+require_once dirname(__DIR__, 2) . '/core/Services/AttendanceCapturePolicy.php';
+require_once dirname(__DIR__, 2) . '/core/Services/ClockHealth.php';
+try {
+    ClockHealth::assertSafe();
+    $gps = AttendanceCapturePolicy::validateGps($body);
+    $time = AttendanceCapturePolicy::normalCaptureTime($body);
+    $photoPath = AttendanceCapturePolicy::validatePhotoPath((string)($body['photo_path'] ?? ''), $userId, $action === 'checkin' ? 'in' : 'out');
+} catch (DomainException $e) {
+    ApiAuth::fail($e->getCode() ?: 422, $e->getMessage());
 }
+$tsNow = strtotime($time);
+$type = 'GPS';
+$lat = $gps['latitude']; $lng = $gps['longitude'];
+$locId = !empty($body['location_id']) ? (int)$body['location_id'] : null;
+$deviceInfo = is_string($body['device_info'] ?? null) ? $body['device_info'] : '';
+$remarks = trim((string)($body['remarks'] ?? ''));
+if ($userId <= 0) ApiAuth::fail(400, 'user_id required');
 $date = date('Y-m-d', $tsNow);
 $ip = $_SERVER['REMOTE_ADDR'] ?? null;
 
@@ -398,20 +326,14 @@ try {
 
     $pdo->beginTransaction();
 
-    // Catalog entries can be retired while a client is submitting a cached location.
-    // Lock before writing; historical attendance continues referencing the old row.
-    if ($type === 'GPS' && $locId !== null) {
-        $locationQuery = $pdo->prepare('SELECT id, is_active FROM hr_checkin_locations WHERE id=? FOR UPDATE');
-        $locationQuery->execute([$locId]);
-        $location = $locationQuery->fetch(PDO::FETCH_ASSOC);
-        if (!$location || !(int)$location['is_active']) {
-            $pdo->rollBack();
-            ApiAuth::fail(409, 'Check-in location changed or is inactive; refresh locations and retry');
-        }
-    }
+    AttendanceCapturePolicy::assertLocation($pdo, $gps, $locId, $targetUser, getHrBoolSetting($pdo, 'enforce_location_checkin', true));
+    // A location lock wait must not turn a formerly fresh GPS fix into accepted stale evidence.
+    $gps = AttendanceCapturePolicy::validateGps($body);
     $find = $pdo->prepare("SELECT * FROM hr_attendances WHERE user_id = ? AND attendance_date = ? LIMIT 1 FOR UPDATE");
     $find->execute([$userId, $date]);
     $row = $find->fetch(PDO::FETCH_ASSOC);
+    ClockHealth::assertSafe();
+    $gps = AttendanceCapturePolicy::validateGps($body);
 
     if ($action === 'checkin') {
         if ($row && !empty($row['check_in_time'])) {
@@ -485,7 +407,11 @@ try {
         ]);
         $newId = (int)$row['id'];
     }
+    AttendanceCapturePolicy::persistMetadata($pdo, $newId, $action === 'checkin' ? 'in' : 'out', $gps, $photoPath, $deviceInfo, $time);
     $pdo->commit();
+} catch (DomainException $e) {
+    if ($pdo->inTransaction()) $pdo->rollBack();
+    ApiAuth::fail($e->getCode() ?: 422, $e->getMessage());
 } catch (Throwable $e) {
     if ($pdo->inTransaction()) $pdo->rollBack();
     tpHrLogException($e, 'api/v1/attendance');

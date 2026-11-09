@@ -1,0 +1,10 @@
+[Unit]
+Description=Record TP clock monitor failure in the local journal
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/logger -p daemon.crit -t tp-clock-health Clock monitor failed or detected unsafe time; inspect tp-clock-health.service and HR health status
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
