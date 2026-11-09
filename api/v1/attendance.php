@@ -326,7 +326,8 @@ try {
 
     $pdo->beginTransaction();
 
-    AttendanceCapturePolicy::assertLocation($pdo, $gps, $locId, $targetUser, getHrBoolSetting($pdo, 'enforce_location_checkin', true));
+    $enforceLocation = filter_var((new SettingsService($pdo))->get('enforce_location_checkin', true), FILTER_VALIDATE_BOOLEAN);
+    AttendanceCapturePolicy::assertLocation($pdo, $gps, $locId, $targetUser, $enforceLocation);
     // A location lock wait must not turn a formerly fresh GPS fix into accepted stale evidence.
     $gps = AttendanceCapturePolicy::validateGps($body);
     $find = $pdo->prepare("SELECT * FROM hr_attendances WHERE user_id = ? AND attendance_date = ? LIMIT 1 FOR UPDATE");
