@@ -32,3 +32,5 @@ require_once HR_OWNER_PATH.'/core/Services/PayrollUiService.php';
 
 // Prevent CRM's full helper/bootstrap from being loaded by the shared LINE transport.
 if (!function_exists('http_curl_timeout_options')) {function http_curl_timeout_options(int $seconds,?int $connect=null):array{return [CURLOPT_TIMEOUT=>max(1,$seconds),CURLOPT_CONNECTTIMEOUT=>max(1,min($seconds,$connect??10))];}}
+
+if (!function_exists('crm_tp_erp_url')) {function crm_tp_erp_url():string{return rtrim((string)($_ENV['TP_ERP_URL'] ?? 'https://erp.tp-asset.com'),'/');}}

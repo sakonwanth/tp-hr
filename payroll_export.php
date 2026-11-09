@@ -58,7 +58,7 @@ $out = fopen('php://output', 'w');
 fprintf($out, "\xEF\xBB\xBF"); // UTF-8 BOM for Excel
 
 $headers = ['รหัสพนักงาน', 'ชื่อ', 'นามสกุล', 'แผนก', 'ฐานเงินเดือน', 'โบนัส', 'เบี้ยเลี้ยง', 'รายได้อื่น', 'รวมได้', 'ภาษีหัก ณ ที่จ่าย', 'กองทุนสำรอง', 'ประกันสังคม', 'ประกันกลุ่ม (พนักงานจ่าย)', 'ประกันสุขภาพ (พนักงานจ่าย)', 'หักอื่น', 'รวมหัก', 'สุทธิรับ', 'วันที่จ่ายเงิน'];
-fputcsv($out, $headers);
+fputcsv($out, $headers, ',', '"', '');
 
 foreach ($slips as $s) {
     $ec = $s['employee_code'] ?? '';
@@ -88,7 +88,7 @@ foreach ($slips as $s) {
         $s['net_salary'] ?? 0,
         $dateChanges[(int)$s['user_id']]['payment_date'] ?? payroll_format_pay_date($run['payroll_month'], (int)$run['pay_day']),
     ];
-    fputcsv($out, $row);
+    fputcsv($out, $row, ',', '"', '');
 }
 
 fclose($out);
