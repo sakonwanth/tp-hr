@@ -18,7 +18,7 @@ if (!$current || !function_exists('crm_user_can_access_payroll_web') || !crm_use
 }
 
 $page_title = 'เอกสารออกแบบโมดูลเงินเดือน';
-$current_page = 'payroll';
+$current_page = 'hr-payroll';
 
 $path = __DIR__ . '/docs/PAYROLL-MODULE-DESIGN.md';
 $raw = file_exists($path) ? file_get_contents($path) : '';
@@ -63,7 +63,7 @@ $body_html = $raw !== '' ? simple_md_to_html($raw) : '<p class="text-white/60">�
 
 require_once __DIR__ . '/templates/header.php';
 ?>
-<main class="content-area p-6">
+<section class="tp-ios-master-screen min-w-0">
     <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
             <nav class="text-sm text-white/60 mb-2 min-w-0" aria-label="Breadcrumb">
@@ -83,5 +83,5 @@ require_once __DIR__ . '/templates/header.php';
             <?php echo $body_html; ?>
         </div>
     </div>
-</main>
+</section>
 <?php require_once __DIR__ . '/templates/footer.php'; ?>

@@ -842,7 +842,7 @@ function addPresetItem() {
     if (!label) { document.getElementById('presetNewLabel').focus(); return; }
     var amount = document.getElementById('presetNewAmount').value;
     fetch('api/payroll/item_presets.php', {
-        method: 'POST', headers: {'Content-Type': 'application/json'},
+        method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content},
         body: JSON.stringify({action: 'add', category: currentPresetCategory, label: label, default_amount: amount || null})
     }).then(r => r.json()).then(res => {
         if (res.success) {
@@ -861,7 +861,7 @@ function editPresetItem(id, oldLabel, oldAmount) {
     if (!newLabel) return;
     var newAmount = prompt('จำนวนเงินเริ่มต้น (ว่างถ้าไม่ระบุ):', oldAmount || '');
     fetch('api/payroll/item_presets.php', {
-        method: 'POST', headers: {'Content-Type': 'application/json'},
+        method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content},
         body: JSON.stringify({action: 'edit', id: id, label: newLabel, default_amount: newAmount || null})
     }).then(r => r.json()).then(res => {
         if (res.success) { loadPresetList(currentPresetCategory); refreshDropdowns(currentPresetCategory); }
@@ -872,7 +872,7 @@ function editPresetItem(id, oldLabel, oldAmount) {
 function deletePresetItem(id) {
     if (!confirm('ต้องการลบรายการนี้?')) return;
     fetch('api/payroll/item_presets.php', {
-        method: 'POST', headers: {'Content-Type': 'application/json'},
+        method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content},
         body: JSON.stringify({action: 'delete', id: id})
     }).then(r => r.json()).then(res => {
         if (res.success) { loadPresetList(currentPresetCategory); refreshDropdowns(currentPresetCategory); }

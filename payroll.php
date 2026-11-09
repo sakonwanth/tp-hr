@@ -21,7 +21,7 @@ if (!function_exists('crm_user_can_access_payroll_web') || !crm_user_can_access_
 }
 
 $page_title = 'เงินเดือนพนักงาน';
-$current_page = 'payroll';
+$current_page = 'hr-payroll';
 $message = '';
 $error = '';
 $action = $_GET['action'] ?? '';
@@ -93,7 +93,7 @@ $tp_ios26_list_shell = true;
 
 require_once __DIR__ . '/templates/header.php';
 ?>
-<main class="content-area p-6">
+<section class="tp-ios-master-screen min-w-0">
     <div class="mb-6">
         <nav class="text-sm text-white/60 mb-2 min-w-0" aria-label="Breadcrumb">
             <a href="index.php" class="hover:text-white touch-manipulation">หน้าแรก</a>
@@ -146,5 +146,5 @@ require_once __DIR__ . '/templates/header.php';
     <?php else: ?>
         <?php require HR_OWNER_PATH . '/modules/payroll/list.view.php'; ?>
     <?php endif; ?>
-</main>
+</section>
 <?php require_once __DIR__ . '/templates/footer.php'; ?>

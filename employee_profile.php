@@ -44,7 +44,7 @@ $is_self = ((int)$target_user['id'] === (int)$current_user['id']);
 
 // Page meta
 $page_title = 'โปรไฟล์พนักงาน';
-$current_page = 'employee_profile';
+$current_page = 'profile';
 $message = '';
 $error = '';
 
@@ -63,5 +63,7 @@ $roles = $pdo->query("SELECT id, name, display_name FROM roles ORDER BY id")->fe
 $employees = $is_hr_admin ? ep_list_employees($pdo) : null;
 
 require_once __DIR__ . '/templates/header.php';
+echo '<section class="tp-ios-master-screen min-w-0">';
 require_once HR_OWNER_PATH . '/modules/employee_profile/view.php';
+echo '</section>';
 require_once __DIR__ . '/templates/footer.php';
