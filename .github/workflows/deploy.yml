@@ -78,6 +78,9 @@ jobs:
           npm ci
           npm run verify:static-ui
 
+      - name: Attendance photo viewer behavior
+        run: node scripts/qa_attendance_photo_viewer.cjs
+
   deploy:
     name: Deploy (SSH)
     runs-on: ubuntu-latest

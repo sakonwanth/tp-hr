@@ -86,6 +86,9 @@ jobs:
       - name: Offsite selfie and retry flow
         run: node scripts/qa_offsite_retry.cjs
 
+      - name: Attendance photo viewer behavior
+        run: node scripts/qa_attendance_photo_viewer.cjs
+
       - name: Playwright — install & list tests (no server — validates config & imports)
         run: |
           npm ci

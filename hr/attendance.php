@@ -17,6 +17,28 @@ if (!hr_can_manage_attendance()) {
 $pdo = Database::getInstance()->getConnection();
 require_once dirname(__DIR__) . '/core/Services/DailyAttendancePolicy.php';
 
+/** Photo links retain a normal browser fallback when the viewer is unavailable. */
+function hrAttendancePhotoLink(array $record, string $date, string $side, bool $thumbnail = false): string
+{
+    if (!in_array($side, ['in', 'out'], true)) throw new InvalidArgumentException('Invalid photo side');
+    $label = $side === 'in' ? 'ดูรูปเข้า' : 'ดูรูปออก';
+    $url = attendancePhotoPublicUrl($record['check_' . $side . '_photo'] ?? null);
+    if ($url === '') {
+        return '<span class="inline-flex min-h-[48px] items-center justify-center text-xs text-white/40">' . ($side === 'in' ? 'ไม่มีรูปเข้า' : 'ไม่มีรูปออก') . '</span>';
+    }
+    $name = trim(($record['first_name_th'] ?? '') . ' ' . ($record['last_name_th'] ?? ''));
+    $time = $record['check_' . $side . '_time'] ?? '';
+    $caption = $name . ' · ' . $date . ($time ? ' · ' . date('H:i:s', strtotime($time)) : '');
+    $escape = static fn(string $value): string => htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    $class = $thumbnail
+        ? 'inline-flex min-h-[48px] min-w-[48px] shrink-0 items-center justify-center rounded-full hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-violet-300 touch-manipulation'
+        : 'inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl border border-violet-400/20 bg-violet-500/10 px-3 text-xs text-violet-200 hover:bg-violet-500/20 focus-visible:ring-2 focus-visible:ring-violet-300 whitespace-nowrap touch-manipulation';
+    $content = $thumbnail
+        ? '<img src="' . $escape($url) . '" alt="" class="w-10 h-10 rounded-full object-cover" loading="lazy">'
+        : '<i class="fas fa-camera" aria-hidden="true"></i><span>' . $label . '</span>';
+    return '<a href="' . $escape($url) . '" target="_blank" rel="noopener noreferrer" data-attendance-photo data-photo-title="' . $label . '" data-photo-caption="' . $escape($caption) . '" aria-label="' . $escape($label . 'ของ ' . $name . ' วันที่ ' . $date) . '" aria-haspopup="dialog" class="' . $class . '">' . $content . '</a>';
+}
+
 // Filters
 $date = $_GET['date'] ?? date('Y-m-d');
 $department = $_GET['department'] ?? '';
@@ -43,7 +65,7 @@ $sql = "
     SELECT u.id, u.first_name_th, u.last_name_th, u.employee_code, u.department,
            a.check_in_time, a.check_out_time, a.status, a.late_minutes, 
            a.early_leave_minutes, a.ot_minutes, a.work_minutes, a.id as attendance_id,
-           a.check_in_photo, a.check_in_latitude, a.check_in_longitude,
+           a.check_in_photo, a.check_out_photo, a.check_in_latitude, a.check_in_longitude,
            COALESCE(dor.requested_day_off, s.day_off, 0) AS effective_day_off,
            lr_info.leave_name AS approved_leave_name,
            EXISTS(
@@ -361,6 +383,11 @@ include dirname(__DIR__) . '/templates/header.php';
                 </div>
             </div>
 
+            <div class="grid grid-cols-2 gap-2 mt-3" aria-label="รูปยืนยันการลงเวลา">
+                <?php echo hrAttendancePhotoLink($rec, $date, 'in'); ?>
+                <?php echo hrAttendancePhotoLink($rec, $date, 'out'); ?>
+            </div>
+
             <?php if ($noteText !== ''): ?>
             <div class="mt-3 text-white/70 text-xs">
                 <i class="fas fa-note-sticky text-white/40 mr-1"></i><?php echo $noteText; ?>
@@ -432,7 +459,7 @@ include dirname(__DIR__) . '/templates/header.php';
                     <td class="px-4 py-3">
                         <div class="flex items-center gap-3">
                             <?php if ($rec['check_in_photo']): ?>
-                            <img src="<?php echo htmlspecialchars(attendancePhotoPublicUrl($rec['check_in_photo'])); ?>" alt="" class="w-10 h-10 rounded-full object-cover">
+                            <?php echo hrAttendancePhotoLink($rec, $date, 'in', true); ?>
                             <?php else: ?>
                             <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/50">
                                 <i class="fas fa-user"></i>
@@ -450,6 +477,7 @@ include dirname(__DIR__) . '/templates/header.php';
                         <?php else: ?>
                         <span class="text-white/40">--:--</span>
                         <?php endif; ?>
+                        <div class="mt-1 flex justify-center"><?php echo hrAttendancePhotoLink($rec, $date, 'in'); ?></div>
                     </td>
                     <td class="px-4 py-3 text-center">
                         <?php if ($rec['check_out_time']): ?>
@@ -457,6 +485,7 @@ include dirname(__DIR__) . '/templates/header.php';
                         <?php else: ?>
                         <span class="text-white/40">--:--</span>
                         <?php endif; ?>
+                        <div class="mt-1 flex justify-center"><?php echo hrAttendancePhotoLink($rec, $date, 'out'); ?></div>
                     </td>
                     <td class="px-4 py-3 text-center">
                         <?php if ($rec['work_minutes']): ?>
@@ -531,6 +560,33 @@ include dirname(__DIR__) . '/templates/header.php';
     <?php endif; ?>
 </div>
 </div>
+
+<!-- Native dialog provides keyboard focus containment and a full-size photo view. -->
+<style>
+#attendance-photo-dialog::backdrop { background: rgb(0 0 0 / .75); backdrop-filter: blur(6px); }
+#attendance-photo-dialog:not([open]) { display: none; }
+</style>
+<dialog id="attendance-photo-dialog" class="m-auto p-0 w-[calc(100%-2rem)] max-w-4xl max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-[var(--tp-ios-card-radius)] border border-white/15 bg-slate-950 text-white" aria-labelledby="attendance-photo-title" aria-describedby="attendance-photo-caption">
+    <div class="flex items-start justify-between gap-3 border-b border-white/10 p-4">
+        <div class="min-w-0">
+            <h3 id="attendance-photo-title" class="text-lg font-semibold">รูปยืนยันการลงเวลา</h3>
+            <p id="attendance-photo-caption" class="mt-1 text-sm text-white/60 break-words"></p>
+        </div>
+        <button id="attendance-photo-close" type="button" autofocus class="inline-flex min-h-[48px] min-w-[48px] shrink-0 items-center justify-center rounded-xl hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-violet-300" aria-label="ปิดรูป">
+            <i class="fas fa-times" aria-hidden="true"></i>
+        </button>
+    </div>
+    <div class="bg-black/30 p-4">
+        <p id="attendance-photo-status" class="py-4 text-center text-sm text-white/70" role="status" aria-live="polite"></p>
+        <div id="attendance-photo-image-slot" class="flex min-h-[120px] items-center justify-center"></div>
+    </div>
+    <div class="flex justify-end border-t border-white/10 p-3">
+        <a id="attendance-photo-original" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-white/10 px-4 text-sm hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-violet-300">
+            <i class="fas fa-external-link-alt" aria-hidden="true"></i><span>เปิดรูปต้นฉบับ</span>
+        </a>
+    </div>
+</dialog>
+<script src="/assets/js/attendance-photo-viewer.js?v=1"></script>
 
 <!-- Edit Modal -->
 <div id="edit-modal" class="tp-native-modal fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-5 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
