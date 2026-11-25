@@ -2341,13 +2341,18 @@ class PayrollService
             $items = [];
             $advance = $this->pdo->prepare("SELECT id, amount FROM hr_salary_advances WHERE user_id=? AND deduction_month=? AND repayment_method='payroll' AND status='pending_deduction'");
             $advance->execute([$userId, $month]);
+            // Same shape and wording as payroll_employee_finance_deductions() in
+            // modules/payroll/queries.php: slip renderers read `label`, and a slip
+            // recalculated by the ERP activation path must look like one built by the web run.
             foreach ($advance->fetchAll(PDO::FETCH_ASSOC) as $row) {
-                $items[] = ['name'=>'หักเงินเดือนที่เบิกล่วงหน้า','amount'=>(float)$row['amount'],'source_type'=>'salary_advance','source_id'=>(int)$row['id']];
+                $label = 'หักเงินเบิกล่วงหน้า';
+                $items[] = ['label'=>$label,'name'=>$label,'amount'=>(float)$row['amount'],'source_type'=>'salary_advance','source_id'=>(int)$row['id']];
             }
             $loan = $this->pdo->prepare("SELECT r.id,r.installment_no,r.due_amount,l.term_months FROM hr_loan_repayments r JOIN hr_employee_loans l ON l.id=r.loan_id WHERE l.user_id=? AND l.status='active' AND l.repayment_method='payroll' AND DATE_FORMAT(r.due_date,'%Y-%m')=? AND r.status='scheduled'");
             $loan->execute([$userId, $month]);
             foreach ($loan->fetchAll(PDO::FETCH_ASSOC) as $row) {
-                $items[] = ['name'=>'เงินกู้บริษัท งวดที่ '.(int)$row['installment_no'].' / '.(int)$row['term_months'],'amount'=>(float)$row['due_amount'],'source_type'=>'employee_loan_repayment','source_id'=>(int)$row['id'],'installment_no'=>(int)$row['installment_no'],'installment_total'=>(int)$row['term_months']];
+                $label = 'เงินกู้บริษัท งวดที่ '.(int)$row['installment_no'].' / '.(int)$row['term_months'];
+                $items[] = ['label'=>$label,'name'=>$label,'amount'=>(float)$row['due_amount'],'source_type'=>'employee_loan_repayment','source_id'=>(int)$row['id'],'installment_no'=>(int)$row['installment_no'],'installment_total'=>(int)$row['term_months']];
             }
             return $items;
         } catch (Throwable $e) {

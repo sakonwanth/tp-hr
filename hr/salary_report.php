@@ -1,11 +1,11 @@
 <?php
 /**
  * HR Salary Report - Monthly payroll report matching the manual Excel template
- * CEO level only. Live-calculated via PayrollService, reading ค่าตำแหน่ง/ค่าครองชีพ/
- * ค่าเดินทาง/ค่าบริหาร/ชดเชยวันหยุด from employee_salary_setup — the same shared
- * tp_crm row tp-crm's payroll.php already maintains, so those columns are
- * read-only here. Only กยศ. has no source anywhere yet, so it stays a manual
- * entry per employee per month.
+ * CEO level only. A month with a payroll run is reported from that run's slips (the
+ * figures that were approved/paid); a month without one is a live PayrollService
+ * preview, where กยศ. can be typed in per employee (hr_payroll_manual_items).
+ * Income columns are bucketed by label from income_other_json / allowance_json — the
+ * same items the payroll salary setup maintains.
  */
 
 require_once __DIR__ . '/../bootstrap.php';
@@ -58,121 +58,162 @@ function hr_salary_scalar_float($value): float
     return is_scalar($value) ? (float)$value : 0.0;
 }
 
-/**
- * Read ค่าตำแหน่ง/ค่าครองชีพ/ค่าเดินทาง/ค่าบริหาร/ชดเชยวันหยุด from whichever of
- * allowance_json / income_other_json tp-crm's payroll.php put them in — production
- * data shows both fields are used interchangeably for these labels. Items with a
- * label that doesn't match a known bucket still count toward total_income (the
- * engine sums them regardless) but are returned separately as "unmatched" so the
- * page can flag them — a new label upstream would otherwise inflate the total
- * without ever appearing in a named column.
- *
- * @return array{buckets: array<string,float>, unmatched: list<array{label: string, amount: float}>}
- */
-function hr_salary_extract_income_buckets(?array $setup): array
+// กยศ. as typed in this report (live preview) or in the payroll salary setup's "รายการหักอื่น".
+const HR_SALARY_STUDENT_LOAN_LABELS = ['กยศ.', 'กยศ'];
+
+/** @return list<array<string,mixed>> every item of the given JSON arrays, in order */
+function hr_salary_decode_items(?string ...$jsons): array
 {
-    $out = array_fill_keys(array_keys(HR_SALARY_EXACT_LABEL_BUCKETS), 0.0);
-    $out['holiday_compensation'] = 0.0;
-    $unmatched = [];
-    if (!$setup) {
-        return ['buckets' => $out, 'unmatched' => $unmatched];
-    }
     $items = [];
-    foreach (['allowance_json', 'income_other_json'] as $field) {
-        if (!empty($setup[$field])) {
-            $decoded = json_decode((string)$setup[$field], true);
-            if (is_array($decoded)) {
-                $items = array_merge($items, $decoded);
-            }
-        }
-    }
-    foreach ($items as $item) {
-        if (!is_array($item)) {
+    foreach ($jsons as $json) {
+        if ($json === null || $json === '') {
             continue;
         }
-        $label = trim((string)($item['label'] ?? ''));
-        $amount = (float)($item['amount'] ?? 0);
-        $bucketKey = array_search($label, HR_SALARY_EXACT_LABEL_BUCKETS, true);
-        if ($bucketKey !== false) {
-            $out[$bucketKey] += $amount;
-        } elseif (in_array($label, HR_SALARY_HOLIDAY_COMP_LABELS, true)) {
-            $out['holiday_compensation'] += $amount;
+        $decoded = json_decode($json, true);
+        if (!is_array($decoded)) {
+            continue;
+        }
+        foreach ($decoded as $item) {
+            if (is_array($item)) {
+                $items[] = $item;
+            }
+        }
+    }
+    return $items;
+}
+
+/** Loan/advance items written by the ERP activation path carry `name` rather than `label`. */
+function hr_salary_item_label(array $item): string
+{
+    $label = trim((string)($item['label'] ?? $item['name'] ?? ''));
+    return $label !== '' ? $label : '(ไม่มีชื่อรายการ)';
+}
+
+/**
+ * One report row from a slip (payroll_slips row) or a live PayrollService::calculateSlip() result.
+ *
+ * The template has fixed columns, but total_income / total_deductions also carry things it
+ * has no column for (lateness, provident fund, insurance, loan and advance installments,
+ * labels this file does not recognise). Every such amount is listed in `hidden_items`, and
+ * whatever is still unexplained after that is listed too — so a column total that does not
+ * add up is always flagged rather than silently off.
+ *
+ * @param list<array<string,mixed>> $incomeItems itemised lines behind total_income
+ * @param float $itemisedAllowances part of $figures['allowances'] already covered by $incomeItems
+ */
+function hr_salary_assemble_row(array $employee, array $figures, array $incomeItems, float $itemisedAllowances): array
+{
+    $buckets = array_fill_keys(array_keys(HR_SALARY_EXACT_LABEL_BUCKETS), 0.0) + ['holiday_compensation' => 0.0];
+    $hidden = [];
+    $hiddenIncome = 0.0;
+    $hiddenDeductions = 0.0;
+    $hide = static function (string $label, float $amount, bool $isIncome) use (&$hidden, &$hiddenIncome, &$hiddenDeductions): void {
+        if (abs($amount) < 0.005) {
+            return;
+        }
+        $hidden[] = ['label' => ($isIncome ? 'รายรับ: ' : 'หัก: ') . $label, 'amount' => $amount];
+        if ($isIncome) {
+            $hiddenIncome += $amount;
         } else {
-            $unmatched[] = ['label' => $label !== '' ? $label : '(ไม่มีชื่อรายการ)', 'amount' => $amount];
+            $hiddenDeductions += $amount;
+        }
+    };
+
+    foreach ($incomeItems as $item) {
+        $label = hr_salary_item_label($item);
+        $amount = (float)($item['amount'] ?? 0);
+        $key = array_search($label, HR_SALARY_EXACT_LABEL_BUCKETS, true);
+        if ($key !== false) {
+            $buckets[$key] += $amount;
+        } elseif (in_array($label, HR_SALARY_HOLIDAY_COMP_LABELS, true)) {
+            $buckets['holiday_compensation'] += $amount;
+        } else {
+            $hide($label, $amount, true);
         }
     }
-    return ['buckets' => $out, 'unmatched' => $unmatched];
-}
+    $hide('ค่าเผื่อ (รวม)', (float)($figures['allowances'] ?? 0) - $itemisedAllowances, true);
 
-/** Deduction items other than กยศ. that PayrollService still sums into total_deductions but this report has no named column for. */
-function hr_salary_extract_unmatched_deductions(?array $setup): array
-{
-    $unmatched = [];
-    if ($setup && !empty($setup['deduction_other_json'])) {
-        $decoded = json_decode((string)$setup['deduction_other_json'], true);
-        if (is_array($decoded)) {
-            foreach ($decoded as $item) {
-                if (!is_array($item)) {
-                    continue;
-                }
-                $label = trim((string)($item['label'] ?? ''));
-                if ($label === 'กยศ.') {
-                    continue;
-                }
-                $unmatched[] = ['label' => $label !== '' ? $label : '(ไม่มีชื่อรายการ)', 'amount' => (float)($item['amount'] ?? 0)];
-            }
+    $studentLoan = 0.0;
+    foreach (hr_salary_decode_items($figures['deduction_other_json'] ?? null) as $item) {
+        $label = hr_salary_item_label($item);
+        $amount = (float)($item['amount'] ?? 0);
+        if (in_array($label, HR_SALARY_STUDENT_LOAN_LABELS, true)) {
+            $studentLoan += $amount;
+        } else {
+            $hide($label, $amount, false);
         }
     }
-    return $unmatched;
-}
-
-/** Build one report row: live PayrollService calc + CRM-sourced items + manual กยศ. */
-function hr_salary_build_row(PayrollService $service, array $employee, string $monthFirst, int $payDay, array $manual): array
-{
-    $userId = (int)$employee['id'];
-    $setup = $service->getSalarySetup($userId, $monthFirst);
-    $incomeResult = hr_salary_extract_income_buckets($setup);
-    $buckets = $incomeResult['buckets'];
-    $unmatchedItems = array_merge($incomeResult['unmatched'], hr_salary_extract_unmatched_deductions($setup));
-    $studentLoan = (float)($manual['student_loan_deduction'] ?? 0);
-    $override = [];
-    if ($studentLoan != 0.0) {
-        $items = [];
-        if ($setup && !empty($setup['deduction_other_json'])) {
-            $decoded = json_decode((string)$setup['deduction_other_json'], true);
-            if (is_array($decoded)) {
-                $items = array_values(array_filter($decoded, static function ($item) {
-                    return !is_array($item) || trim((string)($item['label'] ?? '')) !== 'กยศ.';
-                }));
-            }
-        }
-        $items[] = ['label' => 'กยศ.', 'amount' => round($studentLoan, 2)];
-        $override['deduction_other_json'] = json_encode($items, JSON_UNESCAPED_UNICODE);
+    foreach (['lateness_deduction' => 'หักมาสาย', 'provident_fund' => 'กองทุนสำรองเลี้ยงชีพ',
+              'group_insurance' => 'ประกันกลุ่ม', 'health_insurance' => 'ประกันสุขภาพ'] as $field => $label) {
+        $hide($label, (float)($figures[$field] ?? 0), false);
     }
-    $slip = $service->calculateSlip($userId, $monthFirst, $payDay, $override ?: null);
 
-    return [
-        'user_id' => $userId,
+    $row = [
+        'user_id' => (int)$employee['id'],
         'employee_code' => $employee['employee_code'] ?? '',
         'full_name' => $employee['full_name'],
         'position' => $employee['position'] ?? '',
         'bank_name' => $employee['bank_name'] ?? '',
-        'base_salary' => (float)$slip['gross_salary'],
+        'base_salary' => (float)($figures['gross_salary'] ?? 0),
         'allowance_position' => $buckets['allowance_position'],
         'allowance_col' => $buckets['allowance_col'],
         'allowance_transport' => $buckets['allowance_transport'],
-        'bonus' => (float)$slip['bonus'],
+        'bonus' => (float)($figures['bonus'] ?? 0),
         'admin_fee' => $buckets['admin_fee'],
         'holiday_compensation' => $buckets['holiday_compensation'],
-        'total_income' => (float)$slip['total_income'],
-        'social_security' => (float)$slip['social_security'],
-        'leave_deduction' => (float)$slip['absence_deduction'],
-        'tax' => (float)$slip['tax_withheld'],
+        'total_income' => (float)($figures['total_income'] ?? 0),
+        'social_security' => (float)($figures['social_security'] ?? 0),
+        'leave_deduction' => (float)($figures['absence_deduction'] ?? 0),
+        'tax' => (float)($figures['tax_withheld'] ?? 0),
         'student_loan' => $studentLoan,
-        'total_deductions' => (float)$slip['total_deductions'],
-        'net_salary' => (float)$slip['net_salary'],
-        'unmatched_items' => $unmatchedItems,
+        'total_deductions' => (float)($figures['total_deductions'] ?? 0),
+        'net_salary' => (float)($figures['net_salary'] ?? 0),
     ];
+
+    $visibleIncome = $row['base_salary'] + $row['allowance_position'] + $row['allowance_col'] + $row['allowance_transport']
+        + $row['bonus'] + $row['admin_fee'] + $row['holiday_compensation'];
+    $hide('อื่น ๆ (ไม่ทราบที่มา)', $row['total_income'] - $visibleIncome - $hiddenIncome, true);
+    $visibleDeductions = $row['social_security'] + $row['leave_deduction'] + $row['tax'] + $row['student_loan'];
+    $hide('อื่น ๆ (ไม่ทราบที่มา)', $row['total_deductions'] - $visibleDeductions - $hiddenDeductions, false);
+
+    $row['hidden_items'] = $hidden;
+    return $row;
+}
+
+/** Live preview for a month with no payroll run yet: PayrollService calc + manual กยศ. */
+function hr_salary_build_live_row(PayrollService $service, array $employee, string $monthFirst, int $payDay, array $manual): array
+{
+    $userId = (int)$employee['id'];
+    $setup = $service->getSalarySetup($userId, $monthFirst);
+    $studentLoan = (float)($manual['student_loan_deduction'] ?? 0);
+    $override = [];
+    if ($studentLoan != 0.0) {
+        $items = array_values(array_filter(
+            hr_salary_decode_items($setup['deduction_other_json'] ?? null),
+            static fn(array $item): bool => !in_array(hr_salary_item_label($item), HR_SALARY_STUDENT_LOAN_LABELS, true)
+        ));
+        $items[] = ['label' => 'กยศ.', 'amount' => round($studentLoan, 2)];
+        $override['deduction_other_json'] = json_encode($items, JSON_UNESCAPED_UNICODE);
+    }
+    $calc = $service->calculateSlip($userId, $monthFirst, $payDay, $override ?: null);
+
+    // Income lines come from the calculation itself: for a mid-period hire it prorates
+    // income_other_json, which the stored setup row does not reflect.
+    $allowanceItems = hr_salary_decode_items($setup['allowance_json'] ?? null);
+    $itemisedAllowances = array_sum(array_map(static fn(array $i): float => (float)($i['amount'] ?? 0), $allowanceItems));
+    $incomeItems = array_merge($allowanceItems, hr_salary_decode_items($calc['income_other_json'] ?? null));
+    return hr_salary_assemble_row($employee, $calc, $incomeItems, $itemisedAllowances);
+}
+
+/** A month that has a payroll run: the slip is what was (or will be) paid. */
+function hr_salary_build_slip_row(array $slipWithEmployee): array
+{
+    return hr_salary_assemble_row(
+        $slipWithEmployee,
+        $slipWithEmployee,
+        hr_salary_decode_items($slipWithEmployee['income_other_json'] ?? null),
+        0.0
+    );
 }
 
 // --- Resolve selected period ---
@@ -188,9 +229,22 @@ if (!$monthDt) {
     $monthDt = new DateTimeImmutable($monthFirst);
 }
 
-$payDay = (int)($_REQUEST['pay_day'] ?? $service->getDefaultPayDay());
-if ($payDay < 1 || $payDay > 31) {
-    $payDay = $service->getDefaultPayDay();
+// --- Source of figures ---
+// A month with a payroll run is reported from its slips — the bank transfer must match what
+// was approved/paid, even if salary setup or attendance changed afterwards. Only a month
+// with no run yet is calculated live, as a preview.
+$runStmt = $pdo->prepare('SELECT id, status, pay_day FROM payroll_runs WHERE payroll_month = ? LIMIT 1');
+$runStmt->execute([$monthFirst]);
+$reportRun = $runStmt->fetch(PDO::FETCH_ASSOC) ?: null;
+$reportRunStatusLabels = ['draft' => 'ร่าง', 'calculated' => 'คำนวณแล้ว รออนุมัติ', 'approved' => 'อนุมัติแล้ว', 'paid' => 'จ่ายแล้ว'];
+
+if ($reportRun) {
+    $payDay = (int)$reportRun['pay_day'];
+} else {
+    $payDay = (int)($_REQUEST['pay_day'] ?? $service->getDefaultPayDay());
+    if ($payDay < 1 || $payDay > 31) {
+        $payDay = $service->getDefaultPayDay();
+    }
 }
 
 $payDateInput = trim((string)($_REQUEST['pay_date'] ?? ''));
@@ -201,17 +255,43 @@ if (!$payDateDt || $payDateDt->format('Y-m-d') !== $payDateInput) {
 }
 $payDateStr = $payDateDt->format('Y-m-d');
 
-// --- Employees eligible for payroll (same scope PayrollService::createRun() uses) ---
-$employeesStmt = $pdo->prepare("
-    SELECT u.id, u.employee_code, CONCAT(u.first_name_th, ' ', u.last_name_th) AS full_name,
-           u.position, u.bank_name, u.bank_account
-    FROM users u
-    WHERE u.is_active = 1 AND " . tp_hr_payroll_employee_filter_sql('u') . "
-    ORDER BY u.id
-");
-$employeesStmt->execute();
+// --- Employees ---
+// With a run: exactly the people on it (someone who left after payment still belongs on
+// that month's sheet; someone hired later does not). Without: the current payroll scope,
+// as PayrollService::createRun() would pick it.
+if ($reportRun) {
+    $employeesStmt = $pdo->prepare("
+        SELECT s.*, u.id AS id, u.employee_code, CONCAT(u.first_name_th, ' ', u.last_name_th) AS full_name,
+               u.position, u.bank_name, u.bank_account
+        FROM payroll_slips s
+        JOIN users u ON u.id = s.user_id
+        WHERE s.payroll_run_id = ? AND " . tp_hr_payroll_employee_filter_sql('u') . "
+        ORDER BY u.id
+    ");
+    $employeesStmt->execute([(int)$reportRun['id']]);
+} else {
+    $employeesStmt = $pdo->prepare("
+        SELECT u.id, u.employee_code, CONCAT(u.first_name_th, ' ', u.last_name_th) AS full_name,
+               u.position, u.bank_name, u.bank_account
+        FROM users u
+        WHERE u.is_active = 1 AND " . tp_hr_payroll_employee_filter_sql('u') . "
+        ORDER BY u.id
+    ");
+    $employeesStmt->execute();
+}
 $employees = $employeesStmt->fetchAll(PDO::FETCH_ASSOC);
 $employeeIds = array_map(static fn($e) => (int)$e['id'], $employees);
+
+/** @param array<int,array<string,mixed>> $manualByUser */
+$buildRows = static function (array $manualByUser) use ($reportRun, $employees, $service, $monthFirst, $payDay): array {
+    $rows = [];
+    foreach ($employees as $employee) {
+        $rows[] = $reportRun
+            ? hr_salary_build_slip_row($employee)
+            : hr_salary_build_live_row($service, $employee, $monthFirst, $payDay, $manualByUser[(int)$employee['id']] ?? []);
+    }
+    return $rows;
+};
 
 $redirectQuery = static function () use ($periodMonthInput, $payDay, $payDateStr): string {
     return '/hr/salary_report.php?' . http_build_query([
@@ -229,22 +309,26 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     $action = (string)($_POST['action'] ?? 'save');
     $postStudentLoan = $_POST['student_loan'] ?? [];
 
-    $upsert = $pdo->prepare("
-        INSERT INTO hr_payroll_manual_items (user_id, period_month, student_loan_deduction, updated_by)
-        VALUES (?, ?, ?, ?)
-        ON DUPLICATE KEY UPDATE student_loan_deduction = VALUES(student_loan_deduction), updated_by = VALUES(updated_by)
-    ");
-    $pdo->beginTransaction();
-    try {
-        foreach ($employeeIds as $empId) {
-            $studentLoan = round(hr_salary_scalar_float($postStudentLoan[$empId] ?? 0), 2);
-            $upsert->execute([$empId, $monthFirst, $studentLoan, (int)$user['id']]);
+    // กยศ. typed here only feeds the live preview. Once the month has a run, the run's own
+    // deduction lines are what get paid, so nothing is saved over them.
+    if (!$reportRun) {
+        $upsert = $pdo->prepare("
+            INSERT INTO hr_payroll_manual_items (user_id, period_month, student_loan_deduction, updated_by)
+            VALUES (?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE student_loan_deduction = VALUES(student_loan_deduction), updated_by = VALUES(updated_by)
+        ");
+        $pdo->beginTransaction();
+        try {
+            foreach ($employeeIds as $empId) {
+                $studentLoan = round(hr_salary_scalar_float($postStudentLoan[$empId] ?? 0), 2);
+                $upsert->execute([$empId, $monthFirst, $studentLoan, (int)$user['id']]);
+            }
+            $pdo->commit();
+        } catch (Throwable $e) {
+            $pdo->rollBack();
+            flash('error', 'บันทึกข้อมูลไม่สำเร็จ');
+            redirect($redirectQuery(), 302);
         }
-        $pdo->commit();
-    } catch (Throwable $e) {
-        $pdo->rollBack();
-        flash('error', 'บันทึกข้อมูลไม่สำเร็จ');
-        redirect($redirectQuery(), 302);
     }
 
     if ($action === 'export') {
@@ -254,10 +338,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 'student_loan_deduction' => round(hr_salary_scalar_float($postStudentLoan[$empId] ?? 0), 2),
             ];
         }
-        $rows = [];
-        foreach ($employees as $employee) {
-            $rows[] = hr_salary_build_row($service, $employee, $monthFirst, $payDay, $manualByUser[(int)$employee['id']] ?? []);
-        }
+        $rows = $buildRows($manualByUser);
         $bankNote = trim((string)($_POST['bank_note'] ?? ''));
 
         $spreadsheet = new Spreadsheet();
@@ -366,7 +447,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         exit;
     }
 
-    flash('success', 'บันทึกข้อมูลเรียบร้อย');
+    flash('success', $reportRun
+        ? 'เดือนนี้มีรอบเงินเดือนแล้ว ตัวเลขทั้งหมดมาจากรอบ — ไม่มีข้อมูลให้บันทึก'
+        : 'บันทึกข้อมูลเรียบร้อย');
     redirect($redirectQuery(), 302);
 }
 
@@ -378,10 +461,13 @@ foreach ($manualStmt->fetchAll(PDO::FETCH_ASSOC) as $m) {
     $manualByUser[(int)$m['user_id']] = $m;
 }
 
-$rows = [];
-foreach ($employees as $employee) {
-    $rows[] = hr_salary_build_row($service, $employee, $monthFirst, $payDay, $manualByUser[(int)$employee['id']] ?? []);
-}
+$rows = $buildRows($manualByUser);
+$rowsWithHidden = array_filter($rows, static fn(array $r): bool => !empty($r['hidden_items']));
+/** One line per amount the template has no column for, for the ⚠ tooltip. */
+$hiddenTip = static fn(array $row): string => 'รวมอยู่ในยอดแต่ไม่มีคอลัมน์: ' . implode(', ', array_map(
+    static fn(array $h): string => $h['label'] . ' ' . number_format((float)$h['amount'], 2),
+    $row['hidden_items']
+));
 
 $reportFlashOk = flash('success');
 $reportFlashErr = flash('error');
@@ -414,7 +500,7 @@ require_once __DIR__ . '/../templates/header.php';
             <i class="fas fa-money-check-dollar text-violet-400 shrink-0" aria-hidden="true"></i>
             <span>รายงานเงินเดือนพนักงาน</span>
         </h1>
-        <p class="tp-ios-caption-muted max-w-[42rem]">คำนวณสดจากฐานเงินเดือน/ค่าเผื่อ/ค่าบริหาร/ชดเชยวันหยุด (ข้อมูลเดียวกับที่กรอกไว้ใน CRM)/ประกันสังคม/ภาษี ปัจจุบัน — กรอกเฉพาะ กยศ. เพิ่มเติมรายเดือน แล้วดาวน์โหลดเป็นไฟล์ Excel</p>
+        <p class="tp-ios-caption-muted max-w-[42rem]">เดือนที่มีรอบเงินเดือนแล้วใช้ตัวเลขจากสลิปของรอบ (ตรงกับที่อนุมัติ/จ่ายจริง) — เดือนที่ยังไม่มีรอบเป็นการคำนวณล่วงหน้า และกรอก กยศ. เพิ่มได้ แล้วดาวน์โหลดเป็นไฟล์ Excel</p>
     </div>
 </header>
 
@@ -426,7 +512,7 @@ require_once __DIR__ . '/../templates/header.php';
         </div>
         <div class="tp-native-form-group mb-0 min-w-[8rem]">
             <label class="block text-white/70 text-sm mb-1" for="hr-sal-payday">วันตัดรอบ (payDay)</label>
-            <input id="hr-sal-payday" type="number" min="1" max="31" name="pay_day" class="input-field tp-native-input w-full min-h-[48px]" value="<?php echo (int)$payDay; ?>">
+            <input id="hr-sal-payday" type="number" min="1" max="31" name="pay_day" class="input-field tp-native-input w-full min-h-[48px]<?php echo $reportRun ? ' opacity-80 cursor-not-allowed' : ''; ?>" value="<?php echo (int)$payDay; ?>"<?php echo $reportRun ? ' readonly aria-readonly="true" title="ใช้วันตัดรอบของรอบเงินเดือนเดือนนี้"' : ''; ?>>
         </div>
         <div class="tp-native-form-group mb-0 min-w-[10rem]">
             <label class="block text-white/70 text-sm mb-1" for="hr-sal-paydate">วันที่นำจ่าย</label>
@@ -452,11 +538,27 @@ require_once __DIR__ . '/../templates/header.php';
             <p class="text-white/55 text-sm" role="status">พนักงาน <?php echo count($rows); ?> คน</p>
         </div>
 
-        <?php $rowsWithUnmatched = array_filter($rows, static fn($r) => !empty($r['unmatched_items'])); ?>
-        <?php if ($rowsWithUnmatched): ?>
+        <?php if ($reportRun): ?>
+        <div class="mb-4 rounded-[var(--tp-ios-card-radius)] border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-emerald-100 text-sm" role="status">
+            <i class="fas fa-circle-check mr-2" aria-hidden="true"></i>
+            ตัวเลขจากสลิปของ<a class="underline" href="/payroll.php?run_id=<?php echo (int)$reportRun['id']; ?>">รอบเงินเดือนเดือนนี้</a>
+            (สถานะ: <?php echo htmlspecialchars($reportRunStatusLabels[(string)$reportRun['status']] ?? (string)$reportRun['status']); ?>)
+            <?php if (!in_array((string)$reportRun['status'], ['approved', 'paid'], true)): ?>
+            — รอบยังไม่อนุมัติ ตัวเลขอาจเปลี่ยนเมื่อคำนวณรอบใหม่
+            <?php endif; ?>
+            · แก้ กยศ. ได้ที่ "รายการหักอื่น" ในหน้ากำหนดเงินเดือน แล้วคำนวณรอบใหม่
+        </div>
+        <?php else: ?>
+        <div class="mb-4 rounded-[var(--tp-ios-card-radius)] border border-sky-500/30 bg-sky-500/10 px-4 py-3 text-sky-100 text-sm" role="status">
+            <i class="fas fa-circle-info mr-2" aria-hidden="true"></i>
+            เดือนนี้ยังไม่มีรอบเงินเดือน — ตัวเลขเป็นการคำนวณล่วงหน้าจากข้อมูลปัจจุบัน และจะเปลี่ยนได้จนกว่าจะสร้างและอนุมัติรอบ
+        </div>
+        <?php endif; ?>
+
+        <?php if ($rowsWithHidden): ?>
         <div class="mb-4 rounded-[var(--tp-ios-card-radius)] border border-amber-500/35 bg-amber-500/15 px-4 py-3 text-amber-100 text-sm" role="status">
             <i class="fas fa-triangle-exclamation mr-2" aria-hidden="true"></i>
-            พบ <?php echo count($rowsWithUnmatched); ?> คนที่มีรายการรายรับ/รายจ่ายจาก HR ที่ยังไม่รู้จัก (ดูไอคอน <i class="fas fa-triangle-exclamation" aria-hidden="true"></i> ในตาราง) — ยอด "รวมรายรับ"/"รวมรายจ่าย" นับรวมให้ถูกต้องแล้ว แต่จำนวนนี้ยังไม่ถูกแยกเข้าคอลัมน์ไหน ต้องแจ้งให้เพิ่ม label เข้าไปในโค้ด
+            พบ <?php echo count($rowsWithHidden); ?> คนที่ยอด "รวมรายรับ"/"รวมรายจ่าย" มีรายการที่รายงานนี้ไม่มีคอลัมน์ (เช่น หักมาสาย, กองทุนสำรองฯ, งวดเงินกู้/เงินเบิกล่วงหน้า) — ยอดรวมและจ่ายสุทธิถูกต้องแล้ว ดูรายการที่ไอคอน <i class="fas fa-triangle-exclamation" aria-hidden="true"></i> · ถ้าเป็นชื่อรายการที่ควรอยู่ในคอลัมน์ (เช่น ชดเชยวันหยุดสะกดแบบใหม่) แจ้งให้เพิ่มในโค้ด
         </div>
         <?php endif; ?>
 
@@ -480,8 +582,8 @@ require_once __DIR__ . '/../templates/header.php';
                     <div class="min-w-0">
                         <p class="text-white font-semibold">
                             <?php echo ($i + 1) . '. ' . htmlspecialchars($row['full_name']); ?>
-                            <?php if (!empty($row['unmatched_items'])): ?>
-                            <i class="fas fa-triangle-exclamation text-amber-400 ml-1" aria-hidden="true" title="มีรายการจาก HR ที่ยังไม่รู้จัก"></i>
+                            <?php if (!empty($row['hidden_items'])): ?>
+                            <i class="fas fa-triangle-exclamation text-amber-400 ml-1" aria-hidden="true" title="<?php echo htmlspecialchars($hiddenTip($row)); ?>"></i>
                             <?php endif; ?>
                         </p>
                         <p class="text-white/50 text-xs mt-0.5"><?php echo htmlspecialchars($row['position']); ?></p>
@@ -514,7 +616,9 @@ require_once __DIR__ . '/../templates/header.php';
                 </dl>
             </div>
             <?php endforeach; ?>
+            <?php if (!$reportRun): ?>
             <p class="text-white/45 text-xs px-1">แก้ไขยอด กยศ. ได้บนหน้าจอที่กว้างกว่านี้</p>
+            <?php endif; ?>
         </div>
 
         <div class="hidden md:block tp-native-table-shell overflow-x-auto min-w-0 max-w-full overscroll-x-contain -mx-1 px-1 pb-px">
@@ -535,7 +639,11 @@ require_once __DIR__ . '/../templates/header.php';
                         <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-white/60 uppercase">ประกันสังคม</th>
                         <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-white/60 uppercase">ลางาน</th>
                         <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-white/60 uppercase">ภาษี</th>
+                        <?php if ($reportRun): ?>
+                        <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-white/60 uppercase">กยศ.<span class="block normal-case text-[10px] text-white/40">จากรอบ</span></th>
+                        <?php else: ?>
                         <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-amber-300/90 uppercase">กยศ.<span class="block normal-case text-[10px] text-amber-300/70">กรอกเอง</span></th>
+                        <?php endif; ?>
                         <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-white/60 uppercase">รวมรายจ่าย</th>
                         <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-emerald-400/90 uppercase">จ่ายสุทธิ</th>
                     </tr>
@@ -546,13 +654,8 @@ require_once __DIR__ . '/../templates/header.php';
                         <td class="px-3 py-2 text-white/60"><?php echo $i + 1; ?></td>
                         <td class="px-3 py-2 text-white">
                             <?php echo htmlspecialchars($row['full_name']); ?>
-                            <?php if (!empty($row['unmatched_items'])):
-                                $tip = 'รายการที่ยังไม่รู้จัก: ' . implode(', ', array_map(
-                                    static fn($u) => $u['label'] . ' ' . number_format($u['amount'], 2),
-                                    $row['unmatched_items']
-                                ));
-                            ?>
-                            <i class="fas fa-triangle-exclamation text-amber-400 ml-1" aria-hidden="true" title="<?php echo htmlspecialchars($tip); ?>"></i>
+                            <?php if (!empty($row['hidden_items'])): ?>
+                            <i class="fas fa-triangle-exclamation text-amber-400 ml-1" aria-hidden="true" title="<?php echo htmlspecialchars($hiddenTip($row)); ?>"></i>
                             <?php endif; ?>
                         </td>
                         <td class="px-3 py-2 text-white/60"><?php echo htmlspecialchars($row['position']); ?></td>
@@ -567,9 +670,13 @@ require_once __DIR__ . '/../templates/header.php';
                         <td class="px-3 py-2 text-right text-white/80"><?php echo number_format($row['social_security'], 2); ?></td>
                         <td class="px-3 py-2 text-right text-white/80"><?php echo number_format($row['leave_deduction'], 2); ?></td>
                         <td class="px-3 py-2 text-right text-white/80"><?php echo number_format($row['tax'], 2); ?></td>
+                        <?php if ($reportRun): ?>
+                        <td class="px-3 py-2 text-right text-white/80"><?php echo number_format($row['student_loan'], 2); ?></td>
+                        <?php else: ?>
                         <td class="px-3 py-2 text-right">
-                            <input type="number" step="0.01" name="student_loan[<?php echo (int)$row['user_id']; ?>]" value="<?php echo htmlspecialchars((string)$row['student_loan']); ?>" class="input-field tp-native-input w-28 text-right min-h-[48px]">
+                            <input type="number" step="0.01" min="0" name="student_loan[<?php echo (int)$row['user_id']; ?>]" value="<?php echo htmlspecialchars((string)$row['student_loan']); ?>" class="input-field tp-native-input w-28 text-right min-h-[48px]">
                         </td>
+                        <?php endif; ?>
                         <td class="px-3 py-2 text-right text-white/80"><?php echo number_format($row['total_deductions'], 2); ?></td>
                         <td class="px-3 py-2 text-right text-emerald-400 font-semibold"><?php echo number_format($row['net_salary'], 2); ?></td>
                     </tr>
@@ -584,11 +691,13 @@ require_once __DIR__ . '/../templates/header.php';
         </div>
 
         <div class="flex flex-wrap gap-3 mt-5">
+            <?php if (!$reportRun): ?>
             <button type="submit" name="action" value="save" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] border border-white/15 bg-white/10 px-5 text-sm font-semibold text-white hover:bg-white/20 touch-manipulation gap-2 whitespace-nowrap">
                 <i class="fas fa-floppy-disk" aria-hidden="true"></i>บันทึกข้อมูล
             </button>
+            <?php endif; ?>
             <button type="submit" name="action" value="export" class="inline-flex min-h-[48px] items-center justify-center rounded-[var(--tp-ios-card-radius)] bg-violet-600 hover:bg-violet-700 px-5 text-sm font-semibold text-white touch-manipulation gap-2 whitespace-nowrap">
-                <i class="fas fa-file-excel" aria-hidden="true"></i>บันทึกและดาวน์โหลด Excel
+                <i class="fas fa-file-excel" aria-hidden="true"></i><?php echo $reportRun ? 'ดาวน์โหลด Excel' : 'บันทึกและดาวน์โหลด Excel'; ?>
             </button>
         </div>
         <?php else: ?>

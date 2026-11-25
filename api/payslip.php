@@ -268,9 +268,14 @@ function generatePayslipHTML($slip, $monthName, $year) {
     }
     
     foreach ($otherDeduction as $item) {
-        if ($item['amount'] > 0) {
+        if (!is_array($item)) {
+            continue;
+        }
+        if ((float)($item['amount'] ?? 0) > 0) {
+            // Loan/advance items saved by the ERP activation path carry only `name`.
+            $itemLabel = trim((string)($item['label'] ?? $item['name'] ?? ''));
             $html .= '<div class="item-row">
-                    <span>' . htmlspecialchars($item['label']) . '</span>
+                    <span>' . htmlspecialchars($itemLabel !== '' ? $itemLabel : 'หักอื่น') . '</span>
                     <span>' . number_format($item['amount'], 2) . '</span>
                 </div>';
         }

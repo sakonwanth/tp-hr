@@ -74,6 +74,12 @@ class PayrollLedgerService
         return true;
     }
 
+    /** มีรายจ่ายเงินเดือนของรอบนี้ใน Ledger แล้วหรือไม่ */
+    public function hasExpenseForRun(int $runId): bool
+    {
+        return erp_read_company_transaction_by_reference('payroll', $runId) !== null;
+    }
+
     /**
      * ลบรายจ่าย payroll ใน Ledger (พร้อม audit_logs ผ่าน LedgerService)
      *

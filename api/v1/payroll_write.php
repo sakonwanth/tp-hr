@@ -60,7 +60,24 @@ if ($resource === 'employee-finance' && $method === 'POST' && $id > 0
 }
 
 // ── payroll-runs ──
+// Run lifecycle goes through PayrollUiService — the same transactional path as the web
+// payroll page — so the API cannot skip status guards, the ERP ledger entry, or the
+// LINE-link / affordability-override revocation that the web flow performs.
 if ($resource === 'payroll-runs') {
+    require_once BASE_PATH . '/core/LegacyHrUi.php';
+    $runApi = payroll_service();
+
+    /** Map a lifecycle failure onto the API envelope (never returns). */
+    $failRunAction = static function (\Throwable $e, string $context): void {
+        tpHrLogException($e, 'payroll_write ' . $context);
+        if ($e instanceof \InvalidArgumentException) {
+            ApiAuth::fail(400, $e->getMessage());
+        }
+        if ($e instanceof \RuntimeException) {
+            ApiAuth::fail(409, $e->getMessage());
+        }
+        ApiAuth::fail(500, 'Internal server error');
+    };
 
     // POST /payroll-runs → create/recalculate run
     if ($method === 'POST' && $id === 0) {
@@ -74,16 +91,10 @@ if ($resource === 'payroll-runs') {
         try {
             $createdBy = apiKeyResolveActorForApi($pdo, ApiAuth::currentKey(), $input, 'created_by', HR_ROLES);
             $payDay = isset($input['pay_day']) ? (int)$input['pay_day'] : null;
-            $result = $service->createRun($month, $createdBy, $payDay);
+            $result = $runApi->createRun($month, $createdBy, $payDay);
             ApiAuth::success(['data' => $result]);
-        } catch (\InvalidArgumentException $e) {
-            ApiAuth::fail(400, $e->getMessage());
-        } catch (\RuntimeException $e) {
-            tpHrLogException($e, 'payroll_write createRun');
-            ApiAuth::fail(409, $e->getMessage());
         } catch (\Throwable $e) {
-            tpHrLogException($e, 'payroll_write createRun');
-            ApiAuth::fail(500, 'Internal server error');
+            $failRunAction($e, 'createRun');
         }
     }
 
@@ -92,53 +103,55 @@ if ($resource === 'payroll-runs') {
         ApiAuth::require(['payroll.approve']);
         apiKeyForbidServiceScoped();
         $input = ApiAuth::input();
-        $approvedBy = apiKeyResolveActorForApi($pdo, ApiAuth::currentKey(), $input, 'approved_by', CEO_ROLES);
-        $service->approveRun($id, $approvedBy);
-        ApiAuth::success(['message' => 'อนุมัติรอบเงินเดือนแล้ว']);
+        try {
+            $approvedBy = apiKeyResolveActorForApi($pdo, ApiAuth::currentKey(), $input, 'approved_by', CEO_ROLES);
+            $runApi->approveRun($id, $approvedBy);
+            ApiAuth::success(['message' => 'อนุมัติรอบเงินเดือนแล้ว']);
+        } catch (\Throwable $e) {
+            $failRunAction($e, 'approveRun');
+        }
     }
 
     // POST /payroll-runs/{id}/paid
     if ($method === 'POST' && $id > 0 && $sub === 'paid') {
         ApiAuth::require(['payroll.approve']);
+        apiKeyForbidServiceScoped();
         try {
-            $service->markPaid($id);
-            ApiAuth::success(['message' => 'บันทึกจ่ายเงินแล้ว']);
-        } catch (\RuntimeException $e) {
-            tpHrLogException($e, 'payroll_write markPaid');
-            ApiAuth::fail(409, $e->getMessage());
+            $runApi->markPaid($id);
+            ApiAuth::success(['message' => 'บันทึกจ่ายเงินแล้ว', 'ledger_pending' => false]);
+        } catch (\PayrollLedgerPendingException $e) {
+            // The run IS paid; only the ERP ledger row is outstanding (retry from the run page).
+            tpHrLogException($e, 'payroll_write markPaid ledger');
+            ApiAuth::success(['message' => 'บันทึกจ่ายเงินแล้ว', 'ledger_pending' => true, 'warning' => $e->getMessage()]);
         } catch (\Throwable $e) {
-            tpHrLogException($e, 'payroll_write markPaid');
-            ApiAuth::fail(500, 'Internal server error');
+            $failRunAction($e, 'markPaid');
         }
     }
 
     // POST /payroll-runs/{id}/cancel-paid
     if ($method === 'POST' && $id > 0 && $sub === 'cancel-paid') {
         ApiAuth::require(['payroll.approve']);
+        apiKeyForbidServiceScoped();
         try {
-            $service->cancelPaid($id);
-            ApiAuth::success(['message' => 'ยกเลิกการบันทึกจ่ายแล้ว']);
-        } catch (\RuntimeException $e) {
-            tpHrLogException($e, 'payroll_write cancelPaid');
-            ApiAuth::fail(409, $e->getMessage());
+            $runApi->cancelPaid($id);
+            ApiAuth::success(['message' => 'ยกเลิกการบันทึกจ่ายแล้ว', 'ledger_pending' => false]);
+        } catch (\PayrollLedgerPendingException $e) {
+            tpHrLogException($e, 'payroll_write cancelPaid ledger');
+            ApiAuth::success(['message' => 'ยกเลิกการบันทึกจ่ายแล้ว', 'ledger_pending' => true, 'warning' => $e->getMessage()]);
         } catch (\Throwable $e) {
-            tpHrLogException($e, 'payroll_write cancelPaid');
-            ApiAuth::fail(500, 'Internal server error');
+            $failRunAction($e, 'cancelPaid');
         }
     }
 
     // POST /payroll-runs/{id}/cancel-approval
     if ($method === 'POST' && $id > 0 && $sub === 'cancel-approval') {
         ApiAuth::require(['payroll.approve']);
+        apiKeyForbidServiceScoped();
         try {
-            $service->cancelApproval($id);
+            $runApi->cancelApproval($id);
             ApiAuth::success(['message' => 'ยกเลิกการอนุมัติแล้ว']);
-        } catch (\RuntimeException $e) {
-            tpHrLogException($e, 'payroll_write cancelApproval');
-            ApiAuth::fail(409, $e->getMessage());
         } catch (\Throwable $e) {
-            tpHrLogException($e, 'payroll_write cancelApproval');
-            ApiAuth::fail(500, 'Internal server error');
+            $failRunAction($e, 'cancelApproval');
         }
     }
 
@@ -148,12 +161,24 @@ if ($resource === 'payroll-runs') {
         apiKeyForbidServiceScoped();
         $input = ApiAuth::input();
         $userId = (int)($input['user_id'] ?? 0);
-        $run = $service->getRun($id);
+        $run = $runApi->getRun($id);
         if (!$run) ApiAuth::fail(404, 'Run not found');
-
-        $updated = $service->recalculateSlip($id, $userId, $run['payroll_month']);
-        if ($updated) $service->updateRunTotals($id);
-        ApiAuth::success(['updated' => $updated]);
+        // Approved/paid slips are what employees were (or will be) paid — they only change
+        // after an explicit cancel-approval, exactly like the web page.
+        if (!in_array((string)$run['status'], ['draft', 'calculated'], true)) {
+            ApiAuth::fail(409, 'คำนวณสลิปใหม่ได้เฉพาะรอบที่ยังไม่อนุมัติ (สถานะปัจจุบัน: ' . $run['status'] . ')');
+        }
+        $eligible = $pdo->prepare('SELECT 1 FROM users u WHERE u.id = ? AND u.is_active = 1 AND ' . tp_hr_payroll_employee_filter_sql('u'));
+        $eligible->execute([$userId]);
+        if ($userId <= 0 || !$eligible->fetchColumn()) {
+            ApiAuth::fail(400, 'user_id is not an active payroll employee');
+        }
+        try {
+            $updated = $runApi->recalculateSlip($id, $userId, (string)$run['payroll_month']);
+            ApiAuth::success(['updated' => $updated]);
+        } catch (\Throwable $e) {
+            $failRunAction($e, 'recalculateSlip');
+        }
     }
 
     // GET /payroll-runs/{id}/calculate-preview

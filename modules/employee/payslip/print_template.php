@@ -610,7 +610,12 @@ header('Content-Type: text/html; charset=utf-8');
                         if (is_array($deduction_other)) {
                             foreach ($deduction_other as $do):
                                 $amt = (float)($do['amount'] ?? 0);
-                                $label = trim((string)($do['label'] ?? 'หักอื่น'));
+                                // Loan/advance items saved by the ERP activation path before
+                                // the shapes were aligned carry only `name`.
+                                $label = trim((string)($do['label'] ?? $do['name'] ?? ''));
+                                if ($label === '') {
+                                    $label = 'หักอื่น';
+                                }
                                 if ($amt == 0) {
                                     continue;
                                 }
