@@ -37,7 +37,27 @@ if (!defined('BASE_PATH')) {http_response_code(403);exit;}
         'approved' => ' — ไม่สามารถบันทึกจ่ายได้',
         default => ' — ไม่สามารถอนุมัติได้',
     };
+    // ERP ledger vs run status: a failed write after mark-paid / cancel-paid leaves them apart.
+    $_ledger_state = ((string)$run['status'] !== 'draft' && function_exists('payroll_service'))
+        ? payroll_service()->ledgerState((int)$run_id)
+        : 'in_sync';
     ?>
+    <?php if (in_array($_ledger_state, ['missing', 'orphan'], true)): ?>
+    <div class="mb-4 p-4 rounded-xl bg-amber-500/15 border border-amber-400/40 text-amber-100 flex flex-wrap items-center justify-between gap-3" role="alert">
+        <div class="flex items-start gap-3 min-w-0">
+            <i class="fas fa-triangle-exclamation mt-0.5" aria-hidden="true"></i>
+            <span><?php echo $_ledger_state === 'missing'
+                ? 'รอบนี้บันทึกจ่ายแล้ว แต่ยังไม่มีรายจ่ายเงินเดือนในบัญชีกลาง (ERP)'
+                : 'รอบนี้ไม่ได้อยู่ในสถานะจ่ายแล้ว แต่ยังมีรายจ่ายเงินเดือนของรอบนี้ค้างในบัญชีกลาง (ERP)'; ?></span>
+        </div>
+        <form method="post" class="inline">
+            <input type="hidden" name="action" value="sync_ledger">
+            <input type="hidden" name="run_id" value="<?php echo (int)$run_id; ?>">
+            <?php echo function_exists('csrf_field') ? csrf_field() : ''; ?>
+            <button type="submit" class="btn-payroll inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-colors min-h-[48px]"><i class="fas fa-rotate sm:mr-1" aria-hidden="true"></i><span class="btn-text">ซิงก์บัญชีกลาง</span></button>
+        </form>
+    </div>
+    <?php endif; ?>
     <!-- รายละเอียดรอบ + สลิป -->
     <div class="glass-card rounded-2xl p-6 mb-6 border border-white/10">
         <div class="flex flex-wrap items-center justify-between gap-4">

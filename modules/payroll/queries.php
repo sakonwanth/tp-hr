@@ -3461,6 +3461,25 @@ function payroll_update_run_totals($pdo, $run_id) {
     $stmt->execute([(int)$agg['cnt'], (float)$agg['gross'], (float)$agg['tax'], (float)$agg['net'], $run_id]);
 }
 
+/**
+ * Message to show for a failed run action. The run lifecycle throws RuntimeException /
+ * InvalidArgumentException with Thai text written for the operator ("ฐานเงินเดือนเปลี่ยน
+ * หลังคำนวณ กรุณาคำนวณรอบใหม่", override rules, wrong status), so those are shown as-is;
+ * database errors stay generic.
+ */
+function payroll_run_action_error_message(Throwable $e, string $context): string
+{
+    tpCrmLogException($e, $context);
+    $msg = trim($e->getMessage());
+    if ($e instanceof PDOException || $msg === '') {
+        return 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้งหรือติดต่อผู้ดูแลระบบ';
+    }
+    if ($e instanceof RuntimeException || $e instanceof InvalidArgumentException || $e instanceof DomainException) {
+        return $msg;
+    }
+    return 'ไม่สามารถดำเนินการได้ กรุณาลองใหม่อีกครั้งหรือติดต่อผู้ดูแลระบบ';
+}
+
 function payroll_validate_slip_line_event(PDO $pdo, ?string &$reason = null): bool {
     if (!class_exists('LineNotifier')) {
         require_once HR_OWNER_PATH . '/core/Services/LineNotifier.php';

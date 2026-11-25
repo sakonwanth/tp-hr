@@ -71,6 +71,13 @@ $slip = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$slip) {
     die('ไม่พบสลิปเงินเดือน');
 }
+// A LINE link outlives its run's approval: ERP loan activation or an API cancel-approval can
+// return the run to "calculated" and recompute this slip in place. Employees only ever see
+// approved figures (same rule as payslip.php).
+if ($is_token_view && !in_array((string)($slip['run_status'] ?? ''), ['approved', 'paid'], true)) {
+    http_response_code(403);
+    die('สลิปเงินเดือนนี้อยู่ระหว่างปรับปรุงโดยฝ่ายบุคคล กรุณาเปิดลิงก์อีกครั้งหลังได้รับแจ้งสลิปใหม่');
+}
 
 // ดึงภาษีหักเพิ่มรายเดือนจาก salary_setup (ถ้ามี) เพื่อแยกแสดงในสลิป
 $extra_tax_withheld = 0;

@@ -83,27 +83,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 payroll_line_notify_run_event($pdo, $approve_run_id, 'payroll.run_approved');
                 $message = 'อนุมัติรอบเงินเดือนแล้ว';
                 $run_id = $approve_run_id;
-            } catch (Exception $e) {
-                $error = tpCrmUserErrorFromException($e, 'modules/payroll/actions.php approve_run', false);
+            } catch (Throwable $e) {
+                $error = payroll_run_action_error_message($e, 'modules/payroll/actions.php approve_run');
+                $run_id = $approve_run_id;
             }
         }
     } elseif ($post_action === 'cancel_approval') {
         $cancel_run_id = (int)($_POST['run_id'] ?? $run_id);
         if ($cancel_run_id > 0) {
             try {
+                // Also revokes the run's LINE slip links inside the same transaction.
                 payroll_service()->cancelApproval($cancel_run_id, (int)$current_user['id']);
-                try {
-                    $pdo->prepare("UPDATE payroll_slip_tokens t
-                        JOIN payroll_slips s ON t.slip_id = s.id
-                        SET t.revoked_at = NOW()
-                        WHERE s.payroll_run_id = ? AND t.revoked_at IS NULL")
-                        ->execute([$cancel_run_id]);
-                } catch (Throwable $e) { /* best-effort */ }
                 $message = 'ยกเลิกการอนุมัติเรียบร้อย — รอบกลับสู่สถานะ "calculated" สามารถคำนวณสลิปใหม่ได้แล้ว · ลิงก์สลิปเก่าที่ส่งผ่าน LINE ถูกยกเลิกทั้งหมด';
                 $run_id = $cancel_run_id;
                 $action = 'run_detail';
-            } catch (Exception $e) {
-                $error = tpCrmUserErrorFromException($e, 'modules/payroll/actions.php cancel_approval', false);
+            } catch (Throwable $e) {
+                $error = payroll_run_action_error_message($e, 'modules/payroll/actions.php cancel_approval');
                 $run_id = $cancel_run_id;
                 $action = 'run_detail';
             }
@@ -119,11 +114,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $message = 'ยกเลิกการบันทึกจ่ายแล้ว — รอบกลับสู่สถานะ approved · กด "ยกเลิกการอนุมัติ" เพื่อคำนวณสลิปใหม่ได้';
                 $run_id = $cancel_paid_run_id;
                 $action = 'run_detail';
-            } catch (Exception $e) {
-                tpCrmLogException($e, 'modules/payroll/actions.php cancel_paid');
-                $error = ($e instanceof PDOException)
-                    ? 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้งหรือติดต่อผู้ดูแลระบบ'
-                    : $e->getMessage();
+            } catch (PayrollLedgerPendingException $e) {
+                // The run is back to approved; only the ERP reversal is outstanding.
+                $error = $e->getMessage();
+                $run_id = $cancel_paid_run_id;
+                $action = 'run_detail';
+            } catch (Throwable $e) {
+                $error = payroll_run_action_error_message($e, 'modules/payroll/actions.php cancel_paid');
                 $run_id = $cancel_paid_run_id;
                 $action = 'run_detail';
             }
@@ -131,20 +128,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($post_action === 'mark_paid') {
         $paid_run_id = (int)($_POST['run_id'] ?? $run_id);
         if ($paid_run_id > 0) {
+            $notify_paid = false;
             try {
                 payroll_service()->markPaid(
                     $paid_run_id,
                     isset($current_user['id']) ? (int)$current_user['id'] : null
                 );
+                $notify_paid = true;
+                $message = 'บันทึกว่าจ่ายเงินแล้ว — รายการค่าใช้จ่ายถูกบันทึกเข้าบัญชีกลางอัตโนมัติ';
+            } catch (PayrollLedgerPendingException $e) {
+                // Employees were paid and the run is paid; only the ERP expense row is outstanding.
+                $notify_paid = true;
+                $error = $e->getMessage();
+            } catch (Throwable $e) {
+                $error = payroll_run_action_error_message($e, 'modules/payroll/actions.php mark_paid');
+            }
+            if ($notify_paid) {
                 if (!function_exists('payroll_line_notify_run_event')) {
                     require_once __DIR__ . '/notifications.php';
                 }
                 payroll_line_notify_run_event($pdo, $paid_run_id, 'payroll.run_paid');
-                $message = 'บันทึกว่าจ่ายเงินแล้ว — รายการค่าใช้จ่ายถูกบันทึกเข้าบัญชีกลางอัตโนมัติ';
-                $run_id = $paid_run_id;
-            } catch (Exception $e) {
-                $error = tpCrmUserErrorFromException($e, 'modules/payroll/actions.php mark_paid', false);
             }
+            $run_id = $paid_run_id;
+        }
+    } elseif ($post_action === 'sync_ledger') {
+        $sync_run_id = (int)($_POST['run_id'] ?? $run_id);
+        if ($sync_run_id > 0) {
+            try {
+                $done = payroll_service()->syncLedger(
+                    $sync_run_id,
+                    isset($current_user['id']) ? (int)$current_user['id'] : null
+                );
+                $message = [
+                    'recorded' => 'ลงรายจ่ายเงินเดือนเข้าบัญชีกลางเรียบร้อย',
+                    'reversed' => 'ลบรายจ่ายเงินเดือนที่ค้างออกจากบัญชีกลางเรียบร้อย',
+                    'in_sync' => 'บัญชีกลางตรงกับสถานะรอบอยู่แล้ว ไม่ต้องแก้ไข',
+                ][$done] ?? 'ซิงก์บัญชีกลางเรียบร้อย';
+            } catch (Throwable $e) {
+                $error = payroll_run_action_error_message($e, 'modules/payroll/actions.php sync_ledger');
+            }
+            $run_id = $sync_run_id;
+            $action = 'run_detail';
         }
     } elseif ($post_action === 'send_slip_to_line') {
         // ส่งสลิปเงินเดือนให้พนักงาน 1 คนทาง LINE (token-gated download link)
